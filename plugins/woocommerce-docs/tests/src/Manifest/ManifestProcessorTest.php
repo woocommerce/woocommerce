@@ -76,4 +76,50 @@ class ManifestProcessorTest extends WP_UnitTestCase {
 		$this->assertTrue( has_category( $testing_category->term_id, $unit_testing_post->ID ) );
 		$this->assertTrue( has_category( $troubleshoot_category->term_id, $what_went_wrong_post->ID ) );
 	}
+
+	/**
+	 * Test processing a manifest attaches edit url post meta.
+	 */
+	public function test_edit_url() {
+
+		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest.json' ), true );
+		$md_file  = file_get_contents( __DIR__ . '/fixtures/test.md' );
+
+		// Mock the wp_remote_get function with a filter.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $md_file ) {
+				return array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'body'     => $md_file,
+				);
+			},
+			10,
+			3
+		);
+
+		ManifestProcessor::process_manifest( $manifest, 123 );
+
+		$posts = DocsStore::get_posts();
+
+		$install_plugin_post  = $posts[0];
+		$local_dev_post       = $posts[1];
+		$unit_testing_post    = $posts[2];
+		$what_went_wrong_post = $posts[3];
+
+		$edit_url_plugin_post = DocsStore::get_edit_url_from_docs_post( $install_plugin_post->ID, 'edit_url', true );
+		$this->assertEquals( 'https://example.com/edit/install-plugin.md', $edit_url_plugin_post );
+
+		$edit_url_local_dev_post = DocsStore::get_edit_url_from_docs_post( $local_dev_post->ID, 'edit_url', true );
+		$this->assertEquals( 'https://example.com/edit/local-development.md', $edit_url_local_dev_post );
+
+		$edit_url_unit_testing_post = DocsStore::get_edit_url_from_docs_post( $unit_testing_post->ID, 'edit_url', true );
+		$this->assertEquals( 'https://example.com/edit/unit-tests.md', $edit_url_unit_testing_post );
+
+		$edit_url_what_went_wrong_post = DocsStore::get_edit_url_from_docs_post( $what_went_wrong_post->ID, 'edit_url', true );
+		$this->assertEquals( 'https://example.com/edit/what-went-wrong.md', $edit_url_what_went_wrong_post );
+	}
 }
