@@ -44,8 +44,6 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( self::$user );
 
-		$this->endpoint = new WC_REST_System_Status_Controller();
-
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 	}
