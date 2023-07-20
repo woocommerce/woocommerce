@@ -1,4 +1,5 @@
 {
+  "posts": [],
   "categories": [
     {
       "category_title": "Getting Started with WooCommerce",
@@ -7,7 +8,7 @@
           "post_title": "Local Development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37"
+          "id": "c387a046f8307a4f459091a2c45e82263b45e777"
         }
       ],
       "categories": [
@@ -18,7 +19,7 @@
               "post_title": "Install the Plugin",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-              "id": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
+              "id": "c4ac8c48c3445186189d15f01028eacd517b9707"
             }
           ],
           "categories": []
@@ -30,7 +31,7 @@
               "post_title": "What Went Wrong?",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb"
+              "id": "f87dcc9b8177ad2d8549ef7298d66fb7c8616d71"
             }
           ],
           "categories": []
@@ -44,11 +45,17 @@
           "post_title": "Unit Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-          "id": "120770c899215a889246b47ac883e4dda1f97b8b"
+          "id": "1b9de005cc5da3b49d12c24837a5a574aa58ad96"
+        },
+        {
+          "post_title": "Integration Testing",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
+          "id": "c2b952705695df448b9f7d2d0fe8587f33e8641d"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "7f0f6f0c39187a5ee2f939d7a0af56538aaeb7f040f56e6dd62458e34a0491bd"
+  "hash": "44cefde2d1d92618c54064146e4717517ced4cfd8bb37943f03415abe873b78d"
 }
