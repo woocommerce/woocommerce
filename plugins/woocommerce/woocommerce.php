@@ -55,7 +55,7 @@ function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.Fu
  * @return \Automattic\WooCommerce\Container The WooCommerce object container.
  */
 function wc_get_container() {
-	return $GLOBALS['wc_container'];
+	return $GLOBALS['wc_containerZZZZZZZ'];
 }
 
 // Global for backwards compatibility.
