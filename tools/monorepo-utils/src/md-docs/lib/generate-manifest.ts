@@ -54,12 +54,13 @@ async function processDirectory(
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
 
+	category.posts = category.posts || [];
+
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
 			// Skip README.md which we have already processed.
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const fileFrontmatter = generatePostFrontMatter( fileContent );
-			category.posts = [];
 
 			if ( baseUrl.includes( 'github' ) ) {
 				fileFrontmatter.edit_url = generateFileUrl(
