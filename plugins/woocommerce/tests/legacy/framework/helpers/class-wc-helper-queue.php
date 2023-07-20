@@ -22,6 +22,7 @@ class WC_Helper_Queue {
 				'per_page' => -1,
 				'status'   => 'pending',
 				'claimed'  => false,
+				'group'    => 'wc-admin-data',
 			)
 		);
 
