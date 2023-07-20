@@ -60,6 +60,8 @@ export function WriteItForMeButtonContainer() {
 		document.querySelector( '#title' )
 	);
 	const [ fetching, setFetching ] = useState< boolean >( false );
+	const [ shortDescriptionGenerated, setShortDescriptionGenerated ] =
+		useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
@@ -209,10 +211,11 @@ export function WriteItForMeButtonContainer() {
 
 		try {
 			await requestCompletion( prompt );
-			if ( ! shortTinyEditor.getContent() ) {
+			if ( ! shortTinyEditor.getContent() || shortDescriptionGenerated ) {
 				await requestShortCompletion(
 					`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
 				);
+				setShortDescriptionGenerated( true );
 			}
 		} catch ( err ) {
 			handleUseCompletionError( err as UseCompletionError );
