@@ -26,8 +26,10 @@ type UseStoreBrandingOptions = {
 
 // Async function to fetch branding data
 async function fetchBrandingData(): Promise< BrandingData > {
-	const toneOfVoice = await getToneOfVoice();
-	const businessDescription = await getBusinessDescription();
+	const [ toneOfVoice, businessDescription ] = await Promise.all( [
+		getToneOfVoice(),
+		getBusinessDescription(),
+	] );
 
 	return { toneOfVoice, businessDescription };
 }
