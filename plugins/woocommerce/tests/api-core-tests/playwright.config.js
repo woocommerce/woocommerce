@@ -1,10 +1,10 @@
 const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
-const { BASE_URL, CI, DEFAULT_TIMEOUT_OVERRIDE, USER_KEY, USER_SECRET } =
+const { API_BASE_URL, CI, DEFAULT_TIMEOUT_OVERRIDE, USER_KEY, USER_SECRET } =
 	process.env;
 
-const baseURL = BASE_URL ?? 'http://localhost:8086';
+const baseURL = API_BASE_URL ?? 'http://localhost:8086';
 const userKey = USER_KEY ?? 'admin';
 const userSecret = USER_SECRET ?? 'password';
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
