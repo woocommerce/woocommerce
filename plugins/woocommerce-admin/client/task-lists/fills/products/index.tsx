@@ -138,7 +138,7 @@ export const Products = () => {
 						setIsConfirmingLoadSampleProducts( true )
 					}
 					showOtherOptions={ isExpanded }
-					isTaskListItemclicked={ isRequesting }
+					isTaskListItemClicked={ isRequesting }
 				/>
 				<ViewControlButton
 					isExpanded={ isExpanded }

@@ -21,20 +21,20 @@ type StackProps = {
 	} )[];
 	onClickLoadSampleProduct: () => void;
 	showOtherOptions?: boolean;
-	isTaskListItemclicked?: boolean;
+	isTaskListItemClicked?: boolean;
 };
 
 const Stack: React.FC< StackProps > = ( {
 	items,
 	onClickLoadSampleProduct,
 	showOtherOptions = true,
-	isTaskListItemclicked = false,
+	isTaskListItemClicked = false,
 } ) => {
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	return (
 		<div className="woocommerce-products-stack">
-			{ isTaskListItemclicked && (
+			{ isTaskListItemClicked && (
 				<div className="woocommerce-stack__overlay-spinner">
 					<Spinner className="list-overlay" />
 				</div>
