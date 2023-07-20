@@ -1,0 +1,34 @@
+name: Send PRs that require further testing to Slack
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  send-pr-to-slack-for-further-testing:
+    if: "${{ github.event.label.name == 'needs: analysis' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get the PR status
+        id: get_pr_status
+        run: |
+          pr_status=${{ github.event.pull_request.merged == true && 'merged' || 'open' }}
+          echo "pr_status=$pr_status" >> $GITHUB_OUTPUT
+      - name: Calculate SLA timestamp
+        id: calculate_sla
+        run: |
+          sla_timestamp=$(date -d "+ 5 hours" -u +%s)
+          echo "sla_timestamp=$sla_timestamp" >> $GITHUB_OUTPUT
+      - name: Notify Slack
+        uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
+        id: notify
+        with:
+            slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
+            slack-channel: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
+            slack-text: |
+                <!subteam^${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}>, there is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
+                <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
+                *SLA:* <!date^${{ steps.calculate_sla.outputs.sla_timestamp }}^{date_short_pretty} at {time}|5 hours from now>
+            slack-optional-unfurl_links: false
+            slack-optional-unfurl_media: false

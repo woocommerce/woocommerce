@@ -56,6 +56,13 @@ class Edit {
 	private $message;
 
 	/**
+	 * Controller for orders page. Used to determine redirection URLs.
+	 *
+	 * @var PageController
+	 */
+	private $orders_page_controller;
+
+	/**
 	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
 	 * @param string $screen_id Screen ID.
@@ -102,6 +109,20 @@ class Edit {
 			wp_enqueue_script( 'jquery-touch-punch' );
 		}
 		wp_enqueue_script( 'post' ); // Ensure existing JS libraries are still available for backward compat.
+	}
+
+	/**
+	 * Returns the PageController for this edit form. This method is protected to allow child classes to overwrite the PageController object and return custom links.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @return PageController PageController object.
+	 */
+	protected function get_page_controller() {
+		if ( ! isset( $this->orders_page_controller ) ) {
+			$this->orders_page_controller = wc_get_container()->get( PageController::class );
+		}
+		return $this->orders_page_controller;
 	}
 
 	/**
@@ -215,9 +236,39 @@ class Edit {
 		// Order updated message.
 		$this->message = 1;
 
-		// Refresh the order from DB.
-		$this->order = wc_get_order( $this->order->get_id() );
-		$theorder    = $this->order;
+		$this->redirect_order( $this->order );
+	}
+
+	/**
+	 * Helper method to redirect to order edit page.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	private function redirect_order( \WC_Order $order ) {
+		$redirect_to = $this->get_page_controller()->get_edit_url( $order->get_id() );
+		if ( isset( $this->message ) ) {
+			$redirect_to = add_query_arg( 'message', $this->message, $redirect_to );
+		}
+		wp_safe_redirect(
+			/**
+			 * Filter the URL used to redirect after an order is updated. Similar to the WP post's `redirect_post_location` filter.
+			 *
+			 * @param string    $redirect_to The redirect destination URL.
+			 * @param int       $order_id The order ID.
+			 * @param \WC_Order $order The order object.
+			 *
+			 * @since 8.0.0
+			 */
+			apply_filters(
+				'woocommerce_redirect_order_location',
+				$redirect_to,
+				$order->get_id(),
+				$order
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -279,10 +330,10 @@ class Edit {
 	private function render_wrapper_start( $notice = '', $message = '' ) {
 		$post_type = get_post_type_object( $this->order->get_type() );
 
-		$edit_page_url = wc_get_container()->get( PageController::class )->get_edit_url( $this->order->get_id() );
+		$edit_page_url = $this->get_page_controller()->get_edit_url( $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
-		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url( $this->order->get_type() );
+		$new_page_url  = $this->get_page_controller()->get_new_page_url( $this->order->get_type() );
 
 		?>
 		<div class="wrap">
@@ -337,6 +388,7 @@ class Edit {
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
+		<input type="hidden" id="post_ID" name="post_ID" value="<?php echo esc_attr( $this->order->get_id() ); ?>"/>
 		<div id="poststuff">
 		<div id="post-body"
 		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">

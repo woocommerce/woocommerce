@@ -101,4 +101,24 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Test', $refreshed_refund->get_reason() );
 	}
 
+	/**
+	 * @testDox Test that refund props are set as expected.
+	 */
+	public function test_refund_data_is_set() {
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test',
+			)
+		);
+		$refund->save();
+
+		$refreshed_refund = wc_get_order( $order->get_id() )->get_refunds()[0];
+		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
+		$this->assertEquals( 10, $refreshed_refund->get_data()['amount'] );
+		$this->assertEquals( 'Test', $refreshed_refund->get_data()['reason'] );
+	}
+
 }

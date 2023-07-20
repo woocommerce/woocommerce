@@ -31,6 +31,24 @@
         padding-left: $gap-small;
     }
 	&-right {
-        padding-right: $gap-small;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		> .components-dropdown-menu {
+			margin-right: $gap-small;
+			width: 48px;
+			> button.components-dropdown-menu__toggle {
+				padding: $gap-smaller !important;
+				margin-right: -8px;
+			}
+		}
+		> .woocommerce-show-block-inspector-panel {
+			margin-right: -$gap-smaller;
+		}
+		button.woocommerce-modal-actions__done-button,
+		button.woocommerce-modal-actions__cancel-button {
+			margin-left: $gap-smaller;
+			height: $gap-larger - $gap-smallest;
+		}
     }
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Include CSS for experimental tree control so it renders properly in Storybook.
