@@ -13,11 +13,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           sparse-checkout: |
-            .github/actions/test-assistant-pr-scrub
+            .github/actions/pr-scrub-notify-slack
           ref: trunk
       - name: 'Trigger PR scrub'
-        uses: ./.github/actions/test-assistant-pr-scrub
+        uses: ./.github/actions/pr-scrub-notify-slack
         with:
           TEST_ASSISTANCE_BOT_TOKEN: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
           WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
           WOO_PR_TESTING_ANALYSIS_TEAM_ID: ${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}
+
