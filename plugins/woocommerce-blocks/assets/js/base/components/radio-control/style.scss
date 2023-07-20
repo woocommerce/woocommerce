@@ -3,13 +3,11 @@
 	@include reset-typography();
 	display: block;
 	margin: em($gap) 0;
+	margin-top: 0;
 	padding: 0 0 0 em($gap-larger);
 	position: relative;
 	cursor: pointer;
 
-	&:first-child {
-		margin-top: 0;
-	}
 	&:last-child {
 		margin-bottom: 0;
 	}
