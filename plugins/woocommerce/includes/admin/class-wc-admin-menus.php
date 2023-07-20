@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +38,10 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
-		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+			$container = wc_get_container();
+			$container->get( Marketplace::class );
+		} else {
 			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
 		}
 
@@ -426,7 +431,7 @@ class WC_Admin_Menus {
 	 * Maybe add new management product experience.
 	 */
 	public function maybe_add_new_product_management_experience() {
-		if ( Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+		if ( Features::is_enabled( 'new-product-management-experience' ) || FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			global $submenu;
 			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
 				// Disable phpcs since we need to override submenu classes.
