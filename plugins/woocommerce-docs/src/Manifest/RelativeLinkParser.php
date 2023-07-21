@@ -2,6 +2,8 @@
 
 namespace WooCommerceDocs\Manifest;
 
+use WooCommerceDocs\Data\DocsStore;
+
 /**
  * Class RelativeLinkParser
  */
@@ -72,14 +74,20 @@ class RelativeLinkParser {
 		foreach ( $anchors as $anchor ) {
 			$href = $anchor->getAttribute( 'href' );
 
-			error_log( 'SHould i replace this link? ' . $href );
-
 			// Check if its a url or relative path.
-			if ( ! preg_match( ' / ^ https ?: \ / \// ', $href ) ) {
-				error_log( 'Replacing relative link: ' . $href . ' with ' . $link_lookup[ $href ] );
+			if ( ! preg_match( '/ ^ https ?: \ / \//', $href ) ) {
+
 				// Check if the link exists in the lookup object.
 				if ( isset( $link_lookup[ $href ] ) ) {
-					$anchor->setAttribute( 'href', $link_lookup[ $href ] );
+					$post = DocsStore::get_post( $link_lookup[ $href ] );
+
+					if ( $post ) {
+						// get permalink from lookup object.
+						$permalink = get_permalink( $post );
+						$anchor->setAttribute( 'href', $permalink );
+					} else {
+						// TODO log error here.
+					}
 				}
 			}
 		}

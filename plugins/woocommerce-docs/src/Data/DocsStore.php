@@ -89,27 +89,6 @@ class DocsStore {
 	}
 
 	/**
-	 * Add an edit URL to a docs post
-	 *
-	 * @param int    $post_id - The post ID to add the edit URL to.
-	 * @param string $edit_url  - The edit URL to add.
-	 * @return void
-	 */
-	public static function add_edit_url_to_docs_post( $post_id, $edit_url ) {
-		update_post_meta( $post_id, 'edit_url', $edit_url );
-	}
-
-	/**
-	 * Get the edit URL from a docs post
-	 *
-	 * @param int $post_id - The post ID to get the edit URL from.
-	 * @return string The edit URL.
-	 */
-	public static function get_edit_url_from_docs_post( $post_id ) {
-		return get_post_meta( $post_id, 'edit_url', true );
-	}
-
-	/**
 	 * Update a docs post
 	 *
 	 * @param array $post The post to update.

@@ -77,20 +77,15 @@ class ManifestJob {
 						\ActionScheduler_Logger::instance()->log( $action_id, 'No previous manifest found, processing manifest.' );
 					}
 
-					$doc_ids = ManifestProcessor::process_manifest( $json, $action_id );
-					\ActionScheduler_Logger::instance()->log( $action_id, "Extracting links for manifest: `$hash`" );
+					$doc_ids        = ManifestProcessor::process_manifest( $json, $action_id );
 					$relative_links = RelativeLinkParser::extract_links_from_manifest( $json );
-					\ActionScheduler_Logger::instance()->log( $action_id, 'Start parsing links for ids: ' . print_r( $doc_ids, true ) );
 
 					foreach ( $doc_ids as $doc_id ) {
 						$post = DocsStore::get_post( $doc_id );
 
 						if ( $post !== null ) {
-							\ActionScheduler_Logger::instance()->log( $action_id, 'Got a post: ' . print_r( $post, true ) );
-							$content = $post->post_content;
-							\ActionScheduler_Logger::instance()->log( $action_id, "Parsing relative links for doc: `$doc_id`" );
-							$updated_content = RelativeLinkParser::replace_relative_links( $content, $relative_links );
-							\ActionScheduler_Logger::instance()->log( $action_id, 'Updated content: ' . $updated_content );
+							$content            = $post->post_content;
+							$updated_content    = RelativeLinkParser::replace_relative_links( $content, $relative_links );
 							$post->post_content = $updated_content;
 							DocsStore::update_docs_post( $post, $doc_id );
 						} else {
@@ -98,8 +93,6 @@ class ManifestJob {
 							\ActionScheduler_Logger::instance()->log( $action_id, "Post not found for doc: `$doc_id`" );
 						}
 					}
-					\ActionScheduler_Logger::instance()->log( $action_id, "Parsed relative links for manifest: `$hash`" );
-
 					Data\ManifestStore::update_manifest( $manifest_url, $json );
 				} else {
 					\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash unchanged: `$hash`, skipping manifest." );
