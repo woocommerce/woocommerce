@@ -41,6 +41,14 @@ class Cart extends AbstractBlock {
 		$shop_permalink = wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';
 
 		register_block_pattern(
+			'woocommerce/cart-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Cart', 'woo-gutenberg-products-block' ) . '</h1><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
 			'woocommerce/cart-cross-sells-message',
 			array(
 				'title'    => '',

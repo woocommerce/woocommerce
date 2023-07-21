@@ -25,6 +25,31 @@ class Checkout extends AbstractBlock {
 	protected $chunks_folder = 'checkout-blocks';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+	}
+
+	/**
+	 * Register block pattern for Empty Cart Message to make it translatable.
+	 */
+	public function register_patterns() {
+		register_block_pattern(
+			'woocommerce/checkout-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Checkout', 'woo-gutenberg-products-block' ) . '</h1><!-- /wp:heading -->',
+			)
+		);
+	}
+
+	/**
 	 * Get the editor script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
