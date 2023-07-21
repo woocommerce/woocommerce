@@ -451,7 +451,7 @@ Object {
                     class="components-checkbox-control__label"
                     for="inspector-checkbox-control-1"
                   >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                    I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                     <a
                       data-link-type="external"
                       href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -459,7 +459,7 @@ Object {
                     >
                       Learn more about usage tracking
                     </a>
-                    .
+                    ).
                   </label>
                 </div>
               </div>
@@ -596,7 +596,7 @@ Object {
                   class="components-checkbox-control__label"
                   for="inspector-checkbox-control-1"
                 >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                  I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                   <a
                     data-link-type="external"
                     href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -604,7 +604,7 @@ Object {
                   >
                     Learn more about usage tracking
                   </a>
-                  .
+                  ).
                 </label>
               </div>
             </div>
@@ -971,7 +971,7 @@ Object {
                     class="components-checkbox-control__label"
                     for="inspector-checkbox-control-3"
                   >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                    I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                     <a
                       data-link-type="external"
                       href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -979,7 +979,7 @@ Object {
                     >
                       Learn more about usage tracking
                     </a>
-                    .
+                    ).
                   </label>
                 </div>
               </div>
@@ -1116,7 +1116,7 @@ Object {
                   class="components-checkbox-control__label"
                   for="inspector-checkbox-control-3"
                 >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                  I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                   <a
                     data-link-type="external"
                     href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -1124,7 +1124,7 @@ Object {
                   >
                     Learn more about usage tracking
                   </a>
-                  .
+                  ).
                 </label>
               </div>
             </div>
@@ -1878,7 +1878,7 @@ Object {
                     class="components-checkbox-control__label"
                     for="inspector-checkbox-control-2"
                   >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                    I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                     <a
                       data-link-type="external"
                       href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -1886,7 +1886,7 @@ Object {
                     >
                       Learn more about usage tracking
                     </a>
-                    .
+                    ).
                   </label>
                 </div>
               </div>
@@ -2023,7 +2023,7 @@ Object {
                   class="components-checkbox-control__label"
                   for="inspector-checkbox-control-2"
                 >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
+                  I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. 
                   <a
                     data-link-type="external"
                     href="https://woocommerce.com/usage-tracking?utm_medium=product"
@@ -2031,7 +2031,7 @@ Object {
                   >
                     Learn more about usage tracking
                   </a>
-                  .
+                  ).
                 </label>
               </div>
             </div>
