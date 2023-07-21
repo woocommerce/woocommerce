@@ -195,7 +195,7 @@ const replaceProductsBlocks = ( productsBlockClientIds: string[] ) => {
 };
 
 export const replaceProductsWithProductCollection = (
-	unsubscribe: () => void
+	unsubscribe?: () => void
 ) => {
 	const queryBlocksCount =
 		select( 'core/block-editor' ).getGlobalBlockCount( 'core/query' );
@@ -213,7 +213,7 @@ export const replaceProductsWithProductCollection = (
 
 	const replaced = replaceProductsBlocks( productsBlockClientIds );
 
-	if ( replaced ) {
+	if ( unsubscribe && replaced ) {
 		// @todo: unsubscribe on user reverting migration
 		unsubscribe();
 	}
