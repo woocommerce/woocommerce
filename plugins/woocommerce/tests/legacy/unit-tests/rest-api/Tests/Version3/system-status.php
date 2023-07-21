@@ -55,7 +55,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		static $system_status_data = null;
 		if ( ! $system_status_data ) {
 			wp_set_current_user( self::$user );
-			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+			$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
 			$system_status_data = $response->get_data();
 		}
 		return $system_status_data;
@@ -179,8 +179,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_status_info_theme() {
 		$active_theme = wp_get_theme();
-
-		$theme    = (array) $this->get_system_status_data()['theme'];
+		$theme        = (array) $this->get_system_status_data()['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -226,7 +225,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_pages() {
-		$pages    = $this->get_system_status_data()['pages'];
+		$pages = $this->get_system_status_data()['pages'];
 		$this->assertEquals( 5, count( $pages ) );
 	}
 
