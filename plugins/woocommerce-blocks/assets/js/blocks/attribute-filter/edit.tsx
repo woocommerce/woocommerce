@@ -69,7 +69,6 @@ const Edit = ( {
 }: EditProps ) => {
 	const {
 		attributeId,
-		className,
 		displayStyle,
 		heading,
 		headingLevel,
@@ -419,12 +418,7 @@ const Edit = ( {
 			{ isEditing ? (
 				renderEditMode()
 			) : (
-				<div
-					className={ classnames(
-						className,
-						'wc-block-attribute-filter'
-					) }
-				>
+				<div className={ classnames( 'wc-block-attribute-filter' ) }>
 					{ heading && (
 						<BlockTitle
 							className="wc-block-attribute-filter__title"
