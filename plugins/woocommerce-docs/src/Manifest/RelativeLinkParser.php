@@ -63,9 +63,10 @@ class RelativeLinkParser {
 	 *
 	 * @param string $content The content to update.
 	 * @param array  $link_lookup The lookup object containing the links.
+	 * @param int    $action_id The action id used for logging.
 	 * @return string The updated content.
 	 */
-	public static function replace_relative_links( $content, $link_lookup ) {
+	public static function replace_relative_links( $content, $link_lookup, $action_id ) {
 		$dom = new \DOMDocument();
 		$dom->loadHTML( $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 
@@ -75,29 +76,25 @@ class RelativeLinkParser {
 			$href = $anchor->getAttribute( 'href' );
 
 			// Check if its a url or relative path.
-			if ( ! preg_match( '/ ^ https ?: \ / \//', $href ) ) {
+			if ( ! preg_match( '/^ https ?: \/ \//', $href ) ) {
 
 				// Check if the link exists in the lookup object.
 				if ( isset( $link_lookup[ $href ] ) ) {
 					$post = DocsStore::get_post( $link_lookup[ $href ] );
 
 					if ( $post ) {
+						$post_id = $post->ID;
 						// get permalink from lookup object.
-						$permalink = get_permalink( $post );
+						$permalink = get_permalink( $post_id );
 						$anchor->setAttribute( 'href', $permalink );
 					} else {
-						// TODO log error here.
+						\ActionScheduler_Logger::instance()->log( $action_id, "Could not replace file link with post link, post with ID: $post_id not found." );
 					}
 				}
 			}
 		}
 
 		$updated_content = $dom->saveHTML();
-
-		// Remove DOCTYPE and HTML wrapper added by DOMDocument.
-		$updated_content = preg_replace( '/^<!DOCTYPE.+?>/', '', $updated_content );
-		$updated_content = preg_replace( '/^<html><body>/', '', $updated_content );
-		$updated_content = preg_replace( '/<\/body><\/html>$/', '', $updated_content );
 
 		return $updated_content;
 	}

@@ -152,13 +152,9 @@ class BlockConverter {
 
 			if ( XML_ELEMENT_NODE === $node_type ) {
 				if ( 'a' === $node_name ) {
-					$href = self::escape_full_url( $child_node->getAttribute( 'href' ) );
-					error_log( 'raw url: ' . $child_node->getAttribute( 'href' ) . ' escaped url: ' . $href );
+					$href         = self::escape_full_url( $child_node->getAttribute( 'href' ) );
 					$link_content = $this->convert_child_nodes_to_blocks( $child_node );
-
-					error_log( 'The link href is: ' . $href );
-					error_log( 'the raw url: ' . $child_node->getAttribute( 'href' ) );
-					$content .= "<a href=\"{$href}\">{$link_content}</a>";
+					$content     .= "<a href=\"{$href}\">{$link_content}</a>";
 				} elseif ( 'em' === $node_name || 'strong' === $node_name ) {
 					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
 					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";

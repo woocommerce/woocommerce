@@ -83,14 +83,13 @@ class ManifestJob {
 					foreach ( $doc_ids as $doc_id ) {
 						$post = DocsStore::get_post( $doc_id );
 
-						if ( $post !== null ) {
+						if ( null !== $post ) {
 							$content            = $post->post_content;
-							$updated_content    = RelativeLinkParser::replace_relative_links( $content, $relative_links );
+							$updated_content    = RelativeLinkParser::replace_relative_links( $content, $relative_links, $action_id );
 							$post->post_content = $updated_content;
 							DocsStore::update_docs_post( $post, $doc_id );
 						} else {
-							// log not found
-							\ActionScheduler_Logger::instance()->log( $action_id, "Post not found for doc: `$doc_id`" );
+							\ActionScheduler_Logger::instance()->log( $action_id, "During link replacement, post was not found for doc: `$doc_id`" );
 						}
 					}
 					Data\ManifestStore::update_manifest( $manifest_url, $json );
