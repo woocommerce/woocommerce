@@ -213,7 +213,15 @@ export function WriteItForMeButtonContainer() {
 			await requestCompletion( prompt );
 			if ( ! shortTinyEditor.getContent() || shortDescriptionGenerated ) {
 				await requestShortCompletion(
-					`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
+					[
+						'Please write a high-converting Meta Description for the WooCommerce product description below.',
+						'It should strictly adhere to the following guidelines:',
+						'It should entice someone from a search results page to click on the product link.',
+						'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
+						'It should explain what users will see if they click on the product page link.',
+						`It should include the target keyword for the product.`,
+						`Here is the full product description: \n${ tinyEditor.getContent() }`,
+					].join( '\n' )
 				);
 				setShortDescriptionGenerated( true );
 			}
