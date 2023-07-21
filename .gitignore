@@ -82,6 +82,9 @@ plugins/woocommerce/includes/react-admin/feature-config.php
 # PHP lint
 phpcs-report.xml
 
+#PHP Unit
+.phpunit.result.cache
+
 # Allure directories
 allure-report
 allure-results
