@@ -213,26 +213,22 @@ test.describe( 'Checkout page', () => {
 		}
 
 		await page.goto( '/checkout/' );
-		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
-			'2'
-		);
+		await expect( page.getByText('× 2') ).toBeVisible();
 		await expect( page.locator( 'td.product-total' ) ).toContainText(
 			twoProductPrice
 		);
 
-		await page.locator( '#billing_first_name' ).fill( 'Lisa' );
-		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
-		await page
-			.locator( '#billing_address_1' )
-			.fill( '123 Evergreen Terrace' );
-		await page.locator( '#billing_city' ).fill( 'Springfield' );
+		await page.getByRole( 'textbox', { name: 'First name *' } ).fill( 'Lisa' );
+		await page.getByRole( 'textbox', { name: 'Last name *' } ).fill( 'Simpson' );
+		await page.getByRole( 'textbox', { name: 'Street address *' } ).fill( '123 Evergreen Terrace' );
+		await page.getByRole( 'textbox', { name: 'Town / City *' } ).fill( 'Springfield' );
 		await page.locator( '#billing_state' ).selectOption( 'OR' );
-		await page.locator( '#billing_postcode' ).fill( '97403' );
-		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
-		await page.locator( '#billing_email' ).fill( guestEmail );
+		await page.getByRole( 'textbox', { name: 'ZIP Code *' } ).fill( '97403' );
+		await page.getByRole( 'textbox', { name: 'Phone *' } ).fill( '555 555-5555' );
+		await page.getByRole( 'textbox', { name: 'Email address *' } ).fill( guestEmail );
 
 		await page.locator( 'text=Cash on delivery' ).click();
-		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
+		await expect( page.getByText('Pay with cash upon delivery.' ) ).toBeVisible();
 
 		await page.locator( 'text=Place order' ).click();
 
@@ -260,20 +256,14 @@ test.describe( 'Checkout page', () => {
 		// be presented with a request to verify their email address.
 		await setFilterValue( page, 'woocommerce_order_email_verification_grace_period', 0 );
 		await page.reload();
-		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
-			/verify the email address associated with the order/
-		);
+		await expect( page.getByText('To view this page, you must either login or verify the email address associated ') ).toBeVisible();
 
 		// Supplying an email address other than the actual order billing email address will take them back to the same
 		// page with an error message.
 		await page.fill( '#email', 'incorrect@email.address' );
 		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
-			/verify the email address associated with the order/
-		);
-		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
-			/We were unable to verify the email address you provided/
-		);
+		await expect( page.getByText('To view this page, you must either login or verify the email address associated ') ).toBeVisible();
+		await expect( page.getByText('We were unable to verify the email address you provided. Please try again.') ).toBeVisible();
 
 		// However if they supply the *correct* billing email address, they should see the order received page again.
 		await page.fill( '#email', guestEmail );
@@ -281,6 +271,7 @@ test.describe( 'Checkout page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Order received' } )
 		).toBeVisible();
+		await expect( page.getByText( 'We were unable to verify the email address you provided. Please try again.' ) ).not.toBeVisible();
 
 		await page.goto( 'wp-login.php' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
