@@ -33,9 +33,6 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	providesContext: {
-		...metadata.providesContext,
-	},
 	supports: {
 		...featurePluginSupport,
 	},

@@ -12,6 +12,7 @@ import {
 	getMiniCartTotalsFromLocalStorage,
 	getMiniCartTotalsFromServer,
 	updateTotals,
+	migrateAttributesToColorPanel,
 } from '../data';
 
 // This is a simplified version of the response of the Cart API endpoint.
@@ -204,5 +205,36 @@ describe( 'Mini-Cart frontend script when "the display prices during cart and ch
 			)
 		);
 		jest.restoreAllMocks();
+	} );
+} );
+
+const mockAttributes = {
+	miniCartIcon: 'cart',
+	addToCartBehaviour: 'inline',
+	hasHiddenPrice: false,
+	cartAndCheckoutRenderStyle: true,
+	priceColorValue: '#000000',
+	iconColorValue: '#ffffff',
+	productCountColorValue: '#ff0000',
+};
+describe( 'migrateAttributesToColorPanel tests', () => {
+	test( 'it correctly migrates attributes to color panel', () => {
+		const migratedAttributes =
+			migrateAttributesToColorPanel( mockAttributes );
+		expect( migratedAttributes ).toEqual( {
+			miniCartIcon: 'cart',
+			addToCartBehaviour: 'inline',
+			hasHiddenPrice: false,
+			cartAndCheckoutRenderStyle: true,
+			priceColor: {
+				color: '#000000',
+			},
+			iconColor: {
+				color: '#ffffff',
+			},
+			productCountColor: {
+				color: '#ff0000',
+			},
+		} );
 	} );
 } );
