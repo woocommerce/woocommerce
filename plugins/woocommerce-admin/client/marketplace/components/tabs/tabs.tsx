@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
-import { getQuery, getNewPath, navigateTo } from '@woocommerce/navigation';
+import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -80,16 +80,15 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		tab?: string;
 	}
 
-	useEffect( () => {
-		const query: Query = getQuery();
+	const query: Query = useQuery();
 
+	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
-			return;
+		} else {
+			setSelectedTab( DEFAULT_TAB_KEY );
 		}
-
-		setSelectedTab( DEFAULT_TAB_KEY );
-	}, [ setSelectedTab ] );
+	}, [ query, setSelectedTab ] );
 
 	return (
 		<nav className="woocommerce-marketplace__tabs">
