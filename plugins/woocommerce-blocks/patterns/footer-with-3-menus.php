@@ -14,25 +14,26 @@
 		<!-- wp:column {"verticalAlignment":"top","width":"70%"} -->
 		<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:70%">
 			<!-- wp:group {"style":{"spacing":{"blockGap":"32px"}},"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-			<div class="wp-block-group"><!-- wp:site-logo {"shouldSyncIcon":false} /-->
+			<div class="wp-block-group">
+				<!-- wp:site-logo {"shouldSyncIcon":false} /-->
 
 				<!-- wp:columns {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":{"top":"var:preset|spacing|70","left":"var:preset|spacing|70"}}}} -->
 				<div class="wp-block-columns" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 					<!-- wp:column -->
 					<div class="wp-block-column">
-						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical","flexWrap":"wrap"},"style":{"spacing":{"blockGap":"10px"}}} /-->
+						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical","flexWrap":"wrap"}} /-->
 					</div>
 					<!-- /wp:column -->
 
 					<!-- wp:column -->
 					<div class="wp-block-column">
-						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
+						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"}} /-->
 					</div>
 					<!-- /wp:column -->
 
 					<!-- wp:column -->
 					<div class="wp-block-column">
-						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
+						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"}} /-->
 					</div>
 					<!-- /wp:column -->
 				</div>
@@ -44,30 +45,30 @@
 
 		<!-- wp:column {"verticalAlignment":"top","style":{"spacing":{"blockGap":"60px"}},"layout":{"type":"default"}} -->
 		<div class="wp-block-column is-vertically-aligned-top">
-			<!-- wp:group {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"5px"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"right","verticalAlignment":"space-between"}} -->
+			<!-- wp:group {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"var:preset|spacing|50"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"right"}} -->
 			<div class="wp-block-group" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
-				<!-- wp:group {"style":{"border":{"top":{"width":"1px","style":"solid"},"right":{"width":"1px","style":"solid"},"bottom":{"width":"1px","style":"solid"},"left":{"width":"1px","style":"solid"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
-				<div class="wp-block-group" style="border-top-style:solid;border-top-width:1px;border-right-style:solid;border-right-width:1px;border-bottom-style:solid;border-bottom-width:1px;border-left-style:solid;border-left-width:1px">
-					<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search our store","width":280,"widthUnit":"px","buttonText":"Search","buttonUseIcon":true,"query":{"post_type":"product"},"style":{"border":{"top":{"width":"0px","style":"none"},"right":{"width":"0px","style":"none"},"bottom":{"width":"0px","style":"none"},"left":{"width":"0px","style":"none"}}},"backgroundColor":"background","textColor":"foreground"} /-->
-				</div>
-				<!-- /wp:group -->
+				<!-- wp:search {"label":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","showLabel":false,"placeholder":"<?php esc_html_e( 'Search our store', 'woo-gutenberg-products-block' ); ?>","buttonText":"<?php esc_html_e( 'Search our store', 'woo-gutenberg-products-block' ); ?>","buttonUseIcon":true,"query":{"post_type":"product"}} /-->
 
-				<!-- wp:site-title {"level":0,"textAlign":"right","style":{"typography":{"fontStyle":"normal","fontWeight":"700","fontSize":"14px"},"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"anchor":""} /-->
+				<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"right"}} -->
+				<div class="wp-block-group">
+					<!-- wp:site-title /-->
 
-				<!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"12px"}}} -->
-				<p class="has-text-align-right" style="font-size:12px">
-					<?php
+					<!-- wp:paragraph {"align":"right"} -->
+					<p class="has-text-align-right">
+						<?php
 						echo sprintf(
 							esc_html(
-								/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
+							/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
 								__( 'Powered by %1$s with %2$s', 'woo-gutenberg-products-block' )
 							),
 							'<a href="https://wordpress.org">WordPress</a>',
 							'<a href="https://woocommerce.com">WooCommerce</a>'
 						);
 						?>
-				</p>
-				<!-- /wp:paragraph -->
+					</p>
+					<!-- /wp:paragraph -->
+				</div>
+				<!-- /wp:group -->
 			</div>
 			<!-- /wp:group -->
 		</div>
