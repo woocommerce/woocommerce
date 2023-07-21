@@ -22,7 +22,7 @@ class CategoryCreatorTest extends WP_UnitTestCase {
 			'category_slug'  => 'test-category',
 		);
 
-		$term = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$term = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 		$id   = $term['term_id'];
 
 		$category = get_category( $id );
@@ -40,20 +40,35 @@ class CategoryCreatorTest extends WP_UnitTestCase {
 			'category_slug'  => 'test-category',
 		);
 
-		$category_id = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$category_id = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 
 		$manifest_category = array(
 			'category_title' => 'Test Category 2',
-			'category_slug'  => 'test-category-2',
+			'category_slug'  => 'custom-slug',
 		);
 
-		$term = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$term = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 		$id   = $term['term_id'];
 
 		$category = get_category( $id );
 
 		$this->assertEquals( 'Test Category 2', $category->name );
-		$this->assertEquals( 'test-category-2', $category->slug );
+		$this->assertEquals( 'custom-slug', $category->slug );
+	}
+
+	/**
+	 * Test a category can be created without a slug and it generates a
+	 * default one from the title.
+	 */
+	public function test_create_category_no_slug() {
+		$manifest_category = array(
+			'category_title' => 'My Category',
+		);
+
+		$term     = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
+		$category = get_category( $term['term_id'] );
+
+		$this->assertEquals( 'my-category', $category->slug );
 	}
 
 }

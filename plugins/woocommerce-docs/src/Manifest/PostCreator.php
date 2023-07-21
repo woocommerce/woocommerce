@@ -32,14 +32,10 @@ class PostCreator {
 	 * @param int    $logger_action_id The logger action ID.
 	 * @return int The post ID.
 	 */
-	public static function create_post_from_manifest_entry( $manifest_post, $post_content, $logger_action_id ) {
+	public static function create_or_update_post_from_manifest_entry( $manifest_post, $post_content, $logger_action_id ) {
 		$existing_post = DocsStore::get_post( $manifest_post['id'] );
 
-		// Strip frontmatter.
-		$content = preg_replace( '/^---[\s\S]*?---/', '', $post_content );
-
-		// Parse markdown.
-		$blocks = self::get_converter()->convert( $content );
+		$blocks = self::get_converter()->convert_markdown_to_gb_blocks( $post_content );
 
 		// Generate post args.
 		$post_args = new PostArgs( $manifest_post, $blocks );

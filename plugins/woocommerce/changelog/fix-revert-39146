@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Reverts a merged but unshipped PR (PR#39146), so no a new changelog is not required.
-
-

@@ -11,7 +11,7 @@ use WooCommerceDocs\Data\DocsStore;
  */
 class ManifestProcessor {
 	/**
-	 * Process manifest object into WordPress pages
+	 * Process manifest object into WordPress posts and categories.
 	 *
 	 * @param Object $manifest The manifest to process.
 	 * @param int    $logger_action_id The logger action ID.
@@ -32,7 +32,7 @@ class ManifestProcessor {
 	 */
 	private static function process_categories( $categories, $logger_action_id, &$doc_ids, $parent_id = 0 ) {
 		foreach ( $categories as $category ) {
-			$term = CategoryCreator::create_category_from_manifest_entry( $category, $parent_id );
+			$term = CategoryCreator::create_or_update_category_from_manifest_entry( $category, $parent_id );
 
 			// Now, process the posts for this category.
 			foreach ( $category['posts'] as $post ) {
@@ -47,7 +47,7 @@ class ManifestProcessor {
 
 				$content = wp_remote_retrieve_body( $response );
 
-				$post_id = PostCreator::create_post_from_manifest_entry( $post, $content, $category['category_title'], $logger_action_id );
+				$post_id = PostCreator::create_or_update_post_from_manifest_entry( $post, $content, $category['category_title'], $logger_action_id );
 				$doc_id  = DocsStore::get_doc_id_by_post_id( $post_id );
 
 				// Add the post ID to the list of post IDs.
