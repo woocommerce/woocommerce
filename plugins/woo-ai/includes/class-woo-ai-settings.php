@@ -29,10 +29,15 @@ class Woo_AI_Settings {
 	 */
 	protected $id = 'woo-ai-settings-tab';
 
-	private array $tone_of_voice_select_options;
+	/**
+	 * Tone of voice select options.
+	 *
+	 * @var array
+	 */
+	private $tone_of_voice_select_options;
 
 	private const STORE_DESCRIPTION_OPTION_KEY = 'woo_ai_describe_store_description';
-	private const TONE_OF_VOICE_OPTION_KEY = 'woo_ai_tone_of_voice_select';
+	private const TONE_OF_VOICE_OPTION_KEY     = 'woo_ai_tone_of_voice_select';
 
 	/**
 	 * Main Instance.
@@ -66,6 +71,7 @@ class Woo_AI_Settings {
 
 	/**
 	 * Adds settings which can be retrieved via the WooCommerce Settings API.
+	 *
 	 * @see https://github.com/woocommerce/woocommerce/wiki/Settings-API
 	 *
 	 * @param array $settings The original settings array.
@@ -93,7 +99,7 @@ class Woo_AI_Settings {
 
 	/** 
 	 * Register our Woo AI plugin group to the WooCommerce Settings API.
-	 * 
+	 *
 	 * @param array $locations The original settings array.
 	 * @return array The modified settings array.
 	 */
