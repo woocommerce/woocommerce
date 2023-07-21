@@ -513,10 +513,10 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'woocommerce_blocks_product_grid_item_html',
 			"<li class=\"wc-block-grid__product\">
 				<a href=\"{$data->permalink}\" class=\"wc-block-grid__product-link\">
+					{$data->badge}
 					{$data->image}
 					{$data->title}
 				</a>
-				{$data->badge}
 				{$data->price}
 				{$data->rating}
 				{$data->button}
