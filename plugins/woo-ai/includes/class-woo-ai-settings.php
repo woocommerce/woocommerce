@@ -97,7 +97,7 @@ class Woo_AI_Settings {
 			return $settings;
 	}
 
-	/** 
+	/**
 	 * Register our Woo AI plugin group to the WooCommerce Settings API.
 	 *
 	 * @param array $locations The original settings array.

@@ -176,7 +176,7 @@ export function WriteItForMeButtonContainer() {
 			productPropsInstructions.push(
 				`Tagged with: ${ productTags.join( ', ' ) }.`
 			);
-			includedProps.push( 'categories' );
+			includedProps.push( 'tags' );
 		}
 		productAttributes.forEach( ( { name, values } ) => {
 			productPropsInstructions.push(
@@ -196,11 +196,16 @@ export function WriteItForMeButtonContainer() {
 			'Structure the content into paragraphs using <p> tags, and use HTML elements like <strong> and <em> for emphasis.',
 			'Identify the language used in the product name, and craft the description in the same language.',
 			'Only if appropriate, use <ul> and <li> tags to list product features.',
-			`Avoid including the properties (${ includedProps.join(
-				', '
-			) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`,
 			'Do not include a top-level heading at the beginning of the description.',
 		];
+
+		if ( includedProps.length > 0 ) {
+			instructions.push(
+				`Avoid including the properties (${ includedProps.join(
+					', '
+				) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`
+			);
+		}
 
 		if ( brandingData?.toneOfVoice ) {
 			instructions.push(
