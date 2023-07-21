@@ -8,13 +8,13 @@ import { Icon } from '@wordpress/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { IconType } from '.././types';
+import { IconType, ColorItem } from '.././types';
 
 interface Props {
 	count: number;
 	icon?: IconType;
-	iconColor?: string;
-	productCountColor?: string;
+	iconColor: ColorItem | { color: undefined };
+	productCountColor: ColorItem | { color: undefined };
 }
 
 const QuantityBadge = ( {
@@ -40,13 +40,13 @@ const QuantityBadge = ( {
 		<span className="wc-block-mini-cart__quantity-badge">
 			<Icon
 				className="wc-block-mini-cart__icon"
-				color={ iconColor }
+				color={ iconColor.color }
 				size={ 20 }
 				icon={ getIcon( icon ) }
 			/>
 			<span
 				className="wc-block-mini-cart__badge"
-				style={ { background: productCountColor } }
+				style={ { background: productCountColor.color } }
 			>
 				{ count > 0 ? count : '' }
 			</span>
