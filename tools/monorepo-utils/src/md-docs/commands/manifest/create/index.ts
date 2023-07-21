@@ -75,7 +75,7 @@ export const generateManifestCommand = new Command( 'create' )
 
 		await writeFile(
 			absoluteOutputFilePath,
-			JSON.stringify( manifest, null, 2 ) + '\n\n',
+			JSON.stringify( manifest, null, 2 ),
 			( err ) => {
 				if ( err ) {
 					Logger.error( err );
