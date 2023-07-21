@@ -136,6 +136,8 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 		// Reset back to using a real queue.
 		CustomersScheduler::set_queue( null );
 		OrdersScheduler::set_queue( null );
+		WC_Helper_Queue::cancel_all_pending();
+		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
 		// Schedule an action that depends on blocking job.
 		OrdersScheduler::schedule_action( 'import_batch_init', array( 1, false ) );
@@ -152,7 +154,7 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 		);
 
 		// Verify that a second follow up action was queued.
-		$this->assertEquals( 14, count( WC_Helper_Queue::get_all_pending() ) );
+		$this->assertEquals( 2, count( WC_Helper_Queue::get_all_pending() ) );
 		WC_Helper_Queue::run_all_pending();
 		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
