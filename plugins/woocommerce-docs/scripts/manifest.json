@@ -49,13 +49,13 @@
         },
         {
           "post_title": "Integration Testing",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
-          "id": "c2b952705695df448b9f7d2d0fe8587f33e8641d"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/intergration-tests.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/intergration-tests.md",
+          "id": "93200d5fcbe3760820ecae25af1d9f1faa338484"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "44cefde2d1d92618c54064146e4717517ced4cfd8bb37943f03415abe873b78d"
+  "hash": "a3eb585cdc3cf66f03736c43b9d513325f97a0f1c0559147ec65035260df6f8a"
 }
