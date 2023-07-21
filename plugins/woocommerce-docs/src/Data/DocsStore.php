@@ -63,6 +63,11 @@ class DocsStore {
 		return $post_id;
 	}
 
+	/**
+	 * Get the doc ID from a post ID
+	 *
+	 * @param int $post_id The post ID to get the doc ID from.
+	 */
 	public static function get_doc_id_by_post_id( $post_id ) {
 		return get_post_meta( $post_id, 'docs_id', true );
 	}

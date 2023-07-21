@@ -132,6 +132,12 @@ class BlockConverter {
 		return $block_html;
 	}
 
+	/**
+	 * Escape a full URL.
+	 *
+	 * @param mixed $url The URL to escape.
+	 * @return string The escaped URL.
+	 */
 	private static function escape_full_url( $url ) {
 		// Check if the URL is a relative link, relative URLs will be replaced later.
 		$is_relative_link = ( strpos( $url, '://' ) === false );
