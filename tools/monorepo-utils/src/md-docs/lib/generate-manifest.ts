@@ -54,7 +54,10 @@ async function processDirectory(
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
 
-	category.posts = category.posts || [];
+	// If there are markdown files in this directory, add a posts array to the category. Otherwise, assume its a top level category that will contain subcategories.
+	if ( markdownFiles.length > 0 ) {
+		category.posts = [];
+	}
 
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {

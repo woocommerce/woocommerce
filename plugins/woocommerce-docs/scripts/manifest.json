@@ -1,5 +1,4 @@
 {
-  "posts": [],
   "categories": [
     {
       "category_title": "Getting Started with WooCommerce",
@@ -49,13 +48,13 @@
         },
         {
           "post_title": "Integration Testing",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/Intergration-tests.md",
-          "id": "c2b952705695df448b9f7d2d0fe8587f33e8641d"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
+          "id": "ee3fd61c9d7b13614e4431708c336f20c9779e1f"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "44cefde2d1d92618c54064146e4717517ced4cfd8bb37943f03415abe873b78d"
+  "hash": "84a06ceffaced22a955a131c1272ec9a1d14ae0a7cf9bac4ed21874384f86e9a"
 }
