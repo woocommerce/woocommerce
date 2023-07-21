@@ -219,6 +219,7 @@ export function WriteItForMeButtonContainer() {
 						'It should entice someone from a search results page to click on the product link.',
 						'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
 						'It should explain what users will see if they click on the product page link.',
+						'Do not wrap in double quotes or use any other special characters.',
 						`It should include the target keyword for the product.`,
 						`Here is the full product description: \n${ tinyEditor.getContent() }`,
 					].join( '\n' )
