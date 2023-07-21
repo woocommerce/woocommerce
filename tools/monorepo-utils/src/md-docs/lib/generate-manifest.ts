@@ -22,9 +22,9 @@ interface Post {
 	[ key: string ]: unknown;
 }
 
-function generatePageId( filePath: string, prefix = '' ) {
+export function generatePostId( filePath: string, prefix = '' ) {
 	const hash = crypto.createHash( 'sha1' );
-	hash.update( prefix + filePath );
+	hash.update( `${ prefix }/${ filePath }` );
 	return hash.digest( 'hex' );
 }
 
@@ -34,6 +34,7 @@ async function processDirectory(
 	projectName: string,
 	baseUrl: string,
 	baseEditUrl: string,
+	fullPathToDocs: string,
 	checkReadme = true
 ): Promise< Category > {
 	const category: Category = {};
@@ -72,6 +73,9 @@ async function processDirectory(
 
 			const post: Post = { ...fileFrontmatter };
 
+			// get the folder name of rootDirectory.
+			const relativePath = path.relative( fullPathToDocs, filePath );
+
 			category.posts.push( {
 				...post,
 				url: generateFileUrl(
@@ -80,7 +84,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
-				id: generatePageId( filePath, projectName ),
+				id: generatePostId( relativePath, projectName ),
 			} );
 		}
 	} );
@@ -97,7 +101,8 @@ async function processDirectory(
 			subdirectory,
 			projectName,
 			baseUrl,
-			baseEditUrl
+			baseEditUrl,
+			fullPathToDocs
 		);
 
 		category.categories.push( subcategory );
@@ -113,12 +118,15 @@ export async function generateManifestFromDirectory(
 	baseUrl: string,
 	baseEditUrl: string
 ) {
+	const fullPathToDocs = subDirectory;
+
 	const manifest = await processDirectory(
 		rootDirectory,
 		subDirectory,
 		projectName,
 		baseUrl,
 		baseEditUrl,
+		fullPathToDocs,
 		false
 	);
 
