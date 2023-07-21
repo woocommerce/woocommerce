@@ -63,7 +63,9 @@ test.describe(
 				await page.goto( '/updated-cart-permalink', {
 					waitUntil: 'networkidle',
 				} );
-				const cartText = await page.getByText( 'Proceed to checkout' );
+				const cartText = await page.getByRole( 'link', {
+					name: 'Proceed to Checkout',
+				} );
 				expect( cartText ).toBeVisible();
 			} );
 
