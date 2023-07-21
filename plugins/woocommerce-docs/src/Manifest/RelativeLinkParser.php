@@ -76,8 +76,7 @@ class RelativeLinkParser {
 			$href = $anchor->getAttribute( 'href' );
 
 			// Check if its a url or relative path.
-			if ( ! preg_match( '/^ https ?: \/ \//', $href ) ) {
-
+			if ( ! preg_match( '/^https?:\/\//', $href ) ) {
 				// Check if the link exists in the lookup object.
 				if ( isset( $link_lookup[ $href ] ) ) {
 					$post = DocsStore::get_post( $link_lookup[ $href ] );
