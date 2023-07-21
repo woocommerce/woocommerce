@@ -544,9 +544,6 @@ const AttributeFilterBlock = ( {
 								'single-selection': ! multiple,
 								'is-loading': isLoading,
 							} ) }
-							style={ {
-								borderStyle: 'none',
-							} }
 							suggestions={ displayedOptions
 								.filter(
 									( option ) =>
