@@ -1,3 +1,5 @@
+@import '@wordpress/base-styles/_colors.native.scss';
+
 // Spacings
 // Taken from base style system
 // @wordpress/base-styles/_variables.scss
@@ -23,10 +25,10 @@ $header-height-desktop: 89px;
 $header-height-mobile: 129px;
 
 // Colours
-$gutenberg-gray-100: #f0f0f0;
-$gutenberg-gray-300: $gray-300;
-$gutenberg-gray-700: #757575;
+$gutenberg-gray-100: $gray-0;	// replaced with closest colour from _colors.native.scss
+$gutenberg-gray-300: $gray-300; // anything above gray-100 is from the default _colors.scss
+$gutenberg-gray-700: $gray-700;
 $gutenberg-gray-900: $gray-900;
-$mauve-light-12: #1a1523;
+$mauve-light-12: $gray-900;
 $woo-purple-50: #7f54b3;
-$wp-gray-50: #646970;
+$wp-gray-50: $gray-50;
