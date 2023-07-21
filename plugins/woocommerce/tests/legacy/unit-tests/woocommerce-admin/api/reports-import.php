@@ -185,8 +185,6 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Steve User', $reports[0]['name'] );
 
-		remove_filter( 'woocommerce_analytics_disable_action_scheduling', $woocommerce_analytics_disable_action_scheduling_true, 99 );
-
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 5 ) );
 		$response = $this->server->dispatch( $request );
@@ -195,6 +193,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 2, $reports );
 		$this->assertEquals( 'completed', $reports[0]['status'] );
+		
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', $woocommerce_analytics_disable_action_scheduling_true, 99 );
 	}
 
 	/**
