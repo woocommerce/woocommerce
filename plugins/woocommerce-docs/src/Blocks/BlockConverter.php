@@ -34,9 +34,19 @@ class BlockConverter {
 	 *
 	 * @return string
 	 */
-	public function convert( $content ) {
-		$html = $this->parser->convert( $content )->__toString();
+	public function convert_markdown_to_gb_blocks( $content ) {
+		$markdown_without_frontmatter = $this->strip_frontmatter( $content );
+		$html                         = $this->parser->convert( $markdown_without_frontmatter )->__toString();
 		return $this->convert_html_to_blocks( $html );
+	}
+
+	/**
+	 * Strip frontmatter from Markdown.
+	 *
+	 * @param string $content The Markdown content.
+	 */
+	public function strip_frontmatter( $content ) {
+		return preg_replace( '/^---[\s\S]*?---/', '', $content );
 	}
 
 	/**
