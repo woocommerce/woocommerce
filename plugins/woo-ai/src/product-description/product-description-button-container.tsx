@@ -185,18 +185,21 @@ export function WriteItForMeButtonContainer() {
 			includedProps.push( name );
 		} );
 
+		// WooCommerce doesn't set a limit for the product title. Set a limit to control the token usage.
+		const truncatedProductName = productName.slice( 0, MAX_TITLE_LENGTH );
+
 		const instructions = [
-			`Compose an engaging product description for a product named "${ productName.slice(
-				0,
-				MAX_TITLE_LENGTH
-			) }."`,
+			`Compose an engaging product description for a product named "${ truncatedProductName }."`,
+			...productPropsInstructions,
 			`Use a 9th grade reading level.`,
-			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description into paragraphs using standard HTML <p> tags.',
-			'Identify the language used in this product title and use the same language in your response.',
+			`Ensure the description is concise, containing no more than ${ DESCRIPTION_MAX_LENGTH } words.`,
+			'Structure the content into paragraphs using <p> tags, and use HTML elements like <strong> and <em> for emphasis.',
+			'Identify the language used in the product name, and craft the description in the same language.',
 			'Only if appropriate, use <ul> and <li> tags to list product features.',
-			'When appropriate, use <strong> and <em> tags to emphasize text.',
-			'Do not include a top-level heading at the beginning description.',
+			`Avoid including the properties (${ includedProps.join(
+				', '
+			) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`,
+			'Do not include a top-level heading at the beginning of the description.',
 		];
 
 		if ( brandingData?.toneOfVoice ) {
