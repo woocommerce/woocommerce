@@ -177,6 +177,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
+		sleep(6);
+
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -191,10 +193,14 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
+		sleep(6);
+
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 5 ) );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
+
+		sleep(6);
 
 		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 		WC_Helper_Queue::run_all_pending();
