@@ -6,6 +6,7 @@ module.exports = {
 	entry: {
 		...defaultConfig.entry,
 		settings: './src/settings.ts',
+		example: './src/example/index.js',
 	},
 	module: {
 		...defaultConfig.module,
