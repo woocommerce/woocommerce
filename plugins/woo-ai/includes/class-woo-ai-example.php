@@ -25,7 +25,6 @@ class Woo_AI_Example {
 	 */
 	public function load_scripts() {
 		if ( ! defined( 'WC_ADMIN_APP' ) ) {
-			error_log( 'no wc admin app' );
 			return;
 		}
 

@@ -2,12 +2,28 @@
  * External dependencies
  */
 import React, { FC, useState, useRef } from 'react';
+import { css } from '@emotion/react';
 
 declare global {
 	interface Window {
 		wcPhotoRoomKey: string;
 	}
 }
+
+const imageContainerStyle = css( {
+	marginTop: '20px',
+} );
+
+const controlsStyle = css( {
+	marginTop: '20px',
+} );
+
+const containerStyle = css( {
+	minHeight: '500px',
+	display: 'flex',
+	alignItems: 'center',
+	flexDirection: 'column',
+} );
 
 const ImageProcessor: FC = () => {
 	const [ processing, setProcessing ] = useState( false );
@@ -24,6 +40,7 @@ const ImageProcessor: FC = () => {
 			formData.append( 'image_file', file );
 			formData.append( 'bg_color', 'green' );
 			formData.append( 'size', 'preview' );
+			formData.append( 'crop', 'true' );
 
 			setProcessing( true );
 
@@ -50,12 +67,18 @@ const ImageProcessor: FC = () => {
 	};
 
 	return (
-		<div>
-			<input type="file" accept="image/*" ref={ fileInput } />
-			<button onClick={ processImage } disabled={ processing }>
-				Process image
-			</button>
-			{ processedImage && <img src={ processedImage } alt="Processed" /> }
+		<div css={ containerStyle }>
+			<div css={ controlsStyle }>
+				<input type="file" accept="image/*" ref={ fileInput } />
+				<button onClick={ processImage } disabled={ processing }>
+					Process image
+				</button>
+			</div>
+			<div css={ imageContainerStyle }>
+				{ processedImage && (
+					<img src={ processedImage } alt="Processed" />
+				) }
+			</div>
 		</div>
 	);
 };
