@@ -17,6 +17,19 @@ class Woo_AI_Example {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
 		add_action( 'admin_init', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts' ), 15 );
+	}
+
+	/**
+	 * Register example scripts.
+	 */
+	public function load_scripts() {
+		if ( ! defined( 'WC_ADMIN_APP' ) ) {
+			error_log( 'no wc admin app' );
+			return;
+		}
+
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcPhotoRoomKey = "' . PHOTOROOM_KEY . '" ;', 'before' );
 	}
 
 	/**
