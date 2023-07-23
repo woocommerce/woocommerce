@@ -346,9 +346,9 @@ test.describe( 'Checkout page', () => {
 
 		await page.locator( 'text=Place order' ).click();
 
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		// get order ID from the page
 		const orderReceivedText = await page
