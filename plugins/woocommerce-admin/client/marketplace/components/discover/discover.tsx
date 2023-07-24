@@ -6,7 +6,6 @@
  * Internal dependencies
  */
 import './discover.scss';
-import ProductList from '../product-list/product-list';
 
 export default function Discover(): JSX.Element {
 	return (
