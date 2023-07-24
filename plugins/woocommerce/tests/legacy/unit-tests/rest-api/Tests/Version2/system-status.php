@@ -31,14 +31,19 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Fetches the system status data and caches it.
 	 */
-	private function get_system_status_data() {
-		static $system_status_data = null;
-		if ( ! $system_status_data ) {
-			wp_set_current_user( $this->user );
-			$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-			$system_status_data = $response->get_data();
+	private function fetch_or_get_system_status_data_for_user(int $user, bool $force = false) {
+		if ( $user < 0 ) {
+			return null;
 		}
-		return $system_status_data;
+
+		static $system_status_data = array();
+		if ( $force || ! $system_status_data[$user] ) {
+			wp_set_current_user( $user );
+			$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+			$data = $response->get_data();
+			$system_status_data[$user] = $data;
+		}
+		return $system_status_data[$user];
 	}
 
 	/**
@@ -71,13 +76,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_returns_root_properties() {
 		$this->skip_on_php_8_1();
 
-		$this->assertArrayHasKey( 'environment', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'database', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'active_plugins', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'theme', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'settings', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'security', $this->get_system_status_data() );
-		$this->assertArrayHasKey( 'pages', $this->get_system_status_data() );
+		$system_status_data = $this->fetch_or_get_system_status_data_for_user( $this->user );
+		$this->assertArrayHasKey( 'environment', $system_status_data );
+		$this->assertArrayHasKey( 'database', $system_status_data );
+		$this->assertArrayHasKey( 'active_plugins', $system_status_data );
+		$this->assertArrayHasKey( 'theme', $system_status_data );
+		$this->assertArrayHasKey( 'settings', $system_status_data );
+		$this->assertArrayHasKey( 'security', $system_status_data );
+		$this->assertArrayHasKey( 'pages', $system_status_data );
 	}
 
 	/**
@@ -88,7 +94,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_environment() {
 		$this->skip_on_php_8_1();
 
-		$environment = (array) $this->get_system_status_data()['environment'];
+		$environment = (array) $this->fetch_or_get_system_status_data_for_user( $this->user )['environment'];
 
 		// Make sure all expected data is present.
 		$this->assertEquals( 32, count( $environment ) );
@@ -108,7 +114,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->skip_on_php_8_1();
 
 		global $wpdb;
-		$database = (array) $this->get_system_status_data()['database'];
+		$database = (array) $this->fetch_or_get_system_status_data_for_user( $this->user )['database'];
 
 		$this->assertEquals( get_option( 'woocommerce_db_version' ), $database['wc_database_version'] );
 		$this->assertEquals( $wpdb->prefix, $database['database_prefix'] );
@@ -148,7 +154,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_theme() {
 		$this->skip_on_php_8_1();
 		$active_theme = wp_get_theme();
-		$theme        = (array) $this->get_system_status_data()['theme'];
+		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( $this->user )['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -169,7 +175,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 			$term_response[ $term->slug ] = strtolower( $term->name );
 		}
 
-		$settings = (array) $this->get_system_status_data()['settings'];
+		$settings = (array) $this->fetch_or_get_system_status_data_for_user( $this->user )['settings'];
 
 		$this->assertEquals( 17, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
@@ -185,7 +191,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_security() {
 		$this->skip_on_php_8_1();
 
-		$settings = (array) $this->get_system_status_data()['security'];
+		$settings = (array) $this->fetch_or_get_system_status_data_for_user( $this->user )['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
 		$this->assertEquals( 'https' === substr( wc_get_page_permalink( 'shop' ), 0, 5 ), $settings['secure_connection'] );
@@ -200,7 +206,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_pages() {
 		$this->skip_on_php_8_1();
 
-		$pages = $this->get_system_status_data()['pages'];
+		$pages = $this->fetch_or_get_system_status_data_for_user( $this->user )['pages'];
 		$this->assertEquals( 5, count( $pages ) );
 	}
 
