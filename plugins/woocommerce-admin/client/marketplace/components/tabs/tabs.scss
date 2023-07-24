@@ -1,11 +1,13 @@
 @import '../../stylesheets/_variables.scss';
 
-.woocommerce-marketplace__tabs {
-	margin: auto;
-	padding: 0 $content-spacing-small;
-	box-sizing: content-box;
+.woocommerce-marketplace {
+	&__tabs {
+		margin: auto;
+		padding: 0 $content-spacing-small;
+		box-sizing: content-box;
+	}
 
-	.woocommerce-marketplace__tab-button {
+	&__tab-button {
 		border-bottom: 1.5px solid transparent;
 		border-radius: 0;
 		padding: 1.5rem 0;

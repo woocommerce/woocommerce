@@ -16,7 +16,7 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 	const { title } = props;
 
 	return (
-		<div className="product-list">
+		<div className="woocommerce-marketplace__product-list">
 			<ProductListHeader title={ title } />
 			<ProductListContent />
 		</div>

@@ -1,21 +1,21 @@
 @import '../../stylesheets/_variables.scss';
 
-.woocommerce-marketplace__content {
+.woocommerce-marketplace {
 
-	.product-list__content {
+	&__product-list-content {
 		display: grid;
 		gap: $medium-gap;
 	}
 
-	.extension-card {
+	&__extension-card {
 		background-color: #3c3c3c;
 		height: 270px;
 	}
 }
 
 @media screen and (min-width: $breakpoint-medium) {
-	.woocommerce-marketplace__content {
-		.product-list__content {
+	.woocommerce-marketplace {
+		&__product-list-content {
 			gap: $large-gap;
 			grid-template-columns: repeat(2, 1fr);
 		}
@@ -23,8 +23,8 @@
 }
 
 @media screen and (min-width: $breakpoint-large) {
-	.woocommerce-marketplace__content {
-		.product-list__content {
+	.woocommerce-marketplace {
+		&__product-list-content {
 			gap: $large-gap;
 			grid-template-columns: repeat(3, 1fr);
 		}
@@ -32,8 +32,8 @@
 }
 
 @media screen and (min-width: $breakpoint-xlarge) {
-	.woocommerce-marketplace__content {
-		.product-list__content {
+	.woocommerce-marketplace {
+		&__product-list-content {
 			grid-template-columns: repeat(4, 1fr);
 		}
 	}

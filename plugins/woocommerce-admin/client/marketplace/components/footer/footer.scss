@@ -1,6 +1,6 @@
 @import '../../stylesheets/_variables.scss';
 
-.woocommerce-admin-page__marketplace .woocommerce-layout__footer {
+.woocommerce-admin-page__extensions .woocommerce-layout__footer {
 	background: #f6f7f7;
 	// Undo default fixed footer style used in WC Admin
 	position: unset;
@@ -34,7 +34,7 @@
 	}
 
 	&-logo {
-		color: $woo-color-primary-woo-purple-50;
+		color: $woo-purple-50;
 		display: flex;
 		font-size: 14px;
 		font-weight: 600;
@@ -44,9 +44,8 @@
 	}
 }
 
-@media screen and (min-width: 850px) {
+@media screen and (min-width: $breakpoint-medium) {
 	.woocommerce-marketplace__footer-columns {
 		flex-direction: row;
-		align-items: center;
 	}
 }

@@ -1,17 +1,26 @@
+// Spacings
+// Taken from base style system
+// @wordpress/base-styles/_variables.scss
+$small-gap: $grid-unit-10;   // 8px
+$medium-gap: $grid-unit-20;  // 16px
+$large-gap: $grid-unit-30;   // 24px
+$xlarge-gap: $grid-unit-40;  // 32px
+
 // Layout
+$content-spacing-small: $grid-unit-20;
+$content-spacing-large: $grid-unit-40;
+$content-spacing-small: $medium-gap;
+$content-spacing-large: $xlarge-gap;
 $content-max-width: 1600px;
-$content-spacing-small: 16px;
-$content-spacing-large: 32px;
+
+// Breakpoints
 $breakpoint-medium: 769px;
 $breakpoint-large: 1024px;
 $breakpoint-xlarge: 1500px;
-$large-gap: 24px;
-$medium-gap: 16px;
-$small-gap: 8px;
 
 // Colours
-$gutenberg-gray-300: #ddd;
-$gutenberg-gray-900: #1e1e1e;
-$wp-gray-gray-50: #646970;
+$gutenberg-gray-300: $gray-300;
+$gutenberg-gray-900: $gray-900;
 $mauve-light-12: #1a1523;
-$woo-color-primary-woo-purple-50: #7f54b3;
+$woo-purple-50: #7f54b3;
+$wp-gray-50: #646970;

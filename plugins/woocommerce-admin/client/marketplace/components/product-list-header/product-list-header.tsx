@@ -5,6 +5,7 @@
 /**
  * Internal dependencies
  */
+import './product-list-header.scss';
 
 interface ProductListHeaderProps {
 	title: string;
@@ -16,7 +17,7 @@ export default function ProductListHeader(
 	const { title } = props;
 
 	return (
-		<div className="product-list__header">
+		<div className="woo-marketplace__product-list-header">
 			<h2>{ title }</h2>
 		</div>
 	);
