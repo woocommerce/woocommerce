@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { IntroOptInEvent, CoreProfilerStateMachineContext } from '../index';
+import { IntroOptInEvent } from '../index';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 
@@ -20,7 +20,6 @@ export const IntroOptIn = ( {
 }: {
 	sendEvent: ( event: IntroOptInEvent ) => void;
 	navigationProgress: number;
-	context: CoreProfilerStateMachineContext;
 } ) => {
 	const [ iOptInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );

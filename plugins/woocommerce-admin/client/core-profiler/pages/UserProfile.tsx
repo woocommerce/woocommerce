@@ -125,7 +125,7 @@ export const UserProfile = ( {
 }: {
 	sendEvent: ( event: UserProfileEvent ) => void;
 	navigationProgress: number;
-	context: CoreProfilerStateMachineContext;
+	context: Pick< CoreProfilerStateMachineContext, 'userProfile' >;
 } ) => {
 	const [ businessChoice, setBusinessChoice ] = useState< BusinessChoice >(
 		context.userProfile.businessChoice || 'im_just_starting_my_business'
