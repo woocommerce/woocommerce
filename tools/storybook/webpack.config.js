@@ -75,7 +75,7 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
-						`../../plugins/woocommerce/build/woocommerce/assets/client/admin/app/*.css`
+						`../../plugins/woocommerce/assets/client/admin/app/*.css`
 					),
 					to: `./app-css/[name][ext]`,
 				},
