@@ -46,13 +46,13 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Fetches the system status data and caches it.
 	 */
-	private function fetch_or_get_system_status_data_for_user(int $user, bool $force = false) {
+	private function fetch_or_get_system_status_data_for_user(int $user ) {
 		if ( $user < 0 ) {
 			return null;
 		}
 
 		static $system_status_data = array();
-		if ( $force || ! $system_status_data[$user] ) {
+		if ( ! $system_status_data[$user] ) {
 			wp_set_current_user( $user );
 			$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 			$data = $response->get_data();
