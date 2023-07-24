@@ -772,6 +772,32 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Get token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	public function get_payment_token_ids( $order ) {
+		$payment_tokens = $order->get_meta( '_payment_tokens' );
+		if ( ! $payment_tokens && version_compare( $order->get_version(), '8.0.0', '<' ) ) {
+			// Before 8.0 we were incorrectly storing payment_tokens in the order meta. So we need to check there too.
+			$payment_tokens = get_post_meta( $order->get_id(), '_payment_tokens', true );
+		}
+		return array_filter( (array) $payment_tokens );
+	}
+
+	/**
+	 * Update token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $token_ids Payment token ids.
+	 */
+	public function update_payment_token_ids( $order, $token_ids ) {
+		$order->update_meta_data( '_payment_tokens', $token_ids );
+		$order->save();
+	}
+
+	/**
 	 * Get amount already refunded.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -1125,6 +1151,7 @@ WHERE
 		$allowed_keys       = array(
 			'_billing_address_index',
 			'_shipping_address_index',
+			'_payment_tokens',
 		);
 		$allowed_meta       = array_filter(
 			$raw_meta_data,
