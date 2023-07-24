@@ -83,7 +83,7 @@ jobs:
               if: steps.check-freeze.outputs.freeze == 'true'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev
+              run: pnpm run utils code-freeze version-bump ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev -o ${{ github.repository_owner }}
 
             - name: Generate changelog changes
               id: changelog
