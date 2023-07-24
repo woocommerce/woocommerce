@@ -315,7 +315,7 @@ class CustomOrdersTableController {
 	 * @param mixed  $value New value of the setting.
 	 */
 	private function process_updated_option( $option, $old_value, $value ) {
-		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'yes' !== $value ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
 		}
 	}
@@ -364,9 +364,7 @@ class CustomOrdersTableController {
 		}
 		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
 
-		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			$this->data_synchronizer->create_database_tables();
-		}
+		$this->data_synchronizer->create_database_tables();
 
 		// Enabling/disabling the sync implies starting/stopping it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
