@@ -44,21 +44,23 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Fetches the system status data and caches it.
+	 * Fetches the System Status Report data and caches it.
+	 * @param  int $user The ID of a WordPress user to switch to before fetching the data.
+	 * @return Array An array of the data returned by the System Status Report endpoint.
 	 */
-	private function fetch_or_get_system_status_data_for_user(int $user ) {
+	private function fetch_or_get_system_status_data_for_user( int $user ) {
 		if ( $user < 0 ) {
 			return null;
 		}
 
 		static $system_status_data = array();
-		if ( ! $system_status_data[$user] ) {
+		if ( ! $system_status_data['user' . $user] ) {
 			wp_set_current_user( $user );
-			$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-			$data = $response->get_data();
-			$system_status_data[$user] = $data;
+			$response                  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+			$data                      = $response->get_data();
+			$system_status_data['user' . $user] = $data;
 		}
-		return $system_status_data[$user];
+		return $system_status_data['user' . $user];
 	}
 
 	/**
@@ -88,7 +90,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-
 	public function test_get_system_status_info_returns_root_properties() {
 		$this->skip_on_php_8_1();
 		$system_status_data = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user );
