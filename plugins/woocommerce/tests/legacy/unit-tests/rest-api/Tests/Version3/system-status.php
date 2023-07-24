@@ -64,13 +64,13 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		}
 
 		static $system_status_data = array();
-		if ( ! $system_status_data['user' . $user] ) {
+		if ( ! $system_status_data[ 'user' . $user ] ) {
 			wp_set_current_user( $user );
-			$response                  = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-			$data                      = $response->get_data();
-			$system_status_data['user' . $user] = $data;
+			$response                             = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+			$data                                 = $response->get_data();
+			$system_status_data[ 'user' . $user ] = $data;
 		}
-		return $system_status_data['user' . $user];
+		return $system_status_data[ 'user' . $user ];
 	}
 
 	/**
