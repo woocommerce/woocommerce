@@ -4,56 +4,41 @@
  * Slug: woocommerce-blocks/product-details-listing
  * Categories: WooCommerce
  */
+
+$query = new \WC_Product_Query(
+	array(
+		'limit'  => 1,
+		'return' => 'ids',
+		'status' => array( 'publish' ),
+	)
+);
+
+$products   = $query->get_products();
+$product_id = $products ? $products[0] : null;
 ?>
-<!-- wp:columns {"style":{"spacing":{"padding":"0px","blockGap":{"top":"0","left":"0"}}}} -->
-<div class="wp-block-columns" style="padding:0">
-	<!-- wp:column {"style":{"spacing":{"blockGap":"0","padding":"0px"}}} -->
-	<div class="wp-block-column" style="padding:0">
-		<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
-		<figure class="wp-block-image size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-horizontal.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product banner.', 'woo-gutenberg-products-block' ); ?>" />
-		</figure>
-		<!-- /wp:image -->
-		<!-- wp:group {"align":"full","style":{"spacing":{"padding":"0px","blockGap":"0px","margin":{"top":"30px","bottom":"20px","left":"0px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center","verticalAlignment":"center"}} -->
-		<div class="wp-block-group alignfull" style="margin-top:30px;margin-bottom:20px;margin-left:0px;padding:0">
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"24px"},"color":{"text":"#fda700"}}} -->
-			<p class="has-text-color" style="color:#fda700;font-size:24px;">★★★★</p>
-			<!-- /wp:paragraph -->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"24px"},"color":{"text":"#ffe8a4"},"spacing":{"margin":{"right":"8px"}}}} -->
-			<p class="has-text-color" style="color:#ffe8a4;margin-right:8px;font-size:24px;">★</p>
-			<!-- /wp:paragraph -->
+<!-- wp:woocommerce/single-product {"productId":<?php echo esc_attr( $product_id ); ?>} -->
+<div class="wp-block-woocommerce-single-product">
+	<!-- wp:columns -->
+	<div class="wp-block-columns">
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:post-featured-image {"height":"490px"} /-->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"13px"},"color":{"text":"#000000"}}} -->
-			<p class="has-text-color" style="color:#000000;font-size:13px;"><strong>4.2 </strong>(1,079 reviews)</p>
-			<!-- /wp:paragraph -->
+			<!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+			<div class="wp-block-group">
+				<!-- wp:woocommerce/product-rating-stars {"isDescendentOfSingleProductBlock":true,"textColor":"luminous-vivid-amber","style":{"spacing":{"margin":{"right":"5px"}}}} /-->
+				<!-- wp:woocommerce/product-average-rating {"style":{"typography":{"fontWeight":"600","fontSize":"14px"}}} /-->
+				<!-- wp:woocommerce/product-rating-counter {"isDescendentOfSingleProductBlock":true,"style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}},"typography":{"fontSize":"14px"}}} /-->
+			</div>
+			<!-- /wp:group -->
+
+			<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"typography":{"fontStyle":"normal","fontWeight":"700"},"elements":{"link":{"color":{"text":"#000001"}}},"color":{"text":"#000001"}},"fontSize":"x-large","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+			<!-- wp:woocommerce/product-price {"textAlign":"center","isDescendentOfSingleProductBlock":true,"style":{"typography":{"fontSize":"28px","fontStyle":"normal","fontWeight":"700"}}} /-->
+			<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfSingleProductBlock":true,"style":{"color":{"background":"#000001","text":"#fffff1"},"typography":{"fontSize":"18px","fontStyle":"normal","fontWeight":"600"},"spacing":{"padding":{"top":"20px","bottom":"20px","right":"94px","left":"94px"},"margin":{"top":"15px"}}}} /-->
 		</div>
-		<!-- /wp:group -->
-
-		<!-- wp:heading {"style":{"spacing":{"margin":{"bottom":"20px"}},"typography":{"fontSize":"48px","fontStyle":"normal","fontWeight":"700","lineHeight":"120%"}},"textColor":"black","fontSize":"x-large"} -->
-		<h2 class="wp-block-heading has-black-color has-text-color has-text-align-center has-x-large-font-size" style="font-size:48px;font-style:normal;font-weight:700;line-height:120%;margin-bottom:20px;">Patterned Upright, Orange and White, Wood Legs</h2>
-		<!-- /wp:heading -->
-
-		<!-- wp:group {"align":"full","style":{"spacing":{"padding":"0px","blockGap":"0px","margin":{"top":"0px","bottom":"40px","left":"0px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center","verticalAlignment":"center"}} -->
-		<div class="wp-block-group alignfull" style="margin-top:0px;margin-bottom:40px;margin-left:0px;padding:0">
-			<!-- wp:paragraph {"style":{"spacing":{"padding":{"right":"5px"}},"typography":{"fontSize":"28px"},"color":{"text":"#000000"}}} -->
-			<p class="has-text-color" style="color:#000000;font-size:28px;padding-right:5px"><strong><sup><sub>$</sub></sup>37.49</strong></p>
-			<!-- /wp:paragraph -->
-
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"28px","fontWeight":"400"},"layout":{"selfStretch":"fit","flexSize":null},"color":{"text":"#d3d3d3ff"}}} -->
-			<p class="has-text-color" style="color:#d3d3d3ff;font-size:28px;font-weight:400;"><s>$47.49</s></p>
-			<!-- /wp:paragraph -->
-		</div>
-		<!-- /wp:group -->
-
-		<!-- wp:buttons {"style":{"spacing":{"blockGap":"0px"}}} -->
-		<div class="wp-block-buttons is-content-justification-center">
-			<!-- wp:button {"backgroundColor":"black","textColor":"white","className":"is-style-fill","fontSize":"medium","style":{"spacing":{"padding":{"left":"94px","right":"94px","top":"20px","bottom":"20px"}}}} -->
-			<div class="wp-block-button has-custom-font-size is-style-fill has-medium-font-size"><a class="wp-block-button__link has-white-color has-black-background-color has-text-color has-background wp-element-button" style="padding-right:94px;padding-left:94px;padding-top:20px;padding-bottom:20px;"><strong>Add to cart</strong></a></div>
-			<!-- /wp:button -->
-		</div>
-		<!-- /wp:buttons -->
+		<!-- /wp:column -->
 	</div>
-	<!-- /wp:column -->
+	<!-- /wp:columns -->
 </div>
-<!-- /wp:columns -->
+<!-- /wp:woocommerce/single-product -->
