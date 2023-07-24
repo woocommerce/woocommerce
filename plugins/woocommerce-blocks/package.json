@@ -170,7 +170,7 @@
 		"@wordpress/is-shallow-equal": "4.24.0",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "22.3.0",
-		"autoprefixer": "10.4.7",
+		"autoprefixer": "10.4.14",
 		"axios": "0.27.2",
 		"babel-plugin-explicit-exports-references": "^1.0.2",
 		"babel-plugin-react-docgen": "4.2.1",
