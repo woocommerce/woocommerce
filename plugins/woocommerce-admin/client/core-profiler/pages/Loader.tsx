@@ -22,12 +22,12 @@ export type Stage = {
 };
 
 export type Stages = Array< Stage >;
+export type LoaderContextProps = Pick<
+	CoreProfilerStateMachineContext,
+	'loader'
+>;
 
-export const Loader = ( {
-	context,
-}: {
-	context: CoreProfilerStateMachineContext;
-} ) => {
+export const Loader = ( { context }: { context: LoaderContextProps } ) => {
 	const stages = getLoaderStageMeta( context.loader.useStages ?? 'default' );
 	const currentStage = stages[ context.loader.stageIndex ?? 0 ];
 	const [ currentParagraph, setCurrentParagraph ] = useState( 0 );
