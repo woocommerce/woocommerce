@@ -41,6 +41,7 @@ class TaskLists {
 	 * @var array
 	 */
 	const DEFAULT_TASKS = array(
+		'CustomizeStore',
 		'StoreDetails',
 		'Purchase',
 		'Products',
@@ -109,6 +110,7 @@ class TaskLists {
 	 */
 	public static function init_default_lists() {
 		$tasks = array(
+			'CustomizeStore',
 			'StoreDetails',
 			'Purchase',
 			'Products',
@@ -121,9 +123,21 @@ class TaskLists {
 		);
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {
-			array_shift( $tasks );
+			$key = array_search('StoreDetails', $tasks);
+			if ($key !== false) {
+				unset($tasks[$key]);
+			}
 		}
 
+		// Remove the old Personalize your store task if the new CustomizeStore is enabled
+		$task_to_remove = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
+		$store_customisation_task_index = array_search($task_to_remove, $tasks);
+		
+		if ($store_customisation_task_index !== false) {
+			unset($tasks[$store_customisation_task_index]);
+		}
+		
+		
 		self::add_list(
 			array(
 				'id'                      => 'setup',
