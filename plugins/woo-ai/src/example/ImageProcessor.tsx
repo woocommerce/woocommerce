@@ -38,7 +38,6 @@ const ImageProcessor: FC = () => {
 			const formData = new FormData();
 
 			formData.append( 'image_file', file );
-			formData.append( 'bg_color', 'green' );
 			formData.append( 'size', 'preview' );
 			formData.append( 'crop', 'true' );
 
