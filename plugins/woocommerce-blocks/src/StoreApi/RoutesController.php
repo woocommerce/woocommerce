@@ -63,7 +63,8 @@ class RoutesController {
 		];
 
 		if ( Package::is_experimental_build() ) {
-			$this->routes['v1'][ Routes\V1\Order::IDENTIFIER ] = Routes\V1\Order::class;
+			$this->routes['v1'][ Routes\V1\Order::IDENTIFIER ]         = Routes\V1\Order::class;
+			$this->routes['v1'][ Routes\V1\CheckoutOrder::IDENTIFIER ] = Routes\V1\CheckoutOrder::class;
 		}
 	}
 
