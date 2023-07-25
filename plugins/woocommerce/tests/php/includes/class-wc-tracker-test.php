@@ -7,7 +7,6 @@
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
-use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -91,7 +90,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 				);
 			},
 		);
-		FunctionsMockerHack::add_function_mocks( $legacy_mocks );
+		$this->register_legacy_proxy_function_mocks( $legacy_mocks );
 
 		update_option( 'active_plugins', array( 'plugin1', 'plugin2' ) );
 
