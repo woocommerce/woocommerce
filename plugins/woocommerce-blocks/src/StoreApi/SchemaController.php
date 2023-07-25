@@ -43,6 +43,7 @@ class SchemaController {
 				Schemas\V1\CartItemSchema::IDENTIFIER      => Schemas\V1\CartItemSchema::class,
 				Schemas\V1\CartSchema::IDENTIFIER          => Schemas\V1\CartSchema::class,
 				Schemas\V1\CartExtensionsSchema::IDENTIFIER => Schemas\V1\CartExtensionsSchema::class,
+				Schemas\V1\CheckoutOrderSchema::IDENTIFIER => Schemas\V1\CheckoutOrderSchema::class,
 				Schemas\V1\CheckoutSchema::IDENTIFIER      => Schemas\V1\CheckoutSchema::class,
 				Schemas\V1\OrderItemSchema::IDENTIFIER     => Schemas\V1\OrderItemSchema::class,
 				Schemas\V1\OrderCouponSchema::IDENTIFIER   => Schemas\V1\OrderCouponSchema::class,
