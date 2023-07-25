@@ -1429,8 +1429,8 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @param string $size (default: 'woocommerce_thumbnail').
-	 * @param  array $attr Image attributes.
-	 * @param  bool  $placeholder True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param array  $attr Image attributes.
+	 * @param bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
@@ -2338,14 +2338,18 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 				'woocommerce_breadcrumb_defaults',
 				array(
 					'delimiter'   => '&nbsp;&#47;&nbsp;',
-					'wrap_before' => '<nav class="woocommerce-breadcrumb">',
+					'wrap_before' => '<nav class="woocommerce-breadcrumb" aria-label="%s">',
 					'wrap_after'  => '</nav>',
+					/* translators: accessibility text for the breadcrumb navigation. */
+					'aria_label'  => __( 'Breadcrumb', 'woocommerce' ),
 					'before'      => '',
 					'after'       => '',
 					'home'        => _x( 'Home', 'breadcrumb', 'woocommerce' ),
 				)
 			)
 		);
+
+		$args['wrap_before'] = sprintf( $args['wrap_before'], esc_attr( $args['aria_label'] ) );
 
 		$breadcrumbs = new WC_Breadcrumb();
 

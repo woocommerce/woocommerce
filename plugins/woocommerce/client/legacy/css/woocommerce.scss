@@ -683,6 +683,10 @@ p.demo_store,
 					background: $secondary;
 					color: darken($secondary, 40%);
 				}
+
+				span[aria-hidden="true"] {
+					padding: 0;
+				}
 			}
 		}
 	}

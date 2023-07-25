@@ -19,31 +19,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$total   = isset( $total ) ? $total : wc_get_loop_prop( 'total_pages' );
+$total = isset( $total ) ? $total : wc_get_loop_prop( 'total_pages' );
+if ( $total <= 1 ) {
+	return;
+}
+
 $current = isset( $current ) ? $current : wc_get_loop_prop( 'current_page' );
 $base    = isset( $base ) ? $base : esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
 $format  = isset( $format ) ? $format : '';
 
-if ( $total <= 1 ) {
-	return;
-}
+$prev_next = '<span aria-hidden="true">%1$s</span><span class="screen-reader-text">%2$s</span>';
+$prev_text = sprintf( $prev_next, is_rtl() ? '&rarr;' : '&larr;', esc_html_x( 'Previous', 'pagination', 'woocommerce' ) );
+$next_text = sprintf( $prev_next, is_rtl() ? '&larr;' : '&rarr;', esc_html_x( 'Next', 'pagination', 'woocommerce' ) );
 ?>
-<nav class="woocommerce-pagination">
+<nav class="woocommerce-pagination" aria-label="<?php esc_attr_e( 'Products', 'woocommerce' ); ?>">
 	<?php
-	echo paginate_links(
-		apply_filters(
-			'woocommerce_pagination_args',
-			array( // WPCS: XSS ok.
-				'base'      => $base,
-				'format'    => $format,
-				'add_args'  => false,
-				'current'   => max( 1, $current ),
-				'total'     => $total,
-				'prev_text' => is_rtl() ? '&rarr;' : '&larr;',
-				'next_text' => is_rtl() ? '&larr;' : '&rarr;',
-				'type'      => 'list',
-				'end_size'  => 3,
-				'mid_size'  => 3,
+	echo wp_kses_post(
+		paginate_links(
+			/**
+			 * Filters the paginated links arguments of the catalog pagination.
+			 *
+			 * @since 2.0.0
+			 * @link https://developer.wordpress.org/reference/functions/paginate_links/#parameters
+			 * @param array $args The arguments of paginate_links().
+			 */
+			apply_filters(
+				'woocommerce_pagination_args',
+				array(
+					'base'      => $base,
+					'format'    => $format,
+					'add_args'  => false,
+					'current'   => max( 1, $current ),
+					'total'     => $total,
+					'prev_text' => $prev_text,
+					'next_text' => $next_text,
+					'type'      => 'list',
+					'end_size'  => 3,
+					'mid_size'  => 3,
+				)
 			)
 		)
 	);
