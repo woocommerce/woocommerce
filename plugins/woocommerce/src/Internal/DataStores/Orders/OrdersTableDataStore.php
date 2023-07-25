@@ -2288,6 +2288,10 @@ FROM $order_meta_table
 			$order->set_date_created( time() );
 		}
 
+		if ( ! $order->get_date_modified( 'edit' ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+		}
+
 		$this->update_order_meta( $order );
 
 		$this->persist_order_to_db( $order, $force_all_fields );
@@ -2371,7 +2375,7 @@ FROM $order_meta_table
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( time() );
+			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
 		$this->persist_order_to_db( $order );

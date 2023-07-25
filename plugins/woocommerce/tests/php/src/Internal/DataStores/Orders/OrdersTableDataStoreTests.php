@@ -68,6 +68,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
@@ -2001,6 +2002,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_order_create_with_strict_mode_and_null_values() {
 		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
 		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
 		// Set SQL mode to strict to disallow 0 dates.
 		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
@@ -2010,6 +2012,17 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save();
 
 		$this->assertTrue( $order->get_id() > 0 );
+
+		// Let's also repeat with sync off.
+		$this->enable_cot_sync();
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$this->assertTrue( $order->get_id() > 0 );
+		$order = wc_get_order( $order->get_id() );
+		$post  = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_date_modified()->format( 'Y-m-d H:i:s' ), $post->post_date );
 
 		// phpcs:ignore -- Hardcoded value.
 		$wpdb->query( "SET sql_mode = '$sql_mode' " );
