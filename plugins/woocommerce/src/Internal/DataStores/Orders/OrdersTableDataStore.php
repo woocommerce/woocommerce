@@ -86,7 +86,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_prices_include_tax',
 		'_date_completed',
 		'_date_paid',
-		'_payment_tokens',
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
