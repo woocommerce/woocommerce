@@ -3,7 +3,7 @@
 .woocommerce-profiler-plugins-plugin-card {
 	max-width: 492px;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	box-sizing: border-box;
 	border: 1px solid #e0e0e0;
 	border-radius: 2px;
@@ -45,7 +45,7 @@
 		font-size: 14px;
 		line-height: 20px;
 		font-weight: 500;
-		margin: 0 0 8px 0;
+		margin: 0;
 		padding: 0;
 		@include breakpoint( '<782px' ) {
 			margin: 0;
@@ -96,9 +96,18 @@
 		}
 	}
 
+	.woocommerce-profiler-plugin-card-top {
+		display: flex;
+		align-items: center;
+	}
+
 	.woocommerce-profiler-plugins-plugin-card-text {
+		margin: 4px 0 0 80px;
 		@include breakpoint( '<782px' ) {
 			align-self: center;
+		}
+		&.smaller-margin-left {
+			margin-left: 40px;
 		}
 	}
 	.woocommerce-profiler-plugins-plugin-card-text-header {
