@@ -16,12 +16,19 @@ export type RowItem = {
 
 export type Rows = Array< RowItem[] >;
 
+/**
+ * Escape value to prevent CSV injection
+ *
+ * @see https://hackerone.com/reports/72785
+ * @see WC_CSV_Exporter::escape_data()
+ *
+ * @param {string | number} value
+ *
+ * @return {string} Escaped value
+ */
 function escapeCSVValue( value: string | number ) {
 	let stringValue = value.toString();
 
-	// Prevent CSV injection.
-	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
-	// See: WC_CSV_Exporter::escape_data()
 	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
 		stringValue = '"\t' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
@@ -63,9 +70,9 @@ function getCSVRows( rows: Rows ) {
 /**
  * Generates a CSV string from table contents
  *
- * @param {Array.<Header>}        headers Object with table header information
- * @param {Array.Array.<RowItem>} rows    Object with table rows information
- * @return {string}                           Table contents in a CSV format
+ * @param {Array.<Header>} headers Object with table header information
+ * @param {Rows}           rows    Object with table rows information
+ * @return {string} Table contents in a CSV format
  */
 export function generateCSVDataFromTable( headers: Header[], rows: Rows ) {
 	return [ getCSVHeaders( headers ), getCSVRows( rows ) ]
@@ -79,7 +86,7 @@ export function generateCSVDataFromTable( headers: Header[], rows: Rows ) {
  *
  * @param {string} [name='']   Name of the file
  * @param {Object} [params={}] Object of key-values to append to the file name
- * @return {string}                Formatted file name
+ * @return {string} Formatted file name
  */
 export function generateCSVFileName(
 	name = '',
