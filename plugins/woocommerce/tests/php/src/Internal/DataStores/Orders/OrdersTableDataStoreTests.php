@@ -1997,6 +1997,25 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
+	 * @testDox Test that inserting with strict SQL mode is also supported.
+	 */
+	public function test_order_create_with_strict_mode_and_null_values() {
+		global $wpdb;
+		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
+		// Set SQL mode to strict to disallow 0 dates.
+		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$this->assertTrue( $order->get_id() > 0 );
+
+		// phpcs:ignore -- Hardcoded value.
+		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+	}
+
+	/**
 	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
