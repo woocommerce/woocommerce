@@ -106,6 +106,7 @@ class WC_Order extends WC_Abstract_Order {
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_payment_tokens',
 	);
 
 	/**
