@@ -54,12 +54,16 @@ async function processDirectory(
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
 
+	// If there are markdown files in this directory, add a posts array to the category. Otherwise, assume its a top level category that will contain subcategories.
+	if ( markdownFiles.length > 0 ) {
+		category.posts = [];
+	}
+
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
 			// Skip README.md which we have already processed.
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const fileFrontmatter = generatePostFrontMatter( fileContent );
-			category.posts = [];
 
 			if ( baseUrl.includes( 'github' ) ) {
 				fileFrontmatter.edit_url = generateFileUrl(
