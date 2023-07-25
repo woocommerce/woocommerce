@@ -1656,9 +1656,10 @@ FROM $order_meta_table
 		if ( 'create' === $context ) {
 			$post_id = wp_insert_post(
 				array(
-					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-					'post_status' => 'draft',
-					'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_status'   => 'draft',
+					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+					'post_date_gmt' => current_time( 'mysql', 1 ), // We set the date to prevent invalid date errors when using MySQL strict mode.
 				)
 			);
 
@@ -2287,6 +2288,10 @@ FROM $order_meta_table
 			$order->set_date_created( time() );
 		}
 
+		if ( ! $order->get_date_modified( 'edit' ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+		}
+
 		$this->update_order_meta( $order );
 
 		$this->persist_order_to_db( $order, $force_all_fields );
@@ -2370,7 +2375,7 @@ FROM $order_meta_table
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( time() );
+			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
 		$this->persist_order_to_db( $order );
