@@ -2,21 +2,22 @@
 
 .woocommerce-marketplace {
 	&__tabs {
-		margin: auto;
-		padding: 0 $content-spacing-small;
 		box-sizing: content-box;
+		display: flex;
+		gap: 24px;
 	}
 
 	&__tab-button {
 		border-bottom: 1.5px solid transparent;
 		border-radius: 0;
-		padding: 1.5rem 0;
-		margin: 0 1.5rem 0 0;
 		color: $mauve-light-12;
 		font-size: 13px;
 		font-style: normal;
 		font-weight: 600;
+		height: 48px;
 		line-height: 16px;
+		margin: 0 1.5rem 0 0;
+		padding: 0;
 
 		&:focus:not(:disabled) {
 			box-shadow: none;
@@ -25,6 +26,12 @@
 		&.is-active {
 			border-color: var(--wp-admin-theme-color);
 		}
+	}
+}
+
+@media (width <= $breakpoint-medium) {
+	.woocommerce-marketplace__tabs {
+		border-bottom: 1px solid $gutenberg-gray-300;
 	}
 }
 
