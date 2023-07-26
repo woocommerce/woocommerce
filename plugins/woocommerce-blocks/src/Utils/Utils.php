@@ -7,7 +7,10 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 class Utils {
 
 	/**
-	 * Compare the current WordPress version with a given version.
+	 * Compare the current WordPress version with a given version. It's a wrapper around `version-compare`
+	 * that additionally takes into account the suffix (like `-RC1`).
+	 * For example: version 6.3 is considered lower than 6.3-RC2, so you can do
+	 * wp_version_compare( '6.3', '>=' ) and that will return true for 6.3-RC2.
 	 *
 	 * @param string      $version The version to compare against.
 	 * @param string|null $operator Optional. The comparison operator. Defaults to null.
