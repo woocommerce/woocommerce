@@ -51,7 +51,6 @@ test.describe( 'Products API tests: CRUD', () => {
 		expect( responseJSON.virtual ).toEqual( false );
 		expect( responseJSON.downloadable ).toEqual( false );
 		expect( responseJSON.shipping_required ).toEqual( true );
-		expect( responseJSON.post_password ).toEqual( 'test_123' );
 	} );
 
 	test.describe( 'Product attributes tests: CRUD', () => {

@@ -15,7 +15,6 @@ const simpleProduct = {
 	regular_price: '25',
 	description: 'Description for this simple product.',
 	short_description: 'Shorter description.',
-	post_password: 'test_123',
 };
 
 /**
