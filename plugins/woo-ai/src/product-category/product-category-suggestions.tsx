@@ -3,12 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import {
+	__experimentalUseCompletion as useCompletion,
+	UseCompletionError,
+} from '@woocommerce/ai';
 
 /**
  * Internal dependencies
  */
 import { MagicButton, RandomLoadingMessage } from '../components';
-import { useCompletion } from '../hooks';
 import {
 	getCategories,
 	getAllAvailableCategories,
@@ -17,6 +20,7 @@ import {
 } from '../utils';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { SuggestionPills } from '../components/suggestion-pills';
+import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 
 enum SuggestionsState {
 	Initial,
@@ -54,7 +58,8 @@ export const ProductCategorySuggestions = () => {
 	};
 
 	const { requestCompletion } = useCompletion( {
-		onStreamError: ( error ) => {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
+		onStreamError: ( error: UseCompletionError ) => {
 			// eslint-disable-next-line no-console
 			console.debug( 'Streaming error encountered', error );
 			setSuggestionsState( SuggestionsState.Failed );
