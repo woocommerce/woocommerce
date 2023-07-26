@@ -98,6 +98,10 @@ const getCoreConfig = ( options = {} ) => {
 						loader: 'babel-loader?cacheDirectory',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
+							plugins: [
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
+							],
 						},
 					},
 				},
@@ -211,6 +215,8 @@ const getMainConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
 						},
 					},
@@ -357,6 +363,8 @@ const getFrontConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
 						},
 					},
@@ -458,6 +466,8 @@ const getPaymentsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
 						},
 					},
@@ -560,6 +570,8 @@ const getExtensionsConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
 						},
 					},
@@ -677,6 +689,8 @@ const getStylingConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
 						},
 					},
@@ -806,6 +820,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 								// Required until Webpack is updated to ^5.0.0
 								plugins: [
 									'@babel/plugin-proposal-optional-chaining',
+									'@babel/plugin-proposal-class-properties',
 								],
 							},
 						},
