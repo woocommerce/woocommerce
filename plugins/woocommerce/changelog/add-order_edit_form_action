@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add action for 'order_edit_form_top' as a replacement to edit_form_top for HPOS.

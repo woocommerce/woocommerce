@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-do not use image size cache while in customizer

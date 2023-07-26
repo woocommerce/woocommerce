@@ -3,9 +3,14 @@
  */
 import fs from 'fs';
 import path from 'path';
-import matter from 'gray-matter';
 import { glob } from 'glob';
 import crypto from 'crypto';
+
+/**
+ * Internal dependencies
+ */
+import { generatePostFrontMatter } from './generate-frontmatter';
+import { generateFileUrl } from './generate-urls';
 
 interface Category {
 	[ key: string ]: unknown;
@@ -17,75 +22,63 @@ interface Post {
 	[ key: string ]: unknown;
 }
 
-function generatePageId( filePath: string, prefix = '' ) {
+export function generatePostId( filePath: string, prefix = '' ) {
 	const hash = crypto.createHash( 'sha1' );
-	hash.update( prefix + filePath );
+	hash.update( `${ prefix }/${ filePath }` );
 	return hash.digest( 'hex' );
 }
-
-/**
- *	Generates a file url relative to the root directory provided.
- *
- * @param baseUrl          The base url to use for the file url.
- * @param rootDirectory    The root directory where the file resides.
- * @param subDirectory     The sub-directory where the file resides.
- * @param absoluteFilePath The absolute path to the file.
- * @return The file url.
- */
-export const generateFileUrl = (
-	baseUrl: string,
-	rootDirectory: string,
-	subDirectory: string,
-	absoluteFilePath: string
-) => {
-	// check paths are absolute
-	for ( const filePath of [
-		rootDirectory,
-		subDirectory,
-		absoluteFilePath,
-	] ) {
-		if ( ! path.isAbsolute( filePath ) ) {
-			throw new Error(
-				`File URLs cannot be generated without absolute paths. ${ filePath } is not absolute.`
-			);
-		}
-	}
-	// Generate a path from the subdirectory to the file path.
-	const relativeFilePath = path.resolve( subDirectory, absoluteFilePath );
-
-	// Determine the relative path from the rootDirectory to the filePath.
-	const relativePath = path.relative( rootDirectory, relativeFilePath );
-
-	return `${ baseUrl }/${ relativePath }`;
-};
 
 async function processDirectory(
 	rootDirectory: string,
 	subDirectory: string,
 	projectName: string,
 	baseUrl: string,
+	baseEditUrl: string,
+	fullPathToDocs: string,
 	checkReadme = true
 ): Promise< Category > {
-	let category: Category = {};
+	const category: Category = {};
 
 	// Process README.md (if exists) for the category definition.
 	const readmePath = path.join( subDirectory, 'README.md' );
 
 	if ( checkReadme && fs.existsSync( readmePath ) ) {
 		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
-		const readmeFrontmatter = matter( readmeContent ).data;
-		category = { ...readmeFrontmatter };
-		category.posts = [];
+		const frontMatter = generatePostFrontMatter( readmeContent );
+		Object.assign( category, frontMatter );
+	} else if ( checkReadme ) {
+		// derive the category title from the directory name, capitalize first letter
+		const categoryTitle = path.basename( subDirectory );
+		category.category_title =
+			categoryTitle.charAt( 0 ).toUpperCase() + categoryTitle.slice( 1 );
 	}
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
+
+	// If there are markdown files in this directory, add a posts array to the category. Otherwise, assume its a top level category that will contain subcategories.
+	if ( markdownFiles.length > 0 ) {
+		category.posts = [];
+	}
 
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
 			// Skip README.md which we have already processed.
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
-			const fileFrontmatter = matter( fileContent ).data;
+			const fileFrontmatter = generatePostFrontMatter( fileContent );
+
+			if ( baseUrl.includes( 'github' ) ) {
+				fileFrontmatter.edit_url = generateFileUrl(
+					baseEditUrl,
+					rootDirectory,
+					subDirectory,
+					filePath
+				);
+			}
+
 			const post: Post = { ...fileFrontmatter };
+
+			// get the folder name of rootDirectory.
+			const relativePath = path.relative( fullPathToDocs, filePath );
 
 			category.posts.push( {
 				...post,
@@ -95,7 +88,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
-				id: generatePageId( filePath, projectName ),
+				id: generatePostId( relativePath, projectName ),
 			} );
 		}
 	} );
@@ -111,7 +104,9 @@ async function processDirectory(
 			rootDirectory,
 			subdirectory,
 			projectName,
-			baseUrl
+			baseUrl,
+			baseEditUrl,
+			fullPathToDocs
 		);
 
 		category.categories.push( subcategory );
@@ -124,13 +119,18 @@ export async function generateManifestFromDirectory(
 	rootDirectory: string,
 	subDirectory: string,
 	projectName: string,
-	baseUrl: string
+	baseUrl: string,
+	baseEditUrl: string
 ) {
+	const fullPathToDocs = subDirectory;
+
 	const manifest = await processDirectory(
 		rootDirectory,
 		subDirectory,
 		projectName,
 		baseUrl,
+		baseEditUrl,
+		fullPathToDocs,
 		false
 	);
 
