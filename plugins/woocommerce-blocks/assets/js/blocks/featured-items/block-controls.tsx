@@ -11,7 +11,6 @@ import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { crop } from '@wordpress/icons';
 import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
-import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import type { BlockAlignment } from '@wordpress/blocks';
 
@@ -112,13 +111,13 @@ export const BlockControls = ( {
 					allowedTypes={ [ 'image' ] }
 				/>
 				{ backgroundImageId && mediaSrc ? (
-					<TextToolbarButton
+					<ToolbarButton
 						onClick={ () =>
 							setAttributes( { mediaId: 0, mediaSrc: '' } )
 						}
 					>
 						{ __( 'Reset', 'woo-gutenberg-products-block' ) }
-					</TextToolbarButton>
+					</ToolbarButton>
 				) : null }
 			</ToolbarGroup>
 			<ToolbarGroup
