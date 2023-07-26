@@ -1,36 +1,24 @@
 @import '../../stylesheets/_variables.scss';
 
-.marketplace-search-form {
-	background-color: $gutenberg-gray-100;
-	padding: 9px 5px;
+.woocommerce-marketplace__search {
+	grid-area: mktpl-search;
+	background: $gutenberg-gray-100;
+	border-radius: 2px;
 	display: flex;
-	.search-form__search-input {
-		background-color: transparent;
-		border: none;
-		color: $gutenberg-gray-900;
-		display: inline;
-		fill: $woo-purple-50;
-		flex: 1;
-		font-size: 13px;
-		line-height: 20px;
+	height: 40px;
+	padding: 4px 8px 4px 12px;
 
-		::placeholder {
-			color: $gutenberg-gray-700;
-		}
+	input[type='search'] {
+		all: unset;
+		flex-grow: 1;
 	}
-	input[type='text']:focus {
-		border: none;
-		box-shadow: none;
-	}
-	.search-form__search-button {
-		background-color: transparent;
-		border: none;
-		border-radius: 0;
-		cursor: pointer;
-		fill: currentColor;
-		font-size: 1em;
-		line-height: 0;
-		text-align: center;
+
+	@media (width <= $breakpoint-medium) {
+		margin: $content-spacing-small;
 	}
 }
 
+.woocommerce-marketplace__search-button {
+	all: unset;
+	cursor: pointer;
+}

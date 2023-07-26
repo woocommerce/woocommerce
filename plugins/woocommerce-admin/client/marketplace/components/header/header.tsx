@@ -9,7 +9,7 @@ import './header.scss';
 import HeaderTitle from '../header-title/header-title';
 import HeaderAccount from '../header-account/header-account';
 import Tabs from '../tabs/tabs';
-import HeaderSearch from '../header-search/header-search';
+import Search from '../search/search';
 
 export interface HeaderProps {
 	selectedTab?: string | undefined;
@@ -31,7 +31,7 @@ export default function Header( props: HeaderProps ) {
 			<div className="woocommerce-marketplace__header-meta">
 				<HeaderAccount />
 			</div>
-			<HeaderSearch />
+			<Search />
 		</header>
 	);
 }
