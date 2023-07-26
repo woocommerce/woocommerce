@@ -1,0 +1,26 @@
+.wc-product-category-suggestions {
+  &__loading-message {
+    display: flex;
+    align-items: center;
+
+    .woo-ai-loading-message_spinner {
+      display: flex;
+
+      .woocommerce-spinner {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        max-height: 24px;
+      }
+    }
+
+    .woo-ai-loading-message_content {
+      margin-left: 5px;
+    }
+  }
+
+  .woo-ai-write-it-for-me-btn {
+    display: flex;
+    align-items: center;
+  }
+}
