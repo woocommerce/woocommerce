@@ -4,18 +4,63 @@
 import { Attribute } from './types';
 import { getTinyContent } from '.';
 
+/**
+ * Retrieves a hierarchy string for the specified category element. This includes the category label and all parent categories separated by a > character.
+ *
+ * @param {HTMLInputElement} categoryElement - The category element to get the hierarchy string for.
+ * @return {string} The hierarchy string for the specified category element. e.g. "Clothing > Shirts > T-Shirts"
+ */
+const getCategoryHierarchy = ( categoryElement: HTMLElement ) => {
+	let hierarchy = '';
+	let parentElement = categoryElement.parentElement;
+
+	// Traverse up the DOM Tree until a category list item (LI) is found
+	while ( parentElement ) {
+		const isListItem = parentElement.tagName.toUpperCase() === 'LI';
+		const isRootList = parentElement.id === 'product_catchecklist';
+
+		if ( isListItem ) {
+			const categoryLabel =
+				parentElement.querySelector( 'label' )?.innerText.trim() || '';
+
+			if ( categoryLabel ) {
+				hierarchy = hierarchy
+					? `${ categoryLabel } > ${ hierarchy }`
+					: categoryLabel;
+			} else {
+				break;
+			}
+		}
+
+		if ( isRootList ) {
+			// If the root category list is found, it means we have reached the top of the hierarchy
+			break;
+		}
+
+		parentElement = parentElement.parentElement;
+	}
+
+	return hierarchy;
+};
+
+/**
+ * Function to get selected categories in hierarchical manner.
+ *
+ * @return {string[]} Array of category hierarchy strings for each selected category.
+ */
 export const getCategories = (): string[] => {
-	return Array.from(
+	// Get all the selected category checkboxes
+	const checkboxes: NodeListOf< HTMLInputElement > =
 		document.querySelectorAll(
-			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
-		)
-	)
-		.filter(
-			( item ) =>
-				window.getComputedStyle( item, ':before' ).content !== 'none'
-		)
-		.map( ( item ) => item.nextSibling?.nodeValue?.trim() || '' )
-		.filter( Boolean );
+			'#taxonomy-product_cat input[type="checkbox"][name="tax_input[product_cat][]"]'
+		);
+	const categoryElements = Array.from( checkboxes );
+	const selectedCategories = categoryElements.filter(
+		( category ) => category.checked
+	);
+
+	// Get the hierarchy string for each selected category and filter out any empty strings
+	return selectedCategories.map( getCategoryHierarchy ).filter( Boolean );
 };
 
 const isElementVisible = ( element: HTMLElement ) =>
