@@ -16,6 +16,8 @@ import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 export const AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION = false;
 export const MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION = false;
 
+export const PRODUCT_QUERY_VARIATION_NAME = 'woocommerce/product-query';
+
 export const EDIT_ATTRIBUTES_URL =
 	'/wp-admin/edit.php?post_type=product&page=product_attributes';
 
