@@ -131,7 +131,9 @@ export const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 			<span className="woo-ai-loading-message_spinner">
 				<Spinner />
 			</span>
-			<span>{ currentMessage }</span>
+			<span className="woo-ai-loading-message_content">
+				{ currentMessage }
+			</span>
 		</>
 	);
 };
