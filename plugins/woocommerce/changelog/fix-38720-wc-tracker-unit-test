@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Added a unit test for plugin feature compatibility data in WC Tracker
