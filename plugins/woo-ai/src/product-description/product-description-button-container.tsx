@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	DESCRIPTION_MAX_LENGTH,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
 import { useCompletion, useFeedbackSnackbar, useTinyEditor } from '../hooks';
@@ -23,8 +24,6 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
-
-const DESCRIPTION_MAX_LENGTH = 300;
 
 const getApiError = ( error: string ) => {
 	switch ( error ) {
@@ -148,7 +147,7 @@ export function WriteItForMeButtonContainer() {
 			productPropsInstructions.push(
 				`Tagged with: ${ productTags.join( ', ' ) }.`
 			);
-			includedProps.push( 'categories' );
+			includedProps.push( 'tags' );
 		}
 		productAttributes.forEach( ( { name, values } ) => {
 			productPropsInstructions.push(
