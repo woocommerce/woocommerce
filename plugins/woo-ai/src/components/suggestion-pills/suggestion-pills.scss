@@ -1,0 +1,15 @@
+.woo-ai-suggestion-pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  flex-wrap: wrap;
+
+  &__item {
+    margin-bottom: 0;
+  }
+
+  &__select-suggestion.button {
+    border-radius: 28px;
+  }
+}
