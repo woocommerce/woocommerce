@@ -4,3 +4,4 @@ export * from './text-completion';
 export * from './recordTracksFactory';
 export * from './get-post-id';
 export * from './tiny-tools';
+export * from './productDataInstructionsGenerator';

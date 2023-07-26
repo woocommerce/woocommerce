@@ -4,6 +4,14 @@
 import { Attribute } from './types';
 import { getTinyContent } from '.';
 
+export enum ProductProps {
+	Name = 'name',
+	Description = 'description',
+	Categories = 'categories',
+	Tags = 'tags',
+	Attributes = 'attributes',
+}
+
 /**
  * Retrieves a hierarchy string for the specified category element. This includes the category label and all parent categories separated by a > character.
  *
