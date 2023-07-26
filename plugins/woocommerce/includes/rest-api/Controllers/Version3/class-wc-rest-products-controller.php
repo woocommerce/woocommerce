@@ -1145,7 +1145,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'post_password'       => array(
+				'post_password'         => array(
 					'description' => __( 'Post password.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
