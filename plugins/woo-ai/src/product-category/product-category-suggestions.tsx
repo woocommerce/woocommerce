@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
@@ -21,6 +21,7 @@ import {
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { SuggestionPills } from '../components/suggestion-pills';
 import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
+import { recordCategoryTracks } from './utils';
 
 enum SuggestionsState {
 	Initial,
@@ -35,6 +36,10 @@ export const ProductCategorySuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.Initial );
 	const [ suggestions, setSuggestions ] = useState< string[] >( [] );
+
+	useEffect( () => {
+		recordCategoryTracks( 'view_ui' );
+	}, [] );
 
 	const parseCategorySuggestions = ( categorySuggestions: string ) => {
 		return categorySuggestions.split( ',' ).map( ( suggestion ) => {
@@ -62,6 +67,10 @@ export const ProductCategorySuggestions = () => {
 		onStreamError: ( error: UseCompletionError ) => {
 			// eslint-disable-next-line no-console
 			console.debug( 'Streaming error encountered', error );
+			recordCategoryTracks( 'stop', {
+				reason: 'error',
+				error: error.code ?? error.message,
+			} );
 			setSuggestionsState( SuggestionsState.Failed );
 		},
 		onCompletionFinished: ( reason, content ) => {
@@ -77,6 +86,12 @@ export const ProductCategorySuggestions = () => {
 					setSuggestionsState( SuggestionsState.Complete );
 				}
 
+				recordCategoryTracks( 'stop', {
+					reason: 'finished',
+					suggestions: parsed,
+					valid_suggestions: filtered,
+				} );
+
 				setSuggestions( filtered );
 			} catch ( e ) {
 				setSuggestionsState( SuggestionsState.Failed );
@@ -89,6 +104,10 @@ export const ProductCategorySuggestions = () => {
 		// remove the selected item from the list of suggestions
 		setSuggestions( suggestions.filter( ( s ) => s !== suggestion ) );
 		selectCategory( suggestion );
+
+		recordCategoryTracks( 'select', {
+			selected_category: suggestion,
+		} );
 	};
 
 	const buildPrompt = () => {
@@ -119,11 +138,11 @@ export const ProductCategorySuggestions = () => {
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 
-		await requestCompletion( buildPrompt() );
-	};
+		recordCategoryTracks( 'start', {
+			current_categories: getCategories(),
+		} );
 
-	const onGetSuggestionsClick = () => {
-		fetchProductSuggestions();
+		await requestCompletion( buildPrompt() );
 	};
 
 	return (
@@ -181,7 +200,7 @@ export const ProductCategorySuggestions = () => {
 			) }
 			{ suggestionsState === SuggestionsState.Initial && (
 				<MagicButton
-					onClick={ onGetSuggestionsClick }
+					onClick={ fetchProductSuggestions }
 					label={ __( 'Suggest categories using AI', 'woocommerce' ) }
 				/>
 			) }
