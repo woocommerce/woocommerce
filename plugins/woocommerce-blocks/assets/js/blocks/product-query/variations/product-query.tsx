@@ -17,13 +17,12 @@ import { isSiteEditorPage } from '@woocommerce/utils';
  * Internal dependencies
  */
 import {
+	PRODUCT_QUERY_VARIATION_NAME,
 	DEFAULT_ALLOWED_CONTROLS,
 	INNER_BLOCKS_TEMPLATE,
 	QUERY_DEFAULT_ATTRIBUTES,
 	QUERY_LOOP_ID,
 } from '../constants';
-
-export const VARIATION_NAME = 'woocommerce/product-query';
 
 const ARCHIVE_PRODUCT_TEMPLATES = [
 	'woocommerce/woocommerce//archive-product',
@@ -39,11 +38,11 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 			'A block that displays a selection of products in your store.',
 			'woo-gutenberg-products-block'
 		),
-		name: VARIATION_NAME,
+		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: “Products“ is the name of the block. */
 		title: __( 'Products (Beta)', 'woo-gutenberg-products-block' ),
 		isActive: ( blockAttributes ) =>
-			blockAttributes.namespace === VARIATION_NAME,
+			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
 			<Icon
 				icon={ stacks }
@@ -52,7 +51,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		attributes: {
 			...attributes,
-			namespace: VARIATION_NAME,
+			namespace: PRODUCT_QUERY_VARIATION_NAME,
 		},
 		// Gutenberg doesn't support this type yet, discussion here:
 		// https://github.com/WordPress/gutenberg/pull/43632
@@ -84,7 +83,10 @@ if ( isWpVersion( '6.1', '>=' ) ) {
 				},
 			};
 
-			unregisterBlockVariation( QUERY_LOOP_ID, VARIATION_NAME );
+			unregisterBlockVariation(
+				QUERY_LOOP_ID,
+				PRODUCT_QUERY_VARIATION_NAME
+			);
 
 			registerProductsBlock( queryAttributes );
 		}

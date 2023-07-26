@@ -8,15 +8,15 @@ import {
 } from '@wordpress/blocks';
 import { isWpVersion } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
+import {
+	INNER_BLOCKS_TEMPLATE as productsInnerBlocksTemplate,
+	QUERY_DEFAULT_ATTRIBUTES as productsQueryDefaultAttributes,
+	PRODUCT_QUERY_VARIATION_NAME as productsVariationName,
+} from '@woocommerce/blocks/product-query/constants';
 
 /**
  * Internal dependencies
  */
-import {
-	INNER_BLOCKS_TEMPLATE as productsInnerBlocksTemplate,
-	QUERY_DEFAULT_ATTRIBUTES as productsQueryDefaultAttributes,
-} from '../product-query/constants';
-import { VARIATION_NAME as productsVariationName } from '../product-query/variations/product-query';
 import { createArchiveTitleBlock, createRowBlock } from './utils';
 import { OnClickCallbackParameter, type InheritedAttributes } from './types';
 
