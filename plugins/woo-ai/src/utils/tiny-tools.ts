@@ -1,5 +1,5 @@
 type TinyContent = {
-	getContent: () => string;
+	getContent: ( args?: object ) => string;
 	setContent: ( str: string ) => void;
 };
 
@@ -28,6 +28,6 @@ export const setTinyContent = ( str: string ) => {
 	}
 };
 
-export const getTinyContent = () => {
-	return getTinyContentObject()?.getContent();
+export const getTinyContent = ( args?: object ) => {
+	return getTinyContentObject()?.getContent( args );
 };
