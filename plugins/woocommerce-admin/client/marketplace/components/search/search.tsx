@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,7 +12,8 @@ import './search.scss';
 
 const searchPlaceholder = __( 'Search extensions and themes', 'woocommerce' );
 
-const marketplaceAPI = 'https://woocommerce.com/wp-json';
+const marketplaceAPI =
+	'https://woocommerce.com/wp-json/wccom-extensions/1.0/search';
 
 export interface SearchProps {
 	locale?: string | 'en_US';
@@ -27,6 +29,7 @@ export interface SearchProps {
 function Search( props: SearchProps ): JSX.Element {
 	const locale = props.locale ?? 'en_US';
 	const country = props.country ?? '';
+	const [ searchTerm, setSearchTerm ] = useState( '' );
 
 	const build_parameter_string = (
 		query_string: string,
@@ -41,9 +44,10 @@ function Search( props: SearchProps ): JSX.Element {
 	};
 
 	const runSearch = () => {
-		const query = (
-			document.getElementById( 'search-query' ) as HTMLInputElement
-		 ).value.trim();
+		const query = searchTerm.trim();
+		if ( ! query ) {
+			return [];
+		}
 
 		const params = build_parameter_string( query, country, locale );
 		fetch( marketplaceAPI + '?' + params, {
@@ -56,39 +60,49 @@ function Search( props: SearchProps ): JSX.Element {
 		return [];
 	};
 
+	const handleInputChange = (
+		event: React.ChangeEvent< HTMLInputElement >
+	) => {
+		setSearchTerm( event.target.value );
+	};
+
 	const handleKeyUp = ( event: { key: string } ) => {
 		if ( event.key === 'Enter' ) {
 			runSearch();
 		}
+		if ( event.key === 'Escape' ) {
+			setSearchTerm( '' );
+		}
 	};
 
-	const renderSearch = () => {
-		return (
-			<div className="marketplace-search-form">
-				<label className="screen-reader-text" htmlFor="search-query">
-					{ searchPlaceholder }
-				</label>
-				<input
-					id="search-query"
-					className="search-form__search-input"
-					type="search"
-					name="search-query"
-					placeholder={ searchPlaceholder }
-					onKeyUp={ handleKeyUp }
-				/>
-				<button
-					id="wccom-header-search-button"
-					className="search-form__search-button"
-					aria-label={ __( 'Search', 'woocommerce' ) }
-					onClick={ runSearch }
-				>
-					<Icon icon={ search } size={ 32 } />
-				</button>
-			</div>
-		);
-	};
-
-	return <div className="marketplace-search-wrapper">{ renderSearch() }</div>;
+	return (
+		<div className="woocommerce-marketplace__search">
+			<label
+				className="screen-reader-text"
+				htmlFor="woocommerce-marketplace-search-query"
+			>
+				{ searchPlaceholder }
+			</label>
+			<input
+				id="woocommerce-marketplace-search-query"
+				value={ searchTerm }
+				className="woocommerce-marketplace__search-input"
+				type="search"
+				name="woocommerce-marketplace-search-query"
+				placeholder={ searchPlaceholder }
+				onChange={ handleInputChange }
+				onKeyUp={ handleKeyUp }
+			/>
+			<button
+				id="woocommerce-marketplace-search-button"
+				className="woocommerce-marketplace__search-button"
+				aria-label={ __( 'Search', 'woocommerce' ) }
+				onClick={ runSearch }
+			>
+				<Icon icon={ search } size={ 32 } />
+			</button>
+		</div>
+	);
 }
 
 export default Search;

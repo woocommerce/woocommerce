@@ -39,6 +39,7 @@
 
 .woocommerce-marketplace__header-meta {
 	grid-area: mktpl-meta;
+	height: $grid-unit-30;
 	justify-self: end;
 
 	@media (width <= $breakpoint-medium) {
@@ -54,27 +55,3 @@
 		padding: 0 $content-spacing-small;
 	}
 }
-
-.woocommerce-marketplace__header-search {
-	grid-area: mktpl-search;
-	background: #f0f0f0;
-	border-radius: 2px;
-	display: flex;
-	height: 40px;
-	padding: 4px 8px 4px 12px;
-
-	input[type='search'] {
-		all: unset;
-		flex-grow: 1;
-	}
-
-	@media (width <= $breakpoint-medium) {
-		margin: $content-spacing-small;
-	}
-}
-
-.woocommerce-marketplace__header-search-button {
-	all: unset;
-	cursor: pointer;
-}
-
