@@ -14,8 +14,17 @@
 				"type": "object"
 			},
 			"default": []
+		},
+		"conditions": {
+			"__experimentalRole": "content",
+			"type": "array",
+			"items": {
+				"type": "object"
+			},
+			"default": []
 		}
 	},
+	"usesContext": [ "editedProduct" ],
 	"supports": {
 		"align": false,
 		"html": false,
