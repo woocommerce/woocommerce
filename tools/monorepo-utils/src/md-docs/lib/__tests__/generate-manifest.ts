@@ -2,6 +2,7 @@
  * External dependencies
  */
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Internal dependencies
@@ -10,6 +11,7 @@ import {
 	generateManifestFromDirectory,
 	generatePostId,
 } from '../generate-manifest';
+import exp from 'constants';
 
 describe( 'generateManifest', () => {
 	const dir = path.join( __dirname, './fixtures/example-docs' );
@@ -136,6 +138,104 @@ describe( 'generateManifest', () => {
 		expect( manifest.categories[ 0 ].posts[ 0 ].edit_url ).toEqual(
 			'https://github.com/edit/example-docs/get-started/local-development.md'
 		);
+	} );
+
+	it( 'should create a hash for each post in a manifest', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+
+		const topLevelCategories = manifest.categories;
+
+		const posts = [
+			...topLevelCategories[ 0 ].posts,
+			...topLevelCategories[ 0 ].categories[ 0 ].posts,
+			...topLevelCategories[ 0 ].categories[ 1 ].posts,
+			...topLevelCategories[ 1 ].posts,
+		];
+
+		posts.forEach( ( post ) => {
+			expect( post.hash ).not.toBeUndefined();
+		} );
+	} );
+
+	it( 'should update a post hash and manifest hash when content is updated', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+		const post = manifest.categories[ 0 ].posts[ 0 ];
+		const originalPostHash = post.hash;
+		const originalManifestHash = manifest.hash;
+
+		// Confirm hashes are not undefined
+		expect( originalPostHash ).not.toBeUndefined();
+		expect( originalManifestHash ).not.toBeUndefined();
+
+		// Update the file content of the corresponding post
+		const filePath = path.join( dir, 'get-started/local-development.md' );
+		const fileContent = fs.readFileSync( filePath, 'utf-8' );
+		const updatedFileContent = fileContent + '\n\n<!-- updated -->';
+		fs.writeFileSync( filePath, updatedFileContent );
+
+		// Generate a new manifest
+		const nextManifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+		const nextPost = nextManifest.categories[ 0 ].posts[ 0 ];
+		const NextPostHash = nextPost.hash;
+		const NextManifestHash = nextManifest.hash;
+
+		// Confirm hashes are newly created.
+		expect( NextPostHash ).not.toEqual( originalPostHash );
+		expect( NextManifestHash ).not.toEqual( originalManifestHash );
+
+		// Reset the file content
+		fs.writeFileSync( filePath, fileContent );
+	} );
+
+	it( 'should not update a post hash and manifest hash when content is unchanged', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+		const post = manifest.categories[ 0 ].posts[ 0 ];
+		const originalPostHash = post.hash;
+		const originalManifestHash = manifest.hash;
+
+		// Confirm hashes are not undefined
+		expect( originalPostHash ).not.toBeUndefined();
+		expect( originalManifestHash ).not.toBeUndefined();
+
+		// Generate a new manifest
+		const nextManifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+		const nextPost = nextManifest.categories[ 0 ].posts[ 0 ];
+		const NextPostHash = nextPost.hash;
+		const NextManifestHash = nextManifest.hash;
+
+		// Confirm hashes are newly created.
+		expect( NextPostHash ).toEqual( originalPostHash );
+		expect( NextManifestHash ).toEqual( originalManifestHash );
 	} );
 } );
 
