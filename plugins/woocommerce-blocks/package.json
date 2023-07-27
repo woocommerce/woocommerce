@@ -277,7 +277,7 @@
 		"reakit": "1.3.11",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",
-		"use-debounce": "7.0.1",
+		"use-debounce": "9.0.4",
 		"wordpress-components": "npm:@wordpress/components@14.2.0"
 	},
 	"peerDependencies": {
