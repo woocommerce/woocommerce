@@ -32,12 +32,7 @@ export const PluginCard = ( {
 	learnMoreLink?: ReactNode;
 } ) => {
 	return (
-		<div
-			className={ classnames(
-				'woocommerce-profiler-plugins-plugin-card',
-				name
-			) }
-		>
+		<div className="woocommerce-profiler-plugins-plugin-card">
 			<div className="woocommerce-profiler-plugin-card-top">
 				{ ! installed && (
 					<CheckboxControl
