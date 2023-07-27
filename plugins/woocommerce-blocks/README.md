@@ -72,7 +72,7 @@ To begin contributing to the WooCommerce Blocks plugin, see our [getting started
 Other useful docs to explore:
 
 -   [`InnerBlocks`](https://github.com/WordPress/gutenberg/blob/master/packages/block-editor/src/components/inner-blocks/README.md)
--   [`apiFetch`](https://wordpress.org/gutenberg/handbook/designers-developers/developers/packages/packages-api-fetch/)
+-   [`apiFetch`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-api-fetch/)
 -   [`@wordpress/editor`](https://github.com/WordPress/gutenberg/blob/master/packages/editor/README.md)
 -   [`@wordpress/create-block`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-create-block/)
 
