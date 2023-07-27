@@ -153,7 +153,6 @@ $task_list = new TaskList($args);
 - `$task_list::get_tasks()`: Returns an array of tasks associated with the task list.
 - `$task_list::add_task($task)`: Adds a task to the task list.
 - `$task_list::remove_task($task_id)`: Removes a task from the task list based on its ID.
-- `$task_list::has_task($task_id)`: Checks if the task list contains a task with the specified ID.
 - `$task_list::get_task($task_id)`: Retrieves a task from the task list based on its ID.
 - `$task_list::get_viewable_tasks()`: Returns an array of viewable tasks within the task list.
 - `$task_list::is_visible()`: Checks if the task list is visible.
