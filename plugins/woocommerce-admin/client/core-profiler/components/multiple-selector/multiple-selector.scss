@@ -78,6 +78,12 @@
 					margin-bottom: 0 !important;
 				}
 
+				.components-checkbox-control.is-selected {
+					input[type='checkbox'] {
+						border: none !important;
+					}
+				}
+
 				.components-checkbox-control__label {
 					cursor: pointer;
 					font-size: 13px;
@@ -86,16 +92,15 @@
 				}
 
 				.components-checkbox-control__input-container {
-					border: 1px solid #757575;
 					border-radius: 2px;
 					height: 20px !important;
 					padding: 1px;
 					width: 20px !important;
 
 					.components-checkbox-control__input[type='checkbox'] {
-						border: none;
-						height: 16px !important;
-						width: 16px !important;
+						border: 1px solid #1e1e1e;
+						height: 20px !important;
+						width: 20px !important;
 						&:checked {
 							border-radius: 2px;
 						}
@@ -103,7 +108,8 @@
 
 					svg {
 						height: 20px;
-						top: -1px;
+						top: 1px;
+						left: 0px;
 						width: 22px;
 					}
 
