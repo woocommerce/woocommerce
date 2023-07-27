@@ -269,7 +269,6 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 		$wrapped_blocks = self::wrap_single_product_template( $template_content );
 		$template       = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $wrapped_blocks );
 		return self::serialize_blocks( $template );
-
 	}
 
 	/**
