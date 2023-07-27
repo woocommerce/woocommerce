@@ -54,7 +54,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		}
 
 		static $system_status_data = array();
-		if ( ! array_key_exists( 'user' . $user, $system_status_data ) ) {
+		if ( ! isset( $system_status_data[ 'user' . $user ] ) ) {
 			wp_set_current_user( $user );
 			$response                             = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 			$data                                 = $response->get_data();
