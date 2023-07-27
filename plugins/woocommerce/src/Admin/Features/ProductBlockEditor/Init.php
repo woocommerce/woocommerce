@@ -368,8 +368,7 @@ class Init {
 								array(
 									'woocommerce/product-password-fields',
 									array(
-										'label'    => __( 'Require a password', 'woocommerce' ),
-										'property' => 'post_password',
+										'label' => __( 'Require a password', 'woocommerce' ),
 									),
 								),
 							),

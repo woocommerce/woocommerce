@@ -11,9 +11,6 @@
 		"label": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"help": {
-			"type": "string"
 		}
 	},
 	"supports": {

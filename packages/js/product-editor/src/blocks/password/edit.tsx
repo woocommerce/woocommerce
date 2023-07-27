@@ -33,7 +33,7 @@ export function Edit( {
 	attributes,
 }: BlockEditProps< RequirePasswordBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const { label, title, help } = attributes;
+	const { label } = attributes;
 
 	const [ postPassword, setPostPassword ] = useEntityProp< string >(
 		'postType',
@@ -42,17 +42,35 @@ export function Edit( {
 	);
 
 	const [ checked, setChecked ] = useState( Boolean( postPassword ) );
+	const postPasswordId = useInstanceId(
+		BaseControl,
+		'post_password'
+	) as string;
+
 	return (
 		<div { ...blockProps }>
-			<h4>{ title }</h4>
 			<CheckboxControl
 				label={ label }
 				checked={ checked }
-				onChange={ ( selected ) => setChecked( selected ) }
+				onChange={ ( selected ) => {
+					setChecked( selected );
+					if ( ! selected ) {
+						setPostPassword( '' );
+					}
+				} }
 			/>
-			<BaseControl id="todo">
-				<InputControl />
-			</BaseControl>
+			{ checked && (
+				<BaseControl
+					id={ postPasswordId }
+					label={ __( 'Password', 'woocommerce' ) }
+				>
+					<InputControl
+						id={ postPasswordId }
+						value={ postPassword }
+						onChange={ setPostPassword }
+					/>
+				</BaseControl>
+			) }
 		</div>
 	);
 }
