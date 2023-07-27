@@ -91,7 +91,7 @@ const CheckoutExpressPayment = () => {
 							headingLevel="2"
 						>
 							{ __(
-								'Express checkout',
+								'Express Checkout',
 								'woo-gutenberg-products-block'
 							) }
 						</Title>
