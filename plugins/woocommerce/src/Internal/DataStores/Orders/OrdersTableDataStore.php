@@ -557,6 +557,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Abstract_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
+		// Prevent read on sync till backfill is complete to avoid read on sync being triggered by add_|update_|delete_postmeta etc hooks.
+		self::$reading_order_ids[] = $order->get_id();
 		$cpt_data_store = $this->get_post_data_store_for_backfill();
 		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
 			return;
@@ -580,6 +582,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
+		unset( self::$reading_order_ids[ $order->get_id() ] );
 	}
 
 	/**
@@ -1063,6 +1066,7 @@ WHERE
 			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
+				unset( self::$reading_order_ids[ $order_id ] );
 			}
 		}
 	}
