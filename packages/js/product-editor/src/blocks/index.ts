@@ -21,3 +21,4 @@ export { init as initInventoryQuantity } from './inventory-quantity';
 export { init as initToggle } from './toggle';
 export { init as attributesInit } from './attributes';
 export { init as initVariations } from './variations';
+export { init as initRequirePassword } from './password';
