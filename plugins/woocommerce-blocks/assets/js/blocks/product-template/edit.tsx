@@ -17,6 +17,8 @@ import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
+import { isNumber } from '@woocommerce/types';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -102,6 +104,11 @@ const ProductTemplateEdit = ( {
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] = useState();
 	const postType = 'product';
+	const loopShopPerPage = getSettingWithCoercion(
+		'loop_shop_per_page',
+		12,
+		isNumber
+	);
 	const { products, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getTaxonomies } = select( coreStore );
@@ -121,6 +128,7 @@ const ProductTemplateEdit = ( {
 					slug: templateSlug.replace( 'category-', '' ),
 				} );
 			const query: Record< string, unknown > = {
+				postType,
 				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
 				order,
 				orderby: orderBy,
@@ -171,6 +179,7 @@ const ProductTemplateEdit = ( {
 				if ( templateCategory ) {
 					query.categories = templateCategory[ 0 ]?.id;
 				}
+				query.per_page = loopShopPerPage;
 			}
 			return {
 				products: getEntityRecords( 'postType', postType, {

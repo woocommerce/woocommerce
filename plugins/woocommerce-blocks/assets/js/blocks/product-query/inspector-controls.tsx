@@ -7,9 +7,10 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { useSelect, subscribe } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
 import { ProductQueryFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
-import { EditorBlock } from '@woocommerce/types';
+import { EditorBlock, isNumber } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
-import { isWpVersion } from '@woocommerce/settings';
+import { isWpVersion, getSettingWithCoercion } from '@woocommerce/settings';
+import { ProductQueryBlockQuery } from '@woocommerce/blocks/product-query/types';
 import {
 	FormTokenField,
 	ToggleControl,
@@ -125,6 +126,18 @@ export const WooInheritToggleControl = (
 					: props.attributes.query.inherit || false
 			}
 			onChange={ ( inherit ) => {
+				const inheritQuery: Partial< ProductQueryBlockQuery > = {
+					inherit,
+				};
+
+				if ( inherit ) {
+					inheritQuery.perPage = getSettingWithCoercion(
+						'loop_shop_per_page',
+						12,
+						isNumber
+					);
+				}
+
 				if ( isCustomInheritGlobalQueryImplementationEnabled ) {
 					return setQueryAttribute( props, {
 						...QUERY_DEFAULT_ATTRIBUTES.query,
@@ -138,7 +151,7 @@ export const WooInheritToggleControl = (
 
 				setQueryAttribute( props, {
 					...props.defaultWooQueryParams,
-					inherit,
+					...inheritQuery,
 					// Restore the query object value before inherit was enabled.
 					...( inherit === false && {
 						...queryObjectBeforeInheritEnabled,

@@ -129,6 +129,10 @@ class ProductQuery extends AbstractBlock {
 			'post_template_has_support_for_grid_view',
 			$post_template_has_support_for_grid_view
 		);
+
+		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$this->asset_data_registry->add( 'loop_shop_per_page', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ), true );
 	}
 
 	/**

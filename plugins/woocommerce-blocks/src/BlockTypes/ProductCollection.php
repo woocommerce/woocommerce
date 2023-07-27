@@ -87,6 +87,21 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$this->asset_data_registry->add( 'loop_shop_per_page', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ), true );
+	}
+
+	/**
 	 * Update the query for the product query block in Editor.
 	 *
 	 * @param array           $args    Query args.
