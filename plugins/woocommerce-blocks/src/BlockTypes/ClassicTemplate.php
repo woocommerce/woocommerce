@@ -9,7 +9,7 @@ use WC_Shortcode_Checkout;
 use WC_Frontend_Scripts;
 
 /**
- * Classic Single Product class
+ * Classic Template class
  *
  * @internal
  */
@@ -91,7 +91,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			return $this->render_order_received();
 		}
 
-		if ( 'single-product' === $attributes['template'] ) {
+		if ( is_product() ) {
 			return $this->render_single_product();
 		}
 

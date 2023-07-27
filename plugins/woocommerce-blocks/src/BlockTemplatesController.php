@@ -590,7 +590,13 @@ class BlockTemplatesController {
 		if (
 			is_singular( 'product' ) && $this->block_template_is_available( 'single-product' )
 		) {
-			$templates = get_block_templates( array( 'slug__in' => array( 'single-product' ) ) );
+			global $post;
+
+			$valid_slugs = [ 'single-product' ];
+			if ( 'product' === $post->post_type && $post->post_name ) {
+				$valid_slugs[] = 'single-product-' . $post->post_name;
+			}
+			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
