@@ -2384,6 +2384,16 @@ FROM $order_meta_table
 	}
 
 	/**
+	 * Helper method to check whether to backfill post record.
+	 *
+	 * @return bool
+	 */
+	private function should_backfill_post_record() {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		return $data_sync->data_sync_is_enabled();
+	}
+
+	/**
 	 * Helper function to decide whether to backfill post record.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
@@ -2391,8 +2401,7 @@ FROM $order_meta_table
 	 * @return void
 	 */
 	private function maybe_backfill_post_record( $order ) {
-		$data_sync = wc_get_container()->get( DataSynchronizer::class );
-		if ( $data_sync->data_sync_is_enabled() ) {
+		if ( $this->should_backfill_post_record() ) {
 			$this->backfill_post_record( $order );
 		}
 	}
@@ -2689,8 +2698,8 @@ CREATE TABLE $meta_table (
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 		}
 
 		return $delete_meta;
@@ -2707,8 +2716,8 @@ CREATE TABLE $meta_table (
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
 		}
 
 		return $add_meta;
@@ -2725,8 +2734,8 @@ CREATE TABLE $meta_table (
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 		}
 
 		return $update_meta;
