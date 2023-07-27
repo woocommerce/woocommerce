@@ -6,7 +6,10 @@ import path from 'path';
 /**
  * Internal dependencies
  */
-import { generateManifestFromDirectory } from '../generate-manifest';
+import {
+	generateManifestFromDirectory,
+	generatePostId,
+} from '../generate-manifest';
 
 describe( 'generateManifest', () => {
 	const dir = path.join( __dirname, './fixtures/example-docs' );
@@ -95,6 +98,20 @@ describe( 'generateManifest', () => {
 		);
 	} );
 
+	it( 'should generate posts with stable IDs', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+
+		expect( manifest.categories[ 0 ].posts[ 0 ].id ).toEqual(
+			'29bce0a522cef4cd72aad4dd1c9ad5d0b6780704'
+		);
+	} );
+
 	it( 'should create a hash for each manifest', async () => {
 		const manifest = await generateManifestFromDirectory(
 			rootDir,
@@ -119,5 +136,35 @@ describe( 'generateManifest', () => {
 		expect( manifest.categories[ 0 ].posts[ 0 ].edit_url ).toEqual(
 			'https://github.com/edit/example-docs/get-started/local-development.md'
 		);
+	} );
+} );
+
+describe( 'generatePostId', () => {
+	it( 'should generate a stable ID for the same file', () => {
+		const id1 = generatePostId(
+			'get-started/local-development.md',
+			'woodocs'
+		);
+
+		const id2 = generatePostId(
+			'get-started/local-development.md',
+			'woodocs'
+		);
+
+		expect( id1 ).toEqual( id2 );
+	} );
+
+	it( 'should generate a different ID for different prefixes', () => {
+		const id1 = generatePostId(
+			'get-started/local-development.md',
+			'foodocs'
+		);
+
+		const id2 = generatePostId(
+			'get-started/local-development.md',
+			'woodocs'
+		);
+
+		expect( id1 ).not.toEqual( id2 );
 	} );
 } );
