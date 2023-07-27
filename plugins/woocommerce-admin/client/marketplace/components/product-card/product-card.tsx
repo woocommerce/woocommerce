@@ -9,6 +9,7 @@ import { Button, Card } from '@wordpress/components';
  */
 import './product-card.scss';
 import { Product } from '../product-list-content/product-list-content';
+import { getAdminSetting } from '../../../../client/utils/admin-settings';
 
 export interface ProductCardProps {
 	type?: string;
@@ -17,6 +18,7 @@ export interface ProductCardProps {
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { product } = props;
+	const currencySymbol = getAdminSetting( 'currency' )?.symbol;
 	return (
 		<Card className="woocommerce-marketplace__product-card">
 			<div className="woocommerce-marketplace__product-card__content">
@@ -59,8 +61,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					<span>
 						{ product.price === 0 || product.price === '0'
 							? __( 'Free download', 'woocommerce' )
-							: product.price +
-							  window.wcSettings.admin.currency.symbol }
+							: product.price + currencySymbol }
 					</span>
 					<span className="woocommerce-marketplace__product-card__price-billing">
 						{ product.price === 0 || product.price === '0'

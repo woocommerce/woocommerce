@@ -5,12 +5,14 @@ $small-gap: $grid-unit-10;   // 8px
 $medium-gap: $grid-unit-20;  // 16px
 $large-gap: $grid-unit-30;   // 24px
 $xlarge-gap: $grid-unit-40;  // 32px
+$huge-gap: $grid-unit-60;    // 48px
 
 // Layout
 $content-spacing-small: $grid-unit-20;
 $content-spacing-large: $grid-unit-40;
 $content-spacing-small: $medium-gap;
 $content-spacing-large: $xlarge-gap;
+$content-spacing-xlarge: $huge-gap;
 $content-max-width: 1600px;
 
 // Breakpoints

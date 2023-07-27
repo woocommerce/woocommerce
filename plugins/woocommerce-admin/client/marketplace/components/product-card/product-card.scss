@@ -7,14 +7,15 @@
 		flex-direction: column;
 		gap: $medium-gap;
 		padding: $large-gap;
-		border-radius: $grid-unit-05;
+		border-radius: $grid-unit-05 !important;
 		align-items: flex-start;
 		max-width: 500px;
+		margin-top: $large-gap;
 		flex: 0 0 calc(33.33% - 20px);
+		flex-basis: 100%;
 
 		&__content {
 			display: flex;
-			padding: $large-gap;
 			flex-direction: column;
 			align-items: flex-start;
 			gap: $medium-gap;
@@ -58,6 +59,7 @@
 			display: flex;
 			flex-direction: column;
 			align-items: flex-start;
+			height: $grid-unit-60;
 			gap: 2px;
 			flex: 1 0 0;
 			color: $gray-900;
@@ -135,11 +137,13 @@
 
 }
 
-@media screen and (max-width: $breakpoint-medium) {
+@media screen and (min-width: $breakpoint-medium) {
 	.woocommerce-marketplace {
 		&__product-card {
-			margin-top: $large-gap;
-			flex-basis: 100%;
+			margin-top: 0;
+			flex-basis: inherit;
+
+
 		}
 	}
 }
