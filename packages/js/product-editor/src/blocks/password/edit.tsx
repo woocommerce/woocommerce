@@ -1,20 +1,11 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
-import { Link } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
-import { getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import {
-	createElement,
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
