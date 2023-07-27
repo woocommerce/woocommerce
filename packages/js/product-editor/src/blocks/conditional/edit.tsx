@@ -12,44 +12,10 @@ import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId } from '@wordpress/core-data';
 
-type Condition = {
-	key: string;
-	operator: string;
-	value: unknown;
-};
-
-type Data = {
-	[ key: string ]: unknown;
-};
-
-function getValueByString( data: Data, key: string ) {
-	const keys = key.split( '.' );
-	let value = { ...data };
-	for ( let i = 0; i < keys.length; i++ ) {
-		if ( ! value.hasOwnProperty( keys[ i ] ) ) {
-			return undefined;
-		}
-		// @ts-ignore
-		value = value[ keys[ i ] ];
-	}
-	return value;
-}
-
-function evaluate( data: Data, condition: Condition ) {
-	const { key, operator, value } = condition;
-	const dataValue = getValueByString( data, key ) as unknown;
-	switch ( operator ) {
-		case '>':
-			return ( value as number ) > ( dataValue as number );
-		case '<':
-			return ( value as number ) < ( dataValue as number );
-		case '!=':
-			return dataValue !== value;
-		case '=':
-		default:
-			return dataValue === value;
-	}
-}
+/**
+ * Internal dependencies
+ */
+import { Condition, evaluateCondition } from '../../utils/evaluate-condition';
 
 export function Edit( {
 	attributes,
@@ -80,7 +46,7 @@ export function Edit( {
 				if ( ! evaluated ) {
 					return false;
 				}
-				return evaluate( context, condition );
+				return evaluateCondition( context, condition );
 			},
 			true
 		);
