@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -259,6 +260,7 @@ final class WooCommerce {
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
+		$container->get( Marketplace::class );
 	}
 
 	/**
