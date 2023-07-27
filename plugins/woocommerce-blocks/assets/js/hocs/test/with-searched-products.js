@@ -6,12 +6,23 @@
  */
 import TestRenderer, { act } from 'react-test-renderer';
 import * as mockUtils from '@woocommerce/editor-components/utils';
-import * as mockUseDebounce from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
 
 /**
  * Internal dependencies
  */
 import withSearchedProducts from '../with-searched-products';
+
+// Add a mock implementation of debounce for testing so we can spy on the onSearch call.
+jest.mock( 'use-debounce', () => {
+	return {
+		useDebouncedCallback: jest
+			.fn()
+			.mockImplementation(
+				( search ) => () => mockUtils.getProducts( search )
+			),
+	};
+} );
 
 jest.mock( '@woocommerce/block-settings', () => ( {
 	__esModule: true,
@@ -28,15 +39,10 @@ mockUtils.getProducts = jest.fn().mockImplementation( () =>
 	] )
 );
 
-// Add a mock implementation of debounce for testing so we can spy on the onSearch call.
-mockUseDebounce.useDebouncedCallback = jest
-	.fn()
-	.mockImplementation( ( search ) => () => mockUtils.getProducts( search ) );
-
 describe( 'withSearchedProducts Component', () => {
 	const { getProducts } = mockUtils;
 	afterEach( () => {
-		mockUseDebounce.useDebouncedCallback.mockClear();
+		useDebouncedCallback.mockClear();
 		mockUtils.getProducts.mockClear();
 	} );
 	const TestComponent = withSearchedProducts(
@@ -77,7 +83,7 @@ describe( 'withSearchedProducts Component', () => {
 				props.onSearch();
 			} );
 
-			expect( mockUseDebounce.useDebouncedCallback ).toHaveBeenCalled();
+			expect( useDebouncedCallback ).toHaveBeenCalled();
 			expect( getProducts ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
