@@ -178,6 +178,88 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Override to add meta data.
+	 *
+	 * This omits the part of the parent method that looks for a setter function, because the setter
+	 * functions that exist in this class don't actually set meta data.
+	 *
+	 * @since 8.1.0
+	 *
+	 * @param string       $key Meta key.
+	 * @param string|array $value Meta value.
+	 * @param bool         $unique Should this be a unique key?.
+	 */
+	public function add_meta_data( $key, $value, $unique = false ) {
+		// Only bypass the setter function check for props with known conflicts.
+		if ( ! in_array( $key, $this->legacy_datastore_props, true ) ) {
+			return parent::add_meta_data( $key, $value, $unique );
+		}
+
+		$this->maybe_read_meta_data();
+		if ( $unique ) {
+			$this->delete_meta_data( $key );
+		}
+		$this->meta_data[] = new WC_Meta_Data(
+			array(
+				'key'   => $key,
+				'value' => $value,
+			)
+		);
+	}
+
+	/**
+	 * Override to update meta data by key or ID, if provided.
+	 *
+	 * This omits the part of the parent method that looks for a setter function, because the setter
+	 * functions that exist in this class don't actually set meta data.
+	 *
+	 * @since  8.1.0
+	 *
+	 * @param  string       $key Meta key.
+	 * @param  string|array $value Meta value.
+	 * @param  int          $meta_id Meta ID.
+	 */
+	public function update_meta_data( $key, $value, $meta_id = 0 ) {
+		// Only bypass the setter function check for props with known conflicts.
+		if ( ! in_array( $key, $this->legacy_datastore_props, true ) ) {
+			return parent::update_meta_data( $key, $value, $meta_id );
+		}
+
+		$this->maybe_read_meta_data();
+
+		$array_key = false;
+
+		if ( $meta_id ) {
+			$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id, true );
+			$array_key  = $array_keys ? current( $array_keys ) : false;
+		} else {
+			// Find matches by key.
+			$matches = array();
+			foreach ( $this->meta_data as $meta_data_array_key => $meta ) {
+				if ( $meta->key === $key ) {
+					$matches[] = $meta_data_array_key;
+				}
+			}
+
+			if ( ! empty( $matches ) ) {
+				// Set matches to null so only one key gets the new value.
+				foreach ( $matches as $meta_data_array_key ) {
+					$this->meta_data[ $meta_data_array_key ]->value = null;
+				}
+				$array_key = current( $matches );
+			}
+		}
+
+		if ( false !== $array_key ) {
+			$meta        = $this->meta_data[ $array_key ];
+			$meta->key   = $key;
+			$meta->value = $value;
+		} else {
+			$this->add_meta_data( $key, $value, true );
+		}
+	}
+
+	/**
 	 * Magic __get method for backwards compatibility.
 	 *
 	 * @param string $key Value to get.
