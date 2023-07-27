@@ -6,7 +6,7 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 const SETTINGS_URL =
 	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
 
-let isNewProductEditorSupposedToBeEnabled = false;
+let isNewProductEditorEnabled = false;
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
@@ -69,13 +69,13 @@ test.describe( 'Toggle block product editor', () => {
 		test.beforeAll( async ( { browser } ) => {
 			const context = await browser.newContext();
 			const page = await context.newPage();
-			isNewProductEditorSupposedToBeEnabled =
-				await isBlockProductEditorEnabled( page );
+			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
+				page
+			);
 		} );
 
 		test.skip(
-			isNewProductEditorSupposedToBeEnabled &&
-				isTrackingSupposedToBeEnabled,
+			isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
 			'The block product editor is being tested'
 		);
 
@@ -102,16 +102,19 @@ test.describe( 'Toggle block product editor', () => {
 	test.describe( 'Enabled', () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeAll( async ( { browser } ) => {
+		test.afterAll( async ( { browser } ) => {
 			const context = await browser.newContext();
 			const page = await context.newPage();
-			isNewProductEditorSupposedToBeEnabled =
-				await isBlockProductEditorEnabled( page );
+			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
+				page
+			);
+			if ( isNewProductEditorEnabled ) {
+				await toggleBlockProductEditor( page );
+			}
 		} );
 
 		test.skip(
-			isNewProductEditorSupposedToBeEnabled &&
-				isTrackingSupposedToBeEnabled,
+			isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
 		);
 
