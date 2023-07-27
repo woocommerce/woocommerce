@@ -456,8 +456,6 @@ export const checkoutRemoteBranch = async (
 	const fetchArgs = [ 'fetch', 'origin', branch ];
 	if ( isShallow ) {
 		fetchArgs.push( '--depth=1' );
-	} else {
-		fetchArgs.push( '--unshallow' );
 	}
 	await git.raw( fetchArgs );
 	await git.raw( [ 'checkout', '-b', branch, `origin/${ branch }` ] );
