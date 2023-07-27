@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-
+import { Link } from '@woocommerce/components';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -17,8 +18,16 @@ export default function ProductListHeader(
 	const { title } = props;
 
 	return (
-		<div className="woo-marketplace__product-list-header">
-			<h2>{ title }</h2>
+		<div className="woocommerce-marketplace__product-list-header">
+			<h2 className="woocommerce-marketplace__product-list-title">
+				{ title }
+			</h2>
+			<span className="woocommerce-marketplace__product-list-link">
+				{ /* Link will be populated with the correct URL once we have the search ready. */ }
+				<Link href="#" target="_blank">
+					{ __( 'See more', 'woocommerce' ) }
+				</Link>
+			</span>
 		</div>
 	);
 }

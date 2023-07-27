@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Internal dependencies
  */
@@ -18,9 +17,31 @@ export interface Product {
 	reviewsCount?: number | null;
 	currency?: string;
 }
+interface ProductListContentProps {
+	products: Product[];
+}
 
-export default function ProductListContent(): JSX.Element {
+export default function ProductListContent(
+	props: ProductListContentProps
+): JSX.Element {
+	const { products } = props;
 	return (
-		<div className="woocommerce-marketplace__product-list-content"></div>
+		<div className="woocommerce-marketplace__product-list-content">
+			{ products.map( ( product ) => (
+				<ProductCard
+					key={ product.id }
+					type="classic"
+					product={ {
+						title: product.title,
+						icon: product.icon,
+						vendorName: product.vendorName,
+						vendorUrl: product.vendorUrl,
+						price: product.price,
+						url: product.url,
+						description: product.description,
+					} }
+				/>
+			) ) }
+		</div>
 	);
 }
