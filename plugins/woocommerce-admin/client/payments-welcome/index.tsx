@@ -33,6 +33,9 @@ declare global {
 					cta_label: string;
 					tc_url: string;
 				};
+				currency: {
+					symbol: string;
+				};
 			};
 		};
 	}

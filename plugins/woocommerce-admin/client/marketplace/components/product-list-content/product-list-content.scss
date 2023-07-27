@@ -1,0 +1,23 @@
+@import '../../stylesheets/_variables.scss';
+
+.woocommerce-marketplace {
+
+
+	&__product-list {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $large-gap;
+		align-self: stretch;
+	}
+
+	&__product-list-content {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		align-self: stretch;
+		gap: $large-gap;
+		flex-basis: calc(33.33% - $grid-unit-20);
+	}
+}
+

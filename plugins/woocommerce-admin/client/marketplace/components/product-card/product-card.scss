@@ -1,0 +1,145 @@
+@import '../../stylesheets/_variables.scss';
+
+.woocommerce-marketplace {
+
+	&__product-card {
+		display: flex;
+		flex-direction: column;
+		gap: $medium-gap;
+		padding: $large-gap;
+		border-radius: $grid-unit-05;
+		align-items: flex-start;
+		max-width: 500px;
+		flex: 0 0 calc(33.33% - 20px);
+
+		&__content {
+			display: flex;
+			padding: $large-gap;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: $medium-gap;
+			align-self: stretch;
+		}
+
+		&__header {
+			display: flex;
+			align-items: flex-start;
+			gap: $medium-gap;
+			align-self: stretch;
+			min-height: 52px;
+		}
+
+		&__icon {
+			display: flex;
+			width: $grid-unit-60;
+			height: $grid-unit-60;
+			justify-content: center;
+			align-items: center;
+		}
+
+		&__icon img {
+			width: $grid-unit-60;
+			height: $grid-unit-60;
+			flex-shrink: 0;
+			border-radius: $grid-unit;
+		}
+
+		&__details {
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			gap: $medium-gap;
+			flex: 1 0 0;
+			height: $grid-unit-60;
+			background: $white;
+		}
+
+		&__meta {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 2px;
+			flex: 1 0 0;
+			color: $gray-900;
+		}
+
+		&__title {
+			color: $gray-900;
+			font-size: $editor-font-size;
+			font-style: normal;
+			font-weight: 600;
+			line-height: $large-gap;
+			align-self: stretch;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+
+		}
+		&__vendor {
+			display: flex;
+			align-items: flex-start;
+			gap: $grid-unit-05;
+			align-self: stretch;
+			margin: 0;
+			padding: 0;
+
+		}
+		&__vendor span {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 1;
+			text-decoration: none;
+		}
+
+		&__vendor a {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 1;
+			text-decoration: none;
+		}
+
+
+		&__description {
+			display: flex;
+			flex-direction: column;
+			align-self: stretch;
+			flex-wrap: wrap;
+			height: $grid-unit-50;
+			text-overflow: ellipsis;
+			overflow: hidden;
+		}
+
+		&__price {
+			display: flex;
+			justify-content: flex-start;
+			align-items: flex-end;
+			gap: $grid-unit-05;
+			align-self: stretch;
+			text-decoration: none !important;
+			color: $gray-900 !important;
+			font-style: normal;
+			font-weight: 600;
+			line-height: $medium-gap;
+		}
+
+		&__price-billing {
+			color: $gray-600;
+			font-size: $default-font-size;
+			font-style: normal;
+			font-weight: 400;
+			line-height: $medium-gap;
+		}
+	}
+
+
+}
+
+@media screen and (max-width: $breakpoint-medium) {
+	.woocommerce-marketplace {
+		&__product-card {
+			margin-top: $large-gap;
+			flex-basis: 100%;
+		}
+	}
+}
