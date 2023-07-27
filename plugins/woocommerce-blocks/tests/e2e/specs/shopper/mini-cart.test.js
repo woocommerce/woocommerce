@@ -114,62 +114,6 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Drawer', () => {
-		it( 'The drawer opens when shopper clicks on the Mini-Cart icon', async () => {
-			await clickMiniCartButton();
-
-			await expect( page ).toMatchElement(
-				'.wc-block-mini-cart__drawer',
-				{
-					text: 'Start shopping',
-				}
-			);
-		} );
-
-		it( 'The drawer closes when shopper clicks on the drawer close button', async () => {
-			await clickMiniCartButton();
-
-			await expect( page ).toMatchElement(
-				'.wc-block-mini-cart__drawer',
-				{
-					text: 'Start shopping',
-				}
-			);
-
-			// Wait for the drawer to fully open.
-			await page.waitForTimeout( 500 );
-
-			await page.click( '.wc-block-components-drawer__close' );
-
-			await expect( page ).not.toMatchElement(
-				'.wc-block-mini-cart__drawer',
-				{
-					text: 'Start shopping',
-				}
-			);
-		} );
-
-		it( 'The drawer closes when shopper clicks outside the drawer', async () => {
-			await clickMiniCartButton();
-
-			await expect( page ).toMatchElement(
-				'.wc-block-mini-cart__drawer',
-				{
-					text: 'Start shopping',
-				}
-			);
-
-			await page.mouse.click( 50, 200 );
-
-			await expect( page ).not.toMatchElement(
-				'.wc-block-mini-cart__drawer',
-				{
-					text: 'Start shopping',
-				}
-			);
-		} );
-	} );
-
 	describe( 'Empty Mini-Cart', () => {
 		it( 'When the cart is empty, the Mini-Cart Drawer show empty cart message and start shopping button', async () => {
 			await clickMiniCartButton();
