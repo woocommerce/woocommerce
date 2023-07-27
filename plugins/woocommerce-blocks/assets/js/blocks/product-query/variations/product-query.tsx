@@ -8,10 +8,14 @@ import {
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
-import { isWpVersion } from '@woocommerce/settings';
+import { isWpVersion, getSettingWithCoercion } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
-import { QueryBlockAttributes } from '@woocommerce/blocks/product-query/types';
+import {
+	QueryBlockAttributes,
+	ProductQueryBlockQuery,
+} from '@woocommerce/blocks/product-query/types';
 import { isSiteEditorPage } from '@woocommerce/utils';
+import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -74,12 +78,26 @@ if ( isWpVersion( '6.1', '>=' ) ) {
 		}
 
 		if ( isSiteEditorPage( store ) ) {
+			const inherit =
+				ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId );
+
+			const inheritQuery: Partial< ProductQueryBlockQuery > = {
+				inherit,
+			};
+
+			if ( inherit ) {
+				inheritQuery.perPage = getSettingWithCoercion(
+					'loop_shop_per_page',
+					12,
+					isNumber
+				);
+			}
+
 			const queryAttributes = {
 				...QUERY_DEFAULT_ATTRIBUTES,
 				query: {
 					...QUERY_DEFAULT_ATTRIBUTES.query,
-					inherit:
-						ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId ),
+					...inheritQuery,
 				},
 			};
 
