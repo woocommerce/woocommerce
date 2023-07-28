@@ -365,6 +365,12 @@ class Init {
 										'property' => 'reviews_allowed',
 									),
 								),
+								array(
+									'woocommerce/product-password-field',
+									array(
+										'label' => __( 'Require a password', 'woocommerce' ),
+									),
+								),
 							),
 						),
 						array(
