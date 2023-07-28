@@ -42,7 +42,7 @@ class BlockRegistry {
 		'woocommerce/product-inventory-quantity-field',
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-variations-fields',
-		'woocommerce/product-password-fields',
+		'woocommerce/product-password-field',
 	];
 
 	/**
