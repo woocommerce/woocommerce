@@ -580,10 +580,10 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertContains(
 			array(
-				'taxonomy' => 'pa_test',
 				'field'    => 'term_id',
-				'terms'    => array( 1 ),
 				'operator' => 'IN',
+				'taxonomy' => 'pa_test',
+				'terms'    => array( 1 ),
 			),
 			$updated_query['tax_query'],
 		);
