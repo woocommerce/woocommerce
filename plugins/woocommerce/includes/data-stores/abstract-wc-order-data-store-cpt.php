@@ -715,6 +715,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
+				// We don't know if the meta is single or array, so we assume it to be array.
+				if ( ! is_array( $meta_data->value ) ) {
+					$meta_data->value = array( $meta_data->value );
+				}
 				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;

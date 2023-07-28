@@ -23,11 +23,18 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
-	 * Order IDs for which we are checking read on sync in the current request.
+	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to anomaly, so we don't recommend running HPOS with incompatible plugins.
 	 *
 	 * @var array.
 	 */
 	private static $reading_order_ids = array();
+
+	/**
+	 * Keep track of order IDs that are actively being backfilled. We use this to prevent further read on sync from add_|update_|delete_postmeta etc hooks. If we allow this, then we would end up syncing the same order multiple times as it is being backfilled.
+	 *
+	 * @var array
+	 */
+	private static $backfilling_order_ids = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -558,8 +565,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function backfill_post_record( $order ) {
 		// Prevent read on sync till backfill is complete to avoid read on sync being triggered by add_|update_|delete_postmeta etc hooks.
-		self::$reading_order_ids[] = $order->get_id();
-		$cpt_data_store = $this->get_post_data_store_for_backfill();
+		self::$backfilling_order_ids[] = $order->get_id();
+		$cpt_data_store                = $this->get_post_data_store_for_backfill();
 		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
 			return;
 		}
@@ -582,7 +589,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
-		self::$reading_order_ids = array_diff( self::$reading_order_ids, array( $order->get_id() ) );
+		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -1054,7 +1061,7 @@ WHERE
 		}
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
-		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
+		$load_posts_for    = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
 		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
 		foreach ( $data as $order_data ) {
