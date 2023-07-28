@@ -13,4 +13,30 @@ trait BlockContainerTrait {
 		$this->child_blocks[] = &$block;
 		return $block;
 	}
+
+	private function get_child_blocks_sorted_by_order(): array {
+		$sorted_child_blocks = $this->child_blocks;
+
+		usort(
+			$sorted_child_blocks,
+			function( Block $a, Block $b ) {
+				return $a->get_order() <=> $b->get_order();
+			}
+		);
+
+		return $sorted_child_blocks;
+	}
+
+	public function get_child_blocks_as_simple_array(): array {
+		$child_blocks = $this->get_child_blocks_sorted_by_order();
+
+		$child_blocks_as_simple_arrays = array_map(
+			function( Block $block ) {
+				return $block->get_as_simple_array();
+			},
+			$child_blocks
+		);
+
+		return $child_blocks_as_simple_arrays;
+	}
 }

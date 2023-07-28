@@ -105,4 +105,18 @@ class Block implements BlockContainerInterface {
 	public function &get_parent(): BlockContainerInterface {
 		return $this->parent;
 	}
+
+	public function get_as_simple_array(): array {
+		$arr = [
+			$this->get_name(),
+			$this->get_attributes(),
+		];
+
+		$child_blocks_as_simple_array = $this->get_child_blocks_as_simple_array();
+		if ( ! empty( $child_blocks_as_simple_array ) ) {
+			$arr[] = $child_blocks_as_simple_array;
+		}
+
+		return $arr;
+	}
 }

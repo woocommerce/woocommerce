@@ -48,4 +48,8 @@ class BlockTemplate implements BlockContainerInterface {
 	public function &get_parent(): ?BlockContainerInterface {
 		return null;
 	}
+
+	public function get_as_simple_array(): array {
+		return $this->get_child_blocks_as_simple_array();
+	}
 }
