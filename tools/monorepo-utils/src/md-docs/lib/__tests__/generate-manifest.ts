@@ -194,12 +194,12 @@ describe( 'generateManifest', () => {
 			'https://example.com/edit'
 		);
 		const nextPost = nextManifest.categories[ 0 ].posts[ 0 ];
-		const NextPostHash = nextPost.hash;
-		const NextManifestHash = nextManifest.hash;
+		const nextPostHash = nextPost.hash;
+		const nextManifestHash = nextManifest.hash;
 
 		// Confirm hashes are newly created.
-		expect( NextPostHash ).not.toEqual( originalPostHash );
-		expect( NextManifestHash ).not.toEqual( originalManifestHash );
+		expect( nextPostHash ).not.toEqual( originalPostHash );
+		expect( nextManifestHash ).not.toEqual( originalManifestHash );
 
 		// Reset the file content
 		fs.writeFileSync( filePath, fileContent );
@@ -230,12 +230,12 @@ describe( 'generateManifest', () => {
 			'https://example.com/edit'
 		);
 		const nextPost = nextManifest.categories[ 0 ].posts[ 0 ];
-		const NextPostHash = nextPost.hash;
-		const NextManifestHash = nextManifest.hash;
+		const nextPostHash = nextPost.hash;
+		const nextManifestHash = nextManifest.hash;
 
 		// Confirm hashes are newly created.
-		expect( NextPostHash ).toEqual( originalPostHash );
-		expect( NextManifestHash ).toEqual( originalManifestHash );
+		expect( nextPostHash ).toEqual( originalPostHash );
+		expect( nextManifestHash ).toEqual( originalManifestHash );
 	} );
 } );
 
