@@ -80,14 +80,10 @@
 		<!-- wp:paragraph -->
 		<p><em>
 			<?php
-			echo wp_kses(
-				sprintf(
-					/* translators: %1$s is a link to WooCommerce.com, %2$s is the name of the plugin. */
-					__( 'Built with <a href="%1$s" target="_blank">%2$s</a>', 'woo-gutenberg-products-block' ),
-					'https://woocommerce.com/',
-					'WooCommerce'
-				),
-				array( 'a' => array_fill_keys( array( 'href', 'target' ), true ) )
+			echo sprintf(
+				/* translators: %s WooCommerce link */
+				esc_html__( 'Built with %s', 'woo-gutenberg-products-block' ),
+				'<a href="https://woocommerce.com/" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
 			);
 			?>
 		</em></p>

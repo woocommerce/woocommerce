@@ -67,7 +67,15 @@
 		<!-- /wp:group -->
 
 		<!-- wp:paragraph {"style":{"typography":{"fontSize":"14px"}}} -->
-		<p style="font-size:14px"><em>Built with <a href="https://woocommerce.com/">WooCommerce</a> </em></p>
+		<p style="font-size:14px"><em>
+			<?php
+			echo sprintf(
+					/* translators: %s WooCommerce link */
+				esc_html__( 'Built with %s', 'woo-gutenberg-products-block' ),
+				'<a href="https://woocommerce.com/" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
+			);
+			?>
+		</em></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
