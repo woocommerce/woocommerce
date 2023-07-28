@@ -28,8 +28,9 @@ jobs:
               id: changed-files
               uses: tj-actions/changed-files@v32
               with:
+                  path: plugins/woocommerce
                   files: |
-                      ./plugins/woocommerce/**/*.php
+                      **/*.php
 
             - name: Setup WooCommerce Monorepo
               if: steps.changed-files.outputs.any_changed == 'true'
