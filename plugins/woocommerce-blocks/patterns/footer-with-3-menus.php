@@ -57,12 +57,13 @@
 					<p class="has-text-align-right">
 						<?php
 						echo sprintf(
-							esc_html(
 							/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
-								__( 'Powered by %1$s with %2$s', 'woo-gutenberg-products-block' )
+							esc_html__(
+								'Powered by %1$s with %2$s',
+								'woo-gutenberg-products-block'
 							),
-							'<a href="https://wordpress.org">WordPress</a>',
-							'<a href="https://woocommerce.com">WooCommerce</a>'
+							'<a href="https://wordpress.org" target="_blank" rel="noreferrer nofollow">WordPress</a>',
+							'<a href="https://woocommerce.com" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
 						);
 						?>
 					</p>
