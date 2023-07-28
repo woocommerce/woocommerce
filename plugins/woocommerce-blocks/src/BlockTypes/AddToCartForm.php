@@ -96,7 +96,7 @@ class AddToCartForm extends AbstractBlock {
 
 		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';
+		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$form = sprintf(
 			'<div class="wp-block-add-to-cart-form %1$s %2$s %3$s" style="%4$s">%5$s</div>',
