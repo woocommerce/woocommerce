@@ -43,6 +43,7 @@ export function Edit( {
 			<CheckboxControl
 				label={ label }
 				checked={ checked }
+				className="wp-block-woocommerce-product-password-fields__field"
 				onChange={ ( selected ) => {
 					setChecked( selected );
 					if ( ! selected ) {
