@@ -50,6 +50,8 @@ type AttributeControlProps = {
 		newAttributeModalTitle?: string;
 		newAttributeModalNotice?: string;
 		customAttributeHelperMessage?: string;
+		attributeRemoveLabel?: string;
+		attributeRemoveConfirmationMessage?: string;
 		globalAttributeHelperMessage: string;
 	};
 };
@@ -79,6 +81,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
 			'woocommerce'
 		),
+		attributeRemoveConfirmationMessage: __(
+			'Remove this attribute?',
+			'woocommerce'
+		),
 		...uiStrings,
 	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
@@ -103,7 +109,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const handleRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
-		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
+		if ( window.confirm( uiStrings?.attributeRemoveConfirmationMessage ) ) {
 			handleChange(
 				value.filter(
 					( attr ) =>
@@ -219,6 +225,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					{ sortedAttributes.map( ( attr ) => (
 						<AttributeListItem
 							attribute={ attr }
+							removeLabel={ uiStrings?.attributeRemoveLabel }
 							key={ getAttributeId( attr ) }
 							onEditClick={ () => openEditModal( attr ) }
 							onRemoveClick={ () => handleRemove( attr ) }

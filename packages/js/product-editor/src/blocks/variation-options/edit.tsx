@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-
+import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { createElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
@@ -39,6 +39,18 @@ export function Edit() {
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
 					newAttributeModalNotice: '',
+					newAttributeModalTitle: __(
+						'Add variation options',
+						'woocommerce'
+					),
+					attributeRemoveLabel: __(
+						'Remove variation option',
+						'woocommerce'
+					),
+					attributeRemoveConfirmationMessage: __(
+						'Remove this variation option?',
+						'woocommerce'
+					),
 				} }
 			/>
 		</div>
