@@ -2531,4 +2531,43 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
 	}
+
+	/**
+	 * @testDox Test that adding meta, while in callback for adding another meta also works as expected.
+	 */
+	public function test_backfill_does_not_trigger_read_on_sync_with_filters() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		$this->assertEquals( 2, $order->get_customer_id() );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
+	}
+
+	/**
+	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * @param int    $meta_id Meta ID.
+	 * @param int    $post_id Post ID.
+	 * @param string $meta_key Meta key.
+	 * @param string $meta_value Meta value.
+	 */
+	public function add_meta_when_meta_added( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( 'test_key' === $meta_key ) {
+			$order = wc_get_order( $post_id );
+			$order->add_meta_data( 'test_key_2', 'test_value_2' );
+			$order->save_meta_data();
+			$order->add_meta_data( 'test_key_3', 'test_value_3' );
+			$order->save();
+		}
+	}
 }
