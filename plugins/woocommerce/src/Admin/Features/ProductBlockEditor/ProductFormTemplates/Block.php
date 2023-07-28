@@ -52,7 +52,7 @@ class Block implements BlockContainerInterface {
 		$this->root_template = $root_template;
 		$this->parent = is_null( $parent ) ? $root_template : $parent;
 
-		if ( ! is_string( $this->data[ self::NAME_KEY ] ) ) {
+		if (  ! isset( $this->data[ self::NAME_KEY ] ) ||  ! is_string( $this->data[ self::NAME_KEY ] ) ) {
 			throw new \ValueError( 'The block name must be specified.' );
 		}
 
@@ -60,8 +60,8 @@ class Block implements BlockContainerInterface {
 			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
 		}
 
-		if ( is_null( $this->data[ self::ID_KEY ] ) ) {
-			$this->data[ self::ID_KEY ]	= $this->root_template->generate_block_id( $this->get_name() );
+		if ( ! isset( $this->data[ self::ID_KEY ] ) ) {
+			$this->data[ self::ID_KEY ] = $this->root_template->generate_block_id( $this->get_name() );
 		}
 	}
 

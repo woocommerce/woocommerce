@@ -11,7 +11,7 @@ class BlockTemplate implements BlockContainerInterface {
 	private $block_cache = [];
 
 	public function get_block_by_id( string $block_id ): ?Block {
-		return $this->block_cache[ $block_id ];
+		return $this->block_cache[ $block_id ] ?? null;
 	}
 
 	public function _add_block_to_template( Block &$block ) {
