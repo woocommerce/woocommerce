@@ -48,6 +48,8 @@ type AttributeControlProps = {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
+		newAttributeModalNotice?: string;
+		customAttributeHelperMessage?: string;
 		globalAttributeHelperMessage: string;
 	};
 };
@@ -65,16 +67,20 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalOpen = () => {},
 	onRemove = () => {},
 	onRemoveCancel = () => {},
+	uiStrings,
+} ) => {
 	uiStrings = {
-		newAttributeModalTitle: undefined,
-		emptyStateSubtitle: undefined,
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
-	},
-} ) => {
+		newAttributeModalNotice: __(
+			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
+			'woocommerce'
+		),
+		...uiStrings,
+	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
@@ -224,6 +230,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
+					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
@@ -240,6 +247,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						__( 'Edit %s', 'woocommerce' ),
 						currentAttribute.name
 					) }
+					customAttributeHelperMessage={
+						uiStrings.customAttributeHelperMessage
+					}
 					globalAttributeHelperMessage={ createInterpolateElement(
 						uiStrings.globalAttributeHelperMessage,
 						{
