@@ -131,4 +131,136 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the grandchild block\'s grandparent is correct.'
 		);
 	}
+
+	public function test_get_as_simple_array() {
+		$block_template = new BlockTemplate();
+
+		$block = $block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+				'attrs'     => [
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				],
+			]
+		);
+
+		$block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+				'attrs'     => [
+					'attr-3' => 'value-3',
+					'attr-4' => 'value-4',
+				],
+			]
+		);
+
+		$block->add_block(
+			[
+				'id'        => 'test-block-id-3',
+				'blockName' => 'test-block-name-3',
+			]
+		);
+
+		$simple_array = $block->get_as_simple_array();
+
+		$this->assertSame(
+			[
+				'test-block-name',
+				[
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				],
+				[
+					[
+						'test-block-name-2',
+						[
+							'attr-3' => 'value-3',
+							'attr-4' => 'value-4',
+						],
+					],
+					[
+						'test-block-name-3',
+						[],
+					],
+				],
+			],
+			$simple_array,
+			'Failed asserting that the block is converted to a simple array correctly.'
+		);
+	}
+
+	public function test_get_child_blocks_as_sorted_simple_array() {
+		$block_template = new BlockTemplate();
+
+		$block = $block_template->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$block->add_block(
+			[
+				'blockName' => 'five',
+				'order'     => 5,
+			]
+		);
+
+		$block->add_block(
+			[
+				'blockName' => 'three',
+				'order'     => 3,
+			]
+		);
+
+		$block->add_block(
+			[
+				'blockName' => 'one',
+				'order'     => 1,
+			]
+		);
+
+		$block->add_block(
+			[
+				'blockName' => 'four',
+				'order'     => 4,
+			]
+		);
+
+		$block->add_block(
+			[
+				'blockName' => 'two',
+				'order'     => 2,
+			]
+		);
+
+		$this->assertSame(
+			[
+				[
+					'one',
+					[],
+				],
+				[
+					'two',
+					[],
+				],
+				[
+					'three',
+					[],
+				],
+				[
+					'four',
+					[],
+				],
+				[
+					'five',
+					[],
+				],
+			],
+			$block->get_child_blocks_as_simple_array(),
+			'Failed asserting that the child blocks are sorted by order.'
+		);
+	}
 }
