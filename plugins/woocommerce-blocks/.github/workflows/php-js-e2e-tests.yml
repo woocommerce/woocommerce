@@ -75,13 +75,13 @@ jobs:
 
       - name: Upload artifacts on failure
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: e2e-with-gutenberg-test-report-${{matrix.part}}
           path: reports/e2e
 
       - name: Archive flaky tests report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         if: always()
         with:
           name: flaky-tests-report-${{ matrix.part }}
@@ -159,13 +159,13 @@ jobs:
 
       - name: Upload artifacts on failure
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: e2e-test-report-${{matrix.part}}
           path: reports/e2e
 
       - name: Archive flaky tests report
-        uses: actions/upload-artifact@e448a9b857ee2131e752b06002bf0e093c65e571 # v2.2.2
+        uses: actions/upload-artifact@v3.1.2 # v2.2.2
         if: always()
         with:
           name: flaky-tests-report-${{ matrix.part }}
