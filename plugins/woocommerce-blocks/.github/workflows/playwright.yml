@@ -58,7 +58,7 @@ jobs:
       - name: Run Playwright tests
         run: npm run test:e2e-pw
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3.1.2
         with:
           name: playwright-report
           path: playwright-report
