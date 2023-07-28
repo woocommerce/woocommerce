@@ -11,7 +11,6 @@ import {
 	generateManifestFromDirectory,
 	generatePostId,
 } from '../generate-manifest';
-import exp from 'constants';
 
 describe( 'generateManifest', () => {
 	const dir = path.join( __dirname, './fixtures/example-docs' );
