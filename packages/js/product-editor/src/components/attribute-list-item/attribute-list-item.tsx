@@ -21,7 +21,7 @@ type AttributeListItemProps = {
 
 export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 	attribute,
-	editLabel = __( 'edit', 'woocommerce' ),
+	editLabel = __( 'Edit', 'woocommerce' ),
 	removeLabel = __( 'Remove attribute', 'woocommerce' ),
 	onDragStart,
 	onDragEnd,
