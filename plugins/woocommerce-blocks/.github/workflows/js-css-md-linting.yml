@@ -64,7 +64,7 @@ jobs:
               # Continue to the next step even if this fails
               continue-on-error: true
             - name: Upload ESLint report
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v3.1.2
               with:
                   name: eslint_report.json
                   path: eslint_report.json
