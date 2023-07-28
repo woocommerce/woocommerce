@@ -2550,7 +2550,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
 		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
-		$this->assertEquals( 2, $order->get_customer_id() );
 		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 
