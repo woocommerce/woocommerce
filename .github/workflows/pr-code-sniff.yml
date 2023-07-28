@@ -9,8 +9,6 @@ defaults:
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
-env:
-    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
 
 permissions: {}
 
@@ -41,6 +39,7 @@ jobs:
 
             - name: Tool versions
               if: steps.changed-files.outputs.any_changed == 'true'
+              working-directory: plugins/woocommerce
               run: |
                   php --version
                   composer --version
