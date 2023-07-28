@@ -21,7 +21,7 @@ import { preventLeavingProductForm } from './prevent-leaving-product-form';
 
 export * from './create-ordered-children';
 export * from './sort-fills-by-order';
-export * from './init-blocks';
+export * from './register-woo-block-type';
 export * from './product-apifetch-middleware';
 export * from './sift';
 

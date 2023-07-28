@@ -19,7 +19,7 @@ interface BlockRepresentation< T extends Record< string, object > > {
  * @param  block The block to be registered.
  * @return The block, if it has been successfully registered; otherwise `undefined`.
  */
-export function initBlock<
+export function registerWooBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
@@ -27,5 +27,14 @@ export function initBlock<
 		return;
 	}
 	const { metadata, settings, name } = block;
-	return registerBlockType< T >( { name, ...metadata }, settings );
+	const attributes = {
+		...metadata.attributes,
+		_templateId: {
+			type: 'string',
+		},
+	};
+	return registerBlockType< T >(
+		{ name, ...metadata, attributes },
+		settings
+	);
 }

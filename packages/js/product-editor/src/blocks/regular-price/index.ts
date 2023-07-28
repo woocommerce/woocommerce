@@ -6,7 +6,7 @@ import { BlockConfiguration } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-blocks';
+import { registerWooBlockType } from '../../utils';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
 import { SalePriceBlockAttributes } from './types';
@@ -24,5 +24,5 @@ export const settings: Partial<
 };
 
 export function init() {
-	return initBlock( { name, metadata, settings } );
+	return registerWooBlockType( { name, metadata, settings } );
 }

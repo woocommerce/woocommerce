@@ -171,7 +171,7 @@ class WooCommerceBlockTemplate {
             array_merge(
                 $block[ self::BLOCK_ATTRS_KEY ],
                 array(
-                    'parsed' => true,
+                    '_templateId' => $block[ self::ID_KEY ],
                 )
             ),
             isset( $block[ self::INNER_BLOCKS_KEY ] ) ? $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] ) : array()

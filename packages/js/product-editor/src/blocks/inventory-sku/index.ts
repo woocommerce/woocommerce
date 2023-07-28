@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import initBlock from '../../utils/init-block';
+import { registerWooBlockType } from '../../utils';
 import metadata from './block.json';
 import { Edit } from './edit';
 
@@ -14,4 +14,5 @@ export const settings = {
 	edit: Edit,
 };
 
-export const init = () => initBlock( { name, metadata, settings } );
+export const init = () =>
+	registerWooBlockType( { name, metadata: metadata as never, settings } );
