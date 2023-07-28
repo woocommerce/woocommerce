@@ -5,15 +5,14 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { CheckboxControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import {
-	SearchVisibilityBlockAttributes,
-	ProductCatalogVisibility,
-} from './types';
 
 /**
  * Internal dependencies
  */
+import {
+	SearchVisibilityBlockAttributes,
+	ProductCatalogVisibility,
+} from './types';
 
 export function Edit( {
 	attributes,
@@ -34,19 +33,17 @@ export function Edit( {
 	const checked =
 		catalogVisibility === 'search' || catalogVisibility === 'hidden';
 
-	function handleChange( checked: boolean ) {
-		if ( checked ) {
+	function handleChange( selected: boolean ) {
+		if ( selected ) {
 			if ( catalogVisibility === 'catalog' ) {
 				setCatalogVisibility( 'hidden' );
 			} else {
 				setCatalogVisibility( 'search' );
 			}
+		} else if ( catalogVisibility === 'hidden' ) {
+			setCatalogVisibility( 'catalog' );
 		} else {
-			if ( catalogVisibility === 'hidden' ) {
-				setCatalogVisibility( 'catalog' );
-			} else {
-				setCatalogVisibility( 'visible' );
-			}
+			setCatalogVisibility( 'visible' );
 		}
 	}
 
