@@ -19,7 +19,6 @@ export { metadata, name };
 export const settings: Partial<
 	BlockConfiguration< RequirePasswordBlockAttributes >
 > = {
-	example: {},
 	edit: Edit,
 };
 
