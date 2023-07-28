@@ -371,6 +371,12 @@ class Init {
 									),
 								),
 								array(
+									'woocommerce/product-search-visibility-field',
+									array(
+										'label' => __( 'Hide in product catalog', 'woocommerce' ),
+									)
+								),
+								array(
 									'woocommerce/product-catalog-visibility-field',
 									array(
 										'label' => __( 'Hide from search results', 'woocommerce' ),

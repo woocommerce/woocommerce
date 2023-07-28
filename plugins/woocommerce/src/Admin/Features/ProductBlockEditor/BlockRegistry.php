@@ -28,6 +28,7 @@ class BlockRegistry {
 		'woocommerce/product-description-field',
 		'woocommerce/product-images-field',
 		'woocommerce/product-inventory-email-field',
+		'woocommerce/product-search-visibility-field',
 		'woocommerce/product-sku-field',
 		'woocommerce/product-name-field',
 		'woocommerce/product-pricing-field',

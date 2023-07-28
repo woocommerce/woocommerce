@@ -6,6 +6,7 @@ export { init as initConditional } from './conditional';
 export { init as initDescription } from './description';
 export { init as initImages } from './images';
 export { init as initLowStockQty } from './inventory-email';
+export { init as initSearchVisibility } from './search-visibility';
 export { init as initSku } from './inventory-sku';
 export { init as initName } from './name';
 export { init as initPricing } from './pricing';
