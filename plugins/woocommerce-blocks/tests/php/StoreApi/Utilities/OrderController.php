@@ -6,13 +6,16 @@
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Yoast\PHPUnitPolyfills\Polyfills\ExpectException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
+/**
+ * OrderControllerTests class.
+ */
 class OrderControllerTests extends TestCase {
-	use ExpectException;
-
+	/**
+	 * test_validate_selected_shipping_methods_throws
+	 */
 	public function test_validate_selected_shipping_methods_throws() {
 		$class = new OrderController();
 
@@ -20,6 +23,9 @@ class OrderControllerTests extends TestCase {
 		$class->validate_selected_shipping_methods( true, array( false ) );
 	}
 
+	/**
+	 * test_validate_selected_shipping_methods.
+	 */
 	public function test_validate_selected_shipping_methods() {
 		$class = new OrderController();
 
