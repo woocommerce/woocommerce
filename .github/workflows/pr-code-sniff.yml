@@ -48,6 +48,7 @@ jobs:
 
             - name: Run PHPCS
               if: steps.changed-files.outputs.any_changed == 'true'
+              working-directory: plugins/woocommerce
               run: |
                   HEAD_REF=$(git rev-parse HEAD)
                   git checkout $HEAD_REF
