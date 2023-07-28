@@ -33,11 +33,20 @@ class Block implements BlockContainerInterface {
 	 */
 	const INNER_CONTENT_KEY = 'innerContent';
 
+	/**
+	 * @var array
+	 */
 	private $data = [];
 
-	private BlockTemplate $root_template;
+	/**
+	 * @var BlockTemplate
+	 */
+	private $root_template;
 
-	private BlockContainerInterface $parent;
+	/**
+	 * @var BlockContainerInterface
+	 */
+	private $parent;
 
 	public function __construct( array $data, BlockTemplate &$root_template, BlockContainerInterface &$parent = null ) {
 		$this->data = wp_parse_args(
@@ -50,9 +59,9 @@ class Block implements BlockContainerInterface {
 		);
 
 		$this->root_template = $root_template;
-		$this->parent = is_null( $parent ) ? $root_template : $parent;
+		$this->parent        = is_null( $parent ) ? $root_template : $parent;
 
-		if (  ! isset( $this->data[ self::NAME_KEY ] ) ||  ! is_string( $this->data[ self::NAME_KEY ] ) ) {
+		if ( ! isset( $this->data[ self::NAME_KEY ] ) || ! is_string( $this->data[ self::NAME_KEY ] ) ) {
 			throw new \ValueError( 'The block name must be specified.' );
 		}
 

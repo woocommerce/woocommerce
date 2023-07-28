@@ -16,10 +16,12 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 	public function test_add_block() {
 		$block_template = new BlockTemplate();
 
-		$block = $block_template->add_block( [
-			'id'   => 'test-block-id',
-			'blockName' => 'test-block-name',
-		] );
+		$block = $block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
 
 		$this->assertSame( $block, $block_template->get_block_by_id( 'test-block-id' ) );
 	}
@@ -27,25 +29,31 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 	public function test_add_block_throws_exception_if_block_with_same_id_already_exists() {
 		$block_template = new BlockTemplate();
 
-		$block_template->add_block( [
-			'id'   => 'test-block-id',
-			'blockName' => 'test-block-name',
-		] );
+		$block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
 
 		$this->expectException( \ValueError::class );
 
-		$block_template->add_block( [
-			'id'   => 'test-block-id',
-			'blockName' => 'test-block-name',
-		] );
+		$block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
 	}
 
 	public function test_add_block_generates_id_if_not_provided() {
 		$block_template = new BlockTemplate();
 
-		$block = $block_template->add_block( [
-			'blockName' => 'test-block-name',
-		] );
+		$block = $block_template->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
 
 		$this->assertSame( 'test-block-name-1', $block->get_id() );
 	}
@@ -59,10 +67,12 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 	public function test_get_block_by_id_returns_reference() {
 		$block_template = new BlockTemplate();
 
-		$block_template->add_block( [
-			'id'   => 'test-block-id',
-			'blockName' => 'test-block-name',
-		] );
+		$block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
 
 		$block = $block_template->get_block_by_id( 'test-block-id' );
 

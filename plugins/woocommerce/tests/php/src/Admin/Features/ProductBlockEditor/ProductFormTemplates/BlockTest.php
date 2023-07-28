@@ -21,7 +21,7 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$block = new Block(
 			[
-				'blockName' => 'test-block-name'
+				'blockName' => 'test-block-name',
 			],
 			$block_template
 		);
@@ -30,12 +30,12 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	public function test_parent_from_different_template_throws_exception() {
-		$block_template = new BlockTemplate();
+		$block_template   = new BlockTemplate();
 		$block_template_2 = new BlockTemplate();
 
 		$parent = new Block(
 			[
-				'blockName' => 'test-block-parent-name'
+				'blockName' => 'test-block-parent-name',
 			],
 			$block_template_2
 		);
@@ -44,7 +44,7 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		new Block(
 			[
-				'blockName' => 'test-block-name'
+				'blockName' => 'test-block-name',
 			],
 			$block_template,
 			$parent
@@ -54,15 +54,19 @@ class BlockTest extends WC_Unit_Test_Case {
 	public function test_add_block() {
 		$block_template = new BlockTemplate();
 
-		$block = $block_template->add_block( [
-			'id'   => 'test-block-id',
-			'blockName' => 'test-block-name',
-		] );
+		$block = $block_template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
 
-		$child_block = $block->add_block( [
-			'id'   => 'test-block-id-2',
-			'blockName' => 'test-block-name-2',
-		] );
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
 
 		$this->assertSame(
 			$child_block->get_root_template(),
@@ -79,28 +83,35 @@ class BlockTest extends WC_Unit_Test_Case {
 			$child_block,
 			$block_template->get_block_by_id( 'test-block-id-2' ),
 			'Failed asserting that the child block is in the root template.'
-		 );
+		);
 	}
 
 	public function test_nested_add_block() {
 		$block_template = new BlockTemplate();
 
-		$block = $block_template->add_block( [
-			'blockName' => 'test-block-name',
-		] );
+		$block = $block_template->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
 
-		$child_block_1 = $block->add_block( [
-			'blockName' => 'test-block-name',
-		] );
+		$child_block_1 = $block->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
 
-		$child_block_2 = $block->add_block( [
-			'blockName' => 'test-block-name',
-		] );
+		$child_block_2 = $block->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
 
-		$grandchild_block = $child_block_1->add_block( [
-			'blockName' => 'test-block-name',
-		] );
-
+		$grandchild_block = $child_block_1->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
 
 		$this->assertSame(
 			$block_template,
@@ -113,10 +124,11 @@ class BlockTest extends WC_Unit_Test_Case {
 			$grandchild_block->get_parent(),
 			'Failed asserting that the grandchild block\'s parent is the block it was added to.'
 		);
+
 		$this->assertSame(
 			$block,
 			$grandchild_block->get_parent()->get_parent(),
 			'Failed asserting that the grandchild block\'s grandparent is correct.'
-		 );
+		);
 	}
 }
