@@ -31,6 +31,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		wp_set_current_user( 0 );
@@ -76,7 +77,8 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		$this->assertNotEmpty( $fields, $message . ' Fields array is empty.' );
 
 		foreach ( $fields as $field_name => $field_value ) {
-			$this->assertObjectHasAttribute( $field_name, $object, $message . " Property $field_name does not exist on the object." );
+			$this->assertObjectHasProperty( $field_name, $object, $message . " Property $field_name does not exist on the object." );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			$this->assertSame( $field_value, $object->$field_name, $message . " Value of property $field_name is not" . print_r( $field_value, true ) );
 		}
 	}
