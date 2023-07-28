@@ -5,6 +5,8 @@
  * @package WC_Beta_Tester
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Tracks_Debug_Log.
  */

@@ -59,7 +59,6 @@ class WC_Beta_Tester_Live_Branches {
 		wc_admin_register_page(
 			array(
 				'id'         => 'woocommerce-beta-tester-live-branches',
-				// phpcs:disable
 				'title'      => __( 'Live Branches', 'woocommerce-beta-tester' ),
 				'path'       => '/live-branches',
 				'parent'     => 'woocommerce',
