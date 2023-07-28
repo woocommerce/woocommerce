@@ -582,7 +582,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
-		unset( self::$reading_order_ids[ $order->get_id() ] );
+		self::$reading_order_ids = array_diff( self::$reading_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -1066,7 +1066,6 @@ WHERE
 			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
-				unset( self::$reading_order_ids[ $order_id ] );
 			}
 		}
 	}
