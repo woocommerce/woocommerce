@@ -27,6 +27,7 @@ import {
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
+	noSelectionButtonLabel: string;
 }
 
 export interface FeaturedItemRequiredAttributes {
@@ -44,6 +45,7 @@ export interface FeaturedItemRequiredAttributes {
 	overlayGradient: string;
 	showDesc: boolean;
 	showPrice: boolean;
+	editMode: boolean;
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -92,7 +94,12 @@ type FeaturedItemProps< T extends EditorBlock< T > > =
 	| ( T & FeaturedProductProps< T > );
 
 export const withFeaturedItem =
-	( { emptyMessage, icon, label }: WithFeaturedItemConfig ) =>
+	( {
+		emptyMessage,
+		icon,
+		label,
+		noSelectionButtonLabel,
+	}: WithFeaturedItemConfig ) =>
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: FeaturedItemProps< T > ) => {
 		const [ isEditingImage ] = props.useEditingImage;
@@ -140,13 +147,29 @@ export const withFeaturedItem =
 			);
 		};
 
+		const renderNoItemButton = () => {
+			return (
+				<>
+					<p>{ emptyMessage }</p>
+					<div style={ { flexBasis: '100%', height: '0' } }></div>
+					<button
+						type="button"
+						className="components-button is-secondary"
+						onClick={ () => setAttributes( { editMode: true } ) }
+					>
+						{ noSelectionButtonLabel }
+					</button>
+				</>
+			);
+		};
+
 		const renderNoItem = () => (
 			<Placeholder
 				className={ className }
 				icon={ <Icon icon={ icon } /> }
 				label={ label }
 			>
-				{ isLoading ? <Spinner /> : emptyMessage }
+				{ isLoading ? <Spinner /> : renderNoItemButton() }
 			</Placeholder>
 		);
 
