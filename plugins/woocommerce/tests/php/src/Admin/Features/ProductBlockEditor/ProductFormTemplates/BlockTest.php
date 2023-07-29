@@ -137,9 +137,9 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$block = $block_template->add_block(
 			[
-				'id'        => 'test-block-id',
-				'blockName' => 'test-block-name',
-				'attrs'     => [
+				'id'         => 'test-block-id',
+				'blockName'  => 'test-block-name',
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -148,9 +148,9 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$block->add_block(
 			[
-				'id'        => 'test-block-id-2',
-				'blockName' => 'test-block-name-2',
-				'attrs'     => [
+				'id'         => 'test-block-id-2',
+				'blockName'  => 'test-block-name-2',
+				'attributes' => [
 					'attr-3' => 'value-3',
 					'attr-4' => 'value-4',
 				],

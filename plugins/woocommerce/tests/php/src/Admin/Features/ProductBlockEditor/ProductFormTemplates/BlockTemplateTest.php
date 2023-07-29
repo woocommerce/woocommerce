@@ -86,9 +86,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_template->add_block(
 			[
-				'blockName' => 'test-block-name-c',
-				'order'     => 100,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-c',
+				'order'      => 100,
+				'attributes' => [
 					'attr-c1' => 'value-c1',
 					'attr-c2' => 'value-c2',
 				],
@@ -97,9 +97,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b = $block_template->add_block(
 			[
-				'blockName' => 'test-block-name-b',
-				'order'     => 50,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-b',
+				'order'      => 50,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -108,9 +108,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_template->add_block(
 			[
-				'blockName' => 'test-block-name-a',
-				'order'     => 10,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-a',
+				'order'      => 10,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -119,9 +119,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b->add_block(
 			[
-				'blockName' => 'test-block-name-2',
-				'order'     => 20,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-2',
+				'order'      => 20,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -130,9 +130,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b->add_block(
 			[
-				'blockName' => 'test-block-name-1',
-				'order'     => 10,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-1',
+				'order'      => 10,
+				'attributes' => [
 					'attr-3' => 'value-3',
 					'attr-4' => 'value-4',
 				],
@@ -200,9 +200,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_template->add_block(
 			[
-				'blockName' => 'test-block-name-c',
-				'order'     => 100,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-c',
+				'order'      => 100,
+				'attributes' => [
 					'attr-c1' => 'value-c1',
 					'attr-c2' => 'value-c2',
 				],
@@ -211,10 +211,10 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b = $block_template->add_block(
 			[
-				'id'        => 'b',
-				'blockName' => 'test-block-name-b',
-				'order'     => 50,
-				'attrs'     => [
+				'id'         => 'b',
+				'blockName'  => 'test-block-name-b',
+				'order'      => 50,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -223,10 +223,10 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_template->add_block(
 			[
-				'id'        => 'a',
-				'blockName' => 'test-block-name-a',
-				'order'     => 10,
-				'attrs'     => [
+				'id'         => 'a',
+				'blockName'  => 'test-block-name-a',
+				'order'      => 10,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -235,9 +235,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b->add_block(
 			[
-				'blockName' => 'test-block-name-2',
-				'order'     => 20,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-2',
+				'order'      => 20,
+				'attributes' => [
 					'attr-1' => 'value-1',
 					'attr-2' => 'value-2',
 				],
@@ -246,9 +246,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block_b->add_block(
 			[
-				'blockName' => 'test-block-name-1',
-				'order'     => 10,
-				'attrs'     => [
+				'blockName'  => 'test-block-name-1',
+				'order'      => 10,
+				'attributes' => [
 					'attr-3' => 'value-3',
 					'attr-4' => 'value-4',
 				],

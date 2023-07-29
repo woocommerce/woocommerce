@@ -26,7 +26,7 @@ class Block implements BlockContainerInterface {
 	/**
 	 * Key for the block attributes in the block configuration.
 	 */
-	const ATTRIBUTES_KEY = 'attrs';
+	const ATTRIBUTES_KEY = 'attributes';
 
 	/**
 	 * @var array
@@ -47,8 +47,8 @@ class Block implements BlockContainerInterface {
 		$this->data = wp_parse_args(
 			$data,
 			[
-				self::ORDER_KEY         => 10,
-				self::ATTRIBUTES_KEY    => [],
+				self::ORDER_KEY      => 10,
+				self::ATTRIBUTES_KEY => [],
 			]
 		);
 
