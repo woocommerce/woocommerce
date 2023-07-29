@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTe
  *
  * @package Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates
  */
-class Block implements BlockContainerInterface {
+class Block implements BlockInterface {
 	use BlockContainerTrait;
 
 	/**

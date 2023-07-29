@@ -12,7 +12,7 @@ interface BlockContainerInterface {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function &add_block( array $block_config ): Block;
+	public function &add_block( array $block_config ): BlockInterface;
 
 	/**
 	 * Get the root template that the block container belongs to.

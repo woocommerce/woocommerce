@@ -11,7 +11,7 @@ class BlockTemplate implements BlockContainerInterface {
 	/**
 	 * The block cache.
 	 *
-	 * @var Block[]
+	 * @var BlockInterface[]
 	 */
 	private $block_cache = [];
 
@@ -27,13 +27,13 @@ class BlockTemplate implements BlockContainerInterface {
 	/**
 	 * Add a block to the template. This is an internal method and should not be called directly.
 	 *
-	 * @param Block $block The block to add.
+	 * @param BlockInterface $block The block to add.
 	 *
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
 	 *
 	 * @ignore
 	 */
-	public function internal_add_block_to_template( Block &$block ) {
+	public function internal_add_block_to_template( BlockInterface &$block ) {
 		$id = $block->get_id();
 
 		if ( isset( $this->block_cache[ $id ] ) ) {

@@ -9,7 +9,7 @@ trait BlockContainerTrait {
 	/**
 	 * The child blocks.
 	 *
-	 * @var Block[]
+	 * @var BlockInterface[]
 	 */
 	private $child_blocks = [];
 
@@ -18,7 +18,7 @@ trait BlockContainerTrait {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function &add_block( array $block_config ): Block {
+	public function &add_block( array $block_config ): BlockInterface {
 		$root_template = $this->get_root_template();
 
 		$block = new Block( $block_config, $root_template, $this );
