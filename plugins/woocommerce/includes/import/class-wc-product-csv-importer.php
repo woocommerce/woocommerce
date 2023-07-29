@@ -611,12 +611,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				// If the value is a valid date string, return as is.
 				return $value;
 			}
-			// If value is not valid Unix timestamp or date string, return null.
-			return null;
 		} catch ( Exception $e ) {
 			// DateTime constructor throws an exception if the value is not a valid Unix timestamp.
 			return null;
 		}
+		// If value is not valid Unix timestamp or date string, return null.
+		return null;
 	}
 
 	/**
