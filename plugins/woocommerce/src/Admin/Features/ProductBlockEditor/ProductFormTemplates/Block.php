@@ -44,6 +44,11 @@ class Block implements BlockContainerInterface {
 	private $id;
 
 	/**
+	 * @var int
+	 */
+	private $order;
+
+	/**
 	 * @var BlockTemplate
 	 */
 	private $root_template;
@@ -54,7 +59,7 @@ class Block implements BlockContainerInterface {
 	private $parent;
 
 	public function __construct( array $data, BlockTemplate &$root_template, BlockContainerInterface &$parent = null ) {
-		$this->data = wp_parse_args(
+		$data = wp_parse_args(
 			$data,
 			[
 				self::ORDER_KEY      => 10,
@@ -62,23 +67,27 @@ class Block implements BlockContainerInterface {
 			]
 		);
 
+		$this->data = $data;
+
 		$this->root_template = $root_template;
 		$this->parent        = is_null( $parent ) ? $root_template : $parent;
 
-		if ( ! isset( $this->data[ self::NAME_KEY ] ) || ! is_string( $this->data[ self::NAME_KEY ] ) ) {
+		if ( ! isset( $data[ self::NAME_KEY ] ) || ! is_string( $data[ self::NAME_KEY ] ) ) {
 			throw new \ValueError( 'The block name must be specified.' );
 		} else {
-			$this->name = $this->data[ self::NAME_KEY ];
+			$this->name = $data[ self::NAME_KEY ];
 		}
+
+		if ( ! isset( $data[ self::ID_KEY ] ) ) {
+			$this->id = $this->root_template->generate_block_id( $this->get_name() );
+		} else {
+			$this->id = $data[ self::ID_KEY ];
+		}
+
+		$this->order = $data[ self::ORDER_KEY ];
 
 		if ( $this->parent->get_root_template() !== $this->root_template ) {
 			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
-		}
-
-		if ( ! isset( $this->data[ self::ID_KEY ] ) ) {
-			$this->id = $this->root_template->generate_block_id( $this->get_name() );
-		} else {
-			$this->id = $this->data[ self::ID_KEY ];
 		}
 	}
 
@@ -91,11 +100,11 @@ class Block implements BlockContainerInterface {
 	}
 
 	public function get_order(): int {
-		return $this->data[ self::ORDER_KEY ];
+		return $this->order;
 	}
 
 	public function set_order( int $order ) {
-		$this->data[ self::ORDER_KEY ] = $order;
+		$this->order = $order;
 	}
 
 	public function get_attributes(): array {

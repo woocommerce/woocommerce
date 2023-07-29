@@ -30,7 +30,7 @@ class BlockTemplate implements BlockContainerInterface {
 	 * @param string $id_base The base to use when generating an ID.
 	 * @return string
 	 */
-	public function generate_block_id( string $id_base ) {
+	public function generate_block_id( string $id_base ): string {
 		$instance_count = 0;
 
 		do {
