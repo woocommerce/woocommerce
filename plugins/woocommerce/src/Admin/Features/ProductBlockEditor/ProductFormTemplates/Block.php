@@ -39,6 +39,11 @@ class Block implements BlockContainerInterface {
 	private $name;
 
 	/**
+	 * @var string
+	 */
+	private $id;
+
+	/**
 	 * @var BlockTemplate
 	 */
 	private $root_template;
@@ -71,7 +76,9 @@ class Block implements BlockContainerInterface {
 		}
 
 		if ( ! isset( $this->data[ self::ID_KEY ] ) ) {
-			$this->data[ self::ID_KEY ] = $this->root_template->generate_block_id( $this->get_name() );
+			$this->id = $this->root_template->generate_block_id( $this->get_name() );
+		} else {
+			$this->id = $this->data[ self::ID_KEY ];
 		}
 	}
 
@@ -80,7 +87,7 @@ class Block implements BlockContainerInterface {
 	}
 
 	public function get_id(): string {
-		return $this->data[ self::ID_KEY ];
+		return $this->id;
 	}
 
 	public function get_order(): int {
