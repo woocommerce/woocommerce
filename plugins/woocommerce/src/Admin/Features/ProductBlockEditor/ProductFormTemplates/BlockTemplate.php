@@ -5,16 +5,38 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
+/**
+ * Block template class.
+ */
 class BlockTemplate implements BlockContainerInterface {
 	use BlockContainerTrait;
 
+	/**
+	 * The block cache.
+	 *
+	 * @var Block[]
+	 */
 	private $block_cache = [];
 
+	/**
+	 * Get a block by ID.
+	 *
+	 * @param string $block_id The block ID.
+	 */
 	public function get_block_by_id( string $block_id ): ?Block {
 		return $this->block_cache[ $block_id ] ?? null;
 	}
 
-	public function _add_block_to_template( Block &$block ) {
+	/**
+	 * Add a block to the template. This is an internal method and should not be called directly.
+	 *
+	 * @param Block $block The block to add.
+	 *
+	 * @throws \ValueError If a block with the specified ID already exists in the template.
+	 *
+	 * @ignore
+	 */
+	public function internal_add_block_to_template( Block &$block ) {
 		$id = $block->get_id();
 
 		if ( isset( $this->block_cache[ $id ] ) ) {
@@ -41,14 +63,23 @@ class BlockTemplate implements BlockContainerInterface {
 		return $block_id;
 	}
 
+	/**
+	 * Get the root template.
+	 */
 	public function &get_root_template(): BlockTemplate {
 		return $this;
 	}
 
+	/**
+	 * Get the parent block container.
+	 */
 	public function &get_parent(): ?BlockContainerInterface {
 		return null;
 	}
 
+	/**
+	 * Get the template as a simple array.
+	 */
 	public function get_as_simple_array(): array {
 		return $this->get_child_blocks_as_simple_array();
 	}
