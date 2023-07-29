@@ -29,11 +29,6 @@ class Block implements BlockContainerInterface {
 	const ATTRIBUTES_KEY = 'attributes';
 
 	/**
-	 * @var array
-	 */
-	private $data = [];
-
-	/**
 	 * @var string
 	 */
 	private $name;
@@ -46,7 +41,12 @@ class Block implements BlockContainerInterface {
 	/**
 	 * @var int
 	 */
-	private $order;
+	private $order = 10;
+
+	/**
+	 * @var array
+	 */
+	private $attributes = [];
 
 	/**
 	 * @var BlockTemplate
@@ -59,18 +59,12 @@ class Block implements BlockContainerInterface {
 	private $parent;
 
 	public function __construct( array $data, BlockTemplate &$root_template, BlockContainerInterface &$parent = null ) {
-		$data = wp_parse_args(
-			$data,
-			[
-				self::ORDER_KEY      => 10,
-				self::ATTRIBUTES_KEY => [],
-			]
-		);
-
-		$this->data = $data;
-
 		$this->root_template = $root_template;
 		$this->parent        = is_null( $parent ) ? $root_template : $parent;
+
+		if ( $this->parent->get_root_template() !== $this->root_template ) {
+			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
+		}
 
 		if ( ! isset( $data[ self::NAME_KEY ] ) || ! is_string( $data[ self::NAME_KEY ] ) ) {
 			throw new \ValueError( 'The block name must be specified.' );
@@ -84,11 +78,19 @@ class Block implements BlockContainerInterface {
 			$this->id = $data[ self::ID_KEY ];
 		}
 
-		$this->order = $data[ self::ORDER_KEY ];
-
-		if ( $this->parent->get_root_template() !== $this->root_template ) {
-			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
+		if ( isset( $data[ self::ORDER_KEY ] ) && ! is_int( $data[ self::ORDER_KEY ] ) ) {
+			throw new \ValueError( 'The block order must be an integer.' );
+		} elseif ( isset( $data[ self::ORDER_KEY ] ) ) {
+			$this->order = $data[ self::ORDER_KEY ];
 		}
+
+		if ( isset( $data[ self::ATTRIBUTES_KEY ] ) && ! is_array( $data[ self::ATTRIBUTES_KEY ] ) ) {
+			throw new \ValueError( 'The block attributes must be an array.' );
+		} elseif ( isset( $data[ self::ATTRIBUTES_KEY ] ) ) {
+			$this->attributes = $data[ self::ATTRIBUTES_KEY ];
+		}
+
+
 	}
 
 	public function get_name(): string {
@@ -108,11 +110,11 @@ class Block implements BlockContainerInterface {
 	}
 
 	public function get_attributes(): array {
-		return $this->data[ self::ATTRIBUTES_KEY ];
+		return $this->attributes;
 	}
 
 	public function set_attributes( array $attributes ) {
-		$this->data[ self::ATTRIBUTES_KEY ] = $attributes;
+		$this->attributes = $attributes;
 	}
 
 	public function &get_root_template(): BlockTemplate {
