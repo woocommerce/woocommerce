@@ -11,26 +11,6 @@ class Block implements BlockInterface {
 	use BlockContainerTrait;
 
 	/**
-	 * Key for the block name in the block configuration.
-	 */
-	const NAME_KEY = 'blockName';
-
-	/**
-	 * Key for the block ID in the block configuration.
-	 */
-	const ID_KEY = 'id';
-
-	/**
-	 * Key for the internal order in the block configuration.
-	 */
-	const ORDER_KEY = 'order';
-
-	/**
-	 * Key for the block attributes in the block configuration.
-	 */
-	const ATTRIBUTES_KEY = 'attributes';
-
-	/**
 	 * The block name.
 	 *
 	 * @var string
