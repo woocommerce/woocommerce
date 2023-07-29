@@ -3,11 +3,26 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
 interface BlockContainerInterface {
-	public function &add_block( array $block_data ): Block;
 
+	/**
+	 * Add a block to the block container.
+	 *
+	 * @param array $block_config The block data.
+	 */
+	public function &add_block( array $block_config ): Block;
+
+	/**
+	 * Get the root template that the block container belongs to.
+	 */
 	public function &get_root_template(): BlockTemplate;
 
+	/**
+	 * Get the parent block container that the block container belongs to.
+	 */
 	public function &get_parent(): ?BlockContainerInterface;
 
+	/**
+	 * Get the child blocks as a simple array.
+	 */
 	public function get_child_blocks_as_simple_array(): array;
 }
