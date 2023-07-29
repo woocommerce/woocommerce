@@ -7,15 +7,24 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplate
 
 use WC_Unit_Test_Case;
 
+/**
+ * Tests for the Block class.
+ */
 class BlockTest extends WC_Unit_Test_Case {
+	/**
+	 * Test that the block name is required when creating a block.
+	 */
 	public function test_name_is_required() {
 		$block_template = new BlockTemplate();
 
 		$this->expectException( \ValueError::class );
 
-		$block = new Block( [], $block_template );
+		new Block( [], $block_template );
 	}
 
+	/**
+	 * Test that an ID is generated if not provided when creating a block.
+	 */
 	public function test_id_is_generated_if_not_provided() {
 		$block_template = new BlockTemplate();
 
@@ -29,6 +38,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'test-block-name-1', $block->get_id() );
 	}
 
+	/**
+	 * Test that setting a parent from a different template is prevented.
+	 */
 	public function test_parent_from_different_template_throws_exception() {
 		$block_template   = new BlockTemplate();
 		$block_template_2 = new BlockTemplate();
@@ -51,6 +63,10 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that adding a block to a block sets the parent and root template correctly
+	 * and that the block is added to the root template.
+	 */
 	public function test_add_block() {
 		$block_template = new BlockTemplate();
 
@@ -86,6 +102,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that adding nested blocks sets the parent and root template correctly.
+	 */
 	public function test_nested_add_block() {
 		$block_template = new BlockTemplate();
 
@@ -132,6 +151,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that getting the block as a simple array is structured correctly.
+	 */
 	public function test_get_as_simple_array() {
 		$block_template = new BlockTemplate();
 
@@ -192,6 +214,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that getting the child blocks as a sorted simple array is ordered correctly.
+	 */
 	public function test_get_child_blocks_as_sorted_simple_array() {
 		$block_template = new BlockTemplate();
 
