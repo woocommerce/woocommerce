@@ -6,13 +6,22 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplate
 
 use WC_Unit_Test_Case;
 
+/**
+ * Tests for the BlockTemplate class.
+ */
 class BlockTemplateTest extends WC_Unit_Test_Case {
+	/**
+	 * Test generating a block ID.
+	 */
 	public function test_generate_block_id() {
 		$block_template = new BlockTemplate();
 
 		$this->assertSame( 'test-block-id-1', $block_template->generate_block_id( 'test-block-id' ) );
 	}
 
+	/**
+	 * Test adding a block.
+	 */
 	public function test_add_block() {
 		$block_template = new BlockTemplate();
 
@@ -26,6 +35,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		$this->assertSame( $block, $block_template->get_block_by_id( 'test-block-id' ) );
 	}
 
+	/**
+	 * Test adding a block throws an exception if a block with the same ID already exists.
+	 */
 	public function test_add_block_throws_exception_if_block_with_same_id_already_exists() {
 		$block_template = new BlockTemplate();
 
@@ -46,6 +58,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test adding a block generates an ID if one is not provided.
+	 */
 	public function test_add_block_generates_id_if_not_provided() {
 		$block_template = new BlockTemplate();
 
@@ -58,12 +73,18 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'test-block-name-1', $block->get_id() );
 	}
 
+	/**
+	 * Test getting a block by ID returns null if the block does not exist.
+	 */
 	public function test_get_block_by_id_returns_null_if_block_does_not_exist() {
 		$block_template = new BlockTemplate();
 
 		$this->assertNull( $block_template->get_block_by_id( 'test-block-id' ) );
 	}
 
+	/**
+	 * Test getting a block by ID returns a reference to the block.
+	 */
 	public function test_get_block_by_id_returns_reference() {
 		$block_template = new BlockTemplate();
 
@@ -81,6 +102,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		$this->assertSame( 23, $block_template->get_block_by_id( 'test-block-id' )->get_order() );
 	}
 
+	/**
+	 * Test that the simple array representation of a block template is correct.
+	 */
 	public function test_get_as_simple_array() {
 		$block_template = new BlockTemplate();
 
@@ -195,6 +219,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that inserting a block to a parent in the template works.
+	 */
 	public function test_inserting_block_by_parent_id() {
 		$block_template = new BlockTemplate();
 
