@@ -607,7 +607,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				return $datetime->format( 'Y-m-d\TH:i:s\Z' );
 			}
 			// Check whether the value is a valid date string.
-			if (false !== strtotime( $value ) ) {
+			if ( false !== strtotime( $value ) ) {
 				// If the value is a valid date string, return as is.
 				return $value;
 			}
