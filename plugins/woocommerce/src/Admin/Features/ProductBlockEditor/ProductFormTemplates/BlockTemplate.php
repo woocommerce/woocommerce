@@ -1,7 +1,4 @@
 <?php
-/**
- * Base block template.
- */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 

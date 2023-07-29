@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
+/**
+ * Trait for block containers.
+ */
 trait BlockContainerTrait {
 	/**
 	 * The child blocks.

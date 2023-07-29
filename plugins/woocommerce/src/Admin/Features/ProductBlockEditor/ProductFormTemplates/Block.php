@@ -1,12 +1,9 @@
 <?php
-/**
- * Block configuration used to specify blocks in BlockTemplate.
- */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
 /**
- * Class Block
+ * Block configuration used to specify blocks in BlockTemplate.
  *
  * @package Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates
  */

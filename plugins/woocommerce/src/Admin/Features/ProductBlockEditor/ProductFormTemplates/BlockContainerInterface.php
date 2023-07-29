@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
+/**
+ * Interface for block containers.
+ */
 interface BlockContainerInterface {
 
 	/**
