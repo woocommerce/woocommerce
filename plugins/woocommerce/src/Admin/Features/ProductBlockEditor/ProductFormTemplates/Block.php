@@ -29,11 +29,6 @@ class Block implements BlockContainerInterface {
 	const ATTRIBUTES_KEY = 'attrs';
 
 	/**
-	 * Key for the block inner content in the block configuration.
-	 */
-	const INNER_CONTENT_KEY = 'innerContent';
-
-	/**
 	 * @var array
 	 */
 	private $data = [];
@@ -54,7 +49,6 @@ class Block implements BlockContainerInterface {
 			[
 				self::ORDER_KEY         => 10,
 				self::ATTRIBUTES_KEY    => [],
-				self::INNER_CONTENT_KEY => [],
 			]
 		);
 
