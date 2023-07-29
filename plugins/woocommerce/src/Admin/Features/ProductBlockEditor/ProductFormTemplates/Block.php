@@ -34,6 +34,11 @@ class Block implements BlockContainerInterface {
 	private $data = [];
 
 	/**
+	 * @var string
+	 */
+	private $name;
+
+	/**
 	 * @var BlockTemplate
 	 */
 	private $root_template;
@@ -57,6 +62,8 @@ class Block implements BlockContainerInterface {
 
 		if ( ! isset( $this->data[ self::NAME_KEY ] ) || ! is_string( $this->data[ self::NAME_KEY ] ) ) {
 			throw new \ValueError( 'The block name must be specified.' );
+		} else {
+			$this->name = $this->data[ self::NAME_KEY ];
 		}
 
 		if ( $this->parent->get_root_template() !== $this->root_template ) {
@@ -69,7 +76,7 @@ class Block implements BlockContainerInterface {
 	}
 
 	public function get_name(): string {
-		return $this->data[ self::NAME_KEY ];
+		return $this->name;
 	}
 
 	public function get_id(): string {
