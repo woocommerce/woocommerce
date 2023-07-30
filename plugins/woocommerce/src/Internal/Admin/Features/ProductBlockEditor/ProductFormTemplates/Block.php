@@ -8,10 +8,8 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplate
 
 /**
  * Block configuration used to specify blocks in BlockTemplate.
- *
- * @package Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates
  */
-class Block implements BlockInterface {
+class Block implements BlockInterface, BlockContainerInterface {
 	use BlockContainerTrait;
 
 	/**

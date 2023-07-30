@@ -4,10 +4,8 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTe
 
 /**
  * Interface for block configuration used to specify blocks in BlockTemplate.
- *
- * @package Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates
  */
-interface BlockInterface extends BlockContainerInterface {
+interface BlockInterface {
 	/**
 	 * Key for the block name in the block configuration.
 	 */
