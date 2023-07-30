@@ -29,7 +29,8 @@ class BlockTemplate implements BlockTemplateInterface {
 	}
 
 	/**
-	 * Add a block to the template. This is an internal method and should not be called directly.
+	 * Add a block to the template. This is an internal method and should not be called directly
+	 * except for classes that implement BlockContainerInterface, in their add_block() method.
 	 *
 	 * @param BlockInterface $block The block to add.
 	 *
@@ -69,13 +70,6 @@ class BlockTemplate implements BlockTemplateInterface {
 	 */
 	public function &get_root_template(): BlockTemplateInterface {
 		return $this;
-	}
-
-	/**
-	 * Get the parent block container.
-	 */
-	public function &get_parent(): ?BlockContainerInterface {
-		return null;
 	}
 
 	/**

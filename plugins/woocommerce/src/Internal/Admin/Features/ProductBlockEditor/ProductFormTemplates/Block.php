@@ -147,7 +147,7 @@ class Block implements BlockInterface {
 	/**
 	 * Get the block template that this block belongs to.
 	 */
-	public function &get_root_template(): BlockTemplate {
+	public function &get_root_template(): BlockTemplateInterface {
 		return $this->root_template;
 	}
 

@@ -20,11 +20,6 @@ interface BlockContainerInterface {
 	public function &get_root_template(): BlockTemplateInterface;
 
 	/**
-	 * Get the parent block container that the block container belongs to.
-	 */
-	public function &get_parent(): ?BlockContainerInterface;
-
-	/**
 	 * Get the child blocks as a simple array.
 	 */
 	public function get_child_blocks_as_simple_array(): array;

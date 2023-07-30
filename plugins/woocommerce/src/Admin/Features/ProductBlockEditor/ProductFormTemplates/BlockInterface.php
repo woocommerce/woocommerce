@@ -63,14 +63,14 @@ interface BlockInterface extends BlockContainerInterface {
 	public function set_attributes( array $attributes );
 
 	/**
-	 * Get the block template that this block belongs to.
+	 * Get the parent block container that the block belongs to.
 	 */
-	public function &get_root_template(): BlockTemplateInterface;
+	public function &get_parent(): ?BlockContainerInterface;
 
 	/**
-	 * Get the parent block container.
+	 * Get the root template that the block belongs to.
 	 */
-	public function &get_parent(): BlockContainerInterface;
+	public function &get_root_template(): BlockTemplateInterface;
 
 	/**
 	 * Get the block configuration as a simple array.
