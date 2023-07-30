@@ -1,11 +1,15 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
+namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates;
+
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockContainerInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockTemplateInterface;
 
 /**
  * Block template class.
  */
-class BlockTemplate implements BlockContainerInterface {
+class BlockTemplate implements BlockTemplateInterface {
 	use BlockContainerTrait;
 
 	/**
@@ -63,7 +67,7 @@ class BlockTemplate implements BlockContainerInterface {
 	/**
 	 * Get the root template.
 	 */
-	public function &get_root_template(): BlockTemplate {
+	public function &get_root_template(): BlockTemplateInterface {
 		return $this;
 	}
 
