@@ -15,24 +15,24 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that the block name is required when creating a block.
 	 */
 	public function test_name_is_required() {
-		$block_template = new BlockBasedTemplate();
+		$template = new BlockBasedTemplate();
 
 		$this->expectException( \ValueError::class );
 
-		new Block( [], $block_template );
+		new Block( [], $template );
 	}
 
 	/**
 	 * Test that an ID is generated if not provided when creating a block.
 	 */
 	public function test_id_is_generated_if_not_provided() {
-		$block_template = new BlockBasedTemplate();
+		$template = new BlockBasedTemplate();
 
 		$block = new Block(
 			[
 				'blockName' => 'test-block-name',
 			],
-			$block_template
+			$template
 		);
 
 		$this->assertSame( 'test-block-name-1', $block->get_id() );
@@ -42,14 +42,14 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that setting a parent from a different template is prevented.
 	 */
 	public function test_parent_from_different_template_throws_exception() {
-		$block_template   = new BlockBasedTemplate();
-		$block_template_2 = new BlockBasedTemplate();
+		$template   = new BlockBasedTemplate();
+		$template_2 = new BlockBasedTemplate();
 
 		$parent = new Block(
 			[
 				'blockName' => 'test-block-parent-name',
 			],
-			$block_template_2
+			$template_2
 		);
 
 		$this->expectException( \ValueError::class );
@@ -58,7 +58,7 @@ class BlockTest extends WC_Unit_Test_Case {
 			[
 				'blockName' => 'test-block-name',
 			],
-			$block_template,
+			$template,
 			$parent
 		);
 	}
@@ -68,9 +68,9 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * and that the block is added to the root template.
 	 */
 	public function test_add_block() {
-		$block_template = new BlockBasedTemplate();
+		$template = new BlockBasedTemplate();
 
-		$block = $block_template->add_block(
+		$block = $template->add_block(
 			[
 				'id'        => 'test-block-id',
 				'blockName' => 'test-block-name',
@@ -97,7 +97,7 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			$child_block,
-			$block_template->get_block_by_id( 'test-block-id-2' ),
+			$template->get_block_by_id( 'test-block-id-2' ),
 			'Failed asserting that the child block is in the root template.'
 		);
 	}
@@ -155,9 +155,9 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that getting the block as a simple array is structured correctly.
 	 */
 	public function test_get_as_simple_array() {
-		$block_template = new BlockBasedTemplate();
+		$template = new BlockBasedTemplate();
 
-		$block = $block_template->add_block(
+		$block = $template->add_block(
 			[
 				'id'         => 'test-block-id',
 				'blockName'  => 'test-block-name',
@@ -218,9 +218,9 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that getting the child blocks as a sorted simple array is ordered correctly.
 	 */
 	public function test_get_child_blocks_as_sorted_simple_array() {
-		$block_template = new BlockBasedTemplate();
+		$template = new BlockBasedTemplate();
 
-		$block = $block_template->add_block(
+		$block = $template->add_block(
 			[
 				'blockName' => 'test-block-name',
 			]
