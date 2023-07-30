@@ -68,7 +68,7 @@ interface BlockInterface {
 	/**
 	 * Get the root template that the block belongs to.
 	 */
-	public function &get_root_template(): BlockTemplateInterface;
+	public function &get_root_template(): BlockBasedTemplateInterface;
 
 	/**
 	 * Get the block configuration as a simple array.

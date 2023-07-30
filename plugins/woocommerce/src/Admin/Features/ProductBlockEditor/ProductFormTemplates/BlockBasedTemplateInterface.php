@@ -3,9 +3,9 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
 /**
- * Interface for block template.
+ * Interface for block-based template.
  */
-interface BlockTemplateInterface extends BlockContainerInterface {
+interface BlockBasedTemplateInterface extends BlockContainerInterface {
 	/**
 	 * Generate a block ID based on a base.
 	 *

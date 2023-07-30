@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\Prod
 
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockContainerInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockInterface;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockBasedTemplateInterface;
 
 /**
  * Block configuration used to specify blocks in BlockTemplate.
@@ -58,12 +58,13 @@ class Block implements BlockInterface, BlockContainerInterface {
 	 * Block constructor.
 	 *
 	 * @param array                        $config The block configuration.
-	 * @param BlockTemplateInterface       $root_template The block template that this block belongs to.
+	 * @param BlockBasedTemplateInterface  $root_template The block template that this block belongs to.
 	 * @param BlockContainerInterface|null $parent The parent block container.
+	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 */
-	public function __construct( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+	public function __construct( array $config, BlockBasedTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
 		$this->root_template = $root_template;
 		$this->parent        = is_null( $parent ) ? $root_template : $parent;
 
@@ -143,9 +144,9 @@ class Block implements BlockInterface, BlockContainerInterface {
 	}
 
 	/**
-	 * Get the block template that this block belongs to.
+	 * Get the template that this block belongs to.
 	 */
-	public function &get_root_template(): BlockTemplateInterface {
+	public function &get_root_template(): BlockBasedTemplateInterface {
 		return $this->root_template;
 	}
 
