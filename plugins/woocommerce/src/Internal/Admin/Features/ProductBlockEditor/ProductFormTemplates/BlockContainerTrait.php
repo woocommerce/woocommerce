@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\INternal\Admin\Features\ProductBlockEditor\ProductFormTemplates;
+namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockInterface;
 
