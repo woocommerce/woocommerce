@@ -18,6 +18,11 @@ interface BlockContainerInterface {
 	public function &add_block( array $block_config ): BlockInterface;
 
 	/**
+	 * Get the parent block container that the block container belongs to.
+	 */
+	public function &get_parent(): ?BlockContainerInterface;
+
+	/**
 	 * Get the root template that the block container belongs to.
 	 */
 	public function &get_root_template(): BlockBasedTemplateInterface;

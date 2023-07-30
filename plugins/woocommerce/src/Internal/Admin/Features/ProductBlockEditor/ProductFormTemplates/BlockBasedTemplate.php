@@ -73,6 +73,13 @@ class BlockBasedTemplate implements BlockBasedTemplateInterface {
 	}
 
 	/**
+	 * Get the parent block container.
+	 */
+	public function &get_parent(): ?BlockContainerInterface {
+		return null;
+	}
+
+	/**
 	 * Get the template as a simple array.
 	 */
 	public function get_as_simple_array(): array {
