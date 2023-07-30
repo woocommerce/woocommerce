@@ -7,6 +7,13 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTe
  */
 interface BlockBasedTemplateInterface extends BlockContainerInterface {
 	/**
+	 * Get a block by ID.
+	 *
+	 * @param string $block_id The block ID.
+	 */
+	public function get_block_by_id( string $block_id ): ?BlockInterface;
+
+	/**
 	 * Generate a block ID based on a base.
 	 *
 	 * @param string $id_base The base to use when generating an ID.

@@ -24,7 +24,7 @@ class BlockBasedTemplate implements BlockBasedTemplateInterface {
 	 *
 	 * @param string $block_id The block ID.
 	 */
-	public function get_block_by_id( string $block_id ): ?Block {
+	public function get_block_by_id( string $block_id ): ?BlockInterface {
 		return $this->block_cache[ $block_id ] ?? null;
 	}
 
