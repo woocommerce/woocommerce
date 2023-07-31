@@ -112,7 +112,7 @@ class Init {
 		do_action( 'enqueue_block_editor_assets' );
 	}
 
-	/** 
+	/**
 	 * Dequeue conflicting styles.
 	 */
 	public function dequeue_conflicting_styles() {
@@ -122,7 +122,8 @@ class Init {
 
 	/**
 	 * Update the edit product links when the new experience is enabled.
-	 *	 * @param string $link    The edit link.
+	 *
+	 * @param string $link    The edit link.
 	 * @param int    $post_id Post ID.
 	 * @return string
 	 */
