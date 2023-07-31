@@ -564,7 +564,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Abstract_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
-		$cpt_data_store                = $this->get_post_data_store_for_backfill();
+		$cpt_data_store = $this->get_post_data_store_for_backfill();
 		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
 			return;
 		}
