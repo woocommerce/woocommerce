@@ -36,7 +36,10 @@ class TaskLists {
 	protected static $default_tasks_loaded = false;
 
 	/**
-	 * Array of default tasks.
+	 * The contents of this array is used in init_tasks() to run their init() methods.
+	 * If the classes do not have an init() method then nothing is executed.
+	 * Beyond that, adding tasks to this list has no effect, see init_default_lists() for the list of tasks.
+	 * that are added for each task list.
 	 *
 	 * @var array
 	 */
