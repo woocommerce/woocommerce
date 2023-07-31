@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Low in stock query - Avoid ordering the results. Order by can cause slow query for certain versions of mysql/mariahdb.
