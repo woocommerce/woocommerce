@@ -12,7 +12,6 @@ import { scanForChanges } from '../../lib/scan-changes';
 import {
 	printDatabaseUpdates,
 	printHookResults,
-	printSchemaChange,
 	printTemplateResults,
 } from '../../print';
 
@@ -41,17 +40,12 @@ const program = new Command()
 		'Output style for the results. Options: github, cli. Github output will set the results as an output variable for Github actions.',
 		'cli'
 	)
-	.option(
-		'-ss, --skipSchemaCheck',
-		'Skip the schema check, enable this if you are not analyzing WooCommerce'
-	)
 	.action( async ( compare, sinceVersion, options ) => {
-		const { skipSchemaCheck = false, source, base, outputStyle } = options;
+		const { source, base, outputStyle } = options;
 
 		const changes = await scanForChanges(
 			compare,
 			sinceVersion,
-			skipSchemaCheck,
 			source,
 			base,
 			outputStyle
@@ -88,24 +82,6 @@ const program = new Command()
 				'---------------------------------------------------'
 			);
 			Logger.notice( 'No hook changes found.' );
-			Logger.notice(
-				'---------------------------------------------------'
-			);
-		}
-
-		if ( changes.schema.filter( ( s ) => ! s.areEqual ).length ) {
-			printSchemaChange(
-				changes.schema,
-				sinceVersion,
-				outputStyle,
-				Logger.notice
-			);
-		} else {
-			Logger.notice( '\n\n## SCHEMA CHANGES' );
-			Logger.notice(
-				'---------------------------------------------------'
-			);
-			Logger.notice( 'No schema changes found.' );
 			Logger.notice(
 				'---------------------------------------------------'
 			);
