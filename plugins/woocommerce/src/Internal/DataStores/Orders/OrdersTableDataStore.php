@@ -2589,6 +2589,10 @@ FROM $order_meta_table
 		$operational_data_table_name = $this->get_operational_data_table_name();
 		$meta_table                  = $this->get_meta_table_name();
 
+		$max_index_length                   = $this->database_util->get_max_index_length();
+		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
+		$composite_customer_id_email_length = max( $max_index_length - 20, 20 ); // 8 for customer_id, 20 minimum for email.
+
 		$sql = "
 CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned,
@@ -2611,8 +2615,8 @@ CREATE TABLE $orders_table_name (
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
-	KEY customer_id_billing_email (customer_id, billing_email),
-	KEY billing_email (billing_email),
+	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
+	KEY billing_email (billing_email($max_index_length)),
 	KEY type_status (type, status),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -2634,7 +2638,7 @@ CREATE TABLE $addresses_table_name (
 	phone varchar(100) null,
 	KEY order_id (order_id),
 	UNIQUE KEY address_type_order_id (address_type, order_id),
-	KEY email (email),
+	KEY email (email($max_index_length)),
 	KEY phone (phone)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
@@ -2664,8 +2668,8 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key, meta_value(100)),
-	KEY order_id_meta_key_meta_value (order_id, meta_key, meta_value(100))
+	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";
 
