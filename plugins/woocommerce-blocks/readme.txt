@@ -81,14 +81,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-
-= 10.8.1 - 2023-08-07 =
-
-#### Bug Fixes
-
-- Classic Template block registration: Add defensive type handling. ([10475](https://github.com/woocommerce/woocommerce-blocks/pull/10475))
-- Fixed an issue where modifications to the Cart/Checkout templates made in the site editor would not be visible on the front end. [#10462](https://github.com/woocommerce/woocommerce-blocks/pull/10462)
-
 = 10.8.0 - 2023-07-31 =
 
 #### Enhancements
@@ -139,6 +131,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Add the new Featured Products: Fresh & Tasty pattern. ([10339](https://github.com/woocommerce/woocommerce-blocks/pull/10339))
 - Add an endpoint for processing pay-for-order orders. ([10287](https://github.com/woocommerce/woocommerce-blocks/pull/10287))
 - Add an endpoint for getting pay for order orders. ([10199](https://github.com/woocommerce/woocommerce-blocks/pull/10199))
+- Add an endpoint for updating customers by order. ([9743](https://github.com/woocommerce/woocommerce-blocks/pull/9743))
 
 = 10.7.1 - 2023-07-25 =
 
