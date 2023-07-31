@@ -8,6 +8,7 @@ const {
 	getFrontConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
+	getSiteEditorConfig,
 	getStylingConfig,
 	getInteractivityAPIConfig,
 } = require( './bin/webpack-configs.js' );
@@ -85,12 +86,21 @@ const InteractivityConfig = {
 	...getInteractivityAPIConfig( { alias: getAlias() } ),
 };
 
+/**
+ * Config to generate the site editor scripts.
+ */
+const SiteEditorConfig = {
+	...sharedConfig,
+	...getSiteEditorConfig( { alias: getAlias() } ),
+};
+
 module.exports = [
 	CoreConfig,
 	MainConfig,
 	FrontendConfig,
 	ExtensionsConfig,
 	PaymentsConfig,
+	SiteEditorConfig,
 	StylingConfig,
 	InteractivityConfig,
 ];

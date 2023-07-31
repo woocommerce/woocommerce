@@ -5,7 +5,6 @@ import { getCategories, setCategories } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { woo } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
-import '@woocommerce/templates/revert-button';
 
 /**
  * Internal dependencies
