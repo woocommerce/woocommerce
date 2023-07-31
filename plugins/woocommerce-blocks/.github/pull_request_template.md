@@ -18,6 +18,7 @@ Fixes #
 
 #### Other Checks
 
+- [ ] This PR has either a `[type]` label or a `[skip-changelog]` label.
 - [ ] This PR adds/removes a feature flag & I've updated [this doc](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md).
 - [ ] This PR adds/removes an experimental interfaces and I've updated [this doc](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md).
 - [ ] I tagged two reviewers because this PR makes queries to the database or I think it might have some security impact.
