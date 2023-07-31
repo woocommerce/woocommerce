@@ -38,7 +38,6 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 				'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
 			)
 		);
-		window.console.log("badgeElements", badgeElements);
 
 		if ( ! badgeElements?.length ) {
 			return;
