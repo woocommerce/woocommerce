@@ -2568,7 +2568,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order->save_meta_data();
 			$order->add_meta_data( 'test_key_3', 'test_value_3' );
 			$order->save();
-			echo 'ehere';
 		}
 	}
 
