@@ -88,12 +88,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
-<<<<<<< HEAD
-				file_path: filePath,
-				id: generatePageId( filePath, projectName ),
-=======
 				id: generatePostId( relativePath, projectName ),
->>>>>>> origin/trunk
 			} );
 		}
 	} );
