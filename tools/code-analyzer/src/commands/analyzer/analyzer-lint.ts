@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Command } from '@commander-js/extra-typings';
+import { Command, Option } from '@commander-js/extra-typings';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { join } from 'path';
 
@@ -35,13 +35,14 @@ const program = new Command()
 		'Git repo url or local path to a git repo.',
 		join( process.cwd(), '../../' )
 	)
-	.option(
-		'-o, --outputStyle <outputStyle>',
-		'Output style for the results. Options: github, cli. Github output will set the results as an output variable for Github actions.',
-		'cli'
+	.addOption(
+		new Option( '-o, --outputStyle <outputStyle>' ).choices( [
+			'github',
+			'cli',
+		] as const )
 	)
 	.action( async ( compare, sinceVersion, options ) => {
-		const { source, base, outputStyle } = options;
+		const { source, base, outputStyle = 'cli' } = options;
 
 		const changes = await scanForChanges(
 			compare,

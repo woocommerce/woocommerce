@@ -118,7 +118,7 @@ export const scanForChanges = async (
 	sinceVersion: string,
 	source: string,
 	base: string,
-	outputStyle: string,
+	outputStyle: 'cli' | 'github',
 	clonedPath?: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
