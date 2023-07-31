@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_post_types = array( 'simple', 'variable' );
 
 	/**
 	 * Redirection controller.
@@ -363,6 +363,12 @@ class Init {
 									array(
 										'label'    => __( 'Enable product reviews', 'woocommerce' ),
 										'property' => 'reviews_allowed',
+									),
+								),
+								array(
+									'woocommerce/product-password-field',
+									array(
+										'label' => __( 'Require a password', 'woocommerce' ),
 									),
 								),
 							),
@@ -721,7 +727,15 @@ class Init {
 										'</strong>'
 									),
 								),
-								array(),
+								array(
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variation options', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variations-options-field' ) ),
+									),
+								),
 							),
 						),
 					)
