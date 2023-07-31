@@ -71,6 +71,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 		// set last_order_date.
 		$query_results['results'] = $this->set_last_order_date( $query_results['results'] );
+		krsort( $query_results['results'] );
 
 		// convert the post data to the expected API response for the backward compatibility.
 		$query_results['results'] = array_map( array( $this, 'transform_post_to_api_response' ), $query_results['results'] );
@@ -236,7 +237,6 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock')
 			  :postmeta_wheres
-			order by wc_product_meta_lookup.product_id DESC
 			limit %d, %d
 		";
 
