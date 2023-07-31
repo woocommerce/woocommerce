@@ -411,13 +411,15 @@ jQuery( function ( $ ) {
 		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function() {
 			remove_blank_custom_attribute_if_no_other_attributes();
 
-			var woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+			const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
 
 			// If the product has no attributes, add an empty attribute to be filled out by the user.
 			if ( woocommerce_attribute_items.length === 0  ) {
 				add_custom_attribute_to_list();
 			}
 		} );
+
+		const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
 
 		// Sort the attributes by their position.
 		woocommerce_attribute_items.sort( function ( a, b ) {
@@ -544,6 +546,8 @@ jQuery( function ( $ ) {
 			update_attribute_row_indexes();
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
+
+			$( document.body ).trigger( 'woocommerce_added_attribute' );
 
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
