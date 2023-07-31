@@ -126,34 +126,6 @@ jQuery( function ( $ ) {
 			return false;
 		} );
 
-	function disable_or_enable_fields() {
-		var product_type = $( 'select#product-type' ).val();
-		$( `.enable_if_simple` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_external` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_variable` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_${ product_type }` ).each( function () {
-			$( this ).removeClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', false );
-			}
-		} );
-	}
-
 	// Product type specific options.
 	$( 'select#product-type' )
 		.on( 'change', function () {
@@ -173,7 +145,6 @@ jQuery( function ( $ ) {
 			}
 
 			show_and_hide_panels();
-			disable_or_enable_fields();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
@@ -574,8 +545,6 @@ jQuery( function ( $ ) {
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
-			disable_or_enable_fields();
-
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
 			if ( isPageUnloading ) {
@@ -919,8 +888,6 @@ jQuery( function ( $ ) {
 
 					// Hide the 'Used for variations' checkbox if not viewing a variable product
 					show_and_hide_panels();
-
-					disable_or_enable_fields();
 
 					// Make sure the dropdown is not disabled for empty value attributes.
 					$( 'select.attribute_taxonomy' )
