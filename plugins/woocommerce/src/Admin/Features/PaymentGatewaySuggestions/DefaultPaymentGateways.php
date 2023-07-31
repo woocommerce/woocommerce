@@ -755,15 +755,15 @@ class DefaultPaymentGateways {
 			// This is for backwards compatibility only (WC < 5.10.0-dev or WCA < 2.9.0-dev).
 			array(
 				'id'          => 'woocommerce_payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( self::get_wcpay_countries() ),
@@ -797,15 +797,15 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'woocommerce_payments:without-in-person-payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA' ) ) ),
@@ -832,15 +832,15 @@ class DefaultPaymentGateways {
 			// This is the same as the above, but with a different description for countries that support in-person payments such as US and CA.
 			array(
 				'id'          => 'woocommerce_payments:with-in-person-payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array( 'US', 'CA' ) ),
@@ -904,7 +904,7 @@ class DefaultPaymentGateways {
 	 * @return array Array of countries.
 	 */
 	public static function get_wcpay_countries() {
-		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG' );
+		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG', 'BG', 'CZ', 'HR', 'HU', 'RO', 'SE' );
 	}
 
 	/**

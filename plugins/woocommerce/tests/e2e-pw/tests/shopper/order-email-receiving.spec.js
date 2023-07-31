@@ -30,7 +30,11 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		while (
 			await page.locator( '#bulk-action-selector-top' ).isVisible()
 		) {
-			await page.locator( '#cb-select-all-1' ).click();
+			// In WP 6.3, label intercepts check action. Need to force.
+			await page
+				.getByLabel( 'Select All' )
+				.first()
+				.check( { force: true } );
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'delete' );

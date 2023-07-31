@@ -80,7 +80,6 @@ class Woo_AI {
 		}
 	}
 
-
 	/**
 	 * Get plugin download URL.
 	 *

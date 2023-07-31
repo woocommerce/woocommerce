@@ -9,6 +9,8 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -89,7 +91,9 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$features = array(
+		$hpos_enable_sync   = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		$hpos_authoritative = CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
+		$features           = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
@@ -109,11 +113,16 @@ class FeaturesController {
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			'custom_order_tables'  => array(
-				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
-				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
-				'is_experimental' => true,
-				'disable_ui'      => false,
+			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
+			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
+				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+				'enabled_by_default' => false,
+			),
+			$hpos_authoritative    => array(
+				'name' => __( 'High performance order storage', 'woocommerce' ),
+			),
+			$hpos_enable_sync      => array(
+				'name' => '',
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -223,7 +232,8 @@ class FeaturesController {
 		}
 
 		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
-		return 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+		$value         = 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+		return $value;
 	}
 
 	/**
@@ -408,13 +418,16 @@ class FeaturesController {
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
-		if ( 'analytics' === $feature_id ) {
-			return Analytics::TOGGLE_OPTION_NAME;
-		} elseif ( 'new_navigation' === $feature_id ) {
-			return Init::TOGGLE_OPTION_NAME;
+		switch ( $feature_id ) {
+			case 'analytics':
+				return Analytics::TOGGLE_OPTION_NAME;
+			case 'new_navigation':
+				return Init::TOGGLE_OPTION_NAME;
+			case 'custom_order_tables':
+				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
+			default:
+				return "woocommerce_feature_{$feature_id}_enabled";
 		}
-
-		return "woocommerce_feature_{$feature_id}_enabled";
 	}
 
 	/**
@@ -469,7 +482,15 @@ class FeaturesController {
 		$matches = array();
 		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
 
-		if ( ! $success && Analytics::TOGGLE_OPTION_NAME !== $option && Init::TOGGLE_OPTION_NAME !== $option && NewProductManagementExperience::TOGGLE_OPTION_NAME !== $option ) {
+		$known_features = array(
+			Analytics::TOGGLE_OPTION_NAME,
+			Init::TOGGLE_OPTION_NAME,
+			NewProductManagementExperience::TOGGLE_OPTION_NAME,
+			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+		);
+
+		if ( ! $success && ! in_array( $option, $known_features, true ) ) {
 			return;
 		}
 
@@ -481,6 +502,8 @@ class FeaturesController {
 			$feature_id = 'analytics';
 		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
 			$feature_id = 'new_navigation';
+		} elseif ( in_array( $option, $known_features, true ) ) {
+			$feature_id = $option;
 		} else {
 			$feature_id = $matches[1];
 		}
@@ -551,7 +574,7 @@ class FeaturesController {
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
 			function( $feature_id ) use ( $features ) {
-				return $features[ $feature_id ]['is_experimental'];
+				return $features[ $feature_id ]['is_experimental'] ?? false;
 			}
 		);
 		$mature_feature_ids       = array_diff( $feature_ids, $experimental_feature_ids );
@@ -565,10 +588,8 @@ class FeaturesController {
 				 *
 				 * @param bool $disabled False.
 				 */
-				$additional_features = apply_filters( 'woocommerce_settings_features', $features );
+				$feature_settings = apply_filters( 'woocommerce_settings_features', $feature_settings );
 				// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-
-				$feature_settings = array_merge( $feature_settings, $additional_features );
 
 				if ( ! empty( $experimental_feature_ids ) ) {
 					$feature_settings[] = array(
@@ -610,10 +631,11 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
-		$description = $feature['description'];
+		$description = $feature['description'] ?? '';
 		$disabled    = false;
 		$desc_tip    = '';
-		$tooltip     = isset( $feature['tooltip'] ) ? $feature['tooltip'] : '';
+		$tooltip     = $feature['tooltip'] ?? '';
+		$type        = $feature['type'] ?? 'checkbox';
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
@@ -664,50 +686,9 @@ class FeaturesController {
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
+			$disabled                = ! $this->feature_is_enabled( $feature_id );
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id, true );
-			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
-			$incompatibles           = array_filter( $incompatibles, 'is_plugin_active' );
-			$incompatible_count      = count( $incompatibles );
-			if ( $incompatible_count > 0 ) {
-				if ( 1 === $incompatible_count ) {
-					/* translators: %s = printable plugin name */
-					$desc_tip = sprintf( __( "⚠ This feature shouldn't be enabled, the %s plugin is active and isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
-				} elseif ( 2 === $incompatible_count ) {
-					/* translators: %1\$s, %2\$s = printable plugin names */
-					$desc_tip = sprintf(
-						__( "⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it.", 'woocommerce' ),
-						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
-						$this->plugin_util->get_plugin_name( $incompatibles[1] )
-					);
-				} else {
-					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
-					$desc_tip = sprintf(
-						_n(
-							"⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more active plugin isn't compatible with it",
-							"⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it. There are %3\$d other incompatible plugins.",
-							$incompatible_count - 2,
-							'woocommerce'
-						),
-						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
-						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
-						$incompatible_count - 2
-					);
-				}
-
-				$incompatible_plugins_url = add_query_arg(
-					array(
-						'plugin_status' => 'incompatible_with_feature',
-						'feature_id'    => $feature_id,
-					),
-					admin_url( 'plugins.php' )
-				);
-				/* translators: %s = URL of the plugins page */
-				$extra_desc_tip = sprintf( __( " <a href='%s'>Manage incompatible plugins</a>", 'woocommerce' ), $incompatible_plugins_url );
-
-				$desc_tip .= $extra_desc_tip;
-
-				$disabled = ! $this->feature_is_enabled( $feature_id );
-			}
+			$desc_tip                = $this->plugin_util->generate_incompatible_plugin_feature_warning( $feature_id, $plugin_info_for_feature );
 		}
 
 		/**
@@ -722,16 +703,33 @@ class FeaturesController {
 		 */
 		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
 
-		return array(
+		$feature_setting = array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
-			'type'     => 'checkbox',
+			'type'     => $type,
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,
 			'tooltip'  => $tooltip,
 			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
+
+		/**
+		 * Allows to modify feature setting that will be used to render in the feature page.
+		 *
+		 * @param array $feature_setting The feature setting. Describes the feature:
+		 *      - title: The title of the feature.
+		 *      - desc: The description of the feature. Will be displayed under the title.
+		 *      - type: The type of the feature. Could be any of supported settings types from `WC_Admin_Settings::output_fields`, but if it's anything other than checkbox or radio, it will need custom handling.
+		 *      - id: The id of the feature. Will be used as the name of the setting.
+		 *      - disabled: Whether the feature is disabled or not.
+		 *      - desc_tip: The description tip of the feature. Will be displayed as a tooltip next to the description.
+		 *      - tooltip: The tooltip of the feature. Will be displayed as a tooltip next to the name.
+		 *      - default: The default value of the feature.
+		 * @param string $feature_id The id of the feature.
+		 * @since 8.0.0
+		 */
+		return apply_filters( 'woocommerce_feature_setting', $feature_setting, $feature_id );
 	}
 
 	/**
@@ -1152,8 +1150,9 @@ class FeaturesController {
 				$query_params_to_remove[] = $feature_id;
 			}
 		}
-		if ( count( $query_params_to_remove ) > 1 ) {
-			wp_safe_redirect( remove_query_arg( $query_params_to_remove, wp_get_referer() ) );
+		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
 		}
 	}
 }

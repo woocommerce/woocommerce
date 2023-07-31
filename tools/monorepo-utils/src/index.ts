@@ -4,16 +4,20 @@
 import { Command } from '@commander-js/extra-typings';
 import figlet from 'figlet';
 import chalk from 'chalk';
+import dotenv from 'dotenv';
 
 /**
  * Internal dependencies
  */
 import CodeFreeze from './code-freeze/commands';
 import Slack from './slack/commands/slack';
+import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import WorkflowProfiler from './workflow-profiler/commands';
 import { Logger } from './core/logger';
 import { isGithubCI } from './core/environment';
+
+dotenv.config();
 
 if ( ! isGithubCI() ) {
 	Logger.notice(
@@ -29,7 +33,8 @@ const program = new Command()
 	.addCommand( CodeFreeze )
 	.addCommand( Slack )
 	.addCommand( Changefile )
-	.addCommand( WorkflowProfiler );
+	.addCommand( WorkflowProfiler )
+	.addCommand( Manifest );
 
 program.exitOverride();
 

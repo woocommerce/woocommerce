@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_post_types = array( 'simple', 'variable' );
 
 	/**
 	 * Redirection controller.
@@ -259,7 +259,8 @@ class Init {
 								array(
 									'woocommerce/product-name-field',
 									array(
-										'name' => 'Product name',
+										'name'      => 'Product name',
+										'autoFocus' => true,
 									),
 								),
 								array(
@@ -335,11 +336,20 @@ class Init {
 								),
 							),
 						),
+					),
+				),
+				array(
+					'woocommerce/product-tab',
+					array(
+						'id'    => 'organization',
+						'title' => __( 'Organization', 'woocommerce' ),
+						'order' => 15,
+					),
+					array(
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Organization & visibility', 'woocommerce' ),
-								'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
+								'title' => __( 'Product catalog', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -348,18 +358,25 @@ class Init {
 										'name' => 'categories',
 									),
 								),
+								array(
+									'woocommerce/product-checkbox-field',
+									array(
+										'label'    => __( 'Enable product reviews', 'woocommerce' ),
+										'property' => 'reviews_allowed',
+									),
+								),
+								array(
+									'woocommerce/product-password-field',
+									array(
+										'label' => __( 'Require a password', 'woocommerce' ),
+									),
+								),
 							),
 						),
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Attributes', 'woocommerce' ),
-								'description' => sprintf(
-									/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
-									__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
-									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
-									'</a>'
-								),
+								'title' => __( 'Attributes', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -689,6 +706,41 @@ class Init {
 					),
 				),
 			);
+			if ( Features::is_enabled( 'product-variation-management' ) ) {
+				array_push(
+					$args['template'],
+					array(
+						'woocommerce/product-tab',
+						array(
+							'id'    => 'variations',
+							'title' => __( 'Variations', 'woocommerce' ),
+							'order' => 40,
+						),
+						array(
+							array(
+								'woocommerce/product-variations-fields',
+								array(
+									'description' => sprintf(
+										/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
+										__( '%1$sSell your product in multiple variations like size or color.%2$s Get started by adding options for the buyers to choose on the product page.', 'woocommerce' ),
+										'<strong>',
+										'</strong>'
+									),
+								),
+								array(
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variation options', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variations-options-field' ) ),
+									),
+								),
+							),
+						),
+					)
+				);
+			}
 		}
 		return $args;
 	}
@@ -706,6 +758,11 @@ class Init {
 		// not be the product edit page (it mostly likely isn't).
 		if ( PageController::is_admin_page() ) {
 			$screen->is_block_editor( true );
+
+			wp_add_inline_script(
+				'wp-blocks',
+				'wp.blocks && wp.blocks.unstable__bootstrapServerSideBlockDefinitions && wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+			);
 		}
 	}
 }

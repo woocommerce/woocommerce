@@ -229,9 +229,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							} }
 							className="woocommerce-new-attribute-modal"
 						>
-							<Notice isDismissible={ false }>
-								<p>{ notice }</p>
-							</Notice>
+							{ notice && (
+								<Notice isDismissible={ false }>
+									<p>{ notice }</p>
+								</Notice>
+							) }
 
 							<div className="woocommerce-new-attribute-modal__body">
 								<table className="woocommerce-new-attribute-modal__table">

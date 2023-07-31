@@ -33,8 +33,11 @@ class DatabaseUtil {
 	 * @return array An array containing the names of the tables that currently don't exist in the database.
 	 */
 	public function get_missing_tables( string $creation_queries ): array {
-		$dbdelta_output = $this->dbdelta( $creation_queries, false );
-		$parsed_output  = $this->parse_dbdelta_output( $dbdelta_output );
+		global $wpdb;
+		$suppress_errors = $wpdb->suppress_errors( true );
+		$dbdelta_output  = $this->dbdelta( $creation_queries, false );
+		$wpdb->suppress_errors( $suppress_errors );
+		$parsed_output = $this->parse_dbdelta_output( $dbdelta_output );
 		return $parsed_output['created_tables'];
 	}
 
@@ -230,19 +233,35 @@ class DatabaseUtil {
 	 */
 	public function insert_on_duplicate_key_update( $table_name, $data, $format ) : int {
 		global $wpdb;
+		if ( empty( $data ) ) {
+			return 0;
+		}
 
-		$columns             = array_keys( $data );
+		$columns      = array_keys( $data );
+		$value_format = array();
+		$values       = array();
+		$index        = 0;
+		// Directly use NULL for placeholder if the value is NULL, since otherwise $wpdb->prepare will convert it to empty string.
+		foreach ( $data as $key => $value ) {
+			if ( is_null( $value ) ) {
+				$value_format[] = 'NULL';
+			} else {
+				$values[]       = $value;
+				$value_format[] = $format[ $index ];
+			}
+			$index++;
+		}
 		$column_clause       = '`' . implode( '`, `', $columns ) . '`';
-		$value_placeholders  = implode( ', ', array_values( $format ) );
+		$value_format_clause = implode( ', ', $value_format );
 		$on_duplicate_clause = $this->generate_on_duplicate_statement_clause( $columns );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Values are escaped in $wpdb->prepare.
 		$sql = $wpdb->prepare(
 			"
 INSERT INTO $table_name ( $column_clause )
-VALUES ( $value_placeholders )
+VALUES ( $value_format_clause )
 $on_duplicate_clause
 ",
-			array_values( $data )
+			$values
 		);
 		// phpcs:enable
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared.

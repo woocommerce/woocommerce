@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-When detecting which plugins are WooCommerce-aware, improve accuracy by ignoring cached plugin data.

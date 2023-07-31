@@ -14,7 +14,7 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->setup_cot();
-		$this->toggle_cot( false );
+		$this->toggle_cot_feature_and_usage( false );
 	}
 
 	/**
@@ -29,7 +29,7 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	 * Test wc_get_customer_order_count. Borrowed from `WC_Tests_Customer_Functions` class for COT.
 	 */
 	public function test_hpos_wc_customer_bought_product() {
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 		$product_1     = new WC_Product_Simple();

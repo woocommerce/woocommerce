@@ -1,15 +1,11 @@
 /**
- * External dependencies
- */
-import path from 'path';
-
-/**
  * Internal dependencies
  */
 import {
 	getChangelogSignificance,
 	getChangelogType,
 	getChangelogDetails,
+	getChangelogDetailsError,
 } from '../github';
 import { Logger } from '../../../core/logger';
 
@@ -48,11 +44,11 @@ describe( 'getChangelogSignificance', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -87,11 +83,11 @@ describe( 'getChangelogSignificance', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -129,11 +125,11 @@ describe( 'getChangelogSignificance', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -173,11 +169,11 @@ describe( 'getChangelogType', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -212,11 +208,11 @@ describe( 'getChangelogType', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -254,11 +250,11 @@ describe( 'getChangelogType', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -298,11 +294,11 @@ describe( 'getChangelogDetails', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'\r\n' +
 			'</details>';
@@ -314,7 +310,7 @@ describe( 'getChangelogDetails', () => {
 		expect( details.comment ).toEqual( '' );
 	} );
 
-	it( 'should error if a comment and message are added', () => {
+	it( 'should provide comment and message when both are added', () => {
 		const body =
 			'### Changelog entry\r\n' +
 			'\r\n' +
@@ -340,24 +336,22 @@ describe( 'getChangelogDetails', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			'\r\n' +
 			'</details>';
 
 		const details = getChangelogDetails( body );
-		expect( details ).toBeUndefined();
-		expect( Logger.error ).toHaveBeenCalledWith(
-			'Both a message and comment were found. Only one can be entered'
-		);
+		expect( details.message ).toEqual( 'This is a very useful fix.' );
+		expect( details.comment ).toEqual( 'This is a very useful comment.' );
 	} );
 
-	it( 'should error if a comment is entered with a significance other than patch', () => {
+	it( 'should return a comment even when it is entered with a significance other than patch', () => {
 		const body =
 			'### Changelog entry\r\n' +
 			'\r\n' +
@@ -383,19 +377,73 @@ describe( 'getChangelogDetails', () => {
 			'- [ ] Performance - Address performance issues\r\n' +
 			'- [ ] Enhancement\r\n' +
 			'\r\n' +
-			'#### Message\r\n' +
+			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'\r\n' +
-			'#### Comment\r\n' +
+			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			'\r\n' +
 			'</details>';
 
 		const details = getChangelogDetails( body );
-		expect( details ).toBeUndefined();
-		expect( Logger.error ).toHaveBeenCalledWith(
+		expect( details.comment ).toEqual( 'This is a very useful comment.' );
+		expect( details.significance ).toEqual( 'minor' );
+	} );
+} );
+
+describe( 'getChangelogDetailsError', () => {
+	it( 'should return an error when both a message and comment provided', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: 'comment',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual(
+			'Both a message and comment were found. Only one can be entered'
+		);
+	} );
+
+	it( 'should return an error when a comment is provided with a significance other than patch', () => {
+		const error = getChangelogDetailsError( {
+			message: '',
+			comment: 'comment',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual(
 			'Only patch changes can have a comment. Please change the significance to patch or remove the comment'
 		);
+	} );
+
+	it( 'should return an error when no significance found', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: '',
+			type: 'fix',
+			significance: '',
+		} );
+		expect( error ).toEqual( 'No changelog significance found' );
+	} );
+
+	it( 'should return an error when no type found', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: '',
+			type: '',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual( 'No changelog type found' );
+	} );
+
+	it( 'should return an error when neither a comment or message is provided', () => {
+		const error = getChangelogDetailsError( {
+			message: '',
+			comment: '',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual( 'No changelog message or comment found' );
 	} );
 } );

@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
+const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 
 const guestEmail = 'checkout-guest@example.com';
 
@@ -235,15 +236,51 @@ test.describe( 'Checkout page', () => {
 
 		await page.locator( 'text=Place order' ).click();
 
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		// get order ID from the page
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+
+
+		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
+		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
+		// grace period following initial order placement, the 'order received' page should still be rendered.
+		await page.context().clearCookies();
+		await page.reload();
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
+
+		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
+		// be presented with a request to verify their email address.
+		await setFilterValue( page, 'woocommerce_order_email_verification_grace_period', 0 );
+		await page.reload();
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
+			/verify the email address associated with the order/
+		);
+
+		// Supplying an email address other than the actual order billing email address will take them back to the same
+		// page with an error message.
+		await page.fill( '#email', 'incorrect@email.address' );
+		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
+			/verify the email address associated with the order/
+		);
+		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
+			/We were unable to verify the email address you provided/
+		);
+
+		// However if they supply the *correct* billing email address, they should see the order received page again.
+		await page.fill( '#email', guestEmail );
+		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		await page.goto( 'wp-login.php' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
@@ -256,8 +293,8 @@ test.describe( 'Checkout page', () => {
 		);
 
 		await expect(
-			page.locator( 'h2.woocommerce-order-data__heading' )
-		).toContainText( `Order #${ guestOrderId } details` );
+			page.getByRole( 'heading', { name: `Order #${ guestOrderId } details` } )
+		).toBeVisible();
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
 		);
@@ -270,12 +307,13 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
 			twoProductPrice
 		);
+		await clearFilters( page );
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
-		await page.goto( 'wp-admin/' );
-		await page.locator( 'input[name="log"]' ).fill( customer.username );
-		await page.locator( 'input[name="pwd"]' ).fill( customer.password );
+		await page.goto( 'my-account/' );
+		await page.locator( 'input[name="username"]' ).fill( customer.username );
+		await page.locator( 'input[name="password"]' ).fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -320,9 +358,17 @@ test.describe( 'Checkout page', () => {
 			.split( /(\s+)/ )[ 6 ]
 			.toString();
 
-		await page.goto( 'wp-login.php?loggedout=true' );
-		await page.waitForLoadState( 'networkidle' );
+		// Effect a log out/simulate a new browsing session by dropping all cookies.
+		await page.context().clearCookies();
+		await page.reload();
 
+		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+			/Please log in to your account to view this order/
+		);
+
+		// Switch to admin user.
+		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();

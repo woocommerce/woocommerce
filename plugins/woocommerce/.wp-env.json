@@ -10,7 +10,8 @@
         "ALTERNATE_WP_CRON": true
     },
     "mappings": {
-        "wp-cli.yml": "./tests/wp-cli.yml"
+        "wp-cli.yml": "./tests/wp-cli.yml",
+        "wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php"
     },
     "lifecycleScripts": {
         "afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
@@ -24,7 +25,7 @@
                 ".",
                 "https://downloads.wordpress.org/plugin/akismet.zip",
                 "https://github.com/WP-API/Basic-Auth/archive/master.zip",
-                "https://downloads.wordpress.org/plugin/wp-mail-logging.1.11.2.zip"
+                "https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
             ],
             "themes": [
                 "https://downloads.wordpress.org/theme/twentynineteen.zip"

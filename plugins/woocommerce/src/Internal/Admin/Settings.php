@@ -251,7 +251,7 @@ class Settings {
 		foreach ( array_keys( $features ) as $feature_id ) {
 			$new_features[ $feature_id ] = array(
 				'is_enabled'      => $features[ $feature_id ]['is_enabled'],
-				'is_experimental' => $features[ $feature_id ]['is_experimental'],
+				'is_experimental' => $features[ $feature_id ]['is_experimental'] ?? false,
 			);
 		}
 

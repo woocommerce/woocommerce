@@ -58,7 +58,7 @@ describe( 'DiscoverTools component', () => {
 	} );
 
 	describe( 'With plugins loaded', () => {
-		it( 'should render `direct_install: true` plugins with "Install plugin" button', () => {
+		it( 'should render `direct_install: true` plugins with "Install extension" button', () => {
 			(
 				useRecommendedPluginsWithoutChannels as jest.Mock
 			 ).mockReturnValue( {
@@ -92,7 +92,7 @@ describe( 'DiscoverTools component', () => {
 			} );
 			render( <DiscoverTools /> );
 
-			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install plugin" button.
+			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
 			expect( screen.getByText( 'Sales channels' ) ).toBeInTheDocument();
 			expect(
 				screen.getByText( 'Google Listings and Ads' )
@@ -100,7 +100,9 @@ describe( 'DiscoverTools component', () => {
 			expect(
 				screen.getByText( 'Built by WooCommerce' )
 			).toBeInTheDocument();
-			expect( screen.getByText( 'Install plugin' ) ).toBeInTheDocument();
+			expect(
+				screen.getByText( 'Install extension' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should render `direct_install: false` plugins with "View details" button', () => {

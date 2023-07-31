@@ -38,7 +38,7 @@ export const useCreateProductByType = () => {
 			}
 
 			const assignment = await loadExperimentAssignment(
-				'woocommerce_product_creation_experience_202306_v2'
+				'woocommerce_product_creation_experience_202308_v3'
 			);
 
 			if ( assignment.variationName === 'treatment' ) {
@@ -65,9 +65,9 @@ export const useCreateProductByType = () => {
 					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
 				);
 				window.location.href = link;
-			} else {
-				throw new Error( 'Unexpected empty data response from server' );
+				return;
 			}
+			throw new Error( 'Unexpected empty data response from server' );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
 		}
