@@ -7,7 +7,7 @@ import fs from 'fs';
 /**
  * Internal dependencies
  */
-import { Category, Post, generatePageId } from './generate-manifest';
+import { Category, Post, generatePostId } from './generate-manifest';
 
 /**
  * Process relative markdown links in the manifest.
@@ -42,7 +42,7 @@ export const processMarkdownLinks = (
 				);
 
 				if ( fs.existsSync( linkedFilePath ) ) {
-					const linkedId = generatePageId(
+					const linkedId = generatePostId(
 						linkedFilePath,
 						projectName
 					);
