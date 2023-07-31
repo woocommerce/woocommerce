@@ -116,6 +116,9 @@ class Init {
 	 * Dequeue conflicting styles.
 	 */
 	public function dequeue_conflicting_styles() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
 		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
 		wp_dequeue_style( 'woocommerce-blocktheme' );
 	}
