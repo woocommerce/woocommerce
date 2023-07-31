@@ -2309,14 +2309,14 @@ FROM $order_meta_table
 		$order->save_meta_data();
 		$order->apply_changes();
 
+		$this->clear_caches( $order );
+
 		if ( $backfill ) {
 			self::$backfilling_order_ids[] = $order->get_id();
-			$order                         = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
-			$this->maybe_backfill_post_record( $order );
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
-
-		$this->clear_caches( $order );
 	}
 
 	/**
@@ -2397,8 +2397,8 @@ FROM $order_meta_table
 
 		if ( $backfill ) {
 			self::$backfilling_order_ids[] = $order->get_id();
-			$order = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
-			$this->maybe_backfill_post_record( $order );
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
 
