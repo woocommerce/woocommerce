@@ -503,6 +503,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		global $wpdb;
 
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 
 		// Tests trashing of orders.
 		$order = $this->create_complex_cot_order();
@@ -1219,6 +1220,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Direct write to metadata should propagate to the orders table when reading.
 	 */
 	public function test_read_with_direct_meta_write() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
@@ -1242,6 +1244,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
