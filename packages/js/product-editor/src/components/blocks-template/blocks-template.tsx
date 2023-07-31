@@ -3,7 +3,10 @@
  */
 import { createElement, useLayoutEffect, useState } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	synchronizeBlocksWithTemplate,
+} from '@wordpress/blocks';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -24,10 +27,33 @@ type Template = {
 	};
 };
 
+export function getVisibleBlocks(
+	blocks: BlockInstance[],
+	hiddenBlockIds: string[]
+) {
+	const visibleBlocks: BlockInstance[] = [];
+
+	blocks.forEach( ( block ) => {
+		if ( hiddenBlockIds.includes( block.attributes._templateId ) ) {
+			return;
+		}
+		const visibleInnerBlocks = getVisibleBlocks(
+			block.innerBlocks,
+			hiddenBlockIds
+		);
+		const visibleBlock = { ...block, innerBlocks: visibleInnerBlocks };
+		visibleBlocks.push( visibleBlock );
+	} );
+
+	return visibleBlocks;
+}
+
 export function BlocksTemplate() {
 	const [ selectedTemplateId, setSelectedTemplateId ] = useState(
 		'woocommerce/woocommerce//product-editor_simple'
 	);
+	const [ hiddenBlockIds ] = useState( [ 'section/basic-details' ] );
+
 	const productId = useEntityId( 'postType', 'product' );
 
 	const [ , , onChange ] = useEntityBlockEditor( 'postType', 'product', {
@@ -51,11 +77,14 @@ export function BlocksTemplate() {
 			// @ts-ignore
 			( t ) => t.id === selectedTemplateId
 		);
-		onChange(
-			synchronizeBlocksWithTemplate( [], template.content.raw ),
-			{}
+		const newBlocks = synchronizeBlocksWithTemplate(
+			[],
+			template.content.raw
 		);
-	}, [ templates, isLoading, selectedTemplateId ] );
+		const visibleBlocks = getVisibleBlocks( newBlocks, hiddenBlockIds );
+
+		onChange( visibleBlocks, {} );
+	}, [ templates, isLoading, selectedTemplateId, hiddenBlockIds ] );
 
 	if ( ! templates ) {
 		return null;
