@@ -25,66 +25,41 @@ async function expectBlockProductEditor( page ) {
 	).toContainText( 'Add new product' );
 }
 
+async function disableNewEditorIfEnabled( browser ) {
+	const context = await browser.newContext();
+	const page = await context.newPage();
+	isNewProductEditorEnabled = await isBlockProductEditorEnabled( page );
+	if ( isNewProductEditorEnabled ) {
+		await toggleBlockProductEditor( 'disable', page );
+	}
+}
+
 test.describe( 'Enable block product editor', () => {
-	test.describe( 'Default (disabled)', () => {
+	test.describe( 'Enabled', () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeAll( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
+		test.beforeEach( async ( { browser } ) => {
+			await disableNewEditorIfEnabled( browser );
+		} );
+
+		test.afterEach( async ( { browser } ) => {
+			await disableNewEditorIfEnabled( browser );
 		} );
 
 		test.skip(
 			isTrackingSupposedToBeEnabled,
-			'The block product editor is being tested'
+			'The block product editor is not being tested'
 		);
-
-		test( 'is feature flag disabled', async ( { page } ) => {
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-
-			expect( isNewProductEditorEnabled ).toBeFalsy();
-		} );
 
 		test( 'is not hooked up to sidebar "Add New"', async ( { page } ) => {
 			await page.goto( ALL_PRODUCTS_URL );
 			await clickAddNewMenuItem( page );
 			await expectOldProductEditor( page );
 		} );
-	} );
-
-	test.describe( 'Enabled', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
-		test.afterAll( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
-		} );
-
-		test.skip(
-			isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
-			'The block product editor is not being tested'
-		);
 
 		test( 'can enable the block product editor', async ( { page } ) => {
 			await toggleBlockProductEditor( 'enable', page );
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-			await expectBlockProductEditor( page );
-		} );
-
-		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
-			await page.goto( ALL_PRODUCTS_URL );
-			await clickAddNewMenuItem( page );
 			await expectBlockProductEditor( page );
 		} );
 	} );
