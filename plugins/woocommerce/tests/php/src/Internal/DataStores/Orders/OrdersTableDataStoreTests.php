@@ -1277,6 +1277,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
@@ -2567,6 +2568,28 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order->save_meta_data();
 			$order->add_meta_data( 'test_key_3', 'test_value_3' );
 			$order->save();
+			echo 'ehere';
 		}
+	}
+
+	/**
+	 * @testDox When creating a new order, test that we are not backfilling stale data when there is a postmeta hooks that modifies data on the order.
+	 */
+	public function test_backfill_does_not_trigger_when_creating_orders_with_filter() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+		$order = new WC_Order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 }

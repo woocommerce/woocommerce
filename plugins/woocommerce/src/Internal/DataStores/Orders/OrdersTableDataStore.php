@@ -571,7 +571,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 
 		self::$backfilling_order_ids[] = $order->get_id();
 		$cpt_data_store->update_order_from_object( $order );
-		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
@@ -589,6 +588,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
+		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -1668,7 +1668,8 @@ FROM $order_meta_table
 					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
 					'post_status'   => 'draft',
 					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
-					'post_date_gmt' => current_time( 'mysql', 1 ), // We set the date to prevent invalid date errors when using MySQL strict mode.
+					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				)
 			);
 
@@ -2309,7 +2310,10 @@ FROM $order_meta_table
 		$order->apply_changes();
 
 		if ( $backfill ) {
+			self::$backfilling_order_ids[] = $order->get_id();
+			$order                         = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $order );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
 
 		$this->clear_caches( $order );
