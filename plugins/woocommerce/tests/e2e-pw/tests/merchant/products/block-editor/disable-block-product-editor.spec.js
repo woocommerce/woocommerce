@@ -35,6 +35,12 @@ async function expectOldProductEditor( page ) {
 	).toContainText( 'Product data' );
 }
 
+async function expectBlockProductEditor( page ) {
+	await expect(
+		page.locator( '.woocommerce-product-header__inner h1' )
+	).toContainText( 'Add new product' );
+}
+
 test.describe( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -45,7 +51,7 @@ test.describe( 'Disable block product editor', () => {
 		}
 	} );
 
-	test.afterAll( async ( { browser } ) => {
+	test.afterEach( async ( { browser } ) => {
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		isNewProductEditorEnabled = await isBlockProductEditorEnabled( page );
@@ -58,6 +64,12 @@ test.describe( 'Disable block product editor', () => {
 		isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
 		'The block product editor is not being tested'
 	);
+
+	test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
+		await page.goto( ALL_PRODUCTS_URL );
+		await clickAddNewMenuItem( page );
+		await expectBlockProductEditor( page );
+	} );
 
 	test( 'can be disabled from the header', async ( { page } ) => {
 		await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
