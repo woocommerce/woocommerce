@@ -160,6 +160,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [10.5.0](./1050.md)
 -   [10.6.0](./1060.md)
     -   [10.6.1](./1061.md)
+    -   [10.6.2](./1062.md)
 -   [10.7.0](./1070.md)
 
 
