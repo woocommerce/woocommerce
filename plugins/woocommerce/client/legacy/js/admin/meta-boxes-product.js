@@ -436,12 +436,17 @@ jQuery( function ( $ ) {
 	// Set up attributes, if current page has the attributes list.
 	const $product_attributes = $( '.product_attributes' );
 	if ( $product_attributes.length === 1 ) {
-		var woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+		// When the attributes tab is shown, add an empty attribute to be filled out by the user.
+		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function() {
+			remove_blank_custom_attribute_if_no_other_attributes();
 
-		// If the product has no attributes, add an empty attribute to be filled out by the user.
-		if ( woocommerce_attribute_items.length === 0  ) {
-			add_custom_attribute_to_list();
-		}
+			var woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+
+			// If the product has no attributes, add an empty attribute to be filled out by the user.
+			if ( woocommerce_attribute_items.length === 0  ) {
+				add_custom_attribute_to_list();
+			}
+		} );
 
 		// Sort the attributes by their position.
 		woocommerce_attribute_items.sort( function ( a, b ) {
@@ -500,6 +505,7 @@ jQuery( function ( $ ) {
 				url: woocommerce_admin_meta_boxes.ajax_url,
 				data: {
 					action: 'woocommerce_add_attribute',
+					product_type: $( '#product-type' ).val(),
 					taxonomy: globalAttributeId ? globalAttributeId : '',
 					i: indexInList,
 					security: woocommerce_admin_meta_boxes.add_attribute_nonce,
