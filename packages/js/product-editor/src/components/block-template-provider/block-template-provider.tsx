@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement, useLayoutEffect, useState } from '@wordpress/element';
-import { SelectControl } from '@wordpress/components';
 import {
-	BlockInstance,
-	synchronizeBlocksWithTemplate,
-} from '@wordpress/blocks';
+	createElement,
+	Fragment,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
+import { SelectControl } from '@wordpress/components';
+import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -19,6 +21,11 @@ import {
 	useEntityRecords,
 } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { getVisibleBlocks } from './get-visible-blocks';
+
 type Template = {
 	id: string;
 	title: {
@@ -27,28 +34,13 @@ type Template = {
 	};
 };
 
-export function getVisibleBlocks(
-	blocks: BlockInstance[],
-	hiddenBlockIds: string[]
-) {
-	const visibleBlocks: BlockInstance[] = [];
+type BlockTemplateProviderProps = {
+	children: JSX.Element;
+};
 
-	blocks.forEach( ( block ) => {
-		if ( hiddenBlockIds.includes( block.attributes._templateId ) ) {
-			return;
-		}
-		const visibleInnerBlocks = getVisibleBlocks(
-			block.innerBlocks,
-			hiddenBlockIds
-		);
-		const visibleBlock = { ...block, innerBlocks: visibleInnerBlocks };
-		visibleBlocks.push( visibleBlock );
-	} );
-
-	return visibleBlocks;
-}
-
-export function BlocksTemplate() {
+export function BlockTemplateProvider( {
+	children,
+}: BlockTemplateProviderProps ) {
 	const [ selectedTemplateId, setSelectedTemplateId ] = useState(
 		'woocommerce/woocommerce//product-editor_simple'
 	);
@@ -91,15 +83,18 @@ export function BlocksTemplate() {
 	}
 
 	return (
-		<SelectControl
-			className="woocommerce-template-switcher"
-			options={ templates.map( ( template: Template ) => ( {
-				label: template.title.rendered,
-				value: template.id,
-			} ) ) }
-			onChange={ ( templateId ) =>
-				setSelectedTemplateId( templateId as string )
-			}
-		/>
+		<>
+			<SelectControl
+				className="woocommerce-template-switcher"
+				options={ templates.map( ( template: Template ) => ( {
+					label: template.title.rendered,
+					value: template.id,
+				} ) ) }
+				onChange={ ( templateId ) =>
+					setSelectedTemplateId( templateId as string )
+				}
+			/>
+			{ children }
+		</>
 	);
 }

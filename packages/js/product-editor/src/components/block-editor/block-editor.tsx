@@ -31,7 +31,7 @@ import {
 /**
  * Internal dependencies
  */
-import { BlocksTemplate } from '../blocks-template';
+import { BlockTemplateProvider } from '../block-template-provider';
 
 type BlockEditorProps = {
 	context: {
@@ -92,22 +92,23 @@ export function BlockEditor( {
 	return (
 		<div className="woocommerce-product-block-editor">
 			<BlockContextProvider value={ context }>
-				<BlocksTemplate />
-				<BlockEditorProvider
-					value={ blocks }
-					onInput={ onInput }
-					onChange={ onChange }
-					settings={ settings }
-				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
-					<BlockEditorKeyboardShortcuts.Register />
-					<BlockTools>
-						<ObserveTyping>
-							<BlockList className="woocommerce-product-block-editor__block-list" />
-						</ObserveTyping>
-					</BlockTools>
-				</BlockEditorProvider>
+				<BlockTemplateProvider>
+					<BlockEditorProvider
+						value={ blocks }
+						onInput={ onInput }
+						onChange={ onChange }
+						settings={ settings }
+					>
+						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+						{ /* @ts-ignore No types for this exist yet. */ }
+						<BlockEditorKeyboardShortcuts.Register />
+						<BlockTools>
+							<ObserveTyping>
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							</ObserveTyping>
+						</BlockTools>
+					</BlockEditorProvider>
+				</BlockTemplateProvider>
 			</BlockContextProvider>
 		</div>
 	);
