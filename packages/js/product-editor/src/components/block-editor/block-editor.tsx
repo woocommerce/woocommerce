@@ -106,7 +106,7 @@ export function BlockEditor( {
 			<BlockContextProvider value={ context }>
 				<BlockTemplateProvider
 					onChange={ onChange }
-					initialTemplateId={
+					initialTemplate={
 						'woocommerce/woocommerce//product-editor_simple'
 					}
 					templates={ templates }

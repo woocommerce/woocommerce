@@ -1,38 +1,23 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	Fragment,
-	useLayoutEffect,
-	useState,
-} from '@wordpress/element';
-import { SelectControl } from '@wordpress/components';
+import { createElement, useLayoutEffect, useState } from '@wordpress/element';
 import {
 	BlockInstance,
 	synchronizeBlocksWithTemplate,
-	TemplateArray,
 } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { getVisibleBlocks } from './get-visible-blocks';
-
-type Template = {
-	id: string;
-	title: {
-		raw: string;
-		rendered: string;
-	};
-	content: {
-		raw: TemplateArray;
-	};
-};
+import { Provider } from './context';
+import { Template } from './types';
+import { TestTemplateComponent } from './test-template-component';
 
 type BlockTemplateProviderProps = {
 	children: JSX.Element;
-	initialTemplateId: string;
+	initialTemplate: string;
 	onChange: (
 		blocks: BlockInstance[],
 		options: {
@@ -44,16 +29,16 @@ type BlockTemplateProviderProps = {
 
 export function BlockTemplateProvider( {
 	children,
-	initialTemplateId,
+	initialTemplate,
 	onChange,
 	templates,
 }: BlockTemplateProviderProps ) {
-	const [ selectedTemplateId, setSelectedTemplateId ] =
-		useState( initialTemplateId );
-	const [ hiddenBlockIds ] = useState( [ 'section/basic-details' ] );
+	const [ selectedTemplate, setSelectedTemplate ] =
+		useState( initialTemplate );
+	const [ hiddenBlocks, setHiddenBlocks ] = useState< string[] >( [] );
 
 	useLayoutEffect( () => {
-		const template = templates.find( ( t ) => t.id === selectedTemplateId );
+		const template = templates.find( ( t ) => t.id === selectedTemplate );
 		if ( ! template ) {
 			return;
 		}
@@ -61,28 +46,39 @@ export function BlockTemplateProvider( {
 			[],
 			template.content.raw
 		);
-		const visibleBlocks = getVisibleBlocks( newBlocks, hiddenBlockIds );
+		const visibleBlocks = getVisibleBlocks( newBlocks, hiddenBlocks );
 
 		onChange( visibleBlocks, {} );
-	}, [ templates, selectedTemplateId, hiddenBlockIds ] );
+	}, [ templates, selectedTemplate, hiddenBlocks ] );
 
-	if ( ! templates ) {
-		return null;
+	function hideBlock( blockId: string ) {
+		if ( hiddenBlocks.includes( blockId ) ) {
+			return;
+		}
+		setHiddenBlocks( [ ...hiddenBlocks, blockId ] );
+	}
+
+	function unhideBlock( blockId: string ) {
+		setHiddenBlocks( hiddenBlocks.filter( ( id ) => id !== blockId ) );
+	}
+
+	function selectTemplate( templateId: string ) {
+		setSelectedTemplate( templateId );
 	}
 
 	return (
-		<>
-			<SelectControl
-				className="woocommerce-template-switcher"
-				options={ templates.map( ( template: Template ) => ( {
-					label: template.title.rendered,
-					value: template.id,
-				} ) ) }
-				onChange={ ( templateId ) =>
-					setSelectedTemplateId( templateId as string )
-				}
-			/>
+		<Provider
+			value={ {
+				hideBlock,
+				hiddenBlocks,
+				selectedTemplate,
+				selectTemplate,
+				templates,
+				unhideBlock,
+			} }
+		>
+			<TestTemplateComponent />
 			{ children }
-		</>
+		</Provider>
 	);
 }
