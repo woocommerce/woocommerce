@@ -2310,8 +2310,10 @@ FROM $order_meta_table
 		$order->apply_changes();
 
 		if ( $backfill ) {
+			self::$reading_order_ids[] = $order->get_id();
 			$this->maybe_backfill_post_record( $order );
 		}
+
 		$this->clear_caches( $order );
 	}
 
