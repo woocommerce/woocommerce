@@ -2,8 +2,6 @@
 
 namespace WooCommerceDocs\Tests\Manifest;
 
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
-use PHPUnit\Framework\ExpectationFailedException;
 use WooCommerceDocs\Data\DocsStore;
 use WooCommerceDocs\Manifest\PostArgs;
 use WP_UnitTestCase;
@@ -21,7 +19,7 @@ class RelativeLinkParserTest extends WP_UnitTestCase {
 	 * Test that relative links are extracted from a manifest.
 	 */
 	public function test_extract_links_from_manifest() {
-		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest-with-links.json' ), true );
+		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest.json' ), true );
 		$links    = RelativeLinkParser::extract_links_from_manifest( $manifest );
 
 		$this->assertEquals( 2, count( $links ) );
@@ -35,7 +33,7 @@ class RelativeLinkParserTest extends WP_UnitTestCase {
 	 * Test that relative links can be replaced from a manifest.
 	 */
 	public function test_replace_links_in_manifest() {
-		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest-with-links.json' ), true );
+		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest.json' ), true );
 		$links    = RelativeLinkParser::extract_links_from_manifest( $manifest );
 
 		// First create a post with the relative links.
