@@ -611,7 +611,7 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$product_type = sanitize_text_field( wp_unslash( $_POST['product_type'] ) );
+		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : 'simple';
 
 		$i             = absint( $_POST['i'] );
 		$metabox_class = array();
