@@ -8,18 +8,11 @@ import {
 	useState,
 } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	useEntityBlockEditor,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	useEntityId,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityRecords,
-} from '@wordpress/core-data';
+	BlockInstance,
+	synchronizeBlocksWithTemplate,
+	TemplateArray,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -32,43 +25,38 @@ type Template = {
 		raw: string;
 		rendered: string;
 	};
+	content: {
+		raw: TemplateArray;
+	};
 };
 
 type BlockTemplateProviderProps = {
 	children: JSX.Element;
+	initialTemplateId: string;
+	onChange: (
+		blocks: BlockInstance[],
+		options: {
+			[ key: string ]: unknown;
+		}
+	) => void;
+	templates: Template[];
 };
 
 export function BlockTemplateProvider( {
 	children,
+	initialTemplateId,
+	onChange,
+	templates,
 }: BlockTemplateProviderProps ) {
-	const [ selectedTemplateId, setSelectedTemplateId ] = useState(
-		'woocommerce/woocommerce//product-editor_simple'
-	);
+	const [ selectedTemplateId, setSelectedTemplateId ] =
+		useState( initialTemplateId );
 	const [ hiddenBlockIds ] = useState( [ 'section/basic-details' ] );
 
-	const productId = useEntityId( 'postType', 'product' );
-
-	const [ , , onChange ] = useEntityBlockEditor( 'postType', 'product', {
-		id: productId,
-	} );
-
-	const { records: templates, isResolving: isLoading } = useEntityRecords(
-		'postType',
-		'wp_template',
-		{
-			post_type: 'woocommerce_product_editor_template',
-			per_page: -1,
-		}
-	);
-
 	useLayoutEffect( () => {
-		if ( isLoading || ! templates ) {
+		const template = templates.find( ( t ) => t.id === selectedTemplateId );
+		if ( ! template ) {
 			return;
 		}
-		const template = templates.find(
-			// @ts-ignore
-			( t ) => t.id === selectedTemplateId
-		);
 		const newBlocks = synchronizeBlocksWithTemplate(
 			[],
 			template.content.raw
@@ -76,7 +64,7 @@ export function BlockTemplateProvider( {
 		const visibleBlocks = getVisibleBlocks( newBlocks, hiddenBlockIds );
 
 		onChange( visibleBlocks, {} );
-	}, [ templates, isLoading, selectedTemplateId, hiddenBlockIds ] );
+	}, [ templates, selectedTemplateId, hiddenBlockIds ] );
 
 	if ( ! templates ) {
 		return null;

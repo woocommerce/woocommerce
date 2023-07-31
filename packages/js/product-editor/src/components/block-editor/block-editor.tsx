@@ -26,6 +26,9 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityRecords,
 } from '@wordpress/core-data';
 
 /**
@@ -85,14 +88,29 @@ export function BlockEditor( {
 		{ id: product.id }
 	);
 
-	if ( ! blocks ) {
+	const { records: templates } = useEntityRecords(
+		'postType',
+		'wp_template',
+		{
+			post_type: 'woocommerce_product_editor_template',
+			per_page: -1,
+		}
+	);
+
+	if ( ! blocks || ! templates ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-product-block-editor">
 			<BlockContextProvider value={ context }>
-				<BlockTemplateProvider>
+				<BlockTemplateProvider
+					onChange={ onChange }
+					initialTemplateId={
+						'woocommerce/woocommerce//product-editor_simple'
+					}
+					templates={ templates }
+				>
 					<BlockEditorProvider
 						value={ blocks }
 						onInput={ onInput }
