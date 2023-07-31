@@ -35,12 +35,6 @@ async function expectOldProductEditor( page ) {
 	).toContainText( 'Product data' );
 }
 
-async function expectBlockProductEditor( page ) {
-	await expect(
-		page.locator( '.woocommerce-product-header__inner h1' )
-	).toContainText( 'Add new product' );
-}
-
 test.describe( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -87,5 +81,4 @@ test.describe( 'Disable block product editor', () => {
 		await clickAddNewMenuItem( page );
 		await expectOldProductEditor( page );
 	} );
-	// } );
 } );
