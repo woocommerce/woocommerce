@@ -564,14 +564,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Abstract_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
-		// Prevent read on sync till backfill is complete to avoid read on sync being triggered by add_|update_|delete_postmeta etc hooks.
-		self::$backfilling_order_ids[] = $order->get_id();
 		$cpt_data_store                = $this->get_post_data_store_for_backfill();
 		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
 			return;
 		}
 
+		self::$backfilling_order_ids[] = $order->get_id();
 		$cpt_data_store->update_order_from_object( $order );
+		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
@@ -589,7 +589,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
-		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -2310,7 +2309,6 @@ FROM $order_meta_table
 		$order->apply_changes();
 
 		if ( $backfill ) {
-			self::$reading_order_ids[] = $order->get_id();
 			$this->maybe_backfill_post_record( $order );
 		}
 
@@ -2716,7 +2714,9 @@ CREATE TABLE $meta_table (
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
 			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $delete_meta;
@@ -2734,7 +2734,9 @@ CREATE TABLE $meta_table (
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
 			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $add_meta;
@@ -2752,7 +2754,9 @@ CREATE TABLE $meta_table (
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
 			update_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $update_meta;
