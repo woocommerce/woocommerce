@@ -52,9 +52,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
+		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"lint": "eslint src --ext=js,ts,tsx",

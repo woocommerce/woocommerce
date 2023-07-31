@@ -67,8 +67,8 @@ lib/vendor/
 contributors.md
 contributors.html
 
-# Yarn
-yarn.lock
+# Wireit cache
+.wireit
 
 # Editors
 nbproject/private/

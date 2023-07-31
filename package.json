@@ -21,7 +21,7 @@
 		"utils": "./tools/monorepo-utils/bin/run"
 	},
 	"scripts": {
-		"build": "pnpm exec turbo run turbo:build",
+		"build": "wireit",
 		"test": "pnpm exec turbo run turbo:test",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
@@ -59,10 +59,10 @@
 		"sass": "^1.59.3",
 		"sass-loader": "^10.4.1",
 		"syncpack": "^10.7.3",
-		"turbo": "^1.10.7",
 		"typescript": "^4.9.5",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.76.2"
+		"webpack": "^5.76.2",
+		"wireit": "^0.10.0"
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",
@@ -75,6 +75,30 @@
 		"overrides": {
 			"@types/react": "^17.0.2",
 			"react": "^17.0.2"
+		}
+	},
+	"wireit": {
+		"build": {
+			"dependencies": [
+				"./packages/js/ai:build",
+				"./packages/js/api:build",
+				"./packages/js/components:build",
+				"./packages/js/csv-export:build",
+				"./packages/js/currency:build",
+				"./packages/js/customer-effort-score:build",
+				"./packages/js/data:build",
+				"./packages/js/date:build",
+				"./packages/js/e2e-core-tests:build",
+				"./packages/js/experimental:build",
+				"./packages/js/explat:build",
+				"./packages/js/navigation:build",
+				"./packages/js/notices:build",
+				"./packages/js/number:build",
+				"./packages/js/onboarding:build",
+				"./packages/js/product-editor:build",
+				"./packages/js/tracks:build",
+				"./plugins/woocommerce-admin:build"
+			]
 		}
 	}
 }

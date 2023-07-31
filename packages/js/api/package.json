@@ -30,7 +30,7 @@
 	],
 	"sideEffects": false,
 	"scripts": {
-		"turbo:build": "pnpm run clean && npm run compile",
+		"build": "pnpm run clean && npm run compile",
 		"turbo:test": "jest",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"prepare": "composer install",
@@ -38,7 +38,6 @@
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc --project tsconfig.json",
 		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},
