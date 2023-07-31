@@ -70,9 +70,7 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$query = build_query_vars_from_query_block( $block, 1 );
 
-		$parsed_block['context']['query'] = $parsed_block['attrs']['query'];
-
-		return $this->block_instance->build_frontend_query( $query, $parsed_block, 1 );
+		return $this->block_instance->build_frontend_query( $query, $block, 1 );
 	}
 
 	/**
@@ -427,6 +425,75 @@ class ProductCollection extends \WP_UnitTestCase {
 		);
 
 		set_query_var( 'filter_stock_status', '' );
+	}
+
+	/**
+	 * Test merging filter by stock status queries.
+	 */
+	public function test_merging_filter_by_attribute_queries() {
+		// Mock the attribute data.
+		$this->block_instance->set_attributes_filter_query_args(
+			array(
+				array(
+					'filter'     => 'filter_color',
+					'query_type' => 'query_type_color',
+				),
+				array(
+					'filter'     => 'filter_size',
+					'query_type' => 'query_type_size',
+				),
+			)
+		);
+
+		set_query_var( 'filter_color', 'blue' );
+		set_query_var( 'query_type_color', 'or' );
+		set_query_var( 'filter_size', 'xl,xxl' );
+		set_query_var( 'query_type_size', 'and' );
+
+		$merged_query = $this->initialize_merged_query();
+		$tax_queries  = $merged_query['tax_query'];
+
+		$and_query = array();
+		foreach ( $tax_queries as $tax_query ) {
+			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
+				$and_query = $tax_query;
+			}
+		}
+
+		// Check if the AND query is an array.
+		$this->assertIsArray( $and_query );
+
+		$attribute_queries = array();
+		foreach ( $and_query as $and_query_item ) {
+			if ( is_array( $and_query_item ) ) {
+				$attribute_queries = $and_query_item;
+			}
+		}
+
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'pa_color',
+				'field'    => 'slug',
+				'terms'    => array( 'blue' ),
+				'operator' => 'IN',
+			),
+			$attribute_queries
+		);
+
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'pa_size',
+				'field'    => 'slug',
+				'terms'    => array( 'xl', 'xxl' ),
+				'operator' => 'AND',
+			),
+			$attribute_queries
+		);
+
+		set_query_var( 'filter_color', '' );
+		set_query_var( 'query_type_color', '' );
+		set_query_var( 'filter_size', '' );
+		set_query_var( 'query_type_size', '' );
 	}
 
 	/**
