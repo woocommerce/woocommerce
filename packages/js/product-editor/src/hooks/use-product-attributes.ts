@@ -90,9 +90,20 @@ export function useProductAttributes( {
 	};
 
 	const handleChange = ( newAttributes: ProductAttribute[] ) => {
-		const otherAttributes = isVariationAttributes
+		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
+
+		// Remove duplicate global attributes.
+		otherAttributes = otherAttributes.filter( ( attr ) => {
+			if (
+				attr.id > 0 &&
+				newAttributes.findIndex( ( a ) => a.id === attr.id ) !== -1
+			) {
+				return false;
+			}
+			return true;
+		} );
 		const newAugmentedAttributes = getAugmentedAttributes(
 			newAttributes,
 			isVariationAttributes,
@@ -102,18 +113,7 @@ export function useProductAttributes( {
 			otherAttributes,
 			! isVariationAttributes,
 			isVariationAttributes ? 0 : newAttributes.length
-		).filter( ( attr ) => {
-			// Remove duplicate global attributes.
-			if (
-				attr.id > 0 &&
-				newAugmentedAttributes.findIndex(
-					( a ) => a.id === attr.id
-				) !== -1
-			) {
-				return false;
-			}
-			return true;
-		} );
+		);
 
 		if ( isVariationAttributes ) {
 			onChange( [

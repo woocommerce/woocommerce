@@ -250,8 +250,8 @@ describe( 'useProductAttributes', () => {
 			await waitForNextUpdate();
 			result.current.handleChange( [ { ...testAttributes[ 1 ] } ] );
 			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...allAttributes[ 0 ], position: 0 },
-				{ ...allAttributes[ 1 ], position: 1, variation: true },
+				{ ...allAttributes[ 1 ], position: 0 },
+				{ ...allAttributes[ 0 ], position: 1, variation: true },
 			] );
 		} );
 	} );
