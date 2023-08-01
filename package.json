@@ -97,7 +97,8 @@
 				"./packages/js/onboarding:build",
 				"./packages/js/product-editor:build",
 				"./packages/js/tracks:build",
-				"./plugins/woocommerce-admin:build"
+				"./plugins/woocommerce-admin:build",
+				"./plugins/woocommerce:build"
 			]
 		}
 	}

@@ -1904,7 +1904,7 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.70.0
-        version: 5.70.0(webpack-cli@3.3.12)
+        version: 5.70.0(webpack-cli@4.9.2)
 
   packages/js/navigation:
     dependencies:
@@ -2729,6 +2729,9 @@ importers:
       webpack-cli:
         specifier: 3.3.12
         version: 3.3.12(webpack@5.70.0)
+      wireit:
+        specifier: ^0.10.0
+        version: 0.10.0
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3503,6 +3506,9 @@ importers:
       stylelint:
         specifier: 13.8.0
         version: 13.8.0
+      wireit:
+        specifier: ^0.10.0
+        version: 0.10.0
 
   tools/code-analyzer:
     dependencies:
@@ -3904,7 +3910,7 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.70.0
-        version: 5.70.0(webpack-cli@3.3.12)
+        version: 5.70.0(webpack-cli@4.9.2)
 
 packages:
 
@@ -13708,7 +13714,7 @@ packages:
       remark-slug: 6.1.0
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
-      webpack: 5.70.0(webpack-cli@3.3.12)
+      webpack: 5.70.0(webpack-cli@4.9.2)
     transitivePeerDependencies:
       - '@storybook/builder-webpack5'
       - '@storybook/manager-webpack5'
@@ -14718,7 +14724,7 @@ packages:
       typescript: 4.9.5
       unfetch: 4.2.0
       util-deprecate: 1.0.2
-      webpack: 5.70.0(webpack-cli@3.3.12)
+      webpack: 5.70.0(webpack-cli@4.9.2)
     transitivePeerDependencies:
       - '@types/react'
     dev: true
@@ -15237,7 +15243,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       typescript: 4.9.5
-      webpack: 5.70.0(webpack-cli@3.3.12)
+      webpack: 5.70.0(webpack-cli@4.9.2)
     transitivePeerDependencies:
       - '@storybook/manager-webpack5'
       - '@types/react'
@@ -38056,7 +38062,7 @@ packages:
       postcss: 8.4.12
       schema-utils: 3.1.1
       semver: 7.5.0
-      webpack: 5.70.0(webpack-cli@4.9.2)
+      webpack: 5.70.0(webpack-cli@3.3.12)
     dev: true
 
   /postcss-loader@4.3.0(postcss@8.4.12)(webpack@5.76.3):
@@ -39560,7 +39566,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.4
+      object.assign: 4.1.2
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1
@@ -42660,7 +42666,7 @@ packages:
       stylelint: 13.13.1
       stylelint-config-recommended: 3.0.0(stylelint@13.13.1)
       stylelint-config-recommended-scss: 4.3.0(stylelint-scss@3.21.0)(stylelint@13.13.1)
-      stylelint-scss: 3.21.0(stylelint@14.6.0)
+      stylelint-scss: 3.21.0(stylelint@13.13.1)
     dev: true
 
   /stylelint-scss@3.21.0(stylelint@13.13.1):
@@ -42689,20 +42695,6 @@ packages:
       postcss-selector-parser: 6.0.9
       postcss-value-parser: 4.2.0
       stylelint: 13.8.0
-    dev: true
-
-  /stylelint-scss@3.21.0(stylelint@14.6.0):
-    resolution: {integrity: sha512-CMI2wSHL+XVlNExpauy/+DbUcB/oUZLARDtMIXkpV/5yd8nthzylYd1cdHeDMJVBXeYHldsnebUX6MoV5zPW4A==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      stylelint: ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.0.0
-    dependencies:
-      lodash: 4.17.21
-      postcss-media-query-parser: 0.2.3
-      postcss-resolve-nested-selector: 0.1.1
-      postcss-selector-parser: 6.0.9
-      postcss-value-parser: 4.2.0
-      stylelint: 14.6.0
     dev: true
 
   /stylelint-scss@4.2.0(stylelint@14.6.0):
@@ -43350,7 +43342,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0(acorn@8.8.1)
-      webpack: 5.70.0(webpack-cli@4.9.2)
+      webpack: 5.70.0(webpack-cli@3.3.12)
     transitivePeerDependencies:
       - acorn
 
@@ -45406,7 +45398,7 @@ packages:
       webpack: '>=5.32.0'
     dependencies:
       ansis: 1.3.4
-      webpack: 5.70.0(webpack-cli@3.3.12)
+      webpack: 5.70.0(webpack-cli@4.9.2)
     dev: false
 
   /webpack-rtl-plugin@2.0.0:
@@ -45482,7 +45474,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5(webpack@4.46.0)
       watchpack: 1.7.5
-      webpack-cli: 3.3.12(webpack@4.46.0)
+      webpack-cli: 3.3.12(webpack@5.70.0)
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - supports-color

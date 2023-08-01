@@ -12,13 +12,19 @@
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm run build:zip"
 	},
+	"wireit": {
+		"build": {
+			"dependencies": [
+				"./client/legacy:build"
+			]
+		}
+	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
 		"turbo:test": "pnpm test:unit",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm lint:php",
 		"build:feature-config": "php bin/generate-feature-config.php",
@@ -96,6 +102,7 @@
 		"uuid": "^8.3.2",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
+		"wireit": "^0.10.0",
 		"wp-textdomain": "1.0.1"
 	},
 	"lint-staged": {
