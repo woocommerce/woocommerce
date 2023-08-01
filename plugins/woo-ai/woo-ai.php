@@ -87,3 +87,18 @@ function _woo_ai_bootstrap(): void {
 }
 
 add_action( 'plugins_loaded', '_woo_ai_bootstrap' );
+
+function enqueue_admin_scripts() {
+    wp_register_script(
+        'woo-ai-background-removal-pre',
+        plugin_dir_url( __FILE__ ) . 'assets/js/background-removal.js',
+        array(),
+        filemtime( plugin_dir_path( __FILE__ ) . 'path-to-your-js-file/background-removal.js' ),
+        true
+    );
+
+    wp_enqueue_script( 'woo-ai-background-removal-pre' );
+}
+
+// @todo: find a better place for this?
+add_action( 'admin_enqueue_scripts', 'enqueue_admin_scripts' );

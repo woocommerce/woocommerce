@@ -8,6 +8,7 @@ import { render, createRoot } from '@wordpress/element';
  */
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
+import { RemoveBackgroundButton } from './background-removal';
 
 import './index.scss';
 
@@ -29,8 +30,14 @@ const descriptionButtonRoot = document.getElementById(
 const nameSuggestionsRoot = document.getElementById(
 	'woocommerce-ai-app-product-name-suggestions'
 );
+const removeBackgroundButtonRoot = document.getElementById(
+	'woocommerce-ai-app-remove-background-button'
+);
+console.log( 'removeBackgroundButtonRoot', removeBackgroundButtonRoot );
 
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
+	console.log( 'rendering' );
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+	renderComponent( RemoveBackgroundButton, removeBackgroundButtonRoot );
 }
