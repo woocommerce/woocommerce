@@ -55,7 +55,6 @@ runs:
         - name: Install Node and PHP Dependencies
           shell: bash
           run: |
-              pnpm -w install turbo
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Get branch name
@@ -68,15 +67,6 @@ runs:
               else
                 echo "CURRENT_BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
               fi
-
-        - name: Cache Build Output
-          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
-          with:
-              path: .turbo
-              key: ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}-${{ github.sha }}
-              restore-keys: |
-                  ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}
-                  ${{ runner.os }}-build-output
 
         - name: Build
           if: ${{ inputs.build == 'true' }}
