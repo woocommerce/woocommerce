@@ -297,7 +297,10 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$template_args     = array( 'order' => $order );
+		$template_args     = array( 
+			'needs_verification' => false,
+			'order'              => $order,
+		);
 		$order_customer_id = $order->get_customer_id();
 
 		if ( ! $order_customer_id && self::guest_should_verify_email( $order, 'order-received' ) ) {
