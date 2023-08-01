@@ -68,7 +68,7 @@ interface BlockInterface extends BlockContainerInterface {
 	/**
 	 * Get the root template that the block belongs to.
 	 */
-	public function &get_root_template(): BlockBasedTemplateInterface;
+	public function &get_root_template(): BlockTemplateInterface;
 
 	/**
 	 * Get the block configuration as a formatted template.

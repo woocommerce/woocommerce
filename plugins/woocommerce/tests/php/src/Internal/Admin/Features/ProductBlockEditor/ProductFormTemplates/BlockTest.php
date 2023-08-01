@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates;
 
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates\Block;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockBasedTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockTemplate;
 
 use WC_Unit_Test_Case;
 
@@ -15,7 +15,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that the block name is required when creating a block.
 	 */
 	public function test_name_is_required() {
-		$template = new BlockBasedTemplate();
+		$template = new BlockTemplate();
 
 		$this->expectException( \ValueError::class );
 
@@ -26,7 +26,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that an ID is generated if not provided when creating a block.
 	 */
 	public function test_id_is_generated_if_not_provided() {
-		$template = new BlockBasedTemplate();
+		$template = new BlockTemplate();
 
 		$block = new Block(
 			[
@@ -42,8 +42,8 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that setting a parent from a different template is prevented.
 	 */
 	public function test_parent_from_different_template_throws_exception() {
-		$template   = new BlockBasedTemplate();
-		$template_2 = new BlockBasedTemplate();
+		$template   = new BlockTemplate();
+		$template_2 = new BlockTemplate();
 
 		$parent = new Block(
 			[
@@ -68,7 +68,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * and that the block is added to the root template.
 	 */
 	public function test_add_block() {
-		$template = new BlockBasedTemplate();
+		$template = new BlockTemplate();
 
 		$block = $template->add_block(
 			[
@@ -106,7 +106,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that adding nested blocks sets the parent and root template correctly.
 	 */
 	public function test_nested_add_block() {
-		$block_template = new BlockBasedTemplate();
+		$block_template = new BlockTemplate();
 
 		$block = $block_template->add_block(
 			[
@@ -155,7 +155,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
 	public function test_get_as_formatted_template() {
-		$template = new BlockBasedTemplate();
+		$template = new BlockTemplate();
 
 		$block = $template->add_block(
 			[
@@ -218,7 +218,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	 * Test that getting the inner blocks as a sorted formatted template is ordered correctly.
 	 */
 	public function test_get_inner_blocks_as_sorted_formatted_template() {
-		$template = new BlockBasedTemplate();
+		$template = new BlockTemplate();
 
 		$block = $template->add_block(
 			[

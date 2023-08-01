@@ -25,7 +25,7 @@ interface BlockContainerInterface {
 	/**
 	 * Get the root template that the block container belongs to.
 	 */
-	public function &get_root_template(): BlockBasedTemplateInterface;
+	public function &get_root_template(): BlockTemplateInterface;
 
 	/**
 	 * Get the inner blocks as a formatted template.
