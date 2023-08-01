@@ -221,7 +221,8 @@
 				"postcss-loader",
 				"react",
 				"react-dom",
-				"typescript"
+				"typescript",
+				"wireit"
 			],
 			"packages": [
 				"**"

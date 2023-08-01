@@ -24,8 +24,8 @@
 	},
 	"devDependencies": {
 		"@octokit/request-error": "^3.0.1",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@types/node": "^16.18.18",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.32.0",
 		"globby": "^11",
 		"jscodeshift": "^0.13.1",
@@ -33,7 +33,8 @@
 		"shx": "^0.3.3",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.9.5"
+		"typescript": "^4.9.5",
+		"wireit": "^0.10.0"
 	},
 	"oclif": {
 		"bin": "monorepo-merge",
@@ -53,9 +54,22 @@
 			}
 		}
 	},
+	"wireit": {
+		"build": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"src/**/*.{js,ts}",
+				"tsconfig.json"
+			],
+			"output": [
+				"dist/**/*",
+				".tsbuildinfo"
+			]
+		}
+	},
 	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build": "wireit",
 		"lint": "eslint . --ext .ts",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",
