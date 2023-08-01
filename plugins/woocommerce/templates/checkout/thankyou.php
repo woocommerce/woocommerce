@@ -99,8 +99,26 @@ defined( 'ABSPATH' ) || exit;
 
 				</ul>
 
-				<?php do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() ); ?>
-				<?php do_action( 'woocommerce_thankyou', $order->get_id() ); ?>
+				<?php
+				/**
+				 * Action fires at the bottom of the Order Confirmation screen for a specific payment method.
+				 *
+				 * @since 8.1.0
+				 *
+				 * @param int The ID of the order.
+				 */
+				do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
+				?>
+				<?php
+				/**
+				 * Action fires at the bottom of the Order Confirmation screen.
+				 *
+				 * @since 8.1.0
+				 *
+				 * @param int The ID of the order.
+				 */
+				do_action( 'woocommerce_thankyou', $order->get_id() );
+				?>
 
 			<?php endif; ?>
 
