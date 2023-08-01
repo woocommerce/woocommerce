@@ -60,5 +60,8 @@ jobs:
             - name: Log PHPCS debug information
               run: phpcs -i
 
-            - name: Run PHPCS on all files
-              run: phpcs ./src -n --report=checkstyle | cs2pr
+            - name: Run PHPCS on all changed files
+              run: |
+                git fetch origin trunk
+                changes=$(git diff --name-only origin/trunk..HEAD | tr '\n' ' ')
+                phpcs ${changes} -q --report=checkstyle | cs2pr
