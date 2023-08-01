@@ -21,7 +21,7 @@ class HandpickedProducts extends AbstractProductGrid {
 		$ids = array_map( 'absint', $this->attributes['products'] );
 
 		$query_args['post__in']       = $ids;
-		$query_args['posts_per_page'] = count( $ids );
+		$query_args['posts_per_page'] = count( $ids ); // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
 	}
 
 	/**
