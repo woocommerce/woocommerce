@@ -17,6 +17,15 @@
 			"dependencies": [
 				"./client/legacy:build"
 			]
+		},
+		"build:feature-config": {
+			"command": "php bin/generate-feature-config.php",
+			"files": [
+				"./client/admin/config/**/*"
+			],
+			"outputs": [
+				"./includes/react-admin/feature-config.json"
+			]
 		}
 	},
 	"scripts": {
@@ -27,7 +36,7 @@
 		"changelog": "composer exec -- changelogger",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm lint:php",
-		"build:feature-config": "php bin/generate-feature-config.php",
+		"build:feature-config": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"lint:fix": "pnpm lint:js:fix && pnpm lint:php:fix",
 		"lint:php": "composer run-script phpcs",
