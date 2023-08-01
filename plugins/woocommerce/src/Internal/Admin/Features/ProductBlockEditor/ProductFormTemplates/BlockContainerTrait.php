@@ -9,11 +9,11 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplate
  */
 trait BlockContainerTrait {
 	/**
-	 * The child blocks.
+	 * The inner blocks.
 	 *
 	 * @var BlockInterface[]
 	 */
-	private $child_blocks = [];
+	private $inner_blocks = [];
 
 	/**
 	 * Add a block to the block container.
@@ -28,39 +28,39 @@ trait BlockContainerTrait {
 
 		$block = new Block( $block_config, $root_template, $this );
 		$root_template->internal_add_block_to_template( $block );
-		$this->child_blocks[] = &$block;
+		$this->inner_blocks[] = &$block;
 		return $block;
 	}
 
 	/**
-	 * Get the child blocks sorted by order.
+	 * Get the inner blocks sorted by order.
 	 */
-	private function get_child_blocks_sorted_by_order(): array {
-		$sorted_child_blocks = $this->child_blocks;
+	private function get_inner_blocks_sorted_by_order(): array {
+		$sorted_inner_blocks = $this->inner_blocks;
 
 		usort(
-			$sorted_child_blocks,
+			$sorted_inner_blocks,
 			function( Block $a, Block $b ) {
 				return $a->get_order() <=> $b->get_order();
 			}
 		);
 
-		return $sorted_child_blocks;
+		return $sorted_inner_blocks;
 	}
 
 	/**
-	 * Get the child blocks as a simple array.
+	 * Get the inner blocks as a formatted template.
 	 */
-	public function get_child_blocks_as_simple_array(): array {
-		$child_blocks = $this->get_child_blocks_sorted_by_order();
+	public function get_inner_blocks_as_formatted_template(): array {
+		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
-		$child_blocks_as_simple_arrays = array_map(
+		$inner_blocks_as_formatted_template = array_map(
 			function( Block $block ) {
 				return $block->get_as_formatted_template();
 			},
-			$child_blocks
+			$inner_blocks
 		);
 
-		return $child_blocks_as_simple_arrays;
+		return $inner_blocks_as_formatted_template;
 	}
 }

@@ -215,9 +215,9 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that getting the child blocks as a sorted simple array is ordered correctly.
+	 * Test that getting the inner blocks as a sorted formatted template is ordered correctly.
 	 */
-	public function test_get_child_blocks_as_sorted_simple_array() {
+	public function test_get_inner_blocks_as_sorted_formatted_template() {
 		$template = new BlockBasedTemplate();
 
 		$block = $template->add_block(
@@ -284,8 +284,8 @@ class BlockTest extends WC_Unit_Test_Case {
 					[],
 				],
 			],
-			$block->get_child_blocks_as_simple_array(),
-			'Failed asserting that the child blocks are sorted by order.'
+			$block->get_inner_blocks_as_formatted_template(),
+			'Failed asserting that the inner blocks are sorted by order.'
 		);
 	}
 }

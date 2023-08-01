@@ -168,7 +168,7 @@ class Block implements BlockInterface, BlockContainerInterface {
 			$this->get_attributes(),
 		];
 
-		$child_blocks_as_simple_array = $this->get_child_blocks_as_simple_array();
+		$child_blocks_as_simple_array = $this->get_inner_blocks_as_formatted_template();
 		if ( ! empty( $child_blocks_as_simple_array ) ) {
 			$arr[] = $child_blocks_as_simple_array;
 		}

@@ -83,6 +83,6 @@ class BlockBasedTemplate implements BlockBasedTemplateInterface {
 	 * Get the template as a formatted template.
 	 */
 	public function get_as_formatted_template(): array {
-		return $this->get_child_blocks_as_simple_array();
+		return $this->get_inner_blocks_as_formatted_template();
 	}
 }

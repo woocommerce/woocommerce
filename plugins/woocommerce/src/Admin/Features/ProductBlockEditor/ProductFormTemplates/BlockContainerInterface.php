@@ -28,7 +28,7 @@ interface BlockContainerInterface {
 	public function &get_root_template(): BlockBasedTemplateInterface;
 
 	/**
-	 * Get the child blocks as a simple array.
+	 * Get the inner blocks as a formatted template.
 	 */
-	public function get_child_blocks_as_simple_array(): array;
+	public function get_inner_blocks_as_formatted_template(): array;
 }
