@@ -43,6 +43,7 @@ class Init {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
 				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -109,6 +110,17 @@ class Init {
 		 * @since 7.1.0
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+	}
+
+	/**
+	 * Dequeue conflicting styles.
+	 */
+	public function dequeue_conflicting_styles() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
+		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
+		wp_dequeue_style( 'woocommerce-blocktheme' );
 	}
 
 	/**
