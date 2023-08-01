@@ -66,7 +66,7 @@ register_woocommerce_admin_test_helper_rest_route(
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/transients/(?P<transient_names>(.*)+)',
-	'wca_test_helper_delete_option',
+	'wca_test_helper_delete_transient',
 	array(
 		'methods' => \WP_REST_Server::DELETABLE,
 		'args'                => array(
