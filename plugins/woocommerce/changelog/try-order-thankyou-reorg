@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Change the order confirmation screen to always show the 'Thank you for your order' message, even if the viewer must log in or confirm the order email to see the details of the order.
