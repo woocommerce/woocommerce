@@ -31,8 +31,6 @@
 		line-height: 24px;
 		text-align: center;
 		color: $gray-700;
-		letter-spacing: 0.25px;
-		-webkit-font-smoothing: antialiased;
 
 		@include breakpoint( '<782px' ) {
 			color: $gray-700;
