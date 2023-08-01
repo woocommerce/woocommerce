@@ -25,3 +25,8 @@ $ces-feedback-height: 64px;
 	justify-content: center;
 	align-items: center;
 }
+
+.woocommerce-task-header__contents-container.woocommerce-task-header__customize-store img.svg-background {
+	padding-right: 16px;
+	padding-top: 9px; // align with header text
+}
