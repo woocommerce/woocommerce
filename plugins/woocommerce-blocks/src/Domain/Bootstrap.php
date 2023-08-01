@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
+use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Migration;
@@ -351,6 +352,12 @@ class Bootstrap {
 			Notices::class,
 			function( Container $container ) {
 				return new Notices( $container->get( Package::class ) );
+			}
+		);
+		$this->container->register(
+			Hydration::class,
+			function( Container $container ) {
+				return new Hydration( $container->get( AssetDataRegistry::class ) );
 			}
 		);
 		$this->container->register(
