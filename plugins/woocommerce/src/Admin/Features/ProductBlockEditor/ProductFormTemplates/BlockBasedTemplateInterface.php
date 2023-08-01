@@ -11,7 +11,7 @@ interface BlockBasedTemplateInterface extends BlockContainerInterface {
 	 *
 	 * @param string $block_id The block ID.
 	 */
-	public function get_block_by_id( string $block_id ): ?BlockInterface;
+	public function get_block( string $block_id ): ?BlockInterface;
 
 	/**
 	 * Generate a block ID based on a base.

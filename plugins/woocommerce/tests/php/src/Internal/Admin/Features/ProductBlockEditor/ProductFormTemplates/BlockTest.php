@@ -97,7 +97,7 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			$child_block,
-			$template->get_block_by_id( 'test-block-id-2' ),
+			$template->get_block( 'test-block-id-2' ),
 			'Failed asserting that the child block is in the root template.'
 		);
 	}

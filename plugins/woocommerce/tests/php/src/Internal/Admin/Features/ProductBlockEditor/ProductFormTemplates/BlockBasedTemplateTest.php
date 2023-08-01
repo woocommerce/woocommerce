@@ -32,7 +32,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$this->assertSame( $block, $template->get_block_by_id( 'test-block-id' ) );
+		$this->assertSame( $block, $template->get_block( 'test-block-id' ) );
 	}
 
 	/**
@@ -76,16 +76,16 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 	/**
 	 * Test getting a block by ID returns null if the block does not exist.
 	 */
-	public function test_get_block_by_id_returns_null_if_block_does_not_exist() {
+	public function test_get_block_returns_null_if_block_does_not_exist() {
 		$template = new BlockBasedTemplate();
 
-		$this->assertNull( $template->get_block_by_id( 'test-block-id' ) );
+		$this->assertNull( $template->get_block( 'test-block-id' ) );
 	}
 
 	/**
 	 * Test getting a block by ID returns a reference to the block.
 	 */
-	public function test_get_block_by_id_returns_reference() {
+	public function test_get_block_returns_reference() {
 		$template = new BlockBasedTemplate();
 
 		$template->add_block(
@@ -95,11 +95,11 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$block = $template->get_block_by_id( 'test-block-id' );
+		$block = $template->get_block( 'test-block-id' );
 
 		$block->set_order( 23 );
 
-		$this->assertSame( 23, $template->get_block_by_id( 'test-block-id' )->get_order() );
+		$this->assertSame( 23, $template->get_block( 'test-block-id' )->get_order() );
 	}
 
 	/**
@@ -289,7 +289,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$block_to_insert_in = $template->get_block_by_id( 'a' );
+		$block_to_insert_in = $template->get_block( 'a' );
 
 		$block_to_insert_in->add_block(
 			[
@@ -297,7 +297,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$another_block_to_insert_in = $template->get_block_by_id( 'b' );
+		$another_block_to_insert_in = $template->get_block( 'b' );
 
 		$another_block_to_insert_in->add_block(
 			[
