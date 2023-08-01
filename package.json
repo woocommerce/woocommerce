@@ -22,6 +22,7 @@
 	},
 	"scripts": {
 		"build": "wireit",
+		"build-legacy": "wireit",
 		"test": "pnpm exec turbo run turbo:test",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
@@ -78,6 +79,13 @@
 		}
 	},
 	"wireit": {
+		"build-legacy": {
+			"dependencies": [
+				"build",
+				"./plugins/woocommerce-admin:build",
+				"./plugins/woocommerce:build"
+			]
+		},
 		"build": {
 			"dependencies": [
 				"./packages/js/ai:build",
@@ -96,9 +104,7 @@
 				"./packages/js/number:build",
 				"./packages/js/onboarding:build",
 				"./packages/js/product-editor:build",
-				"./packages/js/tracks:build",
-				"./plugins/woocommerce-admin:build",
-				"./plugins/woocommerce:build"
+				"./packages/js/tracks:build"
 			]
 		}
 	}

@@ -20,9 +20,6 @@
 				"babel.config.js"
 			],
 			"output": [
-				"build/**/*",
-				"build-module/**/*",
-				"build-types/**/*",
 				".tsbuildinfo"
 			],
 			"dependencies": [
