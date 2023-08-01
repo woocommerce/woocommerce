@@ -5,12 +5,10 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -91,8 +89,6 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$hpos_enable_sync   = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
-		$hpos_authoritative = CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
 		$features           = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
@@ -113,18 +109,9 @@ class FeaturesController {
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'    => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
+			'custom_order_tables'  => array(
 				'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
 				'enabled_by_default' => false,
-			),
-			$hpos_authoritative    => array(
-				'name'             => __( 'High-Performance Order Storage', 'woocommerce' ),
-				'order'            => 10,
-			),
-			$hpos_enable_sync      => array(
-				'name'            => '',
-				'order'            => 9,
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -444,10 +431,7 @@ class FeaturesController {
 			case 'new_navigation':
 				return Init::TOGGLE_OPTION_NAME;
 			case 'custom_order_tables':
-			case CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
 				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
-			case DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION:
-				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
 			default:
 				return "woocommerce_feature_{$feature_id}_enabled";
 		}
@@ -509,7 +493,6 @@ class FeaturesController {
 			Analytics::TOGGLE_OPTION_NAME,
 			Init::TOGGLE_OPTION_NAME,
 			NewProductManagementExperience::TOGGLE_OPTION_NAME,
-			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 		);
 
@@ -521,14 +504,23 @@ class FeaturesController {
 			return;
 		}
 
-		if ( Analytics::TOGGLE_OPTION_NAME === $option ) {
-			$feature_id = 'analytics';
-		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
-			$feature_id = 'new_navigation';
-		} elseif ( in_array( $option, $known_features, true ) ) {
-			$feature_id = $option;
-		} else {
-			$feature_id = $matches[1];
+		switch ( $option ) {
+			case Analytics::TOGGLE_OPTION_NAME:
+				$feature_id = 'analytics';
+				break;
+			case CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
+				$feature_id = 'custom_order_tables';
+				break;
+			case Init::TOGGLE_OPTION_NAME:
+				$feature_id = 'new_navigation';
+				break;
+			default:
+				if ( in_array( $option, $known_features, true ) ) {
+					$feature_id = $option;
+				} else {
+					$feature_id = $matches[1];
+				}
+				break;
 		}
 
 		/**
@@ -581,15 +573,14 @@ class FeaturesController {
 		$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$feature_settings =
+		$feature_settings = array(
 			array(
-				array(
-					'title' => __( 'Features', 'woocommerce' ),
-					'type'  => 'title',
-					'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce' ),
-					'id'    => 'features_options',
-				),
-			);
+				'title' => __( 'Features', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce' ),
+				'id'    => 'features_options',
+			),
+		);
 
 		$features = $this->get_features( true );
 
@@ -638,6 +629,15 @@ class FeaturesController {
 			}
 
 			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
+
+			$additional_settings = $features[ $id ]['additional_settings'] ?? array();
+			if ( 'custom_order_tables' === $id ) {
+				$additional_settings[] = wc_get_container()->get( CustomOrdersTableController::class )->get_hpos_setting_for_sync();
+			}
+
+			if ( count( $additional_settings ) > 0 ) {
+				$feature_settings = array_merge( $feature_settings, $additional_settings );
+			}
 		}
 
 		$feature_settings[] = array(
@@ -657,11 +657,12 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
-		$description = $feature['description'] ?? '';
-		$disabled    = false;
-		$desc_tip    = '';
-		$tooltip     = $feature['tooltip'] ?? '';
-		$type        = $feature['type'] ?? 'checkbox';
+		$description        = $feature['description'] ?? '';
+		$disabled           = false;
+		$desc_tip           = '';
+		$tooltip            = $feature['tooltip'] ?? '';
+		$type               = $feature['type'] ?? 'checkbox';
+		$setting_definition = $feature['setting'] ?? array();
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
@@ -702,6 +703,11 @@ class FeaturesController {
 			if ( ! empty( $update_text ) ) {
 				$description .= $update_text;
 			}
+		} elseif ( 'custom_order_tables' === $feature_id ) {
+			$setting_definition = array_merge(
+				$setting_definition,
+				wc_get_container()->get( CustomOrdersTableController::class )->get_hpos_setting_for_feature()
+			);
 		}
 
 		if ( 'product_block_editor' === $feature_id ) {
@@ -729,7 +735,7 @@ class FeaturesController {
 		 */
 		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
 
-		$feature_setting = array(
+		$feature_setting_defaults = array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
 			'type'     => $type,
@@ -739,6 +745,7 @@ class FeaturesController {
 			'tooltip'  => $tooltip,
 			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
+		$feature_setting = wp_parse_args( $setting_definition, $feature_setting_defaults );
 
 		/**
 		 * Allows to modify feature setting that will be used to render in the feature page.

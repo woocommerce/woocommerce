@@ -121,7 +121,6 @@ class CustomOrdersTableController {
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
-		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 	}
@@ -393,41 +392,16 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Returns the HPOS setting for rendering in Features section of the settings page.
-	 *
-	 * @param array  $feature_setting HPOS feature value as defined in the feature controller.
-	 * @param string $feature_id ID of the feature.
-	 *
-	 * @return array Feature setting object.
-	 */
-	private function get_hpos_feature_setting( array $feature_setting, string $feature_id ) {
-		if ( ! in_array( $feature_id, array( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'custom_order_tables' ), true ) ) {
-			return $feature_setting;
-		}
-
-		if ( 'yes' === get_transient( 'wc_installing' ) ) {
-			return $feature_setting;
-		}
-
-		$sync_status = $this->data_synchronizer->get_sync_status();
-		switch ( $feature_id ) {
-			case self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
-				return $this->get_hpos_setting_for_feature( $sync_status );
-			case DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION:
-				return $this->get_hpos_setting_for_sync( $sync_status );
-			case 'custom_order_tables':
-				return array();
-		}
-	}
-
-	/**
 	 * Returns the HPOS setting for rendering HPOS vs Post setting block in Features section of the settings page.
 	 *
-	 * @param array $sync_status Details of sync status, includes pending count, and count when sync started.
-	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_feature( $sync_status ) {
+	public function get_hpos_setting_for_feature() {
+		if ( Constants::get_constant( 'WC_INSTALLING' ) ) {
+			return array();
+		}
+
+		$sync_status             = $this->data_synchronizer->get_sync_status();
 		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
 		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
@@ -460,11 +434,14 @@ class CustomOrdersTableController {
 	/**
 	 * Returns the setting for rendering sync enabling setting block in Features section of the settings page.
 	 *
-	 * @param array $sync_status Details of sync status, includes pending count, and count when sync started.
-	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_sync( $sync_status ) {
+	public function get_hpos_setting_for_sync() {
+		if ( Constants::get_constant( 'WC_INSTALLING' ) ) {
+			return array();
+		}
+
+		$sync_status      = $this->data_synchronizer->get_sync_status();
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 		$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
 		$sync_message     = array();
