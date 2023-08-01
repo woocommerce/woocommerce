@@ -5,11 +5,6 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 
-/**
- * Internal dependencies
- */
-import './editor.scss';
-
 export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: 'wc-block-editor-product-gallery_large-image',
