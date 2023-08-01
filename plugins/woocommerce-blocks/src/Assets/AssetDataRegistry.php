@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Package;
-
+use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Exception;
 use InvalidArgumentException;
 
@@ -317,14 +317,38 @@ class AssetDataRegistry {
 	}
 
 	/**
-	 * Hydrate from API.
+	 * Hydrate from the API.
 	 *
 	 * @param string $path REST API path to preload.
 	 */
 	public function hydrate_api_request( $path ) {
 		if ( ! isset( $this->preloaded_api_requests[ $path ] ) ) {
-			$this->preloaded_api_requests = rest_preload_api_request( $this->preloaded_api_requests, $path );
+			$this->preloaded_api_requests[ $path ] = Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
 		}
+	}
+
+	/**
+	 * Hydrate some data from the API.
+	 *
+	 * @param string  $key  The key used to reference the data being registered.
+	 * @param string  $path REST API path to preload.
+	 * @param boolean $check_key_exists If set to true, duplicate data will be ignored if the key exists.
+	 *                                  If false, duplicate data will cause an exception.
+	 *
+	 * @throws InvalidArgumentException  Only throws when site is in debug mode. Always logs the error.
+	 */
+	public function hydrate_data_from_api_request( $key, $path, $check_key_exists = false ) {
+		$this->add(
+			$key,
+			function() use ( $path ) {
+				if ( isset( $this->preloaded_api_requests[ $path ], $this->preloaded_api_requests[ $path ]['body'] ) ) {
+					return $this->preloaded_api_requests[ $path ]['body'];
+				}
+				$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
+				return $response['body'] ?? '';
+			},
+			$check_key_exists
+		);
 	}
 
 	/**

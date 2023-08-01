@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\AtomicBlock;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
@@ -61,10 +60,10 @@ final class BlockTypesController {
 		$block_types = $this->get_block_types();
 
 		foreach ( $block_types as $block_type ) {
-			$block_type_class    = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
-			$block_type_instance = new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
-		}
+			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
+			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
+		}
 	}
 
 	/**
