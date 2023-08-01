@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductFormTemplates;
+namespace Automattic\WooCommerce\Admin\BlockTemplates;
 
 /**
  * Interface for block configuration used to specify blocks in BlockTemplate.

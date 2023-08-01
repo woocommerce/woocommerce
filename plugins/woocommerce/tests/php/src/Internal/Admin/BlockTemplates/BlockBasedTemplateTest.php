@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\BlockTemplates;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductFormTemplates\BlockTemplate;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplate;
 
 use WC_Unit_Test_Case;
 
