@@ -3615,7 +3615,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function order_refresh_lock( $response, $data ) : array {
+	private static function order_refresh_lock( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->refresh_lock_ajax( $response, $data );
 	}
 
@@ -3628,7 +3628,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function check_locked_orders( $response, $data ) : array {
+	private static function check_locked_orders( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
 	}
 
