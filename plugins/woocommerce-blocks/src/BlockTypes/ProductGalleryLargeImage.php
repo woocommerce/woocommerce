@@ -25,7 +25,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
+		return [ 'query', 'queryId', 'postId' ];
 	}
 
 	/**
