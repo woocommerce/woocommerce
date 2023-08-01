@@ -6,8 +6,9 @@
         {
           "post_title": "Local Development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
+          "hash": "7fa2ec20fa654573e07b0d6237a0618ab19999467472a2362fa4ec1955b229f7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "id": "c387a046f8307a4f459091a2c45e82263b45e777"
+          "id": "1a3672ea88756c6d00a3b3baa3f7481b361c8a1e"
         }
       ],
       "categories": [
@@ -17,8 +18,9 @@
             {
               "post_title": "Install the Plugin",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
+              "hash": "89be25e4e91f5c807c7dc9ff778b2b76c6f7061cb9aca6e0cfc7fddb0cc28b6b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-              "id": "c4ac8c48c3445186189d15f01028eacd517b9707"
+              "id": "6c7bb21cb195798a444844fef0ff79aacff86de1"
             }
           ],
           "categories": []
@@ -29,8 +31,9 @@
             {
               "post_title": "What Went Wrong?",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
+              "hash": "9868a39ccc26aa79f06caed1dc3576878953e6279facf7a66ad6f45fd2cd7d0a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "id": "f87dcc9b8177ad2d8549ef7298d66fb7c8616d71"
+              "id": "e2f590a5994fada97bdbdcac751e8bc441530868"
             }
           ],
           "categories": []
@@ -43,18 +46,20 @@
         {
           "post_title": "Unit Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
+          "hash": "f4950c5597f1ef70f546fd3c4b92fd3c23518317aca2d72edb5a7da519c9946f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-          "id": "1b9de005cc5da3b49d12c24837a5a574aa58ad96"
+          "id": "6f1b9c74de42a10cf4c77c2843e0fbdf1ff46316"
         },
         {
           "post_title": "Integration Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
+          "hash": "6929e58b2a32d027f1049eea2ff6136f47b8fb52d4d1781f257de59b999155b0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
-          "id": "ee3fd61c9d7b13614e4431708c336f20c9779e1f"
+          "id": "09c092c2b450edc45b9c247e0a983b7d176984a1"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "84a06ceffaced22a955a131c1272ec9a1d14ae0a7cf9bac4ed21874384f86e9a"
+  "hash": "80feb7e964daa576ce2c4265dc0e0e5d05a0df4fce356cdf63e245e22435e9ba"
 }
