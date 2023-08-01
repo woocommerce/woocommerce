@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Safety measures to prevent future breakages when executing bulk actions in the order list table (HPOS).
