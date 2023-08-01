@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Dequeue blocktheme styles on WooCommerce Admin pages when product block editor is enabled.
