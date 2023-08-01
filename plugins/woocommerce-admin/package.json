@@ -24,6 +24,9 @@
 				"build-module/**/*",
 				"build-types/**/*",
 				".tsbuildinfo"
+			],
+			"dependencies": [
+				"../woocommerce:build:feature-config"
 			]
 		}
 	},
