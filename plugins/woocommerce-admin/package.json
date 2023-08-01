@@ -8,9 +8,27 @@
 		"type": "git",
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
+	"wireit": {
+		"build": {
+			"command": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+			"clean": "if-file-deleted",
+			"files": [
+				"client/**/*.{js,jsx,ts,tsx,scss}",
+				"typings/**/*",
+				"tsconfig.json",
+				"webpack.config.js",
+				"babel.config.js"
+			],
+			"output": [
+				"build/**/*",
+				"build-module/**/*",
+				"build-types/**/*"
+			]
+		}
+	},
 	"scripts": {
 		"changelog": "pnpm --filter=woocommerce -r run changelog ",
-		"build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+		"build": "wireit",
 		"turbo:test": "pnpm run test:client",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
@@ -229,7 +247,8 @@
 		"webpack-dev-server": "^4.11.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-merge": "^5.8.0",
-		"webpack-rtl-plugin": "^2.0.0"
+		"webpack-rtl-plugin": "^2.0.0",
+		"wireit": "^0.10.0"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.0"

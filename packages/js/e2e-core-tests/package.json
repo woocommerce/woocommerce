@@ -42,7 +42,8 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"eslint": "^8.32.0",
-		"eslint-plugin-jest": "23.20.0"
+		"eslint-plugin-jest": "23.20.0",
+		"wireit": "^0.10.0"
 	},
 	"peerDependencies": {
 		"@woocommerce/api": "^0.2.0",
@@ -51,8 +52,23 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"wireit": {
+		"build": {
+			"command": "./bin/build.sh && pnpm run clean && pnpm run compile",
+			"clean": "if-file-deleted",
+			"files": [
+				"src/**/*.{js}",
+				"installFiles/**/*",
+				"test-data/**/*"
+			],
+			"output": [
+				"build/**/*",
+				"build-module/**/*"
+			]
+		}
+	},
 	"scripts": {
-		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
+		"build": "wireit",
 		"prepack": "pnpm run build",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",

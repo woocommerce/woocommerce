@@ -29,8 +29,24 @@
 		"!/dist/**/__test_data__/"
 	],
 	"sideEffects": false,
+	"wireit": {
+		"build": {
+			"command": "pnpm run build:js && pnpm run build:css",
+			"clean": "if-file-deleted",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx,scss}",
+				"tsconfig.json",
+				"tsconfig-cjs.json",
+				"webpack.config.js",
+				"babel.config.js"
+			],
+			"output": [
+				"dist/**/*"
+			]
+		}
+	},
 	"scripts": {
-		"build": "pnpm run clean && npm run compile",
+		"build": "wireit",
 		"turbo:test": "jest",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"prepare": "composer install",
@@ -57,7 +73,8 @@
 		"eslint": "^8.32.0",
 		"jest": "^27",
 		"ts-jest": "^27",
-		"typescript": "^4.9.5"
+		"typescript": "^4.9.5",
+		"wireit": "^0.10.0"
 	},
 	"publishConfig": {
 		"access": "public"
