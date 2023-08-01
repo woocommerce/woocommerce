@@ -62,6 +62,4 @@ jobs:
 
             - name: Run PHPCS on all changed files
               run: |
-                git fetch origin trunk
-                changes=$(git diff --name-only origin/trunk..HEAD | tr '\n' ' ')
-                phpcs ${changes} -q --report=checkstyle | cs2pr
+                phpcs ./src -q --report=checkstyle | cs2pr
