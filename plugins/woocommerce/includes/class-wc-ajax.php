@@ -611,6 +611,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+
 		$i             = absint( $_POST['i'] );
 		$metabox_class = array();
 		$attribute     = new WC_Product_Attribute();
@@ -619,7 +621,13 @@ class WC_AJAX {
 		$attribute->set_name( sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) );
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
-		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 1 ) );
+		$attribute->set_variation(
+			apply_filters(
+				'woocommerce_attribute_default_is_variation',
+				'variable' === $product_type ? 1 : 0,
+				$product_type
+			)
+		);
 		/* phpcs: enable */
 
 		if ( $attribute->is_taxonomy() ) {

@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Do not disable "Used for variations" checkbox on attribute. [#39502](https://github.com/woocommerce/woocommerce/pull/39502)
 * Fix - Adds a grace period during which email verification will not be needed before the order confirmation (or payment) page is rendered. [#39191](https://github.com/woocommerce/woocommerce/pull/39191)
 * Fix - Fix turn off the new block experience when tracking is turned off [#39317](https://github.com/woocommerce/woocommerce/pull/39317)
 * Fix - Restore woocommerce_variations_added jQuery trigger. [#39301](https://github.com/woocommerce/woocommerce/pull/39301)
