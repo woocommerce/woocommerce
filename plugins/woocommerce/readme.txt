@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Dequeue blocktheme styles on WooCommerce Admin pages when product block editor is enabled. [#39478](https://github.com/woocommerce/woocommerce/pull/39478)
 * Fix - Do not disable "Used for variations" checkbox on attribute. [#39502](https://github.com/woocommerce/woocommerce/pull/39502)
 * Fix - Adds a grace period during which email verification will not be needed before the order confirmation (or payment) page is rendered. [#39191](https://github.com/woocommerce/woocommerce/pull/39191)
 * Fix - Fix turn off the new block experience when tracking is turned off [#39317](https://github.com/woocommerce/woocommerce/pull/39317)
