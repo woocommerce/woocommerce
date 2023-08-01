@@ -58,25 +58,19 @@ class Block implements BlockInterface, BlockContainerInterface {
 	 * Block constructor.
 	 *
 	 * @param array                        $config The block configuration.
-	 * @param BlockTemplateInterface  $root_template The block template that this block belongs to.
+	 * @param BlockTemplateInterface       $root_template The block template that this block belongs to.
 	 * @param BlockContainerInterface|null $parent The parent block container.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 */
 	public function __construct( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+		$this->validate( $config, $root_template, $parent );
+
 		$this->root_template = $root_template;
 		$this->parent        = is_null( $parent ) ? $root_template : $parent;
 
-		if ( $this->parent->get_root_template() !== $this->root_template ) {
-			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
-		}
-
-		if ( ! isset( $config[ self::NAME_KEY ] ) || ! is_string( $config[ self::NAME_KEY ] ) ) {
-			throw new \ValueError( 'The block name must be specified.' );
-		} else {
-			$this->name = $config[ self::NAME_KEY ];
-		}
+		$this->name = $config[ self::NAME_KEY ];
 
 		if ( ! isset( $config[ self::ID_KEY ] ) ) {
 			$this->id = $this->root_template->generate_block_id( $this->get_name() );
@@ -84,16 +78,40 @@ class Block implements BlockInterface, BlockContainerInterface {
 			$this->id = $config[ self::ID_KEY ];
 		}
 
+		if ( isset( $config[ self::ORDER_KEY ] ) ) {
+			$this->order = $config[ self::ORDER_KEY ];
+		}
+
+		if ( isset( $config[ self::ATTRIBUTES_KEY ] ) ) {
+			$this->attributes = $config[ self::ATTRIBUTES_KEY ];
+		}
+	}
+
+	/**
+	 * Validate block configuration.
+	 *
+	 * @param array                        $config The block configuration.
+	 * @param BlockTemplateInterface       $root_template The block template that this block belongs to.
+	 * @param BlockContainerInterface|null $parent The parent block container.
+	 *
+	 * @throws \ValueError If the block configuration is invalid.
+	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
+	 */
+	protected function validate( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+		if ( isset( $parent ) && ( $parent->get_root_template() !== $root_template ) ) {
+			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
+		}
+
+		if ( ! isset( $config[ self::NAME_KEY ] ) || ! is_string( $config[ self::NAME_KEY ] ) ) {
+			throw new \ValueError( 'The block name must be specified.' );
+		}
+
 		if ( isset( $config[ self::ORDER_KEY ] ) && ! is_int( $config[ self::ORDER_KEY ] ) ) {
 			throw new \ValueError( 'The block order must be an integer.' );
-		} elseif ( isset( $config[ self::ORDER_KEY ] ) ) {
-			$this->order = $config[ self::ORDER_KEY ];
 		}
 
 		if ( isset( $config[ self::ATTRIBUTES_KEY ] ) && ! is_array( $config[ self::ATTRIBUTES_KEY ] ) ) {
 			throw new \ValueError( 'The block attributes must be an array.' );
-		} elseif ( isset( $config[ self::ATTRIBUTES_KEY ] ) ) {
-			$this->attributes = $config[ self::ATTRIBUTES_KEY ];
 		}
 	}
 
