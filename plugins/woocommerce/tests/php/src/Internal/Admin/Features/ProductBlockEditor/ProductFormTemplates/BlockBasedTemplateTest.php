@@ -103,9 +103,9 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the simple array representation of a block template is correct.
+	 * Test that the formatted template representation of a block template is correct.
 	 */
-	public function test_get_as_simple_array() {
+	public function test_get_as_formatted_template() {
 		$template = new BlockBasedTemplate();
 
 		$template->add_block(
@@ -214,7 +214,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 					],
 				],
 			],
-			$template->get_as_simple_array(),
+			$template->get_as_formatted_template(),
 			'Failed asserting that the block is converted to a simple array correctly.'
 		);
 	}
@@ -360,8 +360,8 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 					],
 				],
 			],
-			$template->get_as_simple_array(),
-			'Failed asserting that the block is converted to a simple array correctly.'
+			$template->get_as_formatted_template(),
+			'Failed asserting that the template is converted to a formatted template correctly.'
 		);
 	}
 }

@@ -158,11 +158,11 @@ class Block implements BlockInterface, BlockContainerInterface {
 	}
 
 	/**
-	 * Get the block configuration as a simple array.
+	 * Get the block configuration as a formatted template.
 	 *
-	 * @return array The block configuration as a simple array.
+	 * @return array The block configuration as a formatted template.
 	 */
-	public function get_as_simple_array(): array {
+	public function get_as_formatted_template(): array {
 		$arr = [
 			$this->get_name(),
 			$this->get_attributes(),

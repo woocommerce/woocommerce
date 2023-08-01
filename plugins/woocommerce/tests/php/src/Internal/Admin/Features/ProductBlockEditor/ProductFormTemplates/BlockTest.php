@@ -152,9 +152,9 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that getting the block as a simple array is structured correctly.
+	 * Test that getting the block as a formatted template is structured correctly.
 	 */
-	public function test_get_as_simple_array() {
+	public function test_get_as_formatted_template() {
 		$template = new BlockBasedTemplate();
 
 		$block = $template->add_block(
@@ -186,7 +186,7 @@ class BlockTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$simple_array = $block->get_as_simple_array();
+		$simple_array = $block->get_as_formatted_template();
 
 		$this->assertSame(
 			[

@@ -71,9 +71,9 @@ interface BlockInterface extends BlockContainerInterface {
 	public function &get_root_template(): BlockBasedTemplateInterface;
 
 	/**
-	 * Get the block configuration as a simple array.
+	 * Get the block configuration as a formatted template.
 	 *
-	 * @return array The block configuration as a simple array.
+	 * @return array The block configuration as a formatted template.
 	 */
-	public function get_as_simple_array(): array;
+	public function get_as_formatted_template(): array;
 }

@@ -56,7 +56,7 @@ trait BlockContainerTrait {
 
 		$child_blocks_as_simple_arrays = array_map(
 			function( Block $block ) {
-				return $block->get_as_simple_array();
+				return $block->get_as_formatted_template();
 			},
 			$child_blocks
 		);

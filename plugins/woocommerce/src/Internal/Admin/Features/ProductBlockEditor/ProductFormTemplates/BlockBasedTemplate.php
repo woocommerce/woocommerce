@@ -80,9 +80,9 @@ class BlockBasedTemplate implements BlockBasedTemplateInterface {
 	}
 
 	/**
-	 * Get the template as a simple array.
+	 * Get the template as a formatted template.
 	 */
-	public function get_as_simple_array(): array {
+	public function get_as_formatted_template(): array {
 		return $this->get_child_blocks_as_simple_array();
 	}
 }
