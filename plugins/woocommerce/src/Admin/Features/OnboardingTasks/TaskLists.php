@@ -44,7 +44,6 @@ class TaskLists {
 	 * @var array
 	 */
 	const DEFAULT_TASKS = array(
-		'CustomizeStore',
 		'StoreDetails',
 		'Purchase',
 		'Products',
