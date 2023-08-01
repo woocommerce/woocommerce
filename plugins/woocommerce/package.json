@@ -16,6 +16,10 @@
 		"build": {
 			"dependencies": [
 				"./client/legacy:build"
+			],
+			"output": [
+				"./assets/css/**/*",
+				"./assets/js/**/*"
 			]
 		}
 	},

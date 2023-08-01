@@ -12,10 +12,6 @@
 				"css/**/*",
 				"js/**/*",
 				"Gruntfile.js"
-			],
-			"output": [
-				"../../assets/css/**/*",
-				"../../assets/js/**/*"
 			]
 		}
 	},
