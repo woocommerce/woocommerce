@@ -87,7 +87,8 @@
 				"build/**/*",
 				"build-module/**/*",
 				"build-types/**/*",
-				"build-style/**/*"
+				"build-style/**/*",
+				".tsbuildinfo"
 			]
 		}
 	},

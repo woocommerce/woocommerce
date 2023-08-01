@@ -57,7 +57,8 @@
 			"output": [
 				"build/**/*",
 				"build-module/**/*",
-				"build-types/**/*"
+				"build-types/**/*",
+				".tsbuildinfo"
 			]
 		}
 	},

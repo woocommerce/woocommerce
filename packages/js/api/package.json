@@ -31,17 +31,17 @@
 	"sideEffects": false,
 	"wireit": {
 		"build": {
-			"command": "pnpm run build:js && pnpm run build:css",
+			"command": "pnpm run clean && pnpm run compile",
 			"clean": "if-file-deleted",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx,scss}",
 				"tsconfig.json",
 				"tsconfig-cjs.json",
-				"webpack.config.js",
-				"babel.config.js"
+				".tsbuildinfo"
 			],
 			"output": [
-				"dist/**/*"
+				"dist/**/*",
+				".tsbuildinfo"
 			]
 		}
 	},
