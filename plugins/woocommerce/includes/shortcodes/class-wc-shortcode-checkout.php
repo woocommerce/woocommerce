@@ -297,7 +297,7 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$template_args     = array( 
+		$template_args     = array(
 			'needs_verification' => false,
 			'order'              => $order,
 		);
