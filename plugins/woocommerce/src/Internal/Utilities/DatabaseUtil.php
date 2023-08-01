@@ -268,4 +268,27 @@ $on_duplicate_clause
 		return $wpdb->query( $sql );
 	}
 
+	/**
+	 * Get max index length.
+	 *
+	 * @return int Max index length.
+	 */
+	public function get_max_index_length() : int {
+		/**
+		 * Filters the maximum index length in the database.
+		 *
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * Additionally, MyISAM engine also limits the index size to 1000 bytes. We add this filter so that interested folks on InnoDB engine can increase the size till allowed 3071 bytes.
+		 *
+		 * @param int $max_index_length Maximum index length. Default 191.
+		 *
+		 * @since 8.0.0
+		 */
+		$max_index_length = apply_filters( 'woocommerce_database_max_index_length', 191 );
+		// Index length cannot be more than 768, which is 3078 bytes in utf8mb4 and max allowed by InnoDB engine.
+		return min( absint( $max_index_length ), 767 );
+	}
 }
