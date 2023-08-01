@@ -32,7 +32,6 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		useDispatch( ONBOARDING_STORE_NAME );
 
 	const updateBadge = useCallback( () => {
-		window.console.log("RUNNING");
 		const badgeElements: Array< HTMLElement > | null = Array.from(
 			document.querySelectorAll(
 				'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
