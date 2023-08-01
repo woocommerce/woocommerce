@@ -38,11 +38,14 @@ import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../../components/edit-product-link-modal';
 import { useValidation } from '../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
+import { useProductEdits } from '../../hooks/use-product-edits';
 
 export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
+
+	const { hasEdit } = useProductEdits();
 
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
@@ -173,8 +176,10 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 						autoComplete="off"
 						data-1p-ignore
 						onBlur={ () => {
-							setSkuIfEmpty();
-							validateName();
+							if ( hasEdit( 'name' ) ) {
+								setSkuIfEmpty();
+								validateName();
+							}
 						} }
 					/>
 				</BaseControl>

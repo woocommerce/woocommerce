@@ -37,7 +37,10 @@ export const Plugins = ( {
 	navigationProgress,
 	sendEvent,
 }: {
-	context: CoreProfilerStateMachineContext;
+	context: Pick<
+		CoreProfilerStateMachineContext,
+		'pluginsAvailable' | 'pluginsInstallationErrors' | 'pluginsSelected'
+	>;
 	sendEvent: (
 		payload:
 			| PluginsInstallationRequestedEvent

@@ -388,6 +388,7 @@ class Edit {
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
+		<input type="hidden" id="post_ID" name="post_ID" value="<?php echo esc_attr( $this->order->get_id() ); ?>"/>
 		<div id="poststuff">
 		<div id="post-body"
 		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
