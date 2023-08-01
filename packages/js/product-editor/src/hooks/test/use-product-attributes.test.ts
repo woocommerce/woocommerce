@@ -254,6 +254,32 @@ describe( 'useProductAttributes', () => {
 				{ ...allAttributes[ 0 ], position: 1, variation: true },
 			] );
 		} );
+
+		it( 'should remove duplicate locals by name', async () => {
+			const allAttributes = [
+				{ ...testAttributes[ 0 ] },
+				{ ...testAttributes[ 1 ] },
+			];
+			const onChange = jest.fn();
+			const { result, waitForNextUpdate } = renderHook(
+				useProductAttributes,
+				{
+					initialProps: {
+						allAttributes,
+						onChange,
+						isVariationAttributes: true,
+						productId: 123,
+					},
+				}
+			);
+			jest.runOnlyPendingTimers();
+			await waitForNextUpdate();
+			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
+			expect( onChange ).toHaveBeenCalledWith( [
+				{ ...allAttributes[ 1 ], position: 0 },
+				{ ...allAttributes[ 0 ], position: 1, variation: true },
+			] );
+		} );
 	} );
 
 	describe( 'is not variation', () => {

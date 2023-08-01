@@ -102,6 +102,15 @@ export function useProductAttributes( {
 			) {
 				return false;
 			}
+			// Local attributes we check by name.
+			if (
+				attr.id === 0 &&
+				newAttributes.findIndex(
+					( a ) => a.name.toLowerCase() === attr.name.toLowerCase()
+				) !== -1
+			) {
+				return false;
+			}
 			return true;
 		} );
 		const newAugmentedAttributes = getAugmentedAttributes(
