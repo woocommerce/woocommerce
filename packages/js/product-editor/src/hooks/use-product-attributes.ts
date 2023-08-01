@@ -138,7 +138,6 @@ export function useProductAttributes( {
 	};
 
 	useEffect( () => {
-		console.log( 'useEffect' );
 		const [ localAttributes, globalAttributes ]: ProductAttribute[][] =
 			sift(
 				getFilteredAttributes( allAttributes, isVariationAttributes ),
