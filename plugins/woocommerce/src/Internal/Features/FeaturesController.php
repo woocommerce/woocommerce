@@ -89,7 +89,7 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$features           = array(
+		$features = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
@@ -745,6 +745,7 @@ class FeaturesController {
 			'tooltip'  => $tooltip,
 			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
+
 		$feature_setting = wp_parse_args( $setting_definition, $feature_setting_defaults );
 
 		/**
