@@ -6,7 +6,6 @@
 .eslintrc
 .eslintignore
 .wordpress-org/
-.turbo/
 composer.json
 tsconfig.json
 composer.lock
