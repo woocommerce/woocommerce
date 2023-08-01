@@ -385,8 +385,9 @@ class WC_Shortcode_Checkout {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! empty( $_POST ) && ! wp_verify_nonce( $_POST['check_submission'] ?? '', 'wc_verify_email' ) ) {
+		$email = filter_input( INPUT_POST, 'email' );
+		$nonce = filter_input( INPUT_POST, 'check_submission' );
+		if ( $email && ! wp_verify_nonce( $nonce, 'wc_verify_email' ) ) {
 			return true;
 		}
 
