@@ -867,7 +867,7 @@ class ListTable extends WP_List_Table {
 	public function column_cb( $item ) {
 		ob_start();
 		?>
-		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="<?php echo esc_attr( $this->_args['singular'] ); ?>[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
 
 		<div class="locked-indicator">
 			<span class="locked-indicator-icon" aria-hidden="true"></span>
@@ -1197,7 +1197,7 @@ class ListTable extends WP_List_Table {
 
 			$action = 'delete';
 		} else {
-			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['order'] ) ) : array();
+			$ids = isset( $_REQUEST['id'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['id'] ) ) : array();
 		}
 
 		/**
