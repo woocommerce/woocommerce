@@ -10,19 +10,6 @@ use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplate;
 
 use WC_Unit_Test_Case;
 
-interface CustomBlockInterface {
-	public function custom_method(): string;
-}
-class CustomBlock extends Block implements CustomBlockInterface {
-	public function __construct( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
-		parent::__construct( $config, $root_template, $parent );
-	}
-
-	public function custom_method(): string {
-		return 'custom';
-	}
-}
-
 /**
  * Tests for the Block class.
  */
