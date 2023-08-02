@@ -44,6 +44,7 @@ type AttributeControlProps = {
 	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	createNewAttributesAsGlobal?: boolean;
 	uiStrings?: {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
@@ -71,6 +72,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onRemove = () => {},
 	onRemoveCancel = () => {},
 	uiStrings,
+	createNewAttributesAsGlobal = false,
 } ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
@@ -246,6 +248,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
 				/>
 			) }
 			<SelectControlMenuSlot />

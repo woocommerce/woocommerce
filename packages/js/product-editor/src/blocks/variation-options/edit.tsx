@@ -36,6 +36,7 @@ export function Edit() {
 			<AttributeControl
 				value={ attributes }
 				onChange={ handleChange }
+				createNewAttributesAsGlobal={ true }
 				uiStrings={ {
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
