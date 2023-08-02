@@ -46,7 +46,7 @@ trait BlockContainerTrait {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
-		$root_template->internal_add_block_to_template( $block );
+		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
 		return $block;
 	}

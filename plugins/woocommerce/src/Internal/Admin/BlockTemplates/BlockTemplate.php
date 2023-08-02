@@ -29,17 +29,17 @@ class BlockTemplate implements BlockTemplateInterface {
 	}
 
 	/**
-	 * Add a block to the template. This is an internal method and should not be called directly
+	 * Caches a block in the template. This is an internal method and should not be called directly
 	 * except for classes that implement BlockContainerInterface, in their add_block() method.
 	 *
-	 * @param BlockInterface $block The block to add.
+	 * @param BlockInterface $block The block to cache.
 	 *
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
 	 * @throws \ValueError If the block template that the block belongs to is not this template.
 	 *
 	 * @ignore
 	 */
-	public function internal_add_block_to_template( BlockInterface &$block ) {
+	public function cache_block( BlockInterface &$block ) {
 		$id = $block->get_id();
 
 		if ( isset( $this->block_cache[ $id ] ) ) {
