@@ -35,6 +35,7 @@ class BlockTemplate implements BlockTemplateInterface {
 	 * @param BlockInterface $block The block to add.
 	 *
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
+	 * @throws \ValueError If the block template that the block belongs to is not this template.
 	 *
 	 * @ignore
 	 */
@@ -43,6 +44,10 @@ class BlockTemplate implements BlockTemplateInterface {
 
 		if ( isset( $this->block_cache[ $id ] ) ) {
 			throw new \ValueError( 'A block with the specified ID already exists in the template.' );
+		}
+
+		if ( $block->get_root_template() !== $this ) {
+			throw new \ValueError( 'The block template that the block belongs to must be the same as this template.' );
 		}
 
 		$this->block_cache[ $id ] = $block;
