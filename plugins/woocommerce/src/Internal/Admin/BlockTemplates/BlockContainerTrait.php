@@ -15,33 +15,43 @@ trait BlockContainerTrait {
 	 */
 	private $inner_blocks = [];
 
+	// phpcs doesn't take into account exceptions thrown by called methods.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
 	/**
 	 * Add a block to the block container.
 	 *
 	 * @param array    $block_config The block data.
-	 * @param callable $block_generator An optional block generator.
+	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \TypeError If the block generator does not return an instance of BlockInterface.
+	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockInterface.
+	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
-	public function &add_block( array $block_config, ?callable $block_generator = null ): BlockInterface {
+	public function &add_block( array $block_config, ?callable $block_creator = null ): BlockInterface {
 		$root_template = $this->get_root_template();
 
-		if ( is_callable( $block_generator ) ) {
-			$block = $block_generator( $block_config, $root_template, $this );
+		if ( is_callable( $block_creator ) ) {
+			$block = $block_creator( $block_config, $root_template, $this );
 
 			if ( ! $block instanceof BlockInterface ) {
-				throw new \TypeError( 'The block generator must return an instance of BlockInterface.' );
+				throw new \UnexpectedValueException( 'The block creator must return an instance of BlockInterface.' );
 			}
 		} else {
 			$block = new Block( $block_config, $root_template, $this );
+		}
+
+		if ( $block->get_parent() !== $this ) {
+			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
 		$root_template->internal_add_block_to_template( $block );
 		$this->inner_blocks[] = &$block;
 		return $block;
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Get the inner blocks sorted by order.
