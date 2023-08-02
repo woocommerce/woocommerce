@@ -17,6 +17,7 @@ const productData = {
 	name: `Simple product Name ${ new Date().getTime().toString() }`,
 	summary: 'This is a product summary',
 	productPrice: '100',
+	salePrice: '90',
 };
 
 test.describe( 'General tab', () => {
@@ -66,6 +67,13 @@ test.describe( 'General tab', () => {
 				)
 				.first()
 				.fill( productData.productPrice );
+			await page
+				.locator(
+					'[id^="wp-block-woocommerce-product-sale-price-field"]'
+				)
+				.first()
+				.fill( productData.salePrice );
+
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
@@ -133,9 +141,23 @@ test.describe( 'General tab', () => {
 			await expect( page.locator( '.product_title' ) ).toHaveText(
 				productData.name
 			);
-			await expect(
-				page.locator( '.summary .woocommerce-Price-amount' )
-			).toContainText( productData.productPrice );
+			const productPriceElements = await page
+				.locator( '.summary .woocommerce-Price-amount' )
+				.all();
+
+			let foundProductPrice = false;
+			let foundSalePrice = false;
+			for ( const element of productPriceElements ) {
+				const textContent = await element.innerText();
+				if ( textContent.includes( productData.productPrice ) ) {
+					foundProductPrice = true;
+				}
+				if ( textContent.includes( productData.salePrice ) ) {
+					foundSalePrice = true;
+				}
+			}
+			await expect( foundProductPrice && foundSalePrice ).toBeTruthy();
+
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 			await expect(
