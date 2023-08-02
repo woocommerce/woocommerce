@@ -193,7 +193,7 @@
 		"eslint-plugin-react": "^7.29.2",
 		"eslint-plugin-xstate": "^1.1.0",
 		"expose-loader": "^3.1.0",
-		"fork-ts-checker-webpack-plugin": "^6.5.0",
+		"fork-ts-checker-webpack-plugin": "^8.0.0",
 		"jest": "^27.5.1",
 		"jest-environment-jsdom": "~27.5.0",
 		"jest-environment-node": "^27.5.1",
