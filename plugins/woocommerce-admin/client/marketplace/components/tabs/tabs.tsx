@@ -37,12 +37,28 @@ const tabs: Tabs = {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
 	},
+	'my-subscriptions': {
+		name: 'my-subscriptions',
+		title: __( 'My Subscriptions', 'woocommerce' ),
+	},
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
 	if ( tabKey === DEFAULT_TAB_KEY ) {
 		navigateTo( {
 			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
+		} );
+		return;
+	}
+	if ( tabKey === 'my-subscriptions' ) {
+		navigateTo( {
+			url: getNewPath(
+				{
+					page: 'wc-addons',
+					section: 'helper',
+				},
+				''
+			),
 		} );
 		return;
 	}
