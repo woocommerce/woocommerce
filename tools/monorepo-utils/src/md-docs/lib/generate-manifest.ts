@@ -12,13 +12,13 @@ import crypto from 'crypto';
 import { generatePostFrontMatter } from './generate-frontmatter';
 import { generateFileUrl } from './generate-urls';
 
-interface Category {
+export interface Category {
 	[ key: string ]: unknown;
 	posts?: Post[];
 	categories?: Category[];
 }
 
-interface Post {
+export interface Post {
 	[ key: string ]: unknown;
 }
 
@@ -94,6 +94,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
+				filePath,
 				id: generatePostId( relativePath, projectName ),
 			} );
 		}
