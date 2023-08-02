@@ -132,7 +132,14 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
+		$this->legacy_feature_ids = array(
+			'analytics',
+			'new_navigation',
+			'product_block_editor',
+			// Compatibility for COT is determined by `custom_order_tables'.
+			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+		);
 
 		$this->init_features( $features );
 
