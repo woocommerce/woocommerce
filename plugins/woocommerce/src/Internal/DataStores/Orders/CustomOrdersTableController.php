@@ -441,7 +441,7 @@ class CustomOrdersTableController {
 			return $feature_setting;
 		}
 
-		if ( Constants::get_constant( 'WC_INSTALLING', false ) ) {
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return $feature_setting;
 		}
 
