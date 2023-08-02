@@ -489,10 +489,17 @@ class WC_Install {
 
 		$schema = self::get_schema();
 
-		if (
-			get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION )
-			|| get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION )
-		) {
+		$hpos_settings = filter_var_array(
+			array(
+				'cot'       => get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ),
+				'data_sync' => get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ),
+			),
+			array(
+				'cot'       => FILTER_VALIDATE_BOOL,
+				'data_sync' => FILTER_VALIDATE_BOOL,
+			)
+		);
+		if ( in_array( true, $hpos_settings, true ) ) {
 			$schema .= wc_get_container()
 				->get( OrdersTableDataStore::class )
 				->get_database_schema();
