@@ -784,6 +784,18 @@ class FeaturesController {
 			return $list;
 		}
 
+		return $this->get_incompatible_plugins( $feature_id, $list );
+	}
+
+	/**
+	 * Returns the list of plugins incompatible with a given feature.
+	 *
+	 * @param string $feature_id ID of the feature. Can also be `all` to denote all features.
+	 * @param array  $list       List of plugins to filter.
+	 *
+	 * @return array List of plugins incompatible with the given feature.
+	 */
+	private function get_incompatible_plugins( $feature_id, $list ) {
 		$incompatibles = array();
 
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
