@@ -28,10 +28,14 @@ class Migration {
 	 */
 	public function run_migrations() {
 		$current_db_version = get_option( Options::WC_BLOCK_VERSION, '' );
+		$schema_version     = get_option( 'wc_blocks_db_schema_version', '' );
 
 		// This check is necessary because the version was not being set in the database until 10.3.0.
+		// Checking wc_blocks_db_schema_version determines if it's a fresh install (value will be empty)
+		// or an update from WC Blocks older than 10.3.0 (it will have some value). In the latter scenario
+		// we should run the migration.
 		// We can remove this check in the next months.
-		if ( ! empty( get_option( 'wc_blocks_db_schema_version', '' ) ) ) {
+		if ( ! empty( $schema_version ) && ( empty( $current_db_version ) ) ) {
 			$this->wc_blocks_update_1030_blockified_product_grid_block();
 		}
 
