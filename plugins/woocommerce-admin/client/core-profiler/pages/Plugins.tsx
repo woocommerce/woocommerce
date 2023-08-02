@@ -72,13 +72,33 @@ export const Plugins = ( {
 			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
 	};
+
 	const submitInstallationRequest = () => {
+		const selectedPluginSlugs = selectedPlugins.map( ( plugin ) =>
+			plugin.key.replace( ':alt', '' )
+		);
+
+		const pluginsAvailable: string[] = [];
+		const pluginsUnselected: string[] = [];
+
+		context.pluginsAvailable.forEach( ( plugin ) => {
+			const pluginSlug = plugin.key.replace( ':alt', '' );
+			pluginsAvailable.push( pluginSlug );
+
+			if (
+				! plugin.is_activated &&
+				! selectedPluginSlugs.includes( pluginSlug )
+			) {
+				pluginsUnselected.push( pluginSlug );
+			}
+		} );
+
 		return sendEvent( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				plugins: selectedPlugins.map( ( plugin ) =>
-					plugin.key.replace( ':alt', '' )
-				),
+				pluginsAvailable,
+				pluginsSelected: selectedPluginSlugs,
+				pluginsUnselected,
 			},
 		} );
 	};
