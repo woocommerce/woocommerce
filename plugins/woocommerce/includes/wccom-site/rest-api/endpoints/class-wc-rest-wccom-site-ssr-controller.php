@@ -112,6 +112,7 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_Controller {
 			array(
 				'body'          => wp_json_encode( array( 'data' => $data ) ),
 				'authenticated' => true,
+				'query_string'  => esc_url( '?ts=' . time() ),
 			)
 		);
 
