@@ -35,7 +35,7 @@ const tabs: Tabs = {
 	},
 	extensions: {
 		name: 'extensions',
-		title: __( 'Extensions', 'woocommerce' ),
+		title: __( 'Browse', 'woocommerce' ),
 	},
 };
 
