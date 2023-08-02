@@ -434,7 +434,10 @@ class FeaturesController {
 			case 'new_navigation':
 				return Init::TOGGLE_OPTION_NAME;
 			case 'custom_order_tables':
+			case CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
 				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
+			case DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION:
+				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
 			default:
 				return "woocommerce_feature_{$feature_id}_enabled";
 		}
