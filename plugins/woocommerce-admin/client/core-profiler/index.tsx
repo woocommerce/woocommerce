@@ -107,9 +107,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		pluginsShown: string[],
+		pluginsShown: string[];
 		pluginsSelected: string[];
-		pluginsUnselected: string[],
+		pluginsUnselected: string[];
 	};
 };
 
@@ -1213,7 +1213,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected', 'recordTracksPluginsInstallationRequest' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {
