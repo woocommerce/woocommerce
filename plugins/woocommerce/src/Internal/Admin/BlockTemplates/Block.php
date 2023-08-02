@@ -88,8 +88,8 @@ class Block implements BlockInterface {
 	/**
 	 * Validate block configuration.
 	 *
-	 * @param array                        $config The block configuration.
-	 * @param BlockTemplateInterface       $root_template The block template that this block belongs to.
+	 * @param array                   $config The block configuration.
+	 * @param BlockTemplateInterface  $root_template The block template that this block belongs to.
 	 * @param ContainerInterface|null $parent The parent block container.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
