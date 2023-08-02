@@ -78,12 +78,12 @@ export const Plugins = ( {
 			plugin.key.replace( ':alt', '' )
 		);
 
-		const pluginsAvailable: string[] = [];
+		const pluginsShown: string[] = [];
 		const pluginsUnselected: string[] = [];
 
 		context.pluginsAvailable.forEach( ( plugin ) => {
 			const pluginSlug = plugin.key.replace( ':alt', '' );
-			pluginsAvailable.push( pluginSlug );
+			pluginsShown.push( pluginSlug );
 
 			if (
 				! plugin.is_activated &&
@@ -96,7 +96,7 @@ export const Plugins = ( {
 		return sendEvent( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				pluginsAvailable,
+				pluginsShown,
 				pluginsSelected: selectedPluginSlugs,
 				pluginsUnselected,
 			},

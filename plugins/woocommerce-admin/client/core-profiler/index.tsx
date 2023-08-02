@@ -107,7 +107,7 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		pluginsAvailable: string[],
+		pluginsShown: string[],
 		pluginsSelected: string[];
 		pluginsUnselected: string[],
 	};

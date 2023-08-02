@@ -106,7 +106,7 @@ const recordTracksPluginsInstallationRequest = (
 	>
 ) => {
 	recordEvent( 'coreprofiler_store_extensions_continue', {
-		available: event.payload.pluginsAvailable || [],
+		shown: event.payload.pluginsShown || [],
 		selected: event.payload.pluginsSelected || [],
 		unselected: event.payload.pluginsUnselected || [],
 	} );
