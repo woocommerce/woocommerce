@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add derivative features to legacy list so that warning is not generated for them.
