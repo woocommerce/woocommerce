@@ -28,7 +28,7 @@ export const processMarkdownLinks = (
 			const updatedPost: Post = { ...post };
 			const filePath = path.resolve(
 				rootDirectory,
-				updatedPost.file_path as string
+				updatedPost.filePath as string
 			);
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const linkRegex = /\[(?:.*?)\]\((.*?)\)/g;
@@ -51,8 +51,8 @@ export const processMarkdownLinks = (
 				}
 			}
 
-			// dont expose file_path on updated posts
-			delete updatedPost.file_path;
+			// dont expose filePath on updated posts
+			delete updatedPost.filePath;
 			return updatedPost;
 		} );
 	}
