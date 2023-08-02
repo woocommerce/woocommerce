@@ -386,7 +386,7 @@ class CustomOrdersTableController {
 	 * @return array Feature setting object.
 	 */
 	public function get_hpos_setting_for_feature() {
-		if ( ! did_action( 'woocommerce_init' ) ) {
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
 		}
 		$sync_status             = $this->data_synchronizer->get_sync_status();
@@ -425,7 +425,7 @@ class CustomOrdersTableController {
 	 * @return array Feature setting object.
 	 */
 	public function get_hpos_setting_for_sync() {
-		if ( ! did_action( 'woocommerce_init' ) ) {
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
 		}
 		$sync_status      = $this->data_synchronizer->get_sync_status();
