@@ -74,6 +74,10 @@ const WCPaymentsWelcomePage = lazy( () =>
 	)
 );
 
+const CustomizeStorePage = lazy( () =>
+	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = () => {
@@ -331,6 +335,18 @@ export const getPages = () => {
 				id: 'woocommerce-wc-pay-welcome-page',
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
+		pages.push( {
+			container: CustomizeStorePage,
+			path: '/customize-store',
+			breadcrumbs: [
+				[ '/customize-store', __( 'Customize Store', 'woocommerce' ) ],
+				__( 'Customize Store', 'woocommerce' ),
+			],
 			capability: 'manage_woocommerce',
 		} );
 	}
