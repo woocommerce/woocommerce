@@ -184,6 +184,34 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that adding a block to a block with an invalid block creator
+	 * (one that doesn't return a BlockInterface instance)
+	 * throws an exception.
+	 */
+	public function test_add_block_with_invalid_block_creator() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$this->expectException( \UnexpectedValueException::class );
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			],
+			function () {
+				return 23;
+			}
+		);
+	}
+
+	/**
 	 * Test that adding nested blocks sets the parent and root template correctly.
 	 */
 	public function test_nested_add_block() {
