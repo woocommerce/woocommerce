@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	Fragment,
+	useEffect,
+} from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import {
 	Form,
@@ -200,6 +205,25 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			onCancel();
 		}
 	};
+
+	useEffect( function focusFirstAttributeField() {
+		const firstAttributeFieldLabel =
+			document.querySelector< HTMLLabelElement >(
+				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
+			);
+
+		if ( ! firstAttributeFieldLabel ) return;
+
+		const timeoutId = setTimeout(
+			( label: HTMLLabelElement ) => {
+				label.focus();
+			},
+			0,
+			firstAttributeFieldLabel
+		);
+
+		return () => clearTimeout( timeoutId );
+	}, [] );
 
 	return (
 		<>
