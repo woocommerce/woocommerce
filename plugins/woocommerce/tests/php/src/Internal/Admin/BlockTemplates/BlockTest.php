@@ -106,10 +106,11 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that adding a block to a block sets the parent and root template correctly
+	 * Test that adding a block to a block with a block creator
+	 * sets the parent and root template correctly
 	 * and that the block is added to the root template.
 	 */
-	public function test_add_block_with_block_generator() {
+	public function test_add_block_with_block_creator() {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
@@ -150,7 +151,35 @@ class BlockTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf(
 			CustomBlockInterface::class,
 			$child_block,
-			'Failed asserting that the child block is an instance of CustomBlock.'
+			'Failed asserting that the child block is an instance of CustomBlockInterface.'
+		);
+	}
+
+	/**
+	 * Test that adding a block to a block with a buggy block creator
+	 * (one that doesn't properly set the parent)
+	 * throws an exception.
+	 */
+	public function test_add_block_with_buggy_block_creator() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$this->expectException( \UnexpectedValueException::class );
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			],
+			function ( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+				return new BuggyCustomBlock( $config, $root_template, $parent );
+			}
 		);
 	}
 
