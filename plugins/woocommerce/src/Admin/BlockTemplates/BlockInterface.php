@@ -75,5 +75,5 @@ interface BlockInterface extends BlockContainerInterface {
 	 *
 	 * @return array The block configuration as a formatted template.
 	 */
-	public function get_as_formatted_template(): array;
+	public function get_formatted_template(): array;
 }

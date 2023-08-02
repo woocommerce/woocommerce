@@ -30,5 +30,5 @@ interface BlockContainerInterface {
 	/**
 	 * Get the inner blocks as a formatted template.
 	 */
-	public function get_inner_blocks_as_formatted_template(): array;
+	public function get_inner_blocks_formatted_template(): array;
 }

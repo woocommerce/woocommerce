@@ -180,15 +180,15 @@ class Block implements BlockInterface, BlockContainerInterface {
 	 *
 	 * @return array The block configuration as a formatted template.
 	 */
-	public function get_as_formatted_template(): array {
+	public function get_formatted_template(): array {
 		$arr = [
 			$this->get_name(),
 			$this->get_attributes(),
 		];
 
-		$child_blocks_as_simple_array = $this->get_inner_blocks_as_formatted_template();
-		if ( ! empty( $child_blocks_as_simple_array ) ) {
-			$arr[] = $child_blocks_as_simple_array;
+		$inner_blocks_formatted_template = $this->get_inner_blocks_formatted_template();
+		if ( ! empty( $inner_blocks_formatted_template ) ) {
+			$arr[] = $inner_blocks_formatted_template;
 		}
 
 		return $arr;

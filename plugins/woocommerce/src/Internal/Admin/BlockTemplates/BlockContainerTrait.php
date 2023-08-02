@@ -51,16 +51,16 @@ trait BlockContainerTrait {
 	/**
 	 * Get the inner blocks as a formatted template.
 	 */
-	public function get_inner_blocks_as_formatted_template(): array {
+	public function get_inner_blocks_formatted_template(): array {
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
-		$inner_blocks_as_formatted_template = array_map(
+		$inner_blocks_formatted_template = array_map(
 			function( Block $block ) {
-				return $block->get_as_formatted_template();
+				return $block->get_formatted_template();
 			},
 			$inner_blocks
 		);
 
-		return $inner_blocks_as_formatted_template;
+		return $inner_blocks_formatted_template;
 	}
 }

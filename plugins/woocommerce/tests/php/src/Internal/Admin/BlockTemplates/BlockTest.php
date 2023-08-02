@@ -154,7 +154,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	/**
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
-	public function test_get_as_formatted_template() {
+	public function test_get_formatted_template() {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
@@ -186,7 +186,7 @@ class BlockTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$simple_array = $block->get_as_formatted_template();
+		$simple_array = $block->get_formatted_template();
 
 		$this->assertSame(
 			[
@@ -217,7 +217,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	/**
 	 * Test that getting the inner blocks as a sorted formatted template is ordered correctly.
 	 */
-	public function test_get_inner_blocks_as_sorted_formatted_template() {
+	public function test_get_inner_blocks_sorted_formatted_template() {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
@@ -284,7 +284,7 @@ class BlockTest extends WC_Unit_Test_Case {
 					[],
 				],
 			],
-			$block->get_inner_blocks_as_formatted_template(),
+			$block->get_inner_blocks_formatted_template(),
 			'Failed asserting that the inner blocks are sorted by order.'
 		);
 	}

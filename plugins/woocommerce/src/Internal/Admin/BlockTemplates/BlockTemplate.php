@@ -82,7 +82,7 @@ class BlockTemplate implements BlockTemplateInterface {
 	/**
 	 * Get the template as a formatted template.
 	 */
-	public function get_as_formatted_template(): array {
-		return $this->get_inner_blocks_as_formatted_template();
+	public function get_formatted_template(): array {
+		return $this->get_inner_blocks_formatted_template();
 	}
 }
