@@ -64,6 +64,15 @@ class DocsStore {
 	}
 
 	/**
+	 * Get the doc ID from a post ID
+	 *
+	 * @param int $post_id The post ID to get the doc ID from.
+	 */
+	public static function get_doc_id_by_post_id( $post_id ) {
+		return get_post_meta( $post_id, 'docs_id', true );
+	}
+
+	/**
 	 * Add an edit URL to a docs post
 	 *
 	 * @param int    $post_id - The post ID to add the edit URL to.
@@ -99,10 +108,9 @@ class DocsStore {
 			'tag'        => 'woocommerce_docs',
 		);
 
-		$existing_page = get_posts( $args );
+		$existing_doc = get_posts( $args );
 
-		if ( ! empty( $existing_page ) ) {
-			$post['ID'] = $existing_page[0]->ID;
+		if ( ! empty( $existing_doc ) ) {
 			return wp_update_post( $post );
 		}
 	}
