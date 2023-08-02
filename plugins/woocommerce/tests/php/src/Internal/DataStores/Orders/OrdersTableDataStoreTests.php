@@ -106,6 +106,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
+		$this->disable_cot_sync();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
 		$post_data             = get_post( $post_order_id, ARRAY_A );
@@ -1872,6 +1873,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_legacy_getters_setters() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order_id = OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
@@ -2001,6 +2003,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->sut->backfill_post_record( $order );
 		$this->enable_cot_sync();
