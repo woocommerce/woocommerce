@@ -135,7 +135,14 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
+		$this->legacy_feature_ids = array(
+			'analytics',
+			'new_navigation',
+			'product_block_editor',
+			// Compatibility for COT is determined by `custom_order_tables'.
+			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+		);
 
 		$this->init_features( $features );
 
@@ -777,6 +784,18 @@ class FeaturesController {
 			return $list;
 		}
 
+		return $this->get_incompatible_plugins( $feature_id, $list );
+	}
+
+	/**
+	 * Returns the list of plugins incompatible with a given feature.
+	 *
+	 * @param string $feature_id ID of the feature. Can also be `all` to denote all features.
+	 * @param array  $list       List of plugins to filter.
+	 *
+	 * @return array List of plugins incompatible with the given feature.
+	 */
+	private function get_incompatible_plugins( $feature_id, $list ) {
 		$incompatibles = array();
 
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
