@@ -8,14 +8,10 @@
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "hash": "800191ff979d3367557260c662af59f9a67e07f2c22b5360afe87b04c80bcc56",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-<<<<<<< HEAD
           "id": "1a3672ea88756c6d00a3b3baa3f7481b361c8a1e",
           "links": {
-            "./installation/install-plugin.md": "16d17f790732fcdc0560d2ae24490be272e2fe39"
+            "./installation/install-plugin.md": "bfcfa044024707516eca31a1bfc28706e39e9206"
           }
-=======
-          "id": "c387a046f8307a4f459091a2c45e82263b45e777"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
         }
       ],
       "categories": [
@@ -27,11 +23,7 @@
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
               "hash": "89be25e4e91f5c807c7dc9ff778b2b76c6f7061cb9aca6e0cfc7fddb0cc28b6b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-<<<<<<< HEAD
               "id": "6c7bb21cb195798a444844fef0ff79aacff86de1"
-=======
-              "id": "c4ac8c48c3445186189d15f01028eacd517b9707"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
             }
           ],
           "categories": []
@@ -44,14 +36,10 @@
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "hash": "3195800696a9f641d075fc12da6c40b3dce66ba423807705c07d14a7f6758094",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-<<<<<<< HEAD
               "id": "e2f590a5994fada97bdbdcac751e8bc441530868",
               "links": {
-                "../../testing/unit-tests.md": "079882c5dbbc1da106e3acc8df4102643e6c2f59"
+                "../../testing/unit-tests.md": "c8e5c681314094b5239f7b32912502f150523bc5"
               }
-=======
-              "id": "f87dcc9b8177ad2d8549ef7298d66fb7c8616d71"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
             }
           ],
           "categories": []
@@ -66,31 +54,18 @@
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "hash": "f4950c5597f1ef70f546fd3c4b92fd3c23518317aca2d72edb5a7da519c9946f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-<<<<<<< HEAD
           "id": "6f1b9c74de42a10cf4c77c2843e0fbdf1ff46316"
-=======
-          "id": "1b9de005cc5da3b49d12c24837a5a574aa58ad96"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
         },
         {
           "post_title": "Integration Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
-<<<<<<< HEAD
           "hash": "6929e58b2a32d027f1049eea2ff6136f47b8fb52d4d1781f257de59b999155b0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
           "id": "09c092c2b450edc45b9c247e0a983b7d176984a1"
-=======
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/integration-tests.md",
-          "id": "ee3fd61c9d7b13614e4431708c336f20c9779e1f"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
         }
       ],
       "categories": []
     }
   ],
-<<<<<<< HEAD
-  "hash": "00958a305458e9fc9191eb56309ab88ab459f10d059cad5fbb74824f9e0d4010"
-=======
-  "hash": "84a06ceffaced22a955a131c1272ec9a1d14ae0a7cf9bac4ed21874384f86e9a"
->>>>>>> 99a5fcd304 (Remove posts when deleted from the manifest)
+  "hash": "c727b2b8092cae90356d44d2803e5c70688b548b474467c994f55431055fbb69"
 }
