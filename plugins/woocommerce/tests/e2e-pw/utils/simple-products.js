@@ -78,10 +78,25 @@ async function expectBlockProductEditor( page ) {
 	).toContainText( 'Add new product' );
 }
 
+/**
+ * Click on a block editor tab.
+ *
+ * @param {Page} page
+ * @param {string} tabName
+ */
+async function clickOnTab( tabName, page ) {
+	await page
+		// .locator( '.woocommerce-product-tab__general-content' )
+		.locator( '.woocommerce-product-tabs' )
+		.getByRole( 'button', { name: tabName } )
+		.click();
+}
+
 module.exports = {
 	expectBlockProductEditor,
 	expectOldProductEditor,
 	clickAddNewMenuItem,
+	clickOnTab,
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 };
