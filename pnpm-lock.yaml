@@ -157,7 +157,7 @@ importers:
         version: 5.54.0(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)(typescript@5.1.6)
       '@woocommerce/api':
         specifier: ^0.2.0
-        version: link:../api
+        version: 0.2.0
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
@@ -1258,10 +1258,10 @@ importers:
         version: 27.5.1
       '@woocommerce/api':
         specifier: ^0.2.0
-        version: link:../api
+        version: 0.2.0
       '@woocommerce/e2e-utils':
         specifier: ^0.1.6
-        version: 0.1.6(@woocommerce/api@packages+js+api)(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0)
+        version: 0.1.6(@woocommerce/api@0.2.0)(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0)
       '@wordpress/deprecated':
         specifier: wp-6.0
         version: 3.6.1
@@ -1328,7 +1328,7 @@ importers:
         version: 6.5.1
       '@woocommerce/api':
         specifier: ^0.2.0
-        version: link:../api
+        version: 0.2.0
       '@wordpress/e2e-test-utils':
         specifier: ^4.16.1
         version: 4.16.1(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0)
@@ -1425,7 +1425,7 @@ importers:
         version: github.com/Automattic/puppeteer-utils/0f3ec50(react-native@0.70.0)
       '@woocommerce/api':
         specifier: ^0.2.0
-        version: link:../api
+        version: 0.2.0
       '@wordpress/deprecated':
         specifier: wp-6.0
         version: 3.6.1
@@ -2701,7 +2701,7 @@ importers:
         version: 11.0.7(react-dom@17.0.2)(react@17.0.2)
       '@woocommerce/api':
         specifier: ^0.2.0
-        version: link:../../packages/js/api
+        version: 0.2.0
       '@woocommerce/e2e-environment':
         specifier: ^0.3.0
         version: link:../../packages/js/e2e-environment
@@ -17749,12 +17749,21 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
 
-  /@woocommerce/e2e-utils@0.1.6(@woocommerce/api@packages+js+api)(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0):
+  /@woocommerce/api@0.2.0:
+    resolution: {integrity: sha512-h7PhFF+KPKZTxhvGASm0vn6N7nY3SFOEx0qJITvqaOwbqh3xvdDbiETSZ9R0BFNY5fD8blYCHblCO4VQ4CO9kA==}
+    dependencies:
+      axios: 0.19.2
+      create-hmac: 1.1.7
+      oauth-1.0a: 2.2.6
+    transitivePeerDependencies:
+      - supports-color
+
+  /@woocommerce/e2e-utils@0.1.6(@woocommerce/api@0.2.0)(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0):
     resolution: {integrity: sha512-gWSEgFIjMqaqiiIyrpa1epIHkmBBAfk6WfRojva1f5ZmffSJCc0VbX2jQQRdFm1BuEYr8KGCCYo+q8NIjlMZ7g==}
     peerDependencies:
       '@woocommerce/api': ^0.2.0
     dependencies:
-      '@woocommerce/api': link:packages/js/api
+      '@woocommerce/api': 0.2.0
       '@wordpress/deprecated': 2.12.3
       '@wordpress/e2e-test-utils': 4.16.1(jest@27.5.1)(puppeteer@2.1.1)(react-native@0.70.0)
       config: 3.3.3
@@ -21973,26 +21982,25 @@ packages:
       follow-redirects: 1.5.10
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /axios@0.21.4(debug@4.3.3):
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.14.7(debug@4.3.3)
+      follow-redirects: 1.15.2(debug@4.3.3)
     transitivePeerDependencies:
       - debug
 
   /axios@0.24.0:
     resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==}
     dependencies:
-      follow-redirects: 1.14.5
+      follow-redirects: 1.15.2(debug@4.3.3)
     transitivePeerDependencies:
       - debug
 
   /axios@0.25.0:
     resolution: {integrity: sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==}
     dependencies:
-      follow-redirects: 1.14.7(debug@4.3.3)
+      follow-redirects: 1.15.2(debug@4.3.3)
     transitivePeerDependencies:
       - debug
     dev: true
@@ -28398,17 +28406,8 @@ packages:
       readable-stream: 2.3.7
     dev: true
 
-  /follow-redirects@1.14.5:
-    resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-
-  /follow-redirects@1.14.7(debug@4.3.3):
-    resolution: {integrity: sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==}
+  /follow-redirects@1.15.2(debug@4.3.3):
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -28425,7 +28424,6 @@ packages:
       debug: 3.1.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -30270,7 +30268,7 @@ packages:
     engines: {node: '>=8.0.0'}
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.14.7(debug@4.3.3)
+      follow-redirects: 1.15.2(debug@4.3.3)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
