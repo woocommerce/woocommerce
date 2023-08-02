@@ -18,15 +18,26 @@ trait BlockContainerTrait {
 	/**
 	 * Add a block to the block container.
 	 *
-	 * @param array $block_config The block data.
+	 * @param array    $block_config The block data.
+	 * @param callable $block_generator An optional block generator.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
+	 * @throws \TypeError If the block generator does not return an instance of BlockInterface.
 	 */
-	public function &add_block( array $block_config ): BlockInterface {
+	public function &add_block( array $block_config, ?callable $block_generator = null ): BlockInterface {
 		$root_template = $this->get_root_template();
 
-		$block = new Block( $block_config, $root_template, $this );
+		if ( is_callable( $block_generator ) ) {
+			$block = $block_generator( $block_config, $root_template, $this );
+
+			if ( ! $block instanceof BlockInterface ) {
+				throw new \TypeError( 'The block generator must return an instance of BlockInterface.' );
+			}
+		} else {
+			$block = new Block( $block_config, $root_template, $this );
+		}
+
 		$root_template->internal_add_block_to_template( $block );
 		$this->inner_blocks[] = &$block;
 		return $block;

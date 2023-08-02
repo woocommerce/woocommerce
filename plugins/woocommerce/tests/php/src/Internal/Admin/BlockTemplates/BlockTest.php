@@ -2,10 +2,26 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\BlockTemplates;
 
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplate;
 
 use WC_Unit_Test_Case;
+
+interface CustomBlockInterface {
+	public function custom_method(): string;
+}
+class CustomBlock extends Block implements CustomBlockInterface {
+	public function __construct( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+		parent::__construct( $config, $root_template, $parent );
+	}
+
+	public function custom_method(): string {
+		return 'custom';
+	}
+}
 
 /**
  * Tests for the Block class.
@@ -99,6 +115,55 @@ class BlockTest extends WC_Unit_Test_Case {
 			$child_block,
 			$template->get_block( 'test-block-id-2' ),
 			'Failed asserting that the child block is in the root template.'
+		);
+	}
+
+	/**
+	 * Test that adding a block to a block sets the parent and root template correctly
+	 * and that the block is added to the root template.
+	 */
+	public function test_add_block_with_block_generator() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			],
+			function ( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+				return new CustomBlock( $config, $root_template, $parent );
+			}
+		);
+
+		$this->assertSame(
+			$child_block->get_root_template(),
+			$block->get_root_template(),
+			'Failed asserting that the child block has the same root template as the parent block.'
+		);
+
+		$this->assertSame(
+			$block,
+			$child_block->get_parent(),
+			'Failed asserting that the child block\'s parent is the block it was added to.'
+		);
+
+		$this->assertSame(
+			$child_block,
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block is in the root template.'
+		);
+
+		$this->assertInstanceOf(
+			CustomBlockInterface::class,
+			$child_block,
+			'Failed asserting that the child block is an instance of CustomBlock.'
 		);
 	}
 
