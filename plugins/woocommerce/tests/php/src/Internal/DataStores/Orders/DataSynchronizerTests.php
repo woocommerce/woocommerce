@@ -555,10 +555,12 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->sut->delete_database_tables();
 		$this->assertFalse( $this->sut->check_orders_table_exists() );
 
+		$cot_sync_value = get_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		$this->assertTrue( $this->sut->check_orders_table_exists() );
 		$this->assertEquals( get_option( DataSynchronizer::ORDERS_TABLE_CREATED ), 'yes' );
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, $cot_sync_value );
 	}
 
 	/**

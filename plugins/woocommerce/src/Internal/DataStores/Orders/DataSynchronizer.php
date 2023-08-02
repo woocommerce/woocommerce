@@ -125,7 +125,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function check_orders_table_exists(): bool {
 		$missing_tables = $this->database_util->get_missing_tables( $this->data_store->get_database_schema() );
 
-		return count( $missing_tables ) === 0;
+		if ( count( $missing_tables ) === 0 ) {
+			update_option( self::ORDERS_TABLE_CREATED, 'yes') ;
+			return true;
+		}
+		return false;
 	}
 
 	/**
