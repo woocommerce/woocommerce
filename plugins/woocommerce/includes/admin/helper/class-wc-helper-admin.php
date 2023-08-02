@@ -67,8 +67,6 @@ class WC_Helper_Admin {
 				admin_url( 'admin.php' )
 			);
 
-			// TODO: this may be needed to make the URL work.
-			// include WC_Helper::get_view_filename( 'html-oauth-start.php' );
 			return $connect_url;
 		}
 
