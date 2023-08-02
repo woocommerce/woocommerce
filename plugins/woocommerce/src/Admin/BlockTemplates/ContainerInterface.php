@@ -31,4 +31,9 @@ interface ContainerInterface {
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
 	public function &add_block( array $block_config, ?callable $block_creator = null ): BlockInterface;
+
+	/**
+	 * Get the root template that the block belongs to.
+	 */
+	public function &get_root_template(): BlockTemplateInterface;
 }

@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
@@ -80,7 +80,7 @@ class BlockTemplate implements BlockTemplateInterface {
 	/**
 	 * Get the parent block container.
 	 */
-	public function &get_parent(): ?BlockContainerInterface {
+	public function &get_parent(): ?ContainerInterface {
 		return null;
 	}
 }
