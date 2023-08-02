@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\BlockTemplates;
 /**
  * Interface for block configuration used to specify blocks in BlockTemplate.
  */
-interface BlockInterface extends BlockContainerInterface {
+interface BlockInterface {
 	/**
 	 * Key for the block name in the block configuration.
 	 */
@@ -61,9 +61,9 @@ interface BlockInterface extends BlockContainerInterface {
 	public function set_attributes( array $attributes );
 
 	/**
-	 * Get the parent block container that the block belongs to.
+	 * Get the parent container that the block belongs to.
 	 */
-	public function &get_parent(): ?BlockContainerInterface;
+	public function &get_parent(): ?ContainerInterface;
 
 	/**
 	 * Get the root template that the block belongs to.

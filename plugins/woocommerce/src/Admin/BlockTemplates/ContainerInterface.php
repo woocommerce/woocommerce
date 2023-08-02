@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\BlockTemplates;
 /**
  * Interface for block containers.
  */
-interface BlockContainerInterface extends BlockInterface, ContainerInterface {
+interface ContainerInterface {
 	/**
 	 * Add a block container to the block container.
 	 *

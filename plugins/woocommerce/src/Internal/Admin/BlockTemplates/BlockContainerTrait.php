@@ -3,6 +3,9 @@
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 
 /**
  * Trait for block containers.
@@ -17,6 +20,34 @@ trait BlockContainerTrait {
 
 	// phpcs doesn't take into account exceptions thrown by called methods.
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Add a block to the block container.
+	 *
+	 * @param array    $block_config The block data.
+	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
+	 *
+	 * @throws \ValueError If the block configuration is invalid.
+	 * @throws \ValueError If a block with the specified ID already exists in the template.
+	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockContainerInterface.
+	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
+	 */
+	public function &add_block_container( array $block_config, ?callable $block_creator = null ): BlockContainerInterface {
+		$block_container = $this->add_block(
+			$block_config,
+			is_callable( $block_creator )
+				? $block_creator
+				: function ( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
+					return new BlockContainer( $config, $root_template, $parent );
+				}
+		);
+
+		if ( ! $block_container instanceof BlockContainerInterface ) {
+			throw new \UnexpectedValueException( 'The block creator must return an instance of BlockContainerInterface.' );
+		}
+
+		return $block_container;
+	}
 
 	/**
 	 * Add a block to the block container.
@@ -72,7 +103,7 @@ trait BlockContainerTrait {
 	/**
 	 * Get the inner blocks as a formatted template.
 	 */
-	public function get_inner_blocks_formatted_template(): array {
+	public function get_formatted_template(): array {
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
 		$inner_blocks_formatted_template = array_map(

@@ -2,16 +2,14 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 
 /**
  * Block configuration used to specify blocks in BlockTemplate.
  */
-class Block implements BlockInterface, BlockContainerInterface {
-	use BlockContainerTrait;
-
+class Block implements BlockInterface {
 	/**
 	 * The block name.
 	 *
@@ -48,9 +46,9 @@ class Block implements BlockInterface, BlockContainerInterface {
 	private $root_template;
 
 	/**
-	 * The parent block container.
+	 * The parent container.
 	 *
-	 * @var BlockContainerInterface
+	 * @var ContainerInterface
 	 */
 	private $parent;
 
@@ -64,7 +62,7 @@ class Block implements BlockInterface, BlockContainerInterface {
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 */
-	public function __construct( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
 		$this->validate( $config, $root_template, $parent );
 
 		$this->root_template = $root_template;
@@ -92,12 +90,12 @@ class Block implements BlockInterface, BlockContainerInterface {
 	 *
 	 * @param array                        $config The block configuration.
 	 * @param BlockTemplateInterface       $root_template The block template that this block belongs to.
-	 * @param BlockContainerInterface|null $parent The parent block container.
+	 * @param ContainerInterface|null $parent The parent block container.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 */
-	protected function validate( array $config, BlockTemplateInterface &$root_template, BlockContainerInterface &$parent = null ) {
+	protected function validate( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
 		if ( isset( $parent ) && ( $parent->get_root_template() !== $root_template ) ) {
 			throw new \ValueError( 'The parent block must belong to the same template as the block.' );
 		}
@@ -171,7 +169,7 @@ class Block implements BlockInterface, BlockContainerInterface {
 	/**
 	 * Get the parent block container.
 	 */
-	public function &get_parent(): BlockContainerInterface {
+	public function &get_parent(): ContainerInterface {
 		return $this->parent;
 	}
 
@@ -185,11 +183,6 @@ class Block implements BlockInterface, BlockContainerInterface {
 			$this->get_name(),
 			$this->get_attributes(),
 		];
-
-		$inner_blocks_formatted_template = $this->get_inner_blocks_formatted_template();
-		if ( ! empty( $inner_blocks_formatted_template ) ) {
-			$arr[] = $inner_blocks_formatted_template;
-		}
 
 		return $arr;
 	}

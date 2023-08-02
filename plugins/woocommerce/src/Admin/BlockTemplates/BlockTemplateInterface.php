@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\BlockTemplates;
 /**
  * Interface for block-based template.
  */
-interface BlockTemplateInterface extends BlockContainerInterface {
+interface BlockTemplateInterface extends ContainerInterface {
 	/**
 	 * Get a block by ID.
 	 *
