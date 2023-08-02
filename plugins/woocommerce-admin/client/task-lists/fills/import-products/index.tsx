@@ -51,7 +51,7 @@ export const Products = () => {
 			),
 		} );
 
-	const productTypeListItems = useProductTypeListItems(
+	const { productTypes: productTypeListItems } = useProductTypeListItems(
 		getProductTypes( {
 			exclude: [ 'subscription' ],
 		} ),

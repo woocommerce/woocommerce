@@ -77,6 +77,12 @@ async function processDirectory(
 
 			const post: Post = { ...fileFrontmatter };
 
+			// Generate hash of the post contents.
+			post.hash = crypto
+				.createHash( 'sha256' )
+				.update( JSON.stringify( fileContent ) )
+				.digest( 'hex' );
+
 			// get the folder name of rootDirectory.
 			const relativePath = path.relative( fullPathToDocs, filePath );
 
@@ -88,6 +94,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
+				filePath,
 				id: generatePostId( relativePath, projectName ),
 			} );
 		}

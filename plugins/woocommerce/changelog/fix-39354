@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible fatal error when edit lock is held on deleted order.
