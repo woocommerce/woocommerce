@@ -98,16 +98,16 @@ export function useProductAttributes( {
 		otherAttributes = otherAttributes.filter( ( attr ) => {
 			if (
 				attr.id > 0 &&
-				newAttributes.findIndex( ( a ) => a.id === attr.id ) !== -1
+				newAttributes.some( ( a ) => a.id === attr.id )
 			) {
 				return false;
 			}
 			// Local attributes we check by name.
 			if (
 				attr.id === 0 &&
-				newAttributes.findIndex(
+				newAttributes.some(
 					( a ) => a.name.toLowerCase() === attr.name.toLowerCase()
-				) !== -1
+				)
 			) {
 				return false;
 			}
