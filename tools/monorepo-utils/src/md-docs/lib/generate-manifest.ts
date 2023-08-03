@@ -85,6 +85,7 @@ async function processDirectory(
 
 			// get the folder name of rootDirectory.
 			const relativePath = path.relative( fullPathToDocs, filePath );
+
 			category.posts.push( {
 				...post,
 				url: generateFileUrl(
