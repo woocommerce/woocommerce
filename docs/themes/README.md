@@ -4,7 +4,4 @@
 
 ## Block Themes
 
-## Marketplace Guidelines
-
-* [Theme Development](./marketplace-guidelines/theme-development.md)
-* [Theme Design](./marketplace-guidelines/theme-design.md)
+* [Marketplace Guidelines](marketplace-guidelines.md)
