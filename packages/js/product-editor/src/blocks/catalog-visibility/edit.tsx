@@ -5,14 +5,12 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { CheckboxControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import {
-	CatalogVisibilityBlockAttributes,
-	ProductCatalogVisibility,
-} from './types';
+import { CatalogVisibilityBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -23,12 +21,9 @@ export function Edit( {
 
 	const blockProps = useBlockProps();
 
-	const [ catalogVisibility, setCatalogVisibility ] =
-		useEntityProp< ProductCatalogVisibility >(
-			'postType',
-			'product',
-			'catalog_visibility'
-		);
+	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
+		Product[ 'catalog_visibility' ]
+	>( 'postType', 'product', 'catalog_visibility' );
 
 	const checked =
 		catalogVisibility === visibilty || catalogVisibility === 'hidden';

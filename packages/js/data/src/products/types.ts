@@ -42,6 +42,12 @@ export type ProductDimensions = {
 	length: string;
 };
 
+export type ProductCatalogVisibility =
+	| 'visible'
+	| 'catalog'
+	| 'search'
+	| 'hidden';
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'
@@ -53,6 +59,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	backorders_allowed: boolean;
 	button_text: string;
 	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
+	catalog_visibility: ProductCatalogVisibility;
 	date_created: string;
 	date_created_gmt: string;
 	date_modified: string;
