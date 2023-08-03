@@ -144,6 +144,10 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 			return $content;
 		}
 
+		if ( empty( $block_content ) ) {
+			return $block_content;
+		}
+
 		return sprintf(
 			'%1$s%2$s%3$s',
 			$this->get_hooks_buffer( $block_hooks, 'before' ),
