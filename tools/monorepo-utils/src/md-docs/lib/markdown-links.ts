@@ -12,13 +12,15 @@ import { Category, Post, generatePostId } from './generate-manifest';
 /**
  * Process relative markdown links in the manifest.
  *
- * @param manifest      Category or Post
- * @param rootDirectory Root directory of the project
- * @param projectName   Name of the project
+ * @param manifest       Category or Post
+ * @param rootDirectory  Root directory of the project
+ * @param absoluteSubDir Path to directory of Markdown files to generate the manifest from.
+ * @param projectName    Name of the project
  */
 export const processMarkdownLinks = (
 	manifest: Category,
 	rootDirectory: string,
+	absoluteSubDir: string,
 	projectName: string
 ) => {
 	const updatedManifest: Category = { ...manifest };
@@ -36,14 +38,18 @@ export const processMarkdownLinks = (
 			let match;
 			while ( ( match = linkRegex.exec( fileContent ) ) ) {
 				const relativePath = match[ 1 ];
-				const linkedFilePath = path.resolve(
+				const absoluteLinkedFilePath = path.resolve(
 					path.dirname( filePath ),
 					relativePath
 				);
+				const relativeLinkedFilePath = path.relative(
+					absoluteSubDir,
+					absoluteLinkedFilePath
+				);
 
-				if ( fs.existsSync( linkedFilePath ) ) {
+				if ( fs.existsSync( absoluteLinkedFilePath ) ) {
 					const linkedId = generatePostId(
-						linkedFilePath,
+						relativeLinkedFilePath,
 						projectName
 					);
 					updatedPost.links = updatedPost.links || {};
@@ -60,7 +66,12 @@ export const processMarkdownLinks = (
 	if ( updatedManifest.categories ) {
 		updatedManifest.categories = updatedManifest.categories.map(
 			( category ) =>
-				processMarkdownLinks( category, rootDirectory, projectName )
+				processMarkdownLinks(
+					category,
+					rootDirectory,
+					absoluteSubDir,
+					projectName
+				)
 		);
 	}
 

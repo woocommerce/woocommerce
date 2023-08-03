@@ -10,7 +10,7 @@
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "id": "1a3672ea88756c6d00a3b3baa3f7481b361c8a1e",
           "links": {
-            "./installation/install-plugin.md": "bfcfa044024707516eca31a1bfc28706e39e9206"
+            "./installation/install-plugin.md": "6c7bb21cb195798a444844fef0ff79aacff86de1"
           }
         }
       ],
@@ -38,7 +38,7 @@
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "id": "e2f590a5994fada97bdbdcac751e8bc441530868",
               "links": {
-                "../../testing/unit-tests.md": "c8e5c681314094b5239f7b32912502f150523bc5"
+                "../../testing/unit-tests.md": "6f1b9c74de42a10cf4c77c2843e0fbdf1ff46316"
               }
             }
           ],
