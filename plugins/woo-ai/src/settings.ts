@@ -4,7 +4,7 @@
 import './settings.scss';
 
 const fieldMap = {
-	enabled: document.getElementById(
+	checkbox: document.getElementById(
 		'woo_ai_enable_checkbox'
 	) as HTMLInputElement,
 	tone: document.getElementById(
@@ -15,56 +15,20 @@ const fieldMap = {
 	) as HTMLInputElement,
 };
 
-const getSelectedOption = (): Element | null =>
-	document.querySelector( `.woo-ai-settings-tone-option.selected` );
-
-const setSelectedDescription = ( value: string ): void => {
-	const selected = document.querySelector(
-		`.woo-ai-settings-tone-option[data-option="${ value }"]`
-	);
-
-	if ( ! selected ) {
-		return;
-	}
-
-	const previousSelected = getSelectedOption();
-
-	if ( previousSelected ) {
-		previousSelected.classList.remove( 'selected' );
-	}
-
-	selected.classList.add( 'selected' );
-};
-
-const setDisabledState = ( disabled: boolean ): void => {
-	if ( fieldMap.tone && fieldMap.describeBusiness ) {
-		fieldMap.tone.disabled = disabled;
-		fieldMap.describeBusiness.disabled = disabled;
-	}
-};
-
 ( () => {
-	if ( fieldMap.enabled?.checked ) {
-		setSelectedDescription( fieldMap.tone?.value || '' );
-		setDisabledState( false );
+	if ( ! fieldMap.checkbox?.checked ) {
+		jQuery( fieldMap.tone ).closest( 'tr' ).hide();
+		jQuery( fieldMap.describeBusiness ).closest( 'tr' ).hide();
 	}
 
-	fieldMap.enabled?.addEventListener( 'change', ( { target } ) => {
+	fieldMap.checkbox?.addEventListener( 'change', ( { target } ) => {
 		const checked = ( target as HTMLInputElement )?.checked;
 		if ( checked ) {
-			setSelectedDescription( fieldMap.tone?.value || '' );
+			jQuery( fieldMap.tone ).closest( 'tr' ).fadeIn( 500 );
+			jQuery( fieldMap.describeBusiness ).closest( 'tr' ).fadeIn( 500 );
 		} else {
-			const selected = getSelectedOption();
-
-			if ( selected ) {
-				selected.classList.remove( 'selected' );
-			}
+			jQuery( fieldMap.tone ).closest( 'tr' ).fadeOut( 500 );
+			jQuery( fieldMap.describeBusiness ).closest( 'tr' ).fadeOut( 500 );
 		}
-		setDisabledState( ! checked );
-	} );
-
-	fieldMap.tone?.addEventListener( 'change', ( { target } ) => {
-		const value = ( target as HTMLSelectElement )?.value;
-		setSelectedDescription( value );
 	} );
 } )();
