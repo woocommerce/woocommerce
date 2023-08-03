@@ -309,7 +309,7 @@ function woocommerce_blocks_interactivity_setup() {
 	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	$is_enabled = apply_filters(
 		'woocommerce_blocks_enable_interactivity_api',
-		false
+		true
 	);
 
 	if ( $is_enabled ) {
