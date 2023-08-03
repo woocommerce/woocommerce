@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -136,9 +136,6 @@ class FeaturesController {
 			'new_navigation',
 			'product_block_editor',
 			'marketplace',
-			// Compatibility for COT is determined by `custom_order_tables'.
-			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 
 		$this->init_features( $features );
@@ -780,7 +777,6 @@ class FeaturesController {
 
 			$incompatibles = $this->compatibility_info_by_feature[ $feature ]['incompatible'];
 			$this->compatibility_info_by_feature[ $feature ]['incompatible'] = array_diff( $incompatibles, array( $plugin_name ) );
-
 		}
 	}
 
