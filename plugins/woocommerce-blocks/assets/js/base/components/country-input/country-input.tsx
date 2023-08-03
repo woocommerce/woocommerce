@@ -24,7 +24,7 @@ export const CountryInput = ( {
 	required = false,
 	errorId,
 	errorMessage = __(
-		'Please select a country.',
+		'Please select a country',
 		'woo-gutenberg-products-block'
 	),
 }: CountryInputWithCountriesProps ): JSX.Element => {

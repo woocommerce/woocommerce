@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ValidatedTextInput, isPostcode } from '@woocommerce/blocks-checkout';
+import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,
@@ -11,95 +11,37 @@ import {
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
 import { useEffect, useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { withInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
-import {
-	AddressField,
-	AddressFields,
-	AddressType,
-	defaultAddressFields,
-	ShippingAddress,
-} from '@woocommerce/settings';
-import { useSelect, useDispatch, dispatch } from '@wordpress/data';
+import { defaultAddressFields } from '@woocommerce/settings';
+import { useDispatch, dispatch } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
-import { FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
+import { AddressFormProps, FieldType, FieldConfig } from './types';
 import prepareAddressFields from './prepare-address-fields';
+import validateShippingCountry from './validate-shipping-country';
+import customValidationHandler from './custom-validation-handler';
 
-// If it's the shipping address form and the user starts entering address
-// values without having set the country first, show an error.
-const validateShippingCountry = (
-	values: ShippingAddress,
-	setValidationErrors: (
-		errors: Record< string, FieldValidationStatus >
-	) => void,
-	clearValidationError: ( error: string ) => void,
-	hasValidationError: boolean
-): void => {
-	const validationErrorId = 'shipping_country';
-	if (
-		! hasValidationError &&
-		! values.country &&
-		( values.city || values.state || values.postcode )
-	) {
-		setValidationErrors( {
-			[ validationErrorId ]: {
-				message: __(
-					'Please select a country to calculate rates.',
-					'woo-gutenberg-products-block'
-				),
-				hidden: false,
-			},
-		} );
-	}
-	if ( hasValidationError && values.country ) {
-		clearValidationError( validationErrorId );
-	}
-};
-
-interface AddressFormProps {
-	// Id for component.
-	id?: string;
-	// Unique id for form.
-	instanceId: string;
-	// Array of fields in form.
-	fields: ( keyof AddressFields )[];
-	// Field configuration for fields in form.
-	fieldConfig?: Record< keyof AddressFields, Partial< AddressField > >;
-	// Function to all for an form onChange event.
-	onChange: ( newValue: ShippingAddress ) => void;
-	// Type of form.
-	type?: AddressType;
-	// Values for fields.
-	values: ShippingAddress;
-}
+const defaultFields = Object.keys(
+	defaultAddressFields
+) as unknown as FieldType[];
 
 /**
  * Checkout address form.
  */
 const AddressForm = ( {
 	id = '',
-	fields = Object.keys(
-		defaultAddressFields
-	) as unknown as ( keyof AddressFields )[],
-	fieldConfig = {} as Record< keyof AddressFields, Partial< AddressField > >,
+	fields = defaultFields,
+	fieldConfig = {} as FieldConfig,
 	instanceId,
 	onChange,
 	type = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
-	const validationErrorId = 'shipping_country';
-	const { setValidationErrors, clearValidationError } =
-		useDispatch( VALIDATION_STORE_KEY );
-
-	const countryValidationError = useSelect( ( select ) => {
-		const store = select( VALIDATION_STORE_KEY );
-		return store.getValidationError( validationErrorId );
-	} );
+	const { clearValidationError } = useDispatch( VALIDATION_STORE_KEY );
 
 	const currentFields = useShallowEqual( fields );
 
@@ -140,55 +82,14 @@ const AddressForm = ( {
 		} );
 	}, [ addressFormFields, type, clearValidationError ] );
 
+	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
 		if ( type === 'shipping' ) {
-			validateShippingCountry(
-				values,
-				setValidationErrors,
-				clearValidationError,
-				!! countryValidationError?.message &&
-					! countryValidationError?.hidden
-			);
+			validateShippingCountry( values );
 		}
-	}, [
-		values,
-		countryValidationError?.message,
-		countryValidationError?.hidden,
-		setValidationErrors,
-		clearValidationError,
-		type,
-	] );
+	}, [ values, type ] );
 
 	id = id || instanceId;
-
-	/**
-	 * Custom validation handler for fields with field specific handling.
-	 */
-	const customValidationHandler = (
-		inputObject: HTMLInputElement,
-		field: string,
-		customValues: {
-			country: string;
-		}
-	): boolean => {
-		if (
-			field === 'postcode' &&
-			customValues.country &&
-			! isPostcode( {
-				postcode: inputObject.value,
-				country: customValues.country,
-			} )
-		) {
-			inputObject.setCustomValidity(
-				__(
-					'Please enter a valid postcode',
-					'woo-gutenberg-products-block'
-				)
-			);
-			return false;
-		}
-		return true;
-	};
 
 	return (
 		<div id={ id } className="wc-block-components-address-form">
@@ -197,8 +98,16 @@ const AddressForm = ( {
 					return null;
 				}
 
-				// Create a consistent error ID based on the field key and type
-				const errorId = `${ type }_${ field.key }`;
+				const fieldProps = {
+					id: `${ id }-${ field.key }`,
+					errorId: `${ type }_${ field.key }`,
+					label: field.required ? field.label : field.optionalLabel,
+					autoCapitalize: field.autocapitalize,
+					autoComplete: field.autocomplete,
+					errorMessage: field.errorMessage,
+					required: field.required,
+					className: `wc-block-components-address-form__${ field.key }`,
+				};
 
 				if ( field.key === 'country' ) {
 					const Tag =
@@ -208,15 +117,8 @@ const AddressForm = ( {
 					return (
 						<Tag
 							key={ field.key }
-							id={ `${ id }-${ field.key }` }
-							errorId={ errorId }
-							label={
-								field.required
-									? field.label
-									: field.optionalLabel
-							}
+							{ ...fieldProps }
 							value={ values.country }
-							autoComplete={ field.autocomplete }
 							onChange={ ( newValue ) =>
 								onChange( {
 									...values,
@@ -224,8 +126,6 @@ const AddressForm = ( {
 									state: '',
 								} )
 							}
-							errorMessage={ field.errorMessage }
-							required={ field.required }
 						/>
 					);
 				}
@@ -238,24 +138,15 @@ const AddressForm = ( {
 					return (
 						<Tag
 							key={ field.key }
-							id={ `${ id }-${ field.key }` }
-							errorId={ errorId }
+							{ ...fieldProps }
 							country={ values.country }
-							label={
-								field.required
-									? field.label
-									: field.optionalLabel
-							}
 							value={ values.state }
-							autoComplete={ field.autocomplete }
 							onChange={ ( newValue ) =>
 								onChange( {
 									...values,
 									state: newValue,
 								} )
 							}
-							errorMessage={ field.errorMessage }
-							required={ field.required }
 						/>
 					);
 				}
@@ -263,35 +154,27 @@ const AddressForm = ( {
 				return (
 					<ValidatedTextInput
 						key={ field.key }
-						id={ `${ id }-${ field.key }` }
-						errorId={ errorId }
-						className={ `wc-block-components-address-form__${ field.key }` }
-						label={
-							field.required ? field.label : field.optionalLabel
-						}
+						{ ...fieldProps }
 						value={ values[ field.key ] }
-						autoCapitalize={ field.autocapitalize }
-						autoComplete={ field.autocomplete }
 						onChange={ ( newValue: string ) =>
 							onChange( {
 								...values,
-								[ field.key ]:
-									field.key === 'postcode'
-										? newValue.trimStart().toUpperCase()
-										: newValue,
+								[ field.key ]: newValue,
 							} )
 						}
+						customFormatter={ ( value: string ) => {
+							if ( field.key === 'postcode' ) {
+								return value.trimStart().toUpperCase();
+							}
+							return value;
+						} }
 						customValidation={ ( inputObject: HTMLInputElement ) =>
-							field.required || inputObject.value
-								? customValidationHandler(
-										inputObject,
-										field.key,
-										values
-								  )
-								: true
+							customValidationHandler(
+								inputObject,
+								field.key,
+								values
+							)
 						}
-						errorMessage={ field.errorMessage }
-						required={ field.required }
 					/>
 				);
 			} ) }
