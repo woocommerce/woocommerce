@@ -19,7 +19,7 @@ export function Edit( {
 }: {
 	attributes: CatalogVisibilityBlockAttributes;
 } ) {
-	const { label } = attributes;
+	const { label, visibilty } = attributes;
 
 	const blockProps = useBlockProps();
 
@@ -31,18 +31,27 @@ export function Edit( {
 		);
 
 	const checked =
-		catalogVisibility === 'catalog' || catalogVisibility === 'hidden';
+		catalogVisibility === visibilty || catalogVisibility === 'hidden';
 
 	function handleChange( selected: boolean ) {
 		if ( selected ) {
-			if ( catalogVisibility === 'search' ) {
-				setCatalogVisibility( 'hidden' );
-			} else {
-				setCatalogVisibility( 'catalog' );
+			if ( catalogVisibility === 'visible' ) {
+				setCatalogVisibility( visibilty );
+				return;
 			}
-		} else if ( catalogVisibility === 'hidden' ) {
-			setCatalogVisibility( 'search' );
+			setCatalogVisibility( 'hidden' );
 		} else {
+			if ( catalogVisibility === 'hidden' ) {
+				if ( visibilty === 'catalog' ) {
+					setCatalogVisibility( 'search' );
+					return;
+				}
+				if ( visibilty === 'search' ) {
+					setCatalogVisibility( 'catalog' );
+					return;
+				}
+				return;
+			}
 			setCatalogVisibility( 'visible' );
 		}
 	}

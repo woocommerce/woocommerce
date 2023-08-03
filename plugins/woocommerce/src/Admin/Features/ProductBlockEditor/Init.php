@@ -371,15 +371,17 @@ class Init {
 									),
 								),
 								array(
-									'woocommerce/product-search-visibility-field',
+									'woocommerce/product-catalog-visibility-field',
 									array(
 										'label' => __( 'Hide in product catalog', 'woocommerce' ),
+										'visibilty' => 'search',
 									),
 								),
 								array(
 									'woocommerce/product-catalog-visibility-field',
 									array(
 										'label' => __( 'Hide from search results', 'woocommerce' ),
+										'visibilty' => 'catalog',
 									),
 								),
 								array(

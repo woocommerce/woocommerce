@@ -11,6 +11,11 @@
 		"label": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"visibilty": {
+			"type": "string",
+			"enum": [ "visible", "catalog", "search", "hidden" ],
+			"default": "visible"
 		}
 	},
 	"supports": {
