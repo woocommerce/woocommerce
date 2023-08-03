@@ -79,7 +79,7 @@ class ManifestJob {
 						$existing_manifest = null;
 					}
 
-					Manifest\ManifestProcessor::process_manifest( $json, $action_id, $existing_manifest );
+					ManifestProcessor::process_manifest( $json, $action_id, $existing_manifest );
 
 					$next_manifest  = Data\ManifestStore::get_manifest_by_url( $manifest_url );
 					$doc_ids        = PostRemover::collect_doc_ids_from_manifest( $next_manifest );
