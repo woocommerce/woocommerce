@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
     test:
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
         timeout-minutes: 30
         runs-on: ubuntu-20.04
@@ -28,14 +28,28 @@ jobs:
             matrix:
                 php: ['7.4', '8.0']
                 wp: ['latest']
+                unittests: ['shard1', 'shard2']
                 include:
                     - wp: nightly
                       php: '7.4'
+                      unittests: 'shard1'
+                    - wp: nightly
+                      php: '7.4'
+                      unittests: 'shard2'
                     - wp: '6.1'
                       php: 7.4
+                      unittests: 'shard1'
+                    - wp: '6.1'
+                      php: 7.4
+                      unittests: 'shard2'
                     - wp: 'latest'
                       php: '7.4'
                       hpos: true
+                      unittests: 'shard1'
+                    - wp: 'latest'
+                      php: '7.4'
+                      hpos: true
+                      unittests: 'shard2'
         services:
             database:
                 image: mysql:5.6
@@ -56,20 +70,20 @@ jobs:
               name: Parse Matrix Variables
               uses: actions/github-script@v6
               with:
-                script: |
-                    const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
-                    parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
-                      core.setOutput( 'wpVersion', version );
-                    } );
+                  script: |
+                      const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
+                      parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
+                        core.setOutput( 'wpVersion', version );
+                      } );
 
             - name: Prepare Testing Environment
               env:
-                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                WP_ENV_PHP_VERSION: ${{ matrix.php }}
+                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
               run: pnpm --filter=woocommerce env:test
 
             - name: Run Tests
               env:
-                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce test:unit:env
+                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
+              run: pnpm --filter=woocommerce test:unit:env --testsuite ${{ matrix.unittests }}

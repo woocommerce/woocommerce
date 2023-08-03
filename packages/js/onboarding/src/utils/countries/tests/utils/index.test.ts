@@ -4,7 +4,7 @@
 /**
  * Internal dependencies
  */
-import { findCountryOption } from '../../';
+import { findCountryOption, getCountry } from '../../';
 import { countryStateOptions } from './country-options';
 import { locations } from './locations';
 
@@ -19,6 +19,18 @@ describe( 'findCountryOption', () => {
 	it( 'should return null when not found', () => {
 		const location = { country_short: 'US' };
 		expect( findCountryOption( countryStateOptions, location ) ).toBeNull();
+	} );
+
+	it( 'should ignore accents for comparsion', () => {
+		const location = {
+			city: 'Malaga',
+			region: 'Andalucia',
+			country_short: 'ES',
+		};
+		expect( findCountryOption( countryStateOptions, location ) ).toEqual( {
+			key: 'ES:MA',
+			label: 'Spain — Málaga',
+		} );
 	} );
 
 	it.each( [
@@ -92,5 +104,20 @@ describe( 'findCountryOption', () => {
 			}
 		} );
 		expect( matchCount / locations.length ).toBeGreaterThan( 0.98 );
+	} );
+} );
+
+describe( 'getCountry', () => {
+	it( 'should return null on undefined location', () => {
+		// @ts-expect-error -- tests undefined
+		expect( getCountry( undefined ) ).toEqual( undefined );
+	} );
+
+	it( 'should return country when country string without state is passed', () => {
+		expect( getCountry( 'SG' ) ).toEqual( 'SG' );
+	} );
+
+	it( 'should return country when country string with state is passed', () => {
+		expect( getCountry( 'AU:VIC' ) ).toEqual( 'AU' );
 	} );
 } );

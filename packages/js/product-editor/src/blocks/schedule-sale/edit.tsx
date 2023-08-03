@@ -20,12 +20,14 @@ import { getSettings } from '@wordpress/date';
  * Internal dependencies
  */
 import { ScheduleSalePricingBlockAttributes } from './types';
+import { useProductEdits } from '../../hooks/use-product-edits';
 import { useValidation } from '../../contexts/validation-context';
 
 export function Edit( {
 	clientId,
 }: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps();
+	const { hasEdit } = useProductEdits();
 
 	const dateTimeFormat = getSettings().formats.datetime;
 
@@ -66,10 +68,10 @@ export function Edit( {
 		}
 	}
 
-	// Hide and clean date fields if the user manually change
+	// Hide and clean date fields if the user manually changes
 	// the sale price to zero or less.
 	useEffect( () => {
-		if ( ! isSalePriceGreaterThanZero ) {
+		if ( hasEdit( 'sale_price' ) && ! isSalePriceGreaterThanZero ) {
 			setShowScheduleSale( false );
 			setDateOnSaleFromGmt( '' );
 			setDateOnSaleToGmt( '' );
@@ -88,7 +90,7 @@ export function Edit( {
 	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
 
 	const {
-		// ref: dateOnSaleFromGmtRef,
+		ref: dateOnSaleFromGmtRef,
 		error: dateOnSaleFromGmtValidationError,
 		validate: validateDateOnSaleFromGmt,
 	} = useValidation< Product >(
@@ -111,7 +113,7 @@ export function Edit( {
 	);
 
 	const {
-		// ref: dateOnSaleToGmtRef,
+		ref: dateOnSaleToGmtRef,
 		error: dateOnSaleToGmtValidationError,
 		validate: validateDateOnSaleToGmt,
 	} = useValidation< Product >(
@@ -143,10 +145,12 @@ export function Edit( {
 			/>
 
 			{ showScheduleSale && (
-				<div className="wp-block-columns">
+				<div className="wp-block-columns wp-block-woocommerce-product-schedule-sale-fields__content">
 					<div className="wp-block-column">
 						<DateTimePickerControl
-							// ref={ dateOnSaleFromGmtRef }
+							ref={
+								dateOnSaleFromGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'From', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale start date and time (optional)',
@@ -165,7 +169,9 @@ export function Edit( {
 
 					<div className="wp-block-column">
 						<DateTimePickerControl
-							// ref={ dateOnSaleToGmtRef }
+							ref={
+								dateOnSaleToGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'To', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale end date and time (optional)',

@@ -12,7 +12,7 @@ export interface WooStep extends Step {
 	meta: {
 		/** Unique name for step, mainly used for tracking. */
 		name: string | null;
-		heading: string | null;
+		heading: string | React.ReactElement | null;
 		descriptions: {
 			desktop: string | React.ReactElement | null;
 			mobile?: string | React.ReactElement | null;

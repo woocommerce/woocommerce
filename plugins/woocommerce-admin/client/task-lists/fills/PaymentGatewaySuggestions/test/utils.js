@@ -47,7 +47,11 @@ const amazonPay = {
 
 describe( 'getSplitGateways()', () => {
 	it( 'Returns WCPay gateways', () => {
-		const [ wcpayGateways ] = getSplitGateways( [ wcpay, cod, paypal ] );
+		const [ wcpayGateways ] = getSplitGateways(
+			[ wcpay, cod, paypal ],
+			'US',
+			true
+		);
 		expect( wcpayGateways ).toEqual( [ wcpay ] );
 	} );
 
@@ -62,7 +66,7 @@ describe( 'getSplitGateways()', () => {
 	} );
 
 	it( 'Excludes enabled gateways', () => {
-		const [ , , additionalGateways ] = getSplitGateways( [
+		const [ , , mainList ] = getSplitGateways( [
 			wcpay,
 			cod,
 			bacs,
@@ -71,61 +75,57 @@ describe( 'getSplitGateways()', () => {
 				enabled: true,
 			},
 		] );
-		expect( additionalGateways ).toEqual( [] );
+		expect( mainList ).toEqual( [] );
 	} );
 
-	describe( 'Additional gateways with eligible WCPay', () => {
+	describe( 'Main gateway list with eligible WCPay', () => {
 		it( 'Returns only "other" category gateways when WCPay or "other" category gateway isnt set up', () => {
-			const [ , , additionalGateways ] = getSplitGateways(
+			const [ , , mainList ] = getSplitGateways(
 				[ wcpay, cod, bacs, paypal, stripe, klarna ],
 				'US',
 				true,
 				false
 			);
-			expect( additionalGateways ).toEqual( [ stripe ] );
+			expect( mainList ).toEqual( [ stripe ] );
 		} );
 		it( 'Returns only "additional" category gateways when WCPay or "other" category gateway is set up', () => {
-			const [ , , additionalGateways ] = getSplitGateways(
+			const [ , , mainList ] = getSplitGateways(
 				[ wcpay, cod, bacs, paypal, stripe, klarna ],
 				'US',
 				true,
 				true
 			);
-			expect( additionalGateways ).toEqual( [ stripe, klarna ] );
+			expect( mainList ).toEqual( [ stripe, klarna ] );
 		} );
 		it( 'Returns "additional" category gateways in recommended order', () => {
-			const [ , , additionalGateways ] = getSplitGateways(
+			const [ , , mainList ] = getSplitGateways(
 				[ wcpay, cod, bacs, amazonPay, paypal, stripe, klarna ],
 				'US',
 				true,
 				true
 			);
-			expect( additionalGateways ).toEqual( [
-				stripe,
-				klarna,
-				amazonPay,
-			] );
+			expect( mainList ).toEqual( [ stripe, klarna, amazonPay ] );
 		} );
 	} );
 
-	describe( 'Additional gateways with ineligible WCPay', () => {
-		it( 'Returns all gateways when "other" gateways isnt set up', () => {
-			const [ , , additionalGateways ] = getSplitGateways(
+	describe( 'Main gateway list with ineligible WCPay', () => {
+		it( 'Returns "other" gateways when no "other" gateway is setup', () => {
+			const [ , , mainList ] = getSplitGateways(
 				[ wcpay, cod, bacs, paypal, stripe, klarna ],
 				'US',
 				false,
 				false
 			);
-			expect( additionalGateways ).toEqual( [ stripe, paypal, klarna ] );
+			expect( mainList ).toEqual( [ stripe ] );
 		} );
 		it( 'Returns only "additional" category gateways when "other" gateways is set up', () => {
-			const [ , , additionalGateways ] = getSplitGateways(
+			const [ , , mainList ] = getSplitGateways(
 				[ wcpay, cod, bacs, paypal, stripe, klarna ],
 				'US',
 				false,
 				true
 			);
-			expect( additionalGateways ).toEqual( [ stripe, klarna ] );
+			expect( mainList ).toEqual( [ stripe, klarna ] );
 		} );
 	} );
 } );

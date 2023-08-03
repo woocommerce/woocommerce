@@ -128,7 +128,7 @@ export const productReadOnlyProperties = [
 	'variations',
 ] as const;
 
-export type ReadOnlyProperties = typeof productReadOnlyProperties[ number ];
+export type ReadOnlyProperties = ( typeof productReadOnlyProperties )[ number ];
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 

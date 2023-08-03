@@ -83,7 +83,7 @@ test.describe(
 			);
 
 			// visit the page
-			await page.click( 'label[for=order_status] > a' );
+			await page.locator( 'label[for=order_status] > a' ).click();
 
 			// verify we landed on the customer payment page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
@@ -104,10 +104,10 @@ test.describe(
 			await page.goto(
 				`wp-admin/post.php?post=${ orderId }&action=edit`
 			);
-			await page.click( 'label[for=order_status] > a' );
+			await page.locator( 'label[for=order_status] > a' ).click();
 
 			// pay for the order
-			await page.click( 'button#place_order' );
+			await page.locator( 'button#place_order' ).click();
 
 			// Verify we landed on the order received page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(

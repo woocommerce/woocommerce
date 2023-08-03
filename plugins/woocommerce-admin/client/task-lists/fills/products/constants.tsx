@@ -85,7 +85,7 @@ export const LoadSampleProductType = {
 };
 
 export type ProductType =
-	| typeof productTypes[ number ]
+	| ( typeof productTypes )[ number ]
 	| typeof LoadSampleProductType;
 export type ProductTypeKey = ProductType[ 'key' ];
 

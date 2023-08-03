@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed empty component logo color, used generic rather than old pink

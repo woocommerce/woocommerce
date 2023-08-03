@@ -88,6 +88,10 @@ export function Edit( {
 			<BaseControl
 				id={ contentId.toString() }
 				label={ label || __( 'Summary', 'woocommerce' ) }
+				help={ __(
+					"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+					'woocommerce'
+				) }
 			>
 				<div { ...blockProps }>
 					<RichText
@@ -96,10 +100,6 @@ export function Edit( {
 						tagName="p"
 						value={ summary }
 						onChange={ setSummary }
-						placeholder={ __(
-							"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
-							'woocommerce'
-						) }
 						data-empty={ Boolean( summary ) }
 						className={ classNames( 'components-summary-control', {
 							[ `has-text-align-${ align }` ]: align,

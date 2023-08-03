@@ -45,11 +45,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	protected function get_images( $product ) {
 		$images         = array();
 		$attachment_ids = array();
-		$featured_id    = null;
 
 		// Add featured image.
 		if ( $product->get_image_id() ) {
-			$featured_id      = $product->get_image_id();
 			$attachment_ids[] = $product->get_image_id();
 		}
 
@@ -70,7 +68,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			$images[] = array(
 				'id'                => (int) $attachment_id,
-				'featured'          => (int) $featured_id === (int) $attachment_id,
 				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
 				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
 				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
@@ -308,31 +305,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$images = is_array( $images ) ? array_filter( $images ) : array();
 
 		if ( ! empty( $images ) ) {
-			$featured_image_index = 0;
-			$featured_image_count = 0;
-
-			// Collect featured field usage.
-			foreach ( $images as $index => $image ) {
-				if ( isset( $image['featured'] ) && $image['featured'] ) {
-					$featured_image_index = $index;
-					$featured_image_count++;
-				}
-			}
-
-			// Handle multiple featured images.
-			if ( $featured_image_count > 1 ) {
-				throw new WC_REST_Exception(
-					'woocommerce_rest_product_featured_image_count',
-					__( 'Only one featured image is allowed.', 'woocommerce' ),
-					400
-				);
-			}
-
-			// If no featured image is set, and the first image explicitly set to false do not set featured at all.
-			if ( 0 === $featured_image_count && isset( $images[0]['featured'] ) && false === $images[0]['featured'] ) {
-				$featured_image_index = null;
-			}
-
 			$gallery = array();
 
 			foreach ( $images as $index => $image ) {
@@ -357,7 +329,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				if ( $featured_image_index === $index ) {
+				$featured_image = $product->get_image_id();
+
+				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
@@ -456,6 +430,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Comment status.
 		if ( isset( $request['reviews_allowed'] ) ) {
 			$product->set_reviews_allowed( $request['reviews_allowed'] );
+		}
+
+		// Post password.
+		if ( isset( $request['post_password'] ) ) {
+			$product->set_post_password( $request['post_password'] );
 		}
 
 		// Virtual.
@@ -1166,6 +1145,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
+				'post_password'         => array(
+					'description' => __( 'Post password.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
 				'average_rating'        => array(
 					'description' => __( 'Reviews average rating.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1277,12 +1261,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 							'id'                => array(
 								'description' => __( 'Image ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'featured'          => array(
-								'description' => __( 'Featured image.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'default'     => false,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'date_created'      => array(
@@ -1526,6 +1504,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			// Add has_options if needed.
 			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
+			}
+
+			if ( in_array( 'post_password', $fields, true ) ) {
+				$data['post_password'] = $product->get_post_password( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

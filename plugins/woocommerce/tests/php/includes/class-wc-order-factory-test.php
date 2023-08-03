@@ -23,7 +23,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->cot_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 
 	/**
@@ -34,7 +34,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		wp_cache_flush();
-		OrderHelper::toggle_cot( $this->cot_state );
+		OrderHelper::toggle_cot_feature_and_usage( $this->cot_state );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	 * @testDox Test that cache does not interfere with order sorting.
 	 */
 	public function test_cache_dont_interfere_with_orders() {
-		OrderHelper::toggle_cot( $this->cot_state );
+		OrderHelper::toggle_cot_feature_and_usage( $this->cot_state );
 		$order1 = OrderHelper::create_order();
 		$order2 = OrderHelper::create_order();
 
@@ -93,7 +93,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, count( $orders ) );
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
 		$this->assertEquals( $order2->get_id(), $orders[1]->get_id() );
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 
 }

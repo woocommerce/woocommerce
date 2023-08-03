@@ -57,14 +57,12 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 					displayState !== 'hidden' ? collapsibleContentId : undefined
 				}
 			>
-				<div>
-					<span>{ toggleText }</span>
+				<span>{ toggleText }</span>
 
-					<Icon
-						icon={ collapsed ? chevronDown : chevronUp }
-						size={ 16 }
-					/>
-				</div>
+				<Icon
+					icon={ collapsed ? chevronDown : chevronUp }
+					size={ 16 }
+				/>
 			</button>
 
 			<DisplayState state={ displayState }>

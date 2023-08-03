@@ -69,14 +69,22 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$params = explode( ',', $request['options'] );
+		$params = ( isset( $request['options'] ) && is_string( $request['options'] ) ) ? explode( ',', $request['options'] ) : array();
 
-		if ( ! isset( $request['options'] ) || ! is_array( $params ) ) {
+		if ( ! $params ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'You must supply an array of options.', 'woocommerce' ), 500 );
 		}
 
 		foreach ( $params as $option ) {
 			if ( ! $this->user_has_permission( $option, $request ) ) {
+				if ( 'production' !== wp_get_environment_type() ) {
+					return new \WP_Error(
+						'woocommerce_rest_cannot_view',
+						__( 'Sorry, you cannot view these options, please remember to update the option permissions in Options API to allow viewing these options in non-production environments.', 'woocommerce' ),
+						array( 'status' => rest_authorization_required_code() )
+					);
+				}
+
 				return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
@@ -99,7 +107,12 @@ class Options extends \WC_REST_Data_Controller {
 			return $permissions[ $option ];
 		}
 
-		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '3.1' );
+		// Don't allow to update options in non-production environments if the option is not whitelisted. This is to force developers to update the option permissions when adding new options.
+		if ( 'production' !== wp_get_environment_type() ) {
+			return false;
+		}
+
+		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '6.3' );
 		return current_user_can( 'manage_options' );
 	}
 
@@ -133,7 +146,7 @@ class Options extends \WC_REST_Data_Controller {
 	 */
 	public function get_option_permissions( $request ) {
 		$permissions = self::get_default_option_permissions();
-		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '3.1.0' );
+		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '6.3.0' );
 	}
 
 	/**
@@ -187,10 +200,22 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_marketing_overview_multichannel_banner_dismissed',
 			'woocommerce_dimension_unit',
 			'woocommerce_weight_unit',
-			'woocommerce_ces_product_mvp_ces_action',
+			'woocommerce_product_editor_show_feedback_bar',
 			'woocommerce_product_tour_modal_hidden',
+			'woocommerce_block_product_tour_shown',
 			'woocommerce_revenue_report_date_tour_shown',
 			'woocommerce_date_type',
+			'date_format',
+			'time_format',
+			'woocommerce_onboarding_profile',
+			'woocommerce_default_country',
+			'blogname',
+			'wcpay_welcome_page_incentives_dismissed',
+			'wcpay_welcome_page_viewed_timestamp',
+			'wcpay_welcome_page_exit_survey_more_info_needed_timestamp',
+			// WC Test helper options.
+			'wc-admin-test-helper-rest-api-filters',
+			'wc_admin_helper_feature_values',
 		);
 
 		$theme_permissions = array(
@@ -211,13 +236,13 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array Options object with option values.
 	 */
 	public function get_options( $request ) {
-		$params  = explode( ',', $request['options'] );
 		$options = array();
 
-		if ( ! is_array( $params ) ) {
-			return array();
+		if ( empty( $request['options'] ) || ! is_string( $request['options'] ) ) {
+			return $options;
 		}
 
+		$params = explode( ',', $request['options'] );
 		foreach ( $params as $option ) {
 			$options[ $option ] = get_option( $option );
 		}

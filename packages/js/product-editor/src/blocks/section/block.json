@@ -15,8 +15,10 @@
 			"type": "string",
 			"__experimentalRole": "content"
 		},
-		"icon": {
-			"type": "object"
+		"blockGap": {
+			"type": "string",
+			"enum": [ "unit-30", "unit-40" ],
+			"default": "unit-30"
 		}
 	},
 	"supports": {

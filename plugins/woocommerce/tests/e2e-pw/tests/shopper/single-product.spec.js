@@ -90,8 +90,8 @@ test.describe( 'Single Product Page', () => {
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		await page.goto( `product/${ slug }` );
 
-		await page.fill( 'input.qty', '5' );
-		await page.click( `text=${getTranslationFor('Add to cart')}` );
+		await page.locator( 'input.qty' ).fill( '5' );
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			getTranslationFor('have been added to your cart.')
@@ -114,7 +114,7 @@ test.describe( 'Single Product Page', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove' );
+		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			getTranslationFor('Your cart is currently empty.')
@@ -146,10 +146,10 @@ test.describe( 'Variable Product Page', () => {
 					},
 				],
 			} )
-			.then( ( response ) => {
+			.then( async ( response ) => {
 				variableProductId = response.data.id;
 				for ( const key in variations ) {
-					api.post(
+					await api.post(
 						`products/${ variableProductId }/variations`,
 						variations[ key ]
 					);
@@ -180,8 +180,10 @@ test.describe( 'Variable Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		for ( const attr of variations ) {
-			await page.selectOption( '#size', attr.attributes[ 0 ].option );
-			await page.click( `text=${getTranslationFor('Add to cart')}` );
+			await page
+				.locator( '#size' )
+				.selectOption( attr.attributes[ 0 ].option );
+			await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 			await expect(
 				page.locator( '.woocommerce-message' )
 			).toContainText( getTranslationFor('has been added to your cart.') );
@@ -200,11 +202,11 @@ test.describe( 'Variable Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );
-		await page.selectOption( '#size', 'Large' );
-		await page.click( `text=${getTranslationFor('Add to cart')}` );
+		await page.locator( '#size' ).selectOption( 'Large' );
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove' );
+		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			getTranslationFor('Your cart is currently empty.')
@@ -282,15 +284,14 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.click( `text=${getTranslationFor('Add to cart')}` );
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
 			getTranslationFor('Please choose the quantity of items you wish to add to your cart…')
 		);
 
-		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
-		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
-		await page.click( `text=${getTranslationFor('Add to cart')}` );
-
+		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
+		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			getTranslationFor('expectedGroupProductsAddedMessage')
 		);
@@ -311,13 +312,13 @@ test.describe( 'Grouped Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );
-		await page.fill( 'div.quantity input.qty >> nth=0', '1' );
-		await page.fill( 'div.quantity input.qty >> nth=1', '1' );
-		await page.click( `text=${getTranslationFor('Add to cart')}` );
+		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
+		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove >> nth=1' );
-		await page.click( 'a.remove >> nth=0' );
+		await page.locator( 'a.remove >> nth=1' ).click();
+		await page.locator( 'a.remove >> nth=0' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			getTranslationFor('Your cart is currently empty.')

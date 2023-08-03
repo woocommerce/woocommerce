@@ -49,7 +49,7 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
-		initialRelease: Flags.boolean( {
+		'initial-release': Flags.boolean( {
 			default: false,
 			description: "Create a package's first release to NPM",
 		} ),
@@ -72,7 +72,7 @@ export default class PackagePrepare extends Command {
 
 		const packages = args.packages.split( ',' );
 
-		if ( flags.initialRelease && packages.length > 1 ) {
+		if ( flags[ 'initial-release' ] && packages.length > 1 ) {
 			this.error(
 				'Please release only a single package when making an initial release'
 			);
@@ -82,7 +82,7 @@ export default class PackagePrepare extends Command {
 			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		await this.preparePackages( packages, flags.initialRelease );
+		await this.preparePackages( packages, flags[ 'initial-release' ] );
 	}
 
 	/**

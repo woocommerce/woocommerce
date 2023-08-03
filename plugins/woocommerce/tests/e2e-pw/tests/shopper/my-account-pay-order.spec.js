@@ -84,17 +84,17 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 	} ) => {
 		await page.goto( 'my-account/orders/' );
 		// sign in as the "customer" user
-		await page.fill( '#username', customer.username );
-		await page.fill( '#password', customer.password );
+		await page.locator( '#username' ).fill( customer.username );
+		await page.locator( '#password' ).fill( customer.password );
 		await page.getByRole('button', { name: getTranslationFor('Log in') })
-			.click();
+		.click();
 
-		await page.click( 'a.pay' );
+		await page.locator( 'a.pay' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			getTranslationFor('Pay for order')
 		);
-		await page.click( '#place_order' );
+		await page.locator( '#place_order' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			getTranslationFor('Order received')

@@ -5,7 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { STORE_KEY } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 
@@ -28,15 +28,29 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 
 	const productId = _productId ?? values.id;
 
-	const classicEditorUrl = productId
-		? getAdminLink( `post.php?post=${ productId }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
+	const { _feature_nonce } = getSetting< { _feature_nonce: string } >(
+		'admin',
+		{}
+	);
 
-	const recordScore = ( checked: string[], comments: string ) => {
+	const classicEditorUrl = productId
+		? getAdminLink(
+				`post.php?post=${ productId }&action=edit&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  )
+		: getAdminLink(
+				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  );
+
+	const recordScore = (
+		checked: string[],
+		comments: string,
+		email: string
+	) => {
 		recordEvent( 'product_mvp_feedback', {
 			action: 'disable',
 			checked,
 			comments: comments || '',
+			email,
 		} );
 		hideProductMVPFeedbackModal();
 		window.location.href = `${ classicEditorUrl }&new-product-experience-disabled=true`;

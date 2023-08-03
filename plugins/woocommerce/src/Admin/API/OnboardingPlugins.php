@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
+use Automattic\Jetpack\Connection\Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -44,12 +46,12 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/install-async',
+			'/' . $this->rest_base . '/install-and-activate-async',
 			array(
 				array(
 					'methods'             => 'POST',
-					'callback'            => array( $this, 'install_async' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'callback'            => array( $this, 'install_and_activate_async' ),
+					'permission_callback' => array( $this, 'can_install_and_activate_plugins' ),
 					'args'                => array(
 						'plugins' => array(
 							'description'       => 'A list of plugins to install',
@@ -95,6 +97,57 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_install_async_schema' ),
 			)
 		);
+
+		// This is an experimental endpoint and is subject to change in the future.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/jetpack-authorization-url',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
+					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'args'                => array(
+						'redirect_url' => array(
+							'description'       => 'The URL to redirect to after authorization',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => true,
+						),
+						'from'         => array(
+							'description'       => 'from value for the jetpack authorization page',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => false,
+							'default'           => 'woocommerce-onboarding',
+						),
+					),
+				),
+			)
+		);
+
+		/*
+		 * This is a temporary solution to override /jetpack/v4/connection/data endpoint
+		 * registered by Jetpack Connection when Jetpack is not installed.
+		 *
+		 * For more details, see https://github.com/woocommerce/woocommerce/issues/38979
+		 */
+		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null && wp_is_mobile() ) {
+			register_rest_route(
+				'jetpack/v4',
+				'/connection/data',
+				array(
+					array(
+						'methods'             => 'GET',
+						'permission_callback' => '__return_true',
+						'callback'            => function() {
+							return new WP_REST_Response( null, 404 );
+						},
+					),
+				),
+				true
+			);
+		}
 	}
 
 	/**
@@ -119,11 +172,11 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 *
 	 * @return array
 	 */
-	public function install_async( WP_REST_Request $request ) {
+	public function install_and_activate_async( WP_REST_Request $request ) {
 		$plugins = $request->get_param( 'plugins' );
 		$job_id  = uniqid();
 
-		WC()->queue()->add( 'woocommerce_plugins_install_async_callback', array( $plugins, $job_id ) );
+		WC()->queue()->add( 'woocommerce_plugins_install_and_activate_async_callback', array( $plugins, $job_id ) );
 
 		$plugin_status = array();
 		foreach ( $plugins as $plugin ) {
@@ -152,7 +205,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$actions = WC()->queue()->search(
 			array(
-				'hook'    => 'woocommerce_plugins_install_async_callback',
+				'hook'    => 'woocommerce_plugins_install_and_activate_async_callback',
 				'search'  => $job_id,
 				'orderby' => 'date',
 				'order'   => 'DESC',
@@ -175,12 +228,49 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'status' => $actions[0]['status'],
 		);
 
-		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id );
+		$option = get_option( 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id );
 		if ( isset( $option['plugins'] ) ) {
 			$response['plugins'] = $option['plugins'];
 		}
 
 		return $response;
+	}
+
+
+	/**
+	 * Return Jetpack authorization URL.
+	 *
+	 * @param WP_REST_Request $request WP_REST_Request object.
+	 *
+	 * @return array
+	 * @throws \Exception If there is an error registering the site.
+	 */
+	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
+		$manager = new Manager( 'woocommerce' );
+		$errors  = new WP_Error();
+
+		// Register the site to wp.com.
+		if ( ! $manager->is_connected() ) {
+			$result = $manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
+		$redirect_url = $request->get_param( 'redirect_url' );
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		return [
+			'success' => ! $errors->has_errors(),
+			'errors'  => $errors->get_error_messages(),
+			'url'     => add_query_arg(
+				[
+					'from'        => $request->get_param( 'from' ),
+					'calypso_env' => $calypso_env,
+				],
+				$manager->get_authorization_url( null, $redirect_url )
+			),
+		];
 	}
 
 	/**

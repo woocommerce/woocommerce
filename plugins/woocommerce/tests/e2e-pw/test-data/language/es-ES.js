@@ -46,6 +46,7 @@ const es_ES = {
     'continue': 'Continuar',
     '"Continue"': '"Seguir"',
     '"Copy link"': '"Copiar enlace"',
+    'Cost': 'Coste',
     'Coupon(s)': 'Cupón(es)',
     'Coupons': 'Cupones',
     'Coupon updated.': 'Cupón actualizado.',
@@ -56,6 +57,7 @@ const es_ES = {
     'Customer payment page →': 'Página de pago del cliente →',
     'Dashboard_WC': 'Escritorio',
     'Dashboard_WP': 'Escritorio',
+    'Delete': 'Borrar',
     'Direct bank transfer details added successfully':
         'Detalles para transferencia bancaria directa añadidos correctamente',
     'Discard': 'Descartar',
@@ -100,11 +102,13 @@ const es_ES = {
     '"Learn about marketing a store"':
         '"Aprende cómo promocionar una tienda"',
     'Length': 'Longitud',
+    'Limit to specific ZIP/postcodes': 'Limitar a códigos postales específicos',
+    'List 1 postcode per line': 'Enumera 1 código postal por línea',
     'Local pickup': 'Recogida local',
     '/Local pickup.*/': /Recogida local.*/,
     'Log In': 'Acceder',
     'Log in': 'Acceder',
-    'Log out': 'Log out',
+    'Log out': 'Salir',//was Log out
     'Manage stock?': '¿Gestionar inventario?',
     'manually': 'manualmente',
     'Marketing subpages': [
@@ -118,8 +122,10 @@ const es_ES = {
         },
     ],
     'Move down': 'Mover abajo',
+    'Move to Trash': 'Mover a la papelera',
     'Move up': 'Subir',
     'Never': 'Nunca',
+    'New attribute': 'Atributo nuevo',
     ': New order #': ' Nuevo pedido #(',
     'No default attributename…': 'attributename… Sin valor por defecto',
     'No, I will enter prices exclusive of tax':
@@ -127,6 +133,7 @@ const es_ES = {
     'No products found': 'No se han encontrado productos',
     'No thanks': 'No, gracias',
     'on': 'en',
+    'Onboarding profile data has been updated.': 'Los datos del perfil de la puesta en marcha se han actualizado.',
     'Order #OrderId details': 'Detalles de Pedido #OrderId',
     'Order received': 'Pedido recibido',
     orderReceivedTextsplit: 8,
@@ -211,11 +218,15 @@ const es_ES = {
         },
     ],
     'Product published.': 'Producto publicado.',
+    'Revoke': 'Revoke',
     'Publish': 'Publicar',
     'Recalculate': 'Recalcular',
     'Refund': 'Reembolsar',
+    '/Refund #\d+/': /Reembolso #\d+/,
     'Regular price': 'Precio normal',
     'Remove section': 'Quitar sección',
+    'Remove selected row(s)': 'Eliminar fila(s) seleccionada(s)',
+    'Revoke': 'Revocar',
     '"Run the importer"': '"Ejecutar el importador"',
     'Save': 'Guardar',
     'Save attributes': 'Guardar atributos',
@@ -223,6 +234,8 @@ const es_ES = {
     'Save shipping classes': 'Guardar clases de envío',
     'Search for a product…': 'Busca un producto…',
     '"Search for a product…"': '"Busca un producto…"',
+    'Select All': 'Seleccionar todo',
+    'Select regions within this zone': 'Elige regiones dentro de esta zona',
     'Set up payments': 'Configurar pagos',
     'Skip setup store details':
         'Saltar la configuración de los detalles de la tienda',
@@ -243,10 +256,14 @@ const es_ES = {
     'United States': 'Estados Unidos',
     'United States (US) — California': 'Estados Unidos (EEUU) — California',
     'Unlimited': 'Ilimitado',
+    'Update': 'Actualizar',
     'Update cart': 'Actualizar carrito',
+    'Used for variations': 'Usado para variaciones',
     'Variable product': 'Producto variable',
     'Variation price (required)': 'Precio de la variación (requerido)',
+    '/verify the email address associated with the order/': /verificar la dirección de correo electrónico asociada con el pedido/,
     'Virtual': 'Virtual', //check
+    'Visible on the product page': 'Visible en la página de productos',
     'View cart': 'Ver carrito',
     'View products': 'Ver productos',
     '"View report"': '"Ver informe"',
@@ -285,8 +302,11 @@ const es_ES = {
             heading: 'Estado del sistema',
         },
     ],
+    '/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/': 
+        /Puedes añadir múltiples métodos de envío dentro de esta zona. Solo los clientes dentro de la zona los verán.*/,
     'Your cart is currently empty.': 'Tu carrito está vacío.',
     'Your settings have been saved.': 'Tus ajustes se han guardado.',
+    'Zone name': 'Nombre de la zona',
 }
 
 module.exports = {

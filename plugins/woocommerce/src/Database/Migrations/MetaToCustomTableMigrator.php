@@ -218,13 +218,14 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	}
 
 	/**
-	 * Migrate a batch of entities from the posts table to the corresponding table.
+	 * Return data to be migrated for a batch of entities.
 	 *
 	 * @param array $entity_ids Ids of entities to migrate.
 	 *
-	 * @return void
+	 * @return array[] Data to be migrated. Would be of the form: array( 'data' => array( ... ), 'errors' => array( ... ) ).
 	 */
-	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
+	public function fetch_sanitized_migration_data( $entity_ids ) {
+		$this->clear_errors();
 		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
 		foreach ( $data['errors'] as $entity_id => $errors ) {
@@ -232,25 +233,59 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 				$this->add_error( "Error importing data for post with id $entity_id: column $column_name: $error_message" );
 			}
 		}
+		return array(
+			'data'   => $data['data'],
+			'errors' => $this->get_errors(),
+		);
+	}
+
+	/**
+	 * Migrate a batch of entities from the posts table to the corresponding table.
+	 *
+	 * @param array $entity_ids Ids of entities to migrate.
+	 *
+	 * @return void
+	 */
+	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
+		$data = $this->fetch_sanitized_migration_data( $entity_ids );
+		$this->process_migration_data( $data );
+	}
+
+	/**
+	 * Process migration data for a batch of entities.
+	 *
+	 * @param array $data Data to be migrated. Should be of the form: array( 'data' => array( ... ) ) as returned by the `fetch_sanitized_migration_data` method.
+	 *
+	 * @return array Array of errors and exception if any.
+	 */
+	public function process_migration_data( array $data ) {
+		$this->clear_errors();
+		$exception = null;
 
 		if ( count( $data['data'] ) === 0 ) {
-			return;
+			return array(
+				'errors'    => $this->get_errors(),
+				'exception' => null,
+			);
 		}
 
-		$entity_ids       = array_keys( $data['data'] );
-		$existing_records = $this->get_already_existing_records( $entity_ids );
+		try {
+			$entity_ids       = array_keys( $data['data'] );
+			$existing_records = $this->get_already_existing_records( $entity_ids );
 
-		$to_insert = array_diff_key( $data['data'], $existing_records );
-		$this->process_insert_batch( $to_insert );
+			$to_insert = array_diff_key( $data['data'], $existing_records );
+			$this->process_insert_batch( $to_insert );
 
-		$existing_records = array_filter(
-			$existing_records,
-			function( $record_data ) {
-				return '1' === $record_data->modified;
-			}
+			$to_update = array_intersect_key( $data['data'], $existing_records );
+			$this->process_update_batch( $to_update, $existing_records );
+		} catch ( \Exception $e ) {
+			$exception = $e;
+		}
+
+		return array(
+			'errors'    => $this->get_errors(),
+			'exception' => $exception,
 		);
-		$to_update        = array_intersect_key( $data['data'], $existing_records );
-		$this->process_update_batch( $to_update, $existing_records );
 	}
 
 	/**
@@ -357,38 +392,13 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
 
-		// Additional SQL to check if the row needs update according to the column mapping.
-		// The IFNULL and CHAR(0) "hack" is needed because NULLs can't be directly compared in SQL.
-		$modified_selector   = array();
-		$core_column_mapping = array_filter(
-			$this->core_column_mapping,
-			function( $mapping ) {
-				return ! isset( $mapping['select_clause'] );
-			}
-		);
-		foreach ( $core_column_mapping as $column_name => $mapping ) {
-			if ( $column_name === $source_primary_key_column ) {
-				continue;
-			}
-			$modified_selector[] =
-				"IFNULL(source.$column_name,CHAR(0)) != IFNULL(destination.{$mapping['destination']},CHAR(0))"
-				. ( 'string' === $mapping['type'] ? ' COLLATE ' . $wpdb->collate : '' );
-		}
-
-		if ( empty( $modified_selector ) ) {
-			$modified_selector = ', 1 AS modified';
-		} else {
-			$modified_selector = trim( implode( ' OR ', $modified_selector ) );
-			$modified_selector = ", if( $modified_selector, 1, 0 ) AS modified";
-		}
-
 		$additional_where = $this->get_additional_where_clause_for_get_data_to_insert_or_update( $entity_ids );
 
 		$already_migrated_entity_ids = $this->db_get_results(
 			$wpdb->prepare(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
 				"
-SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id $modified_selector
+SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
 FROM `$destination_table` destination
 JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
 WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) $additional_where
@@ -571,7 +581,7 @@ WHERE
 	private function validate_data( $value, string $type ) {
 		switch ( $type ) {
 			case 'decimal':
-				$value = wc_format_decimal( $value, false, true );
+				$value = wc_format_decimal( floatval( $value ), false, true );
 				break;
 			case 'int':
 				$value = (int) $value;
@@ -843,8 +853,8 @@ WHERE $where_clause
 			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
 			}
-			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
-			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
+			$row[ $alias ]             = wc_format_decimal( floatval( $row[ $alias ] ), false, true );
+			$row[ $destination_alias ] = wc_format_decimal( floatval( $row[ $destination_alias ] ), false, true );
 		}
 		if ( 'bool' === $schema['type'] ) {
 			$row[ $alias ]             = wc_string_to_bool( $row[ $alias ] );

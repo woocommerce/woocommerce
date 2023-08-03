@@ -1,12 +1,19 @@
 .woocommerce-iframe-editor {
-	align-items: flex-start;
+	box-sizing: border-box;
 	display: flex;
-	flex-direction: row;
-	flex-grow: 1;
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-	z-index: 1000;
+    flex-direction: column;
+    height: 100%;
+
+	&__main {
+		align-items: flex-start;
+		display: flex;
+		flex-direction: row;
+		flex-grow: 1;
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		z-index: 1000;
+	}
 
 	iframe {
 		width: 100%;
@@ -14,6 +21,7 @@
 	}
 
 	&__content {
+		box-sizing: border-box;
 		flex-grow: 1;
 		background-color: #2f2f2f;
 		padding: 90px 48px 40px;
@@ -23,9 +31,21 @@
 		position: relative;
 	}
 
+	&__content-inserter-clipper {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 40px;
+		background-color: inherit;
+		z-index: 100;
+	}
+
 	&__sidebar {
 		flex-shrink: 0;
+		height: 100%;
 		width: 280px;
+		overflow: scroll;
 	}
 
 	.block-editor-block-contextual-toolbar.is-fixed {

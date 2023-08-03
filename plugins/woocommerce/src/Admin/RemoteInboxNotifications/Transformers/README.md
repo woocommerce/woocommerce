@@ -82,7 +82,7 @@ Use `array_column` to extract `array("media", "software")` then choose the first
         }
     },
     {
-    	"use": "dot_noation",
+    	"use": "dot_notation",
     	"arguments": {
     		"key": "0"
     	}
@@ -114,7 +114,7 @@ Flattens a nested array.
 
 #### Example:
 
-Given the follwoing data
+Given the following data
 
 ```php
 array(
@@ -167,7 +167,7 @@ PHP's built-in `array_keys` to return keys from an array. For more information a
 
 #### Example:
 
-Given the follwing data
+Given the following data
 
 ```php
 array(
@@ -241,7 +241,7 @@ PHP's built-in array_values to return values from an array. For more information
 
 #### Example:
 
-Given the follwoing data
+Given the following data
 
 ```php
 array (
@@ -286,7 +286,7 @@ Uses dot notation to select a value in an array. Dot notation lets you access an
 
 
 
-Given the follwoing data
+Given the following data
 
 ```php
 array(
@@ -343,7 +343,7 @@ PHP's built-in count to return the number of values from a countable, such as an
 
 #### Example:
 
-Given the follwing list of usernames
+Given the following list of usernames
 
 ```php
 array(
@@ -365,4 +365,38 @@ Let's count # of users with `count`
 
 **Output:** 3
 
+## prepare_url
 
+This prepares the site URL by removing the protocol and the last slash.
+
+#### Arguments: N/A
+
+####Definition:
+
+```php
+"transformers": [
+    {
+        "use": "prepare_url"
+    }
+],
+```
+
+#### Example:
+
+Given the following data
+
+```php
+$siteurl = "https://mysite.com/"
+```
+
+Removes the protocol and the last slash.
+
+```php
+"transformers": [
+    {
+        "use": "prepare_url",
+    }
+],
+```
+
+**Output:** "mysite.com"

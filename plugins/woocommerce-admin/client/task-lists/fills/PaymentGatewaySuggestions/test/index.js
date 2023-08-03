@@ -62,13 +62,13 @@ const paymentGatewaySuggestions = [
 	},
 	{
 		id: 'woocommerce_payments:non-us',
-		title: 'WooCommerce Payments',
+		title: 'WooPayments',
 		content:
-			'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+			'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/wcpay.svg',
 		plugins: [ 'woocommerce-payments' ],
 		description:
-			'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
+			'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 		is_visible: true,
 		recommendation_priority: 1,
 	},
@@ -86,7 +86,7 @@ const paymentGatewaySuggestions = [
 ];
 
 const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
-	( p ) => p.title !== 'WooCommerce Payments'
+	( p ) => p.title !== 'WooPayments'
 );
 
 describe( 'PaymentGatewaySuggestions', () => {
@@ -97,6 +97,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions,
+			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
 
@@ -116,6 +117,9 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		expect( paymentTitles ).toEqual( [
+			'Stripe',
+			'PayPal Payments',
+			'Eway',
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
@@ -125,7 +129,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 				.querySelector(
 					'.woocommerce-recommended-payments__header-heading'
 				)
-				.textContent.includes( 'WooCommerce Payments' )
+				.textContent.includes( 'WooPayments' )
 		).toBe( true );
 	} );
 
@@ -136,6 +140,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
 
@@ -200,6 +205,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',
@@ -223,7 +229,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
 
-	test( 'should show "category_additional" gateways only after WCPay is set up', () => {
+	test( 'should show "category_additional" gateways after WCPay is set up', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -233,7 +239,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			installedPaymentGateways: [
 				{
 					id: 'woocommerce_payments',
-					title: 'WooCommerce Payments',
+					title: 'WooPayments',
 					plugins: [ 'woocommerce-payments' ],
 					is_visible: true,
 					needs_setup: false,
@@ -269,6 +275,54 @@ describe( 'PaymentGatewaySuggestions', () => {
 		] );
 	} );
 
+	test( 'should show "category_additional" gateways after a primary gateway (other than WCPay) is set up', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [
+				{
+					id: 'ppcp-gateway',
+					title: 'PayPal Payments',
+					content:
+						"Safe and secure payments using credit cards or your customer's PayPal account.",
+					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
+					plugins: [ 'woocommerce-paypal-payments' ],
+					is_visible: true,
+				},
+			],
+			countryCode: 'US',
+		} ) );
+
+		const { container } = render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		expect(
+			screen.getByText( 'Additional payment options' )
+		).toBeInTheDocument();
+
+		const paymentTitleElements = container.querySelectorAll(
+			'.woocommerce-task-payment__title'
+		);
+
+		const paymentTitles = Array.from( paymentTitleElements ).map(
+			( e ) => e.textContent
+		);
+
+		expect( paymentTitles ).toEqual( [
+			'PayPal PaymentsSetup required',
+			'Eway',
+			'Cash on delivery',
+			'Direct bank transfer',
+		] );
+	} );
+
 	test( 'should record event correctly when finish setup is clicked', () => {
 		const onComplete = jest.fn();
 		const query = {};
@@ -276,6 +330,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',

@@ -26,15 +26,15 @@ test.describe( 'Add New Coupon Page', () => {
 	} );
 
 	test( 'can create new coupon', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon', {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
 
 		await page.locator( '#title' ).fill( couponCode );
 
 		// Blur then wait for the auto-save to finish
 		await page.locator( '#title' ).blur();
-		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.getByRole( 'link', { name: getTranslationFor('Move to Trash') } )
+		).toBeVisible();
 
 		await page
 			.locator( '#woocommerce-coupon-description' )
@@ -48,7 +48,7 @@ test.describe( 'Add New Coupon Page', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: `${getTranslationFor('Coupon updated.')}` } )
+				.filter( { hasText: getTranslationFor('Coupon updated.') } )
 		).toBeVisible();
 	} );
 } );

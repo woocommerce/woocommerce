@@ -202,26 +202,24 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		'To start accepting online payments',
 		'woocommerce'
 	);
-	if ( isWCPaySupported ) {
-		if ( isWCPayOrOtherCategoryDoneSetup ) {
-			additionalSectionHeading = __(
-				'Additional payment options',
-				'woocommerce'
-			);
-			additionalSectionHeadingDescription = __(
-				'Give your customers additional choices in ways to pay.',
-				'woocommerce'
-			);
-		} else {
-			additionalSectionHeading = __(
-				'Other payment providers',
-				'woocommerce'
-			);
-			additionalSectionHeadingDescription = __(
-				'Try one of the alternative payment providers.',
-				'woocommerce'
-			);
-		}
+	if ( isWCPayOrOtherCategoryDoneSetup ) {
+		additionalSectionHeading = __(
+			'Additional payment options',
+			'woocommerce'
+		);
+		additionalSectionHeadingDescription = __(
+			'Give your customers additional choices in ways to pay.',
+			'woocommerce'
+		);
+	} else if ( isWCPaySupported ) {
+		additionalSectionHeading = __(
+			'Other payment providers',
+			'woocommerce'
+		);
+		additionalSectionHeadingDescription = __(
+			'Try one of the alternative payment providers.',
+			'woocommerce'
+		);
 	}
 
 	const additionalSection = !! additionalGateways.length && (

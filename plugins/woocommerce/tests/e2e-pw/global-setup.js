@@ -57,9 +57,13 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', admin.username );
-			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( `text=${getTranslationFor('Log In')}` );
+			await adminPage
+				.locator( 'input[name="log"]' )
+				.fill( admin.username );
+			await adminPage
+				.locator( 'input[name="pwd"]' )
+				.fill( admin.password ); 
+			await adminPage.locator( `text=${getTranslationFor('Log In')}` ).click();
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
@@ -97,15 +101,19 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
-			await adminPage.fill( '#key_description', 'Key for API access' );
-			await adminPage.selectOption( '#key_permissions', 'read_write' );
-			await adminPage.click( `text=${getTranslationFor('Generate API key')}` );
-			process.env.CONSUMER_KEY = await adminPage.inputValue(
-				'#key_consumer_key'
-			);
-			process.env.CONSUMER_SECRET = await adminPage.inputValue(
-				'#key_consumer_secret'
-			);
+			await adminPage
+				.locator( '#key_description' )
+				.fill( 'Key for API access' );
+			await adminPage
+				.locator( '#key_permissions' )
+				.selectOption( 'read_write' );
+			await adminPage.locator( `text=${getTranslationFor('Generate API key')}` ).click();
+			process.env.CONSUMER_KEY = await adminPage
+				.locator( '#key_consumer_key' )
+				.inputValue();
+			process.env.CONSUMER_SECRET = await adminPage
+				.locator( '#key_consumer_secret' )
+				.inputValue();
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
 			break;
@@ -130,9 +138,13 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', customer.username );
-			await customerPage.fill( 'input[name="pwd"]', customer.password );
-			await customerPage.click( `text=${getTranslationFor('Log In')}` );
+			await customerPage
+				.locator( 'input[name="log"]' )
+				.fill( customer.username );
+			await customerPage
+				.locator( 'input[name="pwd"]' )
+				.fill( customer.password );
+			await customerPage.locator( `text=${getTranslationFor('Log In')}` ).click();
 
 			await customerPage.goto( `/my-account` );
 			await expect(

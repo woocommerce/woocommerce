@@ -2113,7 +2113,13 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
 		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
-		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
+		/**
+		 * Filter the number of upsell products should on the product page.
+		 *
+		 * @param int $limit number of upsell products.
+		 * @since 3.0.0
+		 */
+		$limit = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
 
 		// Get visible upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
@@ -2193,7 +2199,13 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		$orderby     = apply_filters( 'woocommerce_cross_sells_orderby', $orderby );
 		$order       = apply_filters( 'woocommerce_cross_sells_order', $order );
 		$cross_sells = wc_products_array_orderby( $cross_sells, $orderby, $order );
-		$limit       = apply_filters( 'woocommerce_cross_sells_total', $limit );
+		/**
+		 * Filter the number of cross sell products should on the product page.
+		 *
+		 * @param int $limit number of cross sell products.
+		 * @since 3.0.0
+		 */
+		$limit       = intval( apply_filters( 'woocommerce_cross_sells_total', $limit ) );
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
 
 		wc_get_template(
@@ -3684,10 +3696,28 @@ function wc_logout_url( $redirect = '' ) {
  * @since 3.1.0
  */
 function wc_empty_cart_message() {
-	$message = wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-	$notice  = wc_print_notice( $message, 'notice', array(), true );
-	$notice  = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
-	echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	$notice = wc_print_notice(
+		wp_kses_post(
+			/**
+			 * Filter empty cart message text.
+			 *
+			 * @since 3.1.0
+			 * @param string $message Default empty cart message.
+			 * @return string
+			 */
+			apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) )
+		),
+		'notice',
+		array(),
+		true
+	);
+
+	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
+	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
+
+	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
 }
 
 /**

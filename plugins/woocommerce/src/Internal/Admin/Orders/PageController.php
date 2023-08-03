@@ -131,6 +131,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		global $plugin_page, $pagenow;
+
 		$this->redirection_controller = new PostsRedirectionController( $this );
 
 		// Register menu.
@@ -140,21 +142,72 @@ class PageController {
 			add_action( 'admin_menu', 'register_menu', 9 );
 		}
 
+		// Not on an Orders page.
+		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+			return;
+		}
+
 		$this->set_order_type();
 		$this->set_action();
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
 		self::add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		self::add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
 	/**
 	 * Perform initialization for the current action.
 	 */
 	private function handle_load_page_action() {
+		$screen            = get_current_screen();
+		$screen->post_type = $this->order_type;
+
 		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
 			$this->{"setup_action_{$this->current_action}"}();
 		}
+	}
+
+	/**
+	 * Set the document title for Orders screens to match what it would be with the shop_order CPT.
+	 *
+	 * @param string $admin_title The admin screen title before it's filtered.
+	 *
+	 * @return string The filtered admin title.
+	 */
+	private function set_page_title( $admin_title ) {
+		if ( ! $this->is_order_screen( $this->order_type ) ) {
+			return $admin_title;
+		}
+
+		$wp_order_type = get_post_type_object( $this->order_type );
+		$labels        = get_post_type_labels( $wp_order_type );
+
+		if ( $this->is_order_screen( $this->order_type, 'list' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The name of the website.
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->name ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} elseif ( $this->is_order_screen( $this->order_type, 'edit' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The title of the order 3: The name of the website.
+				esc_html__( '%1$s #%2$s &lsaquo; %3$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->edit_item ),
+				absint( $this->order->get_id() ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} elseif ( $this->is_order_screen( $this->order_type, 'new' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The name of the website.
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->add_new_item ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		}
+
+		return $admin_title;
 	}
 
 	/**
@@ -163,11 +216,7 @@ class PageController {
 	 * @return void
 	 */
 	private function set_order_type() {
-		global $plugin_page, $pagenow;
-
-		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
-			return;
-		}
+		global $plugin_page;
 
 		$this->order_type = str_replace( array( 'wc-orders--', 'wc-orders' ), '', $plugin_page );
 		$this->order_type = empty( $this->order_type ) ? 'shop_order' : $this->order_type;
@@ -425,4 +474,89 @@ class PageController {
 		return admin_url( 'admin.php?page=wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ) );
 	}
 
+	/**
+	 * Helper method to check if the current admin screen is related to orders.
+	 *
+	 * @param string $type   Optional. The order type to check for. Default shop_order.
+	 * @param string $action Optional. The purpose of the screen to check for. 'list', 'edit', or 'new'.
+	 *                       Leave empty to check for any order screen.
+	 *
+	 * @return bool
+	 */
+	public function is_order_screen( $type = 'shop_order', $action = '' ) : bool {
+		if ( ! did_action( 'current_screen' ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					// translators: %s is the name of a function.
+					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
+					esc_html( __METHOD__ )
+				),
+				'7.9.0'
+			);
+
+			return false;
+		}
+
+		$valid_types = wc_get_order_types( 'view-order' );
+		if ( ! in_array( $type, $valid_types, true ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					// translators: %s is the name of an order type.
+					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
+					esc_html( $type )
+				),
+				'7.9.0'
+			);
+
+			return false;
+		}
+
+		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			if ( $action ) {
+				switch ( $action ) {
+					case 'edit':
+						$is_action = 'edit_order' === $this->current_action;
+						break;
+					case 'list':
+						$is_action = 'list_orders' === $this->current_action;
+						break;
+					case 'new':
+						$is_action = 'new_order' === $this->current_action;
+						break;
+					default:
+						$is_action = false;
+						break;
+				}
+			}
+
+			$type_match   = $type === $this->order_type;
+			$action_match = ! $action || $is_action;
+		} else {
+			$screen = get_current_screen();
+
+			if ( $action ) {
+				switch ( $action ) {
+					case 'edit':
+						$screen_match = 'post' === $screen->base && filter_input( INPUT_GET, 'post', FILTER_VALIDATE_INT );
+						break;
+					case 'list':
+						$screen_match = 'edit' === $screen->base;
+						break;
+					case 'new':
+						$screen_match = 'post' === $screen->base && 'add' === $screen->action;
+						break;
+					default:
+						$screen_match = false;
+						break;
+				}
+			}
+
+			$type_match   = $type === $screen->post_type;
+			$action_match = ! $action || $screen_match;
+		}
+
+		return $type_match && $action_match;
+	}
 }

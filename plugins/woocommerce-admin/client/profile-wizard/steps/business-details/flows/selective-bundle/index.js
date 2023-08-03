@@ -14,6 +14,7 @@ import {
 	FlexItem,
 	CheckboxControl,
 	Spinner,
+	Notice,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form, TextControl, SelectControl } from '@woocommerce/components';
@@ -114,6 +115,11 @@ export const prepareExtensionTrackingInstallationData = (
 	return data;
 };
 
+export const isShowWccomMigrationNotice = ( selectedOption ) =>
+	[ 'other-woocommerce', 'other', 'brick-mortar-other' ].includes(
+		selectedOption
+	);
+
 export const isSellingElsewhere = ( selectedOption ) =>
 	[
 		'other',
@@ -121,6 +127,10 @@ export const isSellingElsewhere = ( selectedOption ) =>
 		'brick-mortar-other',
 		'other-woocommerce',
 	].includes( selectedOption );
+
+const getWccomMigrationUrl = ( selectedOption ) => {
+	return `https://woocommerce.com/migrate/?utm_source=nux&utm_medium=product&utm_campaign=migrate&utm_content=${ selectedOption }`;
+};
 
 export const isSellingOtherPlatformInPerson = ( selectedOption ) =>
 	[ 'other', 'brick-mortar-other' ].includes( selectedOption );
@@ -524,7 +534,34 @@ class BusinessDetails extends Component {
 											'selling_venues'
 										) }
 									/>
-
+									{ isShowWccomMigrationNotice(
+										values.selling_venues
+									) && (
+										<Notice
+											className="woocommerce-profile-wizard__wccom-migration-notice"
+											status="info"
+											isDismissible={ false }
+										>
+											{ __(
+												'Need help moving your store?',
+												'woocommerce'
+											) }
+											&nbsp;
+											<Button
+												href={ getWccomMigrationUrl(
+													values.selling_venues
+												) }
+												target="_blank"
+												rel="noopener noreferrer"
+												variant="link"
+											>
+												{ __(
+													'Get free expert advice',
+													'woocommerce'
+												) }
+											</Button>
+										</Notice>
+									) }
 									{ isSellingElsewhere(
 										values.selling_venues
 									) && (

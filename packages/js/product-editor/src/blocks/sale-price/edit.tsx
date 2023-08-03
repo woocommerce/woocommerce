@@ -2,13 +2,12 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { CurrencyContext } from '@woocommerce/currency';
 import { Product } from '@woocommerce/data';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement, useContext } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -19,10 +18,9 @@ import {
 /**
  * Internal dependencies
  */
-import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
-import { formatCurrencyDisplayValue } from '../../utils';
-import { SalePriceBlockAttributes } from './types';
 import { useValidation } from '../../contexts/validation-context';
+import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
+import { SalePriceBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -40,12 +38,9 @@ export function Edit( {
 		'product',
 		'sale_price'
 	);
-	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig, formatAmount } = context;
-	const currencyConfig = getCurrencyConfig();
 	const inputProps = useCurrencyInputProps( {
 		value: salePrice,
-		setValue: setSalePrice,
+		onChange: setSalePrice,
 	} );
 
 	const salePriceId = useInstanceId(
@@ -98,13 +93,7 @@ export function Edit( {
 					id={ salePriceId }
 					name={ 'sale_price' }
 					ref={ salePriceRef }
-					onChange={ setSalePrice }
 					label={ label }
-					value={ formatCurrencyDisplayValue(
-						String( salePrice ),
-						currencyConfig,
-						formatAmount
-					) }
 					onBlur={ validateSalePrice }
 				/>
 			</BaseControl>

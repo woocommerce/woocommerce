@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Optimize installation routine by reducing the number of DELETE statments for admin notices.

@@ -60,9 +60,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
+		await page
+			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -78,9 +78,11 @@ test.describe( 'Cart page', () => {
 		while ( qty-- ) {
 			// (load the shop in case redirection enabled)
 			await page.goto( '/shop/?orderby=date' );
-			await page.click(
-				`a[data-product_id='${ productId }'][href*=add-to-cart]`
-			);
+			await page
+				.locator(
+					`a[data-product_id='${ productId }'][href*=add-to-cart]`
+				)
+				.click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
@@ -92,14 +94,14 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
+		await page
+			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
-		await page.fill( 'input.qty', '2' );
-		await page.click( `text=${getTranslationFor('Update cart')}` );
+		await page.locator( 'input.qty' ).fill( '2' );
+		await page.locator( `text=${getTranslationFor('Update cart')}` ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`
@@ -110,9 +112,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
+		await page
+			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( '/cart/' );
 
@@ -121,7 +123,7 @@ test.describe( 'Cart page', () => {
 			`$${ productPrice }`
 		);
 
-		await page.click( 'a.remove' );
+		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
 			getTranslationFor('Your cart is currently empty.')
@@ -132,9 +134,9 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
+		await page
+			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -142,8 +144,8 @@ test.describe( 'Cart page', () => {
 			`$${ productPrice }`
 		);
 
-		await page.fill( 'input.qty', '2' );
-		await page.click( `text=${getTranslationFor('Update cart')}` );
+		await page.locator( 'input.qty' ).fill( '2' );
+		await page.locator( `text=${getTranslationFor('Update cart')}` ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`
@@ -154,14 +156,14 @@ test.describe( 'Cart page', () => {
 		page,
 	} ) => {
 		await page.goto( '/shop/?orderby=date' );
-		await page.click(
-			`a[data-product_id='${ productId }'][href*=add-to-cart]`
-		);
+		await page
+			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
 
-		await page.click( '.checkout-button' );
+		await page.locator( '.checkout-button' ).click();
 
 		await expect( page.locator( '#order_review' ) ).toBeVisible();
 	} );

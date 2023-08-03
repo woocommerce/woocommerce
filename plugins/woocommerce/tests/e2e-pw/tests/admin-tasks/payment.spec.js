@@ -1,17 +1,31 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { getTranslationFor } = require( './../../test-data/data' );
+const { features } = require( '../../utils' );
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-		);
-		await page.click( `text=${getTranslationFor('Skip setup store details')}` );
-		await page.click( `button >> text=${getTranslationFor('No thanks')}` );
-		await page.waitForLoadState( 'networkidle' );
+	test.beforeEach( async ( { page, baseURL } ) => {
+		// Skip skipping the setup wizard if the core profiler is enabled.
+		// When the core-profiler is enabled, the following code won't work, causing the tests to fail.
+		if ( ! features.is_enabled( 'core-profiler' ) ) {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
+			);
+			await page.locator( `text=${getTranslationFor('Skip setup store details')}`  ).click();
+			await page.locator( `button >> text=${getTranslationFor('No thanks')}` ).click();
+			await page.waitForLoadState( 'networkidle' );
+		} else {
+			await new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc-admin',
+			} ).post( 'onboarding/profile', {
+				skipped: true,
+			} );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -33,7 +47,7 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( `text=${getTranslationFor('Set up payments')}` );
+		await page.locator( `text=${getTranslationFor('Set up payments')}` ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
 		).toHaveText( `${getTranslationFor('Set up payments')}`);
@@ -52,13 +66,23 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( `//input[@placeholder=${getTranslationFor('"Account name"')}]`, 'Savings' );
-		await page.fill( `//input[@placeholder=${getTranslationFor('"Account number"')}]`, '1234' );
-		await page.fill( `//input[@placeholder=${getTranslationFor('"Bank name"')}]`, 'Test Bank' );
-		await page.fill( `//input[@placeholder=${getTranslationFor('"Sort code"')}]`, '12' );
-		await page.fill( `//input[@placeholder=${getTranslationFor('"IBAN"')}]`, '12 3456 7890' );
-		await page.fill( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]`, 'ABBA' );
-		await page.click( `text=${getTranslationFor('Save')}` );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
+			.fill( 'Savings' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Account number"')}]` )
+			.fill( '1234' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Bank name"')}]` )
+			.fill( 'Test Bank' );
+		await page.locator( `//input[@placeholder=${getTranslationFor('"Sort code"')}]` ).fill( '12' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"IBAN"')}]` )
+			.fill( '12 3456 7890' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]` )
+			.fill( 'ABBA' );
+		await page.locator( `text=${getTranslationFor('Save')}` ).click();
 
 		// check that bank transfers were set up
 		await expect(
@@ -115,9 +139,11 @@ test.describe( 'Payment setup task', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// enable COD payment option
-		await page.click(
-			'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
-		);
+		await page
+			.locator(
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+			)
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );

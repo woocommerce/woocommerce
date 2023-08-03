@@ -17,7 +17,8 @@ import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-eff
 import {
 	preventLeavingProductForm,
 	__experimentalUseProductHelper as useProductHelper,
-	__experimentalUseProductMVPCESFooter as useProductMVPCESFooter,
+	__experimentalUseFeedbackBar as useFeedbackBar,
+	TRACKS_SOURCE,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -44,8 +45,7 @@ export const ProductFormActions: React.FC = () => {
 		isDeleting,
 	} = useProductHelper();
 
-	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
-		useProductMVPCESFooter();
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
@@ -76,7 +76,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onSaveDraft = async () => {
 		recordEvent( 'product_edit', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
@@ -97,12 +97,12 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerDraftCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublish = async () => {
 		recordEvent( 'product_update', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
@@ -123,12 +123,12 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerPublishCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublishAndDuplicate = async () => {
 		recordEvent( 'product_publish_and_copy', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -141,7 +141,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onCopyToNewDraft = async () => {
 		recordEvent( 'product_copy', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -156,7 +156,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onTrash = async () => {
 		recordEvent( 'product_delete', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -206,7 +206,7 @@ export const ProductFormActions: React.FC = () => {
 			<SecondaryActionsComponent
 				onClick={ () =>
 					recordEvent( 'product_preview_changes', {
-						new_product_page: true,
+						source: TRACKS_SOURCE,
 						...getProductDataForTracks(),
 					} )
 				}

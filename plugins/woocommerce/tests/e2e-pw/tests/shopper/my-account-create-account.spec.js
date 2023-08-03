@@ -73,8 +73,8 @@ test.describe( 'Shopper My Account Create Account', () => {
 			page.locator( '.woocommerce-form-register' )
 		).toBeVisible();
 
-		await page.fill( 'input#reg_email', customerEmailAddress );
-		await page.click( 'button[name="register"]' );
+		await page.locator( 'input#reg_email' ).fill( customerEmailAddress );
+		await page.locator( 'button[name="register"]' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'

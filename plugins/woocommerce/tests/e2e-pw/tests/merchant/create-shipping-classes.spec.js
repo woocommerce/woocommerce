@@ -10,15 +10,13 @@ test.describe( 'Merchant can add shipping classes', () => {
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
 		);
 
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent( `text=${getTranslationFor('Save shipping classes')}`, 'click' );
+		await page
+			.locator( '.wc-shipping-class-delete >> nth=0' )
+			.dispatchEvent( 'click' );
+		await page
+			.locator( '.wc-shipping-class-delete >> nth=0' )
+			.dispatchEvent( 'click' );
+		await page.locator( `text=${getTranslationFor('Save shipping classes')}` ).click();
 	} );
 
 	test( 'can add shipping classes', async ( { page } ) => {
@@ -40,21 +38,18 @@ test.describe( 'Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
-			await page.click( `text=${getTranslationFor('Add shipping class')}` );
-			await page.fill(
-				'.editing:last-child [data-attribute="name"]',
-				name
-			);
-			await page.fill(
-				'.editing:last-child [data-attribute="slug"]',
-				slug
-			);
-			await page.fill(
-				'.editing:last-child [data-attribute="description"]',
-				description
-			);
+			await page.locator( `text=${getTranslationFor('Add shipping class')}` ).click();
+			await page
+				.locator( '.editing:last-child [data-attribute="name"]' )
+				.fill( name );
+			await page
+				.locator( '.editing:last-child [data-attribute="slug"]' )
+				.fill( slug );
+			await page
+				.locator( '.editing:last-child [data-attribute="description"]' )
+				.fill( description );
 		}
-		await page.click( `text=${getTranslationFor('Save shipping classes')}` );
+		await page.locator( `text=${getTranslationFor('Save shipping classes')}` ).click();
 
 		// Set the expected auto-generated slug
 		shippingClassNoSlug.slug = 'poster-pack';

@@ -47,8 +47,8 @@ const getWCDownloadURL = async () => {
 			Accept: 'application/vnd.github+json',
 		},
 		params: {
-			per_page: 100
-		}
+			per_page: 100,
+		},
 	};
 
 	if ( GITHUB_TOKEN ) {
@@ -121,26 +121,26 @@ test.describe.serial( 'WooCommerce update', () => {
 		} );
 
 		await test.step( 'Upload the WooCommerce plugin zip', async () => {
-			await page.click( 'a.upload-view-toggle' );
+			await page.locator( 'a.upload-view-toggle' ).click();
 			await expect( page.locator( 'p.install-help' ) ).toBeVisible();
 			await expect( page.locator( 'p.install-help' ) ).toContainText(
 				'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
 			);
 			const [ fileChooser ] = await Promise.all( [
 				page.waitForEvent( 'filechooser' ),
-				page.click( '#pluginzip' ),
+				page.locator( '#pluginzip' ).click(),
 			] );
 			await fileChooser.setFiles( woocommerceZipPath );
-			await page.click( '#install-plugin-submit' );
+			await page.locator( '#install-plugin-submit' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		await test.step(
 			'Choose the option "Replace current with uploaded"',
 			async () => {
-				await page.click(
-					'.button-primary.update-from-upload-overwrite'
-				);
+				await page
+					.locator( '.button-primary.update-from-upload-overwrite' )
+					.click();
 				await page.waitForLoadState( 'networkidle' );
 				await expect(
 					page.getByText( 'Plugin updated successfully.' )

@@ -87,9 +87,9 @@ test.describe( 'Checkout coupons', () => {
 			page,
 		} ) => {
 			await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
-			await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( `text=${getTranslationFor('Apply coupon')}` );
+			await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+			await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
+			await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 
 			await expect(
 				page.locator( '.woocommerce-message' )
@@ -107,17 +107,17 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTranslationFor('Apply coupon')}` );
+		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful first time
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			getTranslationFor('Coupon code applied successfully.')
 		);
 		// try to apply the same coupon
-		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTranslationFor('Apply coupon')}` );
+		await page.locator( `text=${getTranslationFor('Click here to enter your code')}`).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// error received
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
 			getTranslationFor('Coupon code already applied!')
@@ -133,16 +133,16 @@ test.describe( 'Checkout coupons', () => {
 
 	test( 'allows checkout to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTranslationFor('Apply coupon')}` );
+		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			getTranslationFor('Coupon code applied successfully.')
 		);
-		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( `text=${getTranslationFor('Apply coupon')}` );
+		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
+		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			getTranslationFor('Coupon code applied successfully.')
@@ -163,9 +163,9 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTranslationFor('Apply coupon')}` );
+		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
@@ -175,7 +175,7 @@ test.describe( 'Checkout coupons', () => {
 			totals[ 0 ]
 		);
 
-		await page.click( 'a.woocommerce-remove-coupon' );
+		await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			'$20.00'

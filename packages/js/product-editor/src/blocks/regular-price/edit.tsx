@@ -3,7 +3,6 @@
  */
 import classNames from 'classnames';
 import { Link } from '@woocommerce/components';
-import { CurrencyContext } from '@woocommerce/currency';
 import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -11,11 +10,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import {
-	createElement,
-	useContext,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -26,10 +21,9 @@ import {
 /**
  * Internal dependencies
  */
-import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
-import { formatCurrencyDisplayValue } from '../../utils';
-import { SalePriceBlockAttributes } from './types';
 import { useValidation } from '../../contexts/validation-context';
+import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
+import { SalePriceBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -47,12 +41,9 @@ export function Edit( {
 		'product',
 		'sale_price'
 	);
-	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig, formatAmount } = context;
-	const currencyConfig = getCurrencyConfig();
 	const inputProps = useCurrencyInputProps( {
 		value: regularPrice,
-		setValue: setRegularPrice,
+		onChange: setRegularPrice,
 	} );
 
 	const interpolatedHelp = help
@@ -121,12 +112,6 @@ export function Edit( {
 					name={ 'regular_price' }
 					ref={ regularPriceRef }
 					label={ label }
-					value={ formatCurrencyDisplayValue(
-						String( regularPrice ),
-						currencyConfig,
-						formatAmount
-					) }
-					onChange={ setRegularPrice }
 					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>

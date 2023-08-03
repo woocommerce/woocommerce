@@ -8,7 +8,7 @@ import { useState, useEffect } from '@wordpress/element';
  */
 import { CoreProfilerStateMachineContext } from '..';
 import ProgressBar from '../components/progress-bar/progress-bar';
-import { getLoaderStageMeta } from '../get-loader-stage-meta';
+import { getLoaderStageMeta } from '../utils/get-loader-stage-meta';
 
 export type Stage = {
 	title: string;
@@ -17,16 +17,17 @@ export type Stage = {
 		label: string;
 		text: string;
 		duration?: number;
+		element?: JSX.Element;
 	} >;
 };
 
 export type Stages = Array< Stage >;
+export type LoaderContextProps = Pick<
+	CoreProfilerStateMachineContext,
+	'loader'
+>;
 
-export const Loader = ( {
-	context,
-}: {
-	context: CoreProfilerStateMachineContext;
-} ) => {
+export const Loader = ( { context }: { context: LoaderContextProps } ) => {
 	const stages = getLoaderStageMeta( context.loader.useStages ?? 'default' );
 	const currentStage = stages[ context.loader.stageIndex ?? 0 ];
 	const [ currentParagraph, setCurrentParagraph ] = useState( 0 );
@@ -67,6 +68,7 @@ export const Loader = ( {
 						{ currentStage.paragraphs[ currentParagraph ]?.label }{ ' ' }
 					</b>
 					{ currentStage.paragraphs[ currentParagraph ]?.text }
+					{ currentStage.paragraphs[ currentParagraph ]?.element }
 				</p>
 			</div>
 		</div>

@@ -59,10 +59,12 @@ const ar_AR = {
     'Coupon updated.': 'تم تحديث القسيمة.',
     'Coupon code already applied!': 'تم استخدام رمز القسيمة الشرائية مسبقاً!',
     'Coupon code applied successfully.': 'تم استخدام رمز القسيمة بنجاح.',
+    'Cost': 'Cost',
     'Custom base': 'تركيبة مخصّصة',//
     'Customer payment page →': 'صفحة الدفع للزبون ←',
     'Dashboard_WC': 'لوحة التحكم',//'لوحة التحكم'
     'Dashboard_WP': 'الرئيسية',//'لوحة التحكم'
+    'Delete': 'حذف', 
     'Direct bank transfer details added successfully': 'تمت إضافة تفاصيل التحويل البنكي المباشر بنجاح',
     'Downloadable products': 'المنتجات القابلة للتنزيل',
     'Downloads': 'التنزيلات',//
@@ -121,6 +123,8 @@ const ar_AR = {
 
         '"Learn about marketing a store"': '"التعرف على كيفية تسويق متجر"',
         'Length': 'الطول',
+        'Limit to specific ZIP/postcodes': 'تحديد إلى رموز بريدية معينة',
+        'List 1 postcode per line': 'أضف رمز بريدي واحد في كل سطر',
         'Local pickup': 'إستلام محلي من المتجر',
 
     
@@ -128,7 +132,7 @@ const ar_AR = {
 
         'Log In': 'دخول',//
         'Log in': 'تسجيل الدخول',
-        'Log out': 'Log out',
+        'Log out': 'تسجيل الخروج',//was Log out
         'Manage stock?': 'إدارة المخزون؟',
 
     
@@ -145,14 +149,17 @@ const ar_AR = {
         ],
         'manually': 'يدويًا',
         'Move down': 'تحريك لأسفل',
+        'Move to Trash': 'نقل لسلة المهملات',
         'Move up': 'تحريك لأعلى',
         'Never': 'أبدًا',
+        'New attribute': 'سمة جديدة',
         ': New order #': ': طلب جديد #',
         'No default attributename…': 'بدون تحديد افتراضي لـ attributename…',
         'No, I will enter prices exclusive of tax': 'لا، سأقوم بإدخال الأسعار غير متضمنةً الضريبة',
         'No products found': 'لم يتم العثور على منتجات',
         'No thanks': 'لا شكرًا',//
         'on': 'على',
+        'Onboarding profile data has been updated.': 'تم تحديث إعداد بيانات الملف الشخصي.',
         'Order #OrderId details': 'تفاصيل الطلب #OrderId',
         'Order received': 'تمّ استلام الطلب',
 
@@ -246,14 +253,19 @@ const ar_AR = {
         'Recalculate': 'إعادة احتساب',
         'Regular price': 'السعر الافتراضي',
         'Remove section': 'إزالة القسم',
+        'Remove selected row(s)': 'حذف الصفوف المحددة',
         '"Run the importer"': '"تشغيل أداة الاستيراد"',
         'Refund': ' مُستردّ ',
+        '/Refund #\d+/': /استعادة المبلغ #\d+/,
+        'Revoke': 'Revoke',
         'Save': 'حفظ',
         'Save attributes': 'حفظ السمات',
         'Save changes': 'حفظ التغييرات',//
         'Save shipping classes': 'حفظ فئات الشحن',
         'Search for a product…': 'البحث عن منتج…',
         '"Search for a product…"': '"البحث عن منتج…"',
+        'Select All': 'تحديد الكل',
+        'Select regions within this zone': 'تحديد المناطق داخل هذه المنطقة',
         'Set up payments': 'إعداد عمليات الدفع',
         'Skip setup store details':'تخطي إعداد تفاصيل المتجر', //'تخطي تفاصيل إعداد المتجر',//تخطي إعداد تفاصيل المتجر
         'Sorry, this download has expired': 'عذراً، تنزيلك لهذا الملف منتهي الصلاحية',
@@ -278,12 +290,16 @@ const ar_AR = {
         'United States (US) — California': 'الولايات المتحدة الأمريكية — كاليفورنيا',//
         'Unlimited': 'غير محدود',
         'Update cart': 'تحديث السلة',
+        'Update': 'تحديث',
+        'Used for variations': 'تستخدم في الأنواع',
         'Variable product': 'منتج متعدد الأنواع',
         'Variation price (required)': 'سعر النوع (مطلوب)',
+        '/verify the email address associated with the order/': /أو التحقق من عنوان البريد الإلكتروني/,
         'View cart': 'عرض السلة',
         '"View report"': '"عرض التقرير"',
         'View products': 'عرض المنتجات',
         'Virtual': 'افتراضي',
+        'Visible on the product page': 'عرض في صفحة المنتج',
         'Weight': 'الوزن',
         'Welcome to the block editor': 'مرحبًا بك في مُحرِّر المكوِّنات',
         'Welcome to WooCommerce': 'مرحبًا بك في ووكومرس',//
@@ -320,9 +336,11 @@ const ar_AR = {
                 heading: 'حالة النظام',
             },
         ],
+        '/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/': 
+            /يمكنك إضافة طرق شحن متعددة داخل هذه المنطقة. سوف يشاهدها الزبائن داخل هذه المنطقة فقط.*/,
         'Your cart is currently empty.': 'سلة مشترياتك فارغة حاليًا.',
         'Your settings have been saved.': 'تم حفظ إعداداتك.',
-    
+        'Zone name': 'اسم المنطقة',
     
 }
 

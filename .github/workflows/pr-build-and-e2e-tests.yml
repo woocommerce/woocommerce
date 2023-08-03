@@ -13,7 +13,6 @@ permissions: {}
 
 jobs:
     e2e-tests-run:
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         permissions:
@@ -85,7 +84,6 @@ jobs:
 
     api-tests-run:
         name: Runs API tests.
-        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read

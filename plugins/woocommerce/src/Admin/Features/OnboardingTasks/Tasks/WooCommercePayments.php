@@ -13,6 +13,13 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
  */
 class WooCommercePayments extends Task {
 	/**
+	 * Used to cache is_complete() method result.
+	 *
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
+	/**
 	 * ID.
 	 *
 	 * @return string
@@ -27,7 +34,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up WooCommerce Payments', 'woocommerce' );
+		return __( 'Set up WooPayments', 'woocommerce' );
 	}
 
 	/**
@@ -37,7 +44,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_content() {
 		return __(
-			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
+			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
 			'woocommerce'
 		);
 	}
@@ -67,7 +74,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_additional_info() {
 		return __(
-			'By using WooCommerce Payments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+			'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
 			'woocommerce'
 		);
 	}
@@ -78,7 +85,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return self::is_connected();
+		if ( null === $this->is_complete_result ) {
+			$this->is_complete_result = self::is_connected();
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**

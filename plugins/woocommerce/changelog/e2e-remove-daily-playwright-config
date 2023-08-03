@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove daily.playwright.config.js and references to it.
