@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useEditorContext } from '@woocommerce/base-context';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
-import PropTypes from 'prop-types';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 
@@ -23,7 +22,14 @@ import PaymentMethodErrorBoundary from './payment-method-error-boundary';
  *
  * @return {*} The rendered component.
  */
-const PaymentMethodCard = ( { children, showSaveOption } ) => {
+interface PaymentMethodCardProps {
+	showSaveOption: boolean;
+	children: React.ReactNode;
+}
+const PaymentMethodCard = ( {
+	children,
+	showSaveOption,
+}: PaymentMethodCardProps ) => {
 	const { isEditor } = useEditorContext();
 	const { shouldSavePaymentMethod, customerId } = useSelect( ( select ) => {
 		const paymentMethodStore = select( PAYMENT_STORE_KEY );
@@ -56,11 +62,6 @@ const PaymentMethodCard = ( { children, showSaveOption } ) => {
 			) }
 		</PaymentMethodErrorBoundary>
 	);
-};
-
-PaymentMethodCard.propTypes = {
-	showSaveOption: PropTypes.bool,
-	children: PropTypes.node,
 };
 
 export default PaymentMethodCard;
