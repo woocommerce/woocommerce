@@ -4,10 +4,6 @@
 import { useSelect } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import {
-	NavigableToolbar,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
 import { plus } from '@wordpress/icons';
 import {
 	createElement,
@@ -17,6 +13,13 @@ import {
 	useContext,
 } from '@wordpress/element';
 import { MouseEvent } from 'react';
+import {
+	NavigableToolbar,
+	store as blockEditorStore,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore ToolSelector exists in WordPress components.
+	ToolSelector,
+} from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore ToolbarItem exists in WordPress components.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -28,13 +31,25 @@ import { Button, ToolbarItem } from '@wordpress/components';
 import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
+import { DocumentOverview } from './document-overview';
+import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
+import { MoreMenu } from './more-menu';
 
-export function HeaderToolbar() {
+type HeaderToolbarProps = {
+	onSave?: () => void;
+	onCancel?: () => void;
+};
+
+export function HeaderToolbar( {
+	onSave = () => {},
+	onCancel = () => {},
+}: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
 	const isWideViewport = useViewportMatch( 'wide' );
+	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const { isInserterEnabled } = useSelect( ( select ) => {
+	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
 		const {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
@@ -45,9 +60,13 @@ export function HeaderToolbar() {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
 			getBlockSelectionEnd,
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore These selectors are available in the block data store.
+			__unstableGetEditorMode: getEditorMode,
 		} = select( blockEditorStore );
 
 		return {
+			isTextModeEnabled: getEditorMode() === 'text',
 			isInserterEnabled: hasInserterItems(
 				getBlockRootClientId( getBlockSelectionEnd() )
 			),
@@ -98,10 +117,40 @@ export function HeaderToolbar() {
 				/>
 				{ isWideViewport && (
 					<>
+						{ isLargeViewport && (
+							<ToolbarItem
+								as={ ToolSelector }
+								disabled={ isTextModeEnabled }
+							/>
+						) }
 						<ToolbarItem as={ EditorHistoryUndo } />
 						<ToolbarItem as={ EditorHistoryRedo } />
+						<ToolbarItem as={ DocumentOverview } />
 					</>
 				) }
+			</div>
+			<div className="woocommerce-iframe-editor__header-toolbar-right">
+				<ToolbarItem
+					as={ Button }
+					variant="tertiary"
+					className="woocommerce-modal-actions__cancel-button"
+					onClick={ onCancel }
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</ToolbarItem>
+				<ToolbarItem
+					as={ Button }
+					variant="primary"
+					className="woocommerce-modal-actions__done-button"
+					onClick={ onSave }
+				>
+					{ __( 'Done', 'woocommerce' ) }
+				</ToolbarItem>
+				<ToolbarItem
+					as={ ShowBlockInspectorPanel }
+					className="woocommerce-show-block-inspector-panel"
+				/>
+				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>
 	);

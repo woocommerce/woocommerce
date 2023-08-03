@@ -1,7 +1,9 @@
+@import '../../shared.scss';
+
 .woocommerce-profiler-plugins-plugin-card {
 	max-width: 492px;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	box-sizing: border-box;
 	border: 1px solid #e0e0e0;
 	border-radius: 2px;
@@ -17,7 +19,11 @@
 	}
 
 	.components-checkbox-control__input-container {
-		margin-top: 6px;
+		margin-top: 0;
+	}
+
+	.components-checkbox-control__input-container {
+		margin-top: 0;
 	}
 
 	input {
@@ -39,7 +45,7 @@
 		font-size: 14px;
 		line-height: 20px;
 		font-weight: 500;
-		margin: 0 0 8px 0;
+		margin: 0;
 		padding: 0;
 		@include breakpoint( '<782px' ) {
 			margin: 0;
@@ -66,27 +72,11 @@
 		}
 	}
 
-	.components-checkbox-control {
-		.components-checkbox-control__input,
-		components-checkbox-control__input-container {
-			width: 16px;
-			height: 16px;
-			&:focus {
-				box-shadow: none;
-				border-color: #1e1e1e;
-			}
-		}
-		.components-checkbox-control__input[type='checkbox']:checked {
-			box-shadow: 0 0 0 1px #fff,
-				0 0 0 2px
-				var(--wp-components-color-accent, var(--wp-admin-theme-color, #007cba));
-			outline: 1px solid transparent;
-		}
-		.components-checkbox-control__checked {
-			left: -1px;
-			top: -1px;
-			width: 18px;
-			height: 18px;
+	.components-checkbox-control__input-container {
+		margin-right: 24px;
+
+		@include breakpoint( '<782px' ) {
+			margin-right: 16px;
 		}
 	}
 
@@ -106,9 +96,18 @@
 		}
 	}
 
+	.woocommerce-profiler-plugin-card-top {
+		display: flex;
+		align-items: center;
+	}
+
 	.woocommerce-profiler-plugins-plugin-card-text {
+		margin: 4px 0 0 80px;
 		@include breakpoint( '<782px' ) {
 			align-self: center;
+		}
+		&.smaller-margin-left {
+			margin-left: 40px;
 		}
 	}
 	.woocommerce-profiler-plugins-plugin-card-text-header {
@@ -124,6 +123,7 @@
 				color: #00450c;
 				font-size: 11px;
 				font-weight: 500;
+				line-height: 20px;
 				@include breakpoint( '<782px' ) {
 					display: none;
 				}

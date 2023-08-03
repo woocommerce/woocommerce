@@ -36,7 +36,10 @@ class TaskLists {
 	protected static $default_tasks_loaded = false;
 
 	/**
-	 * Array of default tasks.
+	 * The contents of this array is used in init_tasks() to run their init() methods.
+	 * If the classes do not have an init() method then nothing is executed.
+	 * Beyond that, adding tasks to this list has no effect, see init_default_lists() for the list of tasks.
+	 * that are added for each task list.
 	 *
 	 * @var array
 	 */
@@ -108,21 +111,39 @@ class TaskLists {
 	 * Initialize default lists.
 	 */
 	public static function init_default_lists() {
+		$tasks = array(
+			'CustomizeStore',
+			'StoreDetails',
+			'Purchase',
+			'Products',
+			'WooCommercePayments',
+			'Payments',
+			'Tax',
+			'Shipping',
+			'Marketing',
+			'Appearance',
+		);
+
+		if ( Features::is_enabled( 'core-profiler' ) ) {
+			$key = array_search( 'StoreDetails', $tasks, true );
+			if ( false !== $key ) {
+				unset( $tasks[ $key ] );
+			}
+		}
+
+		// Remove the old Personalize your store task if the new CustomizeStore is enabled.
+		$task_to_remove                 = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
+		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
+
+		if ( false !== $store_customisation_task_index ) {
+			unset( $tasks[ $store_customisation_task_index ] );
+		}
+
 		self::add_list(
 			array(
 				'id'                      => 'setup',
 				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
-				'tasks'                   => array(
-					'StoreDetails',
-					'Purchase',
-					'Products',
-					'WooCommercePayments',
-					'Payments',
-					'Tax',
-					'Shipping',
-					'Marketing',
-					'Appearance',
-				),
+				'tasks'                   => $tasks,
 				'display_progress_header' => true,
 				'event_prefix'            => 'tasklist_',
 				'options'                 => array(
@@ -425,7 +446,7 @@ class TaskLists {
 
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge count-' . esc_attr( $tasks_count ) . '">' . number_format_i18n( $tasks_count ) . '</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}

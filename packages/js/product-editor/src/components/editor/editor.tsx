@@ -86,13 +86,17 @@ export function Editor( { product, settings }: EditorProps ) {
 											<PluginArea scope="woocommerce-product-block-editor" />
 										</>
 									}
-									footer={ <Footer product={ product } /> }
 								/>
 
 								<Popover.Slot />
 							</ValidationProvider>
 						</SlotFillProvider>
 					</ShortcutProvider>
+					{ /* We put Footer here instead of in InterfaceSkeleton because Footer uses
+					WooFooterItem to actually render in the WooFooterItem.Slot defined by
+					WooCommerce Admin. And, we need to put it outside of the SlotFillProvider
+					we create in this component. */ }
+					<Footer product={ product } />
 				</EntityProvider>
 			</StrictMode>
 		</LayoutContextProvider>

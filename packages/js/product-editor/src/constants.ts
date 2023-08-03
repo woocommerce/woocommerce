@@ -50,3 +50,5 @@ export const VARIANT_SHIPPING_SECTION_DIMENSIONS_ID = `variant/${ SHIPPING_SECTI
 export const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
+
+export const TRACKS_SOURCE = 'product-block-editor-v1';

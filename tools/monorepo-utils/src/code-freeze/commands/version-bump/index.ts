@@ -8,7 +8,10 @@ import simpleGit from 'simple-git';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
-import { sparseCheckoutRepoShallow } from '../../../core/git';
+import {
+	sparseCheckoutRepoShallow,
+	checkoutRemoteBranch,
+} from '../../../core/git';
 import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
@@ -16,16 +19,9 @@ import { bumpFiles } from './bump';
 import { validateArgs } from './lib/validate';
 import { Options } from './types';
 
-const genericErrorFunction = ( err ) => {
-	if ( err.git ) {
-		return err.git;
-	}
-	throw err;
-};
-
 export const versionBumpCommand = new Command( 'version-bump' )
 	.description( 'Bump versions ahead of new development cycle' )
-	.requiredOption( '-v, --version <version>', 'Version to bump to' )
+	.argument( '<version>', 'Version to bump to' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -41,8 +37,19 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Base branch to create the PR against. Default: trunk',
 		'trunk'
 	)
-	.action( async ( options: Options ) => {
-		const { owner, name, version, base } = options;
+	.option(
+		'-d --dry-run',
+		'Prepare the version bump and log a diff. Do not create a PR or push to branch',
+		false
+	)
+	.option(
+		'-c --commit-direct-to-base',
+		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
+		false
+	)
+	.action( async ( version, options: Options ) => {
+		const { owner, name, base, dryRun, commitDirectToBase } = options;
+
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -67,52 +74,88 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 		);
 
-		await validateArgs( tmpRepoPath, version );
-
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 		const majorMinor = getMajorMinor( version );
-		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
-		const exists = await git.raw( 'ls-remote', 'origin', branch );
-
-		if ( exists.trim().length > 0 ) {
-			Logger.error(
-				`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-			);
-		}
-
-		await git.checkoutBranch( branch, base ).catch( genericErrorFunction );
-
-		Logger.notice( `Bumping versions in ${ owner }/${ name }` );
-		bumpFiles( tmpRepoPath, version );
-
-		Logger.notice( 'Adding and committing changes' );
-		await git.add( '.' ).catch( genericErrorFunction );
-		await git
-			.commit( `Prep trunk for ${ majorMinor } cycle` )
-			.catch( genericErrorFunction );
-
-		Logger.notice( 'Pushing to Github' );
-		await git.push( 'origin', branch ).catch( ( e ) => {
-			Logger.error( e );
-		} );
+		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 
 		try {
-			Logger.startTask( 'Creating a pull request' );
+			if ( commitDirectToBase ) {
+				if ( base === 'trunk' ) {
+					Logger.error(
+						`The --commit-direct-to-base option cannot be used with the trunk branch as a base. A pull request must be created instead.`
+					);
+				}
+				Logger.notice( `Checking out ${ base }` );
+				await checkoutRemoteBranch( tmpRepoPath, base );
+			} else {
+				const exists = await git.raw( 'ls-remote', 'origin', branch );
 
-			const pullRequest = await createPullRequest( {
-				owner,
-				name,
-				title: `Prep trunk for ${ majorMinor } cycle`,
-				body: `This PR updates the versions in trunk to ${ version } for next development cycle.`,
-				head: branch,
-				base,
-			} );
-			Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
-			Logger.endTask();
-		} catch ( e ) {
-			Logger.error( e );
+				if ( ! dryRun && exists.trim().length > 0 ) {
+					Logger.error(
+						`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
+					);
+				}
+
+				if ( base !== 'trunk' ) {
+					// if the base is not trunk, we need to checkout the base branch first before creating a new branch.
+					Logger.notice( `Checking out ${ base }` );
+					await checkoutRemoteBranch( tmpRepoPath, base );
+				}
+				Logger.notice( `Creating new branch ${ branch }` );
+				await git.checkoutBranch( branch, base );
+			}
+
+			Logger.notice( 'Validating arguments' );
+			await validateArgs( tmpRepoPath, version, options );
+
+			const workingBranch = commitDirectToBase ? base : branch;
+
+			Logger.notice(
+				`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
+			);
+			bumpFiles( tmpRepoPath, version );
+
+			if ( dryRun ) {
+				const diff = await git.diffSummary();
+				Logger.notice(
+					`The version has been bumped to ${ version } in the following files:`
+				);
+				Logger.warn( diff.files.map( ( f ) => f.file ).join( '\n' ) );
+				Logger.notice(
+					'Dry run complete. No pull was request created nor was a commit made.'
+				);
+				return;
+			}
+
+			Logger.notice( 'Adding and committing changes' );
+			await git.add( '.' );
+			await git.commit(
+				`Prep ${ base } for ${ majorMinor } cycle with version bump to ${ version }`
+			);
+
+			Logger.notice( `Pushing ${ workingBranch } branch to Github` );
+			await git.push( 'origin', workingBranch );
+
+			if ( ! commitDirectToBase ) {
+				Logger.startTask( 'Creating a pull request' );
+
+				const pullRequest = await createPullRequest( {
+					owner,
+					name,
+					title: `Prep ${ base } for ${ majorMinor } cycle`,
+					body: `This PR updates the versions in ${ base } to ${ version }.`,
+					head: branch,
+					base,
+				} );
+				Logger.notice(
+					`Pull request created: ${ pullRequest.html_url }`
+				);
+				Logger.endTask();
+			}
+		} catch ( error ) {
+			Logger.error( error );
 		}
 	} );

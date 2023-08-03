@@ -42,7 +42,7 @@ export const WCPayBannerText: React.VFC< {
 				padding="0 20px 0 0"
 			>
 				{ __(
-					'Accept Payments and manage your business.',
+					'Accept payments and manage your business.',
 					'woocommerce'
 				) }
 			</Text>
@@ -55,7 +55,7 @@ export const WCPayBannerText: React.VFC< {
 			>
 				{ createInterpolateElement(
 					__(
-						'By using WooCommerce Payments you agree to be bound by our <tosLink>Terms of Service</tosLink> and acknowledge that you have read our <privacyLink>Privacy Policy</privacyLink> ',
+						'By using WooPayments you agree to be bound by our <tosLink>Terms of Service</tosLink> and acknowledge that you have read our <privacyLink>Privacy Policy</privacyLink> ',
 						'woocommerce'
 					),
 					{

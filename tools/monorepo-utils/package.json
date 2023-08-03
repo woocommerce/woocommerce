@@ -13,13 +13,17 @@
 		"@octokit/graphql": "4.8.0",
 		"@octokit/graphql-schema": "^14.1.0",
 		"@octokit/types": "^9.2.0",
+		"@types/cli-table": "^0.3.1",
 		"@types/uuid": "^9.0.1",
 		"chalk": "^4.1.2",
+		"cli-table": "^0.3.11",
 		"commander": "^10.0.1",
 		"dotenv": "^10.0.0",
 		"figlet": "^1.6.0",
 		"glob": "^10.2.4",
 		"graphql": "^16.6.0",
+		"gray-matter": "^4.0.3",
+		"js-yaml": "^4.1.0",
 		"octokit": "^2.0.14",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
@@ -41,11 +45,12 @@
 		"start": "tsc --watch",
 		"lint": "eslint . --ext .ts",
 		"postinstall": "pnpm run build",
-		"test": "jest"
+		"turbo:test": "jest",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name"
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.7"
 	},
 	"types": "dist/index.d.ts"
 }

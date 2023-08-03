@@ -118,6 +118,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $error_logger;
 
 	/**
+	 * The name of the main orders table.
+	 *
+	 * @var string
+	 */
+	private $orders_table_name;
+
+	/**
 	 * The instance of the LegacyProxy object to use.
 	 *
 	 * @var LegacyProxy
@@ -140,6 +147,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$this->legacy_proxy       = $legacy_proxy;
 		$this->error_logger       = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->internal_meta_keys = $this->get_internal_meta_keys();
+
+		$this->orders_table_name = self::get_orders_table_name();
 	}
 
 	/**
@@ -987,6 +996,29 @@ WHERE
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$this->orders_table_name} WHERE id=%d)",
+				$order_id
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (bool) $exists;
+	}
+
+	/**
 	 * Method to read an order from custom tables.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -1018,7 +1050,7 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
 		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
 		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
@@ -1308,8 +1340,7 @@ WHERE
 	 * @return void
 	 */
 	private function log_diff( array $diff ): void {
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a log function.
-		$this->error_logger->notice( 'Diff found: ' . print_r( $diff, true ) );
+		$this->error_logger->notice( 'Diff found: ' . wp_json_encode( $diff, JSON_PRETTY_PRINT ) );
 	}
 
 	/**
@@ -1335,7 +1366,7 @@ WHERE
 	 * @param \WC_Abstract_Order $order      The order object.
 	 * @param object             $order_data A row of order data from the database.
 	 */
-	private function set_order_props_from_data( &$order, $order_data ) {
+	protected function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -1346,11 +1377,31 @@ WHERE
 					continue;
 				}
 
-				if ( 'date' === $prop_details['type'] ) {
-					$prop_value = $this->string_to_timestamp( $prop_value );
-				}
+				try {
+					if ( 'date' === $prop_details['type'] ) {
+						$prop_value = $this->string_to_timestamp( $prop_value );
+					}
 
-				$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+					$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+				} catch ( \Exception $e ) {
+					$order_id = $order->get_id();
+					$this->error_logger->warning(
+						sprintf(
+						/* translators: %1$d = peoperty name, %2$d = order ID, %3$s = error message. */
+							__( 'Error when setting property \'%1$s\' for order %2$d: %3$s', 'woocommerce' ),
+							$prop_details['name'],
+							$order_id,
+							$e->getMessage()
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+							'order_id'       => $order_id,
+							'property_name'  => $prop_details['name'],
+						)
+					);
+				}
 			}
 		}
 	}
@@ -1605,8 +1656,10 @@ FROM $order_meta_table
 		if ( 'create' === $context ) {
 			$post_id = wp_insert_post(
 				array(
-					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-					'post_status' => 'draft',
+					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_status'   => 'draft',
+					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+					'post_date_gmt' => current_time( 'mysql', 1 ), // We set the date to prevent invalid date errors when using MySQL strict mode.
 				)
 			);
 
@@ -1641,6 +1694,84 @@ FROM $order_meta_table
 
 		$changes = $order->get_changes();
 		$this->update_address_index_meta( $order, $changes );
+		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
+		$this->set_custom_taxonomies( $order, $default_taxonomies );
+	}
+
+	/**
+	 * Set default taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set default taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return array Sanitized tax input with default taxonomies.
+	 */
+	public function init_default_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( 'auto-draft' === $order->get_status() ) {
+			return $sanitized_tax_input;
+		}
+
+		foreach ( get_object_taxonomies( $order->get_type(), 'object' ) as $taxonomy => $tax_object ) {
+			if ( empty( $tax_object->default_term ) ) {
+				return $sanitized_tax_input;
+			}
+
+			// Filter out empty terms.
+			if ( isset( $sanitized_tax_input[ $taxonomy ] ) && is_array( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = array_filter( $sanitized_tax_input[ $taxonomy ] );
+			}
+
+			// Passed custom taxonomy list overwrites the existing list if not empty.
+			$terms = wp_get_object_terms( $order->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
+			if ( ! empty( $terms ) && empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = $terms;
+			}
+
+			if ( empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$default_term_id = get_option( 'default_term_' . $taxonomy );
+				if ( ! empty( $default_term_id ) ) {
+					$sanitized_tax_input[ $taxonomy ] = array( (int) $default_term_id );
+				}
+			}
+		}
+		return $sanitized_tax_input;
+	}
+
+	/**
+	 * Set custom taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set custom taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return void
+	 */
+	public function set_custom_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( empty( $sanitized_tax_input ) ) {
+			return;
+		}
+
+		foreach ( $sanitized_tax_input as $taxonomy => $tags ) {
+			$taxonomy_obj = get_taxonomy( $taxonomy );
+
+			if ( ! $taxonomy_obj ) {
+				/* translators: %s: Taxonomy name. */
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
+				continue;
+			}
+
+			// array = hierarchical, string = non-hierarchical.
+			if ( is_array( $tags ) ) {
+				$tags = array_filter( $tags );
+			}
+
+			if ( current_user_can( $taxonomy_obj->cap->assign_terms ) ) {
+				wp_set_post_terms( $order->get_id(), $tags, $taxonomy );
+			}
+		}
 	}
 
 	/**
@@ -1738,8 +1869,8 @@ FROM $order_meta_table
 
 		$changes['type'] = $order->get_type();
 
-		// Make sure 'status' is correct.
-		if ( array_key_exists( 'status', $column_mapping ) ) {
+		// Make sure 'status' is correctly prefixed.
+		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
 			$changes['status'] = $this->get_post_status( $order );
 		}
 
@@ -1780,17 +1911,29 @@ FROM $order_meta_table
 			return;
 		}
 
-		if ( ! empty( $args['force_delete'] ) ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'force_delete'     => false,
+				'suppress_filters' => false,
+			)
+		);
 
-			/**
-			 * Fires immediately before an order is deleted from the database.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+		$do_filters = ! $args['suppress_filters'];
+
+		if ( $args['force_delete'] ) {
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $order_id, $order );
+			}
 
 			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
@@ -1804,28 +1947,98 @@ FROM $order_meta_table
 			 *
 			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 			 */
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() || get_post_type( $order_id ) === 'shop_order_placehold' ) {
-				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-				// Once we stop creating posts for orders, we should do the cleanup here instead.
-				wp_delete_post( $order_id );
+			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+			if ( $orders_table_is_authoritative ) {
+				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+				if ( $data_synchronizer->data_sync_is_enabled() ) {
+					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+					// Once we stop creating posts for orders, we should do the cleanup here instead.
+					wp_delete_post( $order_id );
+				} else {
+					$this->handle_order_deletion_with_sync_disabled( $order_id );
+				}
 			}
 
-			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
 		} else {
-			/**
-			 * Fires immediately before an order is trashed.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			}
 
 			$this->trash_order( $order );
 
-			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
+		}
+	}
+
+	/**
+	 * Handles the deletion of an order from the orders table when sync is disabled:
+	 *
+	 * If the corresponding row in the posts table is of placeholder type,
+	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
+	 * and the sync process will detect these and take care of deleting the appropriate post records.
+	 *
+	 * @param int $order_id Th id of the order that has been deleted from the orders table.
+	 * @return void
+	 */
+	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
+		global $wpdb;
+
+		$post_type = $wpdb->get_var(
+			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
+		);
+
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",
+					$order_id,
+					$order_id
+				)
+			);
+		} else {
+			// phpcs:disable WordPress.DB.SlowDBQuery
+			$wpdb->insert(
+				self::get_meta_table_name(),
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
+					'meta_value' => DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE,
+				)
+			);
+			// phpcs:enable WordPress.DB.SlowDBQuery
+
+			// Note that at this point upshift_or_delete_child_orders will already have been invoked,
+			// thus all the child orders either still exist but have a different parent id,
+			// or have been deleted and got their own deletion record already.
+			// So there's no need to do anything about them.
 		}
 	}
 
@@ -1837,7 +2050,7 @@ FROM $order_meta_table
 	 *
 	 * @return void
 	 */
-	private function upshift_or_delete_child_orders( $order ) {
+	private function upshift_or_delete_child_orders( $order ) : void {
 		global $wpdb;
 
 		$order_table     = self::get_orders_table_name();
@@ -2075,6 +2288,10 @@ FROM $order_meta_table
 			$order->set_date_created( time() );
 		}
 
+		if ( ! $order->get_date_modified( 'edit' ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+		}
+
 		$this->update_order_meta( $order );
 
 		$this->persist_order_to_db( $order, $force_all_fields );
@@ -2158,15 +2375,15 @@ FROM $order_meta_table
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( time() );
-		}
-
-		if ( $backfill ) {
-			$this->maybe_backfill_post_record( $order );
+			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
 		$this->persist_order_to_db( $order );
 		$order->save_meta_data();
+
+		if ( $backfill ) {
+			$this->maybe_backfill_post_record( $order );
+		}
 
 		return $changes;
 	}
@@ -2372,6 +2589,10 @@ FROM $order_meta_table
 		$operational_data_table_name = $this->get_operational_data_table_name();
 		$meta_table                  = $this->get_meta_table_name();
 
+		$max_index_length                   = $this->database_util->get_max_index_length();
+		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
+		$composite_customer_id_email_length = max( $max_index_length - 20, 20 ); // 8 for customer_id, 20 minimum for email.
+
 		$sql = "
 CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned,
@@ -2394,8 +2615,8 @@ CREATE TABLE $orders_table_name (
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
-	KEY customer_id_billing_email (customer_id, billing_email),
-	KEY billing_email (billing_email),
+	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
+	KEY billing_email (billing_email($max_index_length)),
 	KEY type_status (type, status),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -2417,7 +2638,7 @@ CREATE TABLE $addresses_table_name (
 	phone varchar(100) null,
 	KEY order_id (order_id),
 	UNIQUE KEY address_type_order_id (address_type, order_id),
-	KEY email (email),
+	KEY email (email($max_index_length)),
 	KEY phone (phone)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
@@ -2447,8 +2668,8 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key, meta_value(100)),
-	KEY order_id_meta_key_meta_value (order_id, meta_key, meta_value(100))
+	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";
 

@@ -101,7 +101,6 @@ class WC_Beta_Tester {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-live-branches.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-assets.php';
 	}

@@ -23,21 +23,25 @@ import { __ } from '@wordpress/i18n';
  *
  * Upon completion, the score and comments is sent to a callback function.
  *
- * @param {Object}   props                     Component props.
- * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {string}   props.title               Title displayed in the modal.
- * @param {string}   props.description         Description displayed in the modal.
- * @param {string}   props.firstQuestion       The first survey question.
- * @param {string}   [props.secondQuestion]    An optional second survey question.
- * @param {string}   props.defaultScore        Default score.
- * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
- * @param {Function} props.customOptions       List of custom score options, contains label and value.
- * @param {Function} props.shouldShowComments  A function to determine whether or not the comments field shown be shown.
+ * @param {Object}   props                         Component props.
+ * @param {Function} props.recordScoreCallback     Function to call when the results are sent.
+ * @param {string}   props.title                   Title displayed in the modal.
+ * @param {string}   props.description             Description displayed in the modal.
+ * @param {boolean}  props.showDescription         Show description in the modal.
+ * @param {string}   props.firstQuestion           The first survey question.
+ * @param {string}   [props.secondQuestion]        An optional second survey question.
+ * @param {string}   props.defaultScore            Default score.
+ * @param {Function} props.onCloseModal            Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.customOptions           List of custom score options, contains label and value.
+ * @param {Function} props.shouldShowComments      A function to determine whether or not the comments field shown be shown.
+ * @param {Function} props.getExtraFieldsToBeShown Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields     Function that validates the extra fields.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
 	title = __( 'Please share your feedback', 'woocommerce' ),
 	description,
+	showDescription = true,
 	firstQuestion,
 	secondQuestion,
 	defaultScore = NaN,
@@ -47,14 +51,18 @@ function CustomerFeedbackModal( {
 		[ firstQuestionScore, secondQuestionScore ].some(
 			( score ) => score === 1 || score === 2
 		),
+	getExtraFieldsToBeShown,
+	validateExtraFields,
 }: {
 	recordScoreCallback: (
 		score: number,
 		secondScore: number,
-		comments: string
+		comments: string,
+		extraFieldsValues: { [ key: string ]: string }
 	) => void;
 	title?: string;
 	description?: string;
+	showDescription?: boolean;
 	firstQuestion: string;
 	secondQuestion?: string;
 	defaultScore?: number;
@@ -64,6 +72,14 @@ function CustomerFeedbackModal( {
 		firstQuestionScore: number,
 		secondQuestionScore: number
 	) => boolean;
+	getExtraFieldsToBeShown?: (
+		extraFieldsValues: { [ key: string ]: string },
+		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void,
+		errors: Record< string, string > | undefined
+	) => JSX.Element;
+	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
+		[ key: string ]: string;
+	};
 } ): JSX.Element | null {
 	const options =
 		customOptions && customOptions.length > 0
@@ -100,6 +116,12 @@ function CustomerFeedbackModal( {
 	const [ comments, setComments ] = useState( '' );
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
+	const [ extraFieldsValues, setExtraFieldsValues ] = useState< {
+		[ key: string ]: string;
+	} >( {} );
+	const [ errors, setErrors ] = useState<
+		Record< string, string > | undefined
+	>( {} );
 
 	const closeModal = () => {
 		setOpen( false );
@@ -118,18 +140,27 @@ function CustomerFeedbackModal( {
 	};
 
 	const sendScore = () => {
-		if (
+		const missingFirstOrSecondQuestions =
 			! Number.isInteger( firstQuestionScore ) ||
-			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
-		) {
+			( secondQuestion && ! Number.isInteger( secondQuestionScore ) );
+		if ( missingFirstOrSecondQuestions ) {
 			setShowNoScoreMessage( true );
+		}
+		const extraFieldsErrors =
+			typeof validateExtraFields === 'function'
+				? validateExtraFields( extraFieldsValues )
+				: {};
+		const validExtraFields = Object.keys( extraFieldsErrors ).length === 0;
+		if ( missingFirstOrSecondQuestions || ! validExtraFields ) {
+			setErrors( extraFieldsErrors );
 			return;
 		}
 		setOpen( false );
 		recordScoreCallback(
 			firstQuestionScore,
 			secondQuestionScore,
-			comments
+			comments,
+			extraFieldsValues
 		);
 	};
 
@@ -144,20 +175,22 @@ function CustomerFeedbackModal( {
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
-			<Text
-				variant="body"
-				as="p"
-				className="woocommerce-customer-effort-score__intro"
-				size={ 14 }
-				lineHeight="20px"
-				marginBottom="1.5em"
-			>
-				{ description ||
-					__(
-						'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
-						'woocommerce'
-					) }
-			</Text>
+			{ showDescription && (
+				<Text
+					variant="body"
+					as="p"
+					className="woocommerce-customer-effort-score__intro"
+					size={ 14 }
+					lineHeight="20px"
+					marginBottom="1.5em"
+				>
+					{ description ||
+						__(
+							'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
+							'woocommerce'
+						) }
+				</Text>
+			) }
 
 			<Text
 				variant="subtitle.small"
@@ -244,12 +277,19 @@ function CustomerFeedbackModal( {
 				>
 					<Text variant="body" as="p">
 						{ __(
-							'Please provide feedback by selecting an option above.',
+							'Please tell us to what extent you agree or disagree with the statements above.',
 							'woocommerce'
 						) }
 					</Text>
 				</div>
 			) }
+
+			{ typeof getExtraFieldsToBeShown === 'function' &&
+				getExtraFieldsToBeShown(
+					extraFieldsValues,
+					setExtraFieldsValues,
+					errors
+				) }
 
 			<div className="woocommerce-customer-effort-score__buttons">
 				<Button isTertiary onClick={ closeModal } name="cancel">
@@ -270,6 +310,8 @@ CustomerFeedbackModal.propTypes = {
 	secondQuestion: PropTypes.string,
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
+	getExtraFieldsToBeShown: PropTypes.func,
+	validateExtraFields: PropTypes.func,
 };
 
 export { CustomerFeedbackModal };

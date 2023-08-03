@@ -21,12 +21,29 @@ class Init {
 	const EDITOR_CONTEXT_NAME = 'woocommerce/edit-product';
 
 	/**
+	 * Supported post types.
+	 *
+	 * @var array
+	 */
+	private $supported_post_types = array( 'simple', 'variable' );
+
+	/**
+	 * Redirection controller.
+	 *
+	 * @var RedirectionController
+	 */
+	private $redirection_controller;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
+
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
 				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -36,56 +53,9 @@ class Init {
 
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
-		}
 
-		add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
-		add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
-	}
-
-	/**
-	 * Redirects from old product form to the new product form if the
-	 * feature `product_block_editor` is enabled.
-	 */
-	public function maybe_redirect_to_new_editor(): void {
-		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			$screen = get_current_screen();
-
-			if ( 'post' === $screen->base && 'product' === $screen->post_type ) {
-				if ( 'add' === $screen->action ) {
-					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
-					exit();
-				}
-
-				if ( isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
-					$product_id = absint( $_GET['post'] );
-					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
-					exit();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Redirects from new product form to the old product form if the
-	 * feature `product_block_editor` is enabled.
-	 */
-	public function maybe_redirect_to_old_editor(): void {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
-				$path        = esc_url_raw( wp_unslash( $_GET['path'] ) );
-				$parsed_path = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
-
-				if ( 'add-product' === $parsed_path[1] ) {
-					wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
-					exit();
-				}
-
-				if ( 'product' === $parsed_path[1] ) {
-					$product_id = absint( $parsed_path[2] );
-					wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
-					exit();
-				}
-			}
+			$tracks = new Tracks();
+			$tracks->init();
 		}
 	}
 
@@ -140,6 +110,17 @@ class Init {
 		 * @since 7.1.0
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+	}
+
+	/**
+	 * Dequeue conflicting styles.
+	 */
+	public function dequeue_conflicting_styles() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
+		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
+		wp_dequeue_style( 'woocommerce-blocktheme' );
 	}
 
 	/**
@@ -290,7 +271,8 @@ class Init {
 								array(
 									'woocommerce/product-name-field',
 									array(
-										'name' => 'Product name',
+										'name'      => 'Product name',
+										'autoFocus' => true,
 									),
 								),
 								array(
@@ -366,11 +348,20 @@ class Init {
 								),
 							),
 						),
+					),
+				),
+				array(
+					'woocommerce/product-tab',
+					array(
+						'id'    => 'organization',
+						'title' => __( 'Organization', 'woocommerce' ),
+						'order' => 15,
+					),
+					array(
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Organization & visibility', 'woocommerce' ),
-								'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
+								'title' => __( 'Product catalog', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -379,18 +370,25 @@ class Init {
 										'name' => 'categories',
 									),
 								),
+								array(
+									'woocommerce/product-checkbox-field',
+									array(
+										'label'    => __( 'Enable product reviews', 'woocommerce' ),
+										'property' => 'reviews_allowed',
+									),
+								),
+								array(
+									'woocommerce/product-password-field',
+									array(
+										'label' => __( 'Require a password', 'woocommerce' ),
+									),
+								),
 							),
 						),
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Attributes', 'woocommerce' ),
-								'description' => sprintf(
-									/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
-									__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
-									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
-									'</a>'
-								),
+								'title' => __( 'Attributes', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -720,6 +718,41 @@ class Init {
 					),
 				),
 			);
+			if ( Features::is_enabled( 'product-variation-management' ) ) {
+				array_push(
+					$args['template'],
+					array(
+						'woocommerce/product-tab',
+						array(
+							'id'    => 'variations',
+							'title' => __( 'Variations', 'woocommerce' ),
+							'order' => 40,
+						),
+						array(
+							array(
+								'woocommerce/product-variations-fields',
+								array(
+									'description' => sprintf(
+										/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
+										__( '%1$sSell your product in multiple variations like size or color.%2$s Get started by adding options for the buyers to choose on the product page.', 'woocommerce' ),
+										'<strong>',
+										'</strong>'
+									),
+								),
+								array(
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variation options', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variations-options-field' ) ),
+									),
+								),
+							),
+						),
+					)
+				);
+			}
 		}
 		return $args;
 	}
@@ -737,6 +770,11 @@ class Init {
 		// not be the product edit page (it mostly likely isn't).
 		if ( PageController::is_admin_page() ) {
 			$screen->is_block_editor( true );
+
+			wp_add_inline_script(
+				'wp-blocks',
+				'wp.blocks && wp.blocks.unstable__bootstrapServerSideBlockDefinitions && wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+			);
 		}
 	}
 }

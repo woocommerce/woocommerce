@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
+import {
+	__experimentalUseCompletion as useCompletion,
+	UseCompletionError,
+} from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -11,18 +14,35 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
-import { WriteItForMeBtn, StopCompletionBtn } from '../components';
-import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
-import { recordTracksFactory, getPostId } from '../utils';
+import { StopCompletionBtn, WriteItForMeBtn } from '../components';
+import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import {
+	getProductName,
+	getPostId,
+	getCategories,
+	getTags,
+	getAttributes,
+	recordTracksFactory,
+} from '../utils';
+import { Attribute } from '../utils/types';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = () => {
-	return __(
-		`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
-		'woocommerce'
-	);
+const getApiError = ( error: string ) => {
+	switch ( error ) {
+		case 'connection_error':
+			return __(
+				'❗ We were unable to reach the experimental service. Please check back in shortly.',
+				'woocommerce'
+			);
+		default:
+			return __(
+				`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
+				'woocommerce'
+			);
+	}
 };
 
 const recordDescriptionTracks = recordTracksFactory(
@@ -41,9 +61,14 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+
+	const handleCompletionError = ( error: UseCompletionError ) =>
+		tinyEditor.setContent( getApiError( error.code ?? '' ) );
+
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
+			feature: WOO_AI_PLUGIN_FEATURE_NAME,
 			onStreamMessage: ( content ) => {
 				// This prevents printing out incomplete HTML tags.
 				const ignoreRegex = new RegExp( /<\/?\w*[^>]*$/g );
@@ -51,12 +76,7 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: ( error ) => {
-				// eslint-disable-next-line no-console
-				console.debug( 'Streaming error encountered', error );
-
-				tinyEditor.setContent( getApiError() );
-			},
+			onStreamError: handleCompletionError,
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -105,28 +125,60 @@ export function WriteItForMeButtonContainer() {
 		};
 	}, [ titleEl ] );
 
+	useEffect( () => {
+		recordDescriptionTracks( 'view_button' );
+	}, [] );
+
 	const writeItForMeEnabled =
 		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
-	const buildPrompt = () => {
-		const instructions = [
-			`Write a product description with the following product title: "${ productTitle.slice(
+	const buildPrompt = (): string => {
+		const productName: string = getProductName();
+		const productCategories: string[] = getCategories();
+		const productTags: string[] = getTags();
+		const productAttributes: Attribute[] = getAttributes();
+
+		const includedProps: string[] = [];
+		const productPropsInstructions: string[] = [];
+		if ( productCategories.length > 0 ) {
+			productPropsInstructions.push(
+				`Falling into the categories: ${ productCategories.join(
+					', '
+				) }.`
+			);
+			includedProps.push( 'categories' );
+		}
+		if ( productTags.length > 0 ) {
+			productPropsInstructions.push(
+				`Tagged with: ${ productTags.join( ', ' ) }.`
+			);
+			includedProps.push( 'categories' );
+		}
+		productAttributes.forEach( ( { name, values } ) => {
+			productPropsInstructions.push(
+				`${ name }: ${ values.join( ', ' ) }.`
+			);
+			includedProps.push( name );
+		} );
+
+		return [
+			`Compose an engaging product description for a product named "${ productName.slice(
 				0,
 				MAX_TITLE_LENGTH
-			) }."`,
-			'Identify the language used in this product title and use the same language in your response.',
-			'Use a 9th grade reading level.',
-			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description into paragraphs using standard HTML <p> tags.',
-			'Only if appropriate, use <ul> and <li> tags to list product features.',
-			'When appropriate, use <strong> and <em> tags to emphasize text.',
+			) }".`,
+			...productPropsInstructions,
+			'Identify the language used in the product name, and craft the description in the same language.',
+			`Ensure the description is concise, containing no more than ${ DESCRIPTION_MAX_LENGTH } words.`,
+			'Structure the content into paragraphs using <p> tags, and use HTML elements like <strong> and <em> for emphasis.',
+			'Only if appropriate, use <ul> and <li> for listing product features.',
+			`Avoid including the properties (${ includedProps.join(
+				', '
+			) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`,
 			'Do not include a top-level heading at the beginning description.',
-		];
-
-		return instructions.join( '\n' );
+		].join( ' ' );
 	};
 
-	const onWriteItForMeClick = () => {
+	const onWriteItForMeClick = async () => {
 		setFetching( true );
 		removeSnackbar();
 
@@ -134,7 +186,12 @@ export function WriteItForMeButtonContainer() {
 		recordDescriptionTracks( 'start', {
 			prompt,
 		} );
-		requestCompletion( prompt );
+
+		try {
+			await requestCompletion( prompt );
+		} catch ( err ) {
+			handleCompletionError( err as UseCompletionError );
+		}
 	};
 
 	return completionActive ? (

@@ -57,13 +57,6 @@ class Woo_AI_Product_Text_Generation {
 		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
 
 		wp_register_style(
-			'wp-components',
-			plugins_url( 'dist/components/style.css', __FILE__ ),
-			array(),
-			$css_file_version
-		);
-
-		wp_register_style(
 			'woo-ai',
 			plugins_url( '/../build/index.css', __FILE__ ),
 			// Add any dependencies styles may have, such as wp-components.

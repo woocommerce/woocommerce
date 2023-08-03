@@ -4,18 +4,19 @@
 	justify-content: center;
 	align-items: center;
 	margin-bottom: 48px;
-	max-width: 550px;
+	max-width: 610px;
 	width: 100%;
 
 	.woocommerce-profiler-heading__title {
 		font-style: normal;
-		font-weight: 500;
-		font-size: 40px;
+		font-size: 32px;
 		line-height: 40px;
 		text-align: center;
 		color: $gray-900;
 		margin-bottom: 12px;
+		letter-spacing: normal;
 		padding-top: 0;
+		font-weight: 500;
 
 		@include breakpoint( '<782px' ) {
 			font-size: 28px;
@@ -29,10 +30,11 @@
 		font-size: 16px;
 		line-height: 24px;
 		text-align: center;
-		color: $gray-800;
+		color: $gray-700;
+		letter-spacing: 0.25px;
 
 		@include breakpoint( '<782px' ) {
-			color: $gray-800;
+			color: $gray-700;
 		}
 	}
 

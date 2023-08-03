@@ -43,7 +43,7 @@ import { Controller, getPages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
-import TransientNotices from './transient-notices';
+import { TransientNotices } from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';

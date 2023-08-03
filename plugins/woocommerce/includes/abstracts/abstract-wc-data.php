@@ -761,7 +761,7 @@ abstract class WC_Data {
 				if ( ! $errors ) {
 					$errors = new WP_Error();
 				}
-				$errors->add( $e->getErrorCode(), $e->getMessage() );
+				$errors->add( $e->getErrorCode(), $e->getMessage(), array( 'property_name' => $prop ) );
 			}
 		}
 

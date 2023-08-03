@@ -154,7 +154,7 @@ class WC_Unit_Tests_Bootstrap {
 	private function initialize_hpos() {
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( true );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
 	}
 
 	/**
@@ -264,6 +264,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 	}
 
 	/**
