@@ -11,7 +11,6 @@ use WooCommerceDocs\Data;
 use WooCommerceDocs\Data\DocsStore;
 use WooCommerceDocs\Manifest\ManifestProcessor;
 use WooCommerceDocs\Manifest\RelativeLinkParser;
-use WooCommerceDocs\Manifest\PostRemover;
 
 /**
  * A class to handle the manifest job.
@@ -81,8 +80,7 @@ class ManifestJob {
 
 					ManifestProcessor::process_manifest( $json, $action_id, $existing_manifest );
 
-					$next_manifest  = Data\ManifestStore::get_manifest_by_url( $manifest_url );
-					$doc_ids        = PostRemover::collect_doc_ids_from_manifest( $next_manifest );
+					$doc_ids        = ManifestProcessor::collect_doc_ids_from_manifest( $json );
 					$relative_links = RelativeLinkParser::extract_links_from_manifest( $json );
 
 					foreach ( $doc_ids as $doc_id ) {

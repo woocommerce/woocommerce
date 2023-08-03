@@ -35,27 +35,9 @@ class PostRemover {
 	 * @param Object $previous_manifest The previous manifest.
 	 */
 	public static function get_doc_ids_to_delete( $manifest, $previous_manifest ) {
-		$manifest_doc_ids          = self::collect_doc_ids_from_manifest( $manifest );
-		$previous_manifest_doc_ids = self::collect_doc_ids_from_manifest( $previous_manifest );
+		$manifest_doc_ids          = ManifestProcessor::collect_doc_ids_from_manifest( $manifest );
+		$previous_manifest_doc_ids = ManifestProcessor::collect_doc_ids_from_manifest( $previous_manifest );
 
 		return array_diff( $previous_manifest_doc_ids, $manifest_doc_ids );
-	}
-
-	/**
-	 * Recusively collect post IDs from a manifest.
-	 *
-	 * @param Object $manifest The manifest to process.
-	 */
-	public static function collect_doc_ids_from_manifest( $manifest ) {
-		$doc_ids = array();
-		foreach ( $manifest['categories'] as $category ) {
-			foreach ( $category['posts'] as $post ) {
-				$doc_ids[] = $post['id'];
-			}
-			$subcategory_ids = self::collect_doc_ids_from_manifest( $category );
-			$doc_ids         = array_merge( $doc_ids, $subcategory_ids );
-		}
-
-		return $doc_ids;
 	}
 }
