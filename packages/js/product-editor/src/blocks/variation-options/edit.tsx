@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
-import { createElement } from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
+import { Link } from '@woocommerce/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -42,6 +43,21 @@ export function Edit() {
 					newAttributeModalTitle: __(
 						'Add variation options',
 						'woocommerce'
+					),
+					newAttributeModalDescription: createInterpolateElement(
+						__(
+							'Select from existing <globalAttributeLink>global attributes</globalAttributeLink> or create options for buyers to choose on the product page. You can change the order later.',
+							'woocommerce'
+						),
+						{
+							globalAttributeLink: (
+								<Link
+									href="https://woocommerce.com/document/variable-product/#add-attributes-to-use-for-variations"
+									type="external"
+									target="_blank"
+								/>
+							),
+						}
 					),
 					attributeRemoveLabel: __(
 						'Remove variation option',

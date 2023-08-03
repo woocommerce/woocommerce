@@ -1,9 +1,9 @@
 <?php
 
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
@@ -532,4 +532,54 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertNotContains( $order1->get_id(), $orders );
 	}
 
+	/**
+	 * @testDox When HPOS is enabled, the custom orders table is created.
+	 */
+	public function test_tables_are_created_when_hpos_enabled() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$this->sut->delete_database_tables();
+		$this->assertFalse( $this->sut->check_orders_table_exists() );
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$this->assertTrue( $this->sut->check_orders_table_exists() );
+		$this->assertEquals( get_option( DataSynchronizer::ORDERS_TABLE_CREATED ), 'yes' );
+	}
+
+	/**
+	 * @testDox When sync is enabled, the custom orders table is created.
+	 */
+	public function test_tables_are_created_when_sync_is_enabled() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$this->sut->delete_database_tables();
+		$this->assertFalse( $this->sut->check_orders_table_exists() );
+
+		$cot_sync_value = get_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		$this->assertTrue( $this->sut->check_orders_table_exists() );
+		$this->assertEquals( get_option( DataSynchronizer::ORDERS_TABLE_CREATED ), 'yes' );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, $cot_sync_value );
+	}
+
+	/**
+	 * @testDox HPOS cannot be turned on when there are pending orders.
+	 */
+	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders() {
+		$this->sut->delete_database_tables();
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		OrderHelper::create_order();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		$cot_setting = apply_filters( 'woocommerce_feature_setting', array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		$this->assertEquals( $cot_setting['value'], 'no' );
+		$this->assertEquals( $cot_setting['disabled'], array( 'yes', 'no' ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		$sync_setting = apply_filters( 'woocommerce_feature_setting', array(), $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		$this->assertEquals( $sync_setting['value'], 'no' );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
+	}
 }

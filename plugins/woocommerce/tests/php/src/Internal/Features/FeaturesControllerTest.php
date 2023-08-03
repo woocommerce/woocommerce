@@ -5,8 +5,9 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
@@ -83,12 +84,20 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				if ( ! $active_only ) {
 					$plugins[] = 'the_plugin_inactive';
 				}
+
 				return $plugins;
 			}
 		};
 		// phpcs:enable Squiz.Commenting
 
-		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
+		$this->fake_plugin_util->set_active_plugins(
+			array(
+				'the_plugin',
+				'the_plugin_2',
+				'the_plugin_3',
+				'the_plugin_4',
+			)
+		);
 
 		$this->sut = new FeaturesController();
 		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
@@ -267,7 +276,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_doing_it_wrong' => function( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
 					$function = $f;
 					$message  = $m;
 					$version  = $v;
@@ -403,10 +412,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'did_action'        => function( $action_name ) {
+				'did_action'        => function ( $action_name ) {
 					return 'woocommerce_init' === $action_name ? false : did_action( $action_name );
 				},
-				'wc_doing_it_wrong' => function( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
 					$function = $f;
 					$message  = $m;
 					$version  = $v;
@@ -544,10 +553,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'did_action'        => function( $action_name ) {
+				'did_action'        => function ( $action_name ) {
 					return 'woocommerce_init' === $action_name ? false : did_action( $action_name );
 				},
-				'wc_doing_it_wrong' => function( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
 					$function = $f;
 					$message  = $m;
 					$version  = $v;
@@ -589,7 +598,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
-			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_inactive' ),
+			'uncertain'    => array(
+				'the_plugin',
+				'the_plugin_2',
+				'the_plugin_3',
+				'the_plugin_4',
+				'the_plugin_inactive',
+			),
 		);
 		$this->assertEquals( $expected, $result );
 	}
@@ -621,7 +636,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$expected = array(
 			'compatible'   => array(),
 			'incompatible' => array(),
-			'uncertain'    => array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_inactive' ),
+			'uncertain'    => array(
+				'the_plugin',
+				'the_plugin_2',
+				'the_plugin_3',
+				'the_plugin_4',
+				'the_plugin_inactive',
+			),
 		);
 		$this->assertEquals( $expected, $result );
 	}
@@ -637,7 +658,16 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function test_get_compatible_plugins_for_feature( bool $active_only ) {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
-		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_2', 'the_plugin_3', 'the_plugin_4', 'the_plugin_5', 'the_plugin_6' ) );
+		$this->fake_plugin_util->set_active_plugins(
+			array(
+				'the_plugin',
+				'the_plugin_2',
+				'the_plugin_3',
+				'the_plugin_4',
+				'the_plugin_5',
+				'the_plugin_6',
+			)
+		);
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin_2', true );
@@ -646,7 +676,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->simulate_after_woocommerce_init_hook();
 		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
-		$expected_uncertain = $active_only ? array( 'the_plugin_5', 'the_plugin_6' ) : array( 'the_plugin_5', 'the_plugin_6', 'the_plugin_inactive' );
+		$expected_uncertain = $active_only ? array( 'the_plugin_5', 'the_plugin_6' ) : array(
+			'the_plugin_5',
+			'the_plugin_6',
+			'the_plugin_inactive',
+		);
 		$expected           = array(
 			'compatible'   => array( 'the_plugin', 'the_plugin_2' ),
 			'incompatible' => array( 'the_plugin_3', 'the_plugin_4' ),
@@ -685,7 +719,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			FeaturesController::FEATURE_ENABLED_CHANGED_ACTION,
-			function( $f, $e ) use ( &$feature_id, &$enabled ) {
+			function ( $f, $e ) use ( &$feature_id, &$enabled ) {
 				$feature_id = $f;
 				$enabled    = $e;
 			},
@@ -705,7 +739,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	private function simulate_inside_before_woocommerce_init_hook() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'doing_action' => function( $action_name ) {
+				'doing_action' => function ( $action_name ) {
 					return 'before_woocommerce_init' === $action_name || doing_action( $action_name );
 				},
 			)
@@ -718,10 +752,137 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	private function simulate_after_woocommerce_init_hook() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'did_action' => function( $action_name ) {
+				'did_action' => function ( $action_name ) {
 					return 'woocommerce_init' === $action_name || did_action( $action_name );
 				},
 			)
 		);
+	}
+
+	/**
+	 * Helper method to disable warning when calling declare_compatibility outside of before_init hook.
+	 */
+	private function disable_verify_init_warning() {
+		$function = null;
+		$message  = null;
+		$version  = null;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+					$function = $f;
+					$message  = $m;
+					$version  = $v;
+				},
+			)
+		);
+	}
+
+	/**
+	 * @testDox No warning is generated when all plugins have declared compatibility.
+	 */
+	public function test_no_warning_when_all_plugin_are_hpos_compatible() {
+		$this->simulate_inside_before_woocommerce_init_hook();
+		// phpcs:disable Squiz.Commenting
+		$fake_plugin_util = new class() extends PluginUtil {
+			private $active_plugins;
+
+			public function __construct() {
+			}
+
+			public function set_active_plugins( $plugins ) {
+				$this->active_plugins = $plugins;
+			}
+
+			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
+				return $this->active_plugins;
+			}
+		};
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_plugin_active' => function ( $plugin ) {
+					return true;
+				},
+			)
+		);
+		// phpcs:enable
+
+		$local_sut = new FeaturesController();
+		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$plugins = array( 'compatible_plugin1', 'compatible_plugin2' );
+		$fake_plugin_util->set_active_plugins( $plugins );
+		foreach ( $plugins as $plugin ) {
+			$local_sut->declare_compatibility( 'custom_order_tables', $plugin );
+			$local_sut->declare_compatibility( 'cart_checkout_blocks', $plugin );
+		}
+		$cot_controller   = new CustomOrdersTableController();
+		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
+			$this->plugin_util         = $fake_plugin_util;
+			$this->features_controller = $local_sut;
+			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
+			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		};
+		$cot_setting      = $cot_setting_call->call( $cot_controller );
+
+		$this->assertEquals( $cot_setting['disabled'], array() );
+		$incompatible_plugins = function () use ( $plugins ) {
+			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
+		};
+		$this->assertEmpty( $incompatible_plugins->call( $local_sut ) );
+	}
+
+	/**
+	 * @testDox If there is an incompatible plugin, it is returned by get_incompatible_plugins.
+	 */
+	public function test_show_warning_when_a_plugin_is_not_hpos_compatible() {
+		$this->simulate_inside_before_woocommerce_init_hook();
+		// phpcs:disable Squiz.Commenting
+		$fake_plugin_util = new class() extends PluginUtil {
+			private $active_plugins;
+
+			public function __construct() {
+			}
+
+			public function set_active_plugins( $plugins ) {
+				$this->active_plugins = $plugins;
+			}
+
+			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
+				return $this->active_plugins;
+			}
+		};
+		// phpcs:enable
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_plugin_active' => function ( $plugin ) {
+					return true;
+				},
+			)
+		);
+
+		$local_sut = new FeaturesController();
+		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$plugins = array( 'compatible_plugin', 'incompatible_plugin' );
+		$fake_plugin_util->set_active_plugins( $plugins );
+		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );
+		$local_sut->declare_compatibility( 'cart_checkout_blocks', 'compatible_plugin' );
+		$local_sut->declare_compatibility( 'custom_order_tables', 'incompatible_plugin', false );
+
+		$cot_controller   = new CustomOrdersTableController();
+		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
+			$this->plugin_util         = $fake_plugin_util;
+			$this->features_controller = $local_sut;
+			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
+			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		};
+		$cot_setting      = $cot_setting_call->call( $cot_controller );
+
+		$this->assertEquals( $cot_setting['disabled'], array( 'yes' ) );
+		$incompatible_plugins = function () use ( $plugins ) {
+			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
+		};
+		$this->assertEquals( array( 'incompatible_plugin' ), array_keys( $incompatible_plugins->call( $local_sut ) ) );
 	}
 }
