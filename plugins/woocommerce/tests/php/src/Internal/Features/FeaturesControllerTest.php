@@ -816,16 +816,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$local_sut->declare_compatibility( 'custom_order_tables', $plugin );
 			$local_sut->declare_compatibility( 'cart_checkout_blocks', $plugin );
 		}
+
 		$cot_controller   = new CustomOrdersTableController();
 		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
-			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
-
 		$this->assertEquals( $cot_setting['disabled'], array() );
+
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};
@@ -875,11 +876,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
-			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
-
 		$this->assertEquals( $cot_setting['disabled'], array( 'yes' ) );
+
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};
