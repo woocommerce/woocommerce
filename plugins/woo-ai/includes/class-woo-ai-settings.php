@@ -6,15 +6,14 @@
  * @package Woo_AI
  */
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
 
 /**
  * Woo_AI_Settings Class.
  */
-class Woo_AI_Settings
-{
+class Woo_AI_Settings {
 
 	/**
 	 * Plugin instance.
@@ -34,8 +33,7 @@ class Woo_AI_Settings
 	/**
 	 * Main Instance.
 	 */
-	public static function instance()
-	{
+	public static function instance() {
 		self::$instance = is_null(self::$instance) ? new self() : self::$instance;
 		return self::$instance;
 	}
@@ -43,8 +41,7 @@ class Woo_AI_Settings
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		add_action('admin_enqueue_scripts', array($this, 'add_woo_ai_settings_script'));
 		add_filter('woocommerce_get_settings_advanced', array($this, 'add_woo_ai_settings'), 10, 2);
 
@@ -54,8 +51,7 @@ class Woo_AI_Settings
 	/**
 	 * Add sanitization hooks.
 	 */
-	public function add_sanitization_hooks()
-	{
+	public function add_sanitization_hooks() {
 		$settings = $this->get_woo_ai_settings();
 
 		foreach ($settings as $setting) {
@@ -70,8 +66,7 @@ class Woo_AI_Settings
 	 *
 	 * @param string $raw_value The current section.
 	 */
-	public function strip_tags_field_value($raw_value)
-	{
+	public function strip_tags_field_value($raw_value) {
 		return wp_strip_all_tags($raw_value ?? '');
 	}
 
@@ -81,8 +76,7 @@ class Woo_AI_Settings
 	 * @param array  $settings The original settings array.
 	 * @param string $current_section The current section.
 	 */
-	public function add_woo_ai_settings($settings = array(), $current_section = null)
-	{
+	public function add_woo_ai_settings($settings = array(), $current_section = null) {
 		if ('features' === $current_section) {
 			return array_merge(
 				$this->get_woo_ai_settings(),
@@ -93,8 +87,7 @@ class Woo_AI_Settings
 		return $settings;
 	}
 
-	public function get_woo_ai_settings()
-	{
+	public function get_woo_ai_settings() {
 		$settings_ai = array();
 
 		// Add Title to the Settings
@@ -152,8 +145,7 @@ class Woo_AI_Settings
 	/**
 	 * Enqueue the styles and JS
 	 */
-	public function add_woo_ai_settings_script()
-	{
+	public function add_woo_ai_settings_script() {
 		global $pagenow;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
