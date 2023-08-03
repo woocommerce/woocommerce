@@ -58,7 +58,7 @@ class COTRedirectionController {
 				$params['_wpnonce']         = wp_create_nonce( 'bulk-posts' );
 			}
 
-			// If an `id` array parameter is present, rename as `post`
+			// If an `id` array parameter is present, rename as `post`.
 			if ( isset( $params['id'] ) && is_array( $params['id'] ) ) {
 				$params['post'] = $params['id'];
 				unset( $params['id'] );
