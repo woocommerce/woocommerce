@@ -27,6 +27,8 @@ type EditAttributeModalProps = {
 	customAttributeHelperMessage?: string;
 	termsLabel?: string;
 	termsPlaceholder?: string;
+	isDefaultLabel?: string;
+	isDefaultTooltip?: string;
 	visibleLabel?: string;
 	visibleTooltip?: string;
 	cancelAccessibleLabel?: string;
@@ -48,6 +50,11 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	),
 	termsLabel = __( 'Values', 'woocommerce' ),
 	termsPlaceholder = __( 'Search or create value', 'woocommerce' ),
+	isDefaultLabel = __( 'Set default value', 'woocommerce' ),
+	isDefaultTooltip = __(
+		'Check to preselect the first choice when customers enter the product page.',
+		'woocommerce'
+	),
 	visibleLabel = __( 'Visible to customers', 'woocommerce' ),
 	visibleTooltip = __(
 		'Show or hide this attribute on the product page',
@@ -120,18 +127,34 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					/>
 				) }
 
-				<div className="woocommerce-edit-attribute-modal__option-container">
-					<CheckboxControl
-						onChange={ ( val ) =>
-							setEditableAttribute( {
-								...( editableAttribute as EnhancedProductAttribute ),
-								visible: val,
-							} )
-						}
-						checked={ editableAttribute?.visible }
-						label={ visibleLabel }
-					/>
-					<Tooltip text={ visibleTooltip } />
+				<div className="woocommerce-edit-attribute-modal__options">
+					<div className="woocommerce-edit-attribute-modal__option-container">
+						<CheckboxControl
+							onChange={ ( checked ) =>
+								setEditableAttribute( {
+									...( editableAttribute as EnhancedProductAttribute ),
+									isDefault: checked,
+								} )
+							}
+							checked={ editableAttribute?.isDefault }
+							label={ isDefaultLabel }
+						/>
+						<Tooltip text={ isDefaultTooltip } />
+					</div>
+
+					<div className="woocommerce-edit-attribute-modal__option-container">
+						<CheckboxControl
+							onChange={ ( val ) =>
+								setEditableAttribute( {
+									...( editableAttribute as EnhancedProductAttribute ),
+									visible: val,
+								} )
+							}
+							checked={ editableAttribute?.visible }
+							label={ visibleLabel }
+						/>
+						<Tooltip text={ visibleTooltip } />
+					</div>
 				</div>
 			</div>
 			<div className="woocommerce-edit-attribute-modal__buttons">
