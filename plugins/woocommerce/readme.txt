@@ -206,6 +206,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Register woocommerce/product-variations-fields block [[#39038]](https://github.com/woocommerce/woocommerce/pull/39038)
 * Add - Removed Avalara from Tax task list item [[#39238]](https://github.com/woocommerce/woocommerce/pull/39238)
 * Add - Show create campaign button when there are campaign types in marketing page. [[#38825]](https://github.com/woocommerce/woocommerce/pull/38825)
+* Update - Update WooCommerce Blocks to 10.6.3 [#39560](https://github.com/woocommerce/woocommerce/pull/39560)
 * Update - Update WooCommerce Blocks to 10.6.2 [#39492](https://github.com/woocommerce/woocommerce/pull/39492)
 * Update - Fix grammar in data-sharing agreement copy [#39327](https://github.com/woocommerce/woocommerce/pull/39327)
 * Update - Update WooCommerce Blocks to 10.6.1 [#39299](https://github.com/woocommerce/woocommerce/pull/39299)
