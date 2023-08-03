@@ -122,7 +122,11 @@ class DocsStore {
 	 */
 	public static function delete_docs_post( $doc_id ) {
 		$post = self::get_post( $doc_id );
-		return wp_delete_post( $post->ID, true );
+		if ( null !== $post ) {
+			return wp_delete_post( $post->ID, true );
+		} else {
+			return false;
+		}
 	}
 
 	/**
