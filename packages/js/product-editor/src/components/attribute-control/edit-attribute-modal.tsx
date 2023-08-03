@@ -128,19 +128,21 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				) }
 
 				<div className="woocommerce-edit-attribute-modal__options">
-					<div className="woocommerce-edit-attribute-modal__option-container">
-						<CheckboxControl
-							onChange={ ( checked ) =>
-								setEditableAttribute( {
-									...( editableAttribute as EnhancedProductAttribute ),
-									isDefault: checked,
-								} )
-							}
-							checked={ editableAttribute?.isDefault }
-							label={ isDefaultLabel }
-						/>
-						<Tooltip text={ isDefaultTooltip } />
-					</div>
+					{ attribute.variation && (
+						<div className="woocommerce-edit-attribute-modal__option-container">
+							<CheckboxControl
+								onChange={ ( checked ) =>
+									setEditableAttribute( {
+										...( editableAttribute as EnhancedProductAttribute ),
+										isDefault: checked,
+									} )
+								}
+								checked={ editableAttribute?.isDefault }
+								label={ isDefaultLabel }
+							/>
+							<Tooltip text={ isDefaultTooltip } />
+						</div>
+					) }
 
 					<div className="woocommerce-edit-attribute-modal__option-container">
 						<CheckboxControl
