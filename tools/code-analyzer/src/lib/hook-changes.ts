@@ -127,7 +127,6 @@ export const scanForHookChanges = async (
 
 						const uniqueKey = getUniqueKey( changes, filePath );
 
-						// Found the bug, the results are only unique per file, not per hook.
 						changes.set( uniqueKey, {
 							filePath,
 							name,
