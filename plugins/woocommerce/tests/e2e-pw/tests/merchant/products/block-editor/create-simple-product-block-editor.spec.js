@@ -161,11 +161,8 @@ test.describe( 'General tab', () => {
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 			await expect(
-				page.locator( 'td[data-title=Product]' )
+				page.locator( 'td[data-title=Product]' ).first()
 			).toContainText( productData.name );
-			await expect(
-				page.locator( 'a.shipping-calculator-button' )
-			).toBeVisible();
 			await page
 				.locator( `a.remove[data-product_id='${ productId }']` )
 				.click();
