@@ -47,7 +47,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 			return $parsed_block;
 		}
 
-		array_walk( $parsed_block['innerBlocks'], array( $this, 'inner_blocks_walker' ) );
+		$this->inner_blocks_walker( $parsed_block );
 
 		return $parsed_block;
 	}
