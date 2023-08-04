@@ -50,8 +50,8 @@ function getBorderClassName( attributes: {
 		: '';
 
 	return classnames( {
-		'has-border-color': borderColor || style?.border?.color,
-		borderColorClass,
+		'has-border-color': !! borderColor || !! style?.border?.color,
+		[ borderColorClass ]: !! borderColorClass,
 	} );
 }
 
