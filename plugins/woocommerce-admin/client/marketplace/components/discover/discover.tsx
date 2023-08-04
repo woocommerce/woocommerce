@@ -7,33 +7,33 @@ import { useEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import ProductList from '../product-list/product-list';
-import { fetchDiscoverPageData, ProductCategory } from '../../utils/functions';
+import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import './discover.scss';
 
 export default function Discover(): JSX.Element | null {
-	const [ productCategory, setProductCategory ] = useState<
-		ProductCategory[]
+	const [ productGroups, setProductGroups ] = useState<
+		Array< ProductGroup >
 	>( [] );
 
 	useEffect( () => {
-		fetchDiscoverPageData().then( ( products: ProductCategory ) => {
-			setProductCategory( [ products ] );
+		fetchDiscoverPageData().then( ( products: Array< ProductGroup > ) => {
+			setProductGroups( products );
 		} );
 	}, [] );
 
-	if ( ! productCategory.length ) {
+	if ( ! productGroups.length ) {
 		return null;
 	}
 
-	const productList = productCategory.flatMap( ( group ) => group );
-
+	const groupsList = productGroups.flatMap( ( group ) => group );
 	return (
 		<div className="woocommerce-marketplace__discover">
-			{ productList.map( ( products ) => (
+			{ groupsList.map( ( groups ) => (
 				<ProductList
-					key={ products.id }
-					title={ products.title }
-					products={ products.items }
+					key={ groups.id }
+					title={ groups.title }
+					products={ groups.items }
+					groupURL={ groups.url }
 				/>
 			) ) }
 		</div>

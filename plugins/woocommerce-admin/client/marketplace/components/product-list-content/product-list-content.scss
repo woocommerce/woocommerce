@@ -1,22 +1,34 @@
 @import '../../stylesheets/_variables.scss';
 
 .woocommerce-marketplace {
-
-	&__product-list {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $medium-gap;
-		align-self: stretch;
-	}
-
 	&__product-list-content {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-start;
-		align-self: stretch;
-		gap: $large-gap;
-		flex-basis: calc(33.33% - $grid-unit-20);
+		display: grid;
+		gap: $medium-gap;
 	}
 }
 
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+}
+
+@media screen and (min-width: $break-wide) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-huge) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+}

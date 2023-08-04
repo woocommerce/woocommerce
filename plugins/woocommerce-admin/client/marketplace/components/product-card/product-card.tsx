@@ -19,18 +19,18 @@ export interface ProductCardProps {
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { product } = props;
 	const currencySymbol = getAdminSetting( 'currency' )?.symbol;
+
 	return (
 		<Card className="woocommerce-marketplace__product-card">
 			<div className="woocommerce-marketplace__product-card__content">
 				<div className="woocommerce-marketplace__product-card__header">
 					<div className="woocommerce-marketplace__product-card__details">
 						{ product.icon && (
-							<div className="woocommerce-marketplace__product-card__icon">
-								<img
-									src={ product.icon }
-									alt={ product.title }
-								/>
-							</div>
+							<img
+								className="woocommerce-marketplace__product-card__icon"
+								src={ product.icon }
+								alt={ product.title }
+							/>
 						) }
 						<div className="woocommerce-marketplace__product-card__meta">
 							<h2 className="woocommerce-marketplace__product-card__title">
@@ -61,7 +61,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					<span>
 						{ product.price === 0 || product.price === '0'
 							? __( 'Free download', 'woocommerce' )
-							: product.price + currencySymbol }
+							: currencySymbol + product.price }
 					</span>
 					<span className="woocommerce-marketplace__product-card__price-billing">
 						{ product.price === 0 || product.price === '0'

@@ -3,14 +3,15 @@
  */
 import { Product } from '../components/product-list-content/product-list-content';
 
-interface ProductCategory {
+interface ProductGroup {
 	id: number;
 	title: string;
 	items: Product[];
+	url: string;
 }
 
-// Fecth data for the discover page from the WooCommerce.com API
-const fetchDiscoverPageData = async (): Promise< ProductCategory > => {
+// Fetch data for the discover page from the WooCommerce.com API
+const fetchDiscoverPageData = async (): Promise< Array< ProductGroup > > => {
 	const fetchUrl =
 		'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
 
@@ -29,4 +30,4 @@ const fetchDiscoverPageData = async (): Promise< ProductCategory > => {
 		} );
 };
 
-export { fetchDiscoverPageData, ProductCategory };
+export { fetchDiscoverPageData, ProductGroup };
