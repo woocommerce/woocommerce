@@ -103,7 +103,7 @@ abstract class AbstractTemplateCompatibility {
 	 * The array format:
 	 * [
 	 *   <hook-name> => [
-	 *     block_name => <block-name>,
+	 *     block_names => [ <block-name>, ... ],
 	 *     position => before|after,
 	 *     hooked => [
 	 *       <function-name> => <priority>,
@@ -113,7 +113,7 @@ abstract class AbstractTemplateCompatibility {
 	 * ]
 	 * Where:
 	 * - hook-name is the name of the hook that will be replaced.
-	 * - block-name is the name of the block that will replace the hook.
+	 * - block-names is the array block names that hook will be attached to.
 	 * - position is the position of the block relative to the hook.
 	 * - hooked is an array of functions hooked to the hook that will be
 	 *   replaced. The key is the function name and the value is the
