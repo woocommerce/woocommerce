@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+When HPOS is authoritative, execute order update logic earlier during the request.
