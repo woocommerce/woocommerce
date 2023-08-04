@@ -59,7 +59,7 @@ async function clickAddNewMenuItem( page ) {
 /**
  * This function checks if the old product editor is visible.
  *
- * @param {Page} page - Represents a single tab in a browser, controlled by puppeteer.
+ * @param {Page} page
  */
 async function expectOldProductEditor( page ) {
 	await expect(
