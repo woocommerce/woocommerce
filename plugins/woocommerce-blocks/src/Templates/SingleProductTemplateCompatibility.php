@@ -32,7 +32,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 		$block_hooks = array_filter(
 			$this->hook_data,
 			function( $hook ) use ( $block_name ) {
-				return $hook['block_name'] === $block_name;
+				return in_array( $block_name, $hook['block_names'], true );
 			}
 		);
 
@@ -170,46 +170,46 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	protected function set_hook_data() {
 		$this->hook_data = array(
 			'woocommerce_before_main_content'           => array(
-				'block_name' => '',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'before',
+				'hooked'      => array(
 					'woocommerce_output_content_wrapper' => 10,
 					'woocommerce_breadcrumb'             => 20,
 				),
 			),
 			'woocommerce_after_main_content'            => array(
-				'block_name' => '',
-				'position'   => 'after',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'after',
+				'hooked'      => array(
 					'woocommerce_output_content_wrapper_end' => 10,
 				),
 			),
 			'woocommerce_sidebar'                       => array(
-				'block_name' => '',
-				'position'   => 'after',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'after',
+				'hooked'      => array(
 					'woocommerce_get_sidebar' => 10,
 				),
 			),
 			'woocommerce_before_single_product'         => array(
-				'block_name' => '',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'before',
+				'hooked'      => array(
 					'woocommerce_output_all_notices' => 10,
 				),
 			),
 			'woocommerce_before_single_product_summary' => array(
-				'block_name' => '',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'before',
+				'hooked'      => array(
 					'woocommerce_show_product_sale_flash' => 10,
 					'woocommerce_show_product_images'     => 20,
 				),
 			),
 			'woocommerce_single_product_summary'        => array(
-				'block_name' => '',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_names' => array(),
+				'position'    => 'before',
+				'hooked'      => array(
 					'woocommerce_template_single_title'   => 5,
 					'woocommerce_template_single_rating'  => 10,
 					'woocommerce_template_single_price'   => 10,
@@ -220,29 +220,29 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 				),
 			),
 			'woocommerce_after_single_product'          => array(
-				'block_name' => '',
-				'position'   => 'after',
-				'hooked'     => array(),
+				'block_names' => array(),
+				'position'    => 'after',
+				'hooked'      => array(),
 			),
 			'woocommerce_product_meta_start'            => array(
-				'block_name' => 'woocommerce/product-meta',
-				'position'   => 'before',
-				'hooked'     => array(),
+				'block_names' => array( 'woocommerce/product-meta' ),
+				'position'    => 'before',
+				'hooked'      => array(),
 			),
 			'woocommerce_product_meta_end'              => array(
-				'block_name' => 'woocommerce/product-meta',
-				'position'   => 'after',
-				'hooked'     => array(),
+				'block_names' => array( 'woocommerce/product-meta' ),
+				'position'    => 'after',
+				'hooked'      => array(),
 			),
 			'woocommerce_share'                         => array(
-				'block_name' => 'woocommerce/product-details',
-				'position'   => 'before',
-				'hooked'     => array(),
+				'block_names' => array( 'woocommerce/product-details' ),
+				'position'    => 'before',
+				'hooked'      => array(),
 			),
 			'woocommerce_after_single_product_summary'  => array(
-				'block_name' => 'woocommerce/product-details',
-				'position'   => 'after',
-				'hooked'     => array(
+				'block_names' => array( 'woocommerce/product-details' ),
+				'position'    => 'after',
+				'hooked'      => array(
 					'woocommerce_output_product_data_tabs' => 10,
 					// We want to display the upsell products after the last block that belongs to the Single Product.
 					// 'woocommerce_upsell_display'           => 15.
