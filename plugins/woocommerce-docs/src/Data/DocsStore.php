@@ -118,10 +118,15 @@ class DocsStore {
 	/**
 	 * Delete a docs post
 	 *
-	 * @param int $post_id The post ID to delete.
+	 * @param int $doc_id The ID to delete from a post's entry in the manifest.
 	 */
-	public static function delete_docs_post( $post_id ) {
-		return wp_delete_post( $post_id );
+	public static function delete_docs_post( $doc_id ) {
+		$post = self::get_post( $doc_id );
+		if ( null !== $post ) {
+			return wp_delete_post( $post->ID, true );
+		} else {
+			return false;
+		}
 	}
 
 	/**
