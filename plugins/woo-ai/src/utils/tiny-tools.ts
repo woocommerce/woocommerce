@@ -37,6 +37,7 @@ export const setTinyContent = ( str: string, editorId?: string ) => {
 	}
 };
 
+// @todo: still not sure if defaulting to empty string is best or if we should throw an error?
 export const getTinyContent = ( editorId?: string ) => {
-	return getTinyContentObject( editorId )?.getContent();
+	return getTinyContentObject( editorId )?.getContent() ?? '';
 };

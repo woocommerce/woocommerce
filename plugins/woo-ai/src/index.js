@@ -8,6 +8,7 @@ import { render, createRoot } from '@wordpress/element';
  */
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
+import { WriteShortDescriptionButtonContainer } from './product-short-description';
 
 import './index.scss';
 
@@ -30,7 +31,15 @@ const nameSuggestionsRoot = document.getElementById(
 	'woocommerce-ai-app-product-name-suggestions'
 );
 
+const shortDescriptionButtonRoot = document.getElementById(
+	'woocommerce-ai-app-product-short-description-gpt-button'
+);
+
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+	renderComponent(
+		WriteShortDescriptionButtonContainer,
+		shortDescriptionButtonRoot
+	);
 }
