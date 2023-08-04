@@ -140,8 +140,9 @@ function SelectControl< ItemType = DefaultItemType >( {
 		'woocommerce-experimental-select-control'
 	);
 
-	const listItemClassName =
-		'woocommerce-experimental-select-control__list-item';
+	const innerInputClassName =
+		'woocommerce-experimental-select-control__input';
+
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
@@ -248,7 +249,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			! document
 				.querySelector( '.' + instanceId )
 				?.contains( event.relatedTarget ) &&
-			! inputClasses.includes( listItemClassName )
+			! inputClasses.includes( innerInputClassName )
 		);
 	};
 
@@ -303,10 +304,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					...getDropdownProps( {
 						preventKeyAction: isOpen,
 					} ),
-					className: classnames(
-						'woocommerce-experimental-select-control__input',
-						listItemClassName
-					),
+					className: innerInputClassName,
 					onFocus: () => {
 						setIsFocused( true );
 						onFocus( { inputValue } );
