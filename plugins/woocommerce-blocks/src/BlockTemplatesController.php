@@ -822,7 +822,7 @@ class BlockTemplatesController {
 		// Use the page template if it exists, which we'll use over our default template if found.
 		$existing_page_template = BlockTemplateUtils::get_block_template( get_stylesheet() . '//page', 'wp_template' );
 
-		if ( $existing_page_template && ! empty( $existing_page_template->content ) ) {
+		if ( $existing_page_template && ! empty( $existing_page_template->content ) && strstr( $existing_page_template->content, 'wp:post-content' ) ) {
 			// Massage the original content into something we can use. Replace post content with a group block.
 			$pattern          = '/(<!--\s*)wp:post-content(.*?)(\/-->)/';
 			$replacement      = '
@@ -835,15 +835,33 @@ class BlockTemplatesController {
 			$template_content = $this->get_default_migrate_page_template( $page );
 		}
 
-		$request = new \WP_REST_Request( 'POST', '/wp/v2/templates/woocommerce/woocommerce//' . $page_id );
-		$request->set_body_params(
+		$new_page_template = BlockTemplateUtils::get_block_template( 'woocommerce/woocommerce//' . $page_id, 'wp_template' );
+
+		// Check template validity--template must exist, and custom template must not be present already.
+		if ( ! $new_page_template || $new_page_template->wp_id ) {
+			update_option( 'has_migrated_' . $page_id, '1' );
+			return;
+		}
+
+		$new_page_template_id = wp_insert_post(
 			[
-				'id'      => 'woocommerce/woocommerce//' . $page_id,
-				'content' => $template_content,
-			]
+				'post_name'    => $new_page_template->slug,
+				'post_type'    => 'wp_template',
+				'post_status'  => 'publish',
+				'tax_input'    => array(
+					'wp_theme' => $new_page_template->theme,
+				),
+				'meta_input'   => array(
+					'origin' => $new_page_template->source,
+				),
+				'post_content' => $template_content,
+			],
+			true
 		);
-		rest_get_server()->dispatch( $request );
-		update_option( 'has_migrated_' . $page_id, '1' );
+
+		if ( ! is_wp_error( $new_page_template_id ) ) {
+			update_option( 'has_migrated_' . $page_id, '1' );
+		}
 	}
 
 	/**
