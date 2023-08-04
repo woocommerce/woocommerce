@@ -89,47 +89,8 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$features = array(
-			'analytics'            => array(
-				'name'               => __( 'Analytics', 'woocommerce' ),
-				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
-				'is_experimental'    => false,
-				'enabled_by_default' => true,
-				'disable_ui'         => false,
-			),
-			'new_navigation'       => array(
-				'name'            => __( 'Navigation', 'woocommerce' ),
-				'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
-				'is_experimental' => false,
-				'disable_ui'      => false,
-			),
-			'product_block_editor' => array(
-				'name'            => __( 'New product editor', 'woocommerce' ),
-				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-				'is_experimental' => true,
-				'disable_ui'      => false,
-			),
-			'custom_order_tables'  => array(
-				'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
-				'enabled_by_default' => false,
-			),
-			'cart_checkout_blocks' => array(
-				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-				'is_experimental' => false,
-				'disable_ui'      => true,
-			),
-			'marketplace'          => array(
-				'name'               => __( 'Marketplace', 'woocommerce' ),
-				'description'        => __(
-					'New, faster way to find extensions and themes for your WooCommerce store',
-					'woocommerce'
-				),
-				'is_experimental'    => false,
-				'enabled_by_default' => true,
-				'disable_ui'         => false,
-			),
-		);
+		$this->compatibility_info_by_plugin  = array();
+		$this->compatibility_info_by_feature = array();
 
 		$this->legacy_feature_ids = array(
 			'analytics',
@@ -137,8 +98,6 @@ class FeaturesController {
 			'product_block_editor',
 			'marketplace',
 		);
-
-		$this->init_features( $features );
 
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
@@ -156,22 +115,71 @@ class FeaturesController {
 	}
 
 	/**
-	 * Initialize the class according to the existing features.
+	 * Generate and cache the feature definitions.
 	 *
-	 * @param array $features Information about the existing features.
+	 * @return array[]
 	 */
-	private function init_features( array $features ) {
-		$this->compatibility_info_by_plugin  = array();
-		$this->compatibility_info_by_feature = array();
-
-		$this->features = $features;
-
-		foreach ( array_keys( $this->features ) as $feature_id ) {
-			$this->compatibility_info_by_feature[ $feature_id ] = array(
-				'compatible'   => array(),
-				'incompatible' => array(),
+	private function get_feature_definitions() {
+		if ( is_null( $this->features ) ) {
+			$features = array(
+				'analytics'            => array(
+					'name'               => __( 'Analytics', 'woocommerce' ),
+					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+					'is_experimental'    => false,
+					'enabled_by_default' => true,
+					'disable_ui'         => false,
+				),
+				'new_navigation'       => array(
+					'name'            => __( 'Navigation', 'woocommerce' ),
+					'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+					'is_experimental' => false,
+					'disable_ui'      => false,
+				),
+				'product_block_editor' => array(
+					'name'            => __( 'New product editor', 'woocommerce' ),
+					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+					'is_experimental' => true,
+					'disable_ui'      => false,
+				),
+				'custom_order_tables'  => array(
+					'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
+					'is_experimental'    => true,
+					'enabled_by_default' => false,
+				),
+				'cart_checkout_blocks' => array(
+					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+					'is_experimental' => false,
+					'disable_ui'      => true,
+				),
+				'marketplace'          => array(
+					'name'               => __( 'Marketplace', 'woocommerce' ),
+					'description'        => __(
+						'New, faster way to find extensions and themes for your WooCommerce store',
+						'woocommerce'
+					),
+					'is_experimental'    => false,
+					'enabled_by_default' => true,
+					'disable_ui'         => false,
+				),
 			);
+
+			/**
+			 * Filter the definitions of the features listed on the Features Settings screen.
+			 *
+			 * @param array $features The feature definitions.
+			 */
+			$this->features = apply_filters( 'woocommerce_feature_definitions', $features );
+
+			foreach ( array_keys( $this->features ) as $feature_id ) {
+				$this->compatibility_info_by_feature[ $feature_id ] = array(
+					'compatible'   => array(),
+					'incompatible' => array(),
+				);
+			}
 		}
+
+		return $this->features;
 	}
 
 	/**
@@ -203,7 +211,7 @@ class FeaturesController {
 	 * @returns array An array of information about existing features.
 	 */
 	public function get_features( bool $include_experimental = false, bool $include_enabled_info = false ): array {
-		$features = $this->features;
+		$features = $this->get_feature_definitions();
 
 		if ( ! $include_experimental ) {
 			$features = array_filter(
@@ -247,7 +255,9 @@ class FeaturesController {
 	 * @return boolean TRUE if the feature is enabled by default, FALSE otherwise.
 	 */
 	private function feature_is_enabled_by_default( string $feature_id ): bool {
-		return ! empty( $this->features[ $feature_id ]['enabled_by_default'] );
+		$features = $this->get_feature_definitions();
+
+		return ! empty( $features[ $feature_id ]['enabled_by_default'] );
 	}
 
 	/**
@@ -329,7 +339,9 @@ class FeaturesController {
 	 * @return bool True if the feature exists.
 	 */
 	private function feature_exists( string $feature_id ): bool {
-		return isset( $this->features[ $feature_id ] );
+		$features = $this->get_feature_definitions();
+
+		return isset( $features[ $feature_id ] );
 	}
 
 	/**
@@ -344,7 +356,7 @@ class FeaturesController {
 	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ) : array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
-		$features = $this->features;
+		$features = $this->get_feature_definitions();
 		if ( $enabled_features_only ) {
 			$features = array_filter(
 				$features,
@@ -921,7 +933,7 @@ class FeaturesController {
 			return false;
 		}
 
-		// phpcs:enable WordPress.Security.NonceVerification
+		$features          = $this->get_feature_definitions();
 		$plugins_page_url  = admin_url( 'plugins.php' );
 		$features_page_url = $this->get_features_page_url();
 
@@ -931,7 +943,7 @@ class FeaturesController {
 			: sprintf(
 				/* translators: %s is a feature name. */
 				__( "You are viewing the active plugins that are incompatible with the '%s' feature.", 'woocommerce' ),
-				$this->features[ $feature_id ]['name']
+				$features[ $feature_id ]['name']
 			);
 
 		$message .= '<br />';
@@ -992,6 +1004,7 @@ class FeaturesController {
 			return;
 		}
 
+		$features                   = $this->get_feature_definitions();
 		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
 		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
 		$incompatible_features      = array_values(
@@ -1014,21 +1027,21 @@ class FeaturesController {
 				$message = sprintf(
 					/* translators: %s = printable plugin name */
 					__( "⚠ This plugin is incompatible with the enabled WooCommerce feature '%s', it shouldn't be activated.", 'woocommerce' ),
-					$this->features[ $incompatible_features[0] ]['name']
+					$features[ $incompatible_features[0] ]['name']
 				);
 			} elseif ( 2 === $incompatible_features_count ) {
 				/* translators: %1\$s, %2\$s = printable plugin names */
 				$message = sprintf(
 					__( "⚠ This plugin is incompatible with the enabled WooCommerce features '%1\$s' and '%2\$s', it shouldn't be activated.", 'woocommerce' ),
-					$this->features[ $incompatible_features[0] ]['name'],
-					$this->features[ $incompatible_features[1] ]['name']
+					$features[ $incompatible_features[0] ]['name'],
+					$features[ $incompatible_features[1] ]['name']
 				);
 			} else {
 				/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 				$message = sprintf(
 					__( "⚠ This plugin is incompatible with the enabled WooCommerce features '%1\$s', '%2\$s' and %3\$d more, it shouldn't be activated.", 'woocommerce' ),
-					$this->features[ $incompatible_features[0] ]['name'],
-					$this->features[ $incompatible_features[1] ]['name'],
+					$features[ $incompatible_features[0] ]['name'],
+					$features[ $incompatible_features[1] ]['name'],
 					$incompatible_features_count - 2
 				);
 			}
@@ -1129,13 +1142,14 @@ class FeaturesController {
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 
 		$all_items = get_plugins();
+		$features  = $this->get_feature_definitions();
 
 		$incompatible_plugins_count = count( $this->filter_plugins_list( $all_items ) );
 		$incompatible_text          =
 			'all' === $feature_id
 			? __( 'Incompatible with WooCommerce features', 'woocommerce' )
 			/* translators: %s = name of a WooCommerce feature */
-			: sprintf( __( "Incompatible with '%s'", 'woocommerce' ), $this->features[ $feature_id ]['name'] );
+			: sprintf( __( "Incompatible with '%s'", 'woocommerce' ), $features[ $feature_id ]['name'] );
 		$incompatible_link = "<a href='plugins.php?plugin_status=incompatible_with_feature&feature_id={$feature_id}' class='current' aria-current='page'>{$incompatible_text} <span class='count'>({$incompatible_plugins_count})</span></a>";
 
 		$all_plugins_count = count( $all_items );
@@ -1175,7 +1189,7 @@ class FeaturesController {
 
 		$query_params_to_remove = array( '_feature_nonce' );
 
-		foreach ( array_keys( $this->features ) as $feature_id ) {
+		foreach ( array_keys( $this->get_feature_definitions() ) as $feature_id ) {
 			if ( isset( $_GET[ $feature_id ] ) && is_numeric( $_GET[ $feature_id ] ) ) {
 				$value = absint( $_GET[ $feature_id ] );
 
