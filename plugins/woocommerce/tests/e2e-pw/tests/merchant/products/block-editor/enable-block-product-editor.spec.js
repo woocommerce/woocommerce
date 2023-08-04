@@ -7,7 +7,7 @@ const {
 
 const ALL_PRODUCTS_URL = 'wp-admin/edit.php?post_type=product';
 const NEW_EDITOR_ADD_PRODUCT_URL =
-	'wp-admin//admin.php?page=wc-admin&path=%2Fadd-product';
+	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
 
 let isNewProductEditorEnabled = false;
 
