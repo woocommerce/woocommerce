@@ -7,7 +7,7 @@ const {
 } = require( '../../../../utils/simple-products' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
-	'wp-admin//admin.php?page=wc-admin&path=%2Fadd-product';
+	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
 
 let isNewProductEditorEnabled = false;
 
@@ -56,7 +56,7 @@ test.describe( 'General tab', () => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 			await clickOnTab( 'General', page );
 			await page
-				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
+				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
 			await page
 				.locator( '.components-summary-control' )
