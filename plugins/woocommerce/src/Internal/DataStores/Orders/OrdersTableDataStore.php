@@ -86,6 +86,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_prices_include_tax',
 		'_date_completed',
 		'_date_paid',
+		'_payment_tokens',
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
@@ -777,7 +778,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return array
 	 */
 	public function get_payment_token_ids( $order ) {
-		$payment_tokens = $order->get_meta( '_payment_tokens' );
+		/**
+		 * We don't store _payment_tokens in props to preserve backward compatibility. In CPT data store, `_payment_tokens` is always fetched directly from DB instead of from prop.
+		 */
+		$payment_tokens = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $payment_tokens ) {
+			$payment_tokens = $payment_tokens[0]->meta_value;
+		}
 		if ( ! $payment_tokens && version_compare( $order->get_version(), '8.0.0', '<' ) ) {
 			// Before 8.0 we were incorrectly storing payment_tokens in the order meta. So we need to check there too.
 			$payment_tokens = get_post_meta( $order->get_id(), '_payment_tokens', true );
@@ -792,8 +799,17 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param array    $token_ids Payment token ids.
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
-		$order->update_meta_data( '_payment_tokens', $token_ids );
-		$order->save();
+		$meta        = new \WC_Meta_Data();
+		$meta->key   = '_payment_tokens';
+		$meta->value = $token_ids;
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $existing_meta ) {
+			$existing_meta = $existing_meta[0];
+			$meta->id      = $existing_meta->id;
+			$this->data_store_meta->update_meta( $order, $meta );
+		} else {
+			$this->data_store_meta->add_meta( $order, $meta );
+		}
 	}
 
 	/**
@@ -1150,7 +1166,6 @@ WHERE
 		$allowed_keys       = array(
 			'_billing_address_index',
 			'_shipping_address_index',
-			'_payment_tokens',
 		);
 		$allowed_meta       = array_filter(
 			$raw_meta_data,
