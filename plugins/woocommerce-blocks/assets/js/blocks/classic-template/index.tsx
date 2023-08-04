@@ -31,6 +31,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
 import { debounce } from '@woocommerce/base-utils';
 import { woo } from '@woocommerce/icons';
+import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -417,7 +418,14 @@ let currentTemplateId: string | undefined;
 subscribe( () => {
 	const previousTemplateId = currentTemplateId;
 	const store = select( 'core/edit-site' );
-	currentTemplateId = store?.getEditedPostId() as string | undefined;
+	// With GB 16.3.0 the return type can be a number: https://github.com/WordPress/gutenberg/issues/53230
+	const editedPostId = store?.getEditedPostId() as
+		| string
+		| number
+		| undefined;
+
+	currentTemplateId = isNumber( editedPostId ) ? undefined : editedPostId;
+
 	const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
 
 	if ( parsedTemplate === null || parsedTemplate === undefined ) {
