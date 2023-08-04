@@ -45,50 +45,33 @@ interface BlockEditorGuideProps {
 	onCloseGuide: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 }
 
-const BlockEditorGuide = ( {
-	isNewUser = false,
-	onCloseGuide,
-}: BlockEditorGuideProps ) => {
+const BlockEditorGuide = ( { onCloseGuide }: BlockEditorGuideProps ) => {
 	const pagesConfig = [
 		{
-			heading: isNewUser
-				? __( 'Fresh and modern interface', 'woocommerce' )
-				: __( 'Refreshed, streamlined interface', 'woocommerce' ),
-			text: isNewUser
-				? __(
-						'Using the product form means less clicking around. Product details are neatly grouped by tabs, so you always know where to go.',
-						'woocommerce'
-				  )
-				: __(
-						'Experience a simpler, more focused interface with a modern design that enhances usability.',
-						'woocommerce'
-				  ),
-		},
-		{
-			heading: __( 'Content-rich product descriptions', 'woocommerce' ),
+			heading: __( 'Fresh and modern interface', 'woocommerce' ),
 			text: __(
-				'Create compelling product pages with blocks, media, images, videos, and any content you desire to engage customers.',
+				'Everything you need to create and sell your products, all in one place. From photos and descriptions to pricing and inventory, all of your product settings can be found here.',
 				'woocommerce'
 			),
 		},
 		{
-			heading: isNewUser
-				? __( 'Speed & performance', 'woocommerce' )
-				: __( 'Improved speed & performance', 'woocommerce' ),
-			text: isNewUser
-				? __(
-						'Create a product from start to finish without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
-						'woocommerce'
-				  )
-				: __(
-						'Enjoy a seamless experience without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
-						'woocommerce'
-				  ),
+			heading: __( 'Content-rich product descriptions', 'woocommerce' ),
+			text: __(
+				"Show off what's great about your products and engage your customers with content-rich product descriptions. Add images, videos, and any other content they might need to make a purchase.",
+				'woocommerce'
+			),
+		},
+		{
+			heading: __( 'Lightning fast performance ', 'woocommerce' ),
+			text: __(
+				'Get your products listed and available for purchase in no time! Our modern technology ensures a reliable and streamlined experience.',
+				'woocommerce'
+			),
 		},
 		{
 			heading: __( 'More features are on the way', 'woocommerce' ),
 			text: __(
-				'While we currently support physical products, exciting updates are coming to accommodate more types, like digital products, variations, and more. Stay tuned!',
+				"We're actively working on adding more features to the product form, including the ability to add digital products, variations, and more. Watch this space!",
 				'woocommerce'
 			),
 		},

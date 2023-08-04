@@ -36,6 +36,10 @@ abstract class TableMigrator {
 	 * @return void
 	 */
 	protected function add_error( string $error ): void {
+		if ( is_null( $this->errors ) ) {
+			$this->errors = array();
+		}
+
 		if ( ! in_array( $error, $this->errors, true ) ) {
 			$this->errors[] = $error;
 		}
@@ -94,6 +98,8 @@ abstract class TableMigrator {
 	 *
 	 * @param array $entity_ids Order ids to migrate.
 	 * @return array An array containing the keys 'errors' (array of strings) and 'exception' (exception object or null).
+	 *
+	 * @deprecated 8.0.0 Use `fetch_sanitized_migration_data` and `process_migration_data` instead.
 	 */
 	public function process_migration_batch_for_ids( array $entity_ids ): array {
 		$this->clear_errors();
@@ -111,12 +117,38 @@ abstract class TableMigrator {
 		);
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn, Squiz.Commenting.FunctionCommentThrowTag.Missing -- Methods are not marked abstract for back compat.
+	/**
+	 * Return data to be migrated for a batch of entities.
+	 *
+	 * @param array $entity_ids Ids of entities to migrate.
+	 *
+	 * @return array[] Data to be migrated. Would be of the form: array( 'data' => array( ... ), 'errors' => array( ... ) ).
+	 */
+	public function fetch_sanitized_migration_data( array $entity_ids ) {
+		throw new \Exception( 'Not implemented' );
+	}
+
+	/**
+	 * Process migration data for a batch of entities.
+	 *
+	 * @param array $data Data to be migrated. Should be of the form: array( 'data' => array( ... ) ) as returned by the `fetch_sanitized_migration_data` method.
+	 *
+	 * @return array Array of errors and exception if any.
+	 */
+	public function process_migration_data( array $data ) {
+		throw new \Exception( 'Not implemented' );
+	}
+	// phpcs:enable
+
 	/**
 	 * The core method that actually performs the migration for the supplied batch of order ids.
 	 * It doesn't need to deal with database errors nor with exceptions.
 	 *
 	 * @param array $entity_ids Order ids to migrate.
 	 * @return void
+	 *
+	 * @deprecated 8.0.0 Use `fetch_sanitized_migration_data` and `process_migration_data` instead.
 	 */
 	abstract protected function process_migration_batch_for_ids_core( array $entity_ids ): void;
 

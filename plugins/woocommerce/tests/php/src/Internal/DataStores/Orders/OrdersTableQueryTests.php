@@ -24,14 +24,14 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
 	 * Restore the original COT state.
 	 */
 	public function tearDown(): void {
-		$this->toggle_cot( $this->cot_state );
+		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		parent::tearDown();
 	}
 

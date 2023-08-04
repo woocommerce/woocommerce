@@ -107,6 +107,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		if ( ! $order_id ) {
+			return false;
+		}
+
+		$post_object = get_post( $order_id );
+		return ! is_null( $post_object ) && in_array( $post_object->post_type, wc_get_order_types(), true );
+	}
+
+	/**
 	 * Method to read an order from the database.
 	 *
 	 * @param WC_Order $order Order object.
@@ -242,7 +259,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$args = wp_parse_args(
 			$args,
 			array(
-				'force_delete' => false,
+				'force_delete'     => false,
+				'suppress_filters' => false,
 			)
 		);
 
@@ -250,14 +268,60 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			return;
 		}
 
+		$do_filters = ! $args['suppress_filters'];
+
 		if ( $args['force_delete'] ) {
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 8.0.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $id, $order );
+			}
+
 			wp_delete_post( $id );
 			$order->set_id( 0 );
-			do_action( 'woocommerce_delete_order', $id );
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $id );
+			}
 		} else {
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 8.0.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $id, $order );
+			}
+
 			wp_trash_post( $id );
 			$order->set_status( 'trash' );
-			do_action( 'woocommerce_trash_order', $id );
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int      $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $id );
+			}
 		}
 	}
 
@@ -651,7 +715,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
-				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+				// We don't know if the meta is single or array, so we assume it to be array.
+				$meta_value = is_array( $meta_data->value ) ? $meta_data->value : array( $meta_data->value );
+				if ( $existing_meta_data[ $meta_data->key ] === $meta_value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}

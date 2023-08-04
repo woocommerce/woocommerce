@@ -79,6 +79,11 @@ function _woo_ai_bootstrap(): void {
 		add_action( 'admin_init', array( 'Woo_AI', 'instance' ) );
 	}
 
+	if ( ! class_exists( 'Woo_AI_Settings' ) ) {
+		include dirname( __FILE__ ) . '/includes/class-woo-ai-settings.php';
+		add_action( 'wp_loaded', array( 'Woo_AI_Settings', 'instance' ), 10 );
+	}
+
 }
 
 add_action( 'plugins_loaded', '_woo_ai_bootstrap' );

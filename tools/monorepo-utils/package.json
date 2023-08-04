@@ -22,6 +22,8 @@
 		"figlet": "^1.6.0",
 		"glob": "^10.2.4",
 		"graphql": "^16.6.0",
+		"gray-matter": "^4.0.3",
+		"js-yaml": "^4.1.0",
 		"octokit": "^2.0.14",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
@@ -43,11 +45,12 @@
 		"start": "tsc --watch",
 		"lint": "eslint . --ext .ts",
 		"postinstall": "pnpm run build",
-		"test": "jest"
+		"turbo:test": "jest",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name"
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.5"
+		"pnpm": "^8.6.7"
 	},
 	"types": "dist/index.d.ts"
 }

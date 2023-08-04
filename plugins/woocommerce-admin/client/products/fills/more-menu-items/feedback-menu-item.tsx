@@ -35,7 +35,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 						action: 'new_product',
 						showDescription: false,
 						title: __(
-							"How's your experience with the new product form?",
+							'What do you think of the new product form?',
 							'woocommerce'
 						),
 						firstQuestion: __(
@@ -44,6 +44,10 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 						),
 						secondQuestion: __(
 							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+						onsubmitLabel: __(
+							"Thanks for the feedback — we'll put it to good use!",
 							'woocommerce'
 						),
 						getExtraFieldsToBeShown: (
@@ -161,7 +165,6 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 					},
 					{
 						type: 'snackbar',
-						icon: <span>🌟</span>,
 					},
 					{
 						block_editor: isDescendantOf( 'product-block-editor' ),

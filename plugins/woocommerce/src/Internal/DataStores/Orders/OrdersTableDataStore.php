@@ -23,11 +23,18 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
-	 * Order IDs for which we are checking read on sync in the current request.
+	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to be an anomaly, so we don't recommend running HPOS with incompatible plugins.
 	 *
 	 * @var array.
 	 */
 	private static $reading_order_ids = array();
+
+	/**
+	 * Keep track of order IDs that are actively being backfilled. We use this to prevent further read on sync from add_|update_|delete_postmeta etc hooks. If we allow this, then we would end up syncing the same order multiple times as it is being backfilled.
+	 *
+	 * @var array
+	 */
+	private static $backfilling_order_ids = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -118,6 +125,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $error_logger;
 
 	/**
+	 * The name of the main orders table.
+	 *
+	 * @var string
+	 */
+	private $orders_table_name;
+
+	/**
 	 * The instance of the LegacyProxy object to use.
 	 *
 	 * @var LegacyProxy
@@ -140,6 +154,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$this->legacy_proxy       = $legacy_proxy;
 		$this->error_logger       = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->internal_meta_keys = $this->get_internal_meta_keys();
+
+		$this->orders_table_name = self::get_orders_table_name();
 	}
 
 	/**
@@ -553,6 +569,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			return;
 		}
 
+		self::$backfilling_order_ids[] = $order->get_id();
 		$cpt_data_store->update_order_from_object( $order );
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
@@ -571,6 +588,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
+		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -987,6 +1005,29 @@ WHERE
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$this->orders_table_name} WHERE id=%d)",
+				$order_id
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (bool) $exists;
+	}
+
+	/**
 	 * Method to read an order from custom tables.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -1018,8 +1059,8 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled() && 0 === $data_synchronizer->get_current_orders_pending_sync_count_cached();
-		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
+		$load_posts_for    = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
 		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
 		foreach ( $data as $order_data ) {
@@ -1334,7 +1375,7 @@ WHERE
 	 * @param \WC_Abstract_Order $order      The order object.
 	 * @param object             $order_data A row of order data from the database.
 	 */
-	private function set_order_props_from_data( &$order, $order_data ) {
+	protected function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -1624,8 +1665,11 @@ FROM $order_meta_table
 		if ( 'create' === $context ) {
 			$post_id = wp_insert_post(
 				array(
-					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-					'post_status' => 'draft',
+					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_status'   => 'draft',
+					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				)
 			);
 
@@ -1877,17 +1921,29 @@ FROM $order_meta_table
 			return;
 		}
 
-		if ( ! empty( $args['force_delete'] ) ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'force_delete'     => false,
+				'suppress_filters' => false,
+			)
+		);
 
-			/**
-			 * Fires immediately before an order is deleted from the database.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+		$do_filters = ! $args['suppress_filters'];
+
+		if ( $args['force_delete'] ) {
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $order_id, $order );
+			}
 
 			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
@@ -1901,28 +1957,98 @@ FROM $order_meta_table
 			 *
 			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 			 */
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() || get_post_type( $order_id ) === 'shop_order_placehold' ) {
-				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-				// Once we stop creating posts for orders, we should do the cleanup here instead.
-				wp_delete_post( $order_id );
+			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+			if ( $orders_table_is_authoritative ) {
+				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+				if ( $data_synchronizer->data_sync_is_enabled() ) {
+					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+					// Once we stop creating posts for orders, we should do the cleanup here instead.
+					wp_delete_post( $order_id );
+				} else {
+					$this->handle_order_deletion_with_sync_disabled( $order_id );
+				}
 			}
 
-			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
 		} else {
-			/**
-			 * Fires immediately before an order is trashed.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			}
 
 			$this->trash_order( $order );
 
-			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
+		}
+	}
+
+	/**
+	 * Handles the deletion of an order from the orders table when sync is disabled:
+	 *
+	 * If the corresponding row in the posts table is of placeholder type,
+	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
+	 * and the sync process will detect these and take care of deleting the appropriate post records.
+	 *
+	 * @param int $order_id Th id of the order that has been deleted from the orders table.
+	 * @return void
+	 */
+	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
+		global $wpdb;
+
+		$post_type = $wpdb->get_var(
+			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
+		);
+
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",
+					$order_id,
+					$order_id
+				)
+			);
+		} else {
+			// phpcs:disable WordPress.DB.SlowDBQuery
+			$wpdb->insert(
+				self::get_meta_table_name(),
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
+					'meta_value' => DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE,
+				)
+			);
+			// phpcs:enable WordPress.DB.SlowDBQuery
+
+			// Note that at this point upshift_or_delete_child_orders will already have been invoked,
+			// thus all the child orders either still exist but have a different parent id,
+			// or have been deleted and got their own deletion record already.
+			// So there's no need to do anything about them.
 		}
 	}
 
@@ -1934,7 +2060,7 @@ FROM $order_meta_table
 	 *
 	 * @return void
 	 */
-	private function upshift_or_delete_child_orders( $order ) {
+	private function upshift_or_delete_child_orders( $order ) : void {
 		global $wpdb;
 
 		$order_table     = self::get_orders_table_name();
@@ -2172,6 +2298,10 @@ FROM $order_meta_table
 			$order->set_date_created( time() );
 		}
 
+		if ( ! $order->get_date_modified( 'edit' ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+		}
+
 		$this->update_order_meta( $order );
 
 		$this->persist_order_to_db( $order, $force_all_fields );
@@ -2180,7 +2310,10 @@ FROM $order_meta_table
 		$order->apply_changes();
 
 		if ( $backfill ) {
-			$this->maybe_backfill_post_record( $order );
+			self::$backfilling_order_ids[] = $order->get_id();
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
 		$this->clear_caches( $order );
 	}
@@ -2255,17 +2388,30 @@ FROM $order_meta_table
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( time() );
-		}
-
-		if ( $backfill ) {
-			$this->maybe_backfill_post_record( $order );
+			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
 		$this->persist_order_to_db( $order );
 		$order->save_meta_data();
 
+		if ( $backfill ) {
+			self::$backfilling_order_ids[] = $order->get_id();
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
+		}
+
 		return $changes;
+	}
+
+	/**
+	 * Helper method to check whether to backfill post record.
+	 *
+	 * @return bool
+	 */
+	private function should_backfill_post_record() {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		return $data_sync->data_sync_is_enabled();
 	}
 
 	/**
@@ -2276,8 +2422,7 @@ FROM $order_meta_table
 	 * @return void
 	 */
 	private function maybe_backfill_post_record( $order ) {
-		$data_sync = wc_get_container()->get( DataSynchronizer::class );
-		if ( $data_sync->data_sync_is_enabled() ) {
+		if ( $this->should_backfill_post_record() ) {
 			$this->backfill_post_record( $order );
 		}
 	}
@@ -2469,6 +2614,10 @@ FROM $order_meta_table
 		$operational_data_table_name = $this->get_operational_data_table_name();
 		$meta_table                  = $this->get_meta_table_name();
 
+		$max_index_length                   = $this->database_util->get_max_index_length();
+		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
+		$composite_customer_id_email_length = max( $max_index_length - 20, 20 ); // 8 for customer_id, 20 minimum for email.
+
 		$sql = "
 CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned,
@@ -2491,8 +2640,8 @@ CREATE TABLE $orders_table_name (
 	PRIMARY KEY (id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
-	KEY customer_id_billing_email (customer_id, billing_email),
-	KEY billing_email (billing_email),
+	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
+	KEY billing_email (billing_email($max_index_length)),
 	KEY type_status (type, status),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -2514,7 +2663,7 @@ CREATE TABLE $addresses_table_name (
 	phone varchar(100) null,
 	KEY order_id (order_id),
 	UNIQUE KEY address_type_order_id (address_type, order_id),
-	KEY email (email),
+	KEY email (email($max_index_length)),
 	KEY phone (phone)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
@@ -2544,8 +2693,8 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key, meta_value(100)),
-	KEY order_id_meta_key_meta_value (order_id, meta_key, meta_value(100))
+	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";
 
@@ -2574,8 +2723,10 @@ CREATE TABLE $meta_table (
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $delete_meta;
@@ -2592,8 +2743,10 @@ CREATE TABLE $meta_table (
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $add_meta;
@@ -2610,8 +2763,10 @@ CREATE TABLE $meta_table (
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			update_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $update_meta;

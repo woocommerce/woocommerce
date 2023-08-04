@@ -4,7 +4,7 @@
 import { Attribute } from './types';
 import { getTinyContent } from '.';
 
-export const getCategories = () => {
+export const getCategories = (): string[] => {
 	return Array.from(
 		document.querySelectorAll(
 			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
@@ -14,7 +14,7 @@ export const getCategories = () => {
 			( item ) =>
 				window.getComputedStyle( item, ':before' ).content !== 'none'
 		)
-		.map( ( item ) => item.nextSibling?.nodeValue?.trim() )
+		.map( ( item ) => item.nextSibling?.nodeValue?.trim() || '' )
 		.filter( Boolean );
 };
 
@@ -33,16 +33,48 @@ export const getTags = (): string[] => {
 
 export const getAttributes = (): Attribute[] => {
 	const attributeContainerEls = Array.from(
-		document.querySelectorAll( '.woocommerce_attribute_data' )
+		document.querySelectorAll( '.woocommerce_attribute' )
 	);
 
 	return attributeContainerEls.reduce( ( acc, item ) => {
-		const name = (
-			item.querySelector( 'input.attribute_name' ) as HTMLInputElement
-		 )?.value;
-		const value = item.querySelector( 'textarea' )?.textContent;
-		if ( name && value ) {
-			acc.push( { name, value } );
+		const attributeGetters = {
+			local: {
+				name: () =>
+					(
+						item.querySelector(
+							'.woocommerce_attribute_data input.attribute_name'
+						) as HTMLInputElement | null
+					 )?.value,
+				values: () =>
+					item
+						.querySelector( '.woocommerce_attribute_data textarea' )
+						?.textContent?.split( '|' )
+						.map( ( attrName ) => attrName.trim() ),
+			},
+			global: {
+				name: () =>
+					(
+						item.querySelector(
+							'.attribute_name > strong'
+						) as Element | null
+					 )?.textContent,
+				values: () =>
+					Array.from(
+						item.querySelectorAll(
+							'select.attribute_values option'
+						) ?? []
+					).map( ( option ) => option.textContent?.trim() ?? '' ),
+			},
+		};
+
+		const type = Boolean( attributeGetters.global.name() )
+			? 'global'
+			: 'local';
+
+		const name = attributeGetters[ type ].name();
+		const values = attributeGetters[ type ].values()?.filter( Boolean );
+		if ( name && values ) {
+			acc.push( { name, values } );
 		}
 		return acc;
 	}, [] as Attribute[] );

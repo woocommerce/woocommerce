@@ -31,6 +31,7 @@ import { getProductAttributeObject } from './utils';
 
 type NewAttributeModalProps = {
 	title?: string;
+	description?: string | React.ReactElement;
 	notice?: string;
 	attributeLabel?: string;
 	valueLabel?: string;
@@ -56,6 +57,7 @@ type AttributeForm = {
 
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
+	description = '',
 	notice = __(
 		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
 		'woocommerce'
@@ -229,9 +231,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							} }
 							className="woocommerce-new-attribute-modal"
 						>
-							<Notice isDismissible={ false }>
-								<p>{ notice }</p>
-							</Notice>
+							{ notice && (
+								<Notice isDismissible={ false }>
+									<p>{ notice }</p>
+								</Notice>
+							) }
+
+							{ description && <p>{ description }</p> }
 
 							<div className="woocommerce-new-attribute-modal__body">
 								<table className="woocommerce-new-attribute-modal__table">

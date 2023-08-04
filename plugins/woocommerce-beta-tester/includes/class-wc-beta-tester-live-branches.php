@@ -15,8 +15,21 @@ class WC_Beta_Tester_Live_Branches {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->woocommerce_is_installed() ) {
+			return;
+		}
+
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
 		add_action( 'admin_init', array( $this, 'register_scripts' ) );
+	}
+
+	/**
+	 * Check if WooCommerce is installed.
+	 *
+	 * @return bool - True if WooCommerce is installed, false otherwise.
+	 */
+	private function woocommerce_is_installed() {
+		return class_exists( 'WooCommerce' );
 	}
 
 	/**

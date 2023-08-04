@@ -4,6 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -17,14 +18,14 @@ import {
 	isProductDownloadable,
 	isProductVirtual,
 	getProductType,
-	getCategories,
 	getTags,
 	getAttributes,
 } from '../utils';
-import { useCompletion, useProductSlug } from '../hooks';
+import { useProductSlug } from '../hooks';
 import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
+import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 
 const MIN_TITLE_LENGTH = 10;
 
@@ -65,12 +66,13 @@ export const ProductNameSuggestions = () => {
 	);
 	const { updateProductSlug } = useProductSlug();
 	const { requestCompletion } = useCompletion( {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamError: ( error ) => {
 			// eslint-disable-next-line no-console
 			console.debug( 'Streaming error encountered', error );
 			recordNameTracks( 'stop', {
 				reason: 'error',
-				error: ( error as { message?: string } )?.message || '',
+				error: error.code ?? error.message,
 			} );
 			setSuggestionsState( SuggestionsState.Failed );
 		},
@@ -88,6 +90,7 @@ export const ProductNameSuggestions = () => {
 				setSuggestions( parsed.suggestions );
 				setIsFirstLoad( false );
 			} catch ( e ) {
+				setSuggestionsState( SuggestionsState.Failed );
 				throw new Error( 'Unable to parse suggestions' );
 			}
 		},
@@ -100,7 +103,7 @@ export const ProductNameSuggestions = () => {
 	);
 
 	useEffect( () => {
-		if ( visible === true && viewed === false ) {
+		if ( visible && ! viewed ) {
 			setViewed( true );
 			recordNameTracks( 'view_ui' );
 		}
@@ -127,14 +130,13 @@ export const ProductNameSuggestions = () => {
 
 		const onBodyClick = ( e: MouseEvent ) => {
 			const target = e.target as HTMLElement;
-
 			if (
 				! (
 					nameInput?.ownerDocument.activeElement === nameInput ||
 					// Need to capture errant handlediv click that happens on load as well
 					Boolean( target.querySelector( ':scope > .handlediv' ) ) ||
 					target?.matches(
-						'#woocommerce-ai-app-product-name-suggestions *, #title'
+						'#woocommerce-ai-app-product-name-suggestions *, #title, .woo-ai-get-suggestions-btn__content'
 					)
 				)
 			) {
@@ -259,7 +261,11 @@ export const ProductNameSuggestions = () => {
 			current_title: getProductName(),
 		} );
 
-		requestCompletion( buildPrompt() );
+		try {
+			await requestCompletion( buildPrompt() );
+		} catch ( e ) {
+			setSuggestionsState( SuggestionsState.Failed );
+		}
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
