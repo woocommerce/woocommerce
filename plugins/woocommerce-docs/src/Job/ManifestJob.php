@@ -75,9 +75,12 @@ class ManifestJob {
 						\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash changed: `$hash`, processing manifest." );
 					} else {
 						\ActionScheduler_Logger::instance()->log( $action_id, 'No previous manifest found, processing manifest.' );
+						$existing_manifest = null;
 					}
 
-					$doc_ids        = ManifestProcessor::process_manifest( $json, $action_id );
+					ManifestProcessor::process_manifest( $json, $action_id, $existing_manifest );
+
+					$doc_ids        = ManifestProcessor::collect_doc_ids_from_manifest( $json );
 					$relative_links = RelativeLinkParser::extract_links_from_manifest( $json );
 
 					foreach ( $doc_ids as $doc_id ) {
@@ -92,6 +95,7 @@ class ManifestJob {
 							\ActionScheduler_Logger::instance()->log( $action_id, "During link replacement, post was not found for doc: `$doc_id`" );
 						}
 					}
+
 					Data\ManifestStore::update_manifest( $manifest_url, $json );
 				} else {
 					\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash unchanged: `$hash`, skipping manifest." );
