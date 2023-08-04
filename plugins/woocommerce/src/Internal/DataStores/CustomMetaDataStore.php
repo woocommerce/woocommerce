@@ -203,7 +203,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return \stdClass|bool Metadata object or FALSE if not found.
 	 */
-	public function get_metadata_by_key( object &$object, string $meta_key ) {
+	public function get_metadata_by_key( &$object, string $meta_key ) {
 		global $wpdb;
 
 		$db_info = $this->get_db_info();

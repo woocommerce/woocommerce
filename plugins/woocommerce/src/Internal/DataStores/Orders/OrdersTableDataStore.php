@@ -799,9 +799,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param array    $token_ids Payment token ids.
 	 */
 	public function update_payment_token_ids( $order, $token_ids ) {
-		$meta        = new \WC_Meta_Data();
-		$meta->key   = '_payment_tokens';
-		$meta->value = $token_ids;
+		$meta          = new \WC_Meta_Data();
+		$meta->key     = '_payment_tokens';
+		$meta->value   = $token_ids;
 		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
 		if ( $existing_meta ) {
 			$existing_meta = $existing_meta[0];
