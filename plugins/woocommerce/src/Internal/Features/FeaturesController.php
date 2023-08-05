@@ -42,13 +42,6 @@ class FeaturesController {
 	private $compatibility_info_by_plugin = array();
 
 	/**
-	 * Ids of the legacy features (they existed before the features engine was implemented).
-	 *
-	 * @var array
-	 */
-	private $legacy_feature_ids;
-
-	/**
 	 * The registered compatibility info for WooCommerce plugins, with feature ids as keys.
 	 *
 	 * @var array
@@ -89,13 +82,6 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$this->legacy_feature_ids = array(
-			'analytics',
-			'new_navigation',
-			'product_block_editor',
-			'marketplace',
-		);
-
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
 		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
@@ -125,18 +111,21 @@ class FeaturesController {
 					'is_experimental'    => false,
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
+					'is_legacy'          => true,
 				),
 				'new_navigation'       => array(
 					'name'            => __( 'Navigation', 'woocommerce' ),
 					'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 					'is_experimental' => false,
 					'disable_ui'      => false,
+					'is_legacy'       => true,
 				),
 				'product_block_editor' => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,
 					'disable_ui'      => false,
+					'is_legacy'       => true,
 				),
 				'cart_checkout_blocks' => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -153,6 +142,7 @@ class FeaturesController {
 					'is_experimental'    => false,
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
+					'is_legacy'          => true,
 				),
 			);
 
@@ -446,7 +436,9 @@ class FeaturesController {
 	 * @return bool True if the id corresponds to a legacy feature.
 	 */
 	public function is_legacy_feature( string $feature_id ): bool {
-		return in_array( $feature_id, $this->legacy_feature_ids, true );
+		$features = $this->get_feature_definitions();
+
+		return ! empty( $features[ $feature_id ]['is_legacy'] );
 	}
 
 	/**
@@ -834,9 +826,11 @@ class FeaturesController {
 			}
 
 			$compatibility     = $this->get_compatible_features_for_plugin( $plugin_name );
-			$incompatible_with = array_diff(
+			$incompatible_with = array_filter(
 				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
-				$this->legacy_feature_ids
+				function( $feature_id ) {
+					return ! $this->is_legacy_feature( $feature_id );
+				}
 			);
 
 			if ( ( 'all' === $feature_id && ! empty( $incompatible_with ) ) || in_array( $feature_id, $incompatible_with, true ) ) {
@@ -875,9 +869,11 @@ class FeaturesController {
 
 		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
 			$compatibility     = $this->get_compatible_features_for_plugin( $plugin, true );
-			$incompatible_with = array_diff(
+			$incompatible_with = array_filter(
 				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
-				$this->legacy_feature_ids
+				function( $feature_id ) {
+					return ! $this->is_legacy_feature( $feature_id );
+				}
 			);
 
 			if ( $incompatible_with ) {
