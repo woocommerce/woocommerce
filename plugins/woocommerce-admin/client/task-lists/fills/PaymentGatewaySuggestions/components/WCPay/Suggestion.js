@@ -10,6 +10,7 @@ import {
 	WCPayBannerImageCut,
 } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -18,6 +19,7 @@ import { useDispatch } from '@wordpress/data';
 import { Action } from '../Action';
 import { connectWcpay } from './utils';
 import './suggestion.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
@@ -27,6 +29,7 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 		enabled: isEnabled,
 		installed: isInstalled,
 	} = paymentGateway;
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
 
 	const { createNotice } = useDispatch( 'core/notices' );
 	// When the WC Pay is installed and onSetupCallback is null
@@ -62,10 +65,11 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 						/>
 					}
 					bannerImage={ <WCPayBannerImageCut /> }
+					isWooPayEligible={ isWooPayEligible }
 				/>
-				<WCPayBannerFooter />
+				<WCPayBenefits isWooPayEligible={ isWooPayEligible } />
+				<WCPayBannerFooter isWooPayEligible={ isWooPayEligible } />
 			</WCPayBanner>
-			<WCPayBenefits />
 		</div>
 	);
 };
