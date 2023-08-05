@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Ensure that declaring compatibility with HPOS works.
+Consolidate HPOS back into a single feature for the purposes of showing it on the Features settings screen.
