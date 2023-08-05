@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
-use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer };
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -39,7 +39,7 @@ class FeaturesController {
 	 *
 	 * @var array
 	 */
-	private $compatibility_info_by_plugin;
+	private $compatibility_info_by_plugin = array();
 
 	/**
 	 * Ids of the legacy features (they existed before the features engine was implemented).
@@ -53,7 +53,7 @@ class FeaturesController {
 	 *
 	 * @var array
 	 */
-	private $compatibility_info_by_feature;
+	private $compatibility_info_by_feature = array();
 
 	/**
 	 * The LegacyProxy instance to use.
@@ -89,9 +89,6 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$this->compatibility_info_by_plugin  = array();
-		$this->compatibility_info_by_feature = array();
-
 		$this->legacy_feature_ids = array(
 			'analytics',
 			'new_navigation',
@@ -140,11 +137,6 @@ class FeaturesController {
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,
 					'disable_ui'      => false,
-				),
-				'custom_order_tables'  => array(
-					'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
-					'is_experimental'    => true,
-					'enabled_by_default' => false,
 				),
 				'cart_checkout_blocks' => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -640,10 +632,6 @@ class FeaturesController {
 			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
 
 			$additional_settings = $features[ $id ]['additional_settings'] ?? array();
-			if ( 'custom_order_tables' === $id ) {
-				$additional_settings[] = wc_get_container()->get( CustomOrdersTableController::class )->get_hpos_setting_for_sync();
-			}
-
 			if ( count( $additional_settings ) > 0 ) {
 				$feature_settings = array_merge( $feature_settings, $additional_settings );
 			}
@@ -652,6 +640,20 @@ class FeaturesController {
 		$feature_settings[] = array(
 			'type' => 'sectionend',
 			'id'   => empty( $experimental_feature_ids ) ? 'features_options' : 'experimental_features_options',
+		);
+
+		// Allow feature setting properties to be determined dynamically just before being rendered.
+		$feature_settings = array_map(
+			function( $feature_setting ) {
+				foreach ( $feature_setting as $prop => $value ) {
+					if ( is_callable( $value ) ) {
+						$feature_setting[ $prop ] = call_user_func( $value );
+					}
+				}
+
+				return $feature_setting;
+			},
+			$feature_settings
 		);
 
 		return $feature_settings;
@@ -712,11 +714,6 @@ class FeaturesController {
 			if ( ! empty( $update_text ) ) {
 				$description .= $update_text;
 			}
-		} elseif ( 'custom_order_tables' === $feature_id ) {
-			$setting_definition = array_merge(
-				$setting_definition,
-				wc_get_container()->get( CustomOrdersTableController::class )->get_hpos_setting_for_feature()
-			);
 		}
 
 		if ( 'product_block_editor' === $feature_id ) {

@@ -856,10 +856,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
+
 			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
-		$this->assertEquals( $cot_setting['disabled'], array() );
+		$actual           = call_user_func( $cot_setting['disabled'] );
+		$this->assertEquals( array(), $actual );
 
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
@@ -930,10 +932,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
+
 			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
-		$this->assertEquals( $cot_setting['disabled'], array( 'yes' ) );
+		$actual           = call_user_func( $cot_setting['disabled'] );
+		$this->assertEquals( array( 'yes' ), $actual );
 
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
