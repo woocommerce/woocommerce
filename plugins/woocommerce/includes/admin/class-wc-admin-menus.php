@@ -243,7 +243,7 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ), true ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product' ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
