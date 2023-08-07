@@ -40,6 +40,7 @@
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
+		"@wordpress/preferences": "^3.15.0",
 		"debug": "^4.3.3",
 		"prop-types": "^15.8.1"
 	},

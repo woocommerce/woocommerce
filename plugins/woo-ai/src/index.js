@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import { dispatch } from '@wordpress/data';
 import { render, createRoot } from '@wordpress/element';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
@@ -11,6 +13,22 @@ import { ProductNameSuggestions } from './product-name';
 import { WriteShortDescriptionButtonContainer } from './product-short-description';
 
 import './index.scss';
+
+// @todo: move to a utils function or something.
+dispatch( preferencesStore ).setPersistenceLayer( {
+	get: async () => {
+		const savedPreferences = window.localStorage.getItem(
+			'woo-ai-plugin-prefs'
+		);
+		return savedPreferences ? JSON.parse( savedPreferences ) : {};
+	},
+	set: ( preferences ) => {
+		window.localStorage.setItem(
+			'woo-ai-plugin-prefs',
+			JSON.stringify( preferences )
+		);
+	},
+} );
 
 const renderComponent = ( Component, rootElement ) => {
 	if ( ! rootElement ) {
