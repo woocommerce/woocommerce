@@ -147,6 +147,12 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'installation_date'  => array(
+				'description'       => __( 'Installation date of the WooCommerce mobile app.', 'woocommerce' ),
+				'required'          => false, // For backward compatibility.
+				'type'              => 'date-time',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 		);
 	}
 }
