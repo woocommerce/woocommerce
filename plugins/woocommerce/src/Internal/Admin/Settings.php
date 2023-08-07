@@ -237,8 +237,7 @@ class Settings {
 
 		$settings['features'] = $this->get_features();
 
-		$data                         = WCPayPromotionInit::get_wc_pay_promotion_spec();
-		$settings['isWooPayEligible'] = $data && 'woocommerce_payments:woopay' === $data->id;
+		$settings['isWooPayEligible'] = WCPayPromotionInit::is_woopay_eligible();
 
 		return $settings;
 	}

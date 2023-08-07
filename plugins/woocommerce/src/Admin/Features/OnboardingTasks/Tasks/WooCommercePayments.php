@@ -73,10 +73,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		$data                         = WCPayPromotionInit::get_wc_pay_promotion_spec();
-		$is_woopay_eligible           = $data && 'woocommerce_payments:woopay' === $data->id;
-
-		if ( $is_woopay_eligible ) {
+		if ( WCPayPromotionInit::is_woopay_eligible() ) {
 			return __(
 				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
 				'woocommerce'
