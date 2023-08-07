@@ -9,9 +9,7 @@ use Automattic\WooCommerce\Admin\API\Plugins;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
-use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPayPromotionDataSourcePoller;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Marketplace_Suggestions;
 
@@ -239,12 +237,8 @@ class Settings {
 
 		$settings['features'] = $this->get_features();
 
-		$data           = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
-		$rule_evaluator = new RuleEvaluator();
-
-		if ( ! empty( $data['woocommerce_payments:woopay'] ) ) {
-			$settings['isWooPayEligible'] = $rule_evaluator->evaluate( $data['woocommerce_payments:woopay']->is_visible );
-		}
+		$data                         = WCPayPromotionInit::get_wc_pay_promotion_spec();
+		$settings['isWooPayEligible'] = $data && 'woocommerce_payments:woopay' === $data->id;
 
 		return $settings;
 	}

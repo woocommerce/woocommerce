@@ -6,10 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
-use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments as NotesWooCommercePayments;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPayPromotionDataSourcePoller;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
 
 /**
  * WooCommercePayments Task
@@ -76,9 +73,8 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		$data               = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
-		$rule_evaluator     = new RuleEvaluator();
-		$is_woopay_eligible = ! empty( $data['woocommerce_payments:woopay'] ) && $rule_evaluator->evaluate( $data['woocommerce_payments:woopay']->is_visible );
+		$data                         = WCPayPromotionInit::get_wc_pay_promotion_spec();
+		$is_woopay_eligible           = $data && 'woocommerce_payments:woopay' === $data->id;
 
 		if ( $is_woopay_eligible ) {
 			return __(
