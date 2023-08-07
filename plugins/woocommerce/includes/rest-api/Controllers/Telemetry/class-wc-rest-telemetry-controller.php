@@ -81,6 +81,12 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 		}
 
 		$platform = $new['platform'];
+
+		// Only sets `first_used` when this and `last_used` haven't been set before.
+		if ( ! $data[ $platform ]['first_used'] && ! $data[ $platform ]['last_used'] ) {
+			$new['first_used'] = $new['last_used'];
+		}
+
 		if ( ! $data[ $platform ] || version_compare( $new['version'], $data[ $platform ]['version'], '>=' ) ) {
 			$data[ $platform ] = $new;
 		}
@@ -109,10 +115,14 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 			return;
 		}
 
+		// The installation date could be null from earlier mobile client versions.
+		$installation_date = $request->get_param( 'installation_date' );
+
 		return array(
 			'platform'  => sanitize_text_field( $platform ),
 			'version'   => sanitize_text_field( $version ),
 			'last_used' => gmdate( 'c' ),
+			'installation_date' => $installation_date,
 		);
 	}
 
