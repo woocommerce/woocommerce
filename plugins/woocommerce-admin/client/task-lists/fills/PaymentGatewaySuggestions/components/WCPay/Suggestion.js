@@ -10,7 +10,6 @@ import {
 	WCPayBannerImageCut,
 } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

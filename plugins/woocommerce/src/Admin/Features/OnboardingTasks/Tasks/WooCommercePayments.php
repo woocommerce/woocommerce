@@ -77,7 +77,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_additional_info() {
 		if ( ! PluginsHelper::is_plugin_installed( NotesWooCommercePayments::PLUGIN_FILE ) ) {
-			$data = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+			$data           = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 			$rule_evaluator = new RuleEvaluator();
 
 			if ( ! empty( $data['woocommerce_payments:woopay'] ) && $rule_evaluator->evaluate( $data['woocommerce_payments:woopay']->is_visible ) ) {

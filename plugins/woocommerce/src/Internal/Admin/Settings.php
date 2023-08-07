@@ -240,7 +240,7 @@ class Settings {
 		$settings['features'] = $this->get_features();
 
 		if ( ! PluginsHelper::is_plugin_installed( WooCommercePayments::PLUGIN_FILE ) ) {
-			$data = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+			$data           = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 			$rule_evaluator = new RuleEvaluator();
 
 			if ( ! empty( $data['woocommerce_payments:woopay'] ) ) {
