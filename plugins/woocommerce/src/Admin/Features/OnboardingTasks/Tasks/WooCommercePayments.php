@@ -76,16 +76,15 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		if ( ! PluginsHelper::is_plugin_installed( NotesWooCommercePayments::PLUGIN_FILE ) ) {
-			$data           = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
-			$rule_evaluator = new RuleEvaluator();
+		$data               = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+		$rule_evaluator     = new RuleEvaluator();
+		$is_woopay_eligible = ! empty( $data['woocommerce_payments:woopay'] ) && $rule_evaluator->evaluate( $data['woocommerce_payments:woopay']->is_visible );
 
-			if ( ! empty( $data['woocommerce_payments:woopay'] ) && $rule_evaluator->evaluate( $data['woocommerce_payments:woopay']->is_visible ) ) {
-				return __(
-					'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
-					'woocommerce'
-				);
-			}
+		if ( $is_woopay_eligible ) {
+			return __(
+				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+				'woocommerce'
+			);
 		}
 
 		return __(
