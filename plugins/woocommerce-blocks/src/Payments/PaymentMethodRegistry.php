@@ -59,9 +59,9 @@ final class PaymentMethodRegistry extends IntegrationRegistry {
 		$payment_methods = $this->get_all_active_registered();
 
 		foreach ( $payment_methods as $payment_method ) {
-			$script_data[ $payment_method->get_name() . '_data' ] = $payment_method->get_payment_method_data();
+			$script_data[ $payment_method->get_name() ] = $payment_method->get_payment_method_data();
 		}
 
-		return array_filter( $script_data );
+		return array( 'paymentMethodData' => array_filter( $script_data ) );
 	}
 }

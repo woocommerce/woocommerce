@@ -42,10 +42,10 @@ export const ProductsByAttributeInspectorControls = (
 					rows={ rows }
 					alignButtons={ alignButtons }
 					setAttributes={ setAttributes }
-					minColumns={ getSetting( 'min_columns', 1 ) }
-					maxColumns={ getSetting( 'max_columns', 6 ) }
-					minRows={ getSetting( 'min_rows', 1 ) }
-					maxRows={ getSetting( 'max_rows', 6 ) }
+					minColumns={ getSetting( 'minColumns', 1 ) }
+					maxColumns={ getSetting( 'maxColumns', 6 ) }
+					minRows={ getSetting( 'minRows', 1 ) }
+					maxRows={ getSetting( 'maxRows', 6 ) }
 				/>
 			</PanelBody>
 			<PanelBody

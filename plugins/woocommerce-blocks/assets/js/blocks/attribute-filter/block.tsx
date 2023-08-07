@@ -72,19 +72,19 @@ const AttributeFilterBlock = ( {
 	getNotice?: GetNotice;
 } ) => {
 	const hasFilterableProducts = getSettingWithCoercion(
-		'has_filterable_products',
+		'hasFilterableProducts',
 		false,
 		isBoolean
 	);
 
 	const filteringForPhpTemplate = getSettingWithCoercion(
-		'is_rendering_php_template',
+		'isRenderingPhpTemplate',
 		false,
 		isBoolean
 	);
 
 	const pageUrl = getSettingWithCoercion(
-		'page_url',
+		'pageUrl',
 		window.location.href,
 		isString
 	);

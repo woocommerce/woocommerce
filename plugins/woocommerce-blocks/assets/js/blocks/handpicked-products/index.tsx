@@ -25,7 +25,7 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 		columns: {
 			type: 'number',
-			default: getSetting( 'default_columns', 3 ),
+			default: getSetting( 'defaultColumns', 3 ),
 		},
 	},
 

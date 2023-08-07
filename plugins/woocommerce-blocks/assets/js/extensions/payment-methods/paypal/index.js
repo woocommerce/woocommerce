@@ -3,7 +3,7 @@
  */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
-import { getSetting, WC_ASSET_URL } from '@woocommerce/settings';
+import { getPaymentMethodData, WC_ASSET_URL } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -11,7 +11,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 
-const settings = getSetting( 'paypal_data', {} );
+const settings = getPaymentMethodData( 'paypal', {} );
 
 /**
  * Content component
@@ -38,7 +38,7 @@ const paypalPaymentMethod = {
 	edit: <Content />,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
-		settings.title ||
+		settings?.title ||
 			__( 'Payment via PayPal', 'woo-gutenberg-products-block' )
 	),
 	supports: {

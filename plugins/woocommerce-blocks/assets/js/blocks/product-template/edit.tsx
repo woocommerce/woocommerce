@@ -105,7 +105,7 @@ const ProductTemplateEdit = ( {
 	const [ activeBlockContextId, setActiveBlockContextId ] = useState();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
-		'loop_shop_per_page',
+		'loopShopPerPage',
 		12,
 		isNumber
 	);

@@ -14,7 +14,7 @@ global.wcSettings = {
 	date: {
 		dow: 0,
 	},
-	has_filterable_products: true,
+	hasFilterableProducts: true,
 	orderStatuses: {
 		pending: 'Pending payment',
 		processing: 'Processing',

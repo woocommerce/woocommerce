@@ -6,7 +6,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
 const filteringForPhpTemplate = getSettingWithCoercion(
-	'is_rendering_php_template',
+	'isRenderingPhpTemplate',
 	false,
 	isBoolean
 );
