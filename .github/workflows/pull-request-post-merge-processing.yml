@@ -46,7 +46,9 @@ jobs:
                   PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: 'Add the label for PR analysis'
-              if: github.event.pull_request.base.ref == 'trunk'
+              if: |
+                github.event.pull_request.base.ref == 'trunk' &&
+                ! contains(github.event.pull_request.labels.*.name, 'status: analysis complete')
               uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8
               with:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +61,8 @@ jobs:
             - name: 'Trigger PR scrub'
               if: |
                 github.event.pull_request.base.ref == 'trunk' &&
-                ! contains(github.event.pull_request.labels.*.name, 'needs: analysis')
+                ! contains(github.event.pull_request.labels.*.name, 'needs: analysis') &&
+                ! contains(github.event.pull_request.labels.*.name, 'status: analysis complete')
               uses: ./.github/actions/pr-scrub-notify-slack
               with:
                 TEST_ASSISTANCE_BOT_TOKEN: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}

@@ -111,15 +111,29 @@ class ManifestProcessorTest extends WP_UnitTestCase {
 		$what_went_wrong_post = $posts[3];
 
 		$edit_url_plugin_post = DocsStore::get_edit_url_from_docs_post( $install_plugin_post->ID, 'edit_url', true );
-		$this->assertEquals( 'https://example.com/edit/install-plugin.md', $edit_url_plugin_post );
+		$this->assertEquals( 'https://example.com/edit/get-started/installation/install-plugin.md', $edit_url_plugin_post );
 
 		$edit_url_local_dev_post = DocsStore::get_edit_url_from_docs_post( $local_dev_post->ID, 'edit_url', true );
-		$this->assertEquals( 'https://example.com/edit/local-development.md', $edit_url_local_dev_post );
+		$this->assertEquals( 'https://example.com/edit/get-started/local-development.md', $edit_url_local_dev_post );
 
 		$edit_url_unit_testing_post = DocsStore::get_edit_url_from_docs_post( $unit_testing_post->ID, 'edit_url', true );
-		$this->assertEquals( 'https://example.com/edit/unit-tests.md', $edit_url_unit_testing_post );
+		$this->assertEquals( 'https://example.com/edit/testing/unit-tests.md', $edit_url_unit_testing_post );
 
 		$edit_url_what_went_wrong_post = DocsStore::get_edit_url_from_docs_post( $what_went_wrong_post->ID, 'edit_url', true );
-		$this->assertEquals( 'https://example.com/edit/what-went-wrong.md', $edit_url_what_went_wrong_post );
+		$this->assertEquals( 'https://example.com/edit/get-started/troubleshooting/what-went-wrong.md', $edit_url_what_went_wrong_post );
+	}
+
+	/**
+	 * Test collecting doc IDs from a manifest.
+	 */
+	public function test_collect_doc_ids_from_manifest() {
+		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest.json' ), true );
+		$doc_ids  = ManifestProcessor::collect_doc_ids_from_manifest( $manifest );
+
+		$this->assertEquals( 4, count( $doc_ids ) );
+		$this->assertContains( 'c068ce54044fa44c760a69bd71ef21274f2a5a37', $doc_ids );
+		$this->assertContains( 'fb59bd01dda7b090e5b0a557948e155a6b679d6a', $doc_ids );
+		$this->assertContains( '1f88c4d039e72c059c928ab475ad1ea0a02c8abb', $doc_ids );
+		$this->assertContains( '120770c899215a889246b47ac883e4dda1f97b8b', $doc_ids );
 	}
 }
