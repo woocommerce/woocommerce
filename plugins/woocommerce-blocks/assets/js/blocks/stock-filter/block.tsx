@@ -63,7 +63,7 @@ const StockStatusFilterBlock = ( {
 	const setWrapperVisibility = useSetWraperVisibility();
 
 	const filteringForPhpTemplate = getSettingWithCoercion(
-		'is_rendering_php_template',
+		'isRenderingPhpTemplate',
 		false,
 		isBoolean
 	);
@@ -412,7 +412,7 @@ const StockStatusFilterBlock = ( {
 	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
 	const hasFilterableProducts = getSettingWithCoercion(
-		'has_filterable_products',
+		'hasFilterableProducts',
 		false,
 		isBoolean
 	);

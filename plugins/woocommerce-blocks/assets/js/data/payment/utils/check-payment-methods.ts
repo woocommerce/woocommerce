@@ -175,7 +175,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		? Object.keys( paymentMethods )
 		: Array.from(
 				new Set( [
-					...( getSetting( 'paymentGatewaySortOrder', [] ) as [] ),
+					...( getSetting( 'paymentMethodSortOrder', [] ) as [] ),
 					...Object.keys( paymentMethods ),
 				] )
 		  );

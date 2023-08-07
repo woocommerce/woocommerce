@@ -47,10 +47,10 @@ export const ProductOnSaleInspectorControls = (
 					rows={ rows }
 					alignButtons={ alignButtons }
 					setAttributes={ setAttributes }
-					minColumns={ getSetting< number >( 'min_columns', 1 ) }
-					maxColumns={ getSetting< number >( 'max_columns', 6 ) }
-					minRows={ getSetting< number >( 'min_rows', 1 ) }
-					maxRows={ getSetting< number >( 'max_rows', 6 ) }
+					minColumns={ getSetting< number >( 'minColumns', 1 ) }
+					maxColumns={ getSetting< number >( 'maxColumns', 6 ) }
+					minRows={ getSetting< number >( 'minRows', 1 ) }
+					maxRows={ getSetting< number >( 'maxRows', 6 ) }
 				/>
 			</PanelBody>
 			<PanelBody

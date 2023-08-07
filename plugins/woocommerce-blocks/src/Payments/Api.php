@@ -80,13 +80,13 @@ class Api {
 	 * Add payment method data to Asset Registry.
 	 */
 	public function add_payment_method_script_data() {
-		// Enqueue the order of enabled gateways as `paymentGatewaySortOrder`.
-		if ( ! $this->asset_registry->exists( 'paymentGatewaySortOrder' ) ) {
+		// Enqueue the order of enabled gateways.
+		if ( ! $this->asset_registry->exists( 'paymentMethodSortOrder' ) ) {
 			// We use payment_gateways() here to get the sort order of all enabled gateways. Some may be
 			// programmatically disabled later on, but we still need to know where the enabled ones are in the list.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
 			$enabled_gateways = array_filter( $payment_gateways, array( $this, 'is_payment_gateway_enabled' ) );
-			$this->asset_registry->add( 'paymentGatewaySortOrder', array_keys( $enabled_gateways ) );
+			$this->asset_registry->add( 'paymentMethodSortOrder', array_keys( $enabled_gateways ) );
 		}
 
 		// Enqueue all registered gateway data (settings/config etc).

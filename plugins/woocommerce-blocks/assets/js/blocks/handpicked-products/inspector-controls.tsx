@@ -32,8 +32,8 @@ export const HandpickedProductsInspectorControls = (
 					onChange={ ( value ) =>
 						setAttributes( { columns: value } )
 					}
-					min={ getSetting( 'min_columns', 1 ) }
-					max={ getSetting( 'max_columns', 6 ) }
+					min={ getSetting( 'minColumns', 1 ) }
+					max={ getSetting( 'maxColumns', 6 ) }
 				/>
 				<ToggleControl
 					label={ __(

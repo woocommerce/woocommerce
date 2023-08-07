@@ -3,7 +3,7 @@
  */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
+import { getPaymentMethodData } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -11,9 +11,9 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 
-const settings = getSetting( 'cod_data', {} );
+const settings = getPaymentMethodData( 'cod', {} );
 const defaultLabel = __( 'Cash on delivery', 'woo-gutenberg-products-block' );
-const label = decodeEntities( settings.title ) || defaultLabel;
+const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
 /**
  * Content component

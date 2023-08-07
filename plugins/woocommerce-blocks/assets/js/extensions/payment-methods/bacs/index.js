@@ -3,7 +3,7 @@
  */
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
+import { getPaymentMethodData } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -11,12 +11,12 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 
-const settings = getSetting( 'bacs_data', {} );
+const settings = getPaymentMethodData( 'bacs', {} );
 const defaultLabel = __(
 	'Direct bank transfer',
 	'woo-gutenberg-products-block'
 );
-const label = decodeEntities( settings.title ) || defaultLabel;
+const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
 /**
  * Content component

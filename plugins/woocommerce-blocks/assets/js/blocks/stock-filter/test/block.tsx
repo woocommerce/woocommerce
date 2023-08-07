@@ -43,7 +43,7 @@ jest.mock( '@woocommerce/settings', () => {
 		getSettingWithCoercion: jest
 			.fn()
 			.mockImplementation( ( key, defaultValue ) => {
-				if ( key === 'has_filterable_products' ) {
+				if ( key === 'hasFilterableProducts' ) {
 					return true;
 				}
 				return defaultValue;
