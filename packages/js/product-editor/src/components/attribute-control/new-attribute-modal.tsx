@@ -212,17 +212,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
 			);
 
-		if ( ! firstAttributeFieldLabel ) return;
-
-		const timeoutId = setTimeout(
-			( label: HTMLLabelElement ) => {
-				label.focus();
-			},
-			0,
-			firstAttributeFieldLabel
-		);
-
-		return () => clearTimeout( timeoutId );
+		firstAttributeFieldLabel?.focus();
 	}, [] );
 
 	return (
