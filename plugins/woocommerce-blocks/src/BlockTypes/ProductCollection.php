@@ -98,7 +98,7 @@ class ProductCollection extends AbstractBlock {
 
 		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$this->asset_data_registry->add( 'loop_shop_per_page', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ), true );
+		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ), true );
 	}
 
 	/**
@@ -150,12 +150,12 @@ class ProductCollection extends AbstractBlock {
 			return;
 		}
 
-		$this->asset_data_registry->add( 'has_filterable_products', true, true );
+		$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
 		/**
 		 * It enables the page to refresh when a filter is applied, ensuring that the product collection block,
 		 * which is a server-side rendered (SSR) block, retrieves the products that match the filters.
 		 */
-		$this->asset_data_registry->add( 'is_rendering_php_template', true, true );
+		$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
 	}
 
 	/**

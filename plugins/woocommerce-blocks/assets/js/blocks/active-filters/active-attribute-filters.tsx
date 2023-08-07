@@ -73,7 +73,7 @@ const ActiveAttributeFilters = ( {
 	const attributeLabel = attributeObject.label;
 
 	const filteringForPhpTemplate = getSettingWithCoercion(
-		'is_rendering_php_template',
+		'isRenderingPhpTemplate',
 		false,
 		isBoolean
 	);

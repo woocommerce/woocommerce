@@ -59,7 +59,7 @@ const ActiveFiltersBlock = ( {
 	const isMounted = useIsMounted();
 	const componentHasMounted = isMounted();
 	const filteringForPhpTemplate = getSettingWithCoercion(
-		'is_rendering_php_template',
+		'isRenderingPhpTemplate',
 		false,
 		isBoolean
 	);
@@ -323,7 +323,7 @@ const ActiveFiltersBlock = ( {
 	);
 
 	const hasFilterableProducts = getSettingWithCoercion(
-		'has_filterable_products',
+		'hasFilterableProducts',
 		false,
 		isBoolean
 	);

@@ -42,8 +42,8 @@ export const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 						onChange={ ( value ) =>
 							setAttributes( { columns: value } )
 						}
-						min={ getSetting( 'min_columns', 1 ) }
-						max={ getSetting( 'max_columns', 6 ) }
+						min={ getSetting( 'minColumns', 1 ) }
+						max={ getSetting( 'maxColumns', 6 ) }
 					/>
 				</PanelBody>
 			</InspectorControls>

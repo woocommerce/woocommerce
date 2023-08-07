@@ -109,22 +109,22 @@ const ProductsByTagBlock = ( {
 						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 						minColumns={ getSettingWithCoercion(
-							'min_columns',
+							'minColumns',
 							1,
 							isNumber
 						) }
 						maxColumns={ getSettingWithCoercion(
-							'max_columns',
+							'maxColumns',
 							6,
 							isNumber
 						) }
 						minRows={ getSettingWithCoercion(
-							'min_rows',
+							'minRows',
 							6,
 							isNumber
 						) }
 						maxRows={ getSettingWithCoercion(
-							'max_rows',
+							'maxRows',
 							6,
 							isNumber
 						) }

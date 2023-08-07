@@ -46,7 +46,7 @@ export const BLOCK_ATTRIBUTES = {
 };
 
 const postTemplateHasSupportForGridView = getSettingWithCoercion(
-	'post_template_has_support_for_grid_view',
+	'postTemplateHasSupportForGridView',
 	false,
 	isBoolean
 );

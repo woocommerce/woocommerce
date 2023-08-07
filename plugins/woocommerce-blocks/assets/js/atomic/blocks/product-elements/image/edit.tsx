@@ -54,7 +54,7 @@ const Edit = ( {
 	const blockProps = useBlockProps( { style: { width, height } } );
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 	const isBlockThemeEnabled = getSettingWithCoercion(
-		'is_block_theme_enabled',
+		'isBlockThemeEnabled',
 		false,
 		isBoolean
 	);
