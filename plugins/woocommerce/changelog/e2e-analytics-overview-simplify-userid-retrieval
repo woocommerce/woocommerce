@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Simplify user id retrieval in analytics-overview.spec.js.

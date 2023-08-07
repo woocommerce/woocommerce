@@ -1174,9 +1174,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} );
 							return promiseDelay( 3000 );
 						},
-						onDone: {
-							actions: [ 'redirectToWooHome' ],
-						},
+						onDone: [
+							{
+								target: 'isJetpackConnected',
+								cond: 'hasJetpackSelected',
+							},
+							{ actions: [ 'redirectToWooHome' ] },
+						],
 					},
 					meta: {
 						component: Loader,

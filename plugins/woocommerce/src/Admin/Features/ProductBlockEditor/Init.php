@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_post_types = array( 'simple', 'variable' );
 
 	/**
 	 * Redirection controller.
@@ -43,6 +43,7 @@ class Init {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
 				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -109,6 +110,17 @@ class Init {
 		 * @since 7.1.0
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+	}
+
+	/**
+	 * Dequeue conflicting styles.
+	 */
+	public function dequeue_conflicting_styles() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
+		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
+		wp_dequeue_style( 'woocommerce-blocktheme' );
 	}
 
 	/**
@@ -336,11 +348,20 @@ class Init {
 								),
 							),
 						),
+					),
+				),
+				array(
+					'woocommerce/product-tab',
+					array(
+						'id'    => 'organization',
+						'title' => __( 'Organization', 'woocommerce' ),
+						'order' => 15,
+					),
+					array(
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Organization & visibility', 'woocommerce' ),
-								'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
+								'title' => __( 'Product catalog', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -349,18 +370,25 @@ class Init {
 										'name' => 'categories',
 									),
 								),
+								array(
+									'woocommerce/product-checkbox-field',
+									array(
+										'label'    => __( 'Enable product reviews', 'woocommerce' ),
+										'property' => 'reviews_allowed',
+									),
+								),
+								array(
+									'woocommerce/product-password-field',
+									array(
+										'label' => __( 'Require a password', 'woocommerce' ),
+									),
+								),
 							),
 						),
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'       => __( 'Attributes', 'woocommerce' ),
-								'description' => sprintf(
-									/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
-									__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
-									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
-									'</a>'
-								),
+								'title' => __( 'Attributes', 'woocommerce' ),
 							),
 							array(
 								array(
@@ -711,7 +739,15 @@ class Init {
 										'</strong>'
 									),
 								),
-								array(),
+								array(
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variation options', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variations-options-field' ) ),
+									),
+								),
 							),
 						),
 					)
