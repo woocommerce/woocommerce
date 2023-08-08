@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
@@ -31,7 +31,7 @@ async function dismissFeedbackModalIfShown( page ) {
 	} catch ( error ) {}
 }
 
-test.describe( 'Disable block product editor', () => {
+test.describe.serial( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
