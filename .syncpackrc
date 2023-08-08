@@ -76,7 +76,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^4.9.5"
+			"pinVersion": "^5.1.6"
 		},
 		{
 			"dependencies": [
