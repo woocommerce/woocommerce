@@ -29,48 +29,16 @@ trait BlockContainerTrait {
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockContainerInterface.
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
-	public function &add_block_container( array $block_config, ?callable $block_creator = null ): BlockContainerInterface {
-		$block_container = $this->add_block(
-			$block_config,
-			is_callable( $block_creator )
-				? $block_creator
-				: function ( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
-					return new BlockContainer( $config, $root_template, $parent );
-				}
-		);
-
-		if ( ! $block_container instanceof BlockContainerInterface ) {
-			throw new \UnexpectedValueException( 'The block creator must return an instance of BlockContainerInterface.' );
-		}
-
-		return $block_container;
-	}
-
-	/**
-	 * Add a block to the block container.
-	 *
-	 * @param array    $block_config The block data.
-	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
-	 *
-	 * @throws \ValueError If the block configuration is invalid.
-	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockInterface.
-	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
-	 */
-	public function &add_block( array $block_config, ?callable $block_creator = null ): BlockInterface {
+	protected function &add_inner_block( array $block_config, $block_class = 'Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block' ): BlockInterface {
 		$root_template = $this->get_root_template();
 
-		if ( is_callable( $block_creator ) ) {
-			$block = $block_creator( $block_config, $root_template, $this );
+		$block_class = apply_filters( 'woocommerce_block_template_block_class', $block_class, $block_config, $root_template, $this );
+		$block       = new $block_class( $block_config, $root_template, $this );
 
-			if ( ! $block instanceof BlockInterface ) {
-				throw new \UnexpectedValueException( 'The block creator must return an instance of BlockInterface.' );
-			}
-		} else {
-			$block = new Block( $block_config, $root_template, $this );
+		if ( ! $block instanceof BlockInterface ) {
+			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
 		}
 
 		if ( $block->get_parent() !== $this ) {

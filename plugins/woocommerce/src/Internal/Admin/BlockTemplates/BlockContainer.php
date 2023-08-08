@@ -36,4 +36,14 @@ class BlockContainer extends Block implements BlockContainerInterface {
 
 		return $arr;
 	}
+
+	/**
+	 * Generate a block ID based on a base.
+	 *
+	 * @param string $id_base The base to use when generating an ID.
+	 * @return string
+	 */
+	public function &add_block( array $block_config ): BlockInterface {
+		return $this->add_inner_block( $block_config );
+	}
 }

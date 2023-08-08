@@ -9,78 +9,14 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 /**
  * Block template class.
  */
-class BlockTemplate implements BlockTemplateInterface {
-	use BlockContainerTrait;
-
-	/**
-	 * The block cache.
-	 *
-	 * @var BlockInterface[]
-	 */
-	private $block_cache = [];
-
-	/**
-	 * Get a block by ID.
-	 *
-	 * @param string $block_id The block ID.
-	 */
-	public function get_block( string $block_id ): ?BlockInterface {
-		return $this->block_cache[ $block_id ] ?? null;
-	}
-
-	/**
-	 * Caches a block in the template. This is an internal method and should not be called directly
-	 * except for classes that implement BlockContainerInterface, in their add_block() method.
-	 *
-	 * @param BlockInterface $block The block to cache.
-	 *
-	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \ValueError If the block template that the block belongs to is not this template.
-	 *
-	 * @ignore
-	 */
-	public function cache_block( BlockInterface &$block ) {
-		$id = $block->get_id();
-
-		if ( isset( $this->block_cache[ $id ] ) ) {
-			throw new \ValueError( 'A block with the specified ID already exists in the template.' );
-		}
-
-		if ( $block->get_root_template() !== $this ) {
-			throw new \ValueError( 'The block template that the block belongs to must be the same as this template.' );
-		}
-
-		$this->block_cache[ $id ] = $block;
-	}
-
+class BlockTemplate extends AbstractBlockTemplate {
 	/**
 	 * Generate a block ID based on a base.
 	 *
 	 * @param string $id_base The base to use when generating an ID.
 	 * @return string
 	 */
-	public function generate_block_id( string $id_base ): string {
-		$instance_count = 0;
-
-		do {
-			$instance_count++;
-			$block_id = $id_base . '-' . $instance_count;
-		} while ( isset( $this->block_cache[ $block_id ] ) );
-
-		return $block_id;
-	}
-
-	/**
-	 * Get the root template.
-	 */
-	public function &get_root_template(): BlockTemplateInterface {
-		return $this;
-	}
-
-	/**
-	 * Get the parent block container.
-	 */
-	public function &get_parent(): ?ContainerInterface {
-		return null;
+	public function add_block( array $block_config ): BlockInterface {
+		return $this->add_inner_block( $block_config, 'Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainer' );
 	}
 }
