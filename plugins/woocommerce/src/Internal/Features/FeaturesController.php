@@ -162,6 +162,8 @@ class FeaturesController {
 			/**
 			 * Filter the definitions of the features listed on the Features Settings screen.
 			 *
+			 * @since 8.1.0
+			 *
 			 * @param array $features The feature definitions.
 			 */
 			$this->features = apply_filters( 'woocommerce_feature_definitions', $features );
