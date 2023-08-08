@@ -144,7 +144,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		switch ( $table_exists ) {
 			case 'no':
 			case 'yes':
-				return $table_exists === 'yes';
+				return 'yes' === $table_exists;
 			default:
 				return $this->check_orders_table_exists();
 		}
