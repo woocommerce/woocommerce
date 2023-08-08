@@ -3,7 +3,7 @@
 .woocommerce-marketplace {
 	&__product-loader-cards {
 		display: grid;
-		background: linear-gradient(to right, $gray-0 40%, $gray-10 60%, $gray-0 80%);
+		background: linear-gradient(to right, $gray-0 40%, $gray-5 60%, $gray-0 80%);
 		background-color: $gray-0;
 		background-size: 500% 200%;
 		animation: GradientSlide 4s linear infinite;
@@ -13,7 +13,6 @@
 	&__product-loader-divider {
 		background: #fff;
 		width: 24px;
-		height: 270px;
 		display: none;
 	}
 
