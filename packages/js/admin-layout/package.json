@@ -43,6 +43,13 @@
 				"build-style/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"lint": {
+			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx}",
+				".eslintrc.js"
+			]
 		}
 	},
 	"scripts": {
@@ -50,7 +57,7 @@
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint src",
+		"lint": "wireit",
 		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",

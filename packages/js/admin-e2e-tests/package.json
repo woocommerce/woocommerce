@@ -68,13 +68,21 @@
 				"build/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"lint": {
+			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"files": [
+				"src/**/*.ts",
+				".eslintrc.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"build": "wireit",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "eslint src",
+		"lint": "wireit",
 		"start": "tsc --project tsconfig.json --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"lint:fix": "eslint src --fix",

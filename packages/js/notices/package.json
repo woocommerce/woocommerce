@@ -54,12 +54,20 @@
 				"build-types/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"lint": {
+			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx}",
+				".eslintrc.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"build": "wireit",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint src",
+		"lint": "wireit",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix"

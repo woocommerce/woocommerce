@@ -52,6 +52,14 @@
 				".tsbuildinfo"
 			],
 			"output": []
+		},
+		"lint": {
+			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx}",
+				".eslintrc.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
@@ -62,7 +70,7 @@
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc --project tsconfig.json",
 		"prepack": "pnpm run build",
-		"lint": "eslint src",
+		"lint": "wireit",
 		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {

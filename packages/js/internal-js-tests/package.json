@@ -34,11 +34,19 @@
 				"build-module/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"lint": {
+			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx}",
+				".eslintrc.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"build": "wireit",
-		"lint": "eslint src",
+		"lint": "wireit",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",
