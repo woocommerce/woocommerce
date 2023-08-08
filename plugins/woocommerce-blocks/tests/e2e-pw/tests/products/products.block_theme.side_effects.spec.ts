@@ -74,14 +74,14 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		const advancedFilterOption = await page.getByLabel(
+		const advancedFilterOption = page.getByLabel(
 			'Advanced Filters options'
 		);
-		const inheritQueryFromTemplateOption = await page.getByLabel(
+		const inheritQueryFromTemplateOption = page.getByLabel(
 			'Inherit query from template'
 		);
 
-		await expect( advancedFilterOption ).not.toBeVisible();
+		await expect( advancedFilterOption ).toBeHidden();
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
 	} );
 	test( 'when Inherit Query from template is disabled all the settings that customize the query should be visble', async ( {
@@ -102,10 +102,10 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		const advancedFilterOption = await page.getByLabel(
+		const advancedFilterOption = page.getByLabel(
 			'Advanced Filters options'
 		);
-		const inheritQueryFromTemplateOption = await page.getByLabel(
+		const inheritQueryFromTemplateOption = page.getByLabel(
 			'Inherit query from template'
 		);
 
@@ -139,10 +139,11 @@ for ( const {
 			} );
 
 			await editor.canvas.click( 'body' );
-			await editor.canvas.waitForLoadState( 'networkidle' );
 			const block = await editorUtils.getBlockByName( blockData.name );
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
 			await editor.selectBlocks( block );
 			await editorUtils.insertBlock(

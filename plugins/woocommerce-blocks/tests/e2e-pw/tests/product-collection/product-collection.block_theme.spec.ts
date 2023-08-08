@@ -26,20 +26,20 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 	} ) => {
 		expect( pageObject.productTemplate ).not.toBeNull();
-		expect( pageObject.products ).toHaveCount( 9 );
-		expect( pageObject.productImages ).toHaveCount( 9 );
-		expect( pageObject.productTitles ).toHaveCount( 9 );
-		expect( pageObject.productPrices ).toHaveCount( 9 );
-		expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+		await expect( pageObject.products ).toHaveCount( 9 );
+		await expect( pageObject.productImages ).toHaveCount( 9 );
+		await expect( pageObject.productTitles ).toHaveCount( 9 );
+		await expect( pageObject.productPrices ).toHaveCount( 9 );
+		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 
 		await pageObject.publishAndGoToFrontend();
 
 		expect( pageObject.productTemplate ).not.toBeNull();
-		expect( pageObject.products ).toHaveCount( 9 );
-		expect( pageObject.productImages ).toHaveCount( 9 );
-		expect( pageObject.productTitles ).toHaveCount( 9 );
-		expect( pageObject.productPrices ).toHaveCount( 9 );
-		expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+		await expect( pageObject.products ).toHaveCount( 9 );
+		await expect( pageObject.productImages ).toHaveCount( 9 );
+		await expect( pageObject.productTitles ).toHaveCount( 9 );
+		await expect( pageObject.productPrices ).toHaveCount( 9 );
+		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {
@@ -200,6 +200,7 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		// TODO There are no products with stock status 'Out of stock' in test data.
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
 			pageObject,
 		} ) => {
@@ -226,7 +227,7 @@ test.describe( 'Product Collection', () => {
 					sidebarSettings.locator(
 						SELECTORS.inheritQueryFromTemplateControl
 					)
-				).not.toBeVisible();
+				).toBeHidden();
 			} );
 
 			test( 'Inherit query from template should work as expected in Product Catalog template', async ( {
@@ -293,18 +294,18 @@ test.describe( 'Product Collection', () => {
 				maxPageToShow: 2,
 			} );
 
-			expect( await pageObject.products ).toHaveCount( 3 );
+			await expect( await pageObject.products ).toHaveCount( 3 );
 
 			await pageObject.setDisplaySettings( {
 				itemsPerPage: 2,
 				offset: 0,
 				maxPageToShow: 2,
 			} );
-			expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( await pageObject.products ).toHaveCount( 2 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( await pageObject.products ).toHaveCount( 2 );
 
 			const paginationNumbers =
 				pageObject.pagination.locator( '.page-numbers' );
@@ -322,9 +323,7 @@ test.describe( 'Product Collection', () => {
 		// In the original viewport size, we expect the product width to be less than the parent width
 		// because we will have more than 1 column
 		let productSize = await firstProduct.boundingBox();
-		let parentSize = await (
-			await firstProduct.locator( 'xpath=..' )
-		 ).boundingBox();
+		let parentSize = await firstProduct.locator( 'xpath=..' ).boundingBox();
 		expect( productSize?.width ).toBeLessThan(
 			parentSize?.width as number
 		);
@@ -337,9 +336,7 @@ test.describe( 'Product Collection', () => {
 		// In the smaller viewport size, we expect the product width to be (approximately) the same as the parent width
 		// because we will have only 1 column
 		productSize = await firstProduct.boundingBox();
-		parentSize = await (
-			await firstProduct.locator( 'xpath=..' )
-		 ).boundingBox();
+		parentSize = await firstProduct.locator( 'xpath=..' ).boundingBox();
 		expect( productSize?.width ).toBeCloseTo( parentSize?.width as number );
 	} );
 } );

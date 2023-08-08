@@ -46,7 +46,7 @@ for ( const { classes, product, frontendPage } of products ) {
 			page,
 		} ) => {
 			await page.goto( frontendPage );
-			const body = await page.locator( 'body' );
+			const body = page.locator( 'body' );
 			const bodyClasses = await body.getAttribute( 'class' );
 
 			classes.forEach( ( className ) => {

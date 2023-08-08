@@ -39,7 +39,7 @@ test.describe( 'Test the checkout header template part', async () => {
 		} );
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( permalink, { waitUntil: 'networkidle' } );
+		await page.goto( permalink, { waitUntil: 'commit' } );
 
 		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
 	} );
