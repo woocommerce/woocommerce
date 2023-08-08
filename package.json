@@ -21,8 +21,7 @@
 		"utils": "./tools/monorepo-utils/bin/run"
 	},
 	"scripts": {
-		"build": "wireit",
-		"build-legacy": "wireit",
+		"build": "pnpm --filter woocommerce*... --filter !woocommerce-docs run -r build",
 		"test": "pnpm exec turbo run turbo:test",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
@@ -76,36 +75,6 @@
 		"overrides": {
 			"@types/react": "^17.0.2",
 			"react": "^17.0.2"
-		}
-	},
-	"wireit": {
-		"build-legacy": {
-			"dependencies": [
-				"build",
-				"./plugins/woocommerce-admin:build",
-				"./plugins/woocommerce:build"
-			]
-		},
-		"build": {
-			"dependencies": [
-				"./packages/js/ai:build",
-				"./packages/js/api:build",
-				"./packages/js/components:build",
-				"./packages/js/csv-export:build",
-				"./packages/js/currency:build",
-				"./packages/js/customer-effort-score:build",
-				"./packages/js/data:build",
-				"./packages/js/date:build",
-				"./packages/js/e2e-core-tests:build",
-				"./packages/js/experimental:build",
-				"./packages/js/explat:build",
-				"./packages/js/navigation:build",
-				"./packages/js/notices:build",
-				"./packages/js/number:build",
-				"./packages/js/onboarding:build",
-				"./packages/js/product-editor:build",
-				"./packages/js/tracks:build"
-			]
 		}
 	}
 }
