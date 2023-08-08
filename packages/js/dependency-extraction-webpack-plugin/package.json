@@ -42,7 +42,7 @@
 	},
 	"wireit": {
 		"lint": {
-			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"command": "eslint src --color --cache --cache-location .eslintcache",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx}",
 				".eslintrc.js"

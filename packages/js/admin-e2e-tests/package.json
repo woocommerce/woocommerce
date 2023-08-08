@@ -70,7 +70,7 @@
 			]
 		},
 		"lint": {
-			"command": "eslint src --color --cache --cache-location .eslintcache .",
+			"command": "eslint src --color --cache --cache-location .eslintcache",
 			"files": [
 				"src/**/*.ts",
 				".eslintrc.js"
