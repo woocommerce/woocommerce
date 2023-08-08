@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Set the order table exist options value when its not present for smooth upgradation from lower WC versions. [#39616](https://github.com/woocommerce/woocommerce/pull/39616)
 * Fix - Add derivative features to legacy list so that warning is not generated for them. [#39537](https://github.com/woocommerce/woocommerce/pull/39537)
 * Fix - Dequeue blocktheme styles on WooCommerce Admin pages when product block editor is enabled. [#39478](https://github.com/woocommerce/woocommerce/pull/39478)
 * Fix - Do not disable "Used for variations" checkbox on attribute. [#39502](https://github.com/woocommerce/woocommerce/pull/39502)

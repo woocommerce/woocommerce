@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Set the order table exist options value when its not present for smooth upgradation from lower WC versions.
