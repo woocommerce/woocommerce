@@ -26,4 +26,4 @@ jobs:
               run: pnpm run -r --filter='!@woocommerce/internal-js-tests' --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
             - name: Test
-              run: pnpm run -r --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' test --color
+              run: pnpm run -r --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' test
