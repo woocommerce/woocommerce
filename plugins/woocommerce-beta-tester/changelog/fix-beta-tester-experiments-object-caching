@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensured that experiments testing works with object caching
