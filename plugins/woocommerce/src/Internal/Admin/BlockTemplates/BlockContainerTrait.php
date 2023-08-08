@@ -21,8 +21,7 @@ trait BlockContainerTrait {
 	/**
 	 * Add a block to the block container.
 	 *
-	 * @param array  $block_config The block data.
-	 * @param string $block_class An optional block class to use.
+	 * @param BlockInterface $block The block.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.

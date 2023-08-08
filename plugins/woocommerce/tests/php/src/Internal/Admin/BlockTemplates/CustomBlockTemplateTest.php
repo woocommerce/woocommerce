@@ -19,23 +19,23 @@ class CustomBlockTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_add_block_does_not_exist() {
 		$template = new CustomBlockTemplate();
-        $this->assertFalse( method_exists( $template, 'add_block' ) );
+		$this->assertFalse( method_exists( $template, 'add_block' ) );
 	}
 
-    /**
+	/**
 	 * Test that a custom block inserter method inserts as expected.
 	 */
 	public function test_add_custom_block() {
 		$template = new CustomBlockTemplate();
 
-        $template->add_custom_block(
-            [
-                'id'        => 'test-block-name',
-                'blockName' => 'test-block-name',
-            ]
-        );
+		$template->add_custom_block(
+			[
+				'id'        => 'test-block-name',
+				'blockName' => 'test-block-name',
+			]
+		);
 
-        $block = $template->get_block( 'test-block-name' );
-        $this->assertInstanceOf( CustomBlock::class, $block );
+		$block = $template->get_block( 'test-block-name' );
+		$this->assertInstanceOf( CustomBlock::class, $block );
 	}
 }
