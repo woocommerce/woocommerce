@@ -35,7 +35,7 @@ const config: ExtendedPlaywrightTestConfig = {
 	use: {
 		baseURL: BASE_URL,
 		screenshot: 'only-on-failure',
-		stateDir: 'tests/e2e-pw/test-results/storage/',
+		stateDir: 'tests/e2e/test-results/storage/',
 		trace: 'retain-on-failure',
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },

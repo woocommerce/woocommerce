@@ -63,7 +63,7 @@ When you're done, you may want to shut down the test environment:
 
 ## How to run end-to-end tests
 
-Visit the [dedicated documentation](../../tests/e2e-pw/README.md).
+Visit the [dedicated documentation](../../tests/e2e/README.md).
 
 ### Debugging e2e tests using generated reports
 

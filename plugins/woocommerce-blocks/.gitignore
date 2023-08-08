@@ -43,9 +43,10 @@ tests/cli/vendor
 
 # E2E tests
 /tests/e2e-tests/config/local-*.json
-**/e2e-pw/test-results/
-**/e2e-pw/artifacts/
+**/e2e/test-results/
+**/e2e/artifacts/
 /artifacts/
+/playwright-report/
 
 # Logs
 /logs
