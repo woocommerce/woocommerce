@@ -44,14 +44,14 @@ const loginAsCustomer = async ( config: FullConfig ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			await customerPage.goto( `/wp-admin`, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
 			await customerPage.click( 'text=Log In' );
 
 			await customerPage.goto( `/my-account`, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 
 			await customerPage
@@ -90,7 +90,7 @@ const prepareAttributes = async ( config: FullConfig ) => {
 	const context = await browser.newContext( contextOptions );
 	const page = await context.newPage();
 
-	await page.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
+	await page.goto( `/wp-admin`, { waitUntil: 'commit' } );
 	await page.fill( 'input[name="log"]', admin.username );
 	await page.fill( 'input[name="pwd"]', admin.password );
 	await page.click( 'text=Log In' );
@@ -105,7 +105,7 @@ const prepareAttributes = async ( config: FullConfig ) => {
 	} );
 
 	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools', {
-		waitUntil: 'networkidle',
+		waitUntil: 'commit',
 	} );
 
 	await page.click( '.regenerate_product_attributes_lookup_table input' );

@@ -10,7 +10,7 @@ import { BlockData } from '@woocommerce/e2e-types';
 export const closeModalIfExists = async ( page: Page ) => {
 	// The modal close button can have different aria-labels, depending on the version of Gutenberg/WP.
 	// Newer versions (WP >=6.2) use `Close`, while older versions (WP <6.1) use `Close dialog`.
-	const closeButton = await page.getByLabel( /^Close$|^Close dialog$/ );
+	const closeButton = page.getByLabel( /^Close$|^Close dialog$/ );
 	if ( ( await closeButton.count() ) > 0 ) {
 		await closeButton.click();
 	}
@@ -35,7 +35,6 @@ export const editBlockPage = async (
 		.getByRole( 'link', { name: `“${ name } block” (Edit)` } )
 		.click();
 
-	await page.waitForLoadState( 'networkidle' );
 	await page.waitForSelector( blockSelector );
 	await closeModalIfExists( page );
 };

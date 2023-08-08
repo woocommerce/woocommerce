@@ -52,7 +52,7 @@ test.describe( 'Test the cart template', async () => {
 		await editor.page.waitForResponse( ( response ) =>
 			response.url().includes( permalink )
 		);
-		await page.goto( permalink, { waitUntil: 'networkidle' } );
+		await page.goto( permalink, { waitUntil: 'commit' } );
 
 		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
 	} );

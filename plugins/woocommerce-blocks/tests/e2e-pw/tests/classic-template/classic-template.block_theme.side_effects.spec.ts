@@ -81,7 +81,7 @@ for ( const { templateTitle, slug } of Object.values( templates ) ) {
 
 		// These tests consistently fail due to the default content of the page--potentially the classic block is not being
 		// used after another test runs. Reenable this when we have a solution for this.
-
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip( `is rendered on ${ templateTitle } template - frontend side`, async ( {
 			admin,
 			editor,

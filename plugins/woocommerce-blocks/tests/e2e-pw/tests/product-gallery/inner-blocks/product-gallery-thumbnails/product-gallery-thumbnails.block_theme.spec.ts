@@ -58,7 +58,7 @@ test.describe( `${ blockData.name }`, () => {
 		] );
 
 		await page.goto( blockData.productPage, {
-			waitUntil: 'networkidle',
+			waitUntil: 'commit',
 		} );
 
 		const blockFrontend = await frontendUtils.getBlockByName(
@@ -93,7 +93,7 @@ test.describe( `${ blockData.name }`, () => {
 			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 		} );
 
@@ -111,8 +111,10 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -132,6 +134,8 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			// We should refactor this.
+			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
 			const groupBlock = await editorUtils.getBlockByTypeWithParent(
@@ -162,7 +166,7 @@ test.describe( `${ blockData.name }`, () => {
 			] );
 
 			await page.goto( blockData.productPage, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 
 			const groupBlockFrontend =
@@ -202,8 +206,10 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -223,6 +229,8 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			// We should refactor this.
+			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
 			const groupBlock = await editorUtils.getBlockByTypeWithParent(
@@ -253,7 +261,7 @@ test.describe( `${ blockData.name }`, () => {
 			] );
 
 			await page.goto( blockData.productPage, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 
 			const groupBlockFrontend =
@@ -295,8 +303,10 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -316,6 +326,8 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			// We should refactor this.
+			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
 			const groupBlock = await editorUtils.getBlockByTypeWithParent(
@@ -346,7 +358,7 @@ test.describe( `${ blockData.name }`, () => {
 			] );
 
 			await page.goto( blockData.productPage, {
-				waitUntil: 'networkidle',
+				waitUntil: 'commit',
 			} );
 
 			const groupBlockFrontend =

@@ -8,6 +8,7 @@ const templatePath = 'woocommerce/woocommerce//order-confirmation';
 const templateType = 'wp_template';
 
 test.fixme( 'Test the order confirmation template', async () => {
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'Template can be opened in the site editor', async ( {
 		page,
 		editorUtils,
@@ -45,7 +46,7 @@ test.fixme( 'Test the order confirmation template', async () => {
 			attributes: { content: 'Hello World' },
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( permalink, { waitUntil: 'networkidle' } );
+		await page.goto( permalink, { waitUntil: 'commit' } );
 
 		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
 	} );

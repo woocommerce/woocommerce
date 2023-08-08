@@ -8,9 +8,11 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		page,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or'
+			'/active-filters-block/?filter_color=blue&query_type_color=or',
+			{
+				waitUntil: 'commit',
+			}
 		);
-		await page.waitForLoadState( 'networkidle' );
 
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
@@ -31,9 +33,11 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		page,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue,gray&query_type_color=or'
+			'/active-filters-block/?filter_color=blue,gray&query_type_color=or',
+			{
+				waitUntil: 'commit',
+			}
 		);
-		await page.waitForLoadState( 'networkidle' );
 
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
@@ -54,9 +58,11 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		page,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or&min_price=15&max_price=40'
+			'/active-filters-block/?filter_color=blue&query_type_color=or&min_price=15&max_price=40',
+			{
+				waitUntil: 'commit',
+			}
 		);
-		await page.waitForLoadState( 'networkidle' );
 
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();

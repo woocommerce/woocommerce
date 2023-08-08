@@ -19,10 +19,9 @@ const blockData = {
 
 const publishAndVisitPost = async ( { page, editor } ) => {
 	await editor.publishPost();
-	await page.waitForLoadState( 'networkidle' );
 	const url = new URL( page.url() );
 	const postId = url.searchParams.get( 'post' );
-	await page.goto( `/?p=${ postId }`, { waitUntil: 'networkidle' } );
+	await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
 };
 
 const selectTextOnlyOption = async ( { page } ) => {
@@ -30,7 +29,7 @@ const selectTextOnlyOption = async ( { page } ) => {
 		.locator( blockData.selectors.editor.iconOptions )
 		.selectOption( 'Text-only' );
 
-	await page.locator( blockData.selectors.editor.iconToggle );
+	page.locator( blockData.selectors.editor.iconToggle );
 };
 
 const selectIconOnlyOption = async ( { page } ) => {
@@ -38,7 +37,7 @@ const selectIconOnlyOption = async ( { page } ) => {
 		.locator( blockData.selectors.editor.iconOptions )
 		.selectOption( 'Icon-only' );
 
-	await page.locator( blockData.selectors.editor.iconToggle );
+	page.locator( blockData.selectors.editor.iconToggle );
 };
 
 const selectIconAndTextOption = async ( { page } ) => {
@@ -46,7 +45,7 @@ const selectIconAndTextOption = async ( { page } ) => {
 		.locator( blockData.selectors.editor.iconOptions )
 		.selectOption( 'Icon and text' );
 
-	await page.locator( blockData.selectors.editor.iconToggle );
+	page.locator( blockData.selectors.editor.iconToggle );
 };
 
 test.describe( `${ blockData.name } Block`, () => {
@@ -70,7 +69,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		).toBeVisible();
 		await expect(
 			block.locator( blockData.selectors.frontend.icon )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Icon Options can be set to Icon-only', async ( {
@@ -90,7 +89,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )
-		).not.toBeVisible();
+		).toBeHidden();
 		await expect(
 			block.locator( blockData.selectors.frontend.icon )
 		).toBeVisible();
