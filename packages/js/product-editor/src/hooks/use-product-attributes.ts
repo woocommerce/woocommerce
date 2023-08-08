@@ -26,25 +26,24 @@ export type EnhancedProductAttribute = ProductAttribute & {
 	visible?: boolean;
 };
 
+const getFilteredAttributes = (
+	attr: ProductAttribute[],
+	isVariationAttributes: boolean
+) => {
+	return isVariationAttributes
+		? attr.filter( ( attribute ) => !! attribute.variation )
+		: attr.filter( ( attribute ) => ! attribute.variation );
+};
+
 export function useProductAttributes( {
 	allAttributes = [],
 	isVariationAttributes = false,
 	onChange,
 	productId,
 }: useProductAttributesProps ) {
-	const getFilteredAttributes = () => {
-		return isVariationAttributes
-			? allAttributes.filter( ( attribute ) => !! attribute.variation )
-			: allAttributes.filter( ( attribute ) => ! attribute.variation );
-	};
-
 	const [ attributes, setAttributes ] = useState<
 		EnhancedProductAttribute[]
-	>( getFilteredAttributes() );
-	const [ localAttributes, globalAttributes ]: ProductAttribute[][] = sift(
-		attributes,
-		( attr: ProductAttribute ) => attr.id === 0
-	);
+	>( getFilteredAttributes( allAttributes, isVariationAttributes ) );
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -78,27 +77,72 @@ export function useProductAttributes( {
 		};
 	};
 
-	const getAugmentedAttributes = ( atts: ProductAttribute[] ) => {
+	const getAugmentedAttributes = (
+		atts: ProductAttribute[],
+		variation: boolean,
+		startPosition: number
+	) => {
 		return atts.map( ( attribute, index ) => ( {
 			...attribute,
-			variation: isVariationAttributes,
-			position: attributes.length + index,
+			variation,
+			position: startPosition + index,
 		} ) );
 	};
 
 	const handleChange = ( newAttributes: ProductAttribute[] ) => {
-		const augmentedAttributes = getAugmentedAttributes( newAttributes );
-		const otherAttributes = isVariationAttributes
+		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
-		setAttributes( augmentedAttributes );
-		onChange( [ ...otherAttributes, ...augmentedAttributes ] );
+
+		// Remove duplicate global attributes.
+		otherAttributes = otherAttributes.filter( ( attr ) => {
+			if (
+				attr.id > 0 &&
+				newAttributes.some( ( a ) => a.id === attr.id )
+			) {
+				return false;
+			}
+			// Local attributes we check by name.
+			if (
+				attr.id === 0 &&
+				newAttributes.some(
+					( a ) => a.name.toLowerCase() === attr.name.toLowerCase()
+				)
+			) {
+				return false;
+			}
+			return true;
+		} );
+		const newAugmentedAttributes = getAugmentedAttributes(
+			newAttributes,
+			isVariationAttributes,
+			isVariationAttributes ? otherAttributes.length : 0
+		);
+		const otherAugmentedAttributes = getAugmentedAttributes(
+			otherAttributes,
+			! isVariationAttributes,
+			isVariationAttributes ? 0 : newAttributes.length
+		);
+
+		if ( isVariationAttributes ) {
+			onChange( [
+				...otherAugmentedAttributes,
+				...newAugmentedAttributes,
+			] );
+		} else {
+			onChange( [
+				...newAugmentedAttributes,
+				...otherAugmentedAttributes,
+			] );
+		}
 	};
 
 	useEffect( () => {
-		if ( ! getFilteredAttributes().length || attributes.length ) {
-			return;
-		}
+		const [ localAttributes, globalAttributes ]: ProductAttribute[][] =
+			sift(
+				getFilteredAttributes( allAttributes, isVariationAttributes ),
+				( attr: ProductAttribute ) => attr.id === 0
+			);
 
 		Promise.all(
 			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
@@ -110,7 +154,7 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ allAttributes, attributes, fetchTerms ] );
+	}, [ allAttributes, isVariationAttributes, fetchTerms ] );
 
 	return {
 		attributes,

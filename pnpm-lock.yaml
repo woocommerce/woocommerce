@@ -3531,8 +3531,8 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0
       '@commander-js/extra-typings':
-        specifier: ^0.1.0
-        version: 0.1.0(commander@9.4.0)
+        specifier: ^10.0.3
+        version: 10.0.3(commander@9.4.0)
       '@oclif/core':
         specifier: ^2.4.0
         version: 2.4.0
@@ -10595,6 +10595,14 @@ packages:
       commander: 10.0.x
     dependencies:
       commander: 10.0.1
+    dev: false
+
+  /@commander-js/extra-typings@10.0.3(commander@9.4.0):
+    resolution: {integrity: sha512-OIw28QV/GlP8k0B5CJTRsl8IyNvd0R8C8rfo54Yz9P388vCNDgdNrFlKxZTGqps+5j6lSw3Ss9JTQwcur1w1oA==}
+    peerDependencies:
+      commander: 10.0.x
+    dependencies:
+      commander: 9.4.0
     dev: false
 
   /@cspotcode/source-map-support@0.8.1:

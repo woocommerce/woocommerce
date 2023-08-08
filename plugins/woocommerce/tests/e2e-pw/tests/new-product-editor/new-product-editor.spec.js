@@ -40,7 +40,7 @@ async function dismissFeedbackModalIfShown( page ) {
 
 async function expectOldProductEditor( page ) {
 	await expect(
-		page.locator( '#woocommerce-product-data h2' )
+		page.locator( '#woocommerce-product-data .postbox-header h2' )
 	).toContainText( 'Product data' );
 }
 

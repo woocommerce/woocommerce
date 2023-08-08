@@ -48,6 +48,7 @@ type AttributeControlProps = {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
+		newAttributeModalDescription?: string | React.ReactElement;
 		newAttributeModalNotice?: string;
 		customAttributeHelperMessage?: string;
 		attributeRemoveLabel?: string;
@@ -237,6 +238,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
+					description={ uiStrings.newAttributeModalDescription }
 					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
