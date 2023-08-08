@@ -32,7 +32,7 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
-	value: ProductAttribute[];
+	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
@@ -189,7 +189,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const currentAttribute = value.find(
 		( attr ) => getAttributeId( attr ) === currentAttributeId
-	) as EnhancedProductAttribute;
+	);
 
 	return (
 		<div className="woocommerce-attribute-field">

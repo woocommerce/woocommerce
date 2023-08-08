@@ -14,16 +14,17 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
  */
 import { sift } from '../utils';
 
+export type EnhancedProductAttribute = ProductAttribute & {
+	isDefault?: boolean;
+	terms?: ProductAttributeTerm[];
+	visible?: boolean;
+};
+
 type useProductAttributesProps = {
 	allAttributes: ProductAttribute[];
 	isVariationAttributes?: boolean;
-	onChange: ( attributes: ProductAttribute[] ) => void;
+	onChange: ( attributes: EnhancedProductAttribute[] ) => void;
 	productId?: number;
-};
-
-export type EnhancedProductAttribute = ProductAttribute & {
-	terms?: ProductAttributeTerm[];
-	visible?: boolean;
 };
 
 const getFilteredAttributes = (
@@ -89,7 +90,7 @@ export function useProductAttributes( {
 		} ) );
 	};
 
-	const handleChange = ( newAttributes: ProductAttribute[] ) => {
+	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
 		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );

@@ -36,6 +36,24 @@ export type ProductAttribute = {
 	options: string[];
 };
 
+/**
+ * Product - Default attributes properties
+ */
+export type ProductDefaultAttribute = {
+	/**
+	 * Attribute ID.
+	 */
+	id: number;
+	/**
+	 * Attribute name.
+	 */
+	name: string;
+	/**
+	 * Selected attribute term name.
+	 */
+	option: string;
+};
+
 export type ProductDimensions = {
 	width: string;
 	height: string;
@@ -66,6 +84,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	date_modified_gmt: string;
 	date_on_sale_from_gmt: string | null;
 	date_on_sale_to_gmt: string | null;
+	default_attributes: ProductDefaultAttribute[];
 	description: string;
 	dimensions: ProductDimensions;
 	download_expiry: number;
