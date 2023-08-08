@@ -54,6 +54,7 @@ type NewAttributeModalProps = {
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
+	createNewAttributesAsGlobal?: boolean;
 };
 
 type AttributeForm = {
@@ -86,6 +87,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
+	createNewAttributesAsGlobal = false,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -312,6 +314,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																			undefined
 																	),
 															] }
+															createNewAttributesAsGlobal={
+																createNewAttributesAsGlobal
+															}
 														/>
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">

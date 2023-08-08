@@ -151,6 +151,7 @@ export function Edit( {
 							),
 						}
 					) }
+					createNewAttributesAsGlobal={ true }
 					notice={ '' }
 					onCancel={ () => {
 						closeNewModal();

@@ -86,6 +86,7 @@ export function Edit() {
 					entityDefaultAttributes,
 				] ) }
 				onChange={ handleChange }
+				createNewAttributesAsGlobal={ true }
 				uiStrings={ {
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
