@@ -39,7 +39,6 @@
 	"wireit": {
 		"build": {
 			"command": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-			"clean": "if-file-deleted",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx,scss}",
 				"tsconfig.json",
@@ -53,15 +52,24 @@
 				"build-style/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"test": {
+			"command": "jest --config ./jest.config.json",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx,scss}",
+				"tsconfig.json",
+				"tsconfig-cjs.json",
+				"babel.config.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"build": "wireit",
-		"turbo:test": "jest --config ./jest.config.json",
+		"test": "wireit",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "eslint src",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",

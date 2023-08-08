@@ -32,7 +32,6 @@
 	"wireit": {
 		"build": {
 			"command": "pnpm run clean && pnpm run compile",
-			"clean": "if-file-deleted",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx,scss}",
 				"tsconfig.json",
@@ -43,12 +42,21 @@
 				"dist/**/*",
 				".tsbuildinfo"
 			]
+		},
+		"test": {
+			"command": "jest",
+			"files": [
+				"src/**/*.{js,jsx,ts,tsx,scss}",
+				"tsconfig.json",
+				"tsconfig-cjs.json",
+				".tsbuildinfo"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"build": "wireit",
-		"turbo:test": "jest",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test": "jest",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",

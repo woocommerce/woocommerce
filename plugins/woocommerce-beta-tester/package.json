@@ -54,7 +54,6 @@
 	"wireit": {
 		"build": {
 			"command": "pnpm run build:admin && pnpm run uglify",
-			"clean": "if-file-deleted",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx,scss}",
 				"tsconfig.json"

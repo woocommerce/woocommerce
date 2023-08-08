@@ -11,7 +11,6 @@
 	"wireit": {
 		"build": {
 			"command": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
-			"clean": "if-file-deleted",
 			"files": [
 				"client/**/*.{js,jsx,ts,tsx,scss}",
 				"typings/**/*",
@@ -25,14 +24,23 @@
 			"dependencies": [
 				"../woocommerce:build:feature-config"
 			]
+		},
+		"test": {
+			"command": "pnpm run test:client",
+			"files": [
+				"client/**/*.{js,jsx,ts,tsx,scss}",
+				"tsconfig.json",
+				"webpack.config.js",
+				"babel.config.js"
+			],
+			"output": []
 		}
 	},
 	"scripts": {
 		"changelog": "pnpm --filter=woocommerce -r run changelog ",
 		"build": "wireit",
-		"turbo:test": "pnpm run test:client",
+		"test": "wireit",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",

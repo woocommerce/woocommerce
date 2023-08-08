@@ -34,7 +34,6 @@
 	"wireit": {
 		"build": {
 			"command": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-			"clean": "if-file-deleted",
 			"files": [
 				"src/**/*.{js,jsx,ts,tsx,scss}",
 				"typings/**/*",
