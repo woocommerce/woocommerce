@@ -14,6 +14,7 @@ const Option = ( {
 	name,
 	onChange,
 	option,
+	disabled = false,
 }: RadioControlOptionProps ): JSX.Element => {
 	const { value, label, description, secondaryLabel, secondaryDescription } =
 		option;
@@ -46,6 +47,7 @@ const Option = ( {
 					[ `${ name }-${ value }__secondary-description` ]:
 						secondaryDescription,
 				} ) }
+				disabled={ disabled }
 			/>
 			<OptionLayout
 				id={ `${ name }-${ value }` }

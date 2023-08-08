@@ -37,13 +37,12 @@ class Api {
 	public function __construct( PaymentMethodRegistry $payment_method_registry, AssetDataRegistry $asset_registry ) {
 		$this->payment_method_registry = $payment_method_registry;
 		$this->asset_registry          = $asset_registry;
-		$this->init();
 	}
 
 	/**
 	 * Initialize class features.
 	 */
-	protected function init() {
+	public function init() {
 		add_action( 'init', array( $this->payment_method_registry, 'initialize' ), 5 );
 		add_filter( 'woocommerce_blocks_register_script_dependencies', array( $this, 'add_payment_method_script_dependencies' ), 10, 2 );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );

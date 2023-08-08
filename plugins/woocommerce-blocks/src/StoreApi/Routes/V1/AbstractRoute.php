@@ -163,9 +163,10 @@ abstract class AbstractRoute implements RouteInterface {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		throw new RouteException( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
 	}
 
 	/**
@@ -175,9 +176,10 @@ abstract class AbstractRoute implements RouteInterface {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		throw new RouteException( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
 	}
 
 	/**
@@ -187,9 +189,10 @@ abstract class AbstractRoute implements RouteInterface {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
-		throw new RouteException( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
 	}
 
 	/**
@@ -199,9 +202,10 @@ abstract class AbstractRoute implements RouteInterface {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
-		throw new RouteException( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
 	}
 
 	/**
