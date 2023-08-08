@@ -16,7 +16,8 @@ class BlockTemplate extends AbstractBlockTemplate {
 	 * @param string $id_base The base to use when generating an ID.
 	 * @return string
 	 */
-	public function add_block( array $block_config, $block_class = 'Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block' ): BlockInterface {
-		return $this->add_inner_block( $block_config, $block_class );
+	public function add_block( array $block_config ): BlockInterface {
+		$block = new Block( $block_config, $this->get_root_template(), $this );
+		return $this->add_inner_block( $block );
 	}
 }

@@ -28,10 +28,7 @@ trait BlockContainerTrait {
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
-	protected function &add_inner_block( array $block_config, $block_class = 'Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block' ): BlockInterface {
-		$root_template = $this->get_root_template();
-		$block         = new $block_class( $block_config, $root_template, $this );
-
+	protected function &add_inner_block( BlockInterface $block ): BlockInterface {
 		if ( ! $block instanceof BlockInterface ) {
 			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
 		}
@@ -40,6 +37,7 @@ trait BlockContainerTrait {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
+		$root_template = $block->get_root_template();
 		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
 		return $block;

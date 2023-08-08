@@ -119,7 +119,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$block_b = $template->add_block_container(
+		$block_b = $template->add_block(
 			[
 				'blockName'  => 'test-block-name-b',
 				'order'      => 50,
@@ -236,7 +236,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$block_b = $template->add_block_container(
+		$block_b = $template->add_block(
 			[
 				'id'         => 'b',
 				'blockName'  => 'test-block-name-b',
@@ -248,7 +248,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$template->add_block_container(
+		$template->add_block(
 			[
 				'id'         => 'a',
 				'blockName'  => 'test-block-name-a',
