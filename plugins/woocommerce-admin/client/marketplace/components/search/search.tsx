@@ -9,11 +9,11 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './search.scss';
+import { MARKETPLACE_URL } from '../constants';
 
 const searchPlaceholder = __( 'Search extensions and themes', 'woocommerce' );
 
-const marketplaceAPI =
-	'https://woocommerce.com/wp-json/wccom-extensions/1.0/search';
+const marketplaceAPI = MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/search';
 
 export interface SearchProps {
 	locale?: string | 'en_US';
