@@ -16,22 +16,22 @@ module.exports = {
 		process.env.CI && '@wordpress/e2e-tests/config/flaky-tests-reporter.js',
 	].filter( Boolean ),
 
-	testEnvironment: '<rootDir>/tests/e2e/config/environment.js',
+	testEnvironment: '<rootDir>/tests/e2e-jest/config/environment.js',
 	testRunner: 'jest-circus/runner',
 	// Where to look for test files
-	roots: [ '<rootDir>/tests/e2e/specs' ],
-	globalSetup: '<rootDir>/tests/e2e/config/setup.js',
-	globalTeardown: '<rootDir>/tests/e2e/config/teardown.js',
+	roots: [ '<rootDir>/tests/e2e-jest/specs' ],
+	globalSetup: '<rootDir>/tests/e2e-jest/config/setup.js',
+	globalTeardown: '<rootDir>/tests/e2e-jest/config/teardown.js',
 	setupFiles: [],
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
 	setupFilesAfterEnv: [
-		'<rootDir>/tests/e2e/config/custom-matchers/index.js',
-		'<rootDir>/tests/e2e/config/jest.setup.js',
+		'<rootDir>/tests/e2e-jest/config/custom-matchers/index.js',
+		'<rootDir>/tests/e2e-jest/config/jest.setup.js',
 		'expect-puppeteer',
 	],
 	testPathIgnorePatterns: [
-		'<rootDir>/tests/e2e/specs/performance',
+		'<rootDir>/tests/e2e-jest/specs/performance',
 		// Ignore all the files that have utils in the name
 		'utils',
 	],

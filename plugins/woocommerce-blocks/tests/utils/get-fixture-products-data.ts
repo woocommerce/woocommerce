@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { Products } from '../e2e/fixtures/fixture-data';
+import { Products } from '../e2e-jest/fixtures/fixture-data';
 
 /**
  * Get products data by key from fixtures.

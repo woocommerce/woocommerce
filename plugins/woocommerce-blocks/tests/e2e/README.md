@@ -1,6 +1,6 @@
 # WooCommerce Blocks Playwright End to End Tests
 
-This is the documentation for the new E2E testing setup based on Playwright and wp-env. Over time, these playwright E2E tests should replace the current [Puppeteer E2E tests](../e2e/).
+This is the documentation for the new E2E testing setup based on Playwright and wp-env. Over time, these playwright E2E tests should replace the current [Puppeteer E2E tests](../e2e-jest/).
 
 ## Table of contents <!-- omit in toc -->
 
@@ -18,7 +18,7 @@ This is the documentation for the new E2E testing setup based on Playwright and 
 
 Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
-If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](../tests/e2e/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
+If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](../tests/e2e-jest/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
 
 ## Introduction
 
@@ -39,7 +39,7 @@ npm run env:start
 ```
 
 ```sh
-npm run test:e2e-pw
+npm run test:e2e
 ```
 
 ### To run the test again, re-create the environment to start with a fresh state
@@ -49,7 +49,7 @@ npm run env:restart
 ```
 
 ```sh
-npm run test:e2e-pw
+npm run test:e2e
 ```
 
 ### Other ways of running tests
@@ -57,31 +57,31 @@ npm run test:e2e-pw
 Headless mode:
 
 ```sh
-npm run test:e2e-pw
+npm run test:e2e
 ```
 
 Interactive UI mode:
 
 ```sh
-npm run test:e2e-pw -- --ui
+npm run test:e2e -- --ui
 ```
 
 Headed mode:
 
 ```sh
-npm run test:e2e-pw -- --headed
+npm run test:e2e -- --headed
 ```
 
 Debug mode:
 
 ```sh
-npm run test:e2e-pw -- --debug
+npm run test:e2e -- --debug
 ```
 
 Running a single test:
 
 ```sh
-npm run test:e2e-pw ./tests/e2e-pw/tests/example.spec.ts
+npm run test:e2e ./tests/e2e/tests/example.spec.ts
 ```
 
 To see all options, run the following command:

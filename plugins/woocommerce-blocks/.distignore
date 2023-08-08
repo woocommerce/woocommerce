@@ -8,6 +8,7 @@
 /patches
 /storybook
 /tests
+/playwright-report
 
 .editorconfig
 .env

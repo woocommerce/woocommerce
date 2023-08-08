@@ -12,7 +12,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { BASE_URL } from '../e2e/utils';
+import { BASE_URL } from '../e2e-jest/utils';
 import {
 	getCartItemPathExpression,
 	getQtyInputPathExpression,

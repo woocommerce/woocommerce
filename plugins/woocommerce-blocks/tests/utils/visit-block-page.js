@@ -14,7 +14,7 @@ import { paramCase as kebabCase } from 'change-case';
  * Internal dependencies
  */
 import { clickLink } from '.';
-import { insertBlockDontWaitForInsertClose } from '../e2e/utils.js';
+import { insertBlockDontWaitForInsertClose } from '../e2e-jest/utils.js';
 
 /**
  * This will visit a GB page or post, and will hide the welcome guide.
