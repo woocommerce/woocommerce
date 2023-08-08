@@ -41,7 +41,7 @@ test.describe( 'Merchant → Cart', () => {
 		test( 'can only be inserted once', async ( { page, editorUtils } ) => {
 			await editorUtils.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
-			const cartBlockButton = await page.locator( 'button', {
+			const cartBlockButton = page.locator( 'button', {
 				has: page.locator( `text="${ blockData.name }"` ),
 			} );
 			await expect( cartBlockButton ).toHaveAttribute(
@@ -57,11 +57,11 @@ test.describe( 'Merchant → Cart', () => {
 		} ) => {
 			// Begin by removing the block.
 			await editor.selectBlocks( blockSelectorInEditor );
-			const options = await page
+			const options = page
 				.getByRole( 'toolbar', { name: 'Block tools' } )
 				.getByRole( 'button', { name: 'Options' } );
 			await options.click();
-			const removeButton = await page.getByText( 'Remove Cart' );
+			const removeButton = page.getByText( 'Remove Cart' );
 			await removeButton.click();
 			// Expect block to have been removed.
 			await expect(
@@ -94,14 +94,14 @@ test.describe( 'Merchant → Cart', () => {
 					' [data-type="woocommerce/cart-order-summary-block"]'
 			);
 
-			const addBlockButton = await editor.canvas
+			const addBlockButton = editor.canvas
 				.getByRole( 'document', { name: 'Block: Order Summary' } )
 				.getByRole( 'button', { name: 'Add block' } );
 			await addBlockButton.dispatchEvent( 'click' );
 			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( 'Table' );
-			const tableButton = await editor.page.getByRole( 'option', {
+			const tableButton = editor.page.getByRole( 'option', {
 				name: 'Table',
 			} );
 			await expect( tableButton ).toBeVisible();
@@ -110,7 +110,7 @@ test.describe( 'Merchant → Cart', () => {
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( 'Audio' );
 
-			const audioButton = await editor.page.getByRole( 'option', {
+			const audioButton = editor.page.getByRole( 'option', {
 				name: 'Audio',
 			} );
 			await test.expect( audioButton ).toBeVisible();
@@ -120,26 +120,20 @@ test.describe( 'Merchant → Cart', () => {
 				blockSelectorInEditor +
 					' [data-type="woocommerce/filled-cart-block"]'
 			);
-			const filledCartAddBlockButton = await editor.canvas
+			const filledCartAddBlockButton = editor.canvas
 				.getByRole( 'document', { name: 'Block: Filled Cart' } )
 				.getByRole( 'button', { name: 'Add block' } )
 				.first();
 			await filledCartAddBlockButton.click();
 
-			const filledCartTableButton = await editor.page.getByRole(
-				'option',
-				{
-					name: 'Table',
-				}
-			);
+			const filledCartTableButton = editor.page.getByRole( 'option', {
+				name: 'Table',
+			} );
 			await expect( filledCartTableButton ).toBeVisible();
 
-			const filledCartAudioButton = await editor.page.getByRole(
-				'option',
-				{
-					name: 'Audio',
-				}
-			);
+			const filledCartAudioButton = editor.page.getByRole( 'option', {
+				name: 'Audio',
+			} );
 			await expect( filledCartAudioButton ).toBeHidden();
 		} );
 
@@ -152,7 +146,7 @@ test.describe( 'Merchant → Cart', () => {
 			await editor.page
 				.getByRole( 'button', { name: 'Switch view' } )
 				.click();
-			const emptyCartButton = await page.getByRole( 'menuitem', {
+			const emptyCartButton = page.getByRole( 'menuitem', {
 				name: 'Empty Cart',
 			} );
 
@@ -171,7 +165,7 @@ test.describe( 'Merchant → Cart', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 			await page.getByRole( 'button', { name: 'Switch view' } ).click();
 
-			const filledCartButton = await page.getByRole( 'menuitem', {
+			const filledCartButton = page.getByRole( 'menuitem', {
 				name: 'Filled Cart',
 			} );
 

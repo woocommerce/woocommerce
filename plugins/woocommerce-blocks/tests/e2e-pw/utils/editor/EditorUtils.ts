@@ -22,7 +22,7 @@ export class EditorUtils {
 		if ( ! parentBlock ) {
 			throw new Error( `Parent block "${ parentName }" not found.` );
 		}
-		const block = await parentBlock.locator( `[data-type="${ name }"]` );
+		const block = parentBlock.locator( `[data-type="${ name }"]` );
 		return block;
 	}
 

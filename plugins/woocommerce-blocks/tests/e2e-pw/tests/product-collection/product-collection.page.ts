@@ -73,7 +73,7 @@ class ProductCollectionPage {
 		await this.editor.publishPost();
 		const url = new URL( this.page.url() );
 		const postId = url.searchParams.get( 'post' );
-		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'networkidle' } );
+		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
 		await this.refreshLocators( 'frontend' );
 	}
 
@@ -105,6 +105,8 @@ class ProductCollectionPage {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
 			.click();
+		// We should refactor this code. We should not wait for timeout.
+		// eslint-disable-next-line playwright/no-wait-for-timeout
 		await this.page.waitForTimeout( 500 );
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
@@ -118,7 +120,7 @@ class ProductCollectionPage {
 
 	async setNumberOfColumns( numberOfColumns: number ) {
 		const sidebarSettings = await this.locateSidebarSettings();
-		const inputField = await sidebarSettings.getByRole( 'spinbutton', {
+		const inputField = sidebarSettings.getByRole( 'spinbutton', {
 			name: 'Columns',
 		} );
 		await inputField.fill( numberOfColumns.toString() );
@@ -134,7 +136,7 @@ class ProductCollectionPage {
 			| 'rating/desc'
 	) {
 		const sidebarSettings = await this.locateSidebarSettings();
-		const orderByComboBox = await sidebarSettings.getByRole( 'combobox', {
+		const orderByComboBox = sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
@@ -201,6 +203,7 @@ class ProductCollectionPage {
 		await input.clear();
 		await input.fill( keyword );
 		// Timeout is needed because of debounce in the block.
+		// eslint-disable-next-line playwright/no-wait-for-timeout
 		await this.page.waitForTimeout( 300 );
 		await this.refreshLocators( 'editor' );
 	}
@@ -227,7 +230,7 @@ class ProductCollectionPage {
 			.click();
 
 		// Set the values.
-		const displaySettingsContainer = await this.page.locator(
+		const displaySettingsContainer = this.page.locator(
 			'.wc-block-editor-product-collection__display-settings'
 		);
 		await displaySettingsContainer.getByLabel( 'Items per Page' ).click();
@@ -248,10 +251,9 @@ class ProductCollectionPage {
 	}
 
 	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {
-		await this.page.waitForLoadState( 'networkidle' );
 		const sidebarSettings = await this.locateSidebarSettings();
 
-		const productAttributesContainer = await sidebarSettings.locator(
+		const productAttributesContainer = sidebarSettings.locator(
 			'.woocommerce-product-attributes'
 		);
 
@@ -303,7 +305,7 @@ class ProductCollectionPage {
 	 * Locators
 	 */
 	async locateSidebarSettings() {
-		return await this.page.getByRole( 'region', {
+		return this.page.getByRole( 'region', {
 			name: 'Editor settings',
 		} );
 	}
@@ -322,58 +324,50 @@ class ProductCollectionPage {
 	}
 
 	private async initializeLocatorsForEditor() {
-		this.productTemplate = await this.page.locator(
-			SELECTORS.productTemplate
-		);
-		this.products = await this.page
+		this.productTemplate = this.page.locator( SELECTORS.productTemplate );
+		this.products = this.page
 			.locator( SELECTORS.product )
 			.locator( 'visible=true' );
-		this.productImages = await this.page
+		this.productImages = this.page
 			.locator( SELECTORS.productImage.inEditor )
 			.locator( 'visible=true' );
-		this.productTitles = await this.productTemplate
+		this.productTitles = this.productTemplate
 			.locator( SELECTORS.productTitle )
 			.locator( 'visible=true' );
-		this.productPrices = await this.page
+		this.productPrices = this.page
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
-		this.addToCartButtons = await this.page
+		this.addToCartButtons = this.page
 			.locator( SELECTORS.addToCartButton.inEditor )
 			.locator( 'visible=true' );
-		this.pagination = await this.page.getByRole( 'document', {
+		this.pagination = this.page.getByRole( 'document', {
 			name: 'Block: Pagination',
 		} );
 	}
 
 	private async initializeLocatorsForFrontend() {
-		this.productTemplate = await this.page.locator(
-			SELECTORS.productTemplate
-		);
-		this.products = await this.page.locator( SELECTORS.product );
-		this.productImages = await this.productTemplate.locator(
+		this.productTemplate = this.page.locator( SELECTORS.productTemplate );
+		this.products = this.page.locator( SELECTORS.product );
+		this.productImages = this.productTemplate.locator(
 			SELECTORS.productImage.onFrontend
 		);
-		this.productTitles = await this.productTemplate.locator(
+		this.productTitles = this.productTemplate.locator(
 			SELECTORS.productTitle
 		);
-		this.productPrices = await this.productTemplate.locator(
+		this.productPrices = this.productTemplate.locator(
 			SELECTORS.productPrice.onFrontend
 		);
-		this.addToCartButtons = await this.productTemplate.locator(
+		this.addToCartButtons = this.productTemplate.locator(
 			SELECTORS.addToCartButton.onFrontend
 		);
-		this.pagination = await this.page.locator(
-			SELECTORS.pagination.onFrontend
-		);
+		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
 	}
 
 	private async waitForProductsToLoad() {
-		await this.page.waitForLoadState( 'networkidle' );
 		// Wait for the product blocks to be loaded.
 		await this.page.waitForSelector( SELECTORS.product );
 		// Wait for the loading spinner to be detached.
 		await this.page.waitForSelector( '.is-loading', { state: 'detached' } );
-		await this.page.waitForLoadState( 'networkidle' );
 	}
 }
 

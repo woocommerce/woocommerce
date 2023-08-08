@@ -46,7 +46,7 @@ test.describe( 'Test the checkout template', async () => {
 			attributes: { content: 'Hello World' },
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( permalink, { waitUntil: 'networkidle' } );
+		await page.goto( permalink, { waitUntil: 'commit' } );
 
 		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
 	} );
