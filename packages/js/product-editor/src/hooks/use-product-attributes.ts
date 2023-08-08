@@ -53,7 +53,6 @@ export function useProductAttributes( {
 			)
 				.getProductAttributeTerms< ProductAttributeTerm[] >( {
 					attribute_id: attributeId,
-					product: productId,
 				} )
 				.then(
 					( attributeTerms ) => {
@@ -69,12 +68,13 @@ export function useProductAttributes( {
 
 	const enhanceAttribute = (
 		globalAttribute: ProductAttribute,
-		terms: ProductAttributeTerm[]
+		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
 			...globalAttribute,
-			terms: terms.length > 0 ? terms : undefined,
-			options: terms.length === 0 ? [] : globalAttribute.options,
+			terms: ( allTerms || [] ).filter( ( term ) =>
+				globalAttribute.options.includes( term.name )
+			),
 		};
 	};
 
