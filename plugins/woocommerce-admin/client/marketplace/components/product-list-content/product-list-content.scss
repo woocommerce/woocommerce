@@ -5,6 +5,7 @@
 	&__product-list-content {
 		display: grid;
 		gap: $medium-gap;
+		margin-top: $grid-unit-20;
 	}
 
 	&__extension-card {

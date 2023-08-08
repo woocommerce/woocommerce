@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import './header-account.scss';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import HeaderAccountModal from './header-account-modal';
+import { MARKETPLACE_URL } from '../constants';
 
 export default function HeaderAccount(): JSX.Element {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -27,7 +28,7 @@ export default function HeaderAccount(): JSX.Element {
 	// component. That component is either an anchor with href if provided or a button that won't accept an href if no href is provided.
 	// Due to early erroring of TypeScript, it only takes the button version into account which doesn't accept href.
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const accountURL: any = 'https://woocommerce.com/my-dashboard/';
+	const accountURL: any = MARKETPLACE_URL + '/my-dashboard/';
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
 
 	const avatar = () => {
