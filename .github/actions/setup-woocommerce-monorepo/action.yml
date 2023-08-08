@@ -38,6 +38,8 @@ runs:
               cache: pnpm
               registry-url: 'https://registry.npmjs.org'
 
+        - uses: google/wireit@setup-github-actions-caching/v1
+
         - name: Setup PHP
           uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
           with:
