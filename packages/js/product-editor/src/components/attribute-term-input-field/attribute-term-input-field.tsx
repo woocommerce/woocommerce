@@ -53,9 +53,6 @@ export const AttributeTermInputField: React.FC<
 	attributeId,
 	label = '',
 } ) => {
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-	);
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);
