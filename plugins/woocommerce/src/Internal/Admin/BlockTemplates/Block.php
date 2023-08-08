@@ -40,8 +40,7 @@ class Block extends AbstractBlock implements BlockContainerInterface {
 	/**
 	 * Generate a block ID based on a base.
 	 *
-	 * @param string $id_base The base to use when generating an ID.
-	 * @return string
+	 * @param array $block_config The block data.
 	 */
 	public function &add_block( array $block_config ): BlockInterface {
 		$block = new Block( $block_config, $this->get_root_template(), $this );
