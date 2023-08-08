@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
 import { Status, Options } from 'wordpress__notices';
@@ -79,7 +79,9 @@ const StoreLocation = ( {
 				countryStore.hasFinishedResolution( 'getCountries' ),
 		};
 	} );
+	const [ isSubmitting, setSubmitting ] = useState( false );
 	const onSubmit = async ( values: FormValues ) => {
+		setSubmitting( true );
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
 				...settings,
@@ -91,6 +93,7 @@ const StoreLocation = ( {
 			},
 		} );
 
+		setSubmitting( false );
 		if ( ! isSettingsError ) {
 			onComplete( values );
 		} else {
@@ -135,7 +138,7 @@ const StoreLocation = ( {
 						getInputProps={ getInputProps }
 						setValue={ setValue }
 					/>
-					<Button isPrimary onClick={ handleSubmit }>
+					<Button isPrimary onClick={ handleSubmit } isBusy={ isSubmitting }>
 						{ buttonText }
 					</Button>
 				</Fragment>
