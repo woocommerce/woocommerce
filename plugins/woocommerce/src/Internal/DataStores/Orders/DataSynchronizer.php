@@ -667,10 +667,12 @@ ORDER BY orders.id ASC
 			return;
 		}
 
+		if ( ! $this->get_table_exists() ) {
+			return;
+		}
+
 		if ( $this->data_sync_is_enabled() ) {
-			if ( $this->get_table_exists() ) {
-				$this->data_store->delete_order_data_from_custom_order_tables( $postid );
-			}
+			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
 		} elseif ( $this->custom_orders_table_is_authoritative() ) {
 			return;
 		}
