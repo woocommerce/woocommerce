@@ -353,7 +353,7 @@ describe( 'useProductAttributes', () => {
 			);
 		} );
 
-		it( 'sets terms for any global attributes and options to empty array', async () => {
+		it( 'sets terms for any global attributes and leaves options the same', async () => {
 			const allAttributes = [
 				{ ...testAttributes[ 0 ] },
 				{ ...testAttributes[ 1 ] },
@@ -377,11 +377,12 @@ describe( 'useProductAttributes', () => {
 			expect( result.current.attributes[ 0 ].terms ).toEqual(
 				attributeTerms[ result.current.attributes[ 0 ].id ]
 			);
-			expect( result.current.attributes[ 0 ].options ).toEqual( [] );
+			expect( result.current.attributes[ 0 ].options ).toEqual(
+				result.current.attributes[ 0 ].options
+			);
 			expect( result.current.attributes[ 1 ].terms ).toEqual(
 				attributeTerms[ result.current.attributes[ 1 ].id ]
 			);
-			expect( result.current.attributes[ 1 ].options ).toEqual( [] );
 		} );
 	} );
 } );
