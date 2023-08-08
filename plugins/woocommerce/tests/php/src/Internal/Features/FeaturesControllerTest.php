@@ -60,9 +60,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->set_up_plugins();
 
-		add_filter( 'woocommerce_feature_definitions', function() use ( $features ) {
-			return $features;
-		} );
+		add_filter(
+			'woocommerce_feature_definitions',
+			function() use ( $features ) {
+				return $features;
+			}
+		);
 
 		$this->sut = new FeaturesController();
 		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
@@ -826,7 +829,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			'woocommerce_feature_definitions',
 			function() {
 				return array(
-					'custom_order_tables' => array(
+					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
 						'is_experimental'    => true,
 						'enabled_by_default' => false,
@@ -903,7 +906,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			'woocommerce_feature_definitions',
 			function() {
 				return array(
-					'custom_order_tables' => array(
+					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
 						'is_experimental'    => true,
 						'enabled_by_default' => false,
