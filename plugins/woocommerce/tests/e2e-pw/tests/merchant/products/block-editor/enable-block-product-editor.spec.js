@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
+	expectBlockProductEditor,
+	expectOldProductEditor,
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
@@ -12,18 +14,6 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 let isNewProductEditorEnabled = false;
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
-
-async function expectOldProductEditor( page ) {
-	await expect(
-		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
-}
-
-async function expectBlockProductEditor( page ) {
-	await expect(
-		page.locator( '.woocommerce-product-header__inner h1' )
-	).toContainText( 'Add new product' );
-}
 
 async function disableNewEditorIfEnabled( browser ) {
 	const context = await browser.newContext();

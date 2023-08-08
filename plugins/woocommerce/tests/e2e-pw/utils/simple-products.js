@@ -1,3 +1,5 @@
+const { expect } = require( '@playwright/test' );
+
 const SETTINGS_URL =
 	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
 
@@ -54,8 +56,47 @@ async function clickAddNewMenuItem( page ) {
 		.click();
 }
 
+/**
+ * This function checks if the old product editor is visible.
+ *
+ * @param {Page} page
+ */
+async function expectOldProductEditor( page ) {
+	await expect(
+		page.locator( '#woocommerce-product-data h2' )
+	).toContainText( 'Product data' );
+}
+
+/**
+ * This function checks if the block product editor is visible.
+ *
+ * @param {Page} page
+ */
+async function expectBlockProductEditor( page ) {
+	await expect(
+		page.locator( '.woocommerce-product-header__inner h1' )
+	).toContainText( 'Add new product' );
+}
+
+/**
+ * Click on a block editor tab.
+ *
+ * @param {Page} page
+ * @param {string} tabName
+ */
+async function clickOnTab( tabName, page ) {
+	await page
+		// .locator( '.woocommerce-product-tab__general-content' )
+		.locator( '.woocommerce-product-tabs' )
+		.getByRole( 'button', { name: tabName } )
+		.click();
+}
+
 module.exports = {
+	expectBlockProductEditor,
+	expectOldProductEditor,
 	clickAddNewMenuItem,
+	clickOnTab,
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 };
