@@ -22,6 +22,7 @@ export interface TabsProps {
 interface Tab {
 	name: string;
 	title: string;
+	href?: string;
 }
 
 interface Tabs {
@@ -40,6 +41,13 @@ const tabs: Tabs = {
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My Subscriptions', 'woocommerce' ),
+		href: getNewPath(
+			{
+				page: 'wc-addons',
+				section: 'helper',
+			},
+			''
+		),
 	},
 };
 
@@ -47,18 +55,6 @@ const setUrlTabParam = ( tabKey: string ) => {
 	if ( tabKey === DEFAULT_TAB_KEY ) {
 		navigateTo( {
 			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
-		} );
-		return;
-	}
-	if ( tabKey === 'my-subscriptions' ) {
-		navigateTo( {
-			url: getNewPath(
-				{
-					page: 'wc-addons',
-					section: 'helper',
-				},
-				''
-			),
 		} );
 		return;
 	}
@@ -72,18 +68,29 @@ const renderTabs = ( props: TabsProps ) => {
 	const tabContent = [];
 	for ( const tabKey in tabs ) {
 		tabContent.push(
-			<Button
-				className={ classNames( 'woocommerce-marketplace__tab-button', {
-					'is-active': tabKey === selectedTab,
-				} ) }
-				onClick={ () => {
-					setSelectedTab( tabKey );
-					setUrlTabParam( tabKey );
-				} }
-				key={ tabKey }
-			>
-				{ tabs[ tabKey ]?.title }
-			</Button>
+			<>
+				{ tabs[ tabKey ]?.href ?
+					<a
+						className="woocommerce-marketplace__tab-button components-button"
+						href={ tabs[ tabKey ]?.href  }
+						key={ tabKey }>
+							{ tabs[ tabKey ]?.title }
+					</a>
+				:
+					<Button
+						className={ classNames( 'woocommerce-marketplace__tab-button', {
+							'is-active': tabKey === selectedTab,
+						} ) }
+						onClick={ () => {
+							setSelectedTab( tabKey );
+							setUrlTabParam( tabKey );
+						} }
+						key={ tabKey }
+					>
+						{ tabs[ tabKey ]?.title }
+					</Button>
+				}
+			</>
 		);
 	}
 	return tabContent;
