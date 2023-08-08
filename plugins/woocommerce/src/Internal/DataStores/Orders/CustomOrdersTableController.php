@@ -390,6 +390,7 @@ class CustomOrdersTableController {
 	private function add_feature_definition( $feature_definitions ) {
 		$feature_definitions['custom_order_tables'] = array(
 			'name'                => __( 'High-Performance order storage', 'woocommerce' ),
+			'option_key'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 			'is_experimental'     => true,
 			'enabled_by_default'  => false,
 			'setting'             => $this->get_hpos_setting_for_feature(),

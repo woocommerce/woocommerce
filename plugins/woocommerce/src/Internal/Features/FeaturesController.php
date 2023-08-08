@@ -108,6 +108,7 @@ class FeaturesController {
 				'analytics'            => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
 					'is_experimental'    => false,
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
@@ -116,6 +117,7 @@ class FeaturesController {
 				'new_navigation'       => array(
 					'name'            => __( 'Navigation', 'woocommerce' ),
 					'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+					'option_key'      => Init::TOGGLE_OPTION_NAME,
 					'is_experimental' => false,
 					'disable_ui'      => false,
 					'is_legacy'       => true,
@@ -123,9 +125,20 @@ class FeaturesController {
 				'product_block_editor' => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+					'option_key'      => NewProductManagementExperience::TOGGLE_OPTION_NAME,
 					'is_experimental' => true,
 					'disable_ui'      => false,
 					'is_legacy'       => true,
+					'disabled'        => function() {
+						return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
+					},
+					'desc_tip'        => function() {
+						$string = '';
+						if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
+							$string = __( '⚠ This feature is compatible with WordPress version 6.2 or higher.', 'woocommerce' );
+						}
+						return $string;
+					},
 				),
 				'cart_checkout_blocks' => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -410,22 +423,22 @@ class FeaturesController {
 
 	/**
 	 * Get the name of the option that enables/disables a given feature.
-	 * Note that it doesn't check if the feature actually exists.
 	 *
-	 * @param string $feature_id The id of the feature.
+	 * Note that it doesn't check if the feature actually exists. Instead it
+	 * defaults to "woocommerce_feature_{$feature_id}_enabled" if a different
+	 * name isn't specified in the feature registration.
+	 *
+	 * @param  string $feature_id The id of the feature.
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
-		switch ( $feature_id ) {
-			case 'analytics':
-				return Analytics::TOGGLE_OPTION_NAME;
-			case 'new_navigation':
-				return Init::TOGGLE_OPTION_NAME;
-			case 'custom_order_tables':
-				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
-			default:
-				return "woocommerce_feature_{$feature_id}_enabled";
+		$features = $this->get_feature_definitions();
+
+		if ( ! empty( $features[ $feature_id ]['option_key'] ) ) {
+			return $features[ $feature_id ]['option_key'];
 		}
+
+		return "woocommerce_feature_{$feature_id}_enabled";
 	}
 
 	/**
@@ -474,22 +487,24 @@ class FeaturesController {
 	 *
 	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
 	 *
-	 * @param string $option The option that has been modified.
+	 * @param string $option    The option that has been modified.
 	 * @param mixed  $old_value The old value of the option.
-	 * @param mixed  $value The new value of the option.
+	 * @param mixed  $value     The new value of the option.
+	 *
+	 * @return void
 	 */
 	private function process_updated_option( string $option, $old_value, $value ) {
-		$matches = array();
-		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
-
-		$known_features = array(
-			Analytics::TOGGLE_OPTION_NAME,
-			Init::TOGGLE_OPTION_NAME,
-			NewProductManagementExperience::TOGGLE_OPTION_NAME,
-			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+		$matches                   = array();
+		$is_default_key            = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
+		$features_with_custom_keys = array_filter(
+			$this->get_feature_definitions(),
+			function( $feature ) {
+				return ! empty( $feature['option_key'] );
+			}
 		);
+		$custom_keys               = wp_list_pluck( $features_with_custom_keys, 'option_key' );
 
-		if ( ! $success && ! in_array( $option, $known_features, true ) ) {
+		if ( ! $is_default_key && ! in_array( $option, $custom_keys, true ) ) {
 			return;
 		}
 
@@ -497,23 +512,15 @@ class FeaturesController {
 			return;
 		}
 
-		switch ( $option ) {
-			case Analytics::TOGGLE_OPTION_NAME:
-				$feature_id = 'analytics';
-				break;
-			case CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
-				$feature_id = 'custom_order_tables';
-				break;
-			case Init::TOGGLE_OPTION_NAME:
-				$feature_id = 'new_navigation';
-				break;
-			default:
-				if ( in_array( $option, $known_features, true ) ) {
-					$feature_id = $option;
-				} else {
-					$feature_id = $matches[1];
-				}
-				break;
+		$feature_id = '';
+		if ( $is_default_key ) {
+			$feature_id = $matches[1];
+		} elseif ( in_array( $option, $custom_keys, true ) ) {
+			$feature_id = array_search( $option, $custom_keys, true );
+		}
+
+		if ( ! $feature_id ) {
+			return;
 		}
 
 		/**
@@ -556,15 +563,6 @@ class FeaturesController {
 		if ( 'features' !== $current_section ) {
 			return $settings;
 		}
-
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		/**
-		 * Filter allowing WooCommerce Admin to be disabled.
-		 *
-		 * @param bool $disabled False.
-		 */
-		$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$feature_settings = array(
 			array(
@@ -621,7 +619,7 @@ class FeaturesController {
 				continue;
 			}
 
-			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
+			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ] );
 
 			$additional_settings = $features[ $id ]['additional_settings'] ?? array();
 			if ( count( $additional_settings ) > 0 ) {
@@ -656,16 +654,24 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id The feature id.
 	 * @param array  $feature The feature parameters, as returned by get_features.
-	 * @param bool   $admin_features_disabled True if admin features have been disabled via 'woocommerce_admin_disabled' filter.
 	 * @return array The parameters to add to the settings array.
 	 */
-	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
+	private function get_setting_for_feature( string $feature_id, array $feature ): array {
 		$description        = $feature['description'] ?? '';
 		$disabled           = false;
 		$desc_tip           = '';
 		$tooltip            = $feature['tooltip'] ?? '';
 		$type               = $feature['type'] ?? 'checkbox';
 		$setting_definition = $feature['setting'] ?? array();
+
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filter allowing WooCommerce Admin to be disabled.
+		 *
+		 * @param bool $disabled False.
+		 */
+		$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
@@ -675,13 +681,13 @@ class FeaturesController {
 
 			if ( $disabled ) {
 				$update_text = sprintf(
-				// translators: 1: line break tag.
+					// translators: 1: line break tag.
 					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
 					'<br/>'
 				);
 			} else {
 				$update_text = sprintf(
-				// translators: 1: line break tag.
+					// translators: 1: line break tag.
 					__(
 						'%1$s This navigation will soon become unavailable while we make necessary improvements.
 			             If you turn it off now, you will not be able to turn it back on.',
@@ -694,7 +700,7 @@ class FeaturesController {
 			$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 			if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 				$update_text = sprintf(
-				// translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag.
+					// translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag.
 					__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce' ),
 					'<br/>',
 					'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
@@ -705,13 +711,6 @@ class FeaturesController {
 
 			if ( ! empty( $update_text ) ) {
 				$description .= $update_text;
-			}
-		}
-
-		if ( 'product_block_editor' === $feature_id ) {
-			$disabled = version_compare( get_bloginfo( 'version' ), '6.2', '<' );
-			if ( $disabled ) {
-				$desc_tip = __( '⚠ This feature is compatible with WordPress version 6.2 or higher.', 'woocommerce' );
 			}
 		}
 
