@@ -63,6 +63,7 @@ export const AttributeTermInputField: React.FC<
 		ProductAttributeTerm[]
 	>( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
+	const [ isCreatingTerm, setIsCreatingTerm ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
 		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
@@ -128,6 +129,7 @@ export const AttributeTermInputField: React.FC<
 		recordEvent( 'product_attribute_term_add', {
 			source: TRACKS_SOURCE,
 		} );
+		setIsCreatingTerm( true );
 		try {
 			const newAttribute: ProductAttributeTerm =
 				await createProductAttributeTerm( {
@@ -137,8 +139,9 @@ export const AttributeTermInputField: React.FC<
 			recordEvent( 'product_attribute_term_add_success', {
 				source: TRACKS_SOURCE,
 			} );
+			onChange( [ ...value, newAttribute ] );
 			invalidateResolutionForStoreSelector( 'getProductAttributes' );
-			setFetchedItems( [ ...fetchedItems, newAttribute ] );
+			setIsCreatingTerm( false );
 		} catch ( e ) {
 			recordEvent( 'product_attribute_term_add_failed', {
 				source: TRACKS_SOURCE,
@@ -147,7 +150,7 @@ export const AttributeTermInputField: React.FC<
 				'error',
 				__( 'Failed to create attribute term.', 'woocommerce' )
 			);
-			focusSelectControl();
+			setIsCreatingTerm( false );
 		}
 	};
 
@@ -208,6 +211,7 @@ export const AttributeTermInputField: React.FC<
 							return {
 								...changes,
 								inputValue: state.inputValue,
+								isOpen: true,
 							};
 						case selectControlStateChangeTypes.ItemClick:
 							if (
@@ -245,7 +249,7 @@ export const AttributeTermInputField: React.FC<
 					return (
 						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
 							{ [
-								isFetching ? (
+								isFetching || isCreatingTerm ? (
 									<div
 										key="loading-spinner"
 										className="woocommerce-attribute-term-field__loading-spinner"
