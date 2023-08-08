@@ -24,8 +24,8 @@ trait BlockContainerTrait {
 	/**
 	 * Add a block to the block container.
 	 *
-	 * @param array    $block_config The block data.
-	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
+	 * @param array  $block_config The block data.
+	 * @param string $block_class An optional block class to use.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
@@ -33,9 +33,7 @@ trait BlockContainerTrait {
 	 */
 	protected function &add_inner_block( array $block_config, $block_class = 'Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block' ): BlockInterface {
 		$root_template = $this->get_root_template();
-
-		$block_class = apply_filters( 'woocommerce_block_template_block_class', $block_class, $block_config, $root_template, $this );
-		$block       = new $block_class( $block_config, $root_template, $this );
+		$block         = new $block_class( $block_config, $root_template, $this );
 
 		if ( ! $block instanceof BlockInterface ) {
 			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
@@ -72,15 +70,22 @@ trait BlockContainerTrait {
 	 * Get the inner blocks as a formatted template.
 	 */
 	public function get_formatted_template(): array {
+		$arr = [
+			$this->get_name(),
+			$this->get_attributes(),
+		];
+
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
-		$inner_blocks_formatted_template = array_map(
-			function( Block $block ) {
-				return $block->get_formatted_template();
-			},
-			$inner_blocks
-		);
+		if ( ! empty( $inner_blocks ) ) {
+			$arr[] = array_map(
+				function( BlockInterface $block ) {
+					return $block->get_formatted_template();
+				},
+				$inner_blocks
+			);
+		}
 
-		return $inner_blocks_formatted_template;
+		return $arr;
 	}
 }

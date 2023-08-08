@@ -76,4 +76,20 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	public function &get_root_template(): BlockTemplateInterface {
 		return $this;
 	}
+
+	/**
+	 * Get the inner blocks as a formatted template.
+	 */
+	public function get_formatted_template(): array {
+		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
+
+		$inner_blocks_formatted_template = array_map(
+			function( Block $block ) {
+				return $block->get_formatted_template();
+			},
+			$inner_blocks
+		);
+
+		return $inner_blocks_formatted_template;
+	}
 }
