@@ -74,7 +74,7 @@ export function useProductAttributes( {
 		return {
 			...globalAttribute,
 			terms: terms.length > 0 ? terms : undefined,
-			options: terms.length === 0 ? globalAttribute.options : [],
+			options: terms.length === 0 ? [] : globalAttribute.options,
 		};
 	};
 
