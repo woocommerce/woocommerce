@@ -69,8 +69,8 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		}
 
 		$cart       = $this->cart_controller->get_cart_instance();
-		$package_id = isset( $request['package_id'] ) ? wc_clean( wp_unslash( $request['package_id'] ) ) : null;
-		$rate_id    = wc_clean( wp_unslash( $request['rate_id'] ) );
+		$package_id = isset( $request['package_id'] ) ? sanitize_text_field( wp_unslash( $request['package_id'] ) ) : null;
+		$rate_id    = sanitize_text_field( wp_unslash( $request['rate_id'] ) );
 
 		try {
 			if ( ! is_null( $package_id ) ) {

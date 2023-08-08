@@ -14,6 +14,8 @@ export interface RadioControlProps {
 	onChange: ( value: string ) => void;
 	// List of radio control options.
 	options: RadioControlOption[];
+	// Is the control disabled.
+	disabled?: boolean;
 }
 
 export interface RadioControlOptionProps {
@@ -21,6 +23,7 @@ export interface RadioControlOptionProps {
 	name?: string;
 	onChange: ( value: string ) => void;
 	option: RadioControlOption;
+	disabled?: boolean;
 }
 
 interface RadioControlOptionContent {

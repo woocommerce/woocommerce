@@ -97,6 +97,12 @@
 				background: $input-text-dark;
 			}
 		}
+
+		&[disabled] {
+			cursor: not-allowed;
+			opacity: 0.5;
+			transition: opacity 200ms ease;
+		}
 	}
 }
 

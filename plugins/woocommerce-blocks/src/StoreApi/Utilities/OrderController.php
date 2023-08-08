@@ -42,8 +42,9 @@ class OrderController {
 	 * Update an order using data from the current cart.
 	 *
 	 * @param \WC_Order $order The order object to update.
+	 * @param boolean   $update_totals Whether to update totals or not.
 	 */
-	public function update_order_from_cart( \WC_Order $order ) {
+	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
 		/**
 		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
 		 * calculate tax for an order to match the current address of the customer.
@@ -81,8 +82,10 @@ class OrderController {
 		);
 
 		// Ensure cart is current.
-		wc()->cart->calculate_shipping();
-		wc()->cart->calculate_totals();
+		if ( $update_totals ) {
+			wc()->cart->calculate_shipping();
+			wc()->cart->calculate_totals();
+		}
 
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );

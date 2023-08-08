@@ -16,6 +16,7 @@ const RadioControl = ( {
 	selected = '',
 	onChange,
 	options = [],
+	disabled = false,
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );
 	const radioControlId = id || instanceId;
@@ -43,6 +44,7 @@ const RadioControl = ( {
 							option.onChange( value );
 						}
 					} }
+					disabled={ disabled }
 				/>
 			) ) }
 		</div>

@@ -377,19 +377,20 @@ class CartSchema extends AbstractSchema {
 	 */
 	protected function get_totals( $cart ) {
 		$has_calculated_shipping = $cart->show_shipping();
+		$decimals                = wc_get_price_decimals();
 
 		return [
-			'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
-			'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),
-			'total_fees'         => $this->prepare_money_response( $cart->get_fee_total(), wc_get_price_decimals() ),
-			'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), wc_get_price_decimals() ),
-			'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), wc_get_price_decimals() ),
-			'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), wc_get_price_decimals() ),
-			'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ) : null,
-			'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ) : null,
+			'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), $decimals ),
+			'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), $decimals ),
+			'total_fees'         => $this->prepare_money_response( $cart->get_fee_total(), $decimals ),
+			'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), $decimals ),
+			'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), $decimals ),
+			'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), $decimals ),
+			'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), $decimals ) : null,
+			'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), $decimals ) : null,
 			// Explicitly request context='edit'; default ('view') will render total as markup.
-			'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), wc_get_price_decimals() ),
-			'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
+			'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), $decimals ),
+			'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), $decimals ),
 			'tax_lines'          => $this->get_tax_lines( $cart ),
 		];
 	}
@@ -408,11 +409,12 @@ class CartSchema extends AbstractSchema {
 		}
 
 		$cart_tax_totals = $cart->get_tax_totals();
+		$decimals        = wc_get_price_decimals();
 
 		foreach ( $cart_tax_totals as $cart_tax_total ) {
 			$tax_lines[] = array(
 				'name'  => $cart_tax_total->label,
-				'price' => $this->prepare_money_response( $cart_tax_total->amount, wc_get_price_decimals() ),
+				'price' => $this->prepare_money_response( $cart_tax_total->amount, $decimals ),
 				'rate'  => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
 			);
 		}

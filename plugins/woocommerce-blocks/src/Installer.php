@@ -8,14 +8,6 @@ namespace Automattic\WooCommerce\Blocks;
  * @internal
  */
 class Installer {
-
-	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		$this->init();
-	}
-
 	/**
 	 * Installation tasks ran on admin_init callback.
 	 */
@@ -26,7 +18,7 @@ class Installer {
 	/**
 	 * Initialize class features.
 	 */
-	protected function init() {
+	public function init() {
 		add_action( 'admin_init', array( $this, 'install' ) );
 	}
 
