@@ -12,12 +12,13 @@ import { createInterpolateElement } from '@wordpress/element';
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
 import WooIcon from '../../assets/images/woo-icon.svg';
+import { MARKETPLACE_URL } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
 	__( '30 day <a>money back guarantee</a>', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href="https://woocommerce.com/refund-policy/" />,
+		a: <a href={ MARKETPLACE_URL + '/refund-policy/' } />,
 	}
 );
 
@@ -25,7 +26,7 @@ const supportTitle = createInterpolateElement(
 	__( '<a>Support</a> teams across the world', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href="https://woocommerce.com/docs/" />,
+		a: <a href={ MARKETPLACE_URL + '/docs/' } />,
 	}
 );
 
@@ -33,7 +34,7 @@ const paymentTitle = createInterpolateElement(
 	__( '<a>Safe & Secure</a> online payment', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href="https://woocommerce.com/products/woocommerce-payments/" />,
+		a: <a href={ MARKETPLACE_URL + '/woocommerce-payments/' } />,
 	}
 );
 
