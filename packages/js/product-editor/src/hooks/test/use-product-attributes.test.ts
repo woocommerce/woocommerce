@@ -44,6 +44,14 @@ const attributeTerms: Record< number, ProductAttributeTerm[] > = {
 			menu_order: 0,
 			count: 2,
 		},
+		{
+			id: 66,
+			name: 'Yellow',
+			slug: 'yellow',
+			description: '',
+			menu_order: 0,
+			count: 2,
+		},
 	],
 	3: [
 		{
@@ -375,7 +383,9 @@ describe( 'useProductAttributes', () => {
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 3 );
 			expect( result.current.attributes[ 0 ].terms ).toEqual(
-				attributeTerms[ result.current.attributes[ 0 ].id ]
+				attributeTerms[ result.current.attributes[ 0 ].id ].filter(
+					( t ) => allAttributes[ 1 ].options.includes( t.name )
+				)
 			);
 			expect( result.current.attributes[ 0 ].options ).toEqual(
 				result.current.attributes[ 0 ].options
