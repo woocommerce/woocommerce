@@ -5,6 +5,10 @@ PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
+if [ -z "$SKIP_INSTALL" ]; then
+  SKIP_INSTALL=false
+fi
+
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
@@ -12,12 +16,15 @@ mkdir -p "$DEST_PATH"
 echo "Cleaning up assets..."
 find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/client/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/js/." ! -name '.gitkeep' -type f -exec rm -f {} +
 
-echo "Installing PHP and JS dependencies..."
-pnpm install
+if ! $SKIP_INSTALL; then
+  echo "Installing PHP and JS dependencies..."
+  pnpm install
+  composer install --no-dev || exit "$?"
+fi
+
 echo "Running JS Build..."
-pnpm -w run build --filter=woocommerce || exit "$?"
+pnpm -w --filter=woocommerce run build || exit "$?"
 echo "Cleaning up PHP dependencies..."
-composer install --no-dev || exit "$?"
 echo "Run makepot..."
 pnpm -r --filter=woocommerce run makepot || exit "$?"
 echo "Syncing files..."
