@@ -13,12 +13,14 @@ $content-spacing-small: $grid-unit-20;
 $content-spacing-large: $grid-unit-40;
 $content-spacing-small: $medium-gap;
 $content-spacing-large: $xlarge-gap;
+$content-spacing-xlarge: $grid-unit-60;
 $content-max-width: 1600px;
 
 // Breakpoints
 $breakpoint-medium: 769px;
 $breakpoint-large: 1024px;
 $breakpoint-xlarge: 1500px;
+$breakpoint-huge: 1920px;
 
 // Header
 $header-height-desktop: 89px;
