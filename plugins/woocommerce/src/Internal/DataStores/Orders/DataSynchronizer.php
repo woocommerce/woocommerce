@@ -155,10 +155,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
-		if ( ! $this->check_orders_table_exists() ) {
-			return;
-		}
-		update_option( self::ORDERS_TABLE_CREATED, 'yes' );
+		$this->check_orders_table_exists();
 	}
 
 	/**
