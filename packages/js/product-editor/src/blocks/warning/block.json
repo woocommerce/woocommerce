@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-warning",
+	"title": "Product Warning",
+	"buttons": {
+		"options": {
+			"title": "Go to Options"
+		}
+	},
+	"category": "woocommerce",
+	"description": "This product has options, such as size or color. You can now manage each variation's price and other details individually.",
+	"keywords": [ "products", "warning" ],
+	"textdomain": "default",
+	"attributes": {
+		"name": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}
