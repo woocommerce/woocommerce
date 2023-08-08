@@ -73,4 +73,4 @@ runs:
         - name: Build
           if: ${{ inputs.build == 'true' }}
           shell: bash
-          run: pnpm build ${{ steps.parse-input.outputs.BUILD_FILTERS }}
+          run: pnpm ${{ steps.parse-input.outputs.BUILD_FILTERS }} run -r build
