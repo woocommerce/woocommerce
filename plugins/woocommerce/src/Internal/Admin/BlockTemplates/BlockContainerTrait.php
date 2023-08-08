@@ -3,9 +3,6 @@
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 
 /**
  * Trait for block containers.
