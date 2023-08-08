@@ -330,7 +330,7 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 		} else {
-			$this->order_controller->update_order_from_cart( $this->order );
+			$this->order_controller->update_order_from_cart( $this->order, true );
 		}
 
 		wc_do_deprecated_action(
