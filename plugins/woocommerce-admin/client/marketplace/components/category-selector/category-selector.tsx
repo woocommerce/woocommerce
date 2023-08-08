@@ -25,7 +25,7 @@ export type CategoryAPIItem = {
 };
 
 function fetchCategories(): Promise< CategoryAPIItem[] > {
-	return fetch( MARKETPLACE_URL + 'wp-json/wccom-extensions/1.0/categories' )
+	return fetch( MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/categories' )
 		.then( ( response ) => {
 			if ( ! response.ok ) {
 				throw new Error( response.statusText );
