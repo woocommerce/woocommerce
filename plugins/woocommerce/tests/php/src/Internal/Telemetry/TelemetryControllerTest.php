@@ -12,9 +12,9 @@ use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
- * OnboardingPlugins API controller test.
+ * Telemetry API controller test.
  *
- * @class OnboardingPluginsTest.
+ * @class TelemetryControllerTest.
  */
 class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
     /**
