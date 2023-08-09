@@ -238,10 +238,11 @@ export const AttributeTermInputField: React.FC<
 					const { changes, type } = actionAndChanges;
 					switch ( type ) {
 						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							const listIsOpen = isCreatingTerm ? { isOpen: isCreatingTerm } : {};
 							return {
 								...changes,
+								...listIsOpen,
 								inputValue: state.inputValue,
-								isOpen: true,
 							};
 						case selectControlStateChangeTypes.ItemClick:
 							if (
