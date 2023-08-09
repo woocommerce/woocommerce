@@ -1,5 +1,5 @@
 {
-	"core": null,
+	"core": "WordPress/WordPress#6.2.2",
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
