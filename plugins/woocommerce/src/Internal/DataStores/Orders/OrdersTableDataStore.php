@@ -23,11 +23,18 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
-	 * Order IDs for which we are checking read on sync in the current request.
+	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to be an anomaly, so we don't recommend running HPOS with incompatible plugins.
 	 *
 	 * @var array.
 	 */
 	private static $reading_order_ids = array();
+
+	/**
+	 * Keep track of order IDs that are actively being backfilled. We use this to prevent further read on sync from add_|update_|delete_postmeta etc hooks. If we allow this, then we would end up syncing the same order multiple times as it is being backfilled.
+	 *
+	 * @var array
+	 */
+	private static $backfilling_order_ids = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -562,7 +569,18 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			return;
 		}
 
-		$cpt_data_store->update_order_from_object( $order );
+		self::$backfilling_order_ids[] = $order->get_id();
+		$this->update_order_meta_from_object( $order );
+		$order_class = get_class( $order );
+		$post_order  = new $order_class();
+		$post_order->set_id( $order->get_id() );
+		$cpt_data_store->read( $post_order );
+
+		// This compares the order data to the post data and set changes array for props that are changed.
+		$post_order->set_props( $order->get_data() );
+
+		$cpt_data_store->update_order_from_object( $post_order );
+
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
@@ -580,6 +598,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				);
 			}
 		}
+		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 	}
 
 	/**
@@ -1051,7 +1070,7 @@ WHERE
 		}
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
-		$load_posts_for    = array_diff( $order_ids, self::$reading_order_ids );
+		$load_posts_for    = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
 		$post_orders       = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
 		foreach ( $data as $order_data ) {
@@ -1659,7 +1678,8 @@ FROM $order_meta_table
 					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
 					'post_status'   => 'draft',
 					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
-					'post_date_gmt' => current_time( 'mysql', 1 ), // We set the date to prevent invalid date errors when using MySQL strict mode.
+					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				)
 			);
 
@@ -2300,7 +2320,10 @@ FROM $order_meta_table
 		$order->apply_changes();
 
 		if ( $backfill ) {
-			$this->maybe_backfill_post_record( $order );
+			self::$backfilling_order_ids[] = $order->get_id();
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
 		$this->clear_caches( $order );
 	}
@@ -2382,10 +2405,24 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
-			$this->maybe_backfill_post_record( $order );
+			$this->clear_caches( $order );
+			self::$backfilling_order_ids[] = $order->get_id();
+			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->maybe_backfill_post_record( $r_order );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
 
 		return $changes;
+	}
+
+	/**
+	 * Helper method to check whether to backfill post record.
+	 *
+	 * @return bool
+	 */
+	private function should_backfill_post_record() {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		return $data_sync->data_sync_is_enabled();
 	}
 
 	/**
@@ -2396,8 +2433,7 @@ FROM $order_meta_table
 	 * @return void
 	 */
 	private function maybe_backfill_post_record( $order ) {
-		$data_sync = wc_get_container()->get( DataSynchronizer::class );
-		if ( $data_sync->data_sync_is_enabled() ) {
+		if ( $this->should_backfill_post_record() ) {
 			$this->backfill_post_record( $order );
 		}
 	}
@@ -2698,8 +2734,10 @@ CREATE TABLE $meta_table (
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $delete_meta;
@@ -2716,8 +2754,10 @@ CREATE TABLE $meta_table (
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $add_meta;
@@ -2734,8 +2774,10 @@ CREATE TABLE $meta_table (
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order ) {
-			$this->maybe_backfill_post_record( $object );
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+			self::$backfilling_order_ids[] = $object->get_id();
+			update_post_meta( $object->get_id(), $meta->key, $meta->value );
+			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $update_meta;

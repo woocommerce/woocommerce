@@ -314,6 +314,7 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 };
 
 const preFetchGeolocation = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
 			() => getGeolocation( context ),
@@ -380,6 +381,7 @@ const updateOnboardingProfileOption = (
 };
 
 const spawnUpdateOnboardingProfileOption = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	spawnUpdateOnboardingProfileOptionRef: (
 		context: CoreProfilerStateMachineContext
 	) =>
@@ -431,6 +433,7 @@ const updateBusinessInfo = async (
 };
 
 const persistBusinessInfo = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	persistBusinessInfoRef: (
 		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent

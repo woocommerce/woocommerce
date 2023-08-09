@@ -107,6 +107,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
+		$this->disable_cot_sync();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
 		$post_data             = get_post( $post_order_id, ARRAY_A );
@@ -502,6 +503,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		global $wpdb;
 
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 
 		// Tests trashing of orders.
 		$order = $this->create_complex_cot_order();
@@ -1218,6 +1220,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Direct write to metadata should propagate to the orders table when reading.
 	 */
 	public function test_read_with_direct_meta_write() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
@@ -1241,6 +1244,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1276,6 +1280,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
@@ -1873,6 +1878,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_legacy_getters_setters() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order_id = OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
@@ -2033,6 +2039,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->sut->backfill_post_record( $order );
 		$this->enable_cot_sync();
@@ -2527,5 +2534,88 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save();
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
+	}
+
+	/**
+	 * @testDox Test that adding meta, while in callback for adding another meta also works as expected.
+	 */
+	public function test_backfill_does_not_trigger_read_on_sync_with_filters() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
+	}
+
+	/**
+	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * @param int    $meta_id Meta ID.
+	 * @param int    $post_id Post ID.
+	 * @param string $meta_key Meta key.
+	 * @param string $meta_value Meta value.
+	 */
+	public function add_meta_when_meta_added( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( 'test_key' === $meta_key ) {
+			$order = wc_get_order( $post_id );
+			$order->add_meta_data( 'test_key_2', 'test_value_2' );
+			$order->save_meta_data();
+			$order->add_meta_data( 'test_key_3', 'test_value_3' );
+			$order->save();
+		}
+	}
+
+	/**
+	 * @testDox When creating a new order, test that we are not backfilling stale data when there is a postmeta hooks that modifies data on the order.
+	 */
+	public function test_backfill_does_not_trigger_when_creating_orders_with_filter() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+		$order = new WC_Order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
+	}
+
+	/**
+	 * @testDox When sync is enabled, order data can be saved and retrieved as expected.
+	 */
+	public function test_order_data_saved_correctly_with_sync() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = new WC_Order();
+		$order->save();
+
+		$order->set_customer_id( 1 ); // Change a custom table column.
+		$order->set_billing_address_1( 'test' ); // Change an address column and a meta row.
+		$order->set_download_permissions_granted( true ); // Change an operational data column.
+		$order->add_meta_data( 'test_key', 'test_value' );
+
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 	}
 }
