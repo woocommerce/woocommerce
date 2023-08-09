@@ -30,6 +30,15 @@ class Woo_AI_Settings {
 	protected $id = 'woo-ai-settings-tab';
 
 	/**
+	 * Constants used for naming of saved options in the database.
+	 */
+	private const WOO_AI_OPTIONS_PREFIX        = 'woo_ai_';
+	private const STORE_DESCRIPTION_OPTION_KEY = self::WOO_AI_OPTIONS_PREFIX . 'describe_store_description';
+	private const TONE_OF_VOICE_OPTION_KEY     = self::WOO_AI_OPTIONS_PREFIX . 'tone_of_voice_select';
+	private const WOO_AI_ENABLED_OPTION_KEY    = self::WOO_AI_OPTIONS_PREFIX . 'enable_checkbox';
+	private const WOO_AI_TITLE_OPTION_KEY      = self::WOO_AI_OPTIONS_PREFIX . 'title';
+
+	/**
 	 * Main Instance.
 	 */
 	public static function instance() {
@@ -93,23 +102,24 @@ class Woo_AI_Settings {
 		$settings_ai = array();
 
 		$settings_ai[] = array(
-			'id'    => 'woo_ai_title',
-			'type'  => 'title',
+			'id'    => self::WOO_AI_TITLE_OPTION_KEY,
 			'title' => __( 'Artificial Intelligence', 'woocommerce' ),
 			'desc'  => __( "Save time by automating mundane parts of store management. This information will make AI-generated content, visuals, and settings more aligned with your store's goals and identity.", 'woocommerce' ),
+			'type'  => 'title',
 		);
 
 		$settings_ai[] = array(
+			'id'      => self::WOO_AI_ENABLED_OPTION_KEY,
 			'title'   => __( 'Enable AI', 'woocommerce' ),
 			'desc'    => __( 'Enable AI features in your store', 'woocommerce' ),
-			'id'      => 'woo_ai_enable_checkbox',
-			'default' => 'yes',
 			'type'    => 'checkbox',
+			'default' => 'yes',
 		);
 
 		$settings_ai[] = array(
+			'id'      => self::TONE_OF_VOICE_OPTION_KEY,
 			'name'    => __( 'Tone of voice', 'woocommerce' ),
-			'id'      => 'woo_ai_tone_of_voice_select',
+			'desc'    => __( 'Select the tone of voice for the AI', 'woocommerce' ),
 			'type'    => 'select',
 			'options' => array(
 				'informal'     => __( 'Relaxed and friendly.', 'woocommerce' ),
@@ -120,21 +130,21 @@ class Woo_AI_Settings {
 				'motivational' => __( 'Passionate and inspiring.', 'woocommerce' ),
 			),
 			'css'     => 'min-width:300px;',
-			'desc'    => __( 'Select the tone of voice for the AI', 'woocommerce' ),
+
 		);
 
 		$settings_ai[] = array(
-			'id'          => 'woo_ai_describe_store_description',
-			'type'        => 'textarea',
+			'id'          => self::STORE_DESCRIPTION_OPTION_KEY,
 			'title'       => __( 'Describe your business', 'woocommerce' ),
+			'type'        => 'textarea',
 			'desc_tip'    => __( 'Tell us what makes your business unique to further improve accuracy of the AI-generated content. This will not be shown to customers.', 'woocommerce' ),
 			'placeholder' => __( 'e.g. Marianne Renoir is a greengrocery taken over by a ten generations Parisian family who wants to keep quality and tradition in the quarter of Montmartre', 'woocommerce' ),
 			'css'         => 'min-width:300px;min-height: 130px;',
 		);
 
 		$settings_ai[] = array(
+			'id'   => self::WOO_AI_TITLE_OPTION_KEY,
 			'type' => 'sectionend',
-			'id'   => 'woo_ai_title',
 		);
 
 		return $settings_ai;
