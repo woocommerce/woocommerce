@@ -55,6 +55,7 @@ export {
 	Menu as __experimentalSelectControlMenu,
 	MenuSlot as __experimentalSelectControlMenuSlot,
 } from './experimental-select-control/menu';
+export { SelectControl as __experimentalSelectControlV2 } from './experimental-select-control-v2';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';

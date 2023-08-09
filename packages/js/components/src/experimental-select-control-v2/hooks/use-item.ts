@@ -15,6 +15,7 @@ type useItemProps< Item > = {
 	multiple: boolean;
 	selected: Selected< Item >;
 	selectItem: ( item: Item ) => void;
+	onMouseOver?: ( e: MouseEvent, item: Item ) => void;
 };
 
 export function useItem< Item = DefaultItem >( {
@@ -23,6 +24,7 @@ export function useItem< Item = DefaultItem >( {
 	multiple,
 	selected,
 	selectItem,
+	onMouseOver = () => {},
 }: useItemProps< Item > ) {
 	function isHighlighted( item: Item ) {
 		return item === highlightedOption;
@@ -47,6 +49,7 @@ export function useItem< Item = DefaultItem >( {
 			isSelected: isSelected( item, selected ),
 			onClick: () => onClick( item ),
 			onMouseDown,
+			onMouseOver: ( e: MouseEvent ) => onMouseOver( e, item ),
 			role: 'option',
 		};
 	}

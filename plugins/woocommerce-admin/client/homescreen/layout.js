@@ -7,6 +7,7 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
+	useState,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -19,6 +20,10 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
+import {
+	__experimentalSelectControlV2 as SelectControl,
+	__experimentalSelectControl as SelectControlOld,
+} from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -56,6 +61,13 @@ const TaskLists = lazy( () =>
 	)
 );
 
+const sampleOptions = [
+	{ value: 'apple', label: 'Apple' },
+	{ value: 'pear', label: 'Pear' },
+	{ value: 'orange', label: 'Orange' },
+	{ value: 'grape', label: 'Grape' },
+	{ value: 'banana', label: 'Banana' },
+];
 export const Layout = ( {
 	defaultHomescreenLayout,
 	query,
@@ -68,6 +80,7 @@ export const Layout = ( {
 	isTaskListHidden,
 	updateOptions,
 } ) => {
+	const [ selected, setSelected ] = useState( [] );
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
@@ -114,6 +127,34 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
+					<SelectControl
+						multiple
+						options={ sampleOptions }
+						label="Single value"
+						selected={ selected }
+						onSelect={ ( option ) =>
+							setSelected( [ ...selected, option ] )
+						}
+						onDeselect={ ( option ) =>
+							setSelected(
+								selected.filter( ( o ) => o !== option )
+							)
+						}
+					></SelectControl>
+					<SelectControlOld
+						multiple
+						items={ sampleOptions }
+						label="Single value"
+						selected={ selected }
+						onSelect={ ( option ) =>
+							setSelected( [ ...selected, option ] )
+						}
+						onRemove={ ( option ) =>
+							setSelected(
+								selected.filter( ( o ) => o !== option )
+							)
+						}
+					></SelectControlOld>
 					{ ! isLoadingTaskLists && ! showingProgressHeader && (
 						<ActivityHeader
 							className="your-store-today"

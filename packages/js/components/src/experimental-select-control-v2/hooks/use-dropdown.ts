@@ -61,6 +61,7 @@ export function useDropdown< Item = DefaultItem >( {
 		highlightedOption,
 		highlightNextOption,
 		highlightPreviousOption,
+		setHighlightedIndex,
 		isOpen: isListboxOpen,
 		open: openListbox,
 	} = useListbox< Item >( {
@@ -83,6 +84,11 @@ export function useDropdown< Item = DefaultItem >( {
 		multiple,
 		selected,
 		selectItem,
+		onMouseOver: ( e, item ) => {
+			if ( filteredOptions.indexOf( item ) !== -1 ) {
+				setHighlightedIndex( filteredOptions.indexOf( item ) );
+			}
+		},
 	} );
 
 	return {

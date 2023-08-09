@@ -51,6 +51,7 @@ export function useListbox< Item = DefaultItem >( {
 			highlightedIndex !== null ? options[ highlightedIndex ] : null,
 		highlightNextOption,
 		highlightPreviousOption,
+		setHighlightedIndex,
 		isOpen,
 		open: () => setIsOpen( true ),
 		props: {
