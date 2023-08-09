@@ -141,7 +141,7 @@ export const getDescription = (): string => {
 		const content = document.querySelector(
 			'#content'
 		) as HTMLInputElement;
-		const tinyContent = getTinyContent( { format: 'text' } );
+		const tinyContent = getTinyContent( 'content', { format: 'text' } );
 		if ( content && isElementVisible( content ) ) {
 			return content.value;
 		} else if ( tinyContent ) {
