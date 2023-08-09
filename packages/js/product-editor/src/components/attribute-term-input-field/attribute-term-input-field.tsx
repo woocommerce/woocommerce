@@ -24,7 +24,6 @@ import {
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
-import { cleanForSlug } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -34,7 +33,6 @@ import { CreateAttributeTermModal } from './create-attribute-term-modal';
 type AttributeTermInputFieldProps = {
 	value?: ProductAttributeTerm[];
 	onChange: ( value: ProductAttributeTerm[] ) => void;
-	autoCreateOnSelect?: boolean;
 	attributeId?: number;
 	placeholder?: string;
 	disabled?: boolean;
@@ -51,12 +49,11 @@ export const AttributeTermInputField: React.FC<
 	placeholder,
 	disabled,
 	attributeId,
-	autoCreateOnSelect = false,
 	label = '',
 } ) => {
-	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { invalidateResolutionForStoreSelector, createProductAttributeTerm } =
-		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+	);
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);
@@ -108,42 +105,10 @@ export const AttributeTermInputField: React.FC<
 		onChange( value.filter( ( opt ) => opt.slug !== item.slug ) );
 	};
 
-	const createAttributeTerm = ( name: string ) => {
-		createProductAttributeTerm< ProductAttributeTerm >( {
-			attribute_id: attributeId,
-			name,
-			slug: cleanForSlug( name ),
-		} ).then(
-			( newTerm ) => {
-				invalidateResolutionForStoreSelector(
-					'getProductAttributeTerms'
-				);
-				onChange( [ ...value, newTerm ] );
-			},
-			( error ) => {
-				let message = __(
-					'Failed to create new attribute term.',
-					'woocommerce'
-				);
-				if ( error.code === 'woocommerce_rest_cannot_create' ) {
-					message = error.message;
-				}
-
-				createErrorNotice( message, {
-					explicitDismiss: true,
-				} );
-			}
-		);
-	};
-
 	const onSelect = ( item: ProductAttributeTerm ) => {
 		// Add new item.
 		if ( item.id === -99 ) {
-			if ( autoCreateOnSelect ) {
-				createAttributeTerm( item.name );
-			} else {
-				setAddNewAttributeTermName( item.name );
-			}
+			setAddNewAttributeTermName( item.name );
 			return;
 		}
 		const isSelected = value.find( ( i ) => i.slug === item.slug );

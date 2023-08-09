@@ -326,9 +326,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																placeholder={
 																	termPlaceholder
 																}
-																autoCreateOnSelect={
-																	true
-																}
 																disabled={
 																	attribute
 																		? ! attribute.id

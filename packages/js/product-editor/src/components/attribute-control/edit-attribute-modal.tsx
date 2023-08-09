@@ -102,7 +102,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				{ attribute.terms ? (
 					<AttributeTermInputField
 						label={ termsLabel }
-						autoCreateOnSelect={ true }
 						placeholder={ termsPlaceholder }
 						value={ editableAttribute?.terms }
 						attributeId={ editableAttribute?.id }
