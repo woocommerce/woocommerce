@@ -109,7 +109,16 @@ export const useCompletion = ( {
 
 			completionSource.current = suggestionsSource;
 
-			return suggestionsSource;
+			return new Promise( ( resolve ) => {
+				( completionSource.current as EventSource ).addEventListener(
+					'message',
+					( event: MessageEvent ) => {
+						if ( event.data === '[DONE]' ) {
+							resolve( event.data );
+						}
+					}
+				);
+			} );
 		} catch ( e ) {
 			throw createExtendedError(
 				'An error occurred while connecting to the completion service',

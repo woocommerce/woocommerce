@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	Fragment,
+	useEffect,
+} from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import {
 	Form,
@@ -49,6 +54,7 @@ type NewAttributeModalProps = {
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
+	createNewAttributesAsGlobal?: boolean;
 };
 
 type AttributeForm = {
@@ -81,6 +87,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
+	createNewAttributesAsGlobal = false,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -201,6 +208,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		}
 	};
 
+	useEffect( function focusFirstAttributeField() {
+		const firstAttributeFieldLabel =
+			document.querySelector< HTMLLabelElement >(
+				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
+			);
+
+		firstAttributeFieldLabel?.focus();
+	}, [] );
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -298,6 +314,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																			undefined
 																	),
 															] }
+															createNewAttributesAsGlobal={
+																createNewAttributesAsGlobal
+															}
 														/>
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">

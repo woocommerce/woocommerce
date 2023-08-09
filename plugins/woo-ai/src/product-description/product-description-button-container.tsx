@@ -9,6 +9,7 @@ import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
 } from '@woocommerce/ai';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -32,7 +33,7 @@ import { Attribute } from '../utils/types';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = ( error: string ) => {
+const getApiError = ( error?: string ) => {
 	switch ( error ) {
 		case 'connection_error':
 			return __(
@@ -41,7 +42,7 @@ const getApiError = ( error: string ) => {
 			);
 		default:
 			return __(
-				`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
+				`❗ We encountered an issue with this experimental feature. Please check back in shortly.`,
 				'woocommerce'
 			);
 	}
@@ -55,10 +56,14 @@ const recordDescriptionTracks = recordTracksFactory(
 );
 
 export function WriteItForMeButtonContainer() {
+	const { createWarningNotice } = useDispatch( 'core/notices' );
+
 	const titleEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
 	const [ fetching, setFetching ] = useState< boolean >( false );
+	const [ shortDescriptionGenerated, setShortDescriptionGenerated ] =
+		useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
@@ -85,11 +90,17 @@ export function WriteItForMeButtonContainer() {
 	} );
 
 	const tinyEditor = useTinyEditor();
-
-	const handleCompletionError = ( error: UseCompletionError ) =>
-		tinyEditor.setContent( getApiError( error.code ?? '' ) );
+	const shortTinyEditor = useTinyEditor( 'excerpt' );
 
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+
+	const handleUseCompletionError = ( err: UseCompletionError ) => {
+		createWarningNotice( getApiError( err.code ?? '' ) );
+		setFetching( false );
+		// eslint-disable-next-line no-console
+		console.error( err );
+	};
+
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			feature: WOO_AI_PLUGIN_FEATURE_NAME,
@@ -100,7 +111,7 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: handleCompletionError,
+			onStreamError: handleUseCompletionError,
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -130,6 +141,17 @@ export function WriteItForMeButtonContainer() {
 				}
 			},
 		} );
+
+	const { requestCompletion: requestShortCompletion } = useCompletion( {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
+		onStreamMessage: ( content ) => shortTinyEditor.setContent( content ),
+		onStreamError: handleUseCompletionError,
+		onCompletionFinished: ( reason, content ) => {
+			if ( reason === 'finished' ) {
+				shortTinyEditor.setContent( content );
+			}
+		},
+	} );
 
 	useEffect( () => {
 		const title = titleEl.current;
@@ -233,8 +255,23 @@ export function WriteItForMeButtonContainer() {
 
 		try {
 			await requestCompletion( prompt );
+			if ( ! shortTinyEditor.getContent() || shortDescriptionGenerated ) {
+				await requestShortCompletion(
+					[
+						'Please write a high-converting Meta Description for the WooCommerce product description below.',
+						'It should strictly adhere to the following guidelines:',
+						'It should entice someone from a search results page to click on the product link.',
+						'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
+						'It should explain what users will see if they click on the product page link.',
+						'Do not wrap in double quotes or use any other special characters.',
+						`It should include the target keyword for the product.`,
+						`Here is the full product description: \n${ tinyEditor.getContent() }`,
+					].join( '\n' )
+				);
+				setShortDescriptionGenerated( true );
+			}
 		} catch ( err ) {
-			handleCompletionError( err as UseCompletionError );
+			handleUseCompletionError( err as UseCompletionError );
 		}
 	};
 

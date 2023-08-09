@@ -30,11 +30,11 @@ class WC_Beta_Tester_Admin_Assets {
 		$version = WC_VERSION;
 
 		// Need admin styles for the modal.
-		wp_register_style( 'wc-beta-tester-admin', WC_Beta_Tester::instance()->plugin_url() . '/assets/css/admin.css', array( 'woocommerce_admin_styles' ) );
+		wp_register_style( 'wc-beta-tester-admin', WC_Beta_Tester::instance()->plugin_url() . '/assets/css/admin.css', array( 'woocommerce_admin_styles' ), WC_BETA_TESTER_VERSION );
 
 		// Register scripts.
-		wp_register_script( 'wc-beta-tester-version-info', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-information' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION );
-		wp_register_script( 'wc-beta-tester-version-picker', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-picker' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION );
+		wp_register_script( 'wc-beta-tester-version-info', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-information' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION, false );
+		wp_register_script( 'wc-beta-tester-version-picker', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-picker' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION, false );
 
 		wp_localize_script(
 			'wc-beta-tester-version-info',
@@ -54,7 +54,7 @@ class WC_Beta_Tester_Admin_Assets {
 			)
 		);
 
-		if ( in_array( $screen_id, array( 'plugins_page_wc-beta-tester', 'plugins_page_wc-beta-tester-version-picker' ) ) ) {
+		if ( in_array( $screen_id, array( 'plugins_page_wc-beta-tester', 'plugins_page_wc-beta-tester-version-picker' ), true ) ) {
 			wp_enqueue_style( 'wc-beta-tester-admin' );
 			wp_enqueue_script( 'wc-beta-tester-version-info' );
 			wp_enqueue_script( 'wc-beta-tester-version-picker' );

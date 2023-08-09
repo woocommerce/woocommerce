@@ -371,6 +371,20 @@ class Init {
 									),
 								),
 								array(
+									'woocommerce/product-catalog-visibility-field',
+									array(
+										'label'     => __( 'Hide in product catalog', 'woocommerce' ),
+										'visibilty' => 'search',
+									),
+								),
+								array(
+									'woocommerce/product-catalog-visibility-field',
+									array(
+										'label'     => __( 'Hide from search results', 'woocommerce' ),
+										'visibilty' => 'catalog',
+									),
+								),
+								array(
 									'woocommerce/product-checkbox-field',
 									array(
 										'label'    => __( 'Enable product reviews', 'woocommerce' ),
