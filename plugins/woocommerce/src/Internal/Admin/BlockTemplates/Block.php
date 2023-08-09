@@ -38,7 +38,7 @@ class Block extends AbstractBlock implements BlockContainerInterface {
 	}
 
 	/**
-	 * Generate a block ID based on a base.
+	 * Add an inner block to this block.
 	 *
 	 * @param array $block_config The block data.
 	 */
