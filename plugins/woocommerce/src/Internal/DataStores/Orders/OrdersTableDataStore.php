@@ -2405,6 +2405,7 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
+			$this->clear_caches( $order );
 			self::$backfilling_order_ids[] = $order->get_id();
 			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
