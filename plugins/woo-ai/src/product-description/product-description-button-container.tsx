@@ -9,7 +9,6 @@ import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
 } from '@woocommerce/ai';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
