@@ -209,7 +209,7 @@ export function WriteItForMeButtonContainer() {
 
 		if ( brandingData?.toneOfVoice ) {
 			instructions.push(
-				`Use a ${ brandingData.toneOfVoice } tone of voice.`
+				`Generate the description using a ${ brandingData.toneOfVoice } tone.`
 			);
 		}
 

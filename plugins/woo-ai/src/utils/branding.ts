@@ -4,9 +4,9 @@
 import apiFetch from '@wordpress/api-fetch';
 
 // Define the expected shape of the API response
-interface ApiResponse {
+type ApiResponse = {
 	value: string;
-}
+};
 
 /**
  * Fetch the tone of voice setting.
