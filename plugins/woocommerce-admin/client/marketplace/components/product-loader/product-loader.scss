@@ -1,6 +1,10 @@
 @import '../../stylesheets/_variables.scss';
 
 .woocommerce-marketplace {
+	&__product-loader {
+		margin-top: $grid-unit-20;
+	}
+
 	&__product-loader-cards {
 		display: grid;
 		background: linear-gradient(to right, $gray-0 40%, $gray-5 60%, $gray-0 80%);
