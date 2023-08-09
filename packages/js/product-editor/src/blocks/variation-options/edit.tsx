@@ -23,6 +23,7 @@ import {
 	useProductAttributes,
 } from '../../hooks/use-product-attributes';
 import { AttributeControl } from '../../components/attribute-control';
+import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
 	return values.reduce< Product[ 'default_attributes' ] >(
@@ -45,6 +46,7 @@ function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
 
 export function Edit() {
 	const blockProps = useBlockProps();
+	const { generateProductVariations } = useProductVariationsHelper();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
 		ProductAttribute[]
@@ -64,6 +66,7 @@ export function Edit() {
 		onChange( values ) {
 			setEntityAttributes( values );
 			setEntityDefaultAttributes( manageDefaultAttributes( values ) );
+			generateProductVariations( values );
 		},
 	} );
 

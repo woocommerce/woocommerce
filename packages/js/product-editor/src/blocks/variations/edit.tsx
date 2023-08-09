@@ -34,6 +34,7 @@ import {
 	useProductAttributes,
 } from '../../hooks/use-product-attributes';
 import { getAttributeId } from '../../components/attribute-control/utils';
+import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 function hasAttributesUsedForVariations(
 	productAttributes: Product[ 'attributes' ]
@@ -56,6 +57,7 @@ export function Edit( {
 }: BlockEditProps< VariationsBlockAttributes > ) {
 	const { description } = attributes;
 
+	const { generateProductVariations } = useProductVariationsHelper();
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
 	const [ productAttributes, setProductAttributes ] = useEntityProp<
 		Product[ 'attributes' ]
@@ -74,6 +76,7 @@ export function Edit( {
 				setDefaultProductAttributes(
 					getFirstOptionFromEachAttribute( values )
 				);
+				generateProductVariations( values );
 			},
 		}
 	);
