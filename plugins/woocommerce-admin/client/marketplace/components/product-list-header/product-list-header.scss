@@ -13,6 +13,11 @@
 		font-size: 20px;
 		font-style: normal;
 		font-weight: 500;
+		margin-top: $small-gap;
+	}
+
+	&__product-list-title--extensions {
+		margin-bottom: 0;
 	}
 
 	&__product-list-link {

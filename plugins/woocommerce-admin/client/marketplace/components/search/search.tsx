@@ -3,20 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
-import { useContext, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import './search.scss';
-import { ProductListContext } from '../../contexts/product-list-context';
 
 const searchPlaceholder = __( 'Search extensions and themes', 'woocommerce' );
-
-export interface SearchProps {
-	locale?: string | 'en_US';
-	country?: string | undefined;
-}
 
 /**
  * Search component.
@@ -26,15 +21,21 @@ export interface SearchProps {
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 
-	const productListContextValue = useContext( ProductListContext );
+	const query = useQuery();
+
+	useEffect( () => {
+		if ( query.term ) {
+			setSearchTerm( query.term );
+		}
+	}, [ query.term ] );
 
 	const runSearch = () => {
-		const query = searchTerm.trim();
-		if ( ! query ) {
-			return [];
-		}
+		const term = searchTerm.trim();
 
-		productListContextValue.setSearchTerm( query );
+		// When the search term changes, we reset the category on purpose.
+		navigateTo( {
+			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+		} );
 
 		return [];
 	};
@@ -49,6 +50,7 @@ function Search(): JSX.Element {
 		if ( event.key === 'Enter' ) {
 			runSearch();
 		}
+
 		if ( event.key === 'Escape' ) {
 			setSearchTerm( '' );
 		}

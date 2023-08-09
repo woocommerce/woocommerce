@@ -34,9 +34,3 @@
 		border-bottom: 1px solid $gutenberg-gray-300;
 	}
 }
-
-@media screen and (min-width: $breakpoint-medium) {
-	.woocommerce-marketplace__tabs {
-		padding: 0 $content-spacing-large;
-	}
-}
