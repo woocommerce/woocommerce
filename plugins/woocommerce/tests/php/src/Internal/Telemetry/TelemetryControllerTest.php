@@ -69,9 +69,9 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Request to install-async endpoint.
+	 * Request to the telemetry endpoint.
 	 *
-	 * @param $body_params
+	 * @param array $body_params Parameters in the request body.
 	 * @return mixed
 	 */
 	private function request( $body_params ) {
@@ -89,7 +89,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_response_is_null_on_success() {
-		// When
+		// When.
 		$data = $this->request(
 			array(
 				'platform'          => 'ios',
@@ -98,7 +98,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$this->assertNull( $data );
 	}
 
@@ -108,10 +108,10 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_401_is_returned_without_logged_in_user() {
-		// Given
+		// Given.
 		$this->useWithoutUser();
 
-		// When
+		// When.
 		$response = $this->request(
 			array(
 				'platform' => 'ios',
@@ -119,7 +119,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Then
+		// Then.
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -129,7 +129,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_WCTracker_mobile_usage_data_fields_are_all_set_for_the_first_time() {
-		// When
+		// When.
 		$this->request(
 			array(
 				'platform'          => 'ios',
@@ -138,7 +138,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
 		$this->assertEquals( '2023-08-08T03:38:50Z', $new_data['ios']['installation_date'] );
 		$this->assertEquals( '14.7', $new_data['ios']['version'] );
@@ -152,7 +152,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_WCTracker_mobile_usage_installation_date_is_not_overwritten_when_it_was_previously_set() {
-		// Given
+		// Given.
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
@@ -161,7 +161,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
 
-		// When
+		// When.
 		$this->request(
 			array(
 				'platform'          => 'ios',
@@ -170,7 +170,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
 		$this->assertEquals( '2023-08-08T03:38:50Z', $new_data['ios']['installation_date'] );
 		$this->assertFalse( isset( $new_data['android'] ) );
@@ -182,7 +182,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_WCTracker_mobile_usage_first_used_is_not_overwritten_when_it_was_previously_set() {
-		// Given
+		// Given.
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
@@ -192,7 +192,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
 
-		// When
+		// When.
 		$this->request(
 			array(
 				'platform' => 'ios',
@@ -200,7 +200,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
 		$this->assertEquals( '2023-08-08T14:58:33+00:00', $new_data['ios']['first_used'] );
 		$this->assertFalse( isset( $new_data['android'] ) );
@@ -212,7 +212,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_WCTracker_mobile_usage_last_used_and_version_are_updated_when_they_were_previously_set_and_version_is_higher() {
-		// Given
+		// Given.
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
@@ -222,7 +222,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
 
-		// When
+		// When.
 		$this->request(
 			array(
 				'platform' => 'ios',
@@ -230,7 +230,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
 		$this->assertEquals( '14.9', $new_data['ios']['version'] );
 		$this->assertGreaterThan( new \DateTime( '2023-08-06T14:58:33+00:00' ), new \DateTime( $new_data['ios']['last_used'] ) );
@@ -243,7 +243,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_WCTracker_mobile_usage_last_used_and_version_are_not_updated_when_they_were_previously_set_and_version_is_lower() {
-		// Given
+		// Given.
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
@@ -253,7 +253,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
 
-		// When
+		// When.
 		$this->request(
 			array(
 				'platform' => 'ios',
@@ -261,7 +261,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data();
 
-		// Then
+		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
 		$this->assertEquals( '14.8', $new_data['ios']['version'] );
 		$this->assertEquals( '2023-08-06T14:58:33+00:00', $new_data['ios']['last_used'] );
