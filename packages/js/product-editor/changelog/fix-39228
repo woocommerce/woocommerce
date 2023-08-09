@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Feedback bar is mis-aligned; transient notices overlap

@@ -122,4 +122,18 @@ class ManifestProcessorTest extends WP_UnitTestCase {
 		$edit_url_what_went_wrong_post = DocsStore::get_edit_url_from_docs_post( $what_went_wrong_post->ID, 'edit_url', true );
 		$this->assertEquals( 'https://example.com/edit/get-started/troubleshooting/what-went-wrong.md', $edit_url_what_went_wrong_post );
 	}
+
+	/**
+	 * Test collecting doc IDs from a manifest.
+	 */
+	public function test_collect_doc_ids_from_manifest() {
+		$manifest = json_decode( file_get_contents( __DIR__ . '/fixtures/manifest.json' ), true );
+		$doc_ids  = ManifestProcessor::collect_doc_ids_from_manifest( $manifest );
+
+		$this->assertEquals( 4, count( $doc_ids ) );
+		$this->assertContains( 'c068ce54044fa44c760a69bd71ef21274f2a5a37', $doc_ids );
+		$this->assertContains( 'fb59bd01dda7b090e5b0a557948e155a6b679d6a', $doc_ids );
+		$this->assertContains( '1f88c4d039e72c059c928ab475ad1ea0a02c8abb', $doc_ids );
+		$this->assertContains( '120770c899215a889246b47ac883e4dda1f97b8b', $doc_ids );
+	}
 }

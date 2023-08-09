@@ -73,6 +73,7 @@ export const generateManifestCommand = new Command( 'create' )
 		const manifestWithLinks = await processMarkdownLinks(
 			manifest,
 			absoluteRootDir,
+			absoluteSubDir,
 			projectName
 		);
 

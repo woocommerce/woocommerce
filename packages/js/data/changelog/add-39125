@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add catalog_visibility property to the Product type

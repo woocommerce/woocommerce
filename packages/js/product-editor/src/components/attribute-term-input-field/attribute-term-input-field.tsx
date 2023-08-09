@@ -3,7 +3,7 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon, Spinner } from '@wordpress/components';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useDispatch } from '@wordpress/data';
 import {
 	useCallback,
 	useEffect,
@@ -51,6 +51,9 @@ export const AttributeTermInputField: React.FC<
 	attributeId,
 	label = '',
 } ) => {
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+	);
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);
@@ -286,6 +289,9 @@ export const AttributeTermInputField: React.FC<
 					onCreated={ ( newAttribute ) => {
 						onSelect( newAttribute );
 						setAddNewAttributeTermName( undefined );
+						invalidateResolutionForStoreSelector(
+							'getProductAttributeTerms'
+						);
 						focusSelectControl();
 					} }
 				/>

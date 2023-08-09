@@ -27,7 +27,7 @@
 		"ts-jest": "^29.1.1",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.9.5"
+		"typescript": "^5.1.6"
 	},
 	"scripts": {
 		"lint": "eslint . --ext .ts",

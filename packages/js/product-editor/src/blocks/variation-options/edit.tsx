@@ -3,8 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
-import { createElement, createInterpolateElement } from '@wordpress/element';
-import { ProductAttribute } from '@woocommerce/data';
+import {
+	createElement,
+	createInterpolateElement,
+	useMemo,
+} from '@wordpress/element';
+import { Product, ProductAttribute } from '@woocommerce/data';
 import { Link } from '@woocommerce/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -14,8 +18,30 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { useProductAttributes } from '../../hooks/use-product-attributes';
+import {
+	EnhancedProductAttribute,
+	useProductAttributes,
+} from '../../hooks/use-product-attributes';
 import { AttributeControl } from '../../components/attribute-control';
+
+function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
+	return values.reduce< Product[ 'default_attributes' ] >(
+		( prevDefaultAttributes, currentAttribute ) => {
+			if ( currentAttribute.isDefault ) {
+				return [
+					...prevDefaultAttributes,
+					{
+						id: currentAttribute.id,
+						name: currentAttribute.name,
+						option: currentAttribute.options[ 0 ],
+					},
+				];
+			}
+			return prevDefaultAttributes;
+		},
+		[]
+	);
+}
 
 export function Edit() {
 	const blockProps = useBlockProps();
@@ -24,18 +50,43 @@ export function Edit() {
 		ProductAttribute[]
 	>( 'postType', 'product', 'attributes' );
 
+	const [ entityDefaultAttributes, setEntityDefaultAttributes ] =
+		useEntityProp< Product[ 'default_attributes' ] >(
+			'postType',
+			'product',
+			'default_attributes'
+		);
+
 	const { attributes, handleChange } = useProductAttributes( {
 		allAttributes: entityAttributes,
-		onChange: setEntityAttributes,
 		isVariationAttributes: true,
 		productId: useEntityId( 'postType', 'product' ),
+		onChange( values ) {
+			setEntityAttributes( values );
+			setEntityDefaultAttributes( manageDefaultAttributes( values ) );
+		},
 	} );
+
+	function mapDefaultAttributes() {
+		return attributes.map( ( attribute ) => ( {
+			...attribute,
+			isDefault: entityDefaultAttributes.some(
+				( defaultAttribute ) =>
+					defaultAttribute.id === attribute.id ||
+					defaultAttribute.name === attribute.name
+			),
+		} ) );
+	}
 
 	return (
 		<div { ...blockProps }>
 			<AttributeControl
-				value={ attributes }
+				value={ useMemo( mapDefaultAttributes, [
+					attributes,
+					entityDefaultAttributes,
+				] ) }
 				onChange={ handleChange }
+				createNewAttributesAsGlobal={ true }
 				uiStrings={ {
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
