@@ -10,10 +10,12 @@ const es_ES = {
     'Add coupon': 'Añadir cupón',
     'Add default block': 'Añadir bloque por defecto',
     'Add manually': 'Añadir manualmente',
+    'Add more sections': 'Añadir más secciones',
     '"Add more sections"': '"Añadir más secciones"',
     'Add new': 'Añadir nuevo',
     'Add New': 'Añadir Nuevo',
     'Add new order': 'Añadir nuevo pedido',
+    'Add Performance section': 'Añadir sección Rendimiento',
     '"Add Performance section"': '"Añadir sección Rendimiento"',
     'Addresses': 'Direcciones',
     'Add shipping class': 'Añadir clase de envío',
@@ -24,7 +26,7 @@ const es_ES = {
     'Allow, but notify customer': 'Permitir, pero se avisará al cliente',
     'and': 'y',
     'Apply coupon': 'Aplicar cupón',
-    arrExpectedSections: [ 'Gráficos', 'Favoritos', 'Rendimiento' ],
+    arrayOfExpectedSections: [ 'Gráficos', 'Favoritos', 'Rendimiento' ],
     'Attributes': 'Atributos',
     '"Bank name"': '"Nombre del banco"',
     '"BIC / Swift"': '"BIC / Swift"',
@@ -36,6 +38,9 @@ const es_ES = {
     '/Canada.*/': /Canadá.*/,
     'Cash on delivery': 'Contra reembolso',
     '"Choose countries / regions…"': '"Seleccionar países/regiones…"',
+    'Choose which': 'Elige qué',
+    'Choose which analytics to display and the section name':
+        'Elige qué análisis mostrar y el nombre de la sección',
     '"Choose which analytics to display and the section name"':
         '"Elige qué análisis mostrar y el nombre de la sección"',
     'Click here to enter your code': 'Haz clic aquí para introducir tu código',
@@ -159,7 +164,7 @@ const es_ES = {
     pages: [
         [ 'Pedidos', 'my-account/orders' ],
         [ 'Descargas', 'my-account/downloads' ],
-        [ 'Dirección', 'my-account/edit-address' ],
+        [ 'Direcciones', 'my-account/edit-address' ],
         [ 'Detalles de la cuenta', 'my-account/edit-account' ],
     ],
     pageNames: [
@@ -185,6 +190,8 @@ const es_ES = {
     'Place order': 'Realizar el pedido',
     'Please choose the quantity of items you wish to add to your cart…':
         'Por favor, elige la cantidad de artículos que quieres añadir a tu carrito…',
+    '/Please log in to your account to view this order/':
+        /Por favor, accede a tu cuenta para ver este pedido/,
     'Please select some product options before adding this product to your cart.':
         'Elige las opciones del producto antes de añadir este producto a tu carrito.',
     'Post name': 'Nombre de la entrada',
@@ -270,6 +277,7 @@ const es_ES = {
     'Weight': 'Peso',
     'Welcome to the block editor': 'Te damos la bienvenida al editor de bloques',
     'Welcome to WooCommerce': 'Bienvenido a WooCommerce',
+    '/We were unable to verify the email address you provided/': /No hemos podido verificar la dirección de correo electrónico que has facilitado/,
     'What type of products will be listed?': '¿Qué tipo de productos se mostrarán?',
     'Width': 'Anchura',
     'WooCommerce subpages': [

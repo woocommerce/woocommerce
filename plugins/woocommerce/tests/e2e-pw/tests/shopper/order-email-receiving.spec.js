@@ -32,7 +32,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		) {
 			// In WP 6.3, label intercepts check action. Need to force.
 			await page
-				.getByLabel( 'Select All' )
+				.getByLabel( getTranslationFor( 'Select All' ) )
 				.first()
 				.check( { force: true } );
 			await page

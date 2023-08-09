@@ -9,11 +9,13 @@ const en_US = {
     'Add': 'Add',
     'Add coupon': 'Add coupon',
     'Add default block': 'Add default block',
+    'Add more sections': 'Add more sections',
     '"Add more sections"': '"Add more sections"',
     'Add manually': 'Add manually',
     'Add new': 'Add new',
     'Add New': 'Add New',
     'Add new order': 'Add new order',
+    'Add Performance section': 'Add Performance section',
     '"Add Performance section"': '"Add Performance section"',
     'Addresses': 'Addresses',
     'Add shipping class': 'Add shipping class',
@@ -24,7 +26,7 @@ const en_US = {
     'Allow, but notify customer': 'Allow, but notify customer',
     'and': 'and',
     'Apply coupon': 'Apply coupon',
-    arrExpectedSections: [ 'Charts', 'Leaderboards', 'Performance' ],
+    arrayOfExpectedSections: [ 'Charts', 'Leaderboards', 'Performance' ],
     'Attributes': 'Attributes',
     '"Bank name"': '"Bank name"',
     '"BIC / Swift"': '"BIC / Swift"',
@@ -36,6 +38,9 @@ const en_US = {
     '/Canada.*/': /Canada.*/,
     'Cash on delivery': 'Cash on delivery',
     '"Choose countries / regions…"': '"Choose countries / regions…"',
+    'Choose which': 'Choose which',
+    'Choose which analytics to display and the section name':
+        'Choose which analytics to display and the section name',
     '"Choose which analytics to display and the section name"':
         '"Choose which analytics to display and the section name"',
     'Click here to enter your code': 'Click here to enter your code',
@@ -183,6 +188,8 @@ const en_US = {
     'Place order': 'Place order',
     'Please choose the quantity of items you wish to add to your cart…':
         'Please choose the quantity of items you wish to add to your cart…',
+    '/Please log in to your account to view this order/':
+        /Please log in to your account to view this order/,
     'Please select some product options before adding this product to your cart.':
         'Please select some product options before adding this product to your cart.',
     'Post name': 'Post name',

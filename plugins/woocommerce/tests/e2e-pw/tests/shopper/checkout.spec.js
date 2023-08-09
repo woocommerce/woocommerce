@@ -72,8 +72,11 @@ test.describe( 'Checkout page', () => {
 		await api.put( 'payment_gateways/bacs', {
 			enabled: true,
 		} );
+		// ensure Cash on Delivery is appropriately populated
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
+			title: getTranslationFor('Cash on delivery'),
+			description: getTranslationFor('Cash on delivery'),
 		} );
 	} );
 
@@ -231,7 +234,8 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( guestEmail );
 
-		await page.locator( `text=${getTranslationFor('Cash on delivery')}` ).click();
+
+ 		await page.locator('label').filter({ hasText: getTranslationFor('Cash on delivery') }).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
 		await page.locator( `text=${getTranslationFor('Place order')}` ).click();
@@ -315,7 +319,7 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'my-account/' );
 		await page.locator( 'input[name="username"]' ).fill( customer.username );
 		await page.locator( 'input[name="password"]' ).fill( customer.password );
-		await page.locator( `text=${getTranslationFor('Log In')}` ).click();
+		await page.getByRole('button', { name: getTranslationFor('Log In') }).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -342,7 +346,7 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( customer.email );
 
-		await page.locator( `text=${getTranslationFor('Cash on delivery')}` ).click();
+		await page.locator('label').filter({ hasText: getTranslationFor('Cash on delivery') }).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
 		await page.locator( `text=${getTranslationFor('Place order')}` ).click();
@@ -365,7 +369,7 @@ test.describe( 'Checkout page', () => {
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
 		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			/Please log in to your account to view this order/
+			getTranslationFor('/Please log in to your account to view this order/')
 		);
 
 		// Switch to admin user.

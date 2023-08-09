@@ -42,14 +42,14 @@ test.describe( 'Can create a new page', () => {
 			.isVisible();
 
 		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: `${getTranslationFor('Close')}` } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor('Close') } ).click();
 		}
 
 		await page
-			.getByRole( 'textbox', { name: `${getTranslationFor('Add Title')}` } )
+			.getByRole( 'textbox', { name: getTranslationFor('Add Title') } )
 			.fill( pageTitle );
 
-		await page.getByRole( 'button', { name: `${getTranslationFor('Add default block')}` } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add default block') } ).click();
 
 		await page
 			.getByRole( 'document', {
@@ -59,7 +59,7 @@ test.describe( 'Can create a new page', () => {
 			.fill( 'Test Page' );
 
 		await page
-			.getByRole( 'button', { name: `${getTranslationFor('Publish')}`, exact: true } )
+			.getByRole( 'button', { name: getTranslationFor('Publish'), exact: true } )
 			.click();
 
 		await page

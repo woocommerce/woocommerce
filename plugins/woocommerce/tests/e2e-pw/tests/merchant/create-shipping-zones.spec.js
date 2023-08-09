@@ -188,7 +188,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByPlaceholder( getTranslationFor( 'Zone name' ) ).fill( shippingZoneNameFlatRate );
 
 			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).click();
-			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).type( `${ getTranslationFor( 'Canada' ) }` );
+			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).type( getTranslationFor( 'Canada' ) );
 			await page.getByRole('option', { name: getTranslationFor( 'Canada' ), exact: true }).click();
 
 			await page.getByRole( 'button', { name: getTranslationFor( 'Add shipping method' ) } ).click();

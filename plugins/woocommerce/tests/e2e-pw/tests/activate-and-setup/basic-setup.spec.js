@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { lstat } = require('fs');
 const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe( 'Store owner can finish initial store setup', () => {
@@ -15,9 +16,9 @@ test.describe( 'Store owner can finish initial store setup', () => {
 	test( 'can configure permalink settings', async ( { page } ) => {
 		await page.goto( 'wp-admin/options-permalink.php' );
 		// Select "Post name" option in common settings section
-		await page.locator( `label >> text=${getTranslationFor('Post name')}` ).check();
+		await page.locator( `label >> text=${getTranslationFor('Post name')}` ).last().check();
 		// Select "Custom base" in product permalinks section
-		await page.locator( `label >> text=${getTranslationFor('Custom base')}` ).check();
+		await page.locator( `label >> text=${getTranslationFor('Custom base')}` ).last().check();
 		// Fill custom base slug to use
 		await page
 			.locator( '#woocommerce_permalink_structure' )

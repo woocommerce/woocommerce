@@ -96,8 +96,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.getByRole( 'button', { name: `${getTranslationFor('Add to cart')}` } ).click();
-		await page.getByRole( 'link', { name: `${getTranslationFor('View cart')}` } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor('View cart') } ).click();
 		await expect( page.locator( `td[data-title=${getTranslationFor('Product')}]` ) ).toContainText(
 			virtualProductName
 		);
@@ -156,8 +156,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.getByRole( 'button', { name: `${getTranslationFor('Add to cart')}` } ).click();
-		await page.getByRole( 'link', { name: `${getTranslationFor('View cart')}` } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor('View cart') } ).click();
 		await expect( page.locator( `td[data-title=${getTranslationFor('Product')}]` ) ).toContainText(
 			nonVirtualProductName
 		);

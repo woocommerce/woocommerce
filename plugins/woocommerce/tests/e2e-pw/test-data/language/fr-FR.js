@@ -9,11 +9,13 @@ const fr_FR = {
 	'Add': 'Ajouter',
 	'Add coupon': 'Ajouter un code promo',
 	'Add default block': 'Ajouter un bloc par défaut',
+	'Add more sections': 'Ajouter plus de sections',
 	'"Add more sections"': '"Ajouter plus de sections"',
 	'Add manually': 'Ajouter manuellement',
 	'Add new': 'Ajouter',
 	'Add New': 'Ajouter',
 	'Add new order': 'Nouvelle commande',
+	'Add Performance section': 'Ajouter la section Performances',
 	'"Add Performance section"': '"Ajouter la section Performances"',
 	'Addresses': 'Adresses',
 	'Add shipping class': 'Ajouter une classe d’expédition',
@@ -24,7 +26,7 @@ const fr_FR = {
 	'Allow, but notify customer': 'Autoriser, mais avec notification client',
 	'and': 'et',
 	'Apply coupon': 'Appliquer le code promo',
-	arrExpectedSections: ['Classements', 'Tableaux', 'Performances'],
+	arrayOfExpectedSections: ['Classements', 'Tableaux', 'Performances'],
 	'Attributes': 'Attributs',
 	'"Bank name"': '"Nom de la banque"',
 	'"BIC / Swift"': '"BIC / Swift"',
@@ -36,7 +38,11 @@ const fr_FR = {
 	'/Canada.*/': /Canada.*/,
 	'Cash on delivery': 'Paiement à la livraison',
 	'"Choose countries / regions…"': '"Choisir les pays/régions…"',
-	'"Choose which analytics to display and the section name"': '"Choisissez les statistiques à afficher et le nom de la section"',
+	'Choose which': 'Choisissez les',
+	'Choose which analytics to display and the section name': 
+		'Choisissez les statistiques à afficher et le nom de la section',
+	'"Choose which analytics to display and the section name"': 
+		'"Choisissez les statistiques à afficher et le nom de la section"',
 	'Click here to enter your code': 'Cliquez ici pour saisir votre code',
 	'Click here to login': 'Cliquez ici pour vous connecter',
 	'Close': 'Fermer',
@@ -100,8 +106,8 @@ const fr_FR = {
 	'Local pickup': 'Point de vente',
 	'/Local pickup.*/': /Point de vente.*/,
 	'Log In': 'Se connecter',
-	'Log in': 'Identification',
-	'Log out': 'Se déconnecter',//was Log out
+	'Log in': 'Se connecter',
+	'Log out': 'Se déconnecter',
 	'Manage stock?': 'Gérer le stock ?',
 	'Marketing subpages': [{
 			name: 'Vue d’ensemble',
@@ -171,6 +177,8 @@ const fr_FR = {
 	'Physical products': 'Produits physiques',
 	'Place order': 'Commander',
 	'Please choose the quantity of items you wish to add to your cart…': 'Veuillez choisir la quantité d’articles que vous souhaitez ajouter à votre panier…',
+	'/Please log in to your account to view this order/':
+		/Veuillez vous connecter à votre compte pour voir cette commande/,
 	'Please select some product options before adding this product to your cart.': 'Veuillez sélectionner des options du produit avant de l’ajouter à votre panier.',
 	'Post name': 'Titre de la publication',
 	'Product': 'Produit',
@@ -209,7 +217,7 @@ const fr_FR = {
 	'Remove selected row(s)': 'Supprimer les lignes sélectionnées',
 	'"Run the importer"': '"Lancer l’importation"',
 	'Refund': 'Rembourser',
-	'/Refund #\d+/': /Remboursement n°\d+/,//?
+	'/Refund #\d+/': /Remboursement n°\d+/,
 	'Revoke': 'Révoquer',
 	'Save': 'Enregistrer',
 	'Save attributes': 'Enregistrer les attributs',
@@ -251,6 +259,7 @@ const fr_FR = {
 	'Weight': 'Poids',
 	'Welcome to the block editor': 'Bienvenue dans l’éditeur de blocs',
 	'Welcome to WooCommerce': 'Bienvenue sur WooCommerce',
+	'/We were unable to verify the email address you provided/': /Nous n’avons pas pu vérifier l’adresse e-mail que vous avez fournie/,
 	'What type of products will be listed?': 'Quel type de produits sera listé',
 	'Width': 'Largeur',
 	'WooCommerce subpages': [{

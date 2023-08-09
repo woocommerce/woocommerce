@@ -9,11 +9,13 @@ const en_GB = {
     'Add': 'Add',
     'Add coupon': 'Add coupon',
     'Add default block': 'Add default block',
+    'Add more sections': 'Add more sections',
     '"Add more sections"': '"Add more sections"',
     'Add manually': 'Add manually',
     'Add new': 'Add new',
     'Add New': 'Add New',
     'Add new order': 'Add new order',
+    'Add Performance section': 'Add Performance section',
     '"Add Performance section"': '"Add Performance section"',
     'Addresses': 'Addresses',
     'Add shipping class': 'Add shipping class',
@@ -24,7 +26,7 @@ const en_GB = {
     'Allow, but notify customer': 'Allow, but notify customer',
     'and': 'and',
     'Apply coupon': 'Apply coupon',
-    arrExpectedSections: [ 'Charts', 'Leaderboards', 'Performance' ],
+    arrayOfExpectedSections: [ 'Charts', 'Leaderboards', 'Performance' ],
     'Attributes': 'Attributes',
     '"Bank name"': '"Bank name"',
     '"BIC / Swift"': '"BIC / Swift"',
@@ -36,6 +38,9 @@ const en_GB = {
     '/Canada.*/': /Canada.*/,
     'Cash on delivery': 'Cash on delivery',
     '"Choose countries / regions…"': '"Choose countries/regions…"',
+    'Choose which': 'Choose which',
+    'Choose which analytics to display and the section name':
+        'Choose which analytics to display and the section name',
     '"Choose which analytics to display and the section name"':
         '"Choose which analytics to display and the section name"',
     'Click here to enter your code': 'Click here to enter your code',
@@ -183,6 +188,8 @@ const en_GB = {
     'Place order': 'Place order',
     'Please choose the quantity of items you wish to add to your cart…':
         'Please choose the quantity of items you wish to add to your basket',
+    '/Please log in to your account to view this order/':
+        /Please log in to your account to view this order/,
     'Please select some product options before adding this product to your cart.':
         'Please select some product options before adding this product to your basket.',
     'Post name': 'Post name',
@@ -266,6 +273,7 @@ const en_GB = {
     'Weight': 'Weight',
     'Welcome to the block editor': 'Welcome to the block editor',
     'Welcome to WooCommerce': 'Welcome to WooCommerce',
+    '/We were unable to verify the email address you provided/': /We were unable to verify the email address you provided/,
     'What type of products will be listed?': 'What type of products will be listed?',
     'Width': 'Width',
     'WooCommerce subpages': [

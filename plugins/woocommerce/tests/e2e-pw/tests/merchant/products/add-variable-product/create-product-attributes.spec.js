@@ -67,7 +67,8 @@ test.describe( 'Add product attributes', () => {
 			if ( i > 0 ) {
 				await test.step( "Click 'Add new'.", async () => {
 					await page
-						.getByRole( 'button', { name: getTranslationFor('Add new') } )
+						.getByRole( 'button', { name: getTranslationFor('Add new'), exact:true } )
+						.last()
 						.click();
 
 					await expect(

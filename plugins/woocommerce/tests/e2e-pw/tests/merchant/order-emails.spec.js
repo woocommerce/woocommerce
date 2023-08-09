@@ -60,7 +60,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-
 		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
 	} );
 

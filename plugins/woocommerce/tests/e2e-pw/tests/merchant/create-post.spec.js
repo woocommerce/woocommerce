@@ -51,7 +51,7 @@ test.describe( 'Can create a new post', () => {
 			await test.step( 'Welcome modal appeared. Close it.', async () => {
 				await page
 					.getByRole( 'document' )
-					.getByRole( 'button', { name: `${getTranslationFor('Close')}` } )
+					.getByRole( 'button', { name: getTranslationFor('Close') } )
 					.click();
 			} );
 		} else {
@@ -61,10 +61,10 @@ test.describe( 'Can create a new post', () => {
 		}
 
 		await page
-			.getByRole( 'textbox', { name: `${getTranslationFor('Add Title')}` } )
+			.getByRole( 'textbox', { name: getTranslationFor('Add Title') } )
 			.fill( postTitle );
 
-		await page.getByRole( 'button', { name: `${getTranslationFor('Add default block')}` } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add default block') } ).click();
 
 		await page
 			.getByRole( 'document', {
@@ -74,12 +74,12 @@ test.describe( 'Can create a new post', () => {
 			.fill( 'Test Post' );
 
 		await page
-			.getByRole( 'button', { name: `${getTranslationFor('Publish')}`, exact: true } )
+			.getByRole( 'button', { name: getTranslationFor('Publish'), exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: `${getTranslationFor('Editor publish')}` } )
-			.getByRole( 'button', { name: `${getTranslationFor('Publish')}`, exact: true } )
+			.getByRole( 'region', { name: getTranslationFor('Editor publish') } )
+			.getByRole( 'button', { name: getTranslationFor('Publish'), exact: true } )
 			.click();
 
 		await expect(
