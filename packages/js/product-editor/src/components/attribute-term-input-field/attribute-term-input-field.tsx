@@ -142,7 +142,7 @@ export const AttributeTermInputField: React.FC<
 				source: TRACKS_SOURCE,
 			} );
 			onChange( [ ...value, newAttribute ] );
-			invalidateResolutionForStoreSelector( 'getProductAttributes' );
+			invalidateResolutionForStoreSelector( 'getProductAttributeTerms' );
 			setIsCreatingTerm( false );
 		} catch ( e ) {
 			recordEvent( 'product_attribute_term_add_failed', {
