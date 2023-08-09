@@ -570,7 +570,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		self::$backfilling_order_ids[] = $order->get_id();
-		$post_order                    = new WC_Order();
+		$this->update_order_meta_from_object( $order );
+		$order_class = get_class( $order );
+		$post_order  = new $order_class();
 		$post_order->set_id( $order->get_id() );
 		$cpt_data_store->read( $post_order );
 
