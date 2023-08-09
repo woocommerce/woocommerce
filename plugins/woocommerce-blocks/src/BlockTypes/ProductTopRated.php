@@ -14,17 +14,11 @@ class ProductTopRated extends AbstractProductGrid {
 	protected $block_name = 'product-top-rated';
 
 	/**
-	 * Show only products with ratings and order by rating.
+	 * Force orderby to rating.
 	 *
 	 * @param array $query_args Query args.
 	 */
 	protected function set_block_query_args( &$query_args ) {
 		$query_args['orderby'] = 'rating';
-
-		$this->meta_query[] = array(
-			'key'     => '_wc_average_rating',
-			'value'   => 0,
-			'compare' => '>',
-		);
 	}
 }
