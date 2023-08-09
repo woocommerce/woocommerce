@@ -2594,4 +2594,28 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 1, $r_order->get_customer_id() );
 		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
+
+	/**
+	 * @testDox When sync is enabled, order data can be saved and retrieved as expected.
+	 */
+	public function test_order_data_saved_correctly_with_sync() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = new WC_Order();
+		$order->save();
+
+		$order->set_customer_id( 1 ); // Change a custom table column.
+		$order->set_billing_address_1( 'test' ); // Change an address column and a meta row.
+		$order->set_download_permissions_granted( true ); // Change an operational data column.
+		$order->add_meta_data( 'test_key', 'test_value' );
+
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+	}
 }

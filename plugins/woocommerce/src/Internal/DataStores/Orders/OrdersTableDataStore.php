@@ -570,7 +570,15 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		self::$backfilling_order_ids[] = $order->get_id();
-		$cpt_data_store->update_order_from_object( $order );
+		$post_order                    = new WC_Order();
+		$post_order->set_id( $order->get_id() );
+		$cpt_data_store->read( $post_order );
+
+		// This compares the order data to the post data and set changes array for props that are changed.
+		$post_order->set_props( $order->get_data() );
+
+		$cpt_data_store->update_order_from_object( $post_order );
+
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
