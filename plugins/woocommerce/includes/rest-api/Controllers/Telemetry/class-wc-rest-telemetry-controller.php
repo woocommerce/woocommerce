@@ -82,23 +82,23 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 
 		$platform = $new['platform'];
 
-        if ( isset($data[ $platform ]) ) {
-            $existing_usage = $data[ $platform ];
+		if ( isset( $data[ $platform ] ) ) {
+			$existing_usage = $data[ $platform ];
 
-            // Sets the installation date only if it has not been set before.
-            if ( !isset($existing_usage['installation_date']) ) {
-                $data[ $platform ]['installation_date'] = $new['installation_date'];
-            }
+			// Sets the installation date only if it has not been set before.
+			if ( ! isset( $existing_usage['installation_date'] ) ) {
+				$data[ $platform ]['installation_date'] = $new['installation_date'];
+			}
 
-            if ( version_compare( $new['version'], $existing_usage['version'], '>=' ) ) {
-                $data[ $platform ]['version'] = $new['version'];
-                $data[ $platform ]['last_used'] = $new['last_used'];
-            }
-        } else {
-            // Only sets `first_used` when the platform usage data hasn't been set before.
-            $new['first_used'] = $new['last_used'];
-            $data[ $platform ] = $new;
-        }
+			if ( version_compare( $new['version'], $existing_usage['version'], '>=' ) ) {
+				$data[ $platform ]['version']   = $new['version'];
+				$data[ $platform ]['last_used'] = $new['last_used'];
+			}
+		} else {
+			// Only sets `first_used` when the platform usage data hasn't been set before.
+			$new['first_used'] = $new['last_used'];
+			$data[ $platform ] = $new;
+		}
 
 		update_option( 'woocommerce_mobile_app_usage', $data );
 	}
@@ -128,9 +128,9 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 		$installation_date = $request->get_param( 'installation_date' );
 
 		return array(
-			'platform'  => sanitize_text_field( $platform ),
-			'version'   => sanitize_text_field( $version ),
-			'last_used' => gmdate( 'c' ),
+			'platform'          => sanitize_text_field( $platform ),
+			'version'           => sanitize_text_field( $version ),
+			'last_used'         => gmdate( 'c' ),
 			'installation_date' => $installation_date,
 		);
 	}
@@ -142,25 +142,25 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 	 */
 	public function get_collection_params() {
 		return array(
-			'platform' => array(
+			'platform'          => array(
 				'description'       => __( 'Platform to track.', 'woocommerce' ),
 				'required'          => true,
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'version'  => array(
+			'version'           => array(
 				'description'       => __( 'Platform version to track.', 'woocommerce' ),
 				'required'          => true,
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'installation_date'  => array(
+			'installation_date' => array(
 				'description'       => __( 'Installation date of the WooCommerce mobile app.', 'woocommerce' ),
 				'required'          => false, // For backward compatibility.
-				'type'               => 'string',
-                'format'             => 'date-time',
+				'type'              => 'string',
+				'format'            => 'date-time',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);
