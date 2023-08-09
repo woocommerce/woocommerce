@@ -30,6 +30,7 @@ import { cleanForSlug } from '@wordpress/url';
 /**
  * Internal dependencies
  */
+import { CreateAttributeTermModal } from './create-attribute-term-modal';
 import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeTermInputFieldProps = {
@@ -39,6 +40,7 @@ type AttributeTermInputFieldProps = {
 	placeholder?: string;
 	disabled?: boolean;
 	label?: string;
+	autoCreateOnSelect?: boolean;
 };
 
 let uniqueId = 0;
@@ -52,6 +54,7 @@ export const AttributeTermInputField: React.FC<
 	disabled,
 	attributeId,
 	label = '',
+	autoCreateOnSelect = true,
 } ) => {
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
@@ -61,6 +64,8 @@ export const AttributeTermInputField: React.FC<
 	>( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
 	const [ isCreatingTerm, setIsCreatingTerm ] = useState( false );
+	const [ addNewAttributeTermName, setAddNewAttributeTermName ] =
+		useState< string >();
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
 		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
@@ -154,11 +159,15 @@ export const AttributeTermInputField: React.FC<
 	const onSelect = ( item: ProductAttributeTerm ) => {
 		// Add new item.
 		if ( item.id === -99 ) {
-			createAttributeTerm( {
-				name: item.name,
-				slug: cleanForSlug( item.name ),
-			} );
-			focusSelectControl();
+			if ( autoCreateOnSelect ) {
+				createAttributeTerm( {
+					name: item.name,
+					slug: cleanForSlug( item.name ),
+				} );
+				focusSelectControl();
+			} else {
+				setAddNewAttributeTermName( item.name );
+			}
 			return;
 		}
 		const isSelected = value.find( ( i ) => i.slug === item.slug );
@@ -315,6 +324,24 @@ export const AttributeTermInputField: React.FC<
 					);
 				} }
 			</SelectControl>
+			{ ! autoCreateOnSelect && addNewAttributeTermName && attributeId !== undefined && (
+				<CreateAttributeTermModal
+					initialAttributeTermName={ addNewAttributeTermName }
+					onCancel={ () => {
+						setAddNewAttributeTermName( undefined );
+						focusSelectControl();
+					} }
+					attributeId={ attributeId }
+					onCreated={ ( newAttribute ) => {
+						onSelect( newAttribute );
+						setAddNewAttributeTermName( undefined );
+						invalidateResolutionForStoreSelector(
+							'getProductAttributeTerms'
+						);
+						focusSelectControl();
+					} }
+				/>
+			) }
 		</>
 	);
 };
