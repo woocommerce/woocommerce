@@ -1,284 +1,181 @@
 /**
  * External dependencies
  */
-import { select, dispatch } from '@wordpress/data';
-import {
-	pluckEmail,
-	removeAllNotices,
-	debounce,
-} from '@woocommerce/base-utils';
+import { removeAllNotices, debounce, pick } from '@woocommerce/base-utils';
 import {
 	CartBillingAddress,
 	CartShippingAddress,
 	BillingAddressShippingAddress,
 } from '@woocommerce/types';
+import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
 import { STORE_KEY } from './constants';
-import { VALIDATION_STORE_KEY } from '../validation';
 import { processErrorResponse } from '../utils';
+import { getDirtyKeys, validateDirtyProps, BaseAddressKey } from './utils';
 
-type CustomerData = {
-	billingAddress: CartBillingAddress;
-	shippingAddress: CartShippingAddress;
-};
-
-type BillingOrShippingAddress = CartBillingAddress | CartShippingAddress;
-
-const pick = < Type >( object: Type, keys: string[] ): Type => {
-	return keys.reduce( ( obj, key ) => {
-		if ( object && object.hasOwnProperty( key ) ) {
-			obj[ key as keyof Type ] = object[ key as keyof Type ];
-		}
-		return obj;
-	}, {} as Type );
-};
-
-/**
- * Checks if a cart response contains an email property.
- */
-const isBillingAddress = (
-	address: BillingOrShippingAddress
-): address is CartBillingAddress => {
-	return 'email' in address;
+// This is used to track and cache the local state of push changes.
+const localState = {
+	// True when the customer data has been initialized.
+	customerDataIsInitialized: false,
+	// True when a push is currently happening to avoid simultaneous pushes.
+	doingPush: false,
+	// Local cache of the last pushed customerData used for comparisons.
+	customerData: {
+		billingAddress: {} as CartBillingAddress,
+		shippingAddress: {} as CartShippingAddress,
+	},
+	// Tracks which props have changed so the correct data gets pushed to the server.
+	dirtyProps: {
+		billingAddress: [] as BaseAddressKey[],
+		shippingAddress: [] as BaseAddressKey[],
+	},
 };
 
 /**
- * Trims and normalizes address data for comparison.
+ * Initializes the customer data cache on the first run.
  */
-export const normalizeAddress = ( address: BillingOrShippingAddress ) => {
-	const trimmedAddress = Object.entries( address ).reduce(
-		( acc, [ key, value ] ) => {
-			//Skip normalizing for any non string field
-			if ( typeof value !== 'string' ) {
-				acc[ key as keyof BillingOrShippingAddress ] = value;
-				return acc;
-			}
-
-			if ( key === 'postcode' ) {
-				acc[ key as keyof BillingOrShippingAddress ] = value
-					.replace( ' ', '' )
-					.toUpperCase();
-				return acc;
-			}
-
-			acc[ key as keyof BillingOrShippingAddress ] = value.trim();
-			return acc;
-		},
-		{} as BillingOrShippingAddress
-	);
-	return trimmedAddress;
+const initialize = () => {
+	localState.customerData = select( STORE_KEY ).getCustomerData();
+	localState.customerDataIsInitialized = true;
 };
 
 /**
- * Does a shallow compare of all address data to determine if the cart needs updating on the server.
+ * Checks customer data against new customer data to get a list of dirty props.
  */
-const isAddressDirty = < T extends CartBillingAddress | CartShippingAddress >(
-	// An object containing all previous address information
-	previousAddress: T,
-	// An object containing all address information.
-	address: T
-): boolean => {
-	if (
-		isBillingAddress( address ) &&
-		pluckEmail( address ) !==
-			pluckEmail( previousAddress as CartBillingAddress )
-	) {
-		return true;
+const updateDirtyProps = () => {
+	// Returns all current customer data from the store.
+	const newCustomerData = select( STORE_KEY ).getCustomerData();
+
+	localState.dirtyProps.billingAddress = [
+		...localState.dirtyProps.billingAddress,
+		...getDirtyKeys(
+			localState.customerData.billingAddress,
+			newCustomerData.billingAddress
+		),
+	];
+
+	localState.dirtyProps.shippingAddress = [
+		...localState.dirtyProps.shippingAddress,
+		...getDirtyKeys(
+			localState.customerData.shippingAddress,
+			newCustomerData.shippingAddress
+		),
+	];
+
+	// Update local cache of customer data so the next time this runs, it can compare against the latest data.
+	localState.customerData = newCustomerData;
+};
+
+/**
+ * Function to dispatch an update to the server.
+ */
+const updateCustomerData = (): void => {
+	if ( localState.doingPush ) {
+		return;
 	}
 
-	const addressMatches = isShallowEqual(
-		normalizeAddress( previousAddress ),
-		normalizeAddress( address )
-	);
+	// Prevent multiple pushes from happening at the same time.
+	localState.doingPush = true;
 
-	return ! addressMatches;
-};
+	// Get updated list of dirty props by comparing customer data.
+	updateDirtyProps();
 
-type BaseAddressKey = keyof CartBillingAddress | keyof CartShippingAddress;
+	// Do we need to push anything?
+	const needsPush =
+		localState.dirtyProps.billingAddress.length > 0 ||
+		localState.dirtyProps.shippingAddress.length > 0;
 
-const getDirtyKeys = < T extends CartBillingAddress | CartShippingAddress >(
-	// An object containing all previous address information
-	previousAddress: T,
-	// An object containing all address information.
-	address: T
-): BaseAddressKey[] => {
-	const previousAddressKeys = Object.keys(
-		previousAddress
-	) as BaseAddressKey[];
-
-	return previousAddressKeys.filter( ( key ) => {
-		return previousAddress[ key ] !== address[ key ];
-	} );
-};
-
-/**
- * Local cache of customerData used for comparisons.
- */
-let customerData = <CustomerData>{
-	billingAddress: {},
-	shippingAddress: {},
-};
-
-// Tracks if customerData has been populated.
-let customerDataIsInitialized = false;
-
-/**
- * Tracks which props have changed so the correct data gets pushed to the server.
- */
-const dirtyProps = <
-	{
-		billingAddress: BaseAddressKey[];
-		shippingAddress: BaseAddressKey[];
+	if ( ! needsPush ) {
+		localState.doingPush = false;
+		return;
 	}
->{
-	billingAddress: [],
-	shippingAddress: [],
-};
 
-/**
- * Function to dispatch an update to the server. This is debounced.
- */
-const updateCustomerData = debounce( (): void => {
-	const { billingAddress, shippingAddress } = customerData;
-	const validationStore = select( VALIDATION_STORE_KEY );
-
-	// Before we push anything, we need to ensure that the data we're pushing (dirty fields) are valid, otherwise we will
-	// abort and wait for the validation issues to be resolved.
-	const invalidProps = [
-		...dirtyProps.billingAddress.filter( ( key ) => {
-			return (
-				validationStore.getValidationError( 'billing_' + key ) !==
-				undefined
-			);
-		} ),
-		...dirtyProps.shippingAddress.filter( ( key ) => {
-			return (
-				validationStore.getValidationError( 'shipping_' + key ) !==
-				undefined
-			);
-		} ),
-	].filter( Boolean );
-
-	if ( invalidProps.length ) {
+	// Check props are valid, or abort.
+	if ( ! validateDirtyProps( localState.dirtyProps ) ) {
+		localState.doingPush = false;
 		return;
 	}
 
 	// Find valid data from the list of dirtyProps and prepare to push to the server.
 	const customerDataToUpdate = {} as Partial< BillingAddressShippingAddress >;
 
-	if ( dirtyProps.billingAddress.length ) {
+	if ( localState.dirtyProps.billingAddress.length ) {
 		customerDataToUpdate.billing_address = pick(
-			billingAddress,
-			dirtyProps.billingAddress
+			localState.customerData.billingAddress,
+			localState.dirtyProps.billingAddress
 		);
-		dirtyProps.billingAddress = [];
 	}
 
-	if ( dirtyProps.shippingAddress.length ) {
+	if ( localState.dirtyProps.shippingAddress.length ) {
 		customerDataToUpdate.shipping_address = pick(
-			shippingAddress,
-			dirtyProps.shippingAddress
+			localState.customerData.shippingAddress,
+			localState.dirtyProps.shippingAddress
 		);
-		dirtyProps.shippingAddress = [];
 	}
 
-	// If there is customer data to update, push it to the server.
-	if ( Object.keys( customerDataToUpdate ).length ) {
-		dispatch( STORE_KEY )
-			.updateCustomerData( customerDataToUpdate )
-			.then( removeAllNotices )
-			.catch( ( response ) => {
-				processErrorResponse( response );
+	dispatch( STORE_KEY )
+		.updateCustomerData( customerDataToUpdate )
+		.then( () => {
+			localState.dirtyProps.billingAddress = [];
+			localState.dirtyProps.shippingAddress = [];
+			localState.doingPush = false;
+			removeAllNotices();
+		} )
+		.catch( ( response ) => {
+			localState.doingPush = false;
+			processErrorResponse( response );
+		} );
+};
 
-				// Data did not persist due to an error. Make the props dirty again so they get pushed to the server.
-				if ( customerDataToUpdate.billing_address ) {
-					dirtyProps.billingAddress = [
-						...dirtyProps.billingAddress,
-						...( Object.keys(
-							customerDataToUpdate.billing_address
-						) as BaseAddressKey[] ),
-					];
-				}
-				if ( customerDataToUpdate.shipping_address ) {
-					dirtyProps.shippingAddress = [
-						...dirtyProps.shippingAddress,
-						...( Object.keys(
-							customerDataToUpdate.shipping_address
-						) as BaseAddressKey[] ),
-					];
-				}
-			} );
+/**
+ * Function to dispatch an update to the server. This is debounced.
+ */
+const debouncedUpdateCustomerData = debounce( () => {
+	if ( localState.doingPush ) {
+		debouncedUpdateCustomerData();
+		return;
 	}
-}, 1000 );
+	updateCustomerData();
+}, 1500 );
 
 /**
  * After cart has fully initialized, pushes changes to the server when data in the store is changed. Updates to the
  * server are debounced to prevent excessive requests.
+ *
+ * Any update to the store triggers this, so we do a shallow compare on the important data to know if we really need to
+ * schedule a push.
  */
-export const pushChanges = (): void => {
-	const store = select( STORE_KEY );
-
-	if ( ! store.hasFinishedResolution( 'getCartData' ) ) {
+export const pushChanges = ( debounced = true ): void => {
+	if ( ! select( STORE_KEY ).hasFinishedResolution( 'getCartData' ) ) {
 		return;
 	}
 
-	// Returns all current customer data from the store.
-	const newCustomerData = store.getCustomerData();
-
-	// On first run, this will populate the customerData cache with the current customer data in the store.
-	// This does not need to be pushed to the server because it's already there.
-	if ( ! customerDataIsInitialized ) {
-		customerData = newCustomerData;
-		customerDataIsInitialized = true;
+	if ( ! localState.customerDataIsInitialized ) {
+		initialize();
 		return;
 	}
 
-	// Check if the billing and shipping addresses are "dirty"--as in, they've changed since the last push.
-	const billingIsDirty = isAddressDirty(
-		customerData.billingAddress,
-		newCustomerData.billingAddress
-	);
-	const shippingIsDirty = isAddressDirty(
-		customerData.shippingAddress,
-		newCustomerData.shippingAddress
-	);
-
-	// Update local cache of dirty prop keys.
-	if ( billingIsDirty ) {
-		dirtyProps.billingAddress = [
-			...dirtyProps.billingAddress,
-			...getDirtyKeys(
-				customerData.billingAddress,
-				newCustomerData.billingAddress
-			),
-		];
-	}
-	if ( shippingIsDirty ) {
-		dirtyProps.shippingAddress = [
-			...dirtyProps.shippingAddress,
-			...getDirtyKeys(
-				customerData.shippingAddress,
-				newCustomerData.shippingAddress
-			),
-		];
-	}
-
-	// Update local cache of customer data so the next time this runs, it can compare against the latest data.
-	customerData = newCustomerData;
-
-	// Trigger the update if we have any dirty props.
 	if (
-		dirtyProps.billingAddress.length ||
-		dirtyProps.shippingAddress.length
+		isShallowEqual(
+			localState.customerData,
+			select( STORE_KEY ).getCustomerData()
+		)
 	) {
+		return;
+	}
+
+	if ( debounced ) {
+		debouncedUpdateCustomerData();
+	} else {
 		updateCustomerData();
 	}
 };
 
+// Cancel the debounced updateCustomerData function and trigger it immediately.
 export const flushChanges = (): void => {
-	updateCustomerData.flush();
+	debouncedUpdateCustomerData.flush();
 };

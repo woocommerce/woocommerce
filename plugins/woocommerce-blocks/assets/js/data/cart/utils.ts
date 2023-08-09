@@ -1,9 +1,15 @@
 /**
  * External dependencies
  */
-import { Cart, CartResponse } from '@woocommerce/types';
 import { select } from '@wordpress/data';
 import { camelCaseKeys } from '@woocommerce/base-utils';
+import { isEmail } from '@wordpress/url';
+import {
+	CartBillingAddress,
+	CartShippingAddress,
+	Cart,
+	CartResponse,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -35,4 +41,78 @@ export const shippingAddressHasValidationErrors = () => {
 		countryValidationErrors,
 		postcodeValidationErrors,
 	].some( ( entry ) => typeof entry !== 'undefined' );
+};
+
+export type BaseAddressKey =
+	| keyof CartBillingAddress
+	| keyof CartShippingAddress;
+
+/**
+ * Normalizes address values before push.
+ */
+export const normalizeAddressProp = (
+	key: BaseAddressKey,
+	value?: string | undefined
+) => {
+	// Skip normalizing for any non string field
+	if ( typeof value !== 'string' ) {
+		return value;
+	}
+	if ( key === 'email' ) {
+		return isEmail( value ) ? value.trim() : '';
+	}
+	if ( key === 'postcode' ) {
+		return value.replace( ' ', '' ).toUpperCase();
+	}
+	return value.trim();
+};
+
+/**
+ * Compares two address objects and returns an array of keys that have changed.
+ */
+export const getDirtyKeys = <
+	T extends CartBillingAddress & CartShippingAddress
+>(
+	// An object containing all previous address information
+	previousAddress: Partial< T >,
+	// An object containing all address information.
+	address: Partial< T >
+): BaseAddressKey[] => {
+	const previousAddressKeys = Object.keys(
+		previousAddress
+	) as BaseAddressKey[];
+
+	return previousAddressKeys.filter( ( key: BaseAddressKey ) => {
+		return (
+			normalizeAddressProp( key, previousAddress[ key ] ) !==
+			normalizeAddressProp( key, address[ key ] )
+		);
+	} );
+};
+
+/**
+ * Validates dirty props before push.
+ */
+export const validateDirtyProps = ( dirtyProps: {
+	billingAddress: BaseAddressKey[];
+	shippingAddress: BaseAddressKey[];
+} ): boolean => {
+	const validationStore = select( VALIDATION_STORE_KEY );
+
+	const invalidProps = [
+		...dirtyProps.billingAddress.filter( ( key ) => {
+			return (
+				validationStore.getValidationError( 'billing_' + key ) !==
+				undefined
+			);
+		} ),
+		...dirtyProps.shippingAddress.filter( ( key ) => {
+			return (
+				validationStore.getValidationError( 'shipping_' + key ) !==
+				undefined
+			);
+		} ),
+	].filter( Boolean );
+
+	return invalidProps.length === 0;
 };
