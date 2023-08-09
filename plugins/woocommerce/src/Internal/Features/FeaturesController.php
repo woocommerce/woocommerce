@@ -154,7 +154,7 @@ class FeaturesController {
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
 			$legacy_features = array(
-				'analytics'            => array(
+				'analytics'                => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
@@ -163,15 +163,18 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
-				'new_navigation'       => array(
+				'new_navigation'           => array(
 					'name'            => __( 'Navigation', 'woocommerce' ),
-					'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+					'description'     => __(
+						'Add the new WooCommerce navigation experience to the dashboard',
+						'woocommerce'
+					),
 					'option_key'      => Init::TOGGLE_OPTION_NAME,
 					'is_experimental' => false,
 					'disable_ui'      => false,
 					'is_legacy'       => true,
 				),
-				'product_block_editor' => array(
+				'product_block_editor'     => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,
@@ -183,24 +186,39 @@ class FeaturesController {
 					'desc_tip'        => function() {
 						$string = '';
 						if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
-							$string = __( '⚠ This feature is compatible with WordPress version 6.2 or higher.', 'woocommerce' );
+							$string = __(
+								'⚠ This feature is compatible with WordPress version 6.2 or higher.',
+								'woocommerce'
+							);
 						}
+
 						return $string;
 					},
 				),
-				'cart_checkout_blocks' => array(
+				'cart_checkout_blocks'     => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 					'is_experimental' => false,
 					'disable_ui'      => true,
 				),
-				'marketplace'          => array(
+				'marketplace'              => array(
 					'name'               => __( 'Marketplace', 'woocommerce' ),
 					'description'        => __(
 						'New, faster way to find extensions and themes for your WooCommerce store',
 						'woocommerce'
 					),
 					'is_experimental'    => false,
+					'enabled_by_default' => true,
+					'disable_ui'         => false,
+					'is_legacy'          => true,
+				),
+				'order_source_attribution' => array(
+					'name'               => __( 'Order Source Attribution (Beta)', 'woocommerce' ),
+					'description'        => __(
+						'Enable this feature to track and credit channels and campaigns that contribute to orders on your site.',
+						'woocommerce'
+					),
+					'is_experimental'    => true,
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
 					'is_legacy'          => true,
