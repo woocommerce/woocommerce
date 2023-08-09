@@ -1,9 +1,11 @@
-<?php // @codingStandardsIgnoreLine
+<?php
 /**
  * Register REST endpoint for fetching live branches manifest.
  *
  * @package WC_Beta_Tester
  */
+
+defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/../../includes/class-wc-beta-tester-live-branches-installer.php';
 
