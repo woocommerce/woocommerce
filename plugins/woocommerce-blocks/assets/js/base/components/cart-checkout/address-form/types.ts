@@ -6,6 +6,7 @@ import type {
 	AddressFields,
 	AddressType,
 	ShippingAddress,
+	KeyedAddressField,
 } from '@woocommerce/settings';
 
 export type FieldConfig = Record<
@@ -14,6 +15,13 @@ export type FieldConfig = Record<
 >;
 
 export type FieldType = keyof AddressFields;
+
+export type AddressFormFields = {
+	fields: KeyedAddressField[];
+	type: AddressType;
+	required: KeyedAddressField[];
+	hidden: KeyedAddressField[];
+};
 
 export interface AddressFormProps {
 	// Id for component.

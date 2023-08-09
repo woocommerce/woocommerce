@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useEffect, Fragment, useState } from '@wordpress/element';
+import {
+	useMemo,
+	useEffect,
+	Fragment,
+	useState,
+	useCallback,
+} from '@wordpress/element';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutAddress,
@@ -103,6 +109,24 @@ const Block = ( {
 		showApartmentField,
 	] ) as Record< keyof AddressFields, Partial< AddressField > >;
 
+	const onChangeAddress = useCallback(
+		( values: Partial< ShippingAddress > ) => {
+			setShippingAddress( values );
+			if ( useShippingAsBilling ) {
+				setBillingAddress( { ...values, email } );
+				dispatchCheckoutEvent( 'set-billing-address' );
+			}
+			dispatchCheckoutEvent( 'set-shipping-address' );
+		},
+		[
+			dispatchCheckoutEvent,
+			email,
+			setBillingAddress,
+			setShippingAddress,
+			useShippingAsBilling,
+		]
+	);
+
 	const AddressFormWrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
@@ -115,14 +139,7 @@ const Block = ( {
 				<AddressForm
 					id="shipping"
 					type="shipping"
-					onChange={ ( values: Partial< ShippingAddress > ) => {
-						setShippingAddress( values );
-						if ( useShippingAsBilling ) {
-							setBillingAddress( { ...values, email } );
-							dispatchCheckoutEvent( 'set-billing-address' );
-						}
-						dispatchCheckoutEvent( 'set-shipping-address' );
-					} }
+					onChange={ onChangeAddress }
 					values={ shippingAddress }
 					fields={
 						Object.keys(

@@ -32,6 +32,7 @@ const registeredStore = registerStore< State >( STORE_KEY, {
 	__experimentalUseThunks: true,
 } );
 
+// Pushes changes whenever the store is updated.
 registeredStore.subscribe( pushChanges );
 
 // This will skip the debounce and immediately push changes to the server when a field is blurred.

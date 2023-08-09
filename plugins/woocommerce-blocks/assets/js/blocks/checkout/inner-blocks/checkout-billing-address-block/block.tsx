@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useMemo, useEffect, Fragment, useState } from '@wordpress/element';
+import {
+	useMemo,
+	useEffect,
+	Fragment,
+	useState,
+	useCallback,
+} from '@wordpress/element';
 import {
 	useCheckoutAddress,
 	useStoreEvents,
@@ -87,6 +93,23 @@ const Block = ( {
 		showApartmentField,
 	] ) as Record< keyof AddressFields, Partial< AddressField > >;
 
+	const onChangeAddress = useCallback(
+		( values: Partial< BillingAddress > ) => {
+			setBillingAddress( values );
+			if ( useBillingAsShipping ) {
+				setShippingAddress( values );
+				dispatchCheckoutEvent( 'set-shipping-address' );
+			}
+			dispatchCheckoutEvent( 'set-billing-address' );
+		},
+		[
+			dispatchCheckoutEvent,
+			setBillingAddress,
+			setShippingAddress,
+			useBillingAsShipping,
+		]
+	);
+
 	const AddressFormWrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useBillingAsShipping
 		? [ noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS ]
@@ -98,14 +121,7 @@ const Block = ( {
 			<AddressForm
 				id="billing"
 				type="billing"
-				onChange={ ( values: Partial< BillingAddress > ) => {
-					setBillingAddress( values );
-					if ( useBillingAsShipping ) {
-						setShippingAddress( values );
-						dispatchCheckoutEvent( 'set-shipping-address' );
-					}
-					dispatchCheckoutEvent( 'set-billing-address' );
-				} }
+				onChange={ onChangeAddress }
 				values={ billingAddress }
 				fields={
 					Object.keys(
