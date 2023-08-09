@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 register_woocommerce_admin_test_helper_rest_route(
 	'/rest-api-filters',
 	array( WCA_Test_Helper_Rest_Api_Filters::class, 'create' ),
@@ -52,7 +54,9 @@ register_woocommerce_admin_test_helper_rest_route(
 	)
 );
 
-
+/**
+ * Class WCA_Test_Helper_Rest_Api_Filters.
+ */
 class WCA_Test_Helper_Rest_Api_Filters {
 	const WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION = 'wc-admin-test-helper-rest-api-filters';
 

@@ -290,11 +290,6 @@ class PageController {
 		switch ( $this->current_action ) {
 			case 'edit_order':
 			case 'new_order':
-				if ( ! isset( $this->order_edit_form ) ) {
-					$this->order_edit_form = new Edit();
-					$this->order_edit_form->setup( $this->order );
-				}
-				$this->order_edit_form->set_current_action( $this->current_action );
 				$this->order_edit_form->display();
 				break;
 			case 'list_orders':
@@ -341,6 +336,22 @@ class PageController {
 	}
 
 	/**
+	 * Prepares the order edit form for creating or editing an order.
+	 *
+	 * @see \Automattic\WooCommerce\Internal\Admin\Orders\Edit.
+	 * @since 8.1.0
+	 */
+	private function prepare_order_edit_form(): void {
+		if ( ! $this->order || ! in_array( $this->current_action, array( 'new_order', 'edit_order' ), true ) ) {
+			return;
+		}
+
+		$this->order_edit_form = $this->order_edit_form ?? new Edit();
+		$this->order_edit_form->setup( $this->order );
+		$this->order_edit_form->set_current_action( $this->current_action );
+	}
+
+	/**
 	 * Handles initialization of the orders edit form.
 	 *
 	 * @return void
@@ -351,6 +362,8 @@ class PageController {
 		$this->verify_edit_permission();
 		$this->handle_edit_lock();
 		$theorder = $this->order;
+
+		$this->prepare_order_edit_form();
 	}
 
 	/**
@@ -380,6 +393,8 @@ class PageController {
 		}
 
 		$theorder = $this->order;
+
+		$this->prepare_order_edit_form();
 	}
 
 	/**

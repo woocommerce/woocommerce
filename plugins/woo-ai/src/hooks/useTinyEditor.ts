@@ -3,6 +3,9 @@
  */
 import { setTinyContent, getTinyContent } from '../utils/tiny-tools';
 
-export const useTinyEditor = () => {
-	return { setContent: setTinyContent, getContent: getTinyContent };
+export const useTinyEditor = ( editorId?: string ) => {
+	return {
+		setContent: ( str: string ) => setTinyContent( str, editorId ),
+		getContent: () => getTinyContent( editorId ),
+	};
 };

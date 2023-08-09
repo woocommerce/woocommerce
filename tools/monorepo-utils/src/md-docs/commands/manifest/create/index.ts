@@ -10,6 +10,7 @@ import path from 'path';
  */
 import { generateManifestFromDirectory } from '../../../lib/generate-manifest';
 import { Logger } from '../../../../core/logger';
+import { processMarkdownLinks } from '../../../lib/markdown-links';
 
 export const generateManifestCommand = new Command( 'create' )
 	.description(
@@ -69,13 +70,20 @@ export const generateManifestCommand = new Command( 'create' )
 			baseEditUrl
 		);
 
+		const manifestWithLinks = await processMarkdownLinks(
+			manifest,
+			absoluteRootDir,
+			absoluteSubDir,
+			projectName
+		);
+
 		Logger.endTask();
 
 		Logger.startTask( 'Writing manifest' );
 
 		await writeFile(
 			absoluteOutputFilePath,
-			JSON.stringify( manifest, null, 2 ),
+			JSON.stringify( manifestWithLinks, null, 2 ),
 			( err ) => {
 				if ( err ) {
 					Logger.error( err );

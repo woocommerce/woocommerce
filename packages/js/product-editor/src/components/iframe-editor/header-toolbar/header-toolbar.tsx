@@ -135,17 +135,15 @@ export function HeaderToolbar( {
 					variant="tertiary"
 					className="woocommerce-modal-actions__cancel-button"
 					onClick={ onCancel }
-				>
-					{ __( 'Cancel', 'woocommerce' ) }
-				</ToolbarItem>
+					text={ __( 'Cancel', 'woocommerce' ) }
+				/>
 				<ToolbarItem
 					as={ Button }
 					variant="primary"
 					className="woocommerce-modal-actions__done-button"
 					onClick={ onSave }
-				>
-					{ __( 'Done', 'woocommerce' ) }
-				</ToolbarItem>
+					text={ __( 'Done', 'woocommerce' ) }
+				/>
 				<ToolbarItem
 					as={ ShowBlockInspectorPanel }
 					className="woocommerce-show-block-inspector-panel"

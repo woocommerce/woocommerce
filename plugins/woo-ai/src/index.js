@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, createRoot } from '@wordpress/element';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 /**
  * Internal dependencies
@@ -12,15 +13,23 @@ import { ProductCategorySuggestions } from './product-category';
 
 import './index.scss';
 
+const queryClient = new QueryClient();
+
 const renderComponent = ( Component, rootElement ) => {
 	if ( ! rootElement ) {
 		return;
 	}
 
+	const WrappedComponent = () => (
+		<QueryClientProvider client={ queryClient }>
+			<Component />
+		</QueryClientProvider>
+	);
+
 	if ( createRoot ) {
-		createRoot( rootElement ).render( <Component /> );
+		createRoot( rootElement ).render( <WrappedComponent /> );
 	} else {
-		render( <Component />, rootElement );
+		render( <WrappedComponent />, rootElement );
 	}
 };
 

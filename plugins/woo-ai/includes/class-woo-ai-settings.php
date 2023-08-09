@@ -30,6 +30,16 @@ class Woo_AI_Settings {
 	protected $id = 'woo-ai-settings-tab';
 
 	/**
+	 * Tone of voice select options.
+	 *
+	 * @var array
+	 */
+	private $tone_of_voice_select_options;
+
+	private const STORE_DESCRIPTION_OPTION_KEY = 'woo_ai_describe_store_description';
+	private const TONE_OF_VOICE_OPTION_KEY     = 'woo_ai_tone_of_voice_select';
+
+	/**
 	 * Main Instance.
 	 */
 	public static function instance() {
@@ -44,8 +54,62 @@ class Woo_AI_Settings {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_settings_script' ) );
 		add_action( 'woocommerce_settings_save_advanced', array( $this, 'action_save_woo_ai_settings_tab' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'add_ui' ) );
+		add_filter( 'woocommerce_settings_groups', array( $this, 'add_woo_ai_settings_group' ) );
+		add_filter( 'woocommerce_settings-woo-ai', array( $this, 'add_woo_ai_settings_group_settings' ) );
+
+		$this->tone_of_voice_select_options = array(
+			'informal'     => __( 'Informal', 'woocommerce' ),
+			'humorous'     => __( 'Humorous', 'woocommerce' ),
+			'neutral'      => __( 'Neutral', 'woocommerce' ),
+			'youthful'     => __( 'Youthful', 'woocommerce' ),
+			'formal'       => __( 'Formal', 'woocommerce' ),
+			'motivational' => __( 'Motivational', 'woocommerce' ),
+		);
 
 		$this->add_sanitization_hooks();
+	}
+
+	/**
+	 * Adds settings which can be retrieved via the WooCommerce Settings API.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/wiki/Settings-API
+	 *
+	 * @param array $settings The original settings array.
+	 * @return array The modified settings array.
+	 */
+	public function add_woo_ai_settings_group_settings( $settings ) {
+			$settings[] = array(
+				'id'          => 'tone-of-voice',
+				'option_key'  => self::TONE_OF_VOICE_OPTION_KEY,
+				'label'       => __( 'Storewide Tone of Voice', 'woocommerce' ),
+				'description' => __( 'This controls the conversational tone that will be used when generating content.', 'woocommerce' ),
+				'default'     => 'neutral',
+				'type'        => 'select',
+				'options'     => $this->tone_of_voice_select_options,
+			);
+			$settings[] = array(
+				'id'          => 'store-description',
+				'option_key'  => self::STORE_DESCRIPTION_OPTION_KEY,
+				'label'       => __( 'Store Description', 'woocommerce' ),
+				'description' => __( 'This is a short description of your store which could be used to help generate content.', 'woocommerce' ),
+				'type'        => 'textarea',
+			);
+			return $settings;
+	}
+
+	/**
+	 * Register our Woo AI plugin group to the WooCommerce Settings API.
+	 *
+	 * @param array $locations The original settings array.
+	 * @return array The modified settings array.
+	 */
+	public function add_woo_ai_settings_group( $locations ) {
+			$locations[] = array(
+				'id'          => 'woo-ai',
+				'label'       => __( 'Woo AI', 'woocommerce' ),
+				'description' => __( 'Settings for the Woo AI plugin.', 'woocommerce' ),
+			);
+			return $locations;
 	}
 
 	/**
@@ -147,25 +211,18 @@ class Woo_AI_Settings {
 
 			array(
 				'title'             => __( 'Tone of voice', 'woocommerce' ),
-				'id'                => 'woo_ai_tone_of_voice_select',
+				'id'                => self::TONE_OF_VOICE_OPTION_KEY,
 				'css'               => 'min-width:300px;',
 				'default'           => 'neutral',
 				'type'              => 'select',
 				'desc'              => $markup_str,
 				'desc_tip'          => __( 'Choose the language style that best resonates with your customers. It\'ll be used in text-based content, like product descriptions.', 'woocommerce' ),
 				'custom_attributes' => array( 'disabled' => 'true' ),
-				'options'           => array(
-					'informal'     => esc_html__( 'Informal', 'woocommerce' ),
-					'humorous'     => esc_html__( 'Humorous', 'woocommerce' ),
-					'neutral'      => esc_html__( 'Neutral', 'woocommerce' ),
-					'youthful'     => esc_html__( 'Youthful', 'woocommerce' ),
-					'formal'       => esc_html__( 'Formal', 'woocommerce' ),
-					'motivational' => esc_html__( 'Motivational', 'woocommerce' ),
-				),
+				'options'           => $this->tone_of_voice_select_options,
 			),
 
 			array(
-				'id'                => 'woo_ai_describe_store_description',
+				'id'                => self::STORE_DESCRIPTION_OPTION_KEY,
 				'type'              => 'textarea',
 				'custom_attributes' => array( 'disabled' => 'true' ),
 				'title'             => __( 'Describe your business', 'woocommerce' ),

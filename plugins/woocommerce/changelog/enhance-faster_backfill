@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use direct meta calls for backfilling instead of expensive object update.

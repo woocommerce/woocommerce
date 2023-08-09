@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 ENABLE_HPOS="${ENABLE_HPOS:-0}"
-ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Activate twentynineteen theme \n'
@@ -31,11 +30,6 @@ if [ $ENABLE_HPOS == 1 ]; then
 	echo -e 'Enable High-Performance Order Tables\n'
 	wp-env run tests-cli wp option update woocommerce_feature_custom_order_tables_enabled 'yes'
 	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'yes'
-fi
-
-if [ $ENABLE_NEW_PRODUCT_EDITOR == 1 ]; then
-	echo -e 'Enable the new product editor feature\n'
-	wp-env run tests-cli wp plugin install https://github.com/woocommerce/woocommerce-experimental-enable-new-product-editor/releases/download/0.1.0/woocommerce-experimental-enable-new-product-editor.zip --activate
 fi
 
 if [ $ENABLE_TRACKING == 1 ]; then

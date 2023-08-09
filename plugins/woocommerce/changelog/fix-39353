@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible error when refreshing order edit locks.

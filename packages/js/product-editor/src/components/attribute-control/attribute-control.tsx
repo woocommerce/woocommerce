@@ -32,7 +32,7 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
-	value: ProductAttribute[];
+	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
@@ -44,10 +44,16 @@ type AttributeControlProps = {
 	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	createNewAttributesAsGlobal?: boolean;
 	uiStrings?: {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
+		newAttributeModalDescription?: string | React.ReactElement;
+		newAttributeModalNotice?: string;
+		customAttributeHelperMessage?: string;
+		attributeRemoveLabel?: string;
+		attributeRemoveConfirmationMessage?: string;
 		globalAttributeHelperMessage: string;
 	};
 };
@@ -65,16 +71,25 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalOpen = () => {},
 	onRemove = () => {},
 	onRemoveCancel = () => {},
+	uiStrings,
+	createNewAttributesAsGlobal = false,
+} ) => {
 	uiStrings = {
-		newAttributeModalTitle: undefined,
-		emptyStateSubtitle: undefined,
-		newAttributeListItemLabel: __( 'Add attributes', 'woocommerce' ),
+		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
-	},
-} ) => {
+		newAttributeModalNotice: __(
+			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
+			'woocommerce'
+		),
+		attributeRemoveConfirmationMessage: __(
+			'Remove this attribute?',
+			'woocommerce'
+		),
+		...uiStrings,
+	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
@@ -97,7 +112,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const handleRemove = ( attribute: ProductAttribute ) => {
 		// eslint-disable-next-line no-alert
-		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
+		if ( window.confirm( uiStrings?.attributeRemoveConfirmationMessage ) ) {
 			handleChange(
 				value.filter(
 					( attr ) =>
@@ -176,7 +191,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const currentAttribute = value.find(
 		( attr ) => getAttributeId( attr ) === currentAttributeId
-	) as EnhancedProductAttribute;
+	);
 
 	return (
 		<div className="woocommerce-attribute-field">
@@ -213,6 +228,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					{ sortedAttributes.map( ( attr ) => (
 						<AttributeListItem
 							attribute={ attr }
+							removeLabel={ uiStrings?.attributeRemoveLabel }
 							key={ getAttributeId( attr ) }
 							onEditClick={ () => openEditModal( attr ) }
 							onRemoveClick={ () => handleRemove( attr ) }
@@ -224,12 +240,15 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
+					description={ uiStrings.newAttributeModalDescription }
+					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
 					} }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -240,6 +259,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						__( 'Edit %s', 'woocommerce' ),
 						currentAttribute.name
 					) }
+					customAttributeHelperMessage={
+						uiStrings.customAttributeHelperMessage
+					}
 					globalAttributeHelperMessage={ createInterpolateElement(
 						uiStrings.globalAttributeHelperMessage,
 						{
