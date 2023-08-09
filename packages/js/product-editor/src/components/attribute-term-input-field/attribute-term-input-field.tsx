@@ -43,6 +43,11 @@ type AttributeTermInputFieldProps = {
 	autoCreateOnSelect?: boolean;
 };
 
+interface customError extends Error {
+    code: string;
+    message: string;
+}
+
 let uniqueId = 0;
 
 export const AttributeTermInputField: React.FC<
@@ -145,10 +150,21 @@ export const AttributeTermInputField: React.FC<
 			invalidateResolutionForStoreSelector( 'getProductAttributes' );
 			invalidateResolutionForStoreSelector( 'getProductAttributeTerms' );
 			setIsCreatingTerm( false );
-		} catch ( e ) {
-			recordEvent( 'product_attribute_term_add_failed', {
+		} catch ( err: unknown ) {
+			let error = {
 				source: TRACKS_SOURCE,
-			} );
+				code: 'Unknown error.',
+				message: 'An unknown error occurred.',
+			};
+			const errorResponse = err as customError;
+			if ( errorResponse?.code && errorResponse?.message ) {
+				error = {
+					...error,
+					code: errorResponse.code,
+					message: errorResponse.message,
+				};
+			}
+			recordEvent( 'product_attribute_term_add_failed', error );
 			createNotice(
 				'error',
 				__( 'Failed to create attribute term.', 'woocommerce' )
