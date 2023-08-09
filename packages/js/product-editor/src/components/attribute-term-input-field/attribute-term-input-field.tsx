@@ -54,6 +54,7 @@ export const AttributeTermInputField: React.FC<
 	autoCreateOnSelect = false,
 	label = '',
 } ) => {
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { invalidateResolutionForStoreSelector, createProductAttributeTerm } =
 		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
 	const attributeTermInputId = useRef(
@@ -114,9 +115,24 @@ export const AttributeTermInputField: React.FC<
 			slug: cleanForSlug( name ),
 		} ).then(
 			( newTerm ) => {
+				invalidateResolutionForStoreSelector(
+					'getProductAttributeTerms'
+				);
 				onChange( [ ...value, newTerm ] );
 			},
-			() => {}
+			( error ) => {
+				let message = __(
+					'Failed to create new attribute term.',
+					'woocommerce'
+				);
+				if ( error.code === 'woocommerce_rest_cannot_create' ) {
+					message = error.message;
+				}
+
+				createErrorNotice( message, {
+					explicitDismiss: true,
+				} );
+			}
 		);
 	};
 
