@@ -44,8 +44,8 @@ type AttributeTermInputFieldProps = {
 };
 
 interface customError extends Error {
-    code: string;
-    message: string;
+	code: string;
+	message: string;
 }
 
 let uniqueId = 0;
@@ -156,7 +156,10 @@ export const AttributeTermInputField: React.FC<
 				code: 'Unknown error.',
 				message: 'An unknown error occurred.',
 			};
-			let noticeMessage = __( 'Failed to create attribute term.', 'woocommerce' );
+			let noticeMessage = __(
+				'Failed to create attribute term.',
+				'woocommerce'
+			);
 			const errorResponse = err as customError;
 			if ( errorResponse?.code && errorResponse?.message ) {
 				error = {
@@ -165,14 +168,14 @@ export const AttributeTermInputField: React.FC<
 					message: errorResponse.message,
 				};
 				if ( errorResponse.code === 'term_exists' ) {
-					noticeMessage = __( 'Attribute term already exists.', 'woocommerce' );
+					noticeMessage = __(
+						'Attribute term already exists.',
+						'woocommerce'
+					);
 				}
 			}
 			recordEvent( 'product_attribute_term_add_failed', error );
-			createNotice(
-				'error',
-				__( noticeMessage, 'woocommerce' )
-			);
+			createNotice( 'error', noticeMessage );
 			setIsCreatingTerm( false );
 		}
 	};
@@ -345,24 +348,26 @@ export const AttributeTermInputField: React.FC<
 					);
 				} }
 			</SelectControl>
-			{ ! autoCreateOnSelect && addNewAttributeTermName && attributeId !== undefined && (
-				<CreateAttributeTermModal
-					initialAttributeTermName={ addNewAttributeTermName }
-					onCancel={ () => {
-						setAddNewAttributeTermName( undefined );
-						focusSelectControl();
-					} }
-					attributeId={ attributeId }
-					onCreated={ ( newAttribute ) => {
-						onSelect( newAttribute );
-						setAddNewAttributeTermName( undefined );
-						invalidateResolutionForStoreSelector(
-							'getProductAttributeTerms'
-						);
-						focusSelectControl();
-					} }
-				/>
-			) }
+			{ ! autoCreateOnSelect &&
+				addNewAttributeTermName &&
+				attributeId !== undefined && (
+					<CreateAttributeTermModal
+						initialAttributeTermName={ addNewAttributeTermName }
+						onCancel={ () => {
+							setAddNewAttributeTermName( undefined );
+							focusSelectControl();
+						} }
+						attributeId={ attributeId }
+						onCreated={ ( newAttribute ) => {
+							onSelect( newAttribute );
+							setAddNewAttributeTermName( undefined );
+							invalidateResolutionForStoreSelector(
+								'getProductAttributeTerms'
+							);
+							focusSelectControl();
+						} }
+					/>
+				) }
 		</>
 	);
 };
