@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.2
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.8.1
+Stable tag: 10.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -80,6 +80,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 10.8.2 - 2023-08-09 =
+
+#### Bug Fixes
+
+- Ensure cached script data is refreshed following a site URL change, version change, or when switching between the WooCommerce Blocks feature plugin and WooCommerce Core.
 
 = 10.8.1 - 2023-08-07 =
 
