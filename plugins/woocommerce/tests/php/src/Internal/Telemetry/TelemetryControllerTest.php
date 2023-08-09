@@ -140,7 +140,8 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
-		$this->assertEquals( '2023-08-08T03:38:50Z', $new_data['ios']['installation_date'] );
+		// The installation date should be converted to the GMT date format 'c' to match other date fields.
+		$this->assertEquals( '2023-08-08T03:38:50+00:00', $new_data['ios']['installation_date'] );
 		$this->assertEquals( '14.7', $new_data['ios']['version'] );
 		$this->assertEquals( $new_data['ios']['last_used'], $new_data['ios']['first_used'] );
 		$this->assertFalse( isset( $new_data['android'] ) );
@@ -156,7 +157,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
-				'installation_date' => '2023-08-08T03:38:50Z',
+				'installation_date' => '2023-08-08T03:38:50+00:00',
 			),
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
@@ -172,7 +173,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Then.
 		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
-		$this->assertEquals( '2023-08-08T03:38:50Z', $new_data['ios']['installation_date'] );
+		$this->assertEquals( '2023-08-08T03:38:50+00:00', $new_data['ios']['installation_date'] );
 		$this->assertFalse( isset( $new_data['android'] ) );
 	}
 
@@ -186,7 +187,6 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
-				'installation_date' => '2023-08-08T03:38:50Z',
 				'first_used'        => '2023-08-08T14:58:33+00:00',
 			),
 		);
@@ -216,7 +216,6 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
-				'installation_date' => '2023-08-08T03:38:50Z',
 				'last_used'         => '2023-08-06T14:58:33+00:00',
 			),
 		);
@@ -247,7 +246,6 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		$existing_data = array(
 			'ios' => array(
 				'version'           => '14.8',
-				'installation_date' => '2023-08-08T03:38:50Z',
 				'last_used'         => '2023-08-06T14:58:33+00:00',
 			),
 		);
