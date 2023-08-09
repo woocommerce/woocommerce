@@ -38,6 +38,7 @@ export function useDropdown< Item = DefaultItem >( {
 	selected,
 }: useDropdownProps< Item > ) {
 	const [ inputValue, setInputValue ] = useState< string >( '' );
+	const [ isFocused, setIsFocused ] = useState( false );
 
 	const { deselectItem, selectItem } = useSelection( {
 		getItemLabel,
@@ -77,6 +78,8 @@ export function useDropdown< Item = DefaultItem >( {
 		openListbox,
 		selectItem,
 		setInputValue,
+		onInputBlur: () => setIsFocused( false ),
+		onInputFocus: () => setIsFocused( true ),
 	} );
 	const { getItemProps } = useItem< Item >( {
 		deselectItem,
@@ -99,6 +102,7 @@ export function useDropdown< Item = DefaultItem >( {
 		isListboxOpen,
 		listboxProps,
 		selected,
+		isFocused,
 		selectItem,
 		deselectItem,
 		setInputValue,

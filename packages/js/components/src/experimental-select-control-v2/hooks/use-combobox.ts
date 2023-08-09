@@ -17,6 +17,8 @@ type useComboboxProps< Item > = {
 	inputValue: string;
 	selectItem: ( item: Item ) => void;
 	setInputValue: ( value: string ) => void;
+	onInputFocus?: () => void;
+	onInputBlur?: () => void;
 };
 
 export function useCombobox< Item = DefaultItem >( {
@@ -28,6 +30,8 @@ export function useCombobox< Item = DefaultItem >( {
 	openListbox,
 	selectItem,
 	setInputValue,
+	onInputBlur = () => {},
+	onInputFocus = () => {},
 }: useComboboxProps< Item > ) {
 	function onKeyDown( event: KeyboardEvent< HTMLInputElement > ) {
 		switch ( event.key ) {
@@ -59,10 +63,14 @@ export function useCombobox< Item = DefaultItem >( {
 		'aria-expanded': 'true', // @todo
 		'aria-haspopup': 'true',
 		'aria-labelledby': 'label-id', //@todo
-		onBlur: closeListbox,
+		onBlur: () => {
+			onInputBlur();
+			closeListbox();
+		},
 		onChange: ( event: ChangeEvent< HTMLInputElement > ) =>
 			setInputValue( event.target?.value ),
 		onFocus: () => {
+			onInputFocus();
 			openListbox();
 		},
 		onKeyDown,

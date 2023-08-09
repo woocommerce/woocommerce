@@ -15,8 +15,8 @@ import {
 import { defaultGetItemLabel } from './utils/default-get-item-label';
 import { Listbox } from './listbox';
 import { Option } from './option';
-import { SelectedItems } from './selected-items';
 import { useDropdown } from './hooks/use-dropdown';
+import { Combobox } from './combobox';
 
 type SelectControlProps< Item > = {
 	children?: Children< Item >;
@@ -48,6 +48,7 @@ export function SelectControl< Item = DefaultItem >( {
 		getItemProps,
 		isListboxOpen,
 		selectItem,
+		isFocused,
 	} = useDropdown< Item >( {
 		getItemLabel,
 		multiple,
@@ -62,21 +63,20 @@ export function SelectControl< Item = DefaultItem >( {
 	return (
 		<div className="woocommerce-experimental-select-control">
 			<label htmlFor={ '@todo' }>{ label }</label>
-			{ multiple && (
-				<SelectedItems
-					items={ selected as Item[] }
-					isReadOnly={ isReadOnly }
-					getItemLabel={ getItemLabel }
-					getItemValue={ getItemValue }
-					onRemove={ ( item ) => {
-						deselectItem( item );
-						onDeselect( item );
-					} }
-				/>
-			) }
-			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-			{ /* @ts-ignore TS complains about autocomplete despite it being a valid property. */ }
-			<input type="text" { ...comboboxProps } />
+
+			<Combobox
+				isFocused={ isFocused }
+				selected={ selected as Item[] }
+				isReadOnly={ isReadOnly }
+				getItemLabel={ getItemLabel }
+				getItemValue={ getItemValue }
+				multiple={ multiple }
+				comboboxProps={ comboboxProps }
+				onRemove={ ( item ) => {
+					deselectItem( item );
+					onDeselect( item );
+				} }
+			/>
 			{ children ? (
 				children( {
 					filteredOptions,
