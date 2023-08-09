@@ -55,13 +55,15 @@ const StateInput = ( {
 	 */
 	const onChangeState = useCallback(
 		( stateValue: string ) => {
-			onChange(
+			const newValue =
 				options.length > 0
 					? optionMatcher( stateValue, options )
-					: stateValue
-			);
+					: stateValue;
+			if ( newValue !== value ) {
+				onChange( newValue );
+			}
 		},
-		[ onChange, options ]
+		[ onChange, options, value ]
 	);
 
 	/**

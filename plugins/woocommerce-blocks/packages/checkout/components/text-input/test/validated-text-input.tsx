@@ -11,7 +11,7 @@ import * as wpData from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { __ValidatedTexInputWithoutId as ValidatedTextInput } from '../validated-text-input';
+import ValidatedTextInput from '../validated-text-input';
 
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,

@@ -14,4 +14,5 @@ export * from './camel-case-keys';
 export * from './snake-case-keys';
 export * from './debounce';
 export * from './keyby';
+export * from './pick';
 export * from './get-inline-styles';
