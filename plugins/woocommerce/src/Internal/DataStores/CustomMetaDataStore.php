@@ -198,7 +198,7 @@ abstract class CustomMetaDataStore {
 	/**
 	 * Retrieves metadata by meta key.
 	 *
-	 * @param \WC_Abstract_Order $object Object ID..
+	 * @param \WC_Abstract_Order $object Object ID.
 	 * @param string             $meta_key Meta key.
 	 *
 	 * @return \stdClass|bool Metadata object or FALSE if not found.
