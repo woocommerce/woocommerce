@@ -566,9 +566,6 @@ class Init {
 									array(),
 									array(
 										array(
-											'woocommerce/product-warning',
-										),
-										array(
 											'woocommerce/product-sku-field',
 										),
 										array(
