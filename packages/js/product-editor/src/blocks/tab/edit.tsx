@@ -1,15 +1,19 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { Button } from '@wordpress/components';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { TabButton } from './tab-button';
+import { Notice } from '../../components/notice';
 
 export interface TabBlockAttributes extends BlockAttributes {
 	id: string;
@@ -38,6 +42,8 @@ export function Edit( {
 		'is-selected': isSelected,
 	} );
 
+	const buttonText = __( 'Go to Options', 'woocommerce' );
+
 	return (
 		<div { ...blockProps }>
 			<TabButton id={ id } selected={ isSelected } order={ order }>
@@ -49,6 +55,29 @@ export function Edit( {
 				role="tabpanel"
 				className={ classes }
 			>
+				<Notice
+					description={ __(
+						"This product has options, such as size or color. You can now manage each variation's price and other details individually.",
+						'woocommerce'
+					) }
+					status="info"
+					className="woocommerce-product-tab__notice"
+				>
+					<Button
+						isSecondary={ true }
+						onClick={ () =>
+							navigateTo( {
+								url: getNewPath(
+									{ tab: 'variations' },
+									'/add-product',
+									{}
+								),
+							} )
+						}
+					>
+						{ buttonText }
+					</Button>
+				</Notice>
 				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 				{ /* @ts-ignore Content only template locking does exist for this property. */ }
 				<InnerBlocks templateLock="contentOnly" />
