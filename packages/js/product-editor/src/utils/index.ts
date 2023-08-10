@@ -18,6 +18,8 @@ import {
 	getTruncatedProductVariationTitle,
 } from './get-product-variation-title';
 import { preventLeavingProductForm } from './prevent-leaving-product-form';
+import { hasAttributesUsedForVariations } from './has-attributes-used-for-variations';
+import { isSelectedTabApplicableForOptionsNotice } from './is-selected-tab-applicable-for-options-notice';
 import { isValidEmail } from './validate-email';
 
 export * from './create-ordered-children';
@@ -39,6 +41,8 @@ export {
 	getProductTitle,
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
+	hasAttributesUsedForVariations,
+	isSelectedTabApplicableForOptionsNotice,
 	isValidEmail,
 	preventLeavingProductForm,
 	PRODUCT_STATUS_LABELS,
