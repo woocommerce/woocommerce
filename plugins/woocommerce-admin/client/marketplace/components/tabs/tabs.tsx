@@ -71,7 +71,11 @@ const renderTabs = ( props: TabsProps ) => {
 			<>
 				{ tabs[ tabKey ]?.href ? (
 					<a
-						className="woocommerce-marketplace__tab-button components-button"
+						className={ classNames(
+							'woocommerce-marketplace__tab-button',
+							'components-button',
+							`woocommerce-marketplace__tab-${ tabKey }`
+						) }
 						href={ tabs[ tabKey ]?.href }
 						key={ tabKey }
 					>
@@ -81,6 +85,7 @@ const renderTabs = ( props: TabsProps ) => {
 					<Button
 						className={ classNames(
 							'woocommerce-marketplace__tab-button',
+							`woocommerce-marketplace__tab-${ tabKey }`,
 							{
 								'is-active': tabKey === selectedTab,
 							}
