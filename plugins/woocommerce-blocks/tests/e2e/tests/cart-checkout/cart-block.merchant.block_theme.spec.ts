@@ -41,8 +41,9 @@ test.describe( 'Merchant → Cart', () => {
 		test( 'can only be inserted once', async ( { page, editorUtils } ) => {
 			await editorUtils.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
-			const cartBlockButton = page.locator( 'button', {
-				has: page.locator( `text="${ blockData.name }"` ),
+			const cartBlockButton = page.getByRole( 'option', {
+				name: blockData.name,
+				exact: true,
 			} );
 			await expect( cartBlockButton ).toHaveAttribute(
 				'aria-disabled',
@@ -61,7 +62,9 @@ test.describe( 'Merchant → Cart', () => {
 				.getByRole( 'toolbar', { name: 'Block tools' } )
 				.getByRole( 'button', { name: 'Options' } );
 			await options.click();
-			const removeButton = page.getByText( 'Remove Cart' );
+			const removeButton = page.getByRole( 'menuitem', {
+				name: 'Delete',
+			} );
 			await removeButton.click();
 			// Expect block to have been removed.
 			await expect(

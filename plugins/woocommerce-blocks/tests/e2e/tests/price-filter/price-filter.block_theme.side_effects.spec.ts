@@ -28,7 +28,7 @@ const blockData: BlockData< {
 
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
-		await admin.createNewPost();
+		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: 'woocommerce/all-products' } );
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
