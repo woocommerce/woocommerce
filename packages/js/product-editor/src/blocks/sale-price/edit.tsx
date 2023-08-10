@@ -21,11 +21,20 @@ import {
 import { useValidation } from '../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 import { SalePriceBlockAttributes } from './types';
+import {
+	hasAttributesUsedForVariations,
+	isSelectedTabApplicableForOptionsNotice,
+} from '../../utils';
 
 export function Edit( {
 	attributes,
 	clientId,
-}: BlockEditProps< SalePriceBlockAttributes > ) {
+	context,
+}: BlockEditProps< SalePriceBlockAttributes > & {
+	context?: {
+		selectedTab?: string | null;
+	};
+} ) {
 	const blockProps = useBlockProps();
 	const { label, help } = attributes;
 	const [ regularPrice ] = useEntityProp< string >(
@@ -47,6 +56,15 @@ export function Edit( {
 		BaseControl,
 		'wp-block-woocommerce-product-sale-price-field'
 	) as string;
+
+	const [ productAttributes ] = useEntityProp< Product[ 'attributes' ] >(
+		'postType',
+		'product',
+		'attributes'
+	);
+	const isDisabled =
+		hasAttributesUsedForVariations( productAttributes ) &&
+		isSelectedTabApplicableForOptionsNotice( context?.selectedTab );
 
 	const {
 		ref: salePriceRef,
@@ -95,6 +113,7 @@ export function Edit( {
 					ref={ salePriceRef }
 					label={ label }
 					onBlur={ validateSalePrice }
+					disabled={ isDisabled }
 				/>
 			</BaseControl>
 		</div>

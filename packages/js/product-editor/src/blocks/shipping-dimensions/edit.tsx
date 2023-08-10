@@ -34,6 +34,7 @@ import {
 	ShippingDimensionsImage,
 } from '../../components/shipping-dimensions-image';
 import { useValidation } from '../../contexts/validation-context';
+import { hasAttributesUsedForVariations } from '../../utils/has-attributes-used-for-variations';
 
 export function Edit( {
 	clientId,
@@ -64,6 +65,14 @@ export function Edit( {
 			weightUnit: getOption( 'woocommerce_weight_unit' ),
 		};
 	}, [] );
+
+	const [ productAttributes ] = useEntityProp< Product[ 'attributes' ] >(
+		'postType',
+		'product',
+		'attributes'
+	);
+
+	const isDisabled = hasAttributesUsedForVariations( productAttributes );
 
 	function getDimensionsControlProps(
 		name: keyof ProductDimensions,
@@ -149,6 +158,7 @@ export function Edit( {
 		) as string,
 		ref: dimensionsWidthRef,
 		onBlur: validateDimensionsWidth,
+		disabled: isDisabled,
 	};
 	const dimensionsLengthProps = {
 		...getDimensionsControlProps( 'length', 'B' ),
@@ -158,6 +168,7 @@ export function Edit( {
 		) as string,
 		ref: dimensionsLengthRef,
 		onBlur: validateDimensionsLength,
+		disabled: isDisabled,
 	};
 	const dimensionsHeightProps = {
 		...getDimensionsControlProps( 'height', 'C' ),
@@ -167,6 +178,7 @@ export function Edit( {
 		) as string,
 		ref: dimensionsHeightRef,
 		onBlur: validateDimensionsHeight,
+		disabled: isDisabled,
 	};
 	const weightProps = {
 		id: useInstanceId( BaseControl, `product_shipping_weight` ) as string,
@@ -176,6 +188,7 @@ export function Edit( {
 		suffix: weightUnit,
 		ref: weightRef,
 		onBlur: validateWeight,
+		disabled: isDisabled,
 	};
 
 	return (
