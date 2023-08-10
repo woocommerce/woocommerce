@@ -159,15 +159,6 @@ for ( const {
 				),
 			] );
 
-			// @todo This is a workaround to wait for the save button to be enabled. It works only without Gutenberg enabled. We have to refactor this.
-			await page
-				.locator(
-					"button.edit-site-save-button__button[aria-label='Save'][aria-disabled='true']"
-				)
-				.waitFor( {
-					state: 'visible',
-				} );
-
 			await page.goto( frontendPage, {
 				waitUntil: 'load',
 			} );

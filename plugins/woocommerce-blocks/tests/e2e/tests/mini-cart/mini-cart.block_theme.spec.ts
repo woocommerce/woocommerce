@@ -23,7 +23,7 @@ const getMiniCartButton = async ( { page } ) => {
 test.describe( `${ blockData.name } Block`, () => {
 	test.describe( `standalone`, () => {
 		test.beforeEach( async ( { admin, page, editor } ) => {
-			await admin.createNewPost();
+			await admin.createNewPost( { legacyCanvas: true } );
 			await editor.insertBlock( { name: blockData.name } );
 			await editor.publishPost();
 			const url = new URL( page.url() );
@@ -108,7 +108,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test.describe( `with All products Block`, () => {
 		test.beforeEach( async ( { admin, page, editor } ) => {
-			await admin.createNewPost();
+			await admin.createNewPost( { legacyCanvas: true } );
 			await editor.insertBlock( { name: blockData.name } );
 			await editor.insertBlock( { name: 'woocommerce/all-products' } );
 			await editor.publishPost();

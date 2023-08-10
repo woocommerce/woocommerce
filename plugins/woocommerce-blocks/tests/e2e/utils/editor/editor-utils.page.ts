@@ -123,11 +123,12 @@ export class EditorUtils {
 	}
 
 	async enterEditMode() {
-		await this.editor.page.waitForSelector(
-			'.edit-site-visual-editor__editor-canvas[role="button"]',
-			{ timeout: 3000 }
-		);
-		await this.editor.canvas.click( 'body' );
+		await this.editor.page
+			.getByRole( 'button', {
+				name: 'Edit',
+				exact: true,
+			} )
+			.click();
 	}
 
 	async isBlockEarlierThan< T >(
@@ -172,5 +173,16 @@ export class EditorUtils {
 		}
 
 		return firstBlockIndex < secondBlockIndex;
+	}
+
+	async waitForSiteEditorFinishLoading() {
+		await this.page
+			.frameLocator( 'iframe[title="Editor canvas"i]' )
+			.locator( 'body > *' )
+			.first()
+			.waitFor();
+		await this.page
+			.locator( '.edit-site-canvas-spinner' )
+			.waitFor( { state: 'hidden' } );
 	}
 }

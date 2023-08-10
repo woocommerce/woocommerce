@@ -55,7 +55,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 	} ) => {
-		await admin.createNewPost();
+		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectTextOnlyOption( { page } );
@@ -78,7 +78,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 	} ) => {
-		await admin.createNewPost();
+		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconOnlyOption( { page } );
@@ -101,7 +101,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 	} ) => {
-		await admin.createNewPost();
+		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconAndTextOption( { page } );

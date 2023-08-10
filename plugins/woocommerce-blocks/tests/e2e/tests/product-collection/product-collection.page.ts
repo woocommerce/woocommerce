@@ -62,7 +62,7 @@ class ProductCollectionPage {
 	}
 
 	async createNewPostAndInsertBlock() {
-		await this.admin.createNewPost();
+		await this.admin.createNewPost( { legacyCanvas: true } );
 		await this.editor.insertBlock( {
 			name: this.BLOCK_NAME,
 		} );

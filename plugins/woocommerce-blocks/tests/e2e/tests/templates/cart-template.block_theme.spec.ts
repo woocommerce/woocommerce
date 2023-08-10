@@ -14,17 +14,19 @@ test.describe( 'Test the cart template', async () => {
 	} );
 
 	test( 'Template can be opened in the site editor', async ( {
+		admin,
 		page,
 		editorUtils,
 	} ) => {
-		await page.goto( '/wp-admin/site-editor.php' );
+		await admin.visitAdminPage( 'site-editor.php' );
+		await editorUtils.waitForSiteEditorFinishLoading();
 		await page.getByRole( 'button', { name: /Templates/i } ).click();
 		await page.getByRole( 'button', { name: /Cart/i } ).click();
 		await editorUtils.enterEditMode();
 
 		await expect(
 			page
-				.frameLocator( 'iframe' )
+				.frameLocator( 'iframe[title="Editor canvas"i]' )
 				.locator( 'button:has-text("Proceed to checkout")' )
 				.first()
 		).toBeVisible();
@@ -45,13 +47,16 @@ test.describe( 'Test the cart template', async () => {
 			name: 'core/paragraph',
 			attributes: { content: 'Hello World' },
 		} );
-		await editor.saveSiteEditorEntities();
 
-		// Wait for the response after saving the post because sometimes there's a race condition, and loading the post
-		// shows a version without the newly saved content.
-		await editor.page.waitForResponse( ( response ) =>
-			response.url().includes( permalink )
-		);
+		await Promise.all( [
+			editor.saveSiteEditorEntities(),
+			// Wait for the response after saving the post because sometimes there's a race condition, and loading the post
+			// shows a version without the newly saved content.
+			editor.page.waitForResponse( ( response ) =>
+				response.url().includes( permalink )
+			),
+		] );
+
 		await page.goto( permalink, { waitUntil: 'commit' } );
 
 		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
