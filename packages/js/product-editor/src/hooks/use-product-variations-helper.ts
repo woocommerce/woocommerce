@@ -8,11 +8,11 @@ import {
 	Product,
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 } from '@woocommerce/data';
-import { EnhancedProductAttribute } from './use-product-attributes';
 
 /**
  * Internal dependencies
  */
+import { EnhancedProductAttribute } from './use-product-attributes';
 
 export function useProductVariationsHelper() {
 	const [ productId ] = useEntityProp< number >(

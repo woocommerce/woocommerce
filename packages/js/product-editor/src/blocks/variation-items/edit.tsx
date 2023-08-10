@@ -9,11 +9,12 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import { VariationsTable } from '../../components/variations-table';
+import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
 
 export function Edit( {
 	context,
-}: BlockEditProps< {} > & {
+}: BlockEditProps< VariationOptionsBlockAttributes > & {
 	context?: {
 		isInSelectedTab?: boolean;
 	};
