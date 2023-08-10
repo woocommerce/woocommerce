@@ -18,16 +18,10 @@ let isNewProductEditorEnabled = false;
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
-	if ( ! isTrackingSupposedToBeEnabled ) {
-		// no modal should be shown, so don't even look for button
-		return;
-	}
-
 	try {
 		await page
-			.locator( '.woocommerce-product-mvp-feedback-modal' )
-			.getByRole( 'button', { name: 'Skip' } )
-			.click( { timeout: 5000 } );
+			.getByText('Skip').nth(3)
+			.click();
 	} catch ( error ) {}
 }
 
@@ -75,6 +69,7 @@ test.describe.serial( 'Disable block product editor', () => {
 			} )
 			.click();
 		await dismissFeedbackModalIfShown( page );
+		await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 		await expectOldProductEditor( page );
 	} );
 	test( 'can be disabled from settings', async ( { page } ) => {
