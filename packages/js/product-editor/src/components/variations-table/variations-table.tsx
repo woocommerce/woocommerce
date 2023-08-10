@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import {
@@ -23,7 +24,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -46,6 +47,16 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
+	const [ entityAttributes ] = useEntityProp< ProductAttribute[] >(
+		'postType',
+		'product',
+		'attributes'
+	);
+	const variableAttributeTags = entityAttributes
+		.filter( ( attr ) => attr.variation )
+		.map( ( attr ) => attr.options )
+		.flat();
+
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
@@ -114,34 +125,45 @@ export function VariationsTable() {
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__attributes">
-							{ variation.attributes.map( ( attribute ) => {
-								const tag = (
-									/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-									/* @ts-ignore Additional props are not required. */
-									<Tag
-										id={ attribute.id }
-										className="woocommerce-product-variations__attribute"
-										key={ attribute.id }
-										label={ truncate( attribute.option, {
-											length: PRODUCT_VARIATION_TITLE_LIMIT,
-										} ) }
-										screenReaderLabel={ attribute.option }
-									/>
-								);
+							{ variation.attributes
+								.filter( ( attribute ) =>
+									variableAttributeTags.includes(
+										attribute.option
+									)
+								)
+								.map( ( attribute ) => {
+									const tag = (
+										/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+										/* @ts-ignore Additional props are not required. */
+										<Tag
+											id={ attribute.id }
+											className="woocommerce-product-variations__attribute"
+											key={ attribute.id }
+											label={ truncate(
+												attribute.option,
+												{
+													length: PRODUCT_VARIATION_TITLE_LIMIT,
+												}
+											) }
+											screenReaderLabel={
+												attribute.option
+											}
+										/>
+									);
 
-								return attribute.option.length <=
-									PRODUCT_VARIATION_TITLE_LIMIT ? (
-									tag
-								) : (
-									<Tooltip
-										key={ attribute.id }
-										text={ attribute.option }
-										position="top center"
-									>
-										<span>{ tag }</span>
-									</Tooltip>
-								);
-							} ) }
+									return attribute.option.length <=
+										PRODUCT_VARIATION_TITLE_LIMIT ? (
+										tag
+									) : (
+										<Tooltip
+											key={ attribute.id }
+											text={ attribute.option }
+											position="top center"
+										>
+											<span>{ tag }</span>
+										</Tooltip>
+									);
+								} ) }
 						</div>
 						<div
 							className={ classnames(
