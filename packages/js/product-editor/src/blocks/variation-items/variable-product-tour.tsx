@@ -85,16 +85,7 @@ export const VariableProductTour: React.FC = () => {
 			// WooTourKit does not handle merging of default options properly,
 			// so we need to duplicate the effects options here.
 			effects: {
-				spotlight: {
-					interactivity: {
-						enabled: true,
-					},
-				},
 				arrowIndicator: true,
-				liveResize: {
-					mutation: true,
-					resize: true,
-				},
 			},
 			callbacks: {
 				onStepViewOnce: () => {
