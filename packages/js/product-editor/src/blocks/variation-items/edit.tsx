@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
+import { BlockEditProps } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -12,7 +13,7 @@ import { VariableProductTour } from './variable-product-tour';
 
 export function Edit( {
 	context,
-}: {
+}: BlockEditProps< {} > & {
 	context?: {
 		isInSelectedTab?: boolean;
 	};

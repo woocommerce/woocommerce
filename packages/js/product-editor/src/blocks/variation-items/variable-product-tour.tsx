@@ -86,6 +86,11 @@ export const VariableProductTour: React.FC = () => {
 			// so we need to duplicate the effects options here.
 			effects: {
 				arrowIndicator: true,
+				spotlight: {
+					interactivity: {
+						enabled: true,
+					},
+				},
 			},
 			callbacks: {
 				onStepViewOnce: () => {

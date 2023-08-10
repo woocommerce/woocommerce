@@ -11,11 +11,18 @@ import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
  */
 import { TabButton } from './tab-button';
 
+export interface TabBlockAttributes extends BlockAttributes {
+	id: string;
+	title: string;
+	order: number;
+	isSelected?: boolean;
+}
+
 export function Edit( {
 	setAttributes,
 	attributes,
 	context,
-}: BlockEditProps< BlockAttributes > & {
+}: BlockEditProps< TabBlockAttributes > & {
 	context?: {
 		selectedTab?: string | null;
 	};
