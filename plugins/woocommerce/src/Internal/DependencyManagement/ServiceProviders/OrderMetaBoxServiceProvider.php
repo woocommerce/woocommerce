@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
@@ -19,6 +20,7 @@ class OrderMetaBoxServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
+		CustomerHistory::class,
 		CustomMetaBox::class,
 	);
 
@@ -26,7 +28,7 @@ class OrderMetaBoxServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
+		$this->share( CustomerHistory::class );
 		$this->share( CustomMetaBox::class );
 	}
-
 }
