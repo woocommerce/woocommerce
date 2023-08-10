@@ -1,1 +1,1 @@
-export * from './FrontendUtils';
+export * from './frontend-utils.page';

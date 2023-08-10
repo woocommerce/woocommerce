@@ -1,1 +1,1 @@
-export * from './EditorUtils';
+export * from './editor-utils.page';

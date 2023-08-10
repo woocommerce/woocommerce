@@ -1,15 +1,78 @@
 .wp-block-button.wc-block-components-product-button {
 	word-break: break-word;
 	white-space: normal;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: $gap-small;
+
+	.wp-block-button__link {
+		word-break: break-word;
+		white-space: normal;
+		display: inline-flex;
+		justify-content: center;
+		text-align: center;
+		// Set button font size and padding so it inherits from parent.
+		padding: 0.5em 1em;
+		font-size: 1em;
+
+		&.loading {
+			opacity: 0.25;
+		}
+
+		&.loading::after {
+			font-family: WooCommerce; /* stylelint-disable-line */
+			content: "\e031";
+			animation: spin 2s linear infinite;
+			margin-left: 0.5em;
+			display: inline-block;
+			width: auto;
+			height: auto;
+		}
+	}
+
+	a[hidden] {
+		display: none;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: translateY(0);
+		}
+		to {
+			transform: translateY(-100%);
+		}
+	}
+
+	@keyframes slideIn {
+		from {
+			transform: translateY(90%);
+			opacity: 0;
+		}
+		to {
+			transform: translate(0);
+			opacity: 1;
+		}
+	}
 
 	.wc-block-components-product-button__button {
 		border-style: none;
 		display: inline-flex;
 		justify-content: center;
-		margin-right: auto;
-		margin-left: auto;
 		white-space: normal;
 		word-break: break-word;
+		width: 150px;
+		overflow: hidden;
+
+		span {
+
+			&.wc-block-slide-out {
+				animation: slideOut 0.1s linear 1 normal forwards;
+			}
+			&.wc-block-slide-in {
+				animation: slideIn 0.1s linear 1 normal;
+			}
+		}
 	}
 
 	.wc-block-components-product-button__button--placeholder {

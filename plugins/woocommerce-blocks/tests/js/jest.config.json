@@ -29,7 +29,8 @@
 		"@woocommerce/shared-hocs": "assets/js/shared/hocs",
 		"@woocommerce/blocks-test-utils": "tests/utils",
 		"@woocommerce/types": "assets/js/types",
-		"@woocommerce/utils": "assets/js/utils"
+		"@woocommerce/utils": "assets/js/utils",
+		"@woocommerce/interactivity": "assets/js/interactivity"
 	},
 	"setupFiles": [
 		"@wordpress/jest-preset-default/scripts/setup-globals.js",
