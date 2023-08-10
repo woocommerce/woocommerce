@@ -14,7 +14,8 @@
 				"wp-content/plugins/gutenberg-test-plugins": "./node_modules/@wordpress/e2e-tests/plugins",
 				"wp-content/plugins/woocommerce-blocks": ".",
 				"wp-content/plugins/woocommerce-gutenberg-products-block": ".",
-				"wp-cli.yml": "./wp-cli.yml"
+				"wp-cli.yml": "./wp-cli.yml",
+				"custom-plugins" : "./tests/e2e/mocks/custom-plugins"
 			}
 		}
 	},

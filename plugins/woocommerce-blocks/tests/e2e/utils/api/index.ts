@@ -1,1 +1,1 @@
-export * from './TemplateApiUtils';
+export * from './template-api-utils.page';
