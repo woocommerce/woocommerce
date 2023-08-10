@@ -2,9 +2,12 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\BlockTemplates;
 
-interface CustomBlockInterface {
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+
+interface CustomBlockInterface extends BlockContainerInterface {
 	/**
-	 * Custom method.
+	 * Adds a method to insert a specific custom inner block.
 	 */
-	public function custom_method(): string;
+	public function add_custom_inner_block(): BlockInterface;
 }

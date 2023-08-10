@@ -3,9 +3,6 @@
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 
 /**
  * Trait for block containers.
@@ -24,59 +21,22 @@ trait BlockContainerTrait {
 	/**
 	 * Add a block to the block container.
 	 *
-	 * @param array    $block_config The block data.
-	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
+	 * @param BlockInterface $block The block.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockContainerInterface.
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
-	public function &add_block_container( array $block_config, ?callable $block_creator = null ): BlockContainerInterface {
-		$block_container = $this->add_block(
-			$block_config,
-			is_callable( $block_creator )
-				? $block_creator
-				: function ( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
-					return new BlockContainer( $config, $root_template, $parent );
-				}
-		);
-
-		if ( ! $block_container instanceof BlockContainerInterface ) {
-			throw new \UnexpectedValueException( 'The block creator must return an instance of BlockContainerInterface.' );
-		}
-
-		return $block_container;
-	}
-
-	/**
-	 * Add a block to the block container.
-	 *
-	 * @param array    $block_config The block data.
-	 * @param callable $block_creator An optional function that returns a new BlockInterface instance.
-	 *
-	 * @throws \ValueError If the block configuration is invalid.
-	 * @throws \ValueError If a block with the specified ID already exists in the template.
-	 * @throws \UnexpectedValueException If the block creator does not return an instance of BlockInterface.
-	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
-	 */
-	public function &add_block( array $block_config, ?callable $block_creator = null ): BlockInterface {
-		$root_template = $this->get_root_template();
-
-		if ( is_callable( $block_creator ) ) {
-			$block = $block_creator( $block_config, $root_template, $this );
-
-			if ( ! $block instanceof BlockInterface ) {
-				throw new \UnexpectedValueException( 'The block creator must return an instance of BlockInterface.' );
-			}
-		} else {
-			$block = new Block( $block_config, $root_template, $this );
+	protected function &add_inner_block( BlockInterface $block ): BlockInterface {
+		if ( ! $block instanceof BlockInterface ) {
+			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
 		}
 
 		if ( $block->get_parent() !== $this ) {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
+		$root_template = $block->get_root_template();
 		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
 		return $block;
@@ -104,15 +64,22 @@ trait BlockContainerTrait {
 	 * Get the inner blocks as a formatted template.
 	 */
 	public function get_formatted_template(): array {
+		$arr = [
+			$this->get_name(),
+			$this->get_attributes(),
+		];
+
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
-		$inner_blocks_formatted_template = array_map(
-			function( Block $block ) {
-				return $block->get_formatted_template();
-			},
-			$inner_blocks
-		);
+		if ( ! empty( $inner_blocks ) ) {
+			$arr[] = array_map(
+				function( BlockInterface $block ) {
+					return $block->get_formatted_template();
+				},
+				$inner_blocks
+			);
+		}
 
-		return $inner_blocks_formatted_template;
+		return $arr;
 	}
 }
