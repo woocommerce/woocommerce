@@ -178,6 +178,35 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test to confirm that `installation_date` is not set when it is not included in the request.
+	 *
+	 * @return void
+	 */
+	public function test_WCTracker_mobile_usage_installation_date_is_not_set_when_it_is_not_in_the_request() {
+		// Given.
+		$existing_data = array(
+			'ios' => array(
+				'version'           => '14.8',
+			),
+		);
+		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
+
+		// When.
+		$this->request(
+			array(
+				'platform'          => 'ios',
+				'version'           => '14.7',
+			)
+		)->get_data();
+
+		// Then.
+		$new_data = get_option( self::MOBILE_USAGE_OPTION_KEY );
+		$this->assertTrue( isset( $new_data['ios'] ) );
+		$this->assertFalse( isset( $new_data['ios']['installation_date'] ) );
+		$this->assertFalse( isset( $new_data['android'] ) );
+	}
+
+	/**
 	 * Test to confirm that `first_used` is only set once per platform.
 	 *
 	 * @return void

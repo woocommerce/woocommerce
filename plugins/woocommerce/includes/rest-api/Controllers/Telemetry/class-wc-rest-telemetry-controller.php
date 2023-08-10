@@ -86,7 +86,7 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 			$existing_usage = $data[ $platform ];
 
 			// Sets the installation date only if it has not been set before.
-			if ( ! isset( $existing_usage['installation_date'] ) ) {
+			if ( isset( $new['installation_date'] ) && ! isset( $existing_usage['installation_date'] ) ) {
 				$data[ $platform ]['installation_date'] = $new['installation_date'];
 			}
 
@@ -127,12 +127,14 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 		// The installation date could be null from earlier mobile client versions.
 		$installation_date = $request->get_param( 'installation_date' );
 
-		return array(
+		return array_filter(array(
 			'platform'          => sanitize_text_field( $platform ),
 			'version'           => sanitize_text_field( $version ),
 			'last_used'         => gmdate( 'c' ),
-			'installation_date' => get_gmt_from_date( $installation_date, 'c' ),
-		);
+			'installation_date' => isset($installation_date) ? get_gmt_from_date( $installation_date, 'c' ) : null,
+		), function($value) {
+			return $value !== null;
+		});
 	}
 
 	/**
