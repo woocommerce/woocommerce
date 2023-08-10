@@ -5,8 +5,11 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Order;
 
 /**
  * Class Edit.
@@ -77,6 +80,7 @@ class Edit {
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
+		self::maybe_register_source_attribution( $screen_id );
 	}
 
 	/**
@@ -200,6 +204,35 @@ class Edit {
 	 */
 	private function add_order_taxonomies_meta_box() {
 		$this->taxonomies_meta_box->add_taxonomies_meta_boxes( $this->screen_id, $this->order->get_type() );
+	}
+
+	/**
+	 * Register source attribution meta boxes if the feature is enabled.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	private static function maybe_register_source_attribution( $screen_id ) {
+		/** @var FeaturesController $feature_controller */
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
+			return;
+		}
+
+		/** @var CustomerHistory $customer_history_meta_box */
+		$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
+
+		add_meta_box(
+			'woocommerce-customer-history',
+			__( 'Customer History', 'woocommerce' ),
+			function( $post_or_order ) use ( $customer_history_meta_box ) {
+				$order = $post_or_order instanceof WC_Order ?: wc_get_order( $post_or_order );
+				$customer_history_meta_box->output( $order );
+			},
+			$screen_id,
+			'side',
+			'high'
+		);
 	}
 
 	/**
