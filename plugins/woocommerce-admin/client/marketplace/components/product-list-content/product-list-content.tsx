@@ -2,7 +2,6 @@
  * Internal dependencies
  */
 import './product-list-content.scss';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @woocommerce/dependency-group
 import ProductCard from '../product-card/product-card';
 
 export interface Product {
@@ -19,6 +18,7 @@ export interface Product {
 	reviewsCount?: number | null;
 	currency?: string;
 }
+
 interface ProductListContentProps {
 	products: Product[];
 }
