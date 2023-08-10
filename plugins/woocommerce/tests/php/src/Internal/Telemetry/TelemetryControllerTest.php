@@ -186,7 +186,7 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		// Given.
 		$existing_data = array(
 			'ios' => array(
-				'version'           => '14.8',
+				'version' => '14.8',
 			),
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
@@ -194,8 +194,8 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		// When.
 		$this->request(
 			array(
-				'platform'          => 'ios',
-				'version'           => '14.7',
+				'platform' => 'ios',
+				'version'  => '14.7',
 			)
 		)->get_data();
 
@@ -215,8 +215,8 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		// Given.
 		$existing_data = array(
 			'ios' => array(
-				'version'           => '14.8',
-				'first_used'        => '2023-08-08T14:58:33+00:00',
+				'version'    => '14.8',
+				'first_used' => '2023-08-08T14:58:33+00:00',
 			),
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
@@ -244,8 +244,8 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		// Given.
 		$existing_data = array(
 			'ios' => array(
-				'version'           => '14.8',
-				'last_used'         => '2023-08-06T14:58:33+00:00',
+				'version'   => '14.8',
+				'last_used' => '2023-08-06T14:58:33+00:00',
 			),
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
@@ -274,8 +274,8 @@ class TelemetryControllerTest extends WC_REST_Unit_Test_Case {
 		// Given.
 		$existing_data = array(
 			'ios' => array(
-				'version'           => '14.8',
-				'last_used'         => '2023-08-06T14:58:33+00:00',
+				'version'   => '14.8',
+				'last_used' => '2023-08-06T14:58:33+00:00',
 			),
 		);
 		update_option( self::MOBILE_USAGE_OPTION_KEY, $existing_data );
