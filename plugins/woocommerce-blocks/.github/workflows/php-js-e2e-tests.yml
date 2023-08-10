@@ -153,6 +153,7 @@ jobs:
         env:
           WOOCOMMERCE_BLOCKS_PHASE: 3
         run: |
+          node ./bin/wp-env-with-wp-622.js
           npm run wp-env start
           npm run wp-env:config && npx cross-env NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --listTests > ~/.jest-e2e-tests
           npx cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js cross-env NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --runInBand --runTestsByPath $( awk 'NR % 5 == ${{ matrix.part }} - 1' < ~/.jest-e2e-tests )
