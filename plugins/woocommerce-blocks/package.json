@@ -267,7 +267,7 @@
 		"compare-versions": "4.1.3",
 		"config": "3.3.7",
 		"dataloader": "2.1.0",
-		"deepsignal": "^1.1.0",
+		"deepsignal": "1.3.6",
 		"dinero.js": "1.9.1",
 		"dompurify": "^2.4.0",
 		"downshift": "6.1.7",

@@ -161,6 +161,8 @@ const entries = {
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
+		'product-button-interactivity':
+			'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
 	},
 	payments: {
 		'wc-payment-method-cheque':
