@@ -16,6 +16,10 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { TabButton } from './tab-button';
 import { Notice } from '../../components/notice';
+import {
+	hasAttributesUsedForVariations,
+	isSelectedTabApplicableForOptionsNotice,
+} from '../../utils';
 
 export interface TabBlockAttributes extends BlockAttributes {
 	id: string;
@@ -50,21 +54,9 @@ export function Edit( {
 		'attributes'
 	);
 
-	function isSelectedTabApplicableForOptionsNotice() {
-		return [ 'inventory', 'pricing', 'shipping' ].includes(
-			context?.selectedTab || ''
-		);
-	}
-
-	function hasAttributesUsedForVariations(
-		attributeList: Product[ 'attributes' ]
-	) {
-		return attributeList.some( ( { variation } ) => variation );
-	}
-
 	const isOptionsNoticeVisible =
 		hasAttributesUsedForVariations( productAttributes ) &&
-		isSelectedTabApplicableForOptionsNotice();
+		isSelectedTabApplicableForOptionsNotice( context?.selectedTab );
 
 	return (
 		<div { ...blockProps }>
