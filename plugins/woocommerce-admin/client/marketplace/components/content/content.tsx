@@ -9,6 +9,7 @@ import './content.scss';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
 import Footer from '../footer/footer';
+import FeedbackModal from '../feedback-modal/feedback-modal';
 
 export interface ContentProps {
 	selectedTab?: string | undefined;
@@ -31,6 +32,7 @@ export default function Content( props: ContentProps ): JSX.Element {
 				{ renderContent( selectedTab ) }
 			</div>
 			<Footer />
+			<FeedbackModal />
 		</>
 	);
 }

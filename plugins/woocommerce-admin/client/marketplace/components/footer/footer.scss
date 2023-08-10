@@ -3,7 +3,7 @@
 .woocommerce-admin-page__extensions .woocommerce-layout__footer {
 	background: #f6f7f7;
 	// Undo default fixed footer style used in WC Admin
-	position: unset;
+	position: relative;
 	width: 100%;
 }
 
