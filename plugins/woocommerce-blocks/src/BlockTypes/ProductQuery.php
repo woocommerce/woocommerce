@@ -138,7 +138,7 @@ class ProductQuery extends AbstractBlock {
 
 				$navigation_link_payload = array(
 					'prefetch' => $is_previous_or_next,
-					'scroll'   => true,
+					'scroll'   => false,
 				);
 
 				$p->set_attribute(
