@@ -10,6 +10,7 @@ import { Button, Card } from '@wordpress/components';
 import './product-card.scss';
 import { Product } from '../product-list/types';
 import { getAdminSetting } from '../../../../client/utils/admin-settings';
+import { appendUTMParams } from '../../utils/functions';
 
 export interface ProductCardProps {
 	type?: string;
@@ -20,14 +21,21 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { product } = props;
 	const currencySymbol = getAdminSetting( 'currency' )?.symbol;
 
+	// Append UTM parameters to the vendor URL
+	let vendorUrl = '';
+	if ( product.vendorUrl ) {
+		vendorUrl = appendUTMParams( product.vendorUrl, {
+			utm_source: 'extensionsscreen',
+			utm_medium: 'product',
+			utm_campaign: 'wcaddons',
+			utm_content: 'devpartner',
+		} );
+	}
+
 	let productVendor: string | JSX.Element | null = product?.vendorName;
 	if ( product?.vendorName && product?.vendorUrl ) {
 		productVendor = (
-			<a
-				href={ product.vendorUrl }
-				target="_blank"
-				rel="noopener noreferrer"
-			>
+			<a href={ vendorUrl } target="_blank" rel="noopener noreferrer">
 				{ product.vendorName }
 			</a>
 		);
