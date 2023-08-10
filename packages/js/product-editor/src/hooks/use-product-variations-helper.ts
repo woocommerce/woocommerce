@@ -54,8 +54,11 @@ export function useProductVariationsHelper() {
 					} );
 				} )
 				.then( () => {
-					return invalidateResolutionForStoreSelector(
+					invalidateResolutionForStoreSelector(
 						'getProductVariations'
+					);
+					return invalidateResolutionForStoreSelector(
+						'getProductVariationsTotalCount'
 					);
 				} )
 				.finally( () => {
