@@ -2367,6 +2367,54 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
+	 * @testDox Test that orders token are stored in the correct meta table
+	 */
+	public function test_payment_token_stored_in_correct_table() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+		$order = wc_create_order();
+		$order->save();
+
+		$token1 = WC_Helper_Payment_Token::create_eCheck_token();
+		$token2 = WC_Helper_Payment_Token::create_eCheck_token();
+		$order->add_payment_token( $token1 );
+		$order->add_payment_token( $token2 );
+		$order->save();
+
+		$token_ids = $order->get_payment_tokens();
+		$this->assertEquals( array( $token1->get_id(), $token2->get_id() ), $token_ids );
+
+		$token_ids = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_value FROM {$wpdb->prefix}wc_orders_meta WHERE order_id = %d AND meta_key = '_payment_tokens'",
+				$order->get_id()
+			)
+		);
+		$token_ids = maybe_unserialize( $token_ids );
+		$this->assertEquals( array( $token1->get_id(), $token2->get_id() ), $token_ids );
+	}
+
+	/**
+	 * Before 7.9.0, payment tokens were stored in the post meta table. This test checks that we can read them anyway.
+	 */
+	public function test_payment_token_is_read_when_stored_in_post_meta() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( false );
+		$order = wc_create_order();
+		$order->save();
+
+		$token1   = WC_Helper_Payment_Token::create_eCheck_token();
+		$token2   = WC_Helper_Payment_Token::create_eCheck_token();
+		$token_ar = array( $token1->get_id(), $token2->get_id() );
+		update_post_meta( $order->get_id(), '_payment_tokens', $token_ar );
+		$order->set_version( '7.9.0' );
+
+		$token_ids = $order->get_payment_tokens();
+		$this->assertEquals( $token_ar, $token_ids );
+	}
+
+	/**
 	 * @testWith [true]
 	 *           [false]
 	 * @testDox An exception thrown while populating the properties of an order is captured and logged as a warning.
