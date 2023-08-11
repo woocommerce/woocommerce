@@ -790,6 +790,7 @@ class Init {
 			$user_data_fields,
 			array(
 				'variable_product_block_tour_shown',
+				'product_block_variable_options_notice_disissed',
 			)
 		);
 	}

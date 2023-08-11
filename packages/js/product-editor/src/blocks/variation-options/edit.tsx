@@ -8,7 +8,11 @@ import {
 	createInterpolateElement,
 	useMemo,
 } from '@wordpress/element';
-import { Product, ProductAttribute } from '@woocommerce/data';
+import {
+	Product,
+	ProductAttribute,
+	useUserPreferences,
+} from '@woocommerce/data';
 import { Link } from '@woocommerce/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -47,6 +51,11 @@ function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
 export function Edit() {
 	const blockProps = useBlockProps();
 	const { generateProductVariations } = useProductVariationsHelper();
+	const {
+		updateUserPreferences,
+		product_block_variable_options_notice_disissed:
+			hasDismissedVariableOptionsNotice,
+	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
 		ProductAttribute[]
@@ -70,6 +79,40 @@ export function Edit() {
 		},
 	} );
 
+	const localAttributeNames = attributes
+		.filter( ( attr ) => attr.id === 0 )
+		.map( ( attr ) => attr.name );
+	let notice: string | React.ReactElement = '';
+	if (
+		localAttributeNames.length > 0 &&
+		hasDismissedVariableOptionsNotice !== 'yes'
+	) {
+		notice = createInterpolateElement(
+			__(
+				'Buyers can’t search or filter by <attributeNames /> to find the variations. Consider adding them again as <globalAttributeLink>global attributes</globalAttributeLink> to make them easier to discover.',
+				'woocommerce'
+			),
+			{
+				attributeNames: (
+					<span>
+						{ localAttributeNames.length === 2
+							? localAttributeNames.join(
+									__( ' and ', 'woocommerce' )
+							  )
+							: localAttributeNames.join( ', ' ) }
+					</span>
+				),
+				globalAttributeLink: (
+					<Link
+						href="https://woocommerce.com/document/variable-product/#add-attributes-to-use-for-variations"
+						type="external"
+						target="_blank"
+					/>
+				),
+			}
+		);
+	}
+
 	function mapDefaultAttributes() {
 		return attributes.map( ( attribute ) => ( {
 			...attribute,
@@ -91,7 +134,13 @@ export function Edit() {
 				onChange={ handleChange }
 				createNewAttributesAsGlobal={ true }
 				useRemoveConfirmationModal={ true }
+				onNoticeDismiss={ () =>
+					updateUserPreferences( {
+						product_block_variable_options_notice_disissed: 'yes',
+					} )
+				}
 				uiStrings={ {
+					notice,
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
 					newAttributeModalNotice: '',
