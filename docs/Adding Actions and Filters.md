@@ -1,6 +1,6 @@
 Like many WordPress plugins, WooCommerce provides a range of actions and filters through which developers can extend and modify the platform.
 
-Often, when writing new code or revising existing code, there is a desire to add new hooks—but this should always be done with thoughtfulness and care. This document aims to provide high level guidance on the matter.
+Often, when writing new code or revising existing code, there is a desire to add new hooks—but this should always be done with thoughtfulness and care. This document aims to provide high-level guidance on the matter.
 
 Practices we generally allow, support and encourage include:
 
@@ -14,7 +14,7 @@ On the flip side, there are several practices we discourage:
 
 * [Tying lifecycle hooks to methods of execution](#tying-lifecycle-hooks-to-methods-of-execution)
 * [Using filters as feature flags](#using-filters-as-feature-flags)
-* [Placing filter hooks inside templates and data-stores](#placement-of-filter-hooks)
+* [Placing filter hooks inside templates and data stores](#placement-of-filter-hooks)
 * [Enumeration values within hook names](#enumeration-values-inside-hook-names)
 
 Beyond those items, we generally otherwise adhere to WordPress coding standards. In regards to hooks, that specifically means following the:
@@ -22,11 +22,11 @@ Beyond those items, we generally otherwise adhere to WordPress coding standards.
 * [Documentation standards for hooks](https://make.wordpress.org/core/handbook/best-practices/inline-documentation-standards/php/#4-hooks-actions-and-filters)
 * [Guidance on Dynamic hook names](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/#interpolation-for-naming-dynamic-hooks)
 
-Please note that we provide example code throughout this guide to help illustrate some of the principles, however to keep things concise we usually omit unnecessary detail, including doc blocks (in practice, though, hooks should always be accompanied by docblocks!).
+Please note that we provide example code throughout this guide to help illustrate some of the principles. However, to keep things concise, we usually omit unnecessary detail, including doc blocks (in practice, though, hooks should always be accompanied by doc blocks!).
 
 ### Prefer existing hooks (or other alternatives)
 
-Hooks come with a long-term obligation: the last thing we want is to add a new hook that developers come to depend on, only to strip it away again. However, this can lead to difficulties when the time comes to refactor a piece of code that contains hooks, sometimes delaying meaningful change or limiting how easily we can implement a change without compromising on backwards compatibility commitments.
+Hooks come with a long-term obligation: the last thing we want is to add a new hook that developers come to depend on, only to strip it away again. However, this can lead to difficulties when the time comes to refactor a piece of code that contains hooks, sometimes delaying meaningful change or limiting how easily we can implement a change without compromising on backward compatibility commitments.
 
 For those reasons, we always prefer that—wherever reasonable—an existing hook or alternative approach in preference to adding a new hook.
 
@@ -48,7 +48,7 @@ In general, lifecycle hooks:
 
 Note that lifecycle hooks primarily exist to let other systems observe, rather than to modify the result. Of course, this does not stop the function author from additionally providing a filter hook that serves this function.
 
-Example, noting that it is the process of fetching the promotions which we view as the “lifecycle event”, and not the function itself:
+For example, noting that it is the process of fetching the promotions which we view as the “lifecycle event”, and not the function itself:
 
 ```php
 function woocommerce_get_current_promotions( ...$args ) {
@@ -63,13 +63,13 @@ function woocommerce_get_current_promotions( ...$args ) {
 
 ### Escape hooks
 
-In some cases it may be appropriate to support short-circuiting of functions or methods. This is what we call an escape hook, and can be useful as a means of overriding code when a better way of doing so is not available.
+In some cases, it may be appropriate to support short-circuiting of functions or methods. This is what we call an escape hook, and can be useful as a means of overriding code when a better way of doing so is not available.
 
 * Escape hooks are always filters
 * They should always supply null as the initial filterable value
 * If the value is changed to a non-null value, then the function should exit early by returning that new value
 
-For type-safety, care should be taken to ensure that, if a function is short-circuited, the return type matches the function signature and/or return type stated in the function docblock.
+For type safety, care should be taken to ensure that, if a function is short-circuited, the return type matches the function signature and/or return type stated in the function doc block.
 
 Example:
 
@@ -123,9 +123,9 @@ function get_featured_product_for_current_customer( ) {
 
 ### Tying lifecycle hooks to methods of execution
 
-There can sometimes be multiple paths leading to the same action. For instance, an order can be updated via the REST API, or through the admin environment, or on the frontend. It may additionally happen via ajax, or via a regular request.
+There can sometimes be multiple paths leading to the same action. For instance, an order can be updated via the REST API, through the admin environment, or on the front end. It may additionally happen via ajax, or via a regular request.
 
-It is important however not to tie hooks for high level processes to specific execution paths. For example an action that fires when an order is created must not only be fired when this happens in the admin environment via an ajax request.
+It is important however not to tie hooks for high-level processes to specific execution paths. For example, an action that fires when an order is created must not only be fired when this happens in the admin environment via an ajax request.
 
 Instead, prefer a more generic hook that passes context about the method of execution to the callback.
 
@@ -188,4 +188,4 @@ The primary reason for avoiding this is that the more values there are in the en
 
 ### Summary
 
-This document is a high level guide to the inclusion and placement of hooks, not an exhaustive list. There will occasionally be exceptions, and there may be good rules and methodologies we are missing: if you have suggestions or ideas for improvement, please reach out!
+This document is a high-level guide to the inclusion and placement of hooks, not an exhaustive list. There will occasionally be exceptions, and there may be good rules and methodologies we are missing: if you have suggestions or ideas for improvement, please reach out!
