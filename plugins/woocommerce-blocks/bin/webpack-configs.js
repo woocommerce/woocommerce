@@ -733,7 +733,7 @@ const getSiteEditorConfig = ( options = {} ) => {
  * @param {Object} options Build options.
  */
 const getStylingConfig = ( options = {} ) => {
-	let { fileSuffix } = options;
+	let { fileSuffix, isClassicThemeConfig } = options;
 	const { alias, resolvePlugins = [] } = options;
 	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
 	const resolve = alias
@@ -775,11 +775,58 @@ const getStylingConfig = ( options = {} ) => {
 						chunks: 'all',
 						priority: 10,
 					},
+					...( isClassicThemeConfig && {
+						vendorsStyle: {
+							test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
+							name: 'wc-blocks-vendors-style',
+							chunks: 'all',
+							priority: 7,
+						},
+						blocksStyle: {
+							// Capture all stylesheets with name `style` or name that starts with underscore (abstracts).
+							test: /(style|_.*)\.scss$/,
+							name: 'wc-all-blocks-style',
+							chunks: 'all',
+							priority: 5,
+						},
+					} ),
 				},
 			},
 		},
 		module: {
 			rules: [
+				{
+					test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'postcss-loader',
+						{
+							loader: 'sass-loader',
+							options: {
+								sassOptions: {
+									includePaths: [ 'node_modules' ],
+								},
+								additionalData: ( content ) => {
+									const styleImports = [
+										'colors',
+										'breakpoints',
+										'variables',
+										'mixins',
+										'animations',
+										'z-index',
+									]
+										.map(
+											( imported ) =>
+												`@import "~@wordpress/base-styles/${ imported }";`
+										)
+										.join( ' ' );
+									return styleImports + content;
+								},
+							},
+						},
+					],
+				},
 				{
 					test: /\.(j|t)sx?$/,
 					use: {
@@ -800,6 +847,7 @@ const getStylingConfig = ( options = {} ) => {
 				},
 				{
 					test: /\.s?css$/,
+					exclude: /node_modules/,
 					use: [
 						MiniCssExtractPlugin.loader,
 						'css-loader',

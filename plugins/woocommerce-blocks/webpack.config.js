@@ -75,7 +75,12 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
-	...getStylingConfig( { alias: getAlias() } ),
+	...getStylingConfig( { alias: getAlias(), isClassicThemeConfig: false } ),
+};
+
+const StylingClassicThemeConfig = {
+	...sharedConfig,
+	...getStylingConfig( { alias: getAlias(), isClassicThemeConfig: true } ),
 };
 
 /**
@@ -103,4 +108,5 @@ module.exports = [
 	SiteEditorConfig,
 	StylingConfig,
 	InteractivityConfig,
+	StylingClassicThemeConfig,
 ];
