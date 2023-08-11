@@ -65,6 +65,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 			<div className="woocommerce-attribute-list-item__actions">
 				{ attribute.id === 0 && (
 					<Tooltip
+						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
 						text={ NOT_FILTERABLE_CUSTOM_ATTR_TEXT }
@@ -77,6 +78,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 				) }
 				{ ! attribute.visible && (
 					<Tooltip
+						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
