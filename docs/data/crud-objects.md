@@ -1,23 +1,23 @@
 # Developing using WooCommerce CRUD objects
 
-CRUD is an abbreviation of the 4 basic operations you can do to a database or resource – Create, Read, Update, Delete.
+CRUD is an abbreviation of the four basic operations you can do to a database or resource – Create, Read, Update, Delete.
 
 [WooCommerce 3.0 introduced CRUD objects](https://woocommerce.wordpress.com/2016/10/27/the-new-crud-classes-in-woocommerce-2-7/) for working with WooCommerce data. **Whenever possible these objects should be used in your code instead of directly updating metadata or using WordPress post objects.**
 
-Each of these objects contains a schema for the data it controls (properties), a getter and setter for each property, and a save/delete method which talks to a data store. The data store handles the actual saving/reading from the database – the object itself does not need to be aware of where the data is stored.
+Each of these objects contains a schema for the data it controls (properties), a getter and setter for each property, and a save/delete method which talks to a data store. The data store handles the actual saving/reading from the database. The object itself does not need to be aware of where the data is stored.
 
 ## The benefits of CRUD
 
-* Structure – each object has a pre-defined structure and keeps it’s own data valid.
+* Structure – Each object has a pre-defined structure and keeps its own data valid.
 * Control – We control the flow of data, and any validation needed, so we know when changes occur.
 * Ease of development – As a developer, you don’t need to know the internals of the data you’re working with, just the names.
-* Abstraction – The data can be moved elsewhere e.g. custom tables, without affecting existing code.
-* Unification – We can use the same code for updating things in admin as we do in the REST API and CLIs – everything is unified.
-* Simplified code – less procedural code to update objects which reduces likelihood of malfunction and adds more unit test coverage.
+* Abstraction – The data can be moved elsewhere, e.g. custom tables, without affecting existing code.
+* Unification – We can use the same code for updating things in admin as we do in the REST API and CLIs. Everything is unified.
+* Simplified code – Less procedural code to update objects which reduces likelihood of malfunction and adds more unit test coverage.
 
 ## CRUD object structure
 
-The [`WC_Data`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-data.php) class is the basic implementation for CRUD objects, and all CRUD objects extend it. The most important parts to note: `$data` is an array of props supported in each object, and `$id` is the object’s ID.
+The [`WC_Data`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-data.php) class is the basic implementation for CRUD objects, and all CRUD objects extend it. The most important properties to note are `$data`, which is an array of props supported in each object, and `$id`, which is the object’s ID.
 
 The [coupon object class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/class-wc-coupon.php) is a good example of extending `WC_Data` and adding CRUD functions to all properties.
 
@@ -89,9 +89,9 @@ public function set_used_by( $used_by ) {
 }
 ```
 
-`set_prop` and `get_prop` are part of `WC_Data`. These apply various filters (based on context) and handle changes (so we can save only changes and not all props).
+`set_prop` and `get_prop` are part of `WC_Data`. These apply various filters (based on context) and handle changes, so we can efficiently save only the props that have changed rather than all props.
 
-A note on `$context`: when getting data to use on the frontend or display, `view` context is used. This applies filters to the data so extensions can change the values dynamically. `edit` context should be used when showing values to edit in the backend, and for saving to the database. Using `edit` context does not apply any filters to the data.
+A note on `$context`: when getting data for use on the front end or display, `view` context is used. This applies filters to the data so extensions can change the values dynamically. `edit` context should be used when showing values to edit in the backend, and for saving to the database. Using `edit` context does not apply any filters to the data.
 
 ### The constructor
 
@@ -129,7 +129,7 @@ Note how it sets the ID based on the data passed to the object, then calls the d
 
 ### Saving and deleting
 
-Save and delete methods are optional at CRUD object level because the `WC_Data` class can handle it. When save is called, the data store is used to store data to the database. Delete removes the object from the database. save must be called for changes to persist, otherwise they will be discarded.
+Save and delete methods are optional on CRUD child classes because the `WC_Data` parent class can handle it. When `save` is called, the data store is used to store data to the database. Delete removes the object from the database. `save` must be called for changes to persist, otherwise they will be discarded.
 
 The save method in `WC_Data` looks like this:
 
