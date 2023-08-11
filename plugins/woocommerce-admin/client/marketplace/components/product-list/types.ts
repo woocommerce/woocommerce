@@ -5,6 +5,7 @@ export type SearchAPIProductType = {
 	link: string;
 	demo_url: string;
 	price: string;
+	raw_price: number;
 	hash: string;
 	slug: string;
 	id: number;
@@ -23,9 +24,8 @@ export interface Product {
 	vendorUrl: string;
 	icon: string;
 	url: string;
-	price: string | number;
+	price: number;
 	productType?: string;
 	averageRating?: number | null;
 	reviewsCount?: number | null;
-	currency?: string;
 }

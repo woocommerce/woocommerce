@@ -78,10 +78,10 @@ export function ProductListContextProvider(
 							vendorUrl: product.vendor_url,
 							icon: product.icon,
 							url: product.link,
-							price: product.price,
+							// Due to backwards compatibility, raw_price is from search API, price is from featured API
+							price: product.raw_price ?? product.price,
 							averageRating: product.rating ?? 0,
 							reviewsCount: product.reviews_count ?? 0,
-							currency: '',
 						};
 					}
 				);
