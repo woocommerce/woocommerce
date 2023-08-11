@@ -23,7 +23,7 @@ export type EnhancedProductAttribute = ProductAttribute & {
 type useProductAttributesProps = {
 	allAttributes: ProductAttribute[];
 	isVariationAttributes?: boolean;
-	onChange: ( attributes: EnhancedProductAttribute[] ) => void;
+	onChange: ( attributes: ProductAttribute[] ) => void;
 	productId?: number;
 };
 
@@ -79,11 +79,11 @@ export function useProductAttributes( {
 	};
 
 	const getAugmentedAttributes = (
-		atts: ProductAttribute[],
+		atts: EnhancedProductAttribute[],
 		variation: boolean,
 		startPosition: number
-	) => {
-		return atts.map( ( attribute, index ) => ( {
+	): ProductAttribute[] => {
+		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
 			position: startPosition + index,
