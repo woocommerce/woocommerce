@@ -49,17 +49,19 @@ export function useProductVariationsHelper() {
 
 			return updateProductAttributes()
 				.then( () => {
-					return _generateProductVariations( {
+					return _generateProductVariations< { count: number } >( {
 						product_id: productId,
 					} );
 				} )
-				.then( () => {
-					invalidateResolutionForStoreSelector(
-						'getProductVariations'
-					);
-					return invalidateResolutionForStoreSelector(
-						'getProductVariationsTotalCount'
-					);
+				.then( ( data ) => {
+					if ( data.count > 0 ) {
+						invalidateResolutionForStoreSelector(
+							'getProductVariations'
+						);
+						return invalidateResolutionForStoreSelector(
+							'getProductVariationsTotalCount'
+						);
+					}
 				} )
 				.finally( () => {
 					setIsGenerating( false );
