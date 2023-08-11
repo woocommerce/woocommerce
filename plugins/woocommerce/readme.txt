@@ -165,6 +165,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 8.0.1 2023-08-09 =
 
+* Fix - Fix an issue which was causing some attributes to default to a minimum length of 3. [#39686](https://github.com/woocommerce/woocommerce/pull/39686)
 * Fix - bump WooCommerce blocks version to 10.6.5 [#39642](https://github.com/woocommerce/woocommerce/pull/39642)
 
 = 8.0.0 2023-08-08 =
