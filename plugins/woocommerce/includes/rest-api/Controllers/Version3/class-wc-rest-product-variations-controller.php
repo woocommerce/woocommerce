@@ -44,6 +44,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
+					'delete' => array(
+						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
+						'type'        => 'boolean',
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -927,6 +931,36 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
+	 * Deletes all unmatched variations (aka duplicates).
+	 *
+	 * @param  WC_Product $product Variable product.
+	 * @return int        Number of deleted variations.
+	 */
+	private function delete_unmatched_product_variations( $product ) {
+		$deleted_count = 0;
+
+		if ( ! $product ) {
+			return $deleted_count;
+		}
+
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+
+		// Get existing variations so we don't create duplicates.
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+
+		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+		foreach ( $existing_variations as $existing_variation ) {
+			if ( in_array( $existing_variation->get_attributes(), $possible_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+				continue;
+			}
+			$existing_variation->delete( true );
+			$deleted_count ++;
+		}
+
+		return $deleted_count;
+	}
+
+	/**
 	 * Generate all variations for a given product.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -946,6 +980,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$product           = wc_get_product( $product_id );
 		$data_store        = $product->get_data_store();
 		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+
+		if ( isset( $request['delete'] ) && $request['delete'] ) {
+			$deleted_count = $this->delete_unmatched_product_variations( $product );
+			$response['deleted_count'] = $deleted_count;
+		}
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 

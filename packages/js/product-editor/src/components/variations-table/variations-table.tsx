@@ -60,41 +60,56 @@ export function VariationsTable() {
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { isLoading, variations, totalCount } = useSelect(
-		( select ) => {
-			const {
-				getProductVariations,
-				hasFinishedResolution,
-				getProductVariationsTotalCount,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-			const requestParams = {
-				product_id: productId,
-				page: currentPage,
-				per_page: perPage,
-				order: 'asc',
-				orderby: 'menu_order',
-			};
-			return {
-				isLoading: ! hasFinishedResolution( 'getProductVariations', [
-					requestParams,
-				] ),
-				variations:
-					getProductVariations< ProductVariation[] >( requestParams ),
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
-			};
-		},
-		[ currentPage, perPage, productId ]
-	);
+	const { isLoading, variations, totalCount, isGeneratingVariations } =
+		useSelect(
+			( select ) => {
+				const {
+					getProductVariations,
+					hasFinishedResolution,
+					getProductVariationsTotalCount,
+					isGeneratingVariations: getIsGeneratingVariations,
+				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+				const requestParams = {
+					product_id: productId,
+					page: currentPage,
+					per_page: perPage,
+					order: 'asc',
+					orderby: 'menu_order',
+				};
+				return {
+					isLoading: ! hasFinishedResolution(
+						'getProductVariations',
+						[ requestParams ]
+					),
+					isGeneratingVariations: getIsGeneratingVariations( {
+						product_id: productId,
+					} ),
+					variations:
+						getProductVariations< ProductVariation[] >(
+							requestParams
+						),
+					totalCount:
+						getProductVariationsTotalCount< number >(
+							requestParams
+						),
+				};
+			},
+			[ currentPage, perPage, productId ]
+		);
 
 	const { updateProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
-	if ( ! variations || isLoading ) {
+	if ( ! variations && isLoading ) {
 		return (
-			<div className="woocommerce-product-variations is-loading">
+			<div className="woocommerce-product-variations__loading">
 				<Spinner />
+				{ isGeneratingVariations && (
+					<span>
+						{ __( 'Generating variations...', 'woocommerce' ) }
+					</span>
+				) }
 			</div>
 		);
 	}
@@ -121,49 +136,52 @@ export function VariationsTable() {
 
 	return (
 		<div className="woocommerce-product-variations">
+			{ isLoading ||
+				( isGeneratingVariations && (
+					<div className="woocommerce-product-variations__loading">
+						<Spinner />
+						{ isGeneratingVariations && (
+							<span>
+								{ __(
+									'Generating variations...',
+									'woocommerce'
+								) }
+							</span>
+						) }
+					</div>
+				) ) }
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__attributes">
-							{ variation.attributes
-								.filter( ( attribute ) =>
-									variableAttributeTags.includes(
-										attribute.option
-									)
-								)
-								.map( ( attribute ) => {
-									const tag = (
-										/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-										/* @ts-ignore Additional props are not required. */
-										<Tag
-											id={ attribute.id }
-											className="woocommerce-product-variations__attribute"
-											key={ attribute.id }
-											label={ truncate(
-												attribute.option,
-												{
-													length: PRODUCT_VARIATION_TITLE_LIMIT,
-												}
-											) }
-											screenReaderLabel={
-												attribute.option
-											}
-										/>
-									);
+							{ variation.attributes.map( ( attribute ) => {
+								const tag = (
+									/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+									/* @ts-ignore Additional props are not required. */
+									<Tag
+										id={ attribute.id }
+										className="woocommerce-product-variations__attribute"
+										key={ attribute.id }
+										label={ truncate( attribute.option, {
+											length: PRODUCT_VARIATION_TITLE_LIMIT,
+										} ) }
+										screenReaderLabel={ attribute.option }
+									/>
+								);
 
-									return attribute.option.length <=
-										PRODUCT_VARIATION_TITLE_LIMIT ? (
-										tag
-									) : (
-										<Tooltip
-											key={ attribute.id }
-											text={ attribute.option }
-											position="top center"
-										>
-											<span>{ tag }</span>
-										</Tooltip>
-									);
-								} ) }
+								return attribute.option.length <=
+									PRODUCT_VARIATION_TITLE_LIMIT ? (
+									tag
+								) : (
+									<Tooltip
+										key={ attribute.id }
+										text={ attribute.option }
+										position="top center"
+									>
+										<span>{ tag }</span>
+									</Tooltip>
+								);
+							} ) }
 						</div>
 						<div
 							className={ classnames(
