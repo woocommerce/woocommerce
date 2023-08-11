@@ -2653,7 +2653,7 @@ CREATE TABLE $orders_table_name (
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY billing_email (billing_email($max_index_length)),
-	KEY type_status (type, status),
+	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
 ) $collate;
