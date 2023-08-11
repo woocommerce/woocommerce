@@ -90,7 +90,7 @@ export function Edit( {
 								} )
 							}
 						>
-							{ __( 'Go to Options', 'woocommerce' ) }
+							{ __( 'Go to Variations', 'woocommerce' ) }
 						</Button>
 					</Notice>
 				) }
