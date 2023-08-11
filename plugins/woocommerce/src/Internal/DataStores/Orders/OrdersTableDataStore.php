@@ -2381,6 +2381,12 @@ FROM $order_meta_table
 			return;
 		}
 
+		// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
+		if ( ( ! empty( $changes['status'] ) && in_array( 'trash', array( $changes['status'], $previous_status ), true ) )
+			|| ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) {
+			return;
+		}
+
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
