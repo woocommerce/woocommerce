@@ -2276,6 +2276,11 @@ FROM $order_meta_table
 
 		$this->persist_save( $order );
 
+		// Do not fire 'woocommerce_new_order' for draft statuses for backwards compatibility.
+		if ( 'auto-draft' === $order->get_status( 'edit') ) {
+			return;
+		}
+
 		/**
 		 * Fires when a new order is created.
 		 *
