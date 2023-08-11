@@ -114,6 +114,16 @@ const getBlockEntries = ( relativePath ) => {
 
 const entries = {
 	styling: {
+		// @wordpress/components styles
+		'custom-select-control-style':
+			'./node_modules/wordpress-components/src/custom-select-control/style.scss',
+		'snackbar-notice-style':
+			'./node_modules/wordpress-components/src/snackbar/style.scss',
+		'combobox-control-style':
+			'./node_modules/wordpress-components/src/combobox-control/style.scss',
+		'form-token-field-style':
+			'./node_modules/wordpress-components/src/form-token-field/style.scss',
+
 		// Packages styles
 		'packages-style': glob.sync( './packages/**/index.js' ),
 
