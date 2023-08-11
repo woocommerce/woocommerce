@@ -53,7 +53,7 @@ export function Edit() {
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
-		product_block_variable_options_notice_disissed:
+		product_block_variable_options_notice_dismissed:
 			hasDismissedVariableOptionsNotice,
 	} = useUserPreferences();
 
@@ -136,7 +136,7 @@ export function Edit() {
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
 					updateUserPreferences( {
-						product_block_variable_options_notice_disissed: 'yes',
+						product_block_variable_options_notice_dismissed: 'yes',
 					} )
 				}
 				uiStrings={ {
