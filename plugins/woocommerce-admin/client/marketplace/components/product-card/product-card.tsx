@@ -9,7 +9,6 @@ import { Button, Card } from '@wordpress/components';
  */
 import './product-card.scss';
 import { Product } from '../product-list/types';
-import { getAdminSetting } from '../../../../client/utils/admin-settings';
 import { appendUTMParams } from '../../utils/functions';
 
 export interface ProductCardProps {
@@ -19,7 +18,8 @@ export interface ProductCardProps {
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { product } = props;
-	const currencySymbol = getAdminSetting( 'currency' )?.symbol;
+	// We hardcode this for now while we only display prices in USD.
+	const currencySymbol = '$';
 
 	// Append UTM parameters to the vendor URL
 	let vendorUrl = '';
@@ -76,12 +76,15 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					variant="link"
 				>
 					<span>
-						{ product.price === 0 || product.price === '0'
-							? __( 'Free download', 'woocommerce' )
-							: currencySymbol + product.price }
+						{
+							// '0' is a free product
+							product.price === 0
+								? __( 'Free download', 'woocommerce' )
+								: currencySymbol + product.price
+						}
 					</span>
 					<span className="woocommerce-marketplace__product-card__price-billing">
-						{ product.price === 0 || product.price === '0'
+						{ product.price === 0
 							? ''
 							: __( ' annually', 'woocommerce' ) }
 					</span>
