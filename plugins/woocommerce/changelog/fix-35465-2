@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Connect WC_Install's create_tables to HPOS tables when its active.
