@@ -139,7 +139,7 @@
 		}
 	}
 }
-.wc-block-grid__product-onsale {
+.wc-block-grid .wc-block-grid__product-onsale {
 	@include font-size(small);
 	padding: em($gap-smallest) em($gap-small);
 	display: inline-block;

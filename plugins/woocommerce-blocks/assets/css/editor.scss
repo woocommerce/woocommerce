@@ -8,6 +8,10 @@
 
 			.wc-block-grid__product {
 				margin: 0 0 $gap-large 0;
+
+				.wc-block-grid__product-onsale {
+					position: absolute;
+				}
 			}
 		}
 
