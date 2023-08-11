@@ -290,16 +290,11 @@ describe( 'Shopper → Checkout', () => {
 
 	describe( 'Checkout Form Errors', () => {
 		beforeAll( async () => {
-			const isShopperLoggedIn = await shopper.isLoggedIn();
-
-			// @todo Find a better way to reset the checkout form instead of login then logout
-			if ( isShopperLoggedIn ) {
-				// Click on the "Log out" link in "My account" page
-				await await shopper.logout();
-			} else {
+			// Logout to clear session.
+			if ( ! ( await shopper.isLoggedIn() ) ) {
 				await shopper.login();
-				await shopper.logout();
 			}
+			await shopper.logout();
 		} );
 
 		it( 'User can see errors when form is incomplete', async () => {
