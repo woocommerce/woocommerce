@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix an issue which was causing some attributes to default to a minimum length of 3.
