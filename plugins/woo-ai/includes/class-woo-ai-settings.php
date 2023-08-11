@@ -138,6 +138,7 @@ class Woo_AI_Settings {
 			'title'       => __( 'Describe your business', 'woocommerce' ),
 			'type'        => 'textarea',
 			'desc_tip'    => __( 'Tell us what makes your business unique to further improve accuracy of the AI-generated content. This will not be shown to customers.', 'woocommerce' ),
+			/* translators: Short paragraph describing the store. */
 			'placeholder' => __( 'e.g. Marianne Renoir is a greengrocery taken over by a ten generations Parisian family who wants to keep quality and tradition in the quarter of Montmartre', 'woocommerce' ),
 			'css'         => 'min-width:300px;min-height: 130px;',
 		);

@@ -16,7 +16,11 @@ const fieldMap = {
 };
 
 ( () => {
-	if ( ! fieldMap.checkbox?.checked ) {
+	if ( fieldMap.checkbox?.checked ) {
+		jQuery( fieldMap.tone ).closest( 'tr' ).show();
+		jQuery( fieldMap.describeBusiness ).closest( 'tr' ).show();
+	} else {
+		// This is a hack for Firefox support since it doesn't have :has() support yet.
 		jQuery( fieldMap.tone ).closest( 'tr' ).hide();
 		jQuery( fieldMap.describeBusiness ).closest( 'tr' ).hide();
 	}
