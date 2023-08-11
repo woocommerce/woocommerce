@@ -8,6 +8,10 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
 import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import HiddenIcon from '../variations-table/hidden-icon';
 import HelpIcon from './help-icon';
 import NotFilterableIcon from './not-filterable-icon';
