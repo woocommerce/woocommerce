@@ -11,7 +11,6 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import ResizableEditor from '@wordpress/edit-site/build-module/components/block-editor/resizable-editor';
 import EditorCanvas from '@wordpress/edit-site/build-module/components/block-editor/editor-canvas';
 import {
 	BlockEditorProvider,
@@ -125,24 +124,20 @@ export default function BlockEditor( { blocks, template } ) {
 				} ) }
 				__unstableContentRef={ contentRef }
 			>
-				<ResizableEditor
+				<EditorCanvas
 					enableResizing={ enableResizing }
-					height={ '100%' }
+					settings={ settings }
+					contentRef={ mergedRefs }
+					readonly={ false }
 				>
-					<EditorCanvas
-						enableResizing={ enableResizing }
-						settings={ settings }
-						contentRef={ mergedRefs }
-						readonly={ true }
-					>
-						{ resizeObserver }
-						<BlockList
-							className="edit-site-block-editor__block-list wp-site-blocks"
-							__experimentalLayout={ LAYOUT }
-							renderAppender={ false }
-						/>
-					</EditorCanvas>
-				</ResizableEditor>
+					{ resizeObserver }
+
+					<BlockList
+						className="edit-site-block-editor__block-list wp-site-blocks"
+						__experimentalLayout={ LAYOUT }
+						renderAppender={ false }
+					/>
+				</EditorCanvas>
 			</BlockTools>
 		</BlockEditorProvider>
 	);
