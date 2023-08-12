@@ -1,7 +1,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const rootDirectory = path.resolve( __dirname );
+const rootDirectory = path.resolve( __dirname, '..', '..', '..' );
 
 const mergedReport = {
 	results: [],
