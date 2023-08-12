@@ -27,6 +27,7 @@ jobs:
 
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
+              continue-on-error: true
 
             - name: Collect and Combine Eslint Reports
               run: node ./.github/workflows/scripts/collect-eslint-reports.js
