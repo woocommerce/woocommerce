@@ -26,7 +26,7 @@
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
-		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
+		"git:update-hooks": "if test -d .git; then rm -r .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
