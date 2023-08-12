@@ -1,8 +1,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const rootDirectory = path.resolve( __dirname );
-const packagesDirectory = path.join( rootDirectory, 'packages' ); // Adjust the path accordingly
+const rootDirectory = path.resolve( __dirname, '..', '..', '..' );
 
 const allReports = [];
 
@@ -24,7 +23,7 @@ function collectReports( directory ) {
 	}
 }
 
-collectReports( packagesDirectory );
+collectReports( rootDirectory );
 
 fs.writeFileSync(
 	'combined_eslint_report.json',
