@@ -3,7 +3,9 @@ const path = require( 'path' );
 
 const rootDirectory = path.resolve( __dirname );
 
-const allReports = [];
+const mergedReport = {
+	results: [],
+};
 
 function adjustPaths( report, packagePath ) {
 	const adjustedReport = { ...report };
@@ -27,7 +29,7 @@ function collectReports( directory ) {
 			if ( fs.existsSync( reportPath ) ) {
 				const report = require( reportPath );
 				const adjustedReport = adjustPaths( report, fullPath );
-				allReports.push( adjustedReport );
+				mergedReport.results.push( ...adjustedReport.results );
 			}
 
 			collectReports( fullPath );
@@ -38,6 +40,6 @@ function collectReports( directory ) {
 collectReports( rootDirectory );
 
 fs.writeFileSync(
-	path.resolve( rootDirectory, 'combined_eslint_report.json' ),
-	JSON.stringify( allReports, null, 2 )
+	path.join( rootDirectory, 'combined_eslint_report.json' ),
+	JSON.stringify( mergedReport, null, 2 )
 );
