@@ -16,6 +16,9 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
+            # This is required to allow the action to annotate the PR with the linting results.
+            checks: write
+            pull-requests: read
         steps:
             - uses: actions/checkout@v3
 
@@ -30,6 +33,7 @@ jobs:
 
             - name: Annotate Code Linting Results
               uses: ataylorme/eslint-annotate-action@v2
+
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   report-json: 'combined_eslint_report.json'
