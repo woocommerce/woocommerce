@@ -33,7 +33,7 @@
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
