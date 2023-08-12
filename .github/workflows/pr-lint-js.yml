@@ -26,7 +26,7 @@ jobs:
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
             - name: Collect and Combine Eslint Reports
-              run: node ./scripts/collect-eslint-reports.js
+              run: node ./github/workflows/scripts/collect-eslint-reports.js
 
             - name: Annotate Code Linting Results
               uses: ataylorme/eslint-annotate-action@v2
