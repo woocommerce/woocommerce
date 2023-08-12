@@ -33,7 +33,7 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  pnpm install --filter monorepo-utils --ignore-scripts
+                  pnpm install --ignore-scripts
 
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
