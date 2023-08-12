@@ -19,25 +19,8 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: '8.6.7'
-
-            - name: Setup Node
-              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
-              with:
-                  node-version-file: .nvmrc
-                  cache: pnpm
-                  registry-url: 'https://registry.npmjs.org'
-
-            - name: Install prerequisites
-              run: |
-                  pnpm install --ignore-scripts
-
-            - name: Build packages that need to be built
-              run: |
-                  pnpm run -r --filter='@woocommerce/e2e-environment' build
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
