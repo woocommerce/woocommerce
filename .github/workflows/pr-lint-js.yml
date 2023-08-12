@@ -35,6 +35,10 @@ jobs:
               run: |
                   pnpm install --ignore-scripts
 
+            - name: Build packages that need to be built
+              run: |
+                  pnpm run -r --filter='@woocommerce/e2e-environment' build
+
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
