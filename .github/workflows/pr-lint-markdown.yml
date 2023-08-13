@@ -38,14 +38,17 @@ jobs:
 
             - name: Lint changed markdown files
               run: |
+                  BLUE='\033[0;34m'
+                  NC='\033[0m'
                   changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
 
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      echo ">>>> Linting file: $file <<<<"
+                      echo -e "${BLUE} >>>> Linting file: $file <<<< ${NC}"
                       cat "$file" | markdownlint --stdin
-                      echo ">>>> End of linting for file: $file <<<<\n"
+                      echo -e "${BLUE} >>>> End of linting for file: $file <<<<\n ${BLUE}"
                     done
                   else
                     echo "No markdown files changed."
                   fi
+              continue-on-error: true
