@@ -35,7 +35,6 @@ jobs:
             - name: Install prerequisites
               run: |
                   pnpm i -g markdownlint-cli
-                  sudo apt-get install -y ccze
 
             - name: Lint changed markdown files
               run: |
@@ -43,9 +42,9 @@ jobs:
 
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      echo "[INFO] Linting file: $file" | ccze -A
-                      cat "$file" | markdownlint --stdin | ccze -A
-                      echo -e "[INFO] End of linting for file: $file \n" | ccze -A
+                      echo ">>>> Linting file: $file <<<<"
+                      cat "$file" | markdownlint --stdin
+                      echo ">>>> End of linting for file: $file <<<<\n"
                     done
                   else
                     echo "No markdown files changed."
