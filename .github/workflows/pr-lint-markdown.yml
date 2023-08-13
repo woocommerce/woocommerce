@@ -34,14 +34,14 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  pnpm install --ignore-scripts
+                  pnpm i -g @wordpress/scripts
 
             - name: Lint changed markdown files
               run: |
                   changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      cat "$file" | pnpm lint:docs -- -s
+                      cat "$file" | wp-scripts lint-md-docs -s
                     done
                   else
                     echo "No markdown files changed."
