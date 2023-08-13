@@ -1,0 +1,5 @@
+node_modules
+vendor
+build
+build-module
+dist

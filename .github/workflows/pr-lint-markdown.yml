@@ -1,0 +1,43 @@
+name: MarkdownLint on PR
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Get changed markdown files
+              id: get_changed_files
+              run: |
+                  echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '.md$')"
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.6.7'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  pnpm install --ignore-scripts
+
+            - name: Lint changed markdown files
+              run: |
+                  changed_files="${{ steps.get_changed_files.outputs.files }}"
+                  if [ -n "$changed_files" ]; then
+                    echo "$changed_files" | xargs -I % pnpm lint:docs -- -s %
+                  else
+                    echo "No markdown files changed."
+                  fi

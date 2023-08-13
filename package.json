@@ -30,7 +30,8 @@
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "node ./tools/monorepo-utils/dist/index.js"
+		"utils": "node ./tools/monorepo-utils/dist/index.js",
+		"lint:docs": "wp-scripts lint-md-docs"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",
@@ -40,6 +41,7 @@
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",
+		"@wordpress/scripts": "^26.10.0",
 		"babel-loader": "^8.3.0",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "^10.2.4",
