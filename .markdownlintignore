@@ -1,5 +1,3 @@
-node_modules
-vendor
-build
-build-module
-dist
+**/build/**
+**/node_modules/**
+**/vendor/**

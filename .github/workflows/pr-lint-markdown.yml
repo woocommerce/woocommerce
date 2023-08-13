@@ -34,15 +34,29 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  pnpm i -g @wordpress/scripts
+                  pnpm i -g markdownlint-cli
 
             - name: Lint changed markdown files
               run: |
                   changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+                  lint_failed=false
+
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      cat "$file" | wp-scripts lint-md-docs -s
+                      lint_result=$(cat "$file" | markdownlint --stdin 2>&1)
+                      if [ $? -ne 0 ]; then
+                        echo "Lint failed for file: $file"
+                        echo "$lint_result"
+                        lint_failed=true
+                      fi
                     done
+
+                    if [ "$lint_failed" = true ]; then
+                      echo "Linting failed for one or more files."
+                      exit 1
+                    else
+                      echo "Linting successful for all files."
+                    fi
                   else
                     echo "No markdown files changed."
                   fi
