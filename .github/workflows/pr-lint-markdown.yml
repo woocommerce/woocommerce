@@ -38,7 +38,7 @@ jobs:
                   changed_files="${{ steps.get_changed_files.outputs.files }}"
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      cat "$file" | markdownlint -s -c .markdownlint.json -
+                      cat "$file" | pnpm lint:docs -- -s
                     done
                   else
                     echo "No markdown files changed."
