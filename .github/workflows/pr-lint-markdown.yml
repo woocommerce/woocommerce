@@ -37,7 +37,9 @@ jobs:
               run: |
                   changed_files="${{ steps.get_changed_files.outputs.files }}"
                   if [ -n "$changed_files" ]; then
-                    echo "$changed_files" | xargs -I % pnpm lint:docs -- -s %
+                    for file in $changed_files; do
+                      cat "$file" | markdownlint -s -c .markdownlint.json -
+                    done
                   else
                     echo "No markdown files changed."
                   fi
