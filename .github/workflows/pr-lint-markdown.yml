@@ -42,9 +42,9 @@ jobs:
 
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      echo -e "\e[1;34m***Linting file:***$file\e[0m"
+                      echo -e ">>>> Linting file: $file <<<<"
                       cat "$file" | markdownlint --stdin
-                      echo -e "\e[1;34m-------------------$file\e[0m"
+                      echo -e ">>> End of linting for file: $file <<<\n"
                     done
                   else
                     echo "No markdown files changed."
