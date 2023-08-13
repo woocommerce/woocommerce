@@ -49,12 +49,12 @@ jobs:
                     for file in $changed_files; do
                       lint_result=$( { cat "$file" | markdownlint --stdin ; } 2>&1 ) || rc="$?"
                       if [ $rc -ne 0 ]; then
-                        lint_results="$lint_results\nLinting failed for file: $file\n$lint_result"
+                        lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
                       fi
                     done
                     if [ $rc -ne 0 ]; then
                       echo -e "${RED}Linting failed for one or more files${NC}"
-                      echo -e "${RED}$lint_results${NC}"
+                      echo -e "$lint_results"
                       exit 1
                     else
                       echo -e "${GREEN}Linting successful for all files.${NC}"
