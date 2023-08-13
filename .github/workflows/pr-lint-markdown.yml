@@ -9,13 +9,16 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 2
 
-            - name: Get changed markdown files
-              id: get_changed_files
-              run: |
-                  echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '.md$')"
+            - name: Get changed files
+              id: changed-files
+              uses: tj-actions/changed-files@v37
+              with:
+                  files: |
+                      *.md
 
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
@@ -35,7 +38,7 @@ jobs:
 
             - name: Lint changed markdown files
               run: |
-                  changed_files="${{ steps.get_changed_files.outputs.files }}"
+                  changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
                       cat "$file" | pnpm lint:docs -- -s
