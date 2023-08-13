@@ -38,6 +38,9 @@ jobs:
 
             - name: Lint changed markdown files
               run: |
+                  RED="\e[1;31m"
+                  GREEN="\e[1;32m"
+                  NC="\e[0m"
                   set -e
                   rc=0
                   changed_files="${{ steps.changed-files.outputs.all_changed_files  }}"
@@ -50,11 +53,11 @@ jobs:
                       fi
                     done
                     if [ $rc -ne 0 ]; then
-                      echo -e "Linting failed for one or more files"
+                      echo -e "${RED} Linting failed for one or more files ${NC}"
                       echo -e "$lint_results"
                       exit 1
                     else
-                      echo -e "Linting successful for all files."
+                      echo -e "${GREEN} Linting successful for all files. ${NC}"
                     fi
                   else
                     echo "No markdown files changed."
