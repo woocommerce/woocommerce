@@ -38,17 +38,19 @@ jobs:
 
             - name: Lint changed markdown files
               run: |
+                  set -e
+                  rc=0
                   changed_files="${{ steps.changed-files.outputs.all_changed_files  }}"
                   if [ -n "$changed_files" ]; then
                     lint_results=""
                     for file in $changed_files; do
                       echo ">>>> Linting file: $file <<<<"
-                      lint_result=$(cat "$file" | markdownlint --stdin)
-                      if [ $? -ne 0 ]; then
-                        lint_results="$lint_results\n Linting failed for file: $file\n$lint_result\n------------------------"
+                      (cat "$file" | markdownlint --stdin) || rc="$?"
+                      if [ $rc -ne 0 ]; then
+                        lint_results="$lint_results\nLinting failed for file: $file"
                       fi
                     done
-                    if [ -n "$lint_results" ]; then
+                    if [ $rc -ne 0 ]; then
                       echo -e "$lint_results"
                       echo -e "Linting failed for one or more files"
                       exit 1
