@@ -53,11 +53,11 @@ jobs:
                       fi
                     done
                     if [ $rc -ne 0 ]; then
-                      echo -e "${RED} Linting failed for one or more files ${NC}"
-                      echo -e "$lint_results"
+                      echo -e "${RED}Linting failed for one or more files${NC}"
+                      echo -e "${RED}$lint_results${NC}"
                       exit 1
                     else
-                      echo -e "${GREEN} Linting successful for all files. ${NC}"
+                      echo -e "${GREEN}Linting successful for all files.${NC}"
                     fi
                   else
                     echo "No markdown files changed."
