@@ -42,8 +42,8 @@ jobs:
 
                   if [ -n "$changed_files" ]; then
                     for file in $changed_files; do
-                      echo "Linting file: $file"
-                      cat "$file" | markdownlint --stdin
+                      echo -e "\e[1;34m***Linting file:***$file\e[0m"
+                      cat "$file" | markdownlint --stdin | sed 's/\(.*\)/\x1b[0;31m\1\x1b[0m/'
                     done
                   else
                     echo "No markdown files changed."
