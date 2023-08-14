@@ -24,12 +24,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	// Append UTM parameters to the vendor URL
 	let vendorUrl = '';
 	if ( product.vendorUrl ) {
-		vendorUrl = appendUTMParams( product.vendorUrl, {
-			utm_source: 'extensionsscreen',
-			utm_medium: 'product',
-			utm_campaign: 'wcaddons',
-			utm_content: 'devpartner',
-		} );
+		vendorUrl = appendUTMParams( product.vendorUrl, [
+			[ 'utm_source', 'extensionsscreen' ],
+			[ 'utm_medium', 'product' ],
+			[ 'utm_campaign', 'wcaddons' ],
+			[ 'utm_content', 'devpartner' ],
+		] );
 	}
 
 	let productVendor: string | JSX.Element | null = product?.vendorName;

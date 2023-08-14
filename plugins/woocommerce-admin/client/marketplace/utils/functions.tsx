@@ -49,13 +49,18 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 }
 
 // Append UTM parameters to a URL, being aware of existing query parameters
-const appendUTMParams = ( url: string, utmParams: object ): string => {
-	const utmString = Object.entries( utmParams )
-		.map( ( [ key, value ] ) => `${ key }=${ value }` )
-		.join( '&' );
-	const separator = url.includes( '?' ) ? '&' : '?';
-
-	return `${ url }${ separator }${ utmString }`;
+const appendUTMParams = (
+	url: string,
+	utmParams: Array< [ string, string ] >
+): string => {
+	const urlObject = new URL( url );
+	if ( ! urlObject ) {
+		return url;
+	}
+	utmParams.forEach( ( [ key, value ] ) => {
+		urlObject.searchParams.set( key, value );
+	} );
+	return urlObject.toString();
 };
 
 export { fetchDiscoverPageData, fetchCategories, ProductGroup, appendUTMParams };
