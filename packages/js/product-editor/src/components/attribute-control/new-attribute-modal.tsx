@@ -55,6 +55,7 @@ type NewAttributeModalProps = {
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
+	disabledAttributeIds?: number[];
 };
 
 type AttributeForm = {
@@ -88,6 +89,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onAdd,
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
+	disabledAttributeIds = [],
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -316,6 +318,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															] }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
+															}
+															disabledAttributeIds={
+																disabledAttributeIds
 															}
 														/>
 													</td>

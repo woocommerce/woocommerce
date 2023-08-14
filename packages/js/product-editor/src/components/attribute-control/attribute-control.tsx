@@ -7,6 +7,8 @@ import {
 	createElement,
 	Fragment,
 	createInterpolateElement,
+	useMemo,
+	useEffect,
 } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
@@ -211,6 +213,21 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		( attr ) => getAttributeId( attr ) === currentAttributeId
 	);
 
+	const disabledAttributeIds = useMemo(
+		() =>
+			value
+				.filter( ( attr ) => ! attr.variation )
+				.map( ( attr ) => attr.id ),
+		[ value, isNewModalVisible ]
+	);
+
+	useEffect( () => {
+		console.log( 'AttributeControl', {
+			value,
+			disabledAttributeIds,
+		} );
+	}, [ disabledAttributeIds, isNewModalVisible ] );
+
 	return (
 		<div className="woocommerce-attribute-field">
 			<Button
@@ -279,6 +296,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
+					disabledAttributeIds={ disabledAttributeIds }
 				/>
 			) }
 			<SelectControlMenuSlot />
