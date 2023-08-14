@@ -33,6 +33,10 @@ import { Layout } from './layout';
 const StoreCustomize = () => {
 	useEffect( () => {
 		if ( ! window.blockSettings ) {
+			// eslint-disable-next-line no-console
+			console.warn(
+				'window.blockSettings not found. Skipping initialization.'
+			);
 			return;
 		}
 
@@ -44,15 +48,10 @@ const StoreCustomize = () => {
 		) => fetchLinkSuggestions( search, searchOptions, settings );
 		settings.__experimentalFetchRichUrlData = fetchUrlData;
 
-		dispatch( editSiteStore ).updateSettings( settings );
-
-		// Register core blocks and set up the fallback block.
 		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters();
-
 		const coreBlocks = __experimentalGetCoreBlocks().filter(
 			( { name } ) => name !== 'core/freeform' && ! getBlockType( name )
 		);
-
 		registerCoreBlocks( coreBlocks );
 		dispatch( blocksStore ).setFreeformFallbackBlockName( 'core/html' );
 
@@ -66,6 +65,7 @@ const StoreCustomize = () => {
 			showListViewByDefault: false,
 			showBlockBreadcrumbs: true,
 		} );
+		dispatch( editSiteStore ).updateSettings( settings );
 
 		dispatch( editorStore ).updateEditorSettings( {
 			defaultTemplateTypes: settings.defaultTemplateTypes,
@@ -79,7 +79,7 @@ const StoreCustomize = () => {
 			false
 		);
 		window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
-	}, [ window.blockSettings ] );
+	}, [] );
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );

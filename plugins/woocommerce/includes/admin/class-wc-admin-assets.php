@@ -619,9 +619,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_add_inline_script(
 					'wp-blocks',
 					sprintf(
-						'wp.domReady( function() {
-							window.blockSettings = %s;
-						} );',
+						'window.blockSettings = %s;',
 						wp_json_encode( $editor_settings )
 					)
 				);
