@@ -1,15 +1,29 @@
 .woocommerce-product-variations {
-	ol {
-		@media ( min-width: #{ ($break-medium) } ) {
-			min-height: 420px;
-		}
-	}
 	display: flex;
 	flex-direction: column;
+	position: relative;
+
 	> div {
 		display: flex;
 		flex-direction: column;
 		flex-grow: 1;
+	}
+
+	&__loading {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		z-index: 1;
+		width: 100%;
+		height: 100%;
+		justify-content: center;
+		align-items: center;
+		gap: $gap;
+
+		.components-spinner {
+			width: $gap-largest;
+			height: $gap-largest;
+		}
 	}
 
 	&__status-dot {
@@ -80,20 +94,6 @@
 
 		&__handle {
 			display: none;
-		}
-	}
-
-	&.is-loading {
-		min-height: 476px;
-
-		.components-spinner {
-			width: 34px;
-			height: 34px;
-			left: 50%;
-			top: 50%;
-			transform: translate(-50%, -50%);
-			position: absolute;
-			margin: 0;
 		}
 	}
 

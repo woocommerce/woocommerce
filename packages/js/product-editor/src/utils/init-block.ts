@@ -16,7 +16,7 @@ interface BlockRepresentation< T extends Record< string, object > > {
 /**
  * Function to register an individual block.
  *
- * @param  block The block to be registered.
+ * @param block The block to be registered.
  * @return The block, if it has been successfully registered; otherwise `undefined`.
  */
 export function initBlock<

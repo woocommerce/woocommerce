@@ -4,10 +4,7 @@
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useState } from '@wordpress/element';
-import {
-	Product,
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-} from '@woocommerce/data';
+import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,7 +17,6 @@ export function useProductVariationsHelper() {
 		'product',
 		'id'
 	);
-	const { saveEntityRecord } = useDispatch( 'core' );
 	const {
 		generateProductVariations: _generateProductVariations,
 		invalidateResolutionForStoreSelector,
@@ -32,36 +28,32 @@ export function useProductVariationsHelper() {
 		async ( attributes: EnhancedProductAttribute[] ) => {
 			setIsGenerating( true );
 
-			const updateProductAttributes = async () => {
-				const hasVariableAttribute = attributes.some(
-					( attr ) => attr.variation
-				);
-				await saveEntityRecord< Promise< Product > >(
-					'postType',
-					'product',
-					{
-						id: productId,
-						type: hasVariableAttribute ? 'variable' : 'simple',
-						attributes,
-					}
-				);
-			};
+			const hasVariableAttribute = attributes.some(
+				( attr ) => attr.variation
+			);
 
-			return updateProductAttributes()
+			return _generateProductVariations< {
+				count: number;
+				deleted_count: number;
+			} >(
+				{
+					product_id: productId,
+				},
+				{
+					type: hasVariableAttribute ? 'variable' : 'simple',
+					attributes,
+				},
+				{
+					delete: true,
+				}
+			)
 				.then( () => {
-					return _generateProductVariations< { count: number } >( {
-						product_id: productId,
-					} );
-				} )
-				.then( ( data ) => {
-					if ( data.count > 0 ) {
-						invalidateResolutionForStoreSelector(
-							'getProductVariations'
-						);
-						return invalidateResolutionForStoreSelector(
-							'getProductVariationsTotalCount'
-						);
-					}
+					invalidateResolutionForStoreSelector(
+						'getProductVariations'
+					);
+					return invalidateResolutionForStoreSelector(
+						'getProductVariationsTotalCount'
+					);
 				} )
 				.finally( () => {
 					setIsGenerating( false );
