@@ -19,6 +19,13 @@ class SourceAttribution {
 	 * SourceAttribution constructor.
 	 */
 	public function __construct() {
+		/**
+		 * Filter the fields to show in the source data metabox.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string[] $fields The fields to show.
+		 */
 		$this->fields = (array) apply_filters( 'wc_order_source_attribution_tracking_fields', $this->default_fields );
 		$this->set_field_prefix();
 	}
@@ -32,7 +39,7 @@ class SourceAttribution {
 	 *
 	 * @return void
 	 */
-	public function output( WC_Order $order) {
+	public function output( WC_Order $order ) {
 		$meta = $this->filter_meta_data( $order->get_meta_data() );
 
 		// If we don't have any meta to show, return.
