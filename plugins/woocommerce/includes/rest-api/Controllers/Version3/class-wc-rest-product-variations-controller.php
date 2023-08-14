@@ -948,9 +948,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Get existing variations so we don't create duplicates.
 		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
 
-		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+		$possible_attribute_combinations = array_reverse( wc_array_cartesian( $attributes ) );
+
 		foreach ( $existing_variations as $existing_variation ) {
-			if ( in_array( $existing_variation->get_attributes(), $possible_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+			$matching_attribute_key = array_search( $existing_variation->get_attributes(), $possible_attribute_combinations ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+			if ( $matching_attribute_key !== false ) {
+				// We only want one possible variation for each possible attribute combination.
+				unset( $possible_attribute_combinations[ $matching_attribute_key ] );
 				continue;
 			}
 			$existing_variation->delete( true );
