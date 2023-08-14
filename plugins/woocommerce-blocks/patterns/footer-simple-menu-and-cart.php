@@ -7,8 +7,8 @@
  */
 ?>
 
-<!-- wp:group {"align":"full"} -->
-<div class="wp-block-group alignfull">
+<!-- wp:group {"className":"wc-blocks-footer-pattern","align":"full"} -->
+<div class="wc-blocks-footer-pattern wp-block-group alignfull">
 	<!-- wp:columns -->
 	<div class="wp-block-columns">
 		<!-- wp:column {"verticalAlignment":"center","width":""} -->
