@@ -1,10 +1,21 @@
 <?php
+/**
+ * Order source attribution meta.
+ *
+ * @since x.x.x
+ *
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
+ */
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
 use Automattic\WooCommerce\Vendor\Detection\MobileDetect;
+use Exception;
 use WC_Meta_Data;
+use WC_Order;
+use WP_Post;
 
 /**
  * Trait SourceAttributionMeta
@@ -14,12 +25,12 @@ use WC_Meta_Data;
 trait SourceAttributionMeta {
 
 	/** @var string[] */
-	private $default_fields = [
-		// main
+	private $default_fields = array(
+		// main fields.
 		'type',
 		'url',
 
-		// utm
+		// utm fields.
 		'utm_campaign',
 		'utm_source',
 		'utm_medium',
@@ -27,16 +38,16 @@ trait SourceAttributionMeta {
 		'utm_id',
 		'utm_term',
 
-		// additional
+		// additional fields.
 		'session_entry',
 		'session_start_time',
 		'session_pages',
 		'session_count',
 		'user_agent',
-	];
+	);
 
 	/** @var array */
-	private $fields = [];
+	private $fields = array();
 
 	/** @var string */
 	private $field_prefix = '';
@@ -48,6 +59,13 @@ trait SourceAttributionMeta {
 	 * @return void
 	 */
 	private function set_field_prefix(): void {
+		/**
+		 * Filter the prefix for the meta fields.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $prefix The prefix for the meta fields.
+		 */
 		$prefix = (string) apply_filters(
 			'wc_order_source_attribution_tracking_field_prefix',
 			'wc_order_source_attribution_'
@@ -63,12 +81,12 @@ trait SourceAttributionMeta {
 	/**
 	 * Filter the meta data to only the keys that we care about.
 	 *
-	 * @param WC_Meta_Data[] $meta
+	 * @param WC_Meta_Data[] $meta The meta data.
 	 *
 	 * @return array
 	 */
 	private function filter_meta_data( array $meta ): array {
-		$return = [];
+		$return = array();
 		$prefix = $this->get_meta_prefixed_field( '' );
 
 		foreach ( $meta as $item ) {
@@ -193,5 +211,32 @@ trait SourceAttributionMeta {
 		}
 
 		return $label;
+	}
+
+	/**
+	 * Get the order object with HPOS compatibility.
+	 *
+	 * @param WP_Post|int $post The post ID or object.
+	 *
+	 * @return WC_Order The order object
+	 * @throws Exception When the order isn't found.
+	 */
+	private function get_hpos_order_object( $post ) {
+		global $theorder;
+
+		if ( is_numeric( $post ) ) {
+			$post = get_post( $post );
+		}
+
+		if ( empty( $theorder ) || $theorder->get_id() !== $post->ID ) {
+			$theorder = wc_get_order( $post->ID );
+		}
+
+		// Throw an exception if we don't have an order object.
+		if ( ! $theorder instanceof WC_Order ) {
+			throw new Exception( __( 'Order not found.', 'woocommerce' ) );
+		}
+
+		return $theorder;
 	}
 }
