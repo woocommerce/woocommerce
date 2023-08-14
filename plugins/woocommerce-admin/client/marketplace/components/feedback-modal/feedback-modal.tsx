@@ -12,7 +12,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './feedback-modal.scss';
 import LikertScale from '../likert-scale/likert-scale';
-import sanitizeHTML from '../../../lib/sanitize-html';
 
 export default function FeedbackModal(): JSX.Element {
 	const CUSTOMER_EFFORT_SCORE_ACTION = 'marketplace_redesign_2023';
@@ -171,15 +170,13 @@ export default function FeedbackModal(): JSX.Element {
 			return;
 		}
 
-		const comments = sanitizeHTML( thoughts ).__html;
-
 		// Send event to CES:
 		recordEvent( 'ces_feedback', {
 			action: CUSTOMER_EFFORT_SCORE_ACTION,
 			score: easyToFind,
 			score_second_question: meetsMyNeeds,
 			score_combined: easyToFind + meetsMyNeeds,
-			comments,
+			thoughts,
 		} );
 		// Close the modal:
 		setOpen( false );
