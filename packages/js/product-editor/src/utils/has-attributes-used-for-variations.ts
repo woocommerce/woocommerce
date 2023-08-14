@@ -12,5 +12,8 @@ import { Product } from '@woocommerce/data';
 export const hasAttributesUsedForVariations = (
 	attributeList: Product[ 'attributes' ]
 ) => {
+	if ( ! Array.isArray( attributeList ) || ! attributeList.length ) {
+		return false;
+	}
 	return attributeList.some( ( { variation } ) => variation );
 };
