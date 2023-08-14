@@ -53,7 +53,7 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { Loader } from './pages/Loader';
+import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
 import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
@@ -1111,7 +1111,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1176,7 +1176,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 				plugins: {
@@ -1238,7 +1238,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1260,7 +1260,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1291,7 +1291,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1386,7 +1386,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},

@@ -44,11 +44,13 @@ module.exports = {
 				? `
 			<link href="experimental-css/style-rtl.css" rel="stylesheet" />
 			<link href="component-css/style-rtl.css" rel="stylesheet" />
+			<link href="onboarding-css/style-rtl.css" rel="stylesheet" />
 			<link href="app-css/style-rtl.css" rel="stylesheet" />
 			`
 				: `
 			<link href="component-css/style.css" rel="stylesheet" />
 			<link href="experimental-css/style.css" rel="stylesheet" />
+			<link href="onboarding-css/style.css" rel="stylesheet" />
 			<link href="app-css/style.css" rel="stylesheet" />
 			`
 		}
