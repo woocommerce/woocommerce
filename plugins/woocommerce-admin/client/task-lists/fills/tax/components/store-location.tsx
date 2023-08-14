@@ -41,8 +41,8 @@ export const StoreLocation: React.FC< {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } =
 		useDispatch( SETTINGS_STORE_NAME );
-	const { generalSettings, isResolving } = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } =
+	const { generalSettings, isResolving, isUpdateSettingsRequesting } = useSelect( ( select ) => {
+		const { getSettings, hasFinishedResolution, isUpdateSettingsRequesting } =
 			select( SETTINGS_STORE_NAME );
 
 		return {
@@ -50,15 +50,16 @@ export const StoreLocation: React.FC< {
 			isResolving: ! hasFinishedResolution( 'getSettings', [
 				'general',
 			] ),
+			isUpdateSettingsRequesting: isUpdateSettingsRequesting( 'general' )
 		};
 	} );
 
 	useEffect( () => {
-		if ( isResolving || ! hasCompleteAddress( generalSettings || {} ) ) {
+		if ( isResolving || isUpdateSettingsRequesting || ! hasCompleteAddress( generalSettings || {} ) ) {
 			return;
 		}
 		nextStep();
-	}, [ isResolving ] );
+	}, [ isResolving, generalSettings, isUpdateSettingsRequesting ] );
 
 	if ( isResolving ) {
 		return null;
@@ -68,15 +69,10 @@ export const StoreLocation: React.FC< {
 		<StoreLocationForm
 			validate={ validateLocationForm }
 			onComplete={ ( values: { [ key: string ]: string } ) => {
-				if ( ! hasCompleteAddress( generalSettings || {} ) ) {
-					return;
-				}
-
 				const country = getCountryCode( values.countryState );
 				recordEvent( 'tasklist_tax_set_location', {
 					country,
 				} );
-				nextStep();
 			} }
 			isSettingsRequesting={ false }
 			settings={ generalSettings }
@@ -84,7 +80,6 @@ export const StoreLocation: React.FC< {
 				updateAndPersistSettingsForGroup
 			}
 			createNotice={ createNotice }
-			isSettingsError={ false }
 		/>
 	);
 };

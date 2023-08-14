@@ -31,7 +31,6 @@ type StoreLocationProps = {
 		content: string,
 		options?: Partial< Options >
 	) => void;
-	isSettingsError: boolean;
 	isSettingsRequesting: boolean;
 	buttonText?: string;
 	updateAndPersistSettingsForGroup: (
@@ -61,7 +60,6 @@ export const defaultValidate = ( values: FormValues ) => {
 const StoreLocation = ( {
 	onComplete,
 	createNotice,
-	isSettingsError,
 	isSettingsRequesting,
 	updateAndPersistSettingsForGroup,
 	settings,
@@ -82,6 +80,7 @@ const StoreLocation = ( {
 	const [ isSubmitting, setSubmitting ] = useState( false );
 	const onSubmit = async ( values: FormValues ) => {
 		setSubmitting( true );
+		try {
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
 				...settings,
@@ -94,17 +93,18 @@ const StoreLocation = ( {
 		} );
 
 		setSubmitting( false );
-		if ( ! isSettingsError ) {
-			onComplete( values );
-		} else {
-			createNotice(
-				'error',
-				__(
-					'There was a problem saving your store location',
-					'woocommerce'
-				)
-			);
-		}
+		onComplete( values );
+	} catch ( e ) {
+		setSubmitting( false );
+
+		createNotice(
+			'error',
+			__(
+				'There was a problem saving your store location',
+				'woocommerce'
+			)
+		);
+	}
 	};
 
 	const getInitialValues = () => {
