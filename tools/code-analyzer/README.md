@@ -8,9 +8,7 @@
 
 Currently there are 3 commands:
 
-### Command #1
-
-`lint`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via setting output variables in GH actions.
+1. `lint`. Analyzer is used as a linter for PRs to check if hook/template/db changes were introduced. It produces output either directly on CI or via setting output variables in GH actions.
 
 Here is an example `analyzer` command, run from this directory:
 
@@ -20,9 +18,7 @@ In this command we compare the `release/6.7` and `release/6.8` branches to find 
 
 To find out more about the other arguments to the command you can run `pnpm run analyzer -- --help`
 
-### Command #2
-
-`major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions.
+2. `major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions.
 
 Here is an example `major-minor` command, run from this directory:
 
@@ -34,9 +30,7 @@ writing the main file in this particular branch reports `6.8.1` so the output of
 This command is particularly useful combined with the analyzer, allowing you to determine the last major/minor.0 version of a branch or ref before passing that as the
 version argument to `analyzer`.
 
-### Command #3
-
-`scan`. Scan is like `lint` but lets you scan for a specific change type. e.g. you can scan just for hook changes if you wish.
+3. `scan`. Scan is like `lint` but lets you scan for a specific change type. e.g. you can scan just for hook changes if you wish.
 
 Here is an example of the `scan` command run to look for hook changes:
 
