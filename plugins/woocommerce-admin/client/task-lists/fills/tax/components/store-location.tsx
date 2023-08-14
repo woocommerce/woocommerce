@@ -41,8 +41,8 @@ export const StoreLocation: React.FC< {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } =
 		useDispatch( SETTINGS_STORE_NAME );
-	const { generalSettings, isResolving, isUpdateSettingsRequesting } =
-		useSelect( ( select ) => {
+	const { generalSettings, isResolving, isUpdating } = useSelect(
+		( select ) => {
 			const {
 				getSettings,
 				hasFinishedResolution,
@@ -54,21 +54,21 @@ export const StoreLocation: React.FC< {
 				isResolving: ! hasFinishedResolution( 'getSettings', [
 					'general',
 				] ),
-				isUpdateSettingsRequesting:
-					isUpdateSettingsRequesting( 'general' ),
+				isUpdating: isUpdateSettingsRequesting( 'general' ),
 			};
-		} );
+		}
+	);
 
 	useEffect( () => {
 		if (
 			isResolving ||
-			isUpdateSettingsRequesting ||
+			isUpdating ||
 			! hasCompleteAddress( generalSettings || {} )
 		) {
 			return;
 		}
 		nextStep();
-	}, [ isResolving, generalSettings, isUpdateSettingsRequesting ] );
+	}, [ isResolving, generalSettings, isUpdating ] );
 
 	if ( isResolving ) {
 		return null;
