@@ -4,6 +4,8 @@ When a package contains sufficient changes to justify a release to [NPM](https:/
 
 Below are instructions for releasing using Github Workflows (recommended) and the command line. When releasing packages for the first time, release from the command line.
 
+Add some more changes to trigger multiple lints.
+
 ## Release packages using Github Workflows (recommended)
 
 ### Prepare packages
