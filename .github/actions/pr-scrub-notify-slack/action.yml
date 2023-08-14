@@ -31,8 +31,10 @@ runs:
           slack-bot-user-oauth-access-token: ${{ inputs.TEST_ASSISTANCE_BOT_TOKEN }}
           slack-channel: ${{ inputs.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
           slack-text: |
-              <!subteam^${{ inputs.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}>, there is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
+              ${{ steps.get_pr_status.outputs.pr_status == 'Merged' && '' || '<!subteam^' + inputs.WOO_PR_TESTING_ANALYSIS_TEAM_ID + '>, ' }}
+              ${{ steps.get_pr_status.outputs.pr_status == 'Merged' && 'There' || 'there' }} is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
               <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
-              *SLA:* <!date^${{ steps.calculate_sla.outputs.sla_timestamp }}^{date_short_pretty} at {time}|5 hours from now>
+              ${{ steps.get_pr_status.outputs.pr_status == 'Merged' && '' || 
+              '*SLA:* <!date^' + steps.calculate_sla.outputs.sla_timestamp + '^{date_short_pretty} at {time}|5 hours from now>' }}
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
