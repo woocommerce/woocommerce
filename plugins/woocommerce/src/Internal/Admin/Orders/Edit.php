@@ -1,6 +1,8 @@
 <?php
 /**
  * Renders order edit page, works with both post and order object.
+ *
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
@@ -232,7 +234,7 @@ class Edit {
 			/* Translators: %s order type name. */
 			sprintf( __( '%s information', 'woocommerce' ), $title ),
 			function( $post_or_order ) use ( $source_attribution_meta_box ) {
-				$order = $post_or_order instanceof WC_Order ?: wc_get_order( $post_or_order );
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				$source_attribution_meta_box->output( $order );
 			},
 			$screen_id,
@@ -247,7 +249,7 @@ class Edit {
 			'woocommerce-customer-history',
 			__( 'Customer History', 'woocommerce' ),
 			function( $post_or_order ) use ( $customer_history_meta_box ) {
-				$order = $post_or_order instanceof WC_Order ?: wc_get_order( $post_or_order );
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				$customer_history_meta_box->output( $order );
 			},
 			$screen_id,
