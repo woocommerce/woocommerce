@@ -81,30 +81,30 @@ const StoreLocation = ( {
 	const onSubmit = async ( values: FormValues ) => {
 		setSubmitting( true );
 		try {
-		await updateAndPersistSettingsForGroup( 'general', {
-			general: {
-				...settings,
-				woocommerce_store_address: values.addressLine1,
-				woocommerce_store_address_2: values.addressLine2,
-				woocommerce_default_country: values.countryState,
-				woocommerce_store_city: values.city,
-				woocommerce_store_postcode: values.postCode,
-			},
-		} );
+			await updateAndPersistSettingsForGroup( 'general', {
+				general: {
+					...settings,
+					woocommerce_store_address: values.addressLine1,
+					woocommerce_store_address_2: values.addressLine2,
+					woocommerce_default_country: values.countryState,
+					woocommerce_store_city: values.city,
+					woocommerce_store_postcode: values.postCode,
+				},
+			} );
 
-		setSubmitting( false );
-		onComplete( values );
-	} catch ( e ) {
-		setSubmitting( false );
+			setSubmitting( false );
+			onComplete( values );
+		} catch ( e ) {
+			setSubmitting( false );
 
-		createNotice(
-			'error',
-			__(
-				'There was a problem saving your store location',
-				'woocommerce'
-			)
-		);
-	}
+			createNotice(
+				'error',
+				__(
+					'There was a problem saving your store location',
+					'woocommerce'
+				)
+			);
+		}
 	};
 
 	const getInitialValues = () => {
