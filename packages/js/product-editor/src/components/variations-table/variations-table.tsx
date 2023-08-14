@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import {
@@ -24,7 +23,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId, useEntityProp } from '@wordpress/core-data';
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -47,15 +46,6 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const [ entityAttributes ] = useEntityProp< ProductAttribute[] >(
-		'postType',
-		'product',
-		'attributes'
-	);
-	const variableAttributeTags = entityAttributes
-		.filter( ( attr ) => attr.variation )
-		.map( ( attr ) => attr.options )
-		.flat();
 
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
@@ -107,7 +97,7 @@ export function VariationsTable() {
 				<Spinner />
 				{ isGeneratingVariations && (
 					<span>
-						{ __( 'Generating variations...', 'woocommerce' ) }
+						{ __( 'Generating variations…', 'woocommerce' ) }
 					</span>
 				) }
 			</div>
@@ -143,7 +133,7 @@ export function VariationsTable() {
 						{ isGeneratingVariations && (
 							<span>
 								{ __(
-									'Generating variations...',
+									'Generating variations…',
 									'woocommerce'
 								) }
 							</span>
