@@ -4,7 +4,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Customer;
 use WC_Log_Levels;
@@ -17,7 +19,7 @@ use WP_User;
  *
  * @since x.x.x
  */
-class SourceAttributionController {
+class SourceAttributionController implements RegisterHooksInterface {
 
 	use SourceAttributionMeta;
 
@@ -29,13 +31,34 @@ class SourceAttributionController {
 	private $logger;
 
 	/**
-	 * @param WC_Logger_Interface $logger
+	 * The LegacyProxy instance.
+	 *
+	 * @var LegacyProxy
 	 */
-	public function __construct( WC_Logger_Interface $logger ) {
-		$this->logger = $logger;
+	private $proxy;
+
+	/**
+	 * Initialization method.
+	 *
+	 * Takes the place of the constructor within WooCommerce Dependency injection.
+	 *
+	 * @internal
+	 *
+	 * @param LegacyProxy              $proxy  The legacy proxy.
+	 * @param WC_Logger_Interface|null $logger The logger object. If not provided, it will be obtained from the proxy.
+	 */
+	final public function init( LegacyProxy $proxy, ?WC_Logger_Interface $logger = null ) {
+		$this->proxy  = $proxy;
+		$this->logger = $logger ?? $proxy->call_function( 'wc_get_logger' );
 	}
 
-	public function setup() {
+	/**
+	 * Register this class instance to the appropriate hooks.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	public function register() {
 		add_action(
 			'wp_enqueue_scripts',
 			function() {
@@ -121,32 +144,33 @@ class SourceAttributionController {
 	 * Scripts & styles for custom source tracking and cart tracking.
 	 */
 	private function enqueue_scripts_and_styles() {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script(
 			'sourcebuster-js',
-			plugins_url( 'assets/js/sourcebuster.min.js', WC_ORDER_ATTRIBUTE_SOURCE_FILE ),
-			[ 'jquery' ],
-			WC_ORDER_ATTRIBUTE_SOURCE_VERSION,
+			plugins_url( "assets/js/frontend/sourcebuster{$suffix}.js", WC_PLUGIN_FILE ),
+			array( 'jquery' ),
+			WC_VERSION,
 			true
 		);
 
 		wp_enqueue_script(
-			'woocommerce-order-attribute-source-js',
-			plugins_url( 'assets/js/woocommerce-order-attribute-source.js', WC_ORDER_ATTRIBUTE_SOURCE_FILE ),
-			[ 'jquery', 'sourcebuster-js' ],
-			WC_ORDER_ATTRIBUTE_SOURCE_VERSION,
+			'woocommerce-order-source-attribution-js',
+			plugins_url( "assets/js/frontend/order-source-attribution{$suffix}.js", WC_PLUGIN_FILE ),
+			array( 'jquery', 'sourcebuster-js' ),
+			WC_VERSION,
 			true
 		);
 
 		// Pass parameters to Order Source Attribution JS.
-		$params = [
+		$params = array(
 			'lifetime'      => (int) apply_filters( 'wc_order_source_attribution_cookie_lifetime_months', 6 ),
 			'session'       => (int) apply_filters( 'wc_order_source_attribution_session_length_minutes', 30 ),
 			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 			'prefix'        => $this->field_prefix,
 			'allowTracking' => wc_bool_to_string( apply_filters( 'wc_order_source_attribution_allow_tracking', true ) ),
-		];
+		);
 
-		wp_localize_script( 'woocommerce-order-attribute-source-js', 'wc_order_attribute_source_params', $params );
+		wp_localize_script( 'woocommerce-order-source-attribution-js', 'wc_order_attribute_source_params', $params );
 	}
 
 	/**
@@ -162,26 +186,21 @@ class SourceAttributionController {
 			return;
 		}
 
-		wp_enqueue_style(
-			'woocommerce-order-source-attribution-admin-css',
-			plugins_url( 'assets/css/order-source-attribution.css', WC_ORDER_ATTRIBUTE_SOURCE_FILE ),
-			[],
-			WC_ORDER_ATTRIBUTE_SOURCE_VERSION
-		);
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			'woocommerce-order-source-attribution-admin-js',
-			plugins_url( 'assets/js/order-source-attribution-admin.js', WC_ORDER_ATTRIBUTE_SOURCE_FILE ),
-			[ 'jquery' ],
-			WC_ORDER_ATTRIBUTE_SOURCE_VERSION
+			plugins_url( "assets/js/admin/order-source-attribution-admin{$suffix}.js", WC_PLUGIN_FILE ),
+			array( 'jquery' ),
+			WC_VERSION
 		);
 	}
 
 	/**
 	 * Display the source data template for the customer.
 	 *
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer The customer object.
 	 *
 	 * @return void
 	 */
@@ -193,7 +212,7 @@ class SourceAttributionController {
 			return;
 		}
 
-		include dirname( WC_ORDER_ATTRIBUTE_SOURCE_FILE ) . '/templates/source-data-fields.php';
+		include dirname( WC_PLUGIN_FILE ) . '/templates/order/source-data-fields.php';
 	}
 
 	/**
@@ -201,7 +220,7 @@ class SourceAttributionController {
 	 *
 	 * @since x.x.x
 	 *
-	 * @param int $order_id
+	 * @param int $order_id The order ID.
 	 *
 	 * @return void
 	 */
@@ -218,7 +237,7 @@ class SourceAttributionController {
 	/**
 	 * Output the data for the Origin column in the orders table.
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order $order The order object.
 	 *
 	 * @return void
 	 */
@@ -246,7 +265,9 @@ class SourceAttributionController {
 	}
 
 	/**
-	 * @param WC_Customer $customer
+	 * Save source data for a Customer object.
+	 *
+	 * @param WC_Customer $customer The customer object.
 	 *
 	 * @return void
 	 */
@@ -259,7 +280,9 @@ class SourceAttributionController {
 	}
 
 	/**
-	 * @param WC_Order $order
+	 * Save source data for an Order object.
+	 *
+	 * @param WC_Order $order The order object.
 	 *
 	 * @return void
 	 */
@@ -277,7 +300,7 @@ class SourceAttributionController {
 	 * @return array
 	 */
 	private function get_source_values(): array {
-		$values = [];
+		$values = array();
 
 		// Look through each field in POST data.
 		foreach ( $this->fields as $field ) {
@@ -301,6 +324,13 @@ class SourceAttributionController {
 	 * @param string $level   The log level.
 	 */
 	private function log( string $message, string $method, string $level = WC_Log_Levels::DEBUG ) {
+		/**
+		 * Filter to enable debug mode.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $enabled 'yes' to enable debug mode, 'no' to disable.
+		 */
 		if ( 'yes' !== apply_filters( 'wc_order_source_attribution_debug_mode_enabled', 'no' ) ) {
 			return;
 		}
@@ -308,7 +338,7 @@ class SourceAttributionController {
 		$this->logger->log(
 			$level,
 			sprintf( '%s %s', $method, $message ),
-			[ 'source' => 'woocommerce-order-source-attribution' ]
+			array( 'source' => 'woocommerce-order-source-attribution' )
 		);
 	}
 
