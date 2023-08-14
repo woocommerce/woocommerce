@@ -3,30 +3,17 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
-import { useRef, useMemo } from '@wordpress/element';
-import {
-	useResizeObserver,
-	useMergeRefs,
-	useViewportMatch,
-} from '@wordpress/compose';
+import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import EditorCanvas from '@wordpress/edit-site/build-module/components/block-editor/editor-canvas';
-import {
-	BlockEditorProvider,
-	BlockList,
-	BlockTools,
-} from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
+import { privateApis as routerPrivateApis } from '@wordpress/router';
+import { unlock } from '@wordpress/edit-site/build-module/private-apis';
+
 /**
  * Internal dependencies
  */
-
-const LAYOUT = {
-	type: 'default',
-	// At the root level of the site editor, no alignments should be allowed.
-	alignments: [],
-};
+import { BlockPreview } from './block-preview';
+const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 const useSettings = ( { templateType } ) => {
 	const { restBlockPatterns, restBlockPatternCategories } = useSelect(
@@ -88,7 +75,6 @@ const useSettings = ( { templateType } ) => {
 
 		return {
 			...restStoredSettings,
-			// inserterMediaCategories,
 			__experimentalBlockPatterns: blockPatterns,
 			__experimentalBlockPatternCategories: blockPatternCategories,
 		};
@@ -98,47 +84,59 @@ const useSettings = ( { templateType } ) => {
 };
 
 export default function BlockEditor( { blocks, template } ) {
-	const [ resizeObserver ] = useResizeObserver();
-	const contentRef = useRef();
-	const isMobileViewport = useViewportMatch( 'small', '<' );
-	const enableResizing =
-		// Disable resizing in mobile viewport.
-		! isMobileViewport;
-
-	const mergedRefs = useMergeRefs( [ contentRef ] );
+	const history = useHistory();
+	const location = useLocation();
 	const settings = useSettings( {
 		templateType: template?.type,
 	} );
-	return (
-		<BlockEditorProvider
-			settings={ settings }
-			value={ blocks }
-			onInput={ () => {} }
-			onChange={ () => {} }
-			useSubRegistry={ false }
-		>
-			<BlockTools
-				className={ classnames( 'edit-site-visual-editor', {
-					'is-focus-mode': false,
-					'is-view-mode': true,
-				} ) }
-				__unstableContentRef={ contentRef }
-			>
-				<EditorCanvas
-					enableResizing={ enableResizing }
-					settings={ settings }
-					contentRef={ mergedRefs }
-					readonly={ false }
-				>
-					{ resizeObserver }
 
-					<BlockList
-						className="edit-site-block-editor__block-list wp-site-blocks"
-						__experimentalLayout={ LAYOUT }
-						renderAppender={ false }
-					/>
-				</EditorCanvas>
-			</BlockTools>
-		</BlockEditorProvider>
-	);
+	const onClickNavigationItem = ( event ) => {
+		if ( ! event.target.href ) {
+			return;
+		}
+
+		if ( event.target.href.includes( 'page_id' ) ) {
+			// Navigate to a page
+			const urlParams = new URLSearchParams(
+				new URL( event.target.href ).search
+			);
+			const pageId = urlParams.get( 'page_id' );
+
+			history.push( {
+				...location.params,
+				postId: pageId,
+				postType: 'page',
+			} );
+		} else {
+			// Home page
+			const { postId, postType, ...params } = location.params;
+			history.push( {
+				...params,
+			} );
+		}
+	};
+
+	return blocks.map( ( block, index ) => {
+		// Add padding to the top and bottom of the block preview.
+		let additionalStyles = '';
+		if ( index === 0 ) {
+			additionalStyles = `
+				.editor-styles-wrapper{ padding-top: var(--wp--style--root--padding-top) };'
+			`;
+		} else if ( index === blocks.length - 1 ) {
+			additionalStyles = `
+				.editor-styles-wrapper{ padding-bottom: var(--wp--style--root--padding-bottom) };
+			`;
+		}
+
+		return (
+			<BlockPreview
+				key={ block.clientId }
+				blocks={ [ block ] }
+				settings={ settings }
+				additionalStyles={ additionalStyles }
+				onClickNavigationItem={ onClickNavigationItem }
+			/>
+		);
+	} );
 }

@@ -13,7 +13,6 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import {
-	Spinner,
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
 } from '@wordpress/components';
@@ -25,6 +24,7 @@ import { GlobalStylesProvider } from '@wordpress/edit-site/build-module/componen
 import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
+
 /**
  * Internal dependencies
  */
@@ -104,10 +104,6 @@ export const Layout = () => {
 		[ blocks ]
 	);
 
-	if ( ! hasLoadedTemplate ) {
-		return <Spinner />;
-	}
-
 	// For debugging purposes
 	window.blocks = blocks;
 	window.headerBlocks = headerPatterns;
@@ -134,7 +130,7 @@ export const Layout = () => {
 							} }
 							className="edit-site-layout__sidebar"
 						>
-							<div className="woocommerce-store-customize__block-pattern-list">
+							<div className="woocommerce-store-customize__block-pattern-list edit-site-sidebar__content">
 								<BlockPatternList
 									shownPatterns={ headerPatterns }
 									blockPatterns={ headerPatterns }

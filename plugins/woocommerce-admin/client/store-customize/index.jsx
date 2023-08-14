@@ -18,6 +18,9 @@ import {
 	__experimentalFetchLinkSuggestions as fetchLinkSuggestions,
 	__experimentalFetchUrlData as fetchUrlData,
 } from '@wordpress/core-data';
+import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
+import { store as preferencesStore } from '@wordpress/preferences';
+import { store as editorStore } from '@wordpress/editor';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -29,15 +32,9 @@ import { Layout } from './layout';
 
 const StoreCustomize = () => {
 	useEffect( () => {
-		// Register core blocks and set up the fallback block.
-		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters();
-
-		const coreBlocks = __experimentalGetCoreBlocks().filter(
-			( { name } ) => name !== 'core/freeform' && ! getBlockType( name )
-		);
-
-		registerCoreBlocks( coreBlocks );
-		dispatch( blocksStore ).setFreeformFallbackBlockName( 'core/html' );
+		if ( ! window.blockSettings ) {
+			return;
+		}
 
 		// Set up the block editor settings.
 		const settings = window.blockSettings;
@@ -48,7 +45,41 @@ const StoreCustomize = () => {
 		settings.__experimentalFetchRichUrlData = fetchUrlData;
 
 		dispatch( editSiteStore ).updateSettings( settings );
-	}, [] );
+
+		// Register core blocks and set up the fallback block.
+		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters();
+
+		const coreBlocks = __experimentalGetCoreBlocks().filter(
+			( { name } ) => name !== 'core/freeform' && ! getBlockType( name )
+		);
+
+		registerCoreBlocks( coreBlocks );
+		dispatch( blocksStore ).setFreeformFallbackBlockName( 'core/html' );
+
+		dispatch( preferencesStore ).setDefaults( 'core/edit-site', {
+			editorMode: 'visual',
+			fixedToolbar: false,
+			focusMode: false,
+			keepCaretInsideBlock: false,
+			welcomeGuide: true,
+			welcomeGuideStyles: true,
+			showListViewByDefault: false,
+			showBlockBreadcrumbs: true,
+		} );
+
+		dispatch( editorStore ).updateEditorSettings( {
+			defaultTemplateTypes: settings.defaultTemplateTypes,
+			defaultTemplatePartAreas: settings.defaultTemplatePartAreas,
+		} );
+
+		// Prevent the default browser action for files dropped outside of dropzones.
+		window.addEventListener(
+			'dragover',
+			( e ) => e.preventDefault(),
+			false
+		);
+		window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
+	}, [ window.blockSettings ] );
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
@@ -66,11 +97,13 @@ const StoreCustomize = () => {
 	}, [] );
 
 	return (
-		<GlobalStylesProvider>
-			<RouterProvider>
-				<Layout />
-			</RouterProvider>
-		</GlobalStylesProvider>
+		<ShortcutProvider style={ { height: '100%' } }>
+			<GlobalStylesProvider>
+				<RouterProvider>
+					<Layout />
+				</RouterProvider>
+			</GlobalStylesProvider>
+		</ShortcutProvider>
 	);
 };
 
