@@ -34,6 +34,7 @@ import {
 	useProductAttributes,
 } from '../../hooks/use-product-attributes';
 import { getAttributeId } from '../../components/attribute-control/utils';
+import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 function hasAttributesUsedForVariations(
 	productAttributes: Product[ 'attributes' ]
@@ -41,22 +42,42 @@ function hasAttributesUsedForVariations(
 	return productAttributes.some( ( { variation } ) => variation );
 }
 
+function getFirstOptionFromEachAttribute(
+	attributes: Product[ 'attributes' ]
+): Product[ 'default_attributes' ] {
+	return attributes.map( ( attribute ) => ( {
+		id: attribute.id,
+		name: attribute.name,
+		option: attribute.options[ 0 ],
+	} ) );
+}
+
 export function Edit( {
 	attributes,
 }: BlockEditProps< VariationsBlockAttributes > ) {
 	const { description } = attributes;
 
+	const { generateProductVariations } = useProductVariationsHelper();
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
 	const [ productAttributes, setProductAttributes ] = useEntityProp<
 		Product[ 'attributes' ]
 	>( 'postType', 'product', 'attributes' );
+	const [ , setDefaultProductAttributes ] = useEntityProp<
+		Product[ 'default_attributes' ]
+	>( 'postType', 'product', 'default_attributes' );
 
 	const { attributes: variationOptions, handleChange } = useProductAttributes(
 		{
 			allAttributes: productAttributes,
-			onChange: setProductAttributes,
 			isVariationAttributes: true,
 			productId: useEntityId( 'postType', 'product' ),
+			onChange( values ) {
+				setProductAttributes( values );
+				setDefaultProductAttributes(
+					getFirstOptionFromEachAttribute( values )
+				);
+				generateProductVariations( values );
+			},
 		}
 	);
 
@@ -133,6 +154,7 @@ export function Edit( {
 							),
 						}
 					) }
+					createNewAttributesAsGlobal={ true }
 					notice={ '' }
 					onCancel={ () => {
 						closeNewModal();

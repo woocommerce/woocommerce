@@ -26,6 +26,7 @@ export type UserPreferences = {
 	};
 	taxes_report_columns?: string;
 	variable_product_tour_shown?: string;
+	variable_product_block_tour_shown?: string;
 	variations_report_columns?: string;
 };
 

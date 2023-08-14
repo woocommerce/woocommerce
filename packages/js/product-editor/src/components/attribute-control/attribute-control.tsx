@@ -32,7 +32,7 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
-	value: ProductAttribute[];
+	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
@@ -44,6 +44,7 @@ type AttributeControlProps = {
 	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	createNewAttributesAsGlobal?: boolean;
 	uiStrings?: {
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
@@ -71,6 +72,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onRemove = () => {},
 	onRemoveCancel = () => {},
 	uiStrings,
+	createNewAttributesAsGlobal = false,
 } ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
@@ -189,7 +191,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const currentAttribute = value.find(
 		( attr ) => getAttributeId( attr ) === currentAttributeId
-	) as EnhancedProductAttribute;
+	);
 
 	return (
 		<div className="woocommerce-attribute-field">
@@ -246,6 +248,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
 				/>
 			) }
 			<SelectControlMenuSlot />

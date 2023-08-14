@@ -706,7 +706,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Abstract_Order $order Order object.
 	 */
-	private function update_order_meta_from_object( $order ) {
+	protected function update_order_meta_from_object( $order ) {
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}

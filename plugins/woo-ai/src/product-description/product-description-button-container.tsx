@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
 } from '@woocommerce/ai';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ import {
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
-import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import { useFeedbackSnackbar, useStoreBranding, useTinyEditor } from '../hooks';
 import {
 	getProductName,
 	getPostId,
@@ -65,6 +66,28 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
+
+	const { createErrorNotice } = useDispatch( noticesStore );
+	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
+	const { data: brandingData } = useStoreBranding( {
+		onError: () => {
+			if ( ! errorNoticeDismissed ) {
+				createErrorNotice(
+					__(
+						'Error fetching branding data, content generation may be degraded.',
+						'woocommerce'
+					),
+					{
+						id: 'woo-ai-branding-error',
+						type: 'snackbar',
+						isDismissible: true,
+						onDismiss: () => setErrorNoticeDismissed( true ),
+					}
+				);
+			}
+		},
+	} );
+
 	const tinyEditor = useTinyEditor();
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
 
@@ -174,7 +197,7 @@ export function WriteItForMeButtonContainer() {
 			productPropsInstructions.push(
 				`Tagged with: ${ productTags.join( ', ' ) }.`
 			);
-			includedProps.push( 'categories' );
+			includedProps.push( 'tags' );
 		}
 		productAttributes.forEach( ( { name, values } ) => {
 			productPropsInstructions.push(
@@ -183,21 +206,41 @@ export function WriteItForMeButtonContainer() {
 			includedProps.push( name );
 		} );
 
-		return [
-			`Compose an engaging product description for a product named "${ productName.slice(
-				0,
-				MAX_TITLE_LENGTH
-			) }".`,
+		// WooCommerce doesn't set a limit for the product title. Set a limit to control the token usage.
+		const truncatedProductName = productName.slice( 0, MAX_TITLE_LENGTH );
+
+		const instructions = [
+			`Compose an engaging product description for a product named "${ truncatedProductName }."`,
 			...productPropsInstructions,
-			'Identify the language used in the product name, and craft the description in the same language.',
+			`Use a 9th grade reading level.`,
 			`Ensure the description is concise, containing no more than ${ DESCRIPTION_MAX_LENGTH } words.`,
 			'Structure the content into paragraphs using <p> tags, and use HTML elements like <strong> and <em> for emphasis.',
-			'Only if appropriate, use <ul> and <li> for listing product features.',
-			`Avoid including the properties (${ includedProps.join(
-				', '
-			) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`,
-			'Do not include a top-level heading at the beginning description.',
-		].join( ' ' );
+			'Identify the language used in the product name, and craft the description in the same language.',
+			'Only if appropriate, use <ul> and <li> tags to list product features.',
+			'Do not include a top-level heading at the beginning of the description.',
+		];
+
+		if ( includedProps.length > 0 ) {
+			instructions.push(
+				`Avoid including the properties (${ includedProps.join(
+					', '
+				) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`
+			);
+		}
+
+		if ( brandingData?.toneOfVoice ) {
+			instructions.push(
+				`Generate the description using a ${ brandingData.toneOfVoice } tone.`
+			);
+		}
+
+		if ( brandingData?.businessDescription ) {
+			instructions.push(
+				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
+			);
+		}
+
+		return instructions.join( '\n' );
 	};
 
 	const onWriteItForMeClick = async () => {

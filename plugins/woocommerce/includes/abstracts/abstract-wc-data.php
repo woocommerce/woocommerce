@@ -195,6 +195,19 @@ abstract class WC_Data {
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
+		/**
+		 * Filters whether an object deletion should take place. Equivalent to `pre_delete_post`.
+		 *
+		 * @param mixed   $check Whether to go ahead with deletion.
+		 * @param WC_Data $this The data object being deleted.
+		 * @param bool    $force_delete Whether to bypass the trash.
+		 *
+		 * @since 8.1.0.
+		 */
+		$check = apply_filters( "woocommerce_pre_delete_$this->object_type", null, $this, $force_delete );
+		if ( null !== $check ) {
+			return $check;
+		}
 		if ( $this->data_store ) {
 			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );

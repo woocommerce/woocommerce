@@ -12,7 +12,7 @@ Currently there are 3 commands:
 
 Here is an example `analyzer` command, run from this directory:
 
-`pnpm run analyzer -- lint "release/6.8" "6.8.0" -b release/6.7`
+`pnpm analyzer lint "release/6.8" "6.8.0" -b release/6.7`
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 
@@ -22,7 +22,7 @@ To find out more about the other arguments to the command you can run `pnpm run 
 
 Here is an example `major-minor` command, run from this directory:
 
-`pnpm run analyzer major-minor -- "release/6.8" "plugins/woocommerce/woocommerce.php"`
+`pnpm analyzer major-minor "release/6.8" "plugins/woocommerce/woocommerce.php"`
 
 In this command we checkout the branch `release/6.8` and check the version of the woocommerce.php mainfile located at the path passed. Note that at the time of
 writing the main file in this particular branch reports `6.8.1` so the output of this command is `6.8.0`.

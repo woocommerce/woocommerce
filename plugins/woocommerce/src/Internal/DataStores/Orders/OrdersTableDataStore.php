@@ -570,7 +570,17 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		self::$backfilling_order_ids[] = $order->get_id();
-		$cpt_data_store->update_order_from_object( $order );
+		$this->update_order_meta_from_object( $order );
+		$order_class = get_class( $order );
+		$post_order  = new $order_class();
+		$post_order->set_id( $order->get_id() );
+		$cpt_data_store->read( $post_order );
+
+		// This compares the order data to the post data and set changes array for props that are changed.
+		$post_order->set_props( $order->get_data() );
+
+		$cpt_data_store->update_order_from_object( $post_order );
+
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
@@ -769,6 +779,47 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function set_order_stock_reduced( $order, $set ) {
 		$this->set_stock_reduced( $order, $set );
+	}
+
+	/**
+	 * Get token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	public function get_payment_token_ids( $order ) {
+		/**
+		 * We don't store _payment_tokens in props to preserve backward compatibility. In CPT data store, `_payment_tokens` is always fetched directly from DB instead of from prop.
+		 */
+		$payment_tokens = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $payment_tokens ) {
+			$payment_tokens = $payment_tokens[0]->meta_value;
+		}
+		if ( ! $payment_tokens && version_compare( $order->get_version(), '8.0.0', '<' ) ) {
+			// Before 8.0 we were incorrectly storing payment_tokens in the order meta. So we need to check there too.
+			$payment_tokens = get_post_meta( $order->get_id(), '_payment_tokens', true );
+		}
+		return array_filter( (array) $payment_tokens );
+	}
+
+	/**
+	 * Update token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $token_ids Payment token ids.
+	 */
+	public function update_payment_token_ids( $order, $token_ids ) {
+		$meta          = new \WC_Meta_Data();
+		$meta->key     = '_payment_tokens';
+		$meta->value   = $token_ids;
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $existing_meta ) {
+			$existing_meta = $existing_meta[0];
+			$meta->id      = $existing_meta->id;
+			$this->data_store_meta->update_meta( $order, $meta );
+		} else {
+			$this->data_store_meta->add_meta( $order, $meta );
+		}
 	}
 
 	/**
@@ -2395,6 +2446,7 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
+			$this->clear_caches( $order );
 			self::$backfilling_order_ids[] = $order->get_id();
 			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
@@ -2642,7 +2694,7 @@ CREATE TABLE $orders_table_name (
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY billing_email (billing_email($max_index_length)),
-	KEY type_status (type, status),
+	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
 ) $collate;
@@ -2680,10 +2732,10 @@ CREATE TABLE $operational_data_table_name (
 	order_stock_reduced tinyint(1) NULL,
 	date_paid_gmt datetime NULL,
 	date_completed_gmt datetime NULL,
-	shipping_tax_amount decimal(26, 8) NULL,
-	shipping_total_amount decimal(26, 8) NULL,
-	discount_tax_amount decimal(26, 8) NULL,
-	discount_total_amount decimal(26, 8) NULL,
+	shipping_tax_amount decimal(26,8) NULL,
+	shipping_total_amount decimal(26,8) NULL,
+	discount_tax_amount decimal(26,8) NULL,
+	discount_total_amount decimal(26,8) NULL,
 	recorded_sales tinyint(1) NULL,
 	UNIQUE KEY order_id (order_id),
 	KEY order_key (order_key)
