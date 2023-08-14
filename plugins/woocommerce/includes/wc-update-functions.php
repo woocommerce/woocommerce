@@ -2575,6 +2575,25 @@ function wc_update_750_add_columns_to_order_stats_table() {
 }
 
 /**
+ * Disable the experimental product management experience.
+ *
+ * @return void
+ */
+function wc_update_750_disable_new_product_management_experience() {
+	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
+		update_option( 'woocommerce_new_product_management_enabled', 'no' );
+	}
+}
+
+/**
+ * Remove the multichannel marketing feature flag and options. This feature is now enabled by default.
+ */
+function wc_update_770_remove_multichannel_marketing_feature_options() {
+	delete_option( 'woocommerce_multichannel_marketing_enabled' );
+	delete_option( 'woocommerce_marketing_overview_welcome_hidden' );
+}
+
+/**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
  * @return bool Whether there are pending migration recrods.
@@ -2607,7 +2626,7 @@ WHERE
 
 	// No need to get the data in application, we can insert directly. Sync setting does not matter as this data already exist in the post table. Limit the batch size to 250.
 	$query =
-	"
+		"
 INSERT INTO $orders_meta_table (order_id, meta_key, meta_value)
 $select_query
 LIMIT 250
@@ -2619,23 +2638,4 @@ LIMIT 250
 	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
 
 	return ! empty( $has_pending );
-}
-
-/**
- * Disable the experimental product management experience.
- *
- * @return void
- */
-function wc_update_750_disable_new_product_management_experience() {
-	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
-		update_option( 'woocommerce_new_product_management_enabled', 'no' );
-	}
-}
-
-/**
- * Remove the multichannel marketing feature flag and options. This feature is now enabled by default.
- */
-function wc_update_770_remove_multichannel_marketing_feature_options() {
-	delete_option( 'woocommerce_multichannel_marketing_enabled' );
-	delete_option( 'woocommerce_marketing_overview_welcome_hidden' );
 }
