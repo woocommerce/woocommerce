@@ -9,7 +9,7 @@ import { controls } from '@wordpress/data';
  */
 import { getUrlParameters, getRestPath, parseId } from '../crud/utils';
 import TYPES from './action-types';
-import { IdQuery, IdType, Item, ItemQuery } from '../crud/types';
+import { IdQuery, IdType, Item } from '../crud/types';
 import { WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
 import type {
 	BatchUpdateRequest,
@@ -69,8 +69,6 @@ export const generateProductVariations = function* (
 			}
 		);
 	} catch ( error ) {
-		const { key } = parseId( idQuery, urlParameters );
-
 		yield generateProductVariationsError( key, error );
 		throw error;
 	}
@@ -89,8 +87,6 @@ export const generateProductVariations = function* (
 		yield generateProductVariationsSuccess( key );
 		return result;
 	} catch ( error ) {
-		const { key } = parseId( idQuery, urlParameters );
-
 		yield generateProductVariationsError( key, error );
 		throw error;
 	}

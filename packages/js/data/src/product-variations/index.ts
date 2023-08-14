@@ -1,5 +1,5 @@
 /**
- * External depedencies
+ * External dependencies
  */
 import { Reducer } from 'redux';
 
