@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
  */
 ?>
 
-<div class="source_data form-field form-field-wide order-source-attribution-metabox">
+<div class="order-source-attribution-metabox">
 
 	<?php if ( array_key_exists( 'origin', $meta ) ) : ?>
 		<h4><?php esc_html_e( 'Origin', 'woocommerce' ); ?></h4>

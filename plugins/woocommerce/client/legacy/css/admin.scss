@@ -8127,3 +8127,37 @@ table.bar_chart {
 		width: calc(100% - 24px);
 	}
 }
+
+.order-source-attribution-metabox {
+	h4 {
+		margin-bottom: .1em;
+	}
+
+	.woocommerce-order-source-attribution-details-container {
+		display: none;
+	}
+
+	.woocommerce-order-source-attribution-details-toggle {
+		display: block;
+		float: right;
+
+		.toggle-indicator {
+			font-family: dashicons;
+			font-size: 1.2em;
+			line-height: 1;
+			vertical-align: middle;
+		}
+
+		&[aria-expanded="true"] {
+			.toggle-indicator::before {
+				content: "\f140";
+			}
+		}
+
+		&[aria-expanded="false"] {
+			.toggle-indicator::before {
+				content: "\f142";
+			}
+		}
+	}
+}
