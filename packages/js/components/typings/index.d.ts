@@ -5,3 +5,4 @@ declare module 'gridicons/dist/*' {
 	} >;
 	export default value;
 }
+declare module '@wordpress/keyboard-shortcuts';

@@ -129,6 +129,18 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 											event.relatedTarget as Element
 										 ).closest(
 											'.media-modal, .components-modal__frame'
+										) ) ||
+									( event.relatedTarget &&
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar'
+										) ) ||
+									( event.relatedTarget &&
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar-dropdown-popover'
 										) )
 								) {
 									return;
