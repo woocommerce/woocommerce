@@ -21,6 +21,8 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
+        outputs:
+            test-result: ${{ steps.run-api-composite-action.outputs.result }}
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
@@ -66,7 +68,8 @@ jobs:
         permissions:
             contents: read
         needs: [api-tests]
-
+        outputs:
+            test-result: ${{ steps.run-e2e-composite-action.outputs.result }}
         steps:
             - uses: actions/checkout@v3
 
@@ -103,6 +106,8 @@ jobs:
             contents: read
         needs: [api-tests]
         if: success() || failure()
+        outputs:
+            test-result: ${{ steps.run-k6-tests.conclusion }}
         steps:
             - uses: actions/checkout@v3
 
@@ -134,6 +139,7 @@ jobs:
                   curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
             - name: Run k6 smoke tests
+              id: run-k6-tests
               env:
                   URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
