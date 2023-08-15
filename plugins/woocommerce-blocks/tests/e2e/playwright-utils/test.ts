@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect, request } from '@playwright/test';
+import { test as base, expect, request as baseRequest } from '@playwright/test';
 import type { ConsoleMessage } from '@playwright/test';
 import {
 	Admin,
@@ -137,12 +137,12 @@ const test = base.extend<
 		await use( new PageUtils( { page } ) );
 	},
 	templateApiUtils: async ( {}, use ) =>
-		await use( new TemplateApiUtils( request ) ),
+		await use( new TemplateApiUtils( baseRequest ) ),
 	editorUtils: async ( { editor, page }, use ) => {
 		await use( new EditorUtils( editor, page ) );
 	},
-	frontendUtils: async ( { page }, use ) => {
-		await use( new FrontendUtils( page ) );
+	frontendUtils: async ( { page, requestUtils }, use ) => {
+		await use( new FrontendUtils( page, requestUtils ) );
 	},
 	storeApiUtils: async ( { requestUtils }, use ) => {
 		await use( new StoreApiUtils( requestUtils ) );
