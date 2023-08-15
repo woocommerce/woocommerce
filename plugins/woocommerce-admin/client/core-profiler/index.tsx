@@ -38,6 +38,7 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import { findComponentMeta } from '~/utils/xstate/find-component';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -54,7 +55,7 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug } from '~/utils';
+import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -64,7 +65,7 @@ import {
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
-import { findComponentMeta } from './utils/find-component';
+import { ComponentMeta } from './types';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -1437,7 +1438,7 @@ export const CoreProfilerController = ( {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
@@ -1455,19 +1456,7 @@ export const CoreProfilerController = ( {
 			? Object.keys( state.value )[ 0 ]
 			: state.value;
 
-	useEffect( () => {
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-profile-wizard__body' );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		return () => {
-			document.body.classList.remove(
-				'woocommerce-profile-wizard__body'
-			);
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-		};
-	} );
+	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
 
 	return (
 		<>
