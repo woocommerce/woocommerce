@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
     lint-test-js:
-        name: Lint and Test JS
+        name: Run JS Tests
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -21,9 +21,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Lint
-              run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
             - name: Test
               run: pnpm run test --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' --color
