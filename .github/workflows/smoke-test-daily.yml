@@ -337,3 +337,50 @@ jobs:
                     -f slug="${{ matrix.slug }}" \
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
+
+    post-slack-summary:
+        name: Post Slack summary
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        if: |
+            success() || (
+              failure() && contains( needs.*.result, 'failure' )
+            )
+        needs:
+            - api-tests
+            - e2e-tests
+            - k6-tests
+            - test-plugins
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Download Slack blocks from plugin tests
+              id: download-plugin-blocks
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.PLUGIN_SLACK_BLOCKS_ARTIFACT }}
+                  path: /tmp/plugin-blocks
+
+            - name: Construct Slack payload
+              id: construct-slack-payload
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                    const script = require('./.github/actions/tests/slack-summary-daily/scripts/construct-slack-payload.js');
+                    script( { core } );
+              env:
+                  API_RESULT: ${{ needs.api-tests.outputs.test-result }}
+                  E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result }}
+                  k6_RESULT: ${{ needs.k6-tests.outputs.test-result }}
+                  PLUGINS_BLOCKS_PATH: ${{ steps.download-plugin-blocks.outputs.download-path }}
+
+            - name: Send Slack message # mytodo: DAILY_TEST_SLACK_CHANNEL
+              id: send-slack-message
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
+                  payload: ${{ steps.construct-slack-payload.outputs.payload }}
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+        
