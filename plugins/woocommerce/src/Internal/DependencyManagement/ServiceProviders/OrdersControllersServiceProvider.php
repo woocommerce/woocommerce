@@ -5,16 +5,14 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
-use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Service provider for the orders controller classes in the Automattic\WooCommerce\Internal\Orders namespace.
  */
-class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider {
+class OrdersControllersServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -23,7 +21,6 @@ class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider 
 	 */
 	protected $provides = array(
 		CouponsController::class,
-		SourceAttributionController::class,
 		TaxesController::class,
 	);
 
@@ -32,12 +29,6 @@ class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider 
 	 */
 	public function register() {
 		$this->share( CouponsController::class );
-		$this->share_with_implements_tags( SourceAttributionController::class )->addArguments(
-			array(
-				LegacyProxy::class,
-				FeaturesController::class,
-			)
-		);
 		$this->share( TaxesController::class );
 	}
 }
