@@ -1,17 +1,16 @@
 /**
  * External dependencies
  */
-
 import { Page } from '@playwright/test';
-
-/**
- * Internal dependencies
- */
+import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 export class FrontendUtils {
 	page: Page;
-	constructor( page: Page ) {
+	requestUtils: RequestUtils;
+
+	constructor( page: Page, requestUtils: RequestUtils ) {
 		this.page = page;
+		this.requestUtils = requestUtils;
 	}
 
 	async getBlockByName( name: string ) {
@@ -32,10 +31,16 @@ export class FrontendUtils {
 			await this.page
 				.getByLabel( `Add “${ itemName }” to your cart` )
 				.click();
-			await this.page.waitForResponse( /add_to_cart/ );
+			await this.page.waitForResponse( /add_to_cart|batch/ );
 			return;
 		}
 		await this.page.click( 'text=Add to cart' );
+	}
+
+	async goToCheckout() {
+		await this.page.goto( '/checkout', {
+			waitUntil: 'commit',
+		} );
 	}
 
 	async goToShop() {
@@ -44,10 +49,23 @@ export class FrontendUtils {
 		} );
 	}
 
-	async goToCheckout() {
-		await this.page.goto( '/checkout', {
-			waitUntil: 'commit',
-		} );
+	async emptyCart() {
+		const cartResponse = await this.requestUtils.request.get(
+			'/wp-json/wc/store/cart'
+		);
+		const nonce = cartResponse.headers()?.nonce;
+		if ( ! nonce ) {
+			throw new Error( 'Could not get cart nonce.' );
+		}
+		const res = await this.requestUtils.request.delete(
+			'/wp-json/wc/store/v1/cart/items',
+			{ headers: { nonce } }
+		);
+		if ( ! res.ok() ) {
+			throw new Error(
+				`Got an error response when trying to empty cart. Status code: ${ res.status() }`
+			);
+		}
 	}
 
 	async isBlockEarlierThan< T >(
