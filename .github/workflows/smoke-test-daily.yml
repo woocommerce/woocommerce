@@ -41,38 +41,24 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run 'Update WooCommerce' test.
-              working-directory: plugins/woocommerce
+            - name: Update site to nightly version
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: ${{ env.API_ARTIFACT }}
+                  tests: update-woocommerce.spec.js
               env:
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   UPDATE_WC: nightly
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
 
-            - name: Run API tests.
-              working-directory: plugins/woocommerce
+            - name: Run API tests
+              id: run-api-composite-action
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  report-name: ${{ env.API_ARTIFACT }}
+                  tests: hello.test.js # mytodo: remove
               env:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
-
-            - name: Generate API Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive API test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.API_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
 
     e2e-tests:
         name: E2E tests on nightly build
