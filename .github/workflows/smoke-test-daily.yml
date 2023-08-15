@@ -8,6 +8,7 @@ env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
     FORCE_COLOR: 1
+    PLUGIN_SLACK_BLOCKS_ARTIFACT: plugin-blocks
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -167,17 +168,23 @@ jobs:
                 include:
                     - plugin: 'WooCommerce Payments'
                       repo: 'automattic/woocommerce-payments'
+                      slug: woocommerce-payments
                     - plugin: 'WooCommerce PayPal Payments'
                       repo: 'woocommerce/woocommerce-paypal-payments'
+                      slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
+                      slug: woocommerce-services
                     - plugin: 'WooCommerce Subscriptions'
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
+                      slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
+                      slug: gutenberg
                     - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
+                      slug: gutenberg-nightly
         steps:
             - uses: actions/checkout@v3
 
@@ -213,21 +220,24 @@ jobs:
               env:
                   E2E_MAX_FAILURES: 15
 
-            - name: Generate E2E Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+            - name: Create context block and save as JSON file
+              id: create-block-json
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
+                      script( { core } );
+              env:
+                  UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
+                  E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  PLUGIN_SLUG: ${{ matrix.slug }}
 
-            - name: Archive E2E test report
-              if: success() || failure()
+            - name: Upload JSON file as artifact
               uses: actions/upload-artifact@v3
               with:
-                  name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  name: ${{ matrix.plugin }}
+                  path: ${{ steps.create-block-json.outputs.path }}
 
     trunk-results:
         name: Publish report on smoke tests on nightly build
