@@ -90,6 +90,8 @@ export interface renderItemArgs extends ItemProps {
 	 * If not provided, a default name will be generated using the controlId.
 	 */
 	name?: string;
+	// Aria label for the input. If not provided, a default label will be generated using the item name.
+	ariaLabel?: string;
 }
 
 export interface SearchListControlProps {
@@ -110,7 +112,7 @@ export interface SearchListControlProps {
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
 	onChange: ( search: SearchListItem[] ) => void;
 	// Callback fired when the search field is used.
-	onSearch?: ( search: string ) => void;
+	onSearch?: ( ( search: string ) => void ) | undefined;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
 	renderItem?: ( args: renderItemArgs ) => JSX.Element;
 	// The list of currently selected items.

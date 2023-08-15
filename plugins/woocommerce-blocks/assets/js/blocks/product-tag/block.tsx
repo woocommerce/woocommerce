@@ -85,7 +85,6 @@ const ProductsByTagBlock = ( {
 					) }
 					initialOpen={ ! attributes.tags.length && ! isEditing }
 				>
-					{ /* @ts-expect-error ProductTagControl is yet to be converted to tsx*/ }
 					<ProductTagControl
 						selected={ attributes.tags }
 						onChange={ ( value = [] ) => {
@@ -203,16 +202,21 @@ const ProductsByTagBlock = ( {
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-product-tag__selection">
-					{ /* @ts-expect-error ProductTagControl is yet to be converted to tsx*/ }
 					<ProductTagControl
 						selected={ currentAttributes.tags }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							setChangedAttributes( { tags: ids } );
+							setChangedAttributes( {
+								...changedAttributes,
+								tags: ids,
+							} );
 						} }
 						operator={ currentAttributes.tagOperator }
 						onOperatorChange={ ( value = 'any' ) =>
-							setChangedAttributes( { tagOperator: value } )
+							setChangedAttributes( {
+								...changedAttributes,
+								tagOperator: value,
+							} )
 						}
 					/>
 					<Button isPrimary onClick={ onDone }>
