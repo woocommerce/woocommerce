@@ -231,13 +231,13 @@ jobs:
                   E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   PLUGIN_SLUG: ${{ matrix.slug }}
-
+        
             - name: Upload JSON file as artifact
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ matrix.plugin }}
                   path: ${{ steps.create-block-json.outputs.path }}
-
+        
     trunk-results:
         name: Publish report on smoke tests on nightly build
         if: |
