@@ -48,4 +48,24 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 		} );
 }
 
-export { fetchDiscoverPageData, fetchCategories, ProductGroup };
+// Append UTM parameters to a URL, being aware of existing query parameters
+const appendUTMParams = (
+	url: string,
+	utmParams: Array< [ string, string ] >
+): string => {
+	const urlObject = new URL( url );
+	if ( ! urlObject ) {
+		return url;
+	}
+	utmParams.forEach( ( [ key, value ] ) => {
+		urlObject.searchParams.set( key, value );
+	} );
+	return urlObject.toString();
+};
+
+export {
+	fetchDiscoverPageData,
+	fetchCategories,
+	ProductGroup,
+	appendUTMParams,
+};
