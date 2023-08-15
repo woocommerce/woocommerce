@@ -92,9 +92,7 @@ function ScaledBlockPreview( {
 						let siteTitles;
 						const onClickNavigation = ( event ) => {
 							event.preventDefault();
-							if ( event.target.href ) {
-								onClickNavigationItem( event );
-							}
+							onClickNavigationItem( event );
 						};
 
 						const possiblyRemoveAllListeners = () => {

@@ -9,7 +9,7 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 import { InterfaceSkeleton } from '@wordpress/interface';
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 import CanvasSpinner from '@wordpress/edit-site/build-module/components/canvas-spinner';
-import { unlock } from '@wordpress/edit-site/build-module/private-apis';
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { BlockContextProvider } from '@wordpress/block-editor';
@@ -23,24 +23,24 @@ export const Editor = ( { blocks, isLoading } ) => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const { context, hasPageContentLock } = useSelect( ( select ) => {
+	const { context, hasPageContentFocus } = useSelect( ( select ) => {
 		const {
 			getEditedPostContext,
-			hasPageContentLock: _hasPageContentLock,
+			hasPageContentFocus: _hasPageContentFocus,
 		} = unlock( select( editSiteStore ) );
 
 		// The currently selected entity to display.
 		// Typically template or template part in the site editor.
 		return {
 			context: getEditedPostContext(),
-			hasPageContentLock: _hasPageContentLock,
+			hasPageContentFocus: _hasPageContentFocus,
 		};
 	}, [] );
 	const { setEditedPostContext } = useDispatch( editSiteStore );
 	const blockContext = useMemo( () => {
 		const { postType, postId, ...nonPostFields } = context ?? {};
 		return {
-			...( hasPageContentLock ? context : nonPostFields ),
+			...( hasPageContentFocus ? context : nonPostFields ),
 			queryContext: [
 				context?.queryContext || { page: 1 },
 				( newQueryContext ) =>
@@ -53,7 +53,7 @@ export const Editor = ( { blocks, isLoading } ) => {
 					} ),
 			],
 		};
-	}, [ context, hasPageContentLock, setEditedPostContext ] );
+	}, [ hasPageContentFocus, context, setEditedPostContext ] );
 
 	return (
 		<>

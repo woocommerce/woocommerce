@@ -6,8 +6,8 @@
 import { useEffect } from '@wordpress/element';
 import { GlobalStylesProvider } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { unlock } from '@wordpress/edit-site/build-module/private-apis';
-import { dispatch } from '@wordpress/data';
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { dispatch, useDispatch } from '@wordpress/data';
 import {
 	registerCoreBlocks,
 	__experimentalGetCoreBlocks,
@@ -31,6 +31,8 @@ import './style.scss';
 import { Layout } from './layout';
 
 const StoreCustomize = () => {
+	const { setCanvasMode } = unlock( useDispatch( editSiteStore ) );
+
 	useEffect( () => {
 		if ( ! window.blockSettings ) {
 			// eslint-disable-next-line no-console
@@ -59,9 +61,12 @@ const StoreCustomize = () => {
 			editorMode: 'visual',
 			fixedToolbar: false,
 			focusMode: false,
+			distractionFree: false,
 			keepCaretInsideBlock: false,
-			welcomeGuide: true,
-			welcomeGuideStyles: true,
+			welcomeGuide: false,
+			welcomeGuideStyles: false,
+			welcomeGuidePage: false,
+			welcomeGuideTemplate: false,
 			showListViewByDefault: false,
 			showBlockBreadcrumbs: true,
 		} );
@@ -79,7 +84,9 @@ const StoreCustomize = () => {
 			false
 		);
 		window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
-	}, [] );
+
+		setCanvasMode( 'view' );
+	}, [ setCanvasMode ] );
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );

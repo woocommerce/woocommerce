@@ -5,14 +5,14 @@
  */
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
+import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { unlock } from '@wordpress/edit-site/build-module/private-apis';
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
  */
-import { BlockPreview } from './block-preview';
+import BlockPreview from './block-preview';
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 const useSettings = ( { templateType } ) => {
@@ -83,6 +83,10 @@ const useSettings = ( { templateType } ) => {
 	return settings;
 };
 
+// We only show the edit option when page count is <= MAX_PAGE_COUNT
+// Performance of Navigation Links is not good past this value.
+const MAX_PAGE_COUNT = 100;
+
 export default function BlockEditor( { blocks, template } ) {
 	const history = useHistory();
 	const location = useLocation();
@@ -90,21 +94,29 @@ export default function BlockEditor( { blocks, template } ) {
 		templateType: template?.type,
 	} );
 
+	// // See packages/block-library/src/page-list/edit.js.
+	const { records: pages } = useEntityRecords( 'postType', 'page', {
+		per_page: MAX_PAGE_COUNT,
+		_fields: [ 'id', 'link', 'menu_order', 'parent', 'title', 'type' ],
+		// TODO: When https://core.trac.wordpress.org/ticket/39037 REST API support for multiple orderby
+		// values is resolved, update 'orderby' to [ 'menu_order', 'post_title' ] to provide a consistent
+		// sort.
+		orderby: 'menu_order',
+		order: 'asc',
+	} );
+
 	const onClickNavigationItem = ( event ) => {
-		if ( ! event.target.href ) {
-			return;
-		}
-
-		if ( event.target.href.includes( 'page_id' ) ) {
-			// Navigate to a page
-			const urlParams = new URLSearchParams(
-				new URL( event.target.href ).search
+		const clickedPage =
+			pages.find( ( page ) => page.link === event.target.href ) ||
+			// Fallback to page title if the link is not found. This is needed for a bug in the block library
+			// See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817
+			pages.find(
+				( page ) => page.title.rendered === event.target.innerText
 			);
-			const pageId = urlParams.get( 'page_id' );
-
+		if ( clickedPage ) {
 			history.push( {
 				...location.params,
-				postId: pageId,
+				postId: clickedPage.id,
 				postType: 'page',
 			} );
 		} else {
@@ -128,11 +140,10 @@ export default function BlockEditor( { blocks, template } ) {
 				.editor-styles-wrapper{ padding-bottom: var(--wp--style--root--padding-bottom) };
 			`;
 		}
-
 		return (
 			<BlockPreview
 				key={ block.clientId }
-				blocks={ [ block ] }
+				blocks={ block }
 				settings={ settings }
 				additionalStyles={ additionalStyles }
 				onClickNavigationItem={ onClickNavigationItem }
