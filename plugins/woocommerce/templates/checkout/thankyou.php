@@ -13,11 +13,11 @@
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 8.1.0
+ *
+ * @var WC_Order $order
  */
 
 defined( 'ABSPATH' ) || exit;
-
-/** @var WC_Order $order */
 ?>
 
 <div class="woocommerce-order">

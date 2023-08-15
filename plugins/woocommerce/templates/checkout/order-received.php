@@ -13,17 +13,19 @@
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 8.1.0
+ *
+ * @var WC_Order|false $order
  */
 
 defined( 'ABSPATH' ) || exit;
-
-/** @var WC_Order|false $order */
 ?>
 
 <p class="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-received">
 	<?php
 	/**
 	 * Filter the message shown after a checkout is complete.
+	 *
+	 * @since 2.2.0
 	 *
 	 * @param string         $message The message.
 	 * @param WC_Order|false $order   The order created during checkout, or false if order data is not available.
