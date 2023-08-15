@@ -66,7 +66,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 ## After Deploy
 
--   [ ] Port to `trunk` the changes to the changelog, testing steps and required versions that you did in the previous steps. You can do so copy-and-pasting the changes in a new commit directly to `trunk`, or cherry-picking the commits that introduced those changes.
+-   [ ] Move the changes to the changelog, testing steps and required versions that you did in the previous steps to `trunk`. You can do so copy-and-pasting the changes in a new commit directly to `trunk`, or cherry-picking the commits that introduced those changes.
 -   [ ] Update the schedules p2 with the shipped date for the release (PdToLP-K-p2).
 -   [ ] Edit the GitHub milestone of the release you just shipped and add the current date as the due date (this is used to track ship date as well).
 
