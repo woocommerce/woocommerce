@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -21,6 +22,7 @@ use WP_User;
  */
 class SourceAttributionController implements RegisterHooksInterface {
 
+	use ScriptDebug;
 	use SourceAttributionMeta;
 
 	/**
@@ -144,10 +146,9 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * Scripts & styles for custom source tracking and cart tracking.
 	 */
 	private function enqueue_scripts_and_styles() {
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script(
 			'sourcebuster-js',
-			plugins_url( "assets/js/frontend/sourcebuster{$suffix}.js", WC_PLUGIN_FILE ),
+			plugins_url( "assets/js/frontend/sourcebuster{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC_VERSION,
 			true
@@ -155,7 +156,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 
 		wp_enqueue_script(
 			'woocommerce-order-source-attribution-js',
-			plugins_url( "assets/js/frontend/order-source-attribution{$suffix}.js", WC_PLUGIN_FILE ),
+			plugins_url( "assets/js/frontend/order-source-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery', 'sourcebuster-js' ),
 			WC_VERSION,
 			true
@@ -186,12 +187,10 @@ class SourceAttributionController implements RegisterHooksInterface {
 			return;
 		}
 
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			'woocommerce-order-source-attribution-admin-js',
-			plugins_url( "assets/js/admin/order-source-attribution-admin{$suffix}.js", WC_PLUGIN_FILE ),
+			plugins_url( "assets/js/admin/order-source-attribution-admin{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC_VERSION
 		);
