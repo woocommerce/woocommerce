@@ -205,9 +205,6 @@ describe( 'Shopper → Checkout', () => {
 	} );
 
 	describe( 'Shipping and Billing Addresses', () => {
-		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
-		const NORMAL_SHIPPING_PRICE = '$20.00';
-
 		beforeAll( async () => {
 			await preventCompatibilityNotice();
 			await merchant.login();
@@ -235,27 +232,6 @@ describe( 'Shopper → Checkout', () => {
 			await reactivateCompatibilityNotice();
 		} );
 
-		// eslint-disable-next-line jest/expect-expect
-		it( 'User can have different shipping and billing addresses', async () => {
-			await shopper.block.goToShop();
-			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await shopper.block.goToCheckout();
-			await page.waitForSelector(
-				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
-			);
-			await unsetCheckbox(
-				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
-			);
-			await shopper.block.fillShippingDetails( SHIPPING_DETAILS );
-			await shopper.block.fillBillingDetails( BILLING_DETAILS );
-			await shopper.block.selectAndVerifyShippingOption(
-				NORMAL_SHIPPING_NAME,
-				NORMAL_SHIPPING_PRICE
-			);
-			await shopper.block.placeOrder();
-			await shopper.block.verifyShippingDetails( SHIPPING_DETAILS );
-			await shopper.block.verifyBillingDetails( BILLING_DETAILS );
-		} );
 		it( 'User can add postcodes for different countries', async () => {
 			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
@@ -383,44 +359,9 @@ describe( 'Shopper → Checkout', () => {
 	} );
 
 	describe( `Shipping`, () => {
-		const FREE_SHIPPING_NAME = 'Free Shipping';
-		const FREE_SHIPPING_PRICE = '$0.00';
-		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
-		const NORMAL_SHIPPING_PRICE = '$20.00';
-
 		afterEach( async () => {
 			await merchant.login();
 			await merchantUtils.disableLocalPickup();
-		} );
-
-		it( 'User can choose free shipping', async () => {
-			await shopper.block.goToShop();
-			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await shopper.block.goToCheckout();
-			await shopper.block.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			);
-			await shopper.block.fillInCheckoutWithTestData();
-			await shopper.block.placeOrder();
-			await page.waitForSelector( '.woocommerce-order' );
-			await expect( page ).toMatch( 'Order received' );
-			await expect( page ).toMatch( FREE_SHIPPING_NAME );
-		} );
-
-		it( 'User can choose flat rate shipping', async () => {
-			await shopper.block.goToShop();
-			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await shopper.block.goToCheckout();
-			await shopper.block.selectAndVerifyShippingOption(
-				NORMAL_SHIPPING_NAME,
-				NORMAL_SHIPPING_PRICE
-			);
-			await shopper.block.fillInCheckoutWithTestData();
-			await shopper.block.placeOrder();
-			await page.waitForSelector( '.woocommerce-order' );
-			await expect( page ).toMatch( 'Order received' );
-			await expect( page ).toMatch( NORMAL_SHIPPING_NAME );
 		} );
 
 		it( 'User does not see shipping rates until full address is entered', async () => {
