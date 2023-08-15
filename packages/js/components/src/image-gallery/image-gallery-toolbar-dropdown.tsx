@@ -82,8 +82,13 @@ export function ImageGalleryToolbarDropdown( {
 						: Children.map(
 								children,
 								( child ) =>
-									isValidElement( child ) &&
-									cloneElement( child, { onClose } )
+									isValidElement< { onClose: () => void } >(
+										child
+									) &&
+									cloneElement< { onClose: () => void } >(
+										child,
+										{ onClose }
+									)
 						  ) }
 					{ canRemove && (
 						<MenuGroup>

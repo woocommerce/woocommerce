@@ -129,7 +129,12 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarItem>
-							{ ( toggleProps ) => (
+							{ ( toggleProps: {
+								'data-toolbar-item': boolean;
+								ref: React.ForwardedRef<
+									typeof ImageGalleryToolbarDropdown
+								>;
+							} ) => (
 								<ImageGalleryToolbarDropdown
 									canRemove={ true }
 									onRemove={ () => removeItem( childIndex ) }
