@@ -112,23 +112,22 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
             - name: Update performance test site with E2E test
-              working-directory: plugins/woocommerce
+              id: update-perf-site
+              continue-on-error: true
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: k6-daily-update-site--run-${{ github.run_number }}
+                  tests: update-woocommerce.spec.js
               env:
                   BASE_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  UPDATE_WC: nightly
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-              run: |
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-              continue-on-error: true
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  UPDATE_WC: nightly
 
             - name: Install k6
               run: |
