@@ -27,7 +27,6 @@ enum SuggestionsState {
 	Initial,
 	Fetching,
 	Failed,
-	NoMatch, // No matching categories found for the suggestions
 	Complete,
 	None,
 }
@@ -78,9 +77,7 @@ export const ProductCategorySuggestions = () => {
 				const parsed = parseCategorySuggestions( content );
 				const filtered = filterValidCategorySuggestions( parsed );
 
-				if ( parsed.length > 0 && filtered.length === 0 ) {
-					setSuggestionsState( SuggestionsState.NoMatch );
-				} else if ( parsed.length === 0 ) {
+				if ( filtered.length === 0 ) {
 					setSuggestionsState( SuggestionsState.None );
 				} else {
 					setSuggestionsState( SuggestionsState.Complete );
@@ -165,21 +162,11 @@ export const ProductCategorySuggestions = () => {
 					</p>
 				</div>
 			) }
-			{ suggestionsState === SuggestionsState.NoMatch && (
-				<div className="wc-product-category-suggestions__no-match notice notice-success">
-					<p>
-						{ __(
-							'Your product is already well-categorized according to the properties you provided.',
-							'woocommerce'
-						) }
-					</p>
-				</div>
-			) }
 			{ suggestionsState === SuggestionsState.None && (
-				<div className="wc-product-category-suggestions__no-results notice notice-warning">
+				<div className="wc-product-category-suggestions__no-match notice notice-warning">
 					<p>
 						{ __(
-							'Unable to generate categories: please ensure sufficient product data, such as title, description, tags, and attributes, is provided for optimum results.',
+							'Unable to generate a matching category for the product.',
 							'woocommerce'
 						) }
 					</p>
