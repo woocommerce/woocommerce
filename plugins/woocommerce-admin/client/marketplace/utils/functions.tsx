@@ -6,7 +6,7 @@ import { MARKETPLACE_URL } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
 
 interface ProductGroup {
-	id: number;
+	id: string;
 	title: string;
 	items: Product[];
 	url: string;
