@@ -33,7 +33,7 @@ jobs:
               run: node ./.github/workflows/scripts/collect-eslint-reports.js
 
             - name: Annotate Code Linting Results
-              uses: ataylorme/eslint-annotate-action@v2
+              uses: ataylorme/eslint-annotate-action@a1bf7cb320a18aa53cb848a267ce9b7417221526
 
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
