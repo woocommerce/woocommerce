@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -10,22 +11,67 @@ import { getUrlParameters, getRestPath, parseId } from '../crud/utils';
 import TYPES from './action-types';
 import { IdQuery, IdType, Item } from '../crud/types';
 import { WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
-import type { BatchUpdateRequest, BatchUpdateResponse } from './types';
+import type {
+	BatchUpdateRequest,
+	BatchUpdateResponse,
+	GenerateRequest,
+} from './types';
+import CRUD_ACTIONS from './crud-actions';
+import { ProductAttribute } from '../products/types';
 
 export function generateProductVariationsError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.GENERATE_VARIATIONS_ERROR as const,
 		key,
 		error,
-		errorType: 'GENERATE_VARIATIONS',
+		errorType: CRUD_ACTIONS.GENERATE_VARIATIONS,
 	};
 }
 
-export const generateProductVariations = function* ( idQuery: IdQuery ) {
+export function generateProductVariationsRequest( key: IdType ) {
+	return {
+		type: TYPES.GENERATE_VARIATIONS_REQUEST as const,
+		key,
+	};
+}
+
+export function generateProductVariationsSuccess( key: IdType ) {
+	return {
+		type: TYPES.GENERATE_VARIATIONS_SUCCESS as const,
+		key,
+	};
+}
+
+export const generateProductVariations = function* (
+	idQuery: IdQuery,
+	productData: {
+		type?: string;
+		attributes: ProductAttribute[];
+	},
+	data: GenerateRequest
+) {
 	const urlParameters = getUrlParameters(
 		WC_PRODUCT_VARIATIONS_NAMESPACE,
 		idQuery
 	);
+	const { key } = parseId( idQuery, urlParameters );
+	yield generateProductVariationsRequest( key );
+
+	try {
+		yield controls.dispatch(
+			'core',
+			'saveEntityRecord',
+			'postType',
+			'product',
+			{
+				id: urlParameters[ 0 ],
+				...productData,
+			}
+		);
+	} catch ( error ) {
+		yield generateProductVariationsError( key, error );
+		throw error;
+	}
 
 	try {
 		const result: Item = yield apiFetch( {
@@ -35,12 +81,12 @@ export const generateProductVariations = function* ( idQuery: IdQuery ) {
 				urlParameters
 			),
 			method: 'POST',
+			data,
 		} );
 
+		yield generateProductVariationsSuccess( key );
 		return result;
 	} catch ( error ) {
-		const { key } = parseId( idQuery, urlParameters );
-
 		yield generateProductVariationsError( key, error );
 		throw error;
 	}
@@ -86,3 +132,9 @@ export function* batchUpdateProductVariations(
 		throw error;
 	}
 }
+
+export type Actions = ReturnType<
+	| typeof generateProductVariationsRequest
+	| typeof generateProductVariationsError
+	| typeof generateProductVariationsSuccess
+>;

@@ -38,6 +38,7 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import { findComponentMeta } from '~/utils/xstate/find-component';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -54,7 +55,7 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug } from '~/utils';
+import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -64,7 +65,7 @@ import {
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
-import { findComponentMeta } from './utils/find-component';
+import { ComponentMeta } from './types';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -342,22 +343,27 @@ const redirectToJetpackAuthPage = (
 	window.location.href = event.data.url + '&installed_ext_success=1';
 };
 
-const updateTrackingOption = (
-	_context: CoreProfilerStateMachineContext,
-	event: IntroOptInEvent
+const updateTrackingOption = async (
+	context: CoreProfilerStateMachineContext
 ) => {
-	if (
-		event.payload.optInDataSharing &&
-		typeof window.wcTracks.enable === 'function'
-	) {
-		window.wcTracks.enable( () => {
-			initializeExPlat();
-		} );
-	} else if ( ! event.payload.optInDataSharing ) {
-		window.wcTracks.isEnabled = false;
-	}
+	await new Promise< void >( ( resolve ) => {
+		if (
+			context.optInDataSharing &&
+			typeof window.wcTracks.enable === 'function'
+		) {
+			window.wcTracks.enable( () => {
+				initializeExPlat();
+				resolve(); // resolve the promise only after explat is enabled by the callback
+			} );
+		} else {
+			if ( ! context.optInDataSharing ) {
+				window.wcTracks.isEnabled = false;
+			}
+			resolve();
+		}
+	} );
 
-	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	const trackingValue = context.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
 	} );
@@ -563,7 +569,6 @@ const coreProfilerMachineActions = {
 	...recordTracksActions,
 	handlePlugins,
 	updateQueryStep,
-	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
@@ -591,6 +596,7 @@ const coreProfilerMachineServices = {
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
+	updateTrackingOption,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -725,11 +731,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				introOptIn: {
 					on: {
 						INTRO_COMPLETED: {
-							target: '#userProfile',
-							actions: [
-								'assignOptInDataSharing',
-								'updateTrackingOption',
-							],
+							target: 'postIntroOptIn',
+							actions: [ 'assignOptInDataSharing' ],
 						},
 						INTRO_SKIPPED: {
 							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
@@ -740,33 +743,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: [
-						{
-							type: 'recordTracksStepViewed',
-							step: 'intro_opt_in',
-						},
-						{ type: 'updateQueryStep', step: 'intro-opt-in' },
-					],
-					exit: actions.choose( [
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_COMPLETED',
-							actions: 'recordTracksIntroCompleted',
-						},
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_SKIPPED',
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									step: 'intro_opt_in',
-								},
-							],
-						},
-					] ),
 					meta: {
 						progress: 20,
 						component: IntroOptIn,
+					},
+				},
+				postIntroOptIn: {
+					invoke: {
+						src: 'updateTrackingOption',
+						onDone: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						},
 					},
 				},
 			},
@@ -1450,7 +1438,7 @@ export const CoreProfilerController = ( {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
@@ -1468,19 +1456,7 @@ export const CoreProfilerController = ( {
 			? Object.keys( state.value )[ 0 ]
 			: state.value;
 
-	useEffect( () => {
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-profile-wizard__body' );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		return () => {
-			document.body.classList.remove(
-				'woocommerce-profile-wizard__body'
-			);
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-		};
-	} );
+	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
 
 	return (
 		<>

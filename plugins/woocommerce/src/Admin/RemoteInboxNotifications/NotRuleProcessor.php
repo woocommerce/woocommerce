@@ -11,6 +11,14 @@ defined( 'ABSPATH' ) || exit;
  * Rule processor that negates the rules in the rule's operand.
  */
 class NotRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * The rule evaluator to use.
+	 *
+	 * @var RuleEvaluator
+	 */
+	protected $rule_evaluator;
+
 	/**
 	 * Constructor.
 	 *

@@ -50,6 +50,9 @@
 			"js": "assets/js/*.js"
 		}
 	},
+  "config": {
+    "build_step": "pnpm run build:zip"
+  },
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",

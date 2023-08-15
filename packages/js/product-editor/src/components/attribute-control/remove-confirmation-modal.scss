@@ -1,0 +1,11 @@
+.woocommerce-remove-attribute-modal {
+	max-width: 650px;
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+}

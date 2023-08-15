@@ -60,7 +60,7 @@
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"start": "tsc --project tsconfig.json --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"lint:fix": "eslint src --fix",
