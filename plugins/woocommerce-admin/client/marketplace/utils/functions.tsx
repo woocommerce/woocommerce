@@ -63,4 +63,9 @@ const appendUTMParams = (
 	return urlObject.toString();
 };
 
-export { fetchDiscoverPageData, fetchCategories, ProductGroup, appendUTMParams };
+export {
+	fetchDiscoverPageData,
+	fetchCategories,
+	ProductGroup,
+	appendUTMParams,
+};
