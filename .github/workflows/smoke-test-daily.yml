@@ -180,27 +180,32 @@ jobs:
               with:
                   build-filters: woocommerce
 
-            - name: Launch wp-env e2e environment
-              working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: e2e
 
             - name: Run 'Upload plugin' test
-              working-directory: plugins/woocommerce
+              id: run-upload-plugin-test
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+                  tests: upload-plugin.spec.js
               env:
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: pnpm test:e2e-pw upload-plugin.spec.js
 
             - name: Run the rest of E2E tests
-              working-directory: plugins/woocommerce
+              id: run-e2e-composite-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  playwright-config: ignore-plugin-tests.playwright.config.js
+                  report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+                  tests: basic.spec.js # mytodo: remove
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm test:e2e-pw
 
             - name: Generate E2E Test report.
               if: success() || failure()
