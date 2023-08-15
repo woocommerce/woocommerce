@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
@@ -31,7 +32,12 @@ class OrdersControllersServiceProvider extends AbstractInterfaceServiceProvider 
 	 */
 	public function register() {
 		$this->share( CouponsController::class );
-		$this->share_with_implements_tags( SourceAttributionController::class )->addArgument( LegacyProxy::class );
+		$this->share_with_implements_tags( SourceAttributionController::class )->addArguments(
+			array(
+				LegacyProxy::class,
+				FeaturesController::class,
+			)
+		);
 		$this->share( TaxesController::class );
 	}
 }
