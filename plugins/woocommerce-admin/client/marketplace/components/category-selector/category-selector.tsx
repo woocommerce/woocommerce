@@ -50,23 +50,17 @@ export default function CategorySelector(): JSX.Element {
 
 		fetchCategories()
 			.then( ( categoriesFromAPI: CategoryAPIItem[] ) => {
-				const categories: Category[] = categoriesFromAPI.map(
-					( categoryAPIItem: CategoryAPIItem ): Category => {
+				const categories: Category[] = categoriesFromAPI
+					.map( ( categoryAPIItem: CategoryAPIItem ): Category => {
 						return {
 							...categoryAPIItem,
 							selected: false,
 						};
-					}
-				);
-
-				// Put the "All" category to the beginning
-				categories.sort( ( a ) => {
-					if ( a.slug === ALL_CATEGORIES_SLUG ) {
-						return -1;
-					}
-
-					return 1;
-				} );
+					} )
+					.filter( ( category: Category ): boolean => {
+						// The "featured" category is returned from the API for legacy reasons, but we don't need it:
+						return category.slug !== '_featured';
+					} );
 
 				// Split array into two from 7th item
 				const visibleCategoryItems = categories.slice( 0, 7 );
