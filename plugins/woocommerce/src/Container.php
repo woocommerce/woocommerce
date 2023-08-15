@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderM
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ObjectCacheServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersDataStoreServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OptionSanitizerServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderSourceAttributionServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
@@ -64,6 +65,7 @@ final class Container {
 		UtilsClassesServiceProvider::class,
 		COTMigrationServiceProvider::class,
 		OrdersControllersServiceProvider::class,
+		OrderSourceAttributionServiceProvider::class,
 		ObjectCacheServiceProvider::class,
 		BatchProcessingServiceProvider::class,
 		OrderMetaBoxServiceProvider::class,
