@@ -53,6 +53,24 @@ trait SourceAttributionMeta {
 	private $field_prefix = '';
 
 	/**
+	 * Set the meta fields and the field prefix.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	private function set_fields_and_prefix() {
+		/**
+		 * Filter the fields to show in the source data metabox.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string[] $fields The fields to show.
+		 */
+		$this->fields = (array) apply_filters( 'wc_order_source_attribution_tracking_fields', $this->default_fields );
+		$this->set_field_prefix();
+	}
+
+	/**
 	 * Set the meta prefix for our fields.
 	 *
 	 * @since x.x.x
