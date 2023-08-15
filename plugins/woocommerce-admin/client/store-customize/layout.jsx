@@ -99,12 +99,22 @@ export const Layout = () => {
 			},
 		} );
 	}, [] );
+
 	const renderedBlocks = useMemo( () => {
 		if ( selectedHeader ) {
 			return [ selectedHeader, ...blocks.slice( 1 ) ];
 		}
 		return blocks;
 	}, [ blocks, selectedHeader ] );
+
+	const onRemoveBlock = useCallback(
+		( clientId ) => {
+			setBlocks( ( _blocks ) =>
+				_blocks.filter( ( block ) => block.clientId !== clientId )
+			);
+		},
+		[ setBlocks ]
+	);
 
 	// For debugging purposes
 	window.blocks = blocks;
@@ -200,6 +210,7 @@ export const Layout = () => {
 									>
 										<Editor
 											blocks={ renderedBlocks }
+											onRemoveBlock={ onRemoveBlock }
 											isLoading={ isEditorLoading }
 										/>
 									</ResizableFrame>

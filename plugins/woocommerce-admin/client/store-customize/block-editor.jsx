@@ -3,16 +3,19 @@
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
+
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 const useSettings = ( { templateType } ) => {
@@ -87,7 +90,7 @@ const useSettings = ( { templateType } ) => {
 // Performance of Navigation Links is not good past this value.
 const MAX_PAGE_COUNT = 100;
 
-export default function BlockEditor( { blocks, template } ) {
+export default function BlockEditor( { blocks, template, onRemoveBlock } ) {
 	const history = useHistory();
 	const location = useLocation();
 	const settings = useSettings( {
@@ -131,23 +134,53 @@ export default function BlockEditor( { blocks, template } ) {
 	return blocks.map( ( block, index ) => {
 		// Add padding to the top and bottom of the block preview.
 		let additionalStyles = '';
-		if ( index === 0 ) {
-			additionalStyles = `
+		let hasActionBar = false;
+		switch ( true ) {
+			case index === 0:
+				// header
+				additionalStyles = `
 				.editor-styles-wrapper{ padding-top: var(--wp--style--root--padding-top) };'
 			`;
-		} else if ( index === blocks.length - 1 ) {
-			additionalStyles = `
+				break;
+
+			case index === blocks.length - 1:
+				// footer
+				additionalStyles = `
 				.editor-styles-wrapper{ padding-bottom: var(--wp--style--root--padding-bottom) };
 			`;
+				break;
+			default:
+				hasActionBar = true;
 		}
+
 		return (
-			<BlockPreview
+			<div
 				key={ block.clientId }
-				blocks={ block }
-				settings={ settings }
-				additionalStyles={ additionalStyles }
-				onClickNavigationItem={ onClickNavigationItem }
-			/>
+				className={ classNames( 'woocommerce-block-preview-container', {
+					'has-action-menu': hasActionBar,
+				} ) }
+			>
+				<BlockPreview
+					blocks={ block }
+					settings={ settings }
+					additionalStyles={ additionalStyles }
+					onClickNavigationItem={ onClickNavigationItem }
+				/>
+				{ hasActionBar && (
+					<div className="woocommerce-block-preview-container__action-bar">
+						<Button
+							className="pattern-action-bar__block pattern-action-bar__action"
+							role="menuitem"
+							variant="secondary"
+							onClick={ () => {
+								onRemoveBlock( block.clientId );
+							} }
+						>
+							{ __( 'Remove', 'woocommerce' ) }
+						</Button>
+					</div>
+				) }
+			</div>
 		);
 	} );
 }

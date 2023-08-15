@@ -19,7 +19,7 @@ import { BlockContextProvider } from '@wordpress/block-editor';
  */
 import BlockEditor from './block-editor';
 
-export const Editor = ( { blocks, isLoading } ) => {
+export const Editor = ( { blocks, isLoading, onRemoveBlock } ) => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
@@ -79,6 +79,7 @@ export const Editor = ( { blocks, isLoading } ) => {
 									<GlobalStylesRenderer />
 									<BlockEditor
 										blocks={ blocks }
+										onRemoveBlock={ onRemoveBlock }
 										template={ template }
 									/>
 								</>

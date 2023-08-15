@@ -10,3 +10,24 @@
 .woocommerce-store-customize__block-pattern-list {
 	padding: 24px 16px;
 }
+
+.woocommerce-block-preview-container.has-action-menu {
+	position: relative;
+
+	&:hover {
+		border: 1.5px solid #3858e9;
+
+		.woocommerce-block-preview-container__action-bar {
+			visibility: visible;
+		}
+	}
+
+	.woocommerce-block-preview-container__action-bar {
+		visibility: hidden;
+		position: absolute;
+		top: 0;
+		left: 0;
+		padding: 20px;
+	}
+}
+
