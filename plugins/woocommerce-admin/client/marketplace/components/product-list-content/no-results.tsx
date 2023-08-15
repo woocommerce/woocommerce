@@ -87,7 +87,7 @@ export default function NoResults(): JSX.Element {
 				<img
 					className="woocommerce-marketplace__no-results__icon"
 					src={ NoResultsIcon }
-					alt="No results."
+					alt={ __( 'No results.', 'woocommerce' ) }
 				/>
 				<div className="woocommerce-marketplace__no-results__description">
 					<p className="woocommerce-marketplace__no-results__description--bold">
