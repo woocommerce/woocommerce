@@ -24,7 +24,7 @@ module.exports = {
 	],
 
 	typescript: {
-		reactDocgen: 'react-docgen-typescript',
+		reactDocgen: 'react-docgen-typescript-plugin',
 	},
 
 	staticDirs: [
