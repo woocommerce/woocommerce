@@ -1,8 +1,9 @@
 /**
  * Internal dependencies
  */
-import { Product } from '../components/product-list-content/product-list-content';
+import { Product } from '../components/product-list/types';
 import { MARKETPLACE_URL } from '../components/constants';
+import { CategoryAPIItem } from '../components/category-selector/types';
 
 interface ProductGroup {
 	id: number;
@@ -30,4 +31,21 @@ const fetchDiscoverPageData = async (): Promise< Array< ProductGroup > > => {
 		} );
 };
 
-export { fetchDiscoverPageData, ProductGroup };
+function fetchCategories(): Promise< CategoryAPIItem[] > {
+	return fetch( MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/categories' )
+		.then( ( response ) => {
+			if ( ! response.ok ) {
+				throw new Error( response.statusText );
+			}
+
+			return response.json();
+		} )
+		.then( ( json ) => {
+			return json;
+		} )
+		.catch( () => {
+			return [];
+		} );
+}
+
+export { fetchDiscoverPageData, fetchCategories, ProductGroup };

@@ -8,7 +8,7 @@ import { Button, Card } from '@wordpress/components';
  * Internal dependencies
  */
 import './product-card.scss';
-import { Product } from '../product-list-content/product-list-content';
+import { Product } from '../product-list/types';
 import { getAdminSetting } from '../../../../client/utils/admin-settings';
 
 export interface ProductCardProps {

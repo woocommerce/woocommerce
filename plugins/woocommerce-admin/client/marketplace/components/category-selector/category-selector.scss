@@ -3,6 +3,7 @@
 .woocommerce-marketplace__category-selector {
 	display: flex;
 	align-items: stretch;
+	margin: $grid-unit-20 0 0 0;
 }
 
 .woocommerce-marketplace__category-item {
@@ -29,6 +30,7 @@
 	&--selected {
 		color: $white;
 		background-color: $gray-900;
+		fill: $white;
 	}
 }
 
@@ -106,4 +108,19 @@
 	padding: 6px $grid-unit-10;
 	line-height: 20px;
 	width: 100%;
+
+	&--selected {
+		color: $white;
+		background-color: $gray-900;
+	}
+}
+
+.woocommerce-marketplace__category-selector-loading {
+	display: flex;
+	margin-top: $grid-unit-20;
+
+	p {
+		margin: 0;
+		line-height: $grid-unit-30;
+	}
 }

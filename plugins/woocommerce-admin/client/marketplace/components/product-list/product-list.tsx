@@ -1,14 +1,9 @@
 /**
- * External dependencies
- */
-
-/**
  * Internal dependencies
  */
-import ProductListContent, {
-	Product,
-} from '../product-list-content/product-list-content';
+import ProductListContent from '../product-list-content/product-list-content';
 import ProductListHeader from '../product-list-header/product-list-header';
+import { Product } from './types';
 
 interface ProductListProps {
 	title: string;

@@ -6,14 +6,5 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 40px;
-		padding: 0 $content-spacing-small;
-	}
-}
-
-@media screen and (min-width: $breakpoint-medium) {
-	.woocommerce-marketplace {
-		&__discover {
-			padding: 0 $content-spacing-large;
-		}
 	}
 }

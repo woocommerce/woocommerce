@@ -2,30 +2,12 @@
  * Internal dependencies
  */
 import './product-list-content.scss';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @woocommerce/dependency-group
 import ProductCard from '../product-card/product-card';
+import { Product } from '../product-list/types';
 
-export interface Product {
-	id?: number;
-	title: string;
-	description: string;
-	vendorName: string;
-	vendorUrl: string;
-	icon: string;
-	url: string;
-	price: string | number;
-	productType?: string;
-	averageRating?: number | null;
-	reviewsCount?: number | null;
-	currency?: string;
-}
-interface ProductListContentProps {
+export default function ProductListContent( props: {
 	products: Product[];
-}
-
-export default function ProductListContent(
-	props: ProductListContentProps
-): JSX.Element {
+} ): JSX.Element {
 	const { products } = props;
 	return (
 		<div className="woocommerce-marketplace__product-list-content">

@@ -3,60 +3,40 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import './search.scss';
-import { MARKETPLACE_URL } from '../constants';
 
 const searchPlaceholder = __( 'Search extensions and themes', 'woocommerce' );
-
-const marketplaceAPI = MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/search';
-
-export interface SearchProps {
-	locale?: string | 'en_US';
-	country?: string | undefined;
-}
 
 /**
  * Search component.
  *
- * @param {SearchProps} props - Search props: locale and country.
  * @return {JSX.Element} Search component.
  */
-function Search( props: SearchProps ): JSX.Element {
-	const locale = props.locale ?? 'en_US';
-	const country = props.country ?? '';
+function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 
-	const build_parameter_string = (
-		query_string: string,
-		query_country: string,
-		query_locale: string
-	): string => {
-		const params = new URLSearchParams();
-		params.append( 'term', query_string );
-		params.append( 'country', query_country );
-		params.append( 'locale', query_locale );
-		return params.toString();
-	};
+	const query = useQuery();
+
+	useEffect( () => {
+		if ( query.term ) {
+			setSearchTerm( query.term );
+		}
+	}, [ query.term ] );
 
 	const runSearch = () => {
-		const query = searchTerm.trim();
-		if ( ! query ) {
-			return [];
-		}
+		const term = searchTerm.trim();
 
-		const params = build_parameter_string( query, country, locale );
-		fetch( marketplaceAPI + '?' + params, {
-			method: 'GET',
-		} )
-			.then( ( response ) => response.json() )
-			.then( ( response ) => {
-				return response;
-			} );
+		// When the search term changes, we reset the category on purpose.
+		navigateTo( {
+			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+		} );
+
 		return [];
 	};
 
@@ -70,6 +50,7 @@ function Search( props: SearchProps ): JSX.Element {
 		if ( event.key === 'Enter' ) {
 			runSearch();
 		}
+
 		if ( event.key === 'Escape' ) {
 			setSearchTerm( '' );
 		}
