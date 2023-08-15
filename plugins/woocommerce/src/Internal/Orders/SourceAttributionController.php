@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
@@ -24,6 +25,13 @@ class SourceAttributionController implements RegisterHooksInterface {
 
 	use ScriptDebug;
 	use SourceAttributionMeta;
+
+	/**
+	 * The FeatureController instance.
+	 *
+	 * @var FeaturesController
+	 */
+	private $feature_controller;
 
 	/**
 	 * WooCommerce logger class instance.
@@ -49,9 +57,11 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @param LegacyProxy              $proxy  The legacy proxy.
 	 * @param WC_Logger_Interface|null $logger The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, ?WC_Logger_Interface $logger = null ) {
-		$this->proxy  = $proxy;
-		$this->logger = $logger ?? $proxy->call_function( 'wc_get_logger' );
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
+		$this->proxy              = $proxy;
+		$this->feature_controller = $controller;
+		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
+		$this->set_fields_and_prefix();
 	}
 
 	/**
@@ -61,6 +71,11 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function register() {
+		// Bail if the feature is not enabled.
+		if ( ! $this->feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
+			return;
+		}
+
 		add_action(
 			'wp_enqueue_scripts',
 			function() {
