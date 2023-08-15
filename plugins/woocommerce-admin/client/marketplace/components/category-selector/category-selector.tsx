@@ -132,20 +132,22 @@ export default function CategorySelector(): JSX.Element {
 					</li>
 				) ) }
 				<li className="woocommerce-marketplace__category-item">
-					<CategoryDropdown
-						label={ __( 'More', 'woocommerce' ) }
-						categories={ dropdownItems }
-						buttonClassName={ classNames(
-							'woocommerce-marketplace__category-item-button',
-							{
-								'woocommerce-marketplace__category-item-button--selected':
-									isSelectedInDropdown(),
-							}
-						) }
-						contentClassName="woocommerce-marketplace__category-item-content"
-						arrowIconSize={ 20 }
-						selected={ selected }
-					/>
+					{ dropdownItems.length > 0 && (
+						<CategoryDropdown
+							label={ __( 'More', 'woocommerce' ) }
+							categories={ dropdownItems }
+							buttonClassName={ classNames(
+								'woocommerce-marketplace__category-item-button',
+								{
+									'woocommerce-marketplace__category-item-button--selected':
+										isSelectedInDropdown(),
+								}
+							) }
+							contentClassName="woocommerce-marketplace__category-item-content"
+							arrowIconSize={ 20 }
+							selected={ selected }
+						/>
+					) }
 				</li>
 			</ul>
 
