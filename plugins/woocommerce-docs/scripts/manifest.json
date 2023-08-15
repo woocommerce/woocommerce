@@ -6,9 +6,12 @@
         {
           "post_title": "Local Development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "hash": "7fa2ec20fa654573e07b0d6237a0618ab19999467472a2362fa4ec1955b229f7",
+          "hash": "800191ff979d3367557260c662af59f9a67e07f2c22b5360afe87b04c80bcc56",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "id": "1a3672ea88756c6d00a3b3baa3f7481b361c8a1e"
+          "id": "1a3672ea88756c6d00a3b3baa3f7481b361c8a1e",
+          "links": {
+            "./installation/install-plugin.md": "6c7bb21cb195798a444844fef0ff79aacff86de1"
+          }
         }
       ],
       "categories": [
@@ -31,9 +34,12 @@
             {
               "post_title": "What Went Wrong?",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "hash": "9868a39ccc26aa79f06caed1dc3576878953e6279facf7a66ad6f45fd2cd7d0a",
+              "hash": "3195800696a9f641d075fc12da6c40b3dce66ba423807705c07d14a7f6758094",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "id": "e2f590a5994fada97bdbdcac751e8bc441530868"
+              "id": "e2f590a5994fada97bdbdcac751e8bc441530868",
+              "links": {
+                "../../testing/unit-tests.md": "6f1b9c74de42a10cf4c77c2843e0fbdf1ff46316"
+              }
             }
           ],
           "categories": []
@@ -61,5 +67,5 @@
       "categories": []
     }
   ],
-  "hash": "80feb7e964daa576ce2c4265dc0e0e5d05a0df4fce356cdf63e245e22435e9ba"
+  "hash": "c727b2b8092cae90356d44d2803e5c70688b548b474467c994f55431055fbb69"
 }

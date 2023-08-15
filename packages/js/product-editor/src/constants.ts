@@ -52,3 +52,13 @@ export const PRODUCT_DETAILS_SLUG = 'product-details';
 export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
 export const TRACKS_SOURCE = 'product-block-editor-v1';
+
+/**
+ * Since the pagination component does not exposes the way of
+ * changing the per page options which are [25, 50, 75, 100]
+ * the default per page option will be the min in the list to
+ * keep compatibility.
+ *
+ * @see https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/pagination/index.js#L12
+ */
+export const DEFAULT_PER_PAGE_OPTION = 25;

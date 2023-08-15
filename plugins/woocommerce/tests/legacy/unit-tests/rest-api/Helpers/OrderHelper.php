@@ -157,7 +157,6 @@ class OrderHelper {
 	 * @return void
 	 */
 	public static function toggle_cot_feature_and_usage( bool $enabled ) {
-		global $wpdb;
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
 

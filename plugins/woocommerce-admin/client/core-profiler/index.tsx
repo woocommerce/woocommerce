@@ -316,6 +316,7 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 };
 
 const preFetchGeolocation = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
 			() => getGeolocation( context ),
@@ -343,22 +344,27 @@ const redirectToJetpackAuthPage = (
 	window.location.href = event.data.url + '&installed_ext_success=1';
 };
 
-const updateTrackingOption = (
-	_context: CoreProfilerStateMachineContext,
-	event: IntroOptInEvent
+const updateTrackingOption = async (
+	context: CoreProfilerStateMachineContext
 ) => {
-	if (
-		event.payload.optInDataSharing &&
-		typeof window.wcTracks.enable === 'function'
-	) {
-		window.wcTracks.enable( () => {
-			initializeExPlat();
-		} );
-	} else if ( ! event.payload.optInDataSharing ) {
-		window.wcTracks.isEnabled = false;
-	}
+	await new Promise< void >( ( resolve ) => {
+		if (
+			context.optInDataSharing &&
+			typeof window.wcTracks.enable === 'function'
+		) {
+			window.wcTracks.enable( () => {
+				initializeExPlat();
+				resolve(); // resolve the promise only after explat is enabled by the callback
+			} );
+		} else {
+			if ( ! context.optInDataSharing ) {
+				window.wcTracks.isEnabled = false;
+			}
+			resolve();
+		}
+	} );
 
-	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	const trackingValue = context.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
 	} );
@@ -382,6 +388,7 @@ const updateOnboardingProfileOption = (
 };
 
 const spawnUpdateOnboardingProfileOption = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	spawnUpdateOnboardingProfileOptionRef: (
 		context: CoreProfilerStateMachineContext
 	) =>
@@ -433,6 +440,7 @@ const updateBusinessInfo = async (
 };
 
 const persistBusinessInfo = assign( {
+	// @ts-expect-error -- TODO fix this type issue.
 	persistBusinessInfoRef: (
 		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
@@ -562,7 +570,6 @@ const coreProfilerMachineActions = {
 	...recordTracksActions,
 	handlePlugins,
 	updateQueryStep,
-	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
@@ -590,6 +597,7 @@ const coreProfilerMachineServices = {
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
+	updateTrackingOption,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -724,11 +732,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				introOptIn: {
 					on: {
 						INTRO_COMPLETED: {
-							target: '#userProfile',
-							actions: [
-								'assignOptInDataSharing',
-								'updateTrackingOption',
-							],
+							target: 'postIntroOptIn',
+							actions: [ 'assignOptInDataSharing' ],
 						},
 						INTRO_SKIPPED: {
 							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
@@ -739,33 +744,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: [
-						{
-							type: 'recordTracksStepViewed',
-							step: 'intro_opt_in',
-						},
-						{ type: 'updateQueryStep', step: 'intro-opt-in' },
-					],
-					exit: actions.choose( [
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_COMPLETED',
-							actions: 'recordTracksIntroCompleted',
-						},
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_SKIPPED',
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									step: 'intro_opt_in',
-								},
-							],
-						},
-					] ),
 					meta: {
 						progress: 20,
 						component: IntroOptIn,
+					},
+				},
+				postIntroOptIn: {
+					invoke: {
+						src: 'updateTrackingOption',
+						onDone: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						},
 					},
 				},
 			},

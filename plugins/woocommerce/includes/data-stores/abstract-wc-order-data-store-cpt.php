@@ -706,7 +706,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Abstract_Order $order Order object.
 	 */
-	private function update_order_meta_from_object( $order ) {
+	protected function update_order_meta_from_object( $order ) {
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}
@@ -715,7 +715,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
-				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+				// We don't know if the meta is single or array, so we assume it to be array.
+				$meta_value = is_array( $meta_data->value ) ? $meta_data->value : array( $meta_data->value );
+				if ( $existing_meta_data[ $meta_data->key ] === $meta_value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}

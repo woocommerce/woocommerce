@@ -36,11 +36,35 @@ export type ProductAttribute = {
 	options: string[];
 };
 
+/**
+ * Product - Default attributes properties
+ */
+export type ProductDefaultAttribute = {
+	/**
+	 * Attribute ID.
+	 */
+	id: number;
+	/**
+	 * Attribute name.
+	 */
+	name: string;
+	/**
+	 * Selected attribute term name.
+	 */
+	option: string;
+};
+
 export type ProductDimensions = {
 	width: string;
 	height: string;
 	length: string;
 };
+
+export type ProductCatalogVisibility =
+	| 'visible'
+	| 'catalog'
+	| 'search'
+	| 'hidden';
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
@@ -53,12 +77,14 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	backorders_allowed: boolean;
 	button_text: string;
 	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
+	catalog_visibility: ProductCatalogVisibility;
 	date_created: string;
 	date_created_gmt: string;
 	date_modified: string;
 	date_modified_gmt: string;
 	date_on_sale_from_gmt: string | null;
 	date_on_sale_to_gmt: string | null;
+	default_attributes: ProductDefaultAttribute[];
 	description: string;
 	dimensions: ProductDimensions;
 	download_expiry: number;
