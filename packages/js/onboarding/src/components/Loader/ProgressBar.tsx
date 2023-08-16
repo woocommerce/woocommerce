@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-
 import { createElement, HTMLAttributes } from 'react';
-/**
- * Internal dependencies
- */
 
 type ProgressBarProps = {
+	/** Component classname */
 	className?: string;
+	/** Progress percentage (0 to 100) */
 	percent?: number;
+	/** Color of the progress bar */
 	color?: string;
+	/** Background color of the progress container */
 	bgcolor?: string;
 };
 

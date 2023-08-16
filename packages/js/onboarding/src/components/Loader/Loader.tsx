@@ -10,6 +10,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import type { ReactNode } from 'react';
+
 /**
  * Internal dependencies
  */
