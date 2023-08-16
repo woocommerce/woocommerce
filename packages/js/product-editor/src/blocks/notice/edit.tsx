@@ -20,12 +20,12 @@ import {
 } from '../../utils';
 
 export interface NoticeBlockAttributes extends BlockAttributes {
-	id: string;
-	title: string;
-	content: string;
 	buttonText: string;
-	type: string;
+	content: string;
+	id: string;
 	isSelected?: boolean;
+	title: string;
+	type: 'error' | 'success' | 'warning' | 'info';
 }
 
 export function Edit( {
@@ -38,7 +38,14 @@ export function Edit( {
 	};
 } ) {
 	const blockProps = useBlockProps();
-	const { id, isSelected: contextIsSelected } = attributes;
+	const {
+		buttonText,
+		content,
+		id,
+		isSelected: contextIsSelected,
+		title,
+		type = 'info',
+	} = attributes;
 	const isSelected = context?.selectedTab === id;
 	if ( isSelected !== contextIsSelected ) {
 		setAttributes( { isSelected } );
@@ -57,14 +64,7 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			{ isOptionsNoticeVisible && (
-				<Notice
-					description={ __(
-						"This product has options, such as size or color. You can now manage each variation's price and other details individually.",
-						'woocommerce'
-					) }
-					status="info"
-					className="woocommerce-product-tab__notice"
-				>
+				<Notice content={ content } title={ title } type={ type }>
 					<Button
 						isSecondary={ true }
 						onClick={ () =>
@@ -77,7 +77,7 @@ export function Edit( {
 							} )
 						}
 					>
-						{ __( 'Go to Variations', 'woocommerce' ) }
+						{ buttonText }
 					</Button>
 				</Notice>
 			) }

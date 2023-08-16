@@ -7,33 +7,33 @@ import classNames from 'classnames';
 
 export type NoticeProps = {
 	title?: string;
-	description?: string;
+	content?: string;
 	className?: string;
-	status?: 'error' | 'success' | 'warning' | 'info';
+	type?: 'error' | 'success' | 'warning' | 'info';
 	children?: ReactNode;
 };
 
 export function Notice( {
 	title = '',
-	description = '',
+	content = '',
 	className,
-	status = 'info',
+	type = 'info',
 	children,
 }: NoticeProps ) {
 	return (
 		<div
 			className={ classNames(
 				className,
-				status,
+				type,
 				'woocommerce-product-notice'
 			) }
 		>
 			{ title && (
-				<h2 className="woocommerce-product-notice__title">{ title }</h2>
+				<h3 className="woocommerce-product-notice__title">{ title }</h3>
 			) }
-			{ description && (
-				<p className="woocommerce-product-notice__description">
-					{ description }
+			{ content && (
+				<p className="woocommerce-product-notice__content">
+					{ content }
 				</p>
 			) }
 			<div className="woocommerce-product-notice__content">
