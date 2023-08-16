@@ -52,6 +52,20 @@ npm run env:restart
 npm run test:e2e
 ```
 
+### Tests with side effects
+
+We call tests that affect other tests (ones that modify the site settings, using
+custom plugins) are tests with side effects and we
+[split](https://github.com/woocommerce/woocommerce-blocks/pull/10508) those
+tests to a separate test suite:
+
+```sh
+npm run test:e2e:side-effects
+```
+
+_Note: All commands parameters of `test:e2e` can be used for
+`test:e2e:side-effects`._
+
 ### Other ways of running tests
 
 Headless mode:

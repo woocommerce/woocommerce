@@ -52,15 +52,8 @@ const config: ExtendedPlaywrightTestConfig = {
 			dependencies: [ 'blockThemeConfiguration' ],
 		},
 		{
-			name: 'blockThemeWithGlobalSideEffects',
-			testMatch: /.*.block_theme.side_effects.spec.ts/,
-			dependencies: [ 'blockTheme' ],
-			fullyParallel: false,
-		},
-		{
 			name: 'classicThemeConfiguration',
-			testMatch: /block-theme.setup.ts/,
-			dependencies: [ 'blockThemeWithGlobalSideEffects' ],
+			testMatch: /classic-theme.setup.ts/,
 		},
 		{
 			name: 'classicTheme',

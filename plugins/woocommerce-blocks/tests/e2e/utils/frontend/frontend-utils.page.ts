@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 export class FrontendUtils {
@@ -110,5 +110,15 @@ export class FrontendUtils {
 		}
 
 		return firstBlockIndex < secondBlockIndex;
+	}
+
+	/**
+	 * Playwright selectText causes flaky tests when running on local
+	 * development machine. This method is more reliable on both environments.
+	 */
+	async selectTextInput( locator: Locator ) {
+		await locator.click();
+		await locator.press( 'End' );
+		await locator.press( 'Shift+Home' );
 	}
 }

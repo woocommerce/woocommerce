@@ -8,7 +8,6 @@ import { BASE_URL, cli } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { getMinMaxPriceInputs } from './utils';
 
 const blockData: BlockData< {
 	urlSearchParamWhenFilterIsApplied: string;
@@ -62,19 +61,15 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 
 	test( 'should show only products that match the filter', async ( {
 		page,
-		pageUtils,
 		frontendUtils,
 	} ) => {
-		const priceFilterBlockLocator = await frontendUtils.getBlockByName(
-			'woocommerce/filter-wrapper'
-		);
-		const { maxPriceInput } = await getMinMaxPriceInputs(
-			priceFilterBlockLocator
-		);
+		const maxPriceInput = page.getByRole( 'textbox', {
+			name: 'Filter products by maximum price',
+		} );
 
-		await maxPriceInput.selectText();
-		await maxPriceInput.type( '10' );
-		await pageUtils.pressKeys( 'Tab' );
+		await frontendUtils.selectTextInput( maxPriceInput );
+		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.press( 'Tab' );
 		await page.waitForResponse( ( response ) =>
 			response.url().includes( blockData.endpointAPI )
 		);
@@ -135,6 +130,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
+		legacyTemplate.waitFor();
+
 		const products = await legacyTemplate
 			.getByRole( 'list' )
 			.locator( '.product' )
@@ -146,21 +143,15 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	// eslint-disable-next-line playwright/no-skipped-test
 	test.skip( 'should show only products that match the filter', async ( {
 		page,
-		pageUtils,
 		frontendUtils,
 	} ) => {
-		const priceFilterBlockLocator = await frontendUtils.getBlockByName(
-			'woocommerce/filter-wrapper'
-		);
-		const { maxPriceInput } = await getMinMaxPriceInputs(
-			priceFilterBlockLocator
-		);
-
-		await maxPriceInput.selectText();
-		await maxPriceInput.type( '10' );
-		await pageUtils.pressKeys( 'Tab', {
-			delay: 100,
+		const maxPriceInput = page.getByRole( 'textbox', {
+			name: 'Filter products by maximum price',
 		} );
+
+		await frontendUtils.selectTextInput( maxPriceInput );
+		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.press( 'Tab' );
 		await page.waitForURL( ( url ) =>
 			url
 				.toString()

@@ -81,6 +81,8 @@
 		"test:debug": "ndb .",
 		"test:e2e": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts",
 		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
+		"test:e2e:side-effects": "npm run test:e2e -- --config=tests/e2e/playwright.side-effects.config.ts",
+		"test:e2e:side-effects:report": "npm run test:e2e:report -- --config=tests/e2e/playwright.side-effects.config.ts",
 		"test:e2e:jest": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev-watch": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
