@@ -3,11 +3,14 @@
 	"version": "1.0.0",
 	"icon": "info",
 	"title": "Product Details",
-	"description": "Display a product’s description, attributes, and reviews.",
+	"description": "Display a product's description, attributes, and reviews.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"align": true
+		"align": true,
+		"spacing": {
+			"margin": true
+		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2,
