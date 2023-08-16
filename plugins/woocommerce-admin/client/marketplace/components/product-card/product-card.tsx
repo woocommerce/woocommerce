@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Card } from '@wordpress/components';
+import { Card } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -55,7 +55,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						) }
 						<div className="woocommerce-marketplace__product-card__meta">
 							<h2 className="woocommerce-marketplace__product-card__title">
-								<a className="woocommerce-marketplace__product-card__link" href={ product.url } target="_blank" rel="noopener noreferrer">
+								<a
+									className="woocommerce-marketplace__product-card__link"
+									href={ product.url }
+									target="_blank"
+									rel="noopener noreferrer"
+								>
 									{ product.title }
 								</a>
 							</h2>
