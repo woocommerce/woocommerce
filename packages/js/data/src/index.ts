@@ -99,6 +99,7 @@ export * from './product-shipping-classes/types';
 export {
 	ProductAttributeTerm,
 	ProductAttributeTermsSelectors,
+	ProductAttributeTermsResolveSelectors,
 } from './product-attribute-terms/types';
 export * from './orders/types';
 export {
@@ -179,7 +180,7 @@ import { ShippingZonesSelectors } from './shipping-zones/types';
 import { ProductTagSelectors } from './product-tags/types';
 import { ProductCategorySelectors } from './product-categories/types';
 import { ProductAttributeTermsSelectors } from './product-attribute-terms/types';
-import { ProductVariationSelectors } from './product-variations/types';
+import { ProductVariationSelectors } from './product-variations/selectors';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
 
@@ -240,7 +241,7 @@ export interface WCDataSelector {
 }
 
 // Other exports
-export { OptionsSelectors };
+export { OptionsSelectors, ProductVariationSelectors };
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';

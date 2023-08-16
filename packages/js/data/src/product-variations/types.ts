@@ -84,11 +84,11 @@ type ProductVariationActions = CrudActions<
 	MutableProperties
 >;
 
-export type ProductVariationSelectors = CrudSelectors<
+export type Selectors = CrudSelectors<
 	'ProductVariation',
 	'ProductVariations',
 	ProductVariation,
-	Query,
+	Partial< Query > & { product_id: string | number },
 	MutableProperties
 >;
 

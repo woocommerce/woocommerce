@@ -38,11 +38,9 @@ export function useProductVariationsHelper() {
 				( attr ) => attr.variation
 			);
 
-			return _generateProductVariations< {
-				count: number;
-				deleted_count: number;
-			} >(
+			return _generateProductVariations(
 				{
+					id: '',
 					product_id: productId,
 				},
 				{

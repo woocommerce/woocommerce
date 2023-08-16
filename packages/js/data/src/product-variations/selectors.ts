@@ -4,12 +4,14 @@
 import { ResourceState } from '../crud/reducer';
 import { IdQuery } from '../crud/types';
 import { getRequestIdentifier, getUrlParameters, parseId } from '../crud/utils';
+import { WPDataSelector, WPDataSelectors } from '../types';
 import { WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
 import CRUD_ACTIONS from './crud-actions';
+import { Selectors } from './types';
 
 export const isGeneratingVariations = (
 	state: ResourceState,
-	idQuery: IdQuery
+	idQuery: IdQuery & { product_id: number | string }
 ) => {
 	const urlParameters = getUrlParameters(
 		WC_PRODUCT_VARIATIONS_NAMESPACE,
@@ -22,3 +24,8 @@ export const isGeneratingVariations = (
 	);
 	return state.requesting[ itemQuery ];
 };
+
+export type ProductVariationSelectors = {
+	isGeneratingVariations: WPDataSelector< typeof isGeneratingVariations >;
+} & WPDataSelectors &
+	Selectors;

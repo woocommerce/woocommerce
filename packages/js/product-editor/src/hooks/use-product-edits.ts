@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
+import { Product } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { CoreSelectors } from '../types';
 
 type EntityEdits = {
 	[ key: string ]: unknown;
@@ -26,9 +32,10 @@ export function useProductEdits() {
 
 	const { edits } = useSelect(
 		( select ) => {
-			const { getEntityRecordNonTransientEdits } = select( 'core' );
+			const { getEntityRecordNonTransientEdits }: CoreSelectors =
+				select( 'core' );
 
-			const _edits = getEntityRecordNonTransientEdits(
+			const _edits = getEntityRecordNonTransientEdits< Product >(
 				'postType',
 				'product',
 				productId

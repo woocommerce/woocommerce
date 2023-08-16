@@ -4,6 +4,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import {
+	OptionsSelectors,
 	OPTIONS_STORE_NAME,
 	Product,
 	ProductDimensions,
@@ -58,7 +59,7 @@ export function Edit( {
 	const { formatNumber, parseNumber } = useProductHelper();
 
 	const { dimensionUnit, weightUnit } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption }: OptionsSelectors = select( OPTIONS_STORE_NAME );
 		return {
 			dimensionUnit: getOption( 'woocommerce_dimension_unit' ),
 			weightUnit: getOption( 'woocommerce_weight_unit' ),

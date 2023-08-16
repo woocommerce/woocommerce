@@ -170,7 +170,8 @@ export type ProductQuery<
 		| 'slug'
 		| 'price'
 		| 'popularity'
-		| 'rating';
+		| 'rating'
+		| 'menu_order';
 	slug: string;
 	status: Status;
 	type: Type;

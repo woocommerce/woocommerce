@@ -18,6 +18,7 @@ import { plus } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
+	ProductAttributeTermsResolveSelectors,
 } from '@woocommerce/data';
 import {
 	selectControlStateChangeTypes,
@@ -77,11 +78,16 @@ export const AttributeTermInputField: React.FC<
 
 	const fetchItems = useCallback(
 		( searchString?: string | undefined ) => {
+			if ( ! attributeId ) {
+				return;
+			}
 			setIsFetching( true );
-			return resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			)
-				.getProductAttributeTerms< ProductAttributeTerm[] >( {
+			return (
+				resolveSelect(
+					EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+				) as ProductAttributeTermsResolveSelectors
+			 )
+				.getProductAttributeTerms( {
 					search: searchString || '',
 					attribute_id: attributeId,
 				} )

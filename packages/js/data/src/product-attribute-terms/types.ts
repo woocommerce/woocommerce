@@ -6,7 +6,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
 /**
  * Internal dependencies
  */
-import { CrudActions, CrudSelectors } from '../crud/types';
+import { CrudActions, CrudSelectors, MapResolveSelectors } from '../crud/types';
 
 export type ProductAttributeTerm = {
 	id: number;
@@ -40,7 +40,7 @@ type MutableProperties = Partial<
 
 type ProductAttributeTermActions = CrudActions<
 	'ProductAttributeTerm',
-	ProductAttributeTerm & { attribute_id: string },
+	ProductAttributeTerm & { attribute_id: string | number },
 	MutableProperties,
 	'name'
 >;
@@ -49,8 +49,11 @@ export type ProductAttributeTermsSelectors = CrudSelectors<
 	'ProductAttributeTerm',
 	'ProductAttributeTerms',
 	ProductAttributeTerm,
-	Query,
+	Partial< Query > & { attribute_id: string | number },
 	MutableProperties
 >;
+
+export type ProductAttributeTermsResolveSelectors =
+	MapResolveSelectors< ProductAttributeTermsSelectors >;
 
 export type ActionDispatchers = DispatchFromMap< ProductAttributeTermActions >;

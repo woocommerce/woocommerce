@@ -16,6 +16,7 @@ import { MouseEvent, ReactNode } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { CoreActions, CoreSelectors } from '../../../../types';
 
 export function useSaveDraft( {
 	productStatus,
@@ -36,9 +37,11 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			const { hasEditsForEntityRecord, isSavingEntityRecord } =
-				select( 'core' );
-			const isSaving = isSavingEntityRecord< boolean >(
+			const {
+				hasEditsForEntityRecord,
+				isSavingEntityRecord,
+			}: CoreSelectors = select( 'core' );
+			const isSaving = isSavingEntityRecord(
 				'postType',
 				'product',
 				productId
@@ -46,7 +49,7 @@ export function useSaveDraft( {
 
 			return {
 				isDisabled: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
+				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					'product',
 					productId
@@ -64,7 +67,8 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { editEntityRecord, saveEditedEntityRecord }: CoreActions =
+		useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( ariaDisabled ) {

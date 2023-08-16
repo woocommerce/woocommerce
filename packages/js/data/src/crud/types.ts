@@ -48,7 +48,7 @@ export type CrudActions<
 > = MapActions<
 	{
 		create: ( query: Partial< ItemType > ) => Item;
-		update: ( query: Partial< ItemType > ) => Item;
+		update: ( query: Partial< ItemType >, data: MutableProperties ) => Item;
 	},
 	ResourceName,
 	RequiredFields extends keyof MutableProperties
@@ -127,6 +127,15 @@ export type MapSelectors< Type, ResourceName, ParamType, ReturnType > = {
 	[ Property in keyof Type as `get${ Capitalize<
 		string & ResourceName
 	> }${ Capitalize< string & Property > }` ]: ( x?: ParamType ) => ReturnType;
+};
+
+export type MapResolveSelectors<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	A extends Record< string, ( ...args: any[] ) => any >
+> = {
+	[ actionCreator in keyof A ]: (
+		...args: Parameters< A[ actionCreator ] >
+	) => Promise< ReturnType< A[ actionCreator ] > >;
 };
 
 export type MapActions< Type, ResourceName, ParamType, ReturnType > = {

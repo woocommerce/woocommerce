@@ -10,6 +10,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { preventLeavingProductForm } from '../utils/prevent-leaving-product-form';
 import { useProductEdits } from './use-product-edits';
+import { CoreSelectors } from '../types';
 
 export function useConfirmUnsavedProductChanges() {
 	const [ productId ] = useEntityProp< number >(
@@ -20,10 +21,10 @@ export function useConfirmUnsavedProductChanges() {
 	const { hasEdits } = useProductEdits();
 	const { isSaving } = useSelect(
 		( select ) => {
-			const { isSavingEntityRecord } = select( 'core' );
+			const { isSavingEntityRecord }: CoreSelectors = select( 'core' );
 
 			return {
-				isSaving: isSavingEntityRecord< boolean >(
+				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
 					productId

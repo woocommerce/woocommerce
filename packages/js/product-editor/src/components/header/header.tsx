@@ -31,12 +31,16 @@ export function Header( { onTabSelect }: HeaderProps ) {
 
 	const lastPersistedProduct = useSelect(
 		( select ) => {
-			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord< Product >(
-				'postType',
-				'product',
-				productId
-			);
+			const {
+				getEntityRecord,
+			}: {
+				getEntityRecord: (
+					kind: string,
+					name: string,
+					key: string | number
+				) => Product;
+			} = select( 'core' );
+			return getEntityRecord( 'postType', 'product', productId );
 		},
 		[ productId ]
 	);

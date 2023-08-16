@@ -18,6 +18,7 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 	Product,
+	WPDataSelectors,
 } from '@woocommerce/data';
 import classNames from 'classnames';
 import {
@@ -53,11 +54,15 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect(
 		( select ) =>
-			select( 'core' ).getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			),
+			(
+				select( 'core' ) as WPDataSelectors & {
+					getEditedEntityRecord: (
+						type: string,
+						name: string,
+						id: string | number
+					) => Product;
+				}
+			 ).getEditedEntityRecord( 'postType', 'product', productId ),
 		[]
 	);
 

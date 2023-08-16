@@ -4,7 +4,7 @@
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { ReactElement } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
-import { Product } from '@woocommerce/data';
+import { Product, WPDataSelectors } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -36,12 +36,18 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		'product',
 		'id'
 	);
-	const product: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			productId
-		)
+	const product: Product = useSelect(
+		( select ) =>
+			(
+				select( 'core' ) as WPDataSelectors & {
+					getEditedEntityRecord: (
+						type: string,
+						name: string,
+						id: string | number
+					) => Product;
+				}
+			 ).getEditedEntityRecord( 'postType', 'product', productId ),
+		[]
 	);
 
 	useEffect( () => {

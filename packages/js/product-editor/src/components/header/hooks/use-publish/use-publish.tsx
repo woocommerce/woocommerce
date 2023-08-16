@@ -12,6 +12,7 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
+import { CoreActions, CoreSelectors } from '../../../../types';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { PublishButtonProps } from '../../publish-button';
 
@@ -36,10 +37,10 @@ export function usePublish( {
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			const { isSavingEntityRecord } = select( 'core' );
+			const { isSavingEntityRecord }: CoreSelectors = select( 'core' );
 
 			return {
-				isSaving: isSavingEntityRecord< boolean >(
+				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
 					productId
@@ -53,7 +54,8 @@ export function usePublish( {
 
 	const isPublished = productStatus === 'publish';
 
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { editEntityRecord, saveEditedEntityRecord }: CoreActions =
+		useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( onClick ) {

@@ -9,7 +9,7 @@ export type BaseQueryParams< Fields = string > = {
 	include: string;
 	offset: number;
 	order: 'asc' | 'desc';
-	orderby: 'date' | 'id' | 'include' | 'title' | 'slug';
+	orderby: 'date' | 'id' | 'include' | 'title' | 'slug' | 'menu_order';
 	parent: number[];
 	parent_exclude: number[];
 	_fields: Fields[];

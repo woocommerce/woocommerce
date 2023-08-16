@@ -20,11 +20,15 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 	const { values } = useFormContext< Product >();
 	const { hideProductMVPFeedbackModal } = useDispatch( STORE_KEY );
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {
-		const { isProductMVPFeedbackModalVisible } = select( STORE_KEY );
+		const {
+			isProductMVPFeedbackModalVisible,
+		}: {
+			isProductMVPFeedbackModalVisible: () => boolean;
+		} = select( STORE_KEY );
 		return {
 			isProductMVPModalVisible: isProductMVPFeedbackModalVisible(),
 		};
-	} );
+	}, [] );
 
 	const productId = _productId ?? values.id;
 

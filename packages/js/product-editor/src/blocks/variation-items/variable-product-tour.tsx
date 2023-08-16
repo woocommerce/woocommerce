@@ -6,6 +6,8 @@ import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductQuery,
+	ProductVariationSelectors,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -27,10 +29,14 @@ export const VariableProductTour: React.FC = () => {
 
 	const { totalCount } = useSelect(
 		( select ) => {
-			const { getProductVariationsTotalCount } = select(
+			const {
+				getProductVariationsTotalCount,
+			}: ProductVariationSelectors = select(
 				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 			);
-			const requestParams = {
+			const requestParams: Partial< ProductQuery > & {
+				product_id: string;
+			} = {
 				product_id: productId,
 				page: 1,
 				per_page: DEFAULT_PER_PAGE_OPTION,
@@ -38,8 +44,7 @@ export const VariableProductTour: React.FC = () => {
 				orderby: 'menu_order',
 			};
 			return {
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
+				totalCount: getProductVariationsTotalCount( requestParams ),
 			};
 		},
 		[ productId ]

@@ -181,7 +181,8 @@ export const useCategorySearch = () => {
 					productCategoryQueryObject
 				),
 			};
-		}
+		},
+		[]
 	);
 	const [ isSearching, setIsSearching ] = useState( true );
 	const [ categoriesAndNewItem, setCategoriesAndNewItem ] = useState<

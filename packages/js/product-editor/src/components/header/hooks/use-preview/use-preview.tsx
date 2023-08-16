@@ -13,6 +13,7 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
+import { CoreActions, CoreSelectors } from '../../../../types';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { PreviewButtonProps } from '../../preview-button';
 
@@ -43,9 +44,11 @@ export function usePreview( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			const { hasEditsForEntityRecord, isSavingEntityRecord } =
-				select( 'core' );
-			const isSaving = isSavingEntityRecord< boolean >(
+			const {
+				hasEditsForEntityRecord,
+				isSavingEntityRecord,
+			}: CoreSelectors = select( 'core' );
+			const isSaving = isSavingEntityRecord(
 				'postType',
 				'product',
 				productId
@@ -53,7 +56,7 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
+				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					'product',
 					productId
@@ -67,7 +70,8 @@ export function usePreview( {
 
 	const ariaDisabled = disabled || isDisabled || isValidating;
 
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { editEntityRecord, saveEditedEntityRecord }: CoreActions =
+		useDispatch( 'core' );
 
 	let previewLink: URL | undefined;
 	if ( typeof permalink === 'string' ) {

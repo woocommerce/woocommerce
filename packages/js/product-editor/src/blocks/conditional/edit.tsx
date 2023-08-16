@@ -6,7 +6,7 @@ import { createElement, useMemo } from '@wordpress/element';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { DisplayState } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import { Product, WPDataSelectors } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -25,11 +25,15 @@ export function Edit( {
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect(
 		( select ) =>
-			select( 'core' ).getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			),
+			(
+				select( 'core' ) as WPDataSelectors & {
+					getEditedEntityRecord: (
+						type: string,
+						name: string,
+						id: string | number
+					) => Product;
+				}
+			 ).getEditedEntityRecord( 'postType', 'product', productId ),
 		[]
 	);
 

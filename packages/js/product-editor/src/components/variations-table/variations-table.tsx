@@ -5,7 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductVariation,
+	WPDataSelectors,
+	ProductVariationSelectors,
+	ProductQuery,
+	ProductVariationsActions,
 } from '@woocommerce/data';
 import {
 	Link,
@@ -58,8 +61,12 @@ export function VariationsTable() {
 					hasFinishedResolution,
 					getProductVariationsTotalCount,
 					isGeneratingVariations: getIsGeneratingVariations,
-				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-				const requestParams = {
+				}: WPDataSelectors & ProductVariationSelectors = select(
+					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				);
+				const requestParams: Partial< ProductQuery > & {
+					product_id: string;
+				} = {
 					product_id: productId,
 					page: currentPage,
 					per_page: perPage,
@@ -72,22 +79,17 @@ export function VariationsTable() {
 						[ requestParams ]
 					),
 					isGeneratingVariations: getIsGeneratingVariations( {
+						id: '',
 						product_id: productId,
 					} ),
-					variations:
-						getProductVariations< ProductVariation[] >(
-							requestParams
-						),
-					totalCount:
-						getProductVariationsTotalCount< number >(
-							requestParams
-						),
+					variations: getProductVariations( requestParams ),
+					totalCount: getProductVariationsTotalCount( requestParams ),
 				};
 			},
 			[ currentPage, perPage, productId ]
 		);
 
-	const { updateProductVariation } = useDispatch(
+	const { updateProductVariation }: ProductVariationsActions = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
@@ -113,8 +115,9 @@ export function VariationsTable() {
 			...prevState,
 			[ variationId ]: true,
 		} ) );
-		updateProductVariation< Promise< ProductVariation > >(
+		updateProductVariation(
 			{ product_id: productId, id: variationId },
+			// @ts-expect-error second attribute is not correctly getting passed through.
 			{ status }
 		).finally( () =>
 			setIsUpdating( ( prevState ) => ( {

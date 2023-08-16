@@ -44,7 +44,8 @@ export const DetailsNameField = ( {} ) => {
 				};
 			}
 			return {};
-		}
+		},
+		[]
 	);
 
 	const hasNameError = () => {
