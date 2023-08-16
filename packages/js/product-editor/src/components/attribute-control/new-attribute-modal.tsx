@@ -56,6 +56,7 @@ type NewAttributeModalProps = {
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
 };
 
 type AttributeForm = {
@@ -90,6 +91,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
+	disabledAttributeMessage = __(
+		'(Already used in Attributes)',
+		'woocommerce'
+	),
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -321,6 +326,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															}
 															disabledAttributeIds={
 																disabledAttributeIds
+															}
+															disabledAttributeMessage={
+																disabledAttributeMessage
 															}
 														/>
 													</td>
