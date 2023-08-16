@@ -217,19 +217,21 @@ jobs:
                   E2E_MAX_FAILURES: 15
 
             - name: Create context block and save as JSON file
+              if: success() || failure()
               id: create-block-json
               uses: actions/github-script@v6
               with:
-                  script: |
-                      const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
-                      script( { core } );
+                script: |
+                    const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
+                    script( { core } );
               env:
-                  UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
-                  E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  PLUGIN_NAME: ${{ matrix.plugin }}
-                  PLUGIN_SLUG: ${{ matrix.slug }}
+                    UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
+                    E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
+                    PLUGIN_NAME: ${{ matrix.plugin }}
+                    PLUGIN_SLUG: ${{ matrix.slug }}
         
             - name: Upload JSON file as artifact
+              if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.PLUGIN_SLACK_BLOCKS_ARTIFACT }}
