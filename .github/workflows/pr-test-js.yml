@@ -35,7 +35,7 @@ jobs:
               run: |
                   # ignore scripts is faster, and postinstall should not be needed for tests.
                   pnpm install --ignore-scripts
-                  pnpm build --filter="./packages/js/**" --filter="!./packages/internal*" --filter="!./packages/e2e*" --filter="!./packages/eslint-plugin"
+                  pnpm build --filter="./packages/js/**" --filter="\!@woocommerce/*e2e*" --filter="\!@woocommerce/*test*" --filter="\!@woocommerce/create-woo-extension" --filter="\!@woocommerce/*plugin*"
 
             - name: Test
               run: pnpm run test --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' --color
