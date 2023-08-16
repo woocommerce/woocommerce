@@ -58,7 +58,6 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
-                  tests: hello.test.js # mytodo: remove
               env:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
@@ -86,7 +85,6 @@ jobs:
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: ${{ env.E2E_ARTIFACT }}
-                  tests: basic.spec.js # mytodo: remove
               env:
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -215,7 +213,6 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-                  tests: basic.spec.js # mytodo: remove
               env:
                   E2E_MAX_FAILURES: 15
 
@@ -375,7 +372,7 @@ jobs:
                   k6_RESULT: ${{ needs.k6-tests.outputs.test-result }}
                   PLUGINS_BLOCKS_PATH: ${{ steps.download-plugin-blocks.outputs.download-path }}
 
-            - name: Send Slack message # mytodo: DAILY_TEST_SLACK_CHANNEL
+            - name: Send Slack message
               id: send-slack-message
               uses: slackapi/slack-github-action@v1.23.0
               with:
