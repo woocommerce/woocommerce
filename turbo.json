@@ -5,13 +5,8 @@
 			"cache": false
 		},
 		"turbo:build": {
-			"dependsOn": [ 
-				"build:feature-config", 
-				"^turbo:build"
-			],
-			"env": [
-				"WC_ADMIN_PHASE" 
-			],
+			"dependsOn": [ "build:feature-config", "^turbo:build" ],
+			"env": [ "WC_ADMIN_PHASE" ],
 			"inputs": [
 				"src/**/*.js",
 				"src/**/*.jsx",
@@ -40,40 +35,21 @@
 				"woocommerce/client/legacy#turbo:build"
 			],
 			"outputs": [],
-			"inputs": [
-				"src/**/*.php",
-				"includes/**/*.php"
-			],
+			"inputs": [ "src/**/*.php", "includes/**/*.php" ],
 			"outputMode": "new-only"
 		},
 
 		"woocommerce/client/legacy#turbo:build": {
-			"dependsOn": [ 
-				"^turbo:build" 
-			],
-			"outputs": [
-				"../../assets/js/**",
-				"../../assets/css/**"
-			],
-			"inputs": [
-				"css/**/*.scss",
-				"css/**/*.css",
-				"js/**/*.js"
-			],
+			"dependsOn": [ "^turbo:build" ],
+			"outputs": [ "../../assets/js/**", "../../assets/css/**" ],
+			"inputs": [ "css/**/*.scss", "css/**/*.css", "js/**/*.js" ],
 			"outputMode": "new-only"
 		},
 
 		"woocommerce/client/admin#turbo:build": {
-			"dependsOn": [ 
-				"build:feature-config", 
-				"^turbo:build"
-			],
-			"env": [
-				"WC_ADMIN_PHASE" 
-			],
-			"outputs": [
-				"../woocommerce/assets/client/admin/**"
-			],
+			"dependsOn": [ "build:feature-config", "^turbo:build" ],
+			"env": [ "WC_ADMIN_PHASE" ],
+			"outputs": [ "../woocommerce/assets/client/admin/**" ],
 			"inputs": [
 				"client/**/*.js",
 				"client/**/*.jsx",
@@ -88,9 +64,6 @@
 
 		"turbo:test": {
 			"cache": false,
-			"dependsOn": [ 
-				"turbo:build" 
-			],
 			"outputs": []
 		}
 	}
