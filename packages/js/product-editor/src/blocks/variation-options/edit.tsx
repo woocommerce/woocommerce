@@ -139,6 +139,9 @@ export function Edit() {
 						product_block_variable_options_notice_dismissed: 'yes',
 					} )
 				}
+				disabledAttributeIds={ entityAttributes
+					.filter( ( attr ) => ! attr.variation )
+					.map( ( attr ) => attr.id ) }
 				uiStrings={ {
 					notice,
 					globalAttributeHelperMessage: '',
@@ -167,8 +170,8 @@ export function Edit() {
 						'Remove variation option',
 						'woocommerce'
 					),
-					attributeRemoveConfirmationModalMessage: __(
-						'If you continue, some variations of this product will be deleted and customers will no longer be able to purchase them.',
+					attributeRemoveConfirmationMessage: __(
+						'Remove this variation option?',
 						'woocommerce'
 					),
 				} }
