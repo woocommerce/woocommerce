@@ -58,5 +58,5 @@ module.exports = ( { core } ) => {
 
 	const payload_stringified = JSON.stringify( payload );
 
-	core.setOuput( 'payload', payload_stringified );
+	core.setOutput( 'payload', payload_stringified );
 };
