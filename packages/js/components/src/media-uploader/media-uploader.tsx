@@ -96,8 +96,8 @@ export const MediaUploader = ( {
 						<MediaUploadComponent
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
-							multiple={ multipleSelect as any }
+							// @ts-expect-error - TODO multiple also accepts string.
+							multiple={ multipleSelect }
 							render={ ( { open } ) => (
 								<Button
 									variant="secondary"
