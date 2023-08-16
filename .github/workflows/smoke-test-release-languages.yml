@@ -3,16 +3,7 @@ on:
     push:
         branches:
             - 'e2e/playwright-tests-EN-ES-AR'
-    pull_request:
-        paths-ignore:
-            - '**/changelog/**'    
-    release:
-        types: [released, prereleased, published]
-    workflow_dispatch:
-        inputs:
-            tag:
-                description: 'WooCommerce Release Tag'
-                required: true
+            
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
     cancel-in-progress: true
