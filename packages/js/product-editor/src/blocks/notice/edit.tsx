@@ -25,7 +25,7 @@ export interface NoticeBlockAttributes extends BlockAttributes {
 	id: string;
 	isSelected?: boolean;
 	title: string;
-	type: 'error' | 'success' | 'warning' | 'info';
+	type: 'error-type' | 'success' | 'warning' | 'info';
 }
 
 export function Edit( {

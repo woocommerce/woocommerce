@@ -9,7 +9,7 @@ export type NoticeProps = {
 	title?: string;
 	content?: string;
 	className?: string;
-	type?: 'error' | 'success' | 'warning' | 'info';
+	type?: 'error-type' | 'success' | 'warning' | 'info';
 	children?: ReactNode;
 };
 
