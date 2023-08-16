@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Bring HPOS order hooks in line with the posts implementation.

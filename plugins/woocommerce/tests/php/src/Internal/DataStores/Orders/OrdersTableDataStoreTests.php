@@ -2666,4 +2666,79 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertTrue( $order->get_download_permissions_granted() );
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 	}
+
+	/**
+	 * @testDox Checks that order new/updated hooks are fired at appropriate times in HPOS (vs CPT).
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_order_hooks_vs_cpt( $cot_is_authoritative = true ) {
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->disable_cot_sync();
+
+		$new_count = $update_count = 0;
+
+		$callback = function( $order_id ) use ( &$new_count, &$update_count ) {
+			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
+			$update_count += 'woocommerce_update_order' === current_action() ? 1 : 0;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+		add_action( 'woocommerce_update_order', $callback );
+
+		// Creating a new order should trigger 'woocommerce_new_order' but not 'woocommerce_update_order'.
+		$order = new WC_Order();
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 0, $update_count );
+
+		// An update to the order should only trigger 'woocommerce_update_order'.
+		$order->set_billing_city( 'Los Angeles' );
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 1, $update_count );
+
+		// Updating datastore-level props should not trigger anything.
+		$order->get_data_store()->set_download_permissions_granted( $order->get_id(), true );
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 1, $update_count );
+
+		// Trashing should not fire an update.
+		$order->get_data_store()->delete( $order );
+		$this->assertEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( 1, $update_count );
+
+		// Untrashing should not fire an update.
+		if ( $cot_is_authoritative ) {
+			$order = wc_get_order( $order->get_id() ); // Refresh order.
+			$order->get_data_store()->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order->get_id() );
+			$order = wc_get_order( $order->get_id() ); // Refresh order.
+		}
+		$this->assertNotEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( 1, $update_count );
+
+		// An auto-draft order should not trigger 'woocommerce_new_order' until first saved with a valid status.
+		if ( $cot_is_authoritative ) {
+			$order = new WC_Order();
+			$order->set_status( 'auto-draft' );
+			$order->save();
+
+			$this->assertEquals( 1, $new_count );
+			$this->assertEquals( 1, $update_count );
+
+			$order->set_status( 'on-hold' );
+			$order->save();
+
+			$this->assertEquals( 2, $new_count );
+			$this->assertEquals( 1, $update_count );
+		}
+
+		remove_action( 'woocommerce_new_order', $callback );
+		remove_action( 'woocommerce_update_order', $callback );
+	}
+
+
 }
