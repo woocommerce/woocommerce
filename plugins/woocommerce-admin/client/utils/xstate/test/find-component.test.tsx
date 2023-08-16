@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { findComponentMeta, ComponentProps } from '../find-component';
+import { findComponentMeta } from '../find-component';
+
+type ComponentProps = {
+	context: string;
+};
 
 describe( 'findComponentMeta', () => {
 	it( 'should return the whole object once "component" key is found in a nested object', () => {

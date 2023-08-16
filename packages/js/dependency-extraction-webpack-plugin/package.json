@@ -42,7 +42,7 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "eslint src",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"lint:fix": "eslint src --fix"
 	},
 	"lint-staged": {

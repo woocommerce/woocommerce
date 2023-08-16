@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 8.0.2 2023-08-15 =
+
+* Fix - Fix an issue which was causing some attributes to default to a minimum length of 3. [#39686](https://github.com/woocommerce/woocommerce/pull/39686)
+
+
 = 8.0.1 2023-08-09 =
 
 * Fix - bump WooCommerce blocks version to 10.6.5 [#39642](https://github.com/woocommerce/woocommerce/pull/39642)
@@ -59,7 +64,7 @@
 * Update - Analytics API: Search for customers by all of the available fields instead of having to choose one [[#38628]](https://github.com/woocommerce/woocommerce/pull/38628)
 * Update - Branding rollout - change WooCommerce Payments to WooPayments [[#39188]](https://github.com/woocommerce/woocommerce/pull/39188)
 * Update - Change button text from "Install plugin" to "Install extension" in Marketing page. [[#39130]](https://github.com/woocommerce/woocommerce/pull/39130)
-* Update - Remove Tiktok from plugin suggestion list [[#39135]](https://github.com/woocommerce/woocommerce/pull/39135)
+* Update - Remove TikTok from plugin suggestion list [[#39135]](https://github.com/woocommerce/woocommerce/pull/39135)
 * Update - Update the call to marketing extensions recommendations API from version 1.2 to version 1.3 with new recommendation Klaviyo. [[#38974]](https://github.com/woocommerce/woocommerce/pull/38974)
 * Update - Update WooCommerce Blocks to 10.6.0 [[#39144]](https://github.com/woocommerce/woocommerce/pull/39144)
 * Update - Use wp_json_encode instead of print_r in output for HPOS-related WP CLI commands. [[#38699]](https://github.com/woocommerce/woocommerce/pull/38699)
@@ -1316,7 +1321,7 @@
 * Update - Update WooCommerce Blocks to 8.7.5 [#35428](https://github.com/woocommerce/woocommerce/pull/35428)
 * Update - Improve the warnings about incompatibilities between plugins and features [#35198](https://github.com/woocommerce/woocommerce/pull/35198)
 * Update - Additional payment methods on new WCPay promotion page (payment-welcome) [#34581](https://github.com/woocommerce/woocommerce/pull/34581)
-* Update - Add Tiktok to free grow extensions list [#34953](https://github.com/woocommerce/woocommerce/pull/34953)
+* Update - Add TikTok to free grow extensions list [#34953](https://github.com/woocommerce/woocommerce/pull/34953)
 * Update - Allowing generic item type in new experimental SelectControl. [#34547](https://github.com/woocommerce/woocommerce/pull/34547)
 * Update - Change order data store internal key to props for better representation. [#34627](https://github.com/woocommerce/woocommerce/pull/34627)
 * Update - Changing inbox display to only 5 notes with the ability to load more. [#35003](https://github.com/woocommerce/woocommerce/pull/35003)

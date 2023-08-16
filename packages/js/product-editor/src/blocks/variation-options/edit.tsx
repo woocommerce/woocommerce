@@ -90,6 +90,7 @@ export function Edit() {
 				] ) }
 				onChange={ handleChange }
 				createNewAttributesAsGlobal={ true }
+				useRemoveConfirmationModal={ true }
 				uiStrings={ {
 					globalAttributeHelperMessage: '',
 					customAttributeHelperMessage: '',
@@ -117,8 +118,8 @@ export function Edit() {
 						'Remove variation option',
 						'woocommerce'
 					),
-					attributeRemoveConfirmationMessage: __(
-						'Remove this variation option?',
+					attributeRemoveConfirmationModalMessage: __(
+						'If you continue, some variations of this product will be deleted and customers will no longer be able to purchase them.',
 						'woocommerce'
 					),
 				} }
