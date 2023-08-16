@@ -1,0 +1,91 @@
+name: Smoke test release languages
+on:
+    push:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'    
+    release:
+        types: [released, prereleased, published]
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'WooCommerce Release Tag'
+                required: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
+    cancel-in-progress: true
+permissions: {}
+env:
+    E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run ${{ github.run_number }})
+    E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run ${{ github.run_number }})
+    SLACK_BLOCKS_ARTIFACT: slack-blocks
+jobs:
+    e2e-tests-run:
+        name: Runs E2E tests.
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+        outputs:
+            E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+                  WP_ENV_PHP_VERSION: 7.4
+              run: pnpm run env:test
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Get total number of Playwright E2E tests to be run.
+              id: count_e2e_total
+              working-directory: plugins/woocommerce
+              run: |
+                  TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
+                  NO_PREFIX=${TOTAL_STR#*"Total: "}
+                  COUNT=${NO_PREFIX%" tests in"*}
+                  echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
+
+            - name: Run Playwright E2E tests.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+            - name: Generate Playwright E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive Playwright E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
