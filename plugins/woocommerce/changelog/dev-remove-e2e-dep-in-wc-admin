@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove dependency on e2e-environment and e2e-utils in wc-admin.
