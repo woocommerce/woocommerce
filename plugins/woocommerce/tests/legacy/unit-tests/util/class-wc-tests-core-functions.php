@@ -193,7 +193,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'USD' => 'United States (US) dollar',
 			'UYU' => 'Uruguayan peso',
 			'UZS' => 'Uzbekistani som',
-			'VEF' => 'Venezuelan bol&iacute;var (Bol&iacute;var fuerte)',
+			'VEF' => 'Venezuelan bol&iacute;var (2008–2018)',
 			'VES' => 'Venezuelan bol&iacute;var',
 			'VND' => 'Vietnamese &#x111;&#x1ed3;ng',
 			'VUV' => 'Vanuatu vatu',
