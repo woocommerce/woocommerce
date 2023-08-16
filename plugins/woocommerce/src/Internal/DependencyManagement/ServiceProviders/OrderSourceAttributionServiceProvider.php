@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
 use Automattic\WooCommerce\Internal\WCCom\TrackingController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -23,6 +24,7 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 	protected $provides = array(
 		SourceAttributionController::class,
 		TrackingController::class,
+		WPConsentAPI::class,
 	);
 
 	/**
@@ -38,5 +40,6 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 			);
 		$this->share_with_implements_tags( TrackingController::class )
 			->addArguments( array( FeaturesController::class ) );
+		$this->share_with_implements_tags( WPConsentAPI::class );
 	}
 }
