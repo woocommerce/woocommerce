@@ -12,6 +12,6 @@
 .woocommerce-experimental-select-control__popover-menu-container {
 	.woocommerce-experimental-select-control__menu-item[disabled] {
 		pointer-events: none;
-		opacity: 0.6;
+		color: $gray-600;
 	}
 }

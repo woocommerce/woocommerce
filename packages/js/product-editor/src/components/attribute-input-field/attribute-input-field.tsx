@@ -3,9 +3,9 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Spinner, Icon } from '@wordpress/components';
+import { Spinner, Icon, Tooltip } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement, Fragment, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -42,6 +42,7 @@ type AttributeInputFieldProps = {
 	placeholder?: string;
 	disabled?: boolean;
 	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
 	ignoredAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 };
@@ -57,6 +58,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	label,
 	disabled,
 	disabledAttributeIds = [],
+	disabledAttributeMessage,
 	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 } ) => {
@@ -195,21 +197,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									index={ index }
 									isActive={ highlightedIndex === index }
 									item={ item }
-									getItemProps={ ( options ) => {
-										console.log(
-											'getItemProps',
-											getItemProps( options )
-										);
-										return {
-											...getItemProps( options ),
-											disabled:
-												item.isDisabled || undefined,
-											onKeyDown( event: KeyboardEvent ) {
-												if ( item.isDisabled )
-													event.stopPropagation();
-											},
-										};
-									} }
+									getItemProps={ ( options ) => ( {
+										...getItemProps( options ),
+										disabled: item.isDisabled || undefined,
+									} ) }
 								>
 									{ isNewAttributeListItem( item ) ? (
 										<div className="woocommerce-attribute-input-field__add-new">
@@ -230,7 +221,12 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 											</span>
 										</div>
 									) : (
-										item.name
+										<>
+											{ item.name }
+											{ item.isDisabled &&
+												disabledAttributeMessage &&
+												` ${ disabledAttributeMessage }` }
+										</>
 									) }
 								</MenuItem>
 							) )
