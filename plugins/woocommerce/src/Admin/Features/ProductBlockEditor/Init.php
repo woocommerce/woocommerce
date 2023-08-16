@@ -500,6 +500,16 @@ class Init {
 									),
 								),
 								array(
+									'woocommerce/product-notice',
+									array(
+										'id'         => 'wc-product-notice',
+										'title'      => '',
+										'content'    => __( 'Prices are in USD.', 'woocommerce' ),
+										'buttonText' => __( 'Prices are in USD.', 'woocommerce' ),
+										'type'       => 'info',
+									),
+								),
+								array(
 									'woocommerce/product-collapsible',
 									array(
 										'toggleText'       => __( 'Advanced', 'woocommerce' ),
