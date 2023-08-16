@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Contains backend logic for the Marketplace feature.
@@ -16,7 +16,9 @@ class Marketplace {
 	 * Class initialization, to be executed when the class is resolved by the container.
 	 */
 	final public function init() {
-		add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
+		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+			add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
+		}
 	}
 
 	/**
