@@ -55,7 +55,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						) }
 						<div className="woocommerce-marketplace__product-card__meta">
 							<h2 className="woocommerce-marketplace__product-card__title">
-								{ product.title }
+								<a className="woocommerce-marketplace__product-card__link" href={ product.url } target="_blank" rel="noopener noreferrer">
+									{ product.title }
+								</a>
 							</h2>
 							{ productVendor && (
 								<p className="woocommerce-marketplace__product-card__vendor">
@@ -69,12 +71,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				<p className="woocommerce-marketplace__product-card__description">
 					{ product.description }
 				</p>
-				<Button
-					className="woocommerce-marketplace__product-card__price"
-					href={ product.url }
-					target="_blank"
-					variant="link"
-				>
+				<div className="woocommerce-marketplace__product-card__price">
 					<span>
 						{
 							// '0' is a free product
@@ -88,7 +85,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							? ''
 							: __( ' annually', 'woocommerce' ) }
 					</span>
-				</Button>
+				</div>
 			</div>
 		</Card>
 	);
