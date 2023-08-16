@@ -21,7 +21,7 @@ The release pull request has been created! This checklist is a guide to follow f
 -   [ ] Run `npm ci`
 -   [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
 -   [ ] Create the testing notes for the release.
-	-   [ ] For each pull request that belongs to the current release, grab the `User Facing Testing` notes from the PR's description.
+    -   [ ] For each pull request that belongs to the current release, grab the `User Facing Testing` notes from the PR's description.
         - If a PR has the `Should be tested by the development team exclusively` checkbox checked, create a new section called 'Testing notes for the development team' and copy the `User Facing Testing` notes from the PR to this section.
         - If a PR has the `Experimental` checkbox checked, do not include it in the testing instructions.
         - If a PR has the `Do not include in the Testing Notes` checkbox checked, as the description suggests, do not include it in the release instructions.

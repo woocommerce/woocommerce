@@ -7,12 +7,31 @@ on:
 jobs:
   PlaywrightE2ETests:
     
-    name: Playwright E2E tests
+    name: Playwright E2E tests - ${{ matrix.config.name }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [
+          { name: Normal, file: playwright.config.ts, resultPath: test-results },
+          { name: SideEffects, file: playwright.side-effects.config.ts, resultPath: test-results-side-effects },
+        ]
     steps:
 
       - uses: actions/checkout@v3
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-modified-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modified-build-${{ env.cache-name }}-
+            ${{ runner.os }}-modified-build-
+            ${{ runner.os }}-modified-
 
       - name: Setup node version and npm cache
         uses: actions/setup-node@v3
@@ -21,6 +40,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Node dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build Assets
@@ -37,7 +57,8 @@ jobs:
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -52,18 +73,17 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
 
-
       - name: Load wp-env
         run: npm run env:start
 
       - name: Run Playwright tests
-        run: npm run test:e2e
+        run: npm run test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
 
       - uses: actions/upload-artifact@v3
         if: ${{ failure() }}
 
         with:
-          name: playwright-report
-          path: artifacts/test-results
+          name: playwright-report-${{ matrix.config.name }}
+          path: artifacts/${{ matrix.config.resultPath }}
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
