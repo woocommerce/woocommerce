@@ -10,6 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { AttributeControl } from '../attribute-control';
 import { useProductAttributes } from '../../hooks/use-product-attributes';
+import { __ } from '@wordpress/i18n';
 
 type AttributesProps = {
 	value: ProductAttribute[];
@@ -31,6 +32,15 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	return (
 		<AttributeControl
 			value={ attributes }
+			disabledAttributeIds={ value
+				.filter( ( attr ) => !! attr.variation )
+				.map( ( attr ) => attr.id ) }
+			uiStrings={ {
+				disabledAttributeMessage: __(
+					'(Already used in Variations)',
+					'woocommerce'
+				),
+			} }
 			onAdd={ () => {
 				recordEvent( 'product_add_attributes_modal_add_button_click' );
 			} }
