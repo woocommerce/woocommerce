@@ -68,38 +68,36 @@ const renderTabs = ( props: TabsProps ) => {
 	const tabContent = [];
 	for ( const tabKey in tabs ) {
 		tabContent.push(
-			<>
-				{ tabs[ tabKey ]?.href ? (
-					<a
-						className={ classNames(
-							'woocommerce-marketplace__tab-button',
-							'components-button',
-							`woocommerce-marketplace__tab-${ tabKey }`
-						) }
-						href={ tabs[ tabKey ]?.href }
-						key={ tabKey }
-					>
-						{ tabs[ tabKey ]?.title }
-					</a>
-				) : (
-					<Button
-						className={ classNames(
-							'woocommerce-marketplace__tab-button',
-							`woocommerce-marketplace__tab-${ tabKey }`,
-							{
-								'is-active': tabKey === selectedTab,
-							}
-						) }
-						onClick={ () => {
-							setSelectedTab( tabKey );
-							setUrlTabParam( tabKey );
-						} }
-						key={ tabKey }
-					>
-						{ tabs[ tabKey ]?.title }
-					</Button>
-				) }
-			</>
+			tabs[ tabKey ]?.href ? (
+				<a
+					className={ classNames(
+						'woocommerce-marketplace__tab-button',
+						'components-button',
+						`woocommerce-marketplace__tab-${ tabKey }`
+					) }
+					href={ tabs[ tabKey ]?.href }
+					key={ tabKey }
+				>
+					{ tabs[ tabKey ]?.title }
+				</a>
+			) : (
+				<Button
+					className={ classNames(
+						'woocommerce-marketplace__tab-button',
+						`woocommerce-marketplace__tab-${ tabKey }`,
+						{
+							'is-active': tabKey === selectedTab,
+						}
+					) }
+					onClick={ () => {
+						setSelectedTab( tabKey );
+						setUrlTabParam( tabKey );
+					} }
+					key={ tabKey }
+				>
+					{ tabs[ tabKey ]?.title }
+				</Button>
+			)
 		);
 	}
 	return tabContent;
