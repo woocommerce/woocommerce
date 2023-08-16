@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
