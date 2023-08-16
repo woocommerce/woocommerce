@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { TemplateApiUtils } from '@woocommerce/e2e-utils';
+import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
 import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
@@ -28,6 +29,8 @@ export const SELECTORS = {
 	onSaleControlLabel: 'Show only products on sale',
 	inheritQueryFromTemplateControl:
 		'.wc-block-product-collection__inherit-query-control',
+	productSearchLabel: 'Search',
+	productSearchButton: '.wp-block-search__button wp-element-button',
 };
 
 class ProductCollectionPage {
@@ -36,6 +39,7 @@ class ProductCollectionPage {
 	private admin: Admin;
 	private editor: Editor;
 	private templateApiUtils: TemplateApiUtils;
+	private editorUtils: EditorUtils;
 	productTemplate!: Locator;
 	products!: Locator;
 	productImages!: Locator;
@@ -49,16 +53,19 @@ class ProductCollectionPage {
 		admin,
 		editor,
 		templateApiUtils,
+		editorUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
 		templateApiUtils: TemplateApiUtils;
+		editorUtils: EditorUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
 		this.templateApiUtils = templateApiUtils;
+		this.editorUtils = editorUtils;
 	}
 
 	async createNewPostAndInsertBlock() {
@@ -77,7 +84,31 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'frontend' );
 	}
 
-	async goToProductCatalogAndInsertBlock() {
+	async replaceProductsWithProductCollectionInTemplate( template: string ) {
+		await this.templateApiUtils.revertTemplate( template );
+		await this.admin.visitSiteEditor( {
+			postId: template,
+			postType: 'wp_template',
+		} );
+		await this.editorUtils.enterEditMode();
+
+		await this.editorUtils.replaceBlockByBlockName(
+			'core/query',
+			'woocommerce/product-collection'
+		);
+
+		await this.editor.saveSiteEditorEntities();
+	}
+
+	async goToProductCatalogFrontend() {
+		await this.page.goto( `/shop` );
+	}
+
+	async goToProductCatalogAndInsertBlock(
+		block: BlockRepresentation = {
+			name: this.BLOCK_NAME,
+		}
+	) {
 		await this.templateApiUtils.revertTemplate(
 			'woocommerce/woocommerce//archive-product'
 		);
@@ -89,10 +120,16 @@ class ProductCollectionPage {
 
 		await this.editor.canvas.click( 'body' );
 
-		await this.editor.insertBlock( {
-			name: this.BLOCK_NAME,
-		} );
+		await this.editor.insertBlock( block );
 		await this.editor.openDocumentSettingsSidebar();
+		await this.editor.saveSiteEditorEntities();
+	}
+
+	async searchProducts( phrase: string ) {
+		await this.page
+			.getByLabel( SELECTORS.productSearchLabel )
+			.fill( phrase );
+		await this.page.locator( SELECTORS.productSearchButton ).click();
 	}
 
 	async addFilter(
@@ -308,6 +345,10 @@ class ProductCollectionPage {
 		return this.page.getByRole( 'region', {
 			name: 'Editor settings',
 		} );
+	}
+
+	locateByTestId( testId: string ) {
+		return this.page.getByTestId( testId );
 	}
 
 	/**

@@ -9,12 +9,16 @@ import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async ( { page, admin, editor, templateApiUtils }, use ) => {
+	pageObject: async (
+		{ page, admin, editor, templateApiUtils, editorUtils },
+		use
+	) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
 			templateApiUtils,
+			editorUtils,
 		} );
 		await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
