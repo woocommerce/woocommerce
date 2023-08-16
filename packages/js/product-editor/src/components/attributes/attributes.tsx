@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -10,7 +11,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { AttributeControl } from '../attribute-control';
 import { useProductAttributes } from '../../hooks/use-product-attributes';
-import { __ } from '@wordpress/i18n';
 
 type AttributesProps = {
 	value: ProductAttribute[];
