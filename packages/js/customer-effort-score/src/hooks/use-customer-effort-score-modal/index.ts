@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ export const useCustomerEffortScoreModal = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const { wasPreviouslyShown, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		const shownForActionsOption =
@@ -32,7 +32,7 @@ export const useCustomerEffortScoreModal = () => {
 			},
 			isLoading: resolving,
 		};
-	} );
+	}, [] );
 
 	const markCesAsShown = async ( action: string ) => {
 		const { getOption } = resolveSelect( OPTIONS_STORE_NAME );
