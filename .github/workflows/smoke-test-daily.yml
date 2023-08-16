@@ -235,7 +235,7 @@ jobs:
             - name: Upload JSON file as artifact
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ matrix.plugin }}
+                  name: ${{ env.PLUGIN_SLACK_BLOCKS_ARTIFACT }}
                   path: ${{ steps.create-block-json.outputs.path }}
         
     trunk-results:
