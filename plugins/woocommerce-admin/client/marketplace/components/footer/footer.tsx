@@ -3,7 +3,7 @@
  */
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { __ } from '@wordpress/i18n';
-import { check, commentContent, lock } from '@wordpress/icons';
+import { check, commentContent, shield } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
 /**
@@ -23,7 +23,7 @@ const refundPolicyTitle = createInterpolateElement(
 );
 
 const supportTitle = createInterpolateElement(
-	__( '<a>Support</a> teams across the world', 'woocommerce' ),
+	__( '<a>Get help</a> when you need it', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
 		a: <a href={ MARKETPLACE_URL + '/docs/' } />,
@@ -31,10 +31,10 @@ const supportTitle = createInterpolateElement(
 );
 
 const paymentTitle = createInterpolateElement(
-	__( '<a>Safe & Secure</a> online payment', 'woocommerce' ),
+	__( '<a>Products</a> you can trust', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_URL + '/woocommerce-payments/' } />,
+		a: <a href={ MARKETPLACE_URL + '/products/' } />,
 	}
 );
 
@@ -43,7 +43,7 @@ function FooterContent(): JSX.Element {
 		<div className="woocommerce-marketplace__footer">
 			<h2 className="woocommerce-marketplace__footer-title">
 				{ __(
-					'Grow your business with hundreds of solutions for your store.',
+					'Hundreds of vetted products and services. Unlimited potential.',
 					'woocommerce'
 				) }
 			</h2>
@@ -52,7 +52,7 @@ function FooterContent(): JSX.Element {
 					icon={ check }
 					title={ refundPolicyTitle }
 					description={ __(
-						'For extensions and themes purchased from our Marketplace, we offer a full refund within 30 days of your date of purchase.',
+						"If you change your mind within 30 days of your purchase, we'll give you a full refund — hassle-free.",
 						'woocommerce'
 					) }
 				/>
@@ -60,15 +60,15 @@ function FooterContent(): JSX.Element {
 					icon={ commentContent }
 					title={ supportTitle }
 					description={ __(
-						'We have happiness engineers around round the globe to help you at any given time.',
+						'With detailed documentation and a global support team, help is always available if you need it.',
 						'woocommerce'
 					) }
 				/>
 				<IconWithText
-					icon={ lock }
+					icon={ shield }
 					title={ paymentTitle }
 					description={ __(
-						'Safety pay with WooCommerce payments, The only payment solution fully integrated to Woo.',
+						'Everything in the Marketplace has been built by our own team or by our trusted partners, so you can be sure of its quality.',
 						'woocommerce'
 					) }
 				/>
