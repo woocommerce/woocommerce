@@ -6,7 +6,6 @@ import { getQuery, navigateTo } from '@woocommerce/navigation';
 import React, { createElement } from 'react';
 import { SlotFillProvider } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -31,23 +30,6 @@ const blockProps = {
 	clientId: '',
 	isSelected: false,
 };
-jest.mock( '@wordpress/core-data', () => {
-	return {
-		__esModule: true,
-		useEntityProp: jest.fn().mockReturnValue( [
-			{
-				productAttributes: [] as Product[ 'attributes' ],
-			},
-		] ),
-	};
-} );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn().mockReturnValue( {
-		product: { manageStock: false, type: 'simple' },
-	} ),
-} ) );
 
 function MockTabs( { onChange = jest.fn() } ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
