@@ -422,6 +422,16 @@ class Init {
 					),
 					array(
 						array(
+							'woocommerce/product-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'title'      => '',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
+						array(
 							'woocommerce/product-section',
 							array(
 								'title'       => __( 'Pricing', 'woocommerce' ),
@@ -500,16 +510,6 @@ class Init {
 									),
 								),
 								array(
-									'woocommerce/product-notice',
-									array(
-										'id'         => 'wc-product-notice',
-										'title'      => '',
-										'content'    => __( 'Prices are in USD.', 'woocommerce' ),
-										'buttonText' => __( 'Prices are in USD.', 'woocommerce' ),
-										'type'       => 'info',
-									),
-								),
-								array(
 									'woocommerce/product-collapsible',
 									array(
 										'toggleText'       => __( 'Advanced', 'woocommerce' ),
@@ -558,6 +558,16 @@ class Init {
 						'order' => 30,
 					),
 					array(
+						array(
+							'woocommerce/product-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'title'      => '',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
 						array(
 							'woocommerce/product-section',
 							array(
@@ -720,6 +730,16 @@ class Init {
 						'order' => 40,
 					),
 					array(
+						array(
+							'woocommerce/product-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'title'      => '',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
 						array(
 							'woocommerce/product-section',
 							array(
