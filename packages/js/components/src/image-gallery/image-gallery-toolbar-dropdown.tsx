@@ -1,5 +1,5 @@
 /**
- * WordPress dependencies
+ * External dependencies
  */
 import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { moreVertical } from '@wordpress/icons';
@@ -11,12 +11,12 @@ import {
 	isValidElement,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { MediaUploadComponentType } from './types';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
+import { MediaUploadComponentType } from './types';
 
 const POPOVER_PROPS = {
 	className: 'woocommerce-image-gallery__toolbar-dropdown-popover',
@@ -46,14 +46,6 @@ export function ImageGalleryToolbarDropdown( {
 			label={ __( 'Options', 'woocommerce' ) }
 			className="woocommerce-image-gallery__toolbar-dropdown"
 			popoverProps={ POPOVER_PROPS }
-			menuProps={ {
-				/**
-				 * @param {KeyboardEvent} event
-				 */
-				onKeyDown( event ) {
-					if ( event.defaultPrevented ) return;
-				},
-			} }
 			{ ...props }
 		>
 			{ ( { onClose } ) => (
