@@ -1,44 +1,56 @@
 /**
  * External dependencies
  */
-import { Button, Modal } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+/**
+ * Internal dependencies
+ */
+
+import TourSpotlight from '../tour-spotlight/tour-spotlight';
 
 interface InfoModalProps {
 	id: string;
 	message: string;
+	title: string;
 }
 
-export const InfoModal: React.FC< InfoModalProps > = ( { id, message } ) => {
-	const hasBeenDismissedBefore = useSelect(
-		// @ts-ignore
-		( select ) =>
-			select( preferencesStore ).get(
-				'woo-ai-plugin',
-				`modalDismissed-${ id }`
-			),
-		[ id ]
+export const InfoModal: React.FC< InfoModalProps > = ( {
+	id,
+	message,
+	title,
+} ) => {
+	const anchorElement = document.querySelector( '#postexcerpt' );
+	const hasBeenDismissedBefore = select( preferencesStore ).get(
+		'woo-ai-plugin',
+		`modalDismissed-${ id }`
 	);
 
 	const { set } = useDispatch( preferencesStore );
 
-	const [ isOpen, setIsOpen ] = useState( ! hasBeenDismissedBefore );
+	const [ isPageLoaded, setIsPageLoaded ] = useState( false );
 
-	const closeModal = () => {
-		setIsOpen( false );
+	useEffect( () => {
+		window.onload = function () {
+			setIsPageLoaded( true );
+		};
+	}, [] );
+
+	if ( ! isPageLoaded || ! anchorElement || hasBeenDismissedBefore )
+		return null;
+
+	const closeTour = () => {
 		set( 'woo-ai-plugin', `modalDismissed-${ id }`, true );
 	};
 
-	if ( ! isOpen ) {
-		return null;
-	}
-
 	return (
-		<Modal title="Notice" onRequestClose={ closeModal }>
-			<p>{ message }</p>
-			<Button onClick={ closeModal }>Okay</Button>
-		</Modal>
+		<TourSpotlight
+			title={ title }
+			description={ message }
+			onDismiss={ closeTour }
+			reference={ '#postexcerpt' }
+		/>
 	);
 };
