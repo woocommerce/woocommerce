@@ -25,10 +25,13 @@ import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
 import {
 	ReportItemsEndpoint,
+	ReportQuery,
 	ReportStatEndpoint,
 	ReportStatObject,
 } from './types';
 import type { ReportsSelect } from './';
+import { WPDataSelectors } from '../types';
+import { ReportsSelectors } from './selectors';
 
 type Filter = {
 	param: string;
@@ -299,8 +302,11 @@ export function getSummaryNumbers< T extends ReportStatEndpoint >(
 	options: QueryOptions
 ) {
 	const { endpoint, select } = options;
-	const { getReportStats, getReportStatsError, isResolving } =
-		select( STORE_NAME );
+	const {
+		getReportStats,
+		getReportStatsError,
+		isResolving,
+	}: ReportsSelectors & WPDataSelectors = select( STORE_NAME );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -545,7 +551,7 @@ export function getReportTableQuery(
 	options: Omit< QueryOptions, 'endpoint' > & {
 		endpoint: ReportItemsEndpoint;
 	}
-) {
+): ReportQuery {
 	const { query, tableQuery = {} } = options;
 	const filterQuery = getFilterQuery( options );
 	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );

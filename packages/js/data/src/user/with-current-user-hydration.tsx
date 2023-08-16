@@ -4,6 +4,7 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
+import { WPDataSelectors } from '../types';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ import { WCUser } from './types';
  * @param {Object} currentUser Current user object in the same format as the WP REST API returns.
  */
 export const withCurrentUserHydration = ( currentUser: WCUser ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			// Use currentUser to hydrate calls to @wordpress/core-data's getCurrentUser().
 
@@ -25,22 +26,16 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
-				// @ts-expect-error both functions are not defined in the wp.data typings
-				const { isResolving, hasFinishedResolution } =
+				const { isResolving, hasFinishedResolution }: WPDataSelectors =
 					select( STORE_NAME );
 				return (
 					! isResolving( 'getCurrentUser' ) &&
 					! hasFinishedResolution( 'getCurrentUser' )
 				);
-			} );
+			}, [] );
 
-			const {
-				// @ts-expect-error startResolution is not defined in the wp.data typings
-				startResolution,
-				// @ts-expect-error finishResolution is not defined in the wp.data typings
-				finishResolution,
-				receiveCurrentUser,
-			} = useDispatch( STORE_NAME );
+			const { startResolution, finishResolution, receiveCurrentUser } =
+				useDispatch( STORE_NAME );
 
 			if ( shouldHydrate ) {
 				startResolution( 'getCurrentUser', [] );

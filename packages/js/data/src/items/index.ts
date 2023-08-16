@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
+import { createReduxStore, register } from '@wordpress/data';
+import { SelectFromMap } from '@automattic/data-stores';
 import { Reducer, AnyAction } from 'redux';
 /**
  * Internal dependencies
@@ -13,19 +13,19 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
 import controls from '../controls';
-import { WPDataActions, WPDataSelectors } from '../types';
+import { WPDataSelectors } from '../types';
 import { getItemsType } from './selectors';
-import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
-registerStore< State >( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
 	selectors,
 	resolvers,
 } );
+register( store );
 
 export const ITEMS_STORE_NAME = STORE_NAME;
 

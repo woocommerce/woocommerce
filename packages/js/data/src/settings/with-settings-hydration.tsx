@@ -8,11 +8,12 @@ import { createElement, useRef, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { WPDataSelectors } from '../types';
 import { STORE_NAME } from './constants';
 import { Settings } from './types';
 
 export const withSettingsHydration = ( group: string, settings: Settings ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
 
@@ -24,8 +25,10 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 			} = useDispatch( STORE_NAME );
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
+					const {
+						isResolving,
+						hasFinishedResolution,
+					}: WPDataSelectors = select( STORE_NAME );
 					return {
 						isResolvingGroup: isResolving( 'getSettings', [
 							group,

@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { WPDataSelector } from '../types';
 import { getResourceName } from '../utils';
 import {
 	ReportState,
@@ -54,4 +55,12 @@ export const getReportStatsError = (
 ) => {
 	const resourceName = getResourceName( endpoint, query );
 	return state.statErrors[ resourceName ] || false;
+};
+
+export type ReportsSelectors = {
+	getReportStatsError: WPDataSelector< typeof getReportStatsError >;
+	getReportStats: < T >(
+		endpoint: ReportStatEndpoint,
+		query: ReportQueryParams
+	) => ReportStatObjectInfer< T >;
 };

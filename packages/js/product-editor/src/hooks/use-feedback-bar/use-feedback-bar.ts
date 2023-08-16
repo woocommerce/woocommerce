@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import {
-	OPTIONS_STORE_NAME,
-	OptionsSelectors,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, OptionsSelectors } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,7 +13,7 @@ export const useFeedbackBar = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const { shouldShowFeedbackBar } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		const showFeedbackBarOption = getOption(

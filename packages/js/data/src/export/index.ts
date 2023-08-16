@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
+import { createReduxStore, register } from '@wordpress/data';
 import { Reducer, AnyAction } from 'redux';
 /**
  * Internal dependencies
@@ -11,17 +10,17 @@ import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer, { State } from './reducer';
-import { WPDataSelectors } from '../types';
 import controls from '../controls';
-import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
-registerStore< State >( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
 	selectors,
 } );
+
+register( store );
 
 export const EXPORT_STORE_NAME = STORE_NAME;

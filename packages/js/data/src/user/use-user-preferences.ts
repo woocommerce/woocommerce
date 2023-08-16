@@ -9,6 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { STORE_NAME } from './constants';
 import { WCUser, UserPreferences } from './types';
+import { WPDataSelectors } from '../types';
 
 /**
  * Retrieve and decode the user's WooCommerce meta values.
@@ -118,7 +119,6 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( STORE_NAME );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
-	// @ts-expect-error WP 5.3.x doesn't have the User entity defined.
 	let { saveUser } = dispatch;
 
 	const userData = useSelect( ( select ) => {
@@ -126,12 +126,22 @@ export const useUserPreferences = () => {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
-			// @ts-expect-error type definition is missing.
 			getLastEntitySaveError,
-			// @ts-expect-error type definition is missing.
 			hasStartedResolution,
-			// @ts-expect-error type definition is missing.
 			hasFinishedResolution,
+		}: WPDataSelectors & {
+			getCurrentUser: () => WCUser< 'capabilities' >;
+			getEntity: ( kind: string, name: string ) => unknown;
+			getEntityRecord: (
+				kind: string,
+				name: string,
+				key: string | number
+			) => unknown;
+			getLastEntitySaveError: (
+				kind: string,
+				name: string,
+				key: string | number
+			) => unknown;
 		} = select( STORE_NAME );
 
 		return {
@@ -144,7 +154,7 @@ export const useUserPreferences = () => {
 			getEntityRecord,
 			getLastEntitySaveError,
 		};
-	} );
+	}, [] );
 
 	const updateUserPreferences = <
 		T extends Record< string, unknown > = UserPreferences

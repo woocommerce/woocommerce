@@ -4,6 +4,7 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement, useEffect } from '@wordpress/element';
+import { WPDataSelectors } from '../types';
 
 /**
  * Internal dependencies
@@ -18,20 +19,20 @@ import { MenuItem } from './types';
  * @param {MenuItem[]} data.menuItems Menu items to hydrate.
  */
 export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const shouldHydrate = useSelect( ( select ) => {
 				if ( ! data ) {
 					return;
 				}
 
-				const { isResolving, hasFinishedResolution } =
+				const { isResolving, hasFinishedResolution }: WPDataSelectors =
 					select( STORE_NAME );
 				return (
 					! isResolving( 'getMenuItems' ) &&
 					! hasFinishedResolution( 'getMenuItems' )
 				);
-			} );
+			}, [] );
 			const { startResolution, finishResolution, setMenuItems } =
 				useDispatch( STORE_NAME );
 

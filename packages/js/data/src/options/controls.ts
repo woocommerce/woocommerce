@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { controls as dataControls } from '@wordpress/data-controls';
-import { Action } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -24,7 +23,7 @@ export const batchFetch = ( optionName: string ) => {
 
 export const controls = {
 	...dataControls,
-	BATCH_FETCH( { optionName }: Action ) {
+	BATCH_FETCH( { optionName }: { optionName: string } ) {
 		optionNames.push( optionName );
 
 		return new Promise( ( resolve ) => {

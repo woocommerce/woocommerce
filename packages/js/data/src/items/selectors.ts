@@ -10,6 +10,7 @@ import { getResourceName } from '../utils';
 import { getTotalCountResourceName } from './utils';
 
 import { ItemType, ItemsState, Query, ItemInfer } from './types';
+import { WPDataSelector } from '../types';
 
 export type getItemsType = < T extends ItemType >(
 	itemType: T,
@@ -71,4 +72,10 @@ export const getItemsError = (
 ) => {
 	const resourceName = getResourceName( itemType, query );
 	return state.errors[ resourceName ];
+};
+
+export type SettingsSelectors = {
+	getItemsError: WPDataSelector< typeof getItemsError >;
+	getItemsTotalCount: WPDataSelector< typeof getItemsTotalCount >;
+	getItems: getItemsType;
 };

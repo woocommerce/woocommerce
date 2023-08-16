@@ -10,6 +10,8 @@ import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
 import { ItemInfer, ItemType, Query } from './types';
 import { ItemsSelector } from './';
+import { SettingsSelectors } from './selectors';
+import { WPDataSelectors } from '../types';
 
 type Options = {
 	id: number;
@@ -44,7 +46,11 @@ export function getLeaderboard( options: Options ) {
 		filterQuery,
 	} = options;
 
-	const { getItems, getItemsError, isResolving } = select( STORE_NAME );
+	const {
+		getItems,
+		getItemsError,
+		isResolving,
+	}: SettingsSelectors & WPDataSelectors = select( STORE_NAME );
 	const response = {
 		isRequesting: false,
 		isError: false,

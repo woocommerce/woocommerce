@@ -240,12 +240,13 @@ export interface WCDataSelector {
 }
 
 // Other exports
+export { OptionsSelectors };
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
 export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
 export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
-export { ActionDispatchers as ProductVariationsActions } from './product-variations/types';
+export { ProductVariationsActions } from './product-variations/actions';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
 export { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';

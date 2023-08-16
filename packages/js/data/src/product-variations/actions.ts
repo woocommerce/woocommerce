@@ -3,6 +3,7 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
+import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import TYPES from './action-types';
 import { IdQuery, IdType, Item } from '../crud/types';
 import { WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
 import type {
+	ActionDispatchers,
 	BatchUpdateRequest,
 	BatchUpdateResponse,
 	GenerateRequest,
@@ -138,3 +140,8 @@ export type Actions = ReturnType<
 	| typeof generateProductVariationsError
 	| typeof generateProductVariationsSuccess
 >;
+
+export type ProductVariationsActions = DispatchFromMap< {
+	generateProductVariations: typeof generateProductVariations;
+} > &
+	ActionDispatchers;

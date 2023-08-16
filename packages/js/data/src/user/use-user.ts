@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { WPDataSelectors } from '../types';
 import { STORE_NAME } from './constants';
 import { WCUser } from './types';
 
@@ -17,19 +18,23 @@ import { WCUser } from './types';
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
 		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-		// @ts-expect-errors Property 'hasStartedResolution', 'hasFinishedResolution' does not exist on type @types/wordpress__core-data
-		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
-			select( STORE_NAME );
+		const {
+			getCurrentUser,
+			hasStartedResolution,
+			hasFinishedResolution,
+		}: WPDataSelectors & {
+			getCurrentUser: () => WCUser< 'capabilities' >;
+		} = select( STORE_NAME );
 
 		return {
 			isRequesting:
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
 			// We register additional user data in backend so we need to use a type assertion here for WC user.
-			user: getCurrentUser() as WCUser< 'capabilities' >,
+			user: getCurrentUser(),
 			getCurrentUser,
 		};
-	} );
+	}, [] );
 
 	const currentUserCan = ( capability: string ) => {
 		if ( userData.user && userData.user.is_super_admin ) {

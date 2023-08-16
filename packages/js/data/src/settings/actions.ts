@@ -151,7 +151,9 @@ export type Actions = ReturnType<
 	| typeof clearSettings
 >;
 
-export type ActionDispatchers = DispatchFromMap< {
-	createProduct: typeof persistSettingsForGroup;
-	updateProduct: typeof updateAndPersistSettingsForGroup;
-} >;
+export type ActionsTypes = {
+	persistSettingsForGroup: typeof persistSettingsForGroup;
+	updateAndPersistSettingsForGroup: typeof updateAndPersistSettingsForGroup;
+};
+
+export type ActionDispatchers = DispatchFromMap< ActionsTypes >;

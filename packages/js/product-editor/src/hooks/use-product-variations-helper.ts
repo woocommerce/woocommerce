@@ -4,7 +4,11 @@
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useState } from '@wordpress/element';
-import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductVariationsActions,
+	WPDataActions,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,7 +24,9 @@ export function useProductVariationsHelper() {
 	const {
 		generateProductVariations: _generateProductVariations,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	}: ProductVariationsActions & WPDataActions = useDispatch(
+		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	);
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 

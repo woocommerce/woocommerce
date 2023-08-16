@@ -10,20 +10,23 @@ import { createElement, useEffect, useRef } from '@wordpress/element';
  */
 import { STORE_NAME } from './constants';
 import { ProfileItems } from './types';
+import { WPDataSelectors } from '../types';
 
 export const withOnboardingHydration = ( data: {
 	profileItems: ProfileItems;
 } ) => {
 	let hydratedProfileItems = false;
 
-	return createHigherOrderComponent< Record< string, unknown > >(
+	return createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
+					const {
+						isResolving,
+						hasFinishedResolution,
+					}: WPDataSelectors = select( STORE_NAME );
 					return {
 						isResolvingGroup: isResolving( 'getProfileItems', [] ),
 						hasFinishedResolutionGroup: hasFinishedResolution(
@@ -31,7 +34,8 @@ export const withOnboardingHydration = ( data: {
 							[]
 						),
 					};
-				}
+				},
+				[]
 			);
 
 			const { startResolution, finishResolution, setProfileItems } =

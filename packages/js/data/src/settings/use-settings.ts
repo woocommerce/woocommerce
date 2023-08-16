@@ -8,6 +8,7 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
+import { SettingsSelectors } from './selectors';
 
 export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 	const { requestedSettings, settingsError, isRequesting, isDirty } =
@@ -18,7 +19,7 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 					getSettingsForGroup,
 					getIsDirty,
 					isUpdateSettingsRequesting,
-				} = select( STORE_NAME );
+				}: SettingsSelectors = select( STORE_NAME );
 				return {
 					requestedSettings: getSettingsForGroup(
 						group,

@@ -6,7 +6,7 @@ import { getReportTableQuery, getRequestQuery } from './utils';
 export type ReportItemsEndpoint =
 	| 'customers'
 	| 'products'
-	| 'varitations'
+	| 'variations'
 	| 'orders'
 	| 'categories'
 	| 'taxes'
@@ -26,6 +26,7 @@ export type ReportStatEndpoint =
 
 export type ReportQueryParams = ReturnType< typeof getReportTableQuery > & {
 	stats?: string;
+	fields?: string[];
 };
 export type ReportStatQueryParams = ReturnType< typeof getRequestQuery >;
 
@@ -552,4 +553,14 @@ export type ReportState = {
 	stats: {
 		[ resourceName: string ]: ReportStatObject;
 	};
+};
+
+export type ReportQuery = {
+	orderby?: string;
+	order?: string;
+	after?: string;
+	before?: string;
+	page?: string | number;
+	per_page?: string | number;
+	fields?: string[];
 };

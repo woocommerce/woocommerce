@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import schema from '@wordpress/core-data';
+import { User } from '@wordpress/core-data';
 
 export type UserPreferences = {
 	activity_panel_inbox_last_read?: string;
@@ -34,11 +34,9 @@ export type WoocommerceMeta = UserPreferences & {
 	task_list_tracked_started_tasks?: string;
 };
 
-export type WCUser<
-	T extends keyof schema.Schema.BaseUser< 'view' > = schema.Schema.ViewKeys.User
-> = Pick<
-	schema.Schema.BaseUser< 'view' >,
-	schema.Schema.ViewKeys.User | T
+export type WCUser< T extends keyof User = keyof User > = Pick<
+	User,
+	keyof User | T
 > & {
 	// https://github.com/woocommerce/woocommerce/blob/3eb1938f4a0d0a93c9bcaf2a904f96bd501177fc/plugins/woocommerce/src/Internal/Admin/WCAdminUser.php#L40-L58
 	woocommerce_meta: WoocommerceMeta;

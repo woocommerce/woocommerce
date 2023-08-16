@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { WPDataSelector } from '../types';
 import { getResourceName, getResourcePrefix } from '../utils';
 import { SettingsState, Settings } from './types';
 
@@ -115,4 +116,20 @@ export const getSettingsError = (
 		return ( state[ group ] && state[ group ].error ) || false;
 	}
 	return state[ getResourceName( group, id ) ].error || false;
+};
+
+export type SettingsSelectors = {
+	getSettingsGroupNames: WPDataSelector< typeof getSettingsGroupNames >;
+	getSettings: WPDataSelector< typeof getSettings >;
+	getDirtyKeys: WPDataSelector< typeof getDirtyKeys >;
+	getIsDirty: WPDataSelector< typeof getIsDirty >;
+	getSettingsForGroup: WPDataSelector< typeof getSettingsForGroup >;
+	isUpdateSettingsRequesting: WPDataSelector<
+		typeof isUpdateSettingsRequesting
+	>;
+	getSetting: WPDataSelector< typeof getSetting >;
+	getLastSettingsErrorForGroup: WPDataSelector<
+		typeof getLastSettingsErrorForGroup
+	>;
+	getSettingsError: WPDataSelector< typeof getSettingsError >;
 };

@@ -44,7 +44,7 @@ export const useOptionsHydration = ( data: Options ) => {
 };
 
 export const withOptionsHydration = ( data: Options ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
 			useOptionsHydration( data );
 
