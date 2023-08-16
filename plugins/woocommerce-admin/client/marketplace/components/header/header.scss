@@ -8,7 +8,7 @@
 	grid-template: 'mktpl-title mktpl-search mktpl-meta' 60px
 		'mktpl-tabs mktpl-tabs mktpl-tabs' auto / 1fr 320px 36px;
 	left: 0;
-	padding: 10px $content-spacing-large 0;
+	padding: 0 $content-spacing-large;
 	position: absolute;
 	top: -60px;
 	width: 100%;
@@ -21,14 +21,23 @@
 			'mktpl-search mktpl-search' auto / auto 48px;
 		padding: 0;
 	}
+
+	.woocommerce-marketplace__header-title {
+		font-size: 14px;
+		font-weight: 600;
+		margin: 0;
+		padding: 10px 0 0;
+
+		@media (width <= $breakpoint-medium) {
+			padding-left: var(--large-gap);
+		}
+	}
 }
 
 .woocommerce-marketplace__header-title {
 	align-items: center;
 	align-self: stretch;
 	display: flex;
-	font-size: 16px;
-	font-weight: 700;
 	grid-area: mktpl-title;
 	line-height: 18px;
 
@@ -40,9 +49,11 @@
 .woocommerce-marketplace__header-meta {
 	grid-area: mktpl-meta;
 	justify-self: end;
+	padding-top: 10px;
 
 	@media (width <= $breakpoint-medium) {
 		margin-right: $content-spacing-small;
+		padding: 0;
 	}
 }
 
@@ -56,13 +67,8 @@
 }
 
 .woocommerce-marketplace__search {
-	grid-area: mktpl-search;
-	background: #f0f0f0;
-	border-radius: 2px;
-	display: flex;
-	height: 40px;
 	margin-right: $medium-gap;
-	padding: 4px 8px 4px 12px;
+	margin-top: 10px;
 
 	input[type='search'] {
 		all: unset;
@@ -73,9 +79,3 @@
 		margin: $content-spacing-small;
 	}
 }
-
-.woocommerce-marketplace__search-button {
-	all: unset;
-	cursor: pointer;
-}
-

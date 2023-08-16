@@ -9,8 +9,8 @@ import { __ } from '@wordpress/i18n';
 
 export default function HeaderTitle() {
 	return (
-		<div className="woocommerce-marketplace__header-title">
+		<h1 className="woocommerce-marketplace__header-title">
 			{ __( 'Extensions', 'woocommerce' ) }
-		</div>
+		</h1>
 	);
 }

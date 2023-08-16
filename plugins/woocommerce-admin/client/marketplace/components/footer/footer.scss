@@ -11,7 +11,7 @@
 	box-sizing: content-box;
 	max-width: $content-max-width;
 	margin: auto;
-	padding: 48px $content-spacing-large;
+	padding: $content-spacing-xlarge $content-spacing-small;
 
 	&-title {
 		color: $gutenberg-gray-900;
@@ -45,6 +45,10 @@
 }
 
 @media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__footer {
+		padding: $content-spacing-xlarge $content-spacing-large;
+	}
+
 	.woocommerce-marketplace__footer-columns {
 		flex-direction: row;
 	}

@@ -28,10 +28,10 @@ export default function Header( props: HeaderProps ) {
 				selectedTab={ selectedTab }
 				setSelectedTab={ setSelectedTab }
 			/>
+			<Search />
 			<div className="woocommerce-marketplace__header-meta">
 				<HeaderAccount />
 			</div>
-			<Search />
 		</header>
 	);
 }
