@@ -19,6 +19,10 @@
 .woocommerce-marketplace__no-results__description {
 	text-align: center;
 	font-size: 13px;
+
+	p {
+		color: $gutenberg-gray-700;
+	}
 }
 
 .woocommerce-marketplace__no-results__description--bold {
