@@ -3,7 +3,6 @@ on:
     push:
         branches:
             - 'e2e/playwright-tests-EN-ES-AR'
-            
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
     cancel-in-progress: true
