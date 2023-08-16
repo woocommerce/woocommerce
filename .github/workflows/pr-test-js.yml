@@ -1,4 +1,4 @@
-name: Lint and tests for JS packages and woocommerce-admin/client
+name: Run tests for JS packages and woocommerce-admin/client
 
 on:
     pull_request:
@@ -11,7 +11,7 @@ concurrency:
 permissions: {}
 
 jobs:
-    lint-test-js:
+    test-js:
         name: Run JS Tests
         runs-on: ubuntu-20.04
         permissions:
@@ -33,7 +33,7 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  # ignore scripts is faster, and postinstall should not be needed for test.
+                  # ignore scripts is faster, and postinstall should not be needed for tests.
                   pnpm install --ignore-scripts
 
             - name: Test
