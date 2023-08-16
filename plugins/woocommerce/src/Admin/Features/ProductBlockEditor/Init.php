@@ -425,7 +425,6 @@ class Init {
 							'woocommerce/product-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
-								'title'      => '',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 								'type'       => 'info',
@@ -562,7 +561,6 @@ class Init {
 							'woocommerce/product-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
-								'title'      => '',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 								'type'       => 'info',
@@ -734,7 +732,6 @@ class Init {
 							'woocommerce/product-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
-								'title'      => '',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 								'type'       => 'info',
