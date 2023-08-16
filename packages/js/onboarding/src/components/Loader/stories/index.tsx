@@ -8,7 +8,8 @@ import React, { createElement } from 'react';
  */
 import { Loader } from '../';
 
-export const ExampleLoader = () => (
+/** Simple straightforward example of how to use the <Loader> compound component */
+export const ExampleSimpleLoader = () => (
 	<Loader>
 		<Loader.Layout>
 			<Loader.Illustration>
@@ -28,7 +29,50 @@ export const ExampleLoader = () => (
 	</Loader>
 );
 
+/** <Loader> component story with controls */
+const Template = ( { progress, title, messages } ) => (
+	<Loader>
+		<Loader.Layout>
+			<Loader.Illustration>
+				<img
+					src="https://placekitten.com/200/200"
+					alt="a cute kitteh"
+				/>
+			</Loader.Illustration>
+			<Loader.Title>{ title }</Loader.Title>
+			<Loader.ProgressBar progress={ progress } />
+			<Loader.Sequence interval={ 1000 }>
+				{ messages.map( ( message, index ) => (
+					<Loader.Subtext key={ index }>{ message }</Loader.Subtext>
+				) ) }
+			</Loader.Sequence>
+		</Loader.Layout>
+	</Loader>
+);
+
+export const ExampleLoaderWithControls = Template.bind( {} );
+ExampleLoaderWithControls.args = {
+	title: 'Very Impressive Title',
+	progress: 30,
+	messages: [ 'Message 1', 'Message 2', 'Message 3' ],
+};
+
 export default {
 	title: 'WooCommerce Admin/Onboarding/Loader',
-	component: Loader,
+	component: ExampleLoaderWithControls,
+	argTypes: {
+		title: {
+			control: 'text',
+		},
+		progress: {
+			control: {
+				type: 'range',
+				min: 0,
+				max: 100,
+			},
+		},
+		messages: {
+			control: 'object',
+		},
+	},
 };
