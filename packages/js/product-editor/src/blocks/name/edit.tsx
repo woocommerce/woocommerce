@@ -51,12 +51,14 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 		useState( false );
 
 	const productId = useEntityId( 'postType', 'product' );
-	const product: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			productId
-		)
+	const product: Product = useSelect(
+		( select ) =>
+			select( 'core' ).getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
+			),
+		[]
 	);
 
 	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
@@ -79,7 +81,8 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 				};
 			}
 			return {};
-		}
+		},
+		[]
 	);
 
 	const {

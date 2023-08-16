@@ -51,14 +51,14 @@ export function useProductAttributes( {
 			return resolveSelect(
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 			)
-				.getProductAttributeTerms< ProductAttributeTerm[] >( {
+				.getProductAttributeTerms( {
 					attribute_id: attributeId,
 				} )
 				.then(
-					( attributeTerms ) => {
+					( attributeTerms: ProductAttributeTerm[] ) => {
 						return attributeTerms;
 					},
-					( error ) => {
+					( error: Error ) => {
 						return error;
 					}
 				);

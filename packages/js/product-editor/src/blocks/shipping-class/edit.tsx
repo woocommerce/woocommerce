@@ -7,6 +7,9 @@ import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
 	ProductShippingClass,
 	PartialProduct,
+	ProductShippingClassSelectors,
+	ProductShippingClassesActions,
+	WPDataActions,
 } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -77,7 +80,7 @@ export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
 
 	const { createProductShippingClass, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-	);
+	) as ProductShippingClassesActions & WPDataActions;
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
@@ -117,10 +120,9 @@ export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
 	const { shippingClasses } = useSelect( ( select ) => {
 		const { getProductShippingClasses } = select(
 			EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-		);
+		) as ProductShippingClassSelectors;
 		return {
-			shippingClasses:
-				getProductShippingClasses< ProductShippingClass[] >() ?? [],
+			shippingClasses: getProductShippingClasses() ?? [],
 		};
 	}, [] );
 
@@ -195,10 +197,10 @@ export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
 						categories,
 						shippingClasses
 					) }
-					onAdd={ ( shippingClassValues ) =>
-						createProductShippingClass<
-							Promise< ProductShippingClass >
-						>( shippingClassValues )
+					onAdd={ ( shippingClassValues ) => {
+						return createProductShippingClass(
+							shippingClassValues as ProductShippingClass
+						)
 							.then( ( value ) => {
 								recordEvent(
 									'product_new_shipping_class_modal_add_button_click'
@@ -209,8 +211,8 @@ export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
 								setShippingClass( value.slug );
 								return value;
 							} )
-							.catch( handleShippingClassServerError )
-					}
+							.catch( handleShippingClassServerError );
+					} }
 					onCancel={ () => setShowShippingClassModal( false ) }
 				/>
 			) }

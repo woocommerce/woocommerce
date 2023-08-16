@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	OptionsSelectors,
+	WCDataSelector,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
