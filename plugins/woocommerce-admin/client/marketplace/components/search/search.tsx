@@ -11,7 +11,7 @@ import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
  */
 import './search.scss';
 
-const searchPlaceholder = __( 'Search extensions and themes', 'woocommerce' );
+const searchPlaceholder = __( 'Search for extensions', 'woocommerce' );
 
 /**
  * Search component.
