@@ -6,35 +6,31 @@ module.exports = ( { core } ) => {
 	const emoji_UPLOAD = selectEmoji( UPLOAD_RESULT );
 	const emoji_E2E = selectEmoji( E2E_RESULT );
 
-	const block = {
-		type: 'context',
-		elements: [
-			{
+	const blockGroup = [
+		{
+			type: 'section',
+			text: {
 				type: 'mrkdwn',
-				text: PLUGIN_NAME,
+				text: `*${ PLUGIN_NAME }*`,
 			},
-			{
-				type: 'mrkdwn',
-				text: ' ',
-			},
-			{
-				type: 'mrkdwn',
-				text: ' ',
-			},
-			{
-				type: 'mrkdwn',
-				text: `Upload test ${ emoji_UPLOAD }`,
-			},
-			{
-				type: 'mrkdwn',
-				text: `E2E ${ emoji_E2E }`,
-			},
-		],
-	};
-	const block_stringified = JSON.stringify( block );
+		},
+		{
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: `"Upload plugin" test ${ emoji_UPLOAD }\tOther E2E tests ${ emoji_E2E }`,
+				},
+			],
+		},
+		{
+			type: 'divider',
+		},
+	];
+	const blockGroup_stringified = JSON.stringify( blockGroup );
 
 	const path = `/tmp/${ PLUGIN_SLUG }.json`;
-	fs.writeFileSync( path, block_stringified );
+	fs.writeFileSync( path, blockGroup_stringified );
 
 	core.setOutput( 'path', path );
 };
