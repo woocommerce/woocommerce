@@ -25,6 +25,5 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "selectedTab" ],
 	"editorStyle": "file:./editor.css"
 }
