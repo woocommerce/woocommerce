@@ -55,8 +55,6 @@
 		"@react-spring/web": "^9.4.3",
 		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/api": "^0.2.0",
-		"@woocommerce/e2e-environment": "^0.3.0",
-		"@woocommerce/e2e-utils": "^0.2.0",
 		"@wordpress/a11y": "wp-6.0",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/base-styles": "wp-6.0",

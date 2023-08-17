@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+On the order confirmation screen, show the 'thank you' message regardless of whether the viewer is verified or not.

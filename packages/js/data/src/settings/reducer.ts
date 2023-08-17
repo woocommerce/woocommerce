@@ -89,7 +89,7 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 								: groupIds,
 						error,
 						lastReceived: time,
-						isRequesting: false,
+						isRequesting: state[ group ]?.isRequesting || false,
 						dirty:
 							state[ group ] && state[ group ].dirty
 								? union( state[ group ].dirty, groupIds )

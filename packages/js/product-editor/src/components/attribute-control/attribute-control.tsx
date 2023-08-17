@@ -8,7 +8,7 @@ import {
 	Fragment,
 	createInterpolateElement,
 } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
@@ -45,9 +45,11 @@ type AttributeControlProps = {
 	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	onNoticeDismiss?: () => void;
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
 	uiStrings?: {
+		notice?: string | React.ReactElement;
 		emptyStateSubtitle?: string;
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
@@ -74,6 +76,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalOpen = () => {},
 	onRemove = () => {},
 	onRemoveCancel = () => {},
+	onNoticeDismiss = () => {},
 	uiStrings,
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
@@ -220,6 +223,16 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			>
 				{ uiStrings.newAttributeListItemLabel }
 			</Button>
+			{ uiStrings.notice && (
+				<Notice
+					isDismissible={ true }
+					status="warning"
+					className="woocommerce-attribute-field__notice"
+					onRemove={ onNoticeDismiss }
+				>
+					<p>{ uiStrings.notice }</p>
+				</Notice>
+			) }
 			{ Boolean( value.length ) && (
 				<Sortable
 					onOrderChange={ ( items ) => {

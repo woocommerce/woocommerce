@@ -2711,12 +2711,6 @@ importers:
       '@woocommerce/api':
         specifier: ^0.2.0
         version: 0.2.0
-      '@woocommerce/e2e-environment':
-        specifier: ^0.3.0
-        version: link:../../packages/js/e2e-environment
-      '@woocommerce/e2e-utils':
-        specifier: ^0.2.0
-        version: link:../../packages/js/e2e-utils
       '@wordpress/a11y':
         specifier: wp-6.0
         version: 3.6.1
@@ -41123,7 +41117,7 @@ packages:
       sass: 1.60.0
       schema-utils: 3.1.1
       semver: 7.5.0
-      webpack: 5.76.3(webpack-cli@4.9.2)
+      webpack: 5.76.3(webpack-cli@3.3.12)
     dev: true
 
   /sass-loader@12.6.0(sass@1.60.0)(webpack@5.76.3):
