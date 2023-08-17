@@ -131,12 +131,14 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 											'.media-modal, .components-modal__frame'
 										) ) ||
 									( event.relatedTarget &&
+										// Check if not a button within the toolbar is clicked, to prevent hiding the toolbar.
 										(
 											event.relatedTarget as Element
 										 ).closest(
 											'.woocommerce-image-gallery__toolbar'
 										) ) ||
 									( event.relatedTarget &&
+										// Prevent toolbar from hiding if the dropdown is clicked within the toolbar.
 										(
 											event.relatedTarget as Element
 										 ).closest(

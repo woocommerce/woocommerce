@@ -60,7 +60,6 @@ export function ImageGalleryToolbarDropdown( {
 							render={ ( { open } ) => (
 								<MenuItem
 									onClick={ () => {
-										// onClose();
 										open();
 									} }
 								>
