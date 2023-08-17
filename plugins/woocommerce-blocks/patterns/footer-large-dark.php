@@ -22,11 +22,11 @@
 				<!-- /wp:spacer -->
 
 				<!-- wp:heading {"level":5} -->
-				<h5>Join the community</h5>
+				<h5><?php esc_html_e( 'Join the community', 'woo-gutenberg-products-block' ); ?></h5>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph -->
-				<p>Learn about new products and discounts!</p>
+				<p><?php esc_html_e( 'Learn about new products and discounts!', 'woo-gutenberg-products-block' ); ?></p>
 				<!-- /wp:paragraph -->
 
 				<!-- wp:spacer {"height":"20px"} -->
@@ -58,7 +58,7 @@
 
 		<!-- wp:column {"verticalAlignment":"top","width":"20%","style":{"spacing":{"blockGap":"16px"}}} -->
 		<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:20%">
-			<!-- wp:woocommerce/customer-account {"displayStyle":"text_only"} /-->
+			<!-- wp:woocommerce/customer-account {"displayStyle":"text_only","fontSize":"small"} /-->
 		</div>
 		<!-- /wp:column -->
 	</div>
