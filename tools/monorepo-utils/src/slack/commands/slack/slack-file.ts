@@ -15,7 +15,7 @@ import { existsSync } from 'fs';
  */
 import { Logger } from '../../../core/logger';
 
-export const slackFileCommand = new Command( 'message' )
+export const slackFileCommand = new Command( 'file' )
 	.description( 'Send a file upload message to a slack channel' )
 	.argument(
 		'<token>',
