@@ -422,7 +422,7 @@ class Init {
 					),
 					array(
 						array(
-							'woocommerce/product-notice',
+							'woocommerce/product-has-variations-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
@@ -558,7 +558,7 @@ class Init {
 					),
 					array(
 						array(
-							'woocommerce/product-notice',
+							'woocommerce/product-has-variations-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
@@ -729,7 +729,7 @@ class Init {
 					),
 					array(
 						array(
-							'woocommerce/product-notice',
+							'woocommerce/product-has-variations-notice',
 							array(
 								'id'         => 'wc-product-notice-has-options',
 								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
