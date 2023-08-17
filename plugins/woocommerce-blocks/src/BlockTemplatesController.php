@@ -952,6 +952,15 @@ class BlockTemplatesController {
 	 * @return string THe actual permalink assigned to the page. May differ from $permalink if it was already taken.
 	 */
 	protected function sync_endpoint_with_page( $page, $page_slug, $permalink ) {
+		$matching_page = get_page_by_path( $permalink );
+
+		if ( $matching_page && 'publish' === $matching_page->post_status ) {
+			// Existing page matches given permalink; use its ID.
+			update_option( 'woocommerce_' . $page_slug . '_page_id', $matching_page->ID );
+			return $permalink;
+		}
+
+		// No matching page; either update current page (by ID stored in option table) or create a new page.
 		if ( ! $page ) {
 			$updated_page_id = wc_create_page(
 				esc_sql( $permalink ),
