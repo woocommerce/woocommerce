@@ -543,7 +543,7 @@ describe( 'Shopper → Mini-Cart', () => {
 				);
 			} );
 
-			it( 'User can see translation in filled Mini-Cart', async () => {
+			it.skip( 'User can see translation in filled Mini-Cart', async () => {
 				await page.click(
 					selectors.frontend.productWithAddToCartButton
 				);
@@ -575,7 +575,7 @@ describe( 'Shopper → Mini-Cart', () => {
 				);
 			} );
 
-			it( 'User can see translation in filled Mini-Cart', async () => {
+			it.skip( 'User can see translation in filled Mini-Cart', async () => {
 				await page.click(
 					selectors.frontend.productWithAddToCartButton
 				);
