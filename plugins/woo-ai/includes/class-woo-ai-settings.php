@@ -30,6 +30,13 @@ class Woo_AI_Settings {
 	protected $id = 'woo-ai-settings-tab';
 
 	/**
+	 * Tone of voice select options.
+	 *
+	 * @var array
+	 */
+	private $tone_of_voice_select_options;
+
+	/**
 	 * Constants used for naming of saved options in the database.
 	 */
 	private const WOO_AI_OPTIONS_PREFIX        = 'woo_ai_';
@@ -52,6 +59,17 @@ class Woo_AI_Settings {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_settings_script' ) );
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_woo_ai_settings' ), 10, 2 );
+		add_filter( 'woocommerce_settings_groups', array( $this, 'add_woo_ai_settings_group' ) );
+		add_filter( 'woocommerce_settings-woo-ai', array( $this, 'add_woo_ai_settings_group_settings' ) );
+
+		$this->tone_of_voice_select_options = array(
+			'informal'     => __( 'Relaxed and friendly.', 'woocommerce' ),
+			'humorous'     => __( 'Light-hearted and fun.', 'woocommerce' ),
+			'neutral'      => __( 'A balanced tone that uses casual expressions.', 'woocommerce' ),
+			'youthful'     => __( 'Friendly and cheeky tone.', 'woocommerce' ),
+			'formal'       => __( 'Direct yet respectful formal tone.', 'woocommerce' ),
+			'motivational' => __( 'Passionate and inspiring.', 'woocommerce' ),
+		);
 
 		$this->add_sanitization_hooks();
 	}
@@ -76,6 +94,49 @@ class Woo_AI_Settings {
 	 */
 	public function strip_tags_field_value( $raw_value ) {
 		return wp_strip_all_tags( $raw_value ?? '' );
+	}
+
+	/**
+	 * Adds settings which can be retrieved via the WooCommerce Settings API.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/wiki/Settings-API
+	 *
+	 * @param array $settings The original settings array.
+	 * @return array The modified settings array.
+	 */
+	public function add_woo_ai_settings_group_settings( $settings ) {
+		$settings[] = array(
+			'id'          => 'tone-of-voice',
+			'option_key'  => self::TONE_OF_VOICE_OPTION_KEY,
+			'label'       => __( 'Storewide Tone of Voice', 'woocommerce' ),
+			'description' => __( 'This controls the conversational tone that will be used when generating content.', 'woocommerce' ),
+			'default'     => 'neutral',
+			'type'        => 'select',
+			'options'     => $this->tone_of_voice_select_options,
+		);
+		$settings[] = array(
+			'id'          => 'store-description',
+			'option_key'  => self::STORE_DESCRIPTION_OPTION_KEY,
+			'label'       => __( 'Store Description', 'woocommerce' ),
+			'description' => __( 'This is a short description of your store which could be used to help generate content.', 'woocommerce' ),
+			'type'        => 'textarea',
+		);
+		return $settings;
+	}
+
+	/**
+	 * Register our Woo AI plugin group to the WooCommerce Settings API.
+	 *
+	 * @param array $locations The original settings array.
+	 * @return array The modified settings array.
+	 */
+	public function add_woo_ai_settings_group( $locations ) {
+		$locations[] = array(
+			'id'          => 'woo-ai',
+			'label'       => __( 'Woo AI', 'woocommerce' ),
+			'description' => __( 'Settings for the Woo AI plugin.', 'woocommerce' ),
+		);
+		return $locations;
 	}
 
 	/**
@@ -121,14 +182,7 @@ class Woo_AI_Settings {
 			'name'    => __( 'Tone of voice', 'woocommerce' ),
 			'desc'    => __( 'Select the tone of voice for the AI', 'woocommerce' ),
 			'type'    => 'select',
-			'options' => array(
-				'informal'     => __( 'Relaxed and friendly.', 'woocommerce' ),
-				'humorous'     => __( 'Light-hearted and fun.', 'woocommerce' ),
-				'neutral'      => __( 'A balanced tone that uses casual expressions.', 'woocommerce' ),
-				'youthful'     => __( 'Friendly and cheeky tone.', 'woocommerce' ),
-				'formal'       => __( 'Direct yet respectful formal tone.', 'woocommerce' ),
-				'motivational' => __( 'Passionate and inspiring.', 'woocommerce' ),
-			),
+			'options' => $this->tone_of_voice_select_options,
 			'css'     => 'min-width:300px;',
 
 		);
