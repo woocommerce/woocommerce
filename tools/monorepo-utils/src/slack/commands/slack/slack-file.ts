@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { WebClient } from '@slack/web-api';
+import { ErrorCode, WebClient } from '@slack/web-api';
 import { basename } from 'path';
 
 /**
@@ -24,8 +24,8 @@ export const slackFileCommand = new Command( 'file' )
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
 	.argument( '<filePath>', 'File path to upload to the slack channel.' )
 	.argument(
-		'<channels...>',
-		'Slack channels to send the message to. Pass as many as you like.'
+		'<channelIds...>',
+		'Slack channel IDs to send the message to. Pass as many as you like.'
 	)
 	.option(
 		'--dont-fail',
@@ -48,21 +48,34 @@ export const slackFileCommand = new Command( 'file' )
 		}
 
 		const client = new WebClient( token );
+
 		for ( const channel of channels ) {
 			try {
-				// @ts-expect-error - types are not up to date.
 				await client.files.uploadV2( {
 					file: filePath,
 					filename: basename( filePath ),
-					channels: channel,
+					channel_id: channel,
 					initial_comment: text.replace( /\\n/g, '\n' ),
+					request_file_info: false,
 				} );
 
 				Logger.notice(
 					`Successfully uploaded ${ filePath } to channel: ${ channel }`
 				);
 			} catch ( e ) {
-				Logger.error( e, shouldFail );
+				if (
+					'code' in e &&
+					e.code === ErrorCode.PlatformError &&
+					'message' in e &&
+					e.message.includes( 'missing_scope' )
+				) {
+					Logger.error(
+						`The provided token does not have the required scopes, please add files:write and chat:write to the token.`,
+						shouldFail
+					);
+				} else {
+					Logger.error( e, shouldFail );
+				}
 			}
 		}
 
