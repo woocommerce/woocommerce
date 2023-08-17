@@ -29,7 +29,6 @@ module.exports = ( { core } ) => {
 					emoji: true,
 				},
 			},
-			,
 			{
 				type: 'context',
 				elements: [
