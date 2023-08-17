@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry;
 
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+
 /**
  * Template transformer.
  */
@@ -12,7 +14,7 @@ class TemplateTransformer {
 	 *
 	 * @param object $block_template The product template.
 	 */
-	public function transform( $block_template ): \WP_Block_Template {
+	public function transform( BlockTemplateInterface $block_template ): \WP_Block_Template {
 		$template                 = new \WP_Block_Template();
 		$template->id             = $block_template->get_id();
 		$template->theme          = 'woocommerce/woocommerce';
