@@ -20,6 +20,7 @@
 		"commander": "^10.0.1",
 		"dotenv": "^10.0.0",
 		"figlet": "^1.6.0",
+		"form-data": "^4.0.0",
 		"glob": "^10.2.4",
 		"graphql": "^16.6.0",
 		"gray-matter": "^4.0.3",
