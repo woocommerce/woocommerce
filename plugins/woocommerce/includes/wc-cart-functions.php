@@ -176,7 +176,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order && hash_equals( $order->get_order_key(), $order_key ) ) {
+			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
 				WC()->cart->empty_cart();
 			}
 		}
