@@ -34,7 +34,7 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
 		$block_template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-		$block_template_registry->register( 'custom-block-template', CustomBlockTemplate::class );
+		$block_template_registry->register( new CustomBlockTemplate() );
 	}
 
     /**

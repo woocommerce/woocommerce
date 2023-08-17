@@ -24,8 +24,8 @@ class BlockTemplateRegistryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		$this->block_template_registry = new BlockTemplateRegistry();
-		$this->block_template_registry->register( 'custom-block-template', CustomBlockTemplate::class );
-		$this->block_template_registry->register( 'my-block-template', BlockTemplate::class );
+		$this->block_template_registry->register( new CustomBlockTemplate() );
+		$this->block_template_registry->register( new BlockTemplate() );
 	}
 
 	/**
@@ -35,7 +35,7 @@ class BlockTemplateRegistryTest extends WC_Unit_Test_Case {
 		$registered_templates = $this->block_template_registry->get_all_registered();
 		$this->assertCount( 2, $registered_templates );
 		$this->assertInstanceOf( CustomBlockTemplate::class, $registered_templates['custom-block-template'] );
-		$this->assertInstanceOf( BlockTemplate::class, $registered_templates['my-block-template'] );
+		$this->assertInstanceOf( BlockTemplate::class, $registered_templates['woocommerce-block-template'] );
 	}
 
 	/**
@@ -43,14 +43,14 @@ class BlockTemplateRegistryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_register_duplicate_id() {
 		$this->expectException( \ValueError::class );
-		$registered_templates = $this->block_template_registry->register( 'my-block-template', BlockTemplate::class );
+		$registered_templates = $this->block_template_registry->register( new BlockTemplate() );
 	}
 
 	/**
 	 * Test getting a single template by ID.
 	 */
 	public function test_get_registered() {
-		$my_block_template = $this->block_template_registry->get_registered( 'my-block-template' );
-		$this->assertInstanceOf( BlockTemplate::class, $my_block_template );
+		$custom_block_template = $this->block_template_registry->get_registered( 'custom-block-template' );
+		$this->assertInstanceOf( CustomBlockTemplate::class, $custom_block_template );
 	}
 }

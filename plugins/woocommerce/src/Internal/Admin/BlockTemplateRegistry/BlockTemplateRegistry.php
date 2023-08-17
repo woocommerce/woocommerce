@@ -38,8 +38,8 @@ final class BlockTemplateRegistry {
      * @param string $id Template ID.
      * @param array  $template Template layout.
      */
-    public function register( string $id, string $template_class ) {
-        $template = new $template_class();
+    public function register( BlockTemplateInterface $template ) {
+        $id = $template->get_id();
 
         if ( isset( $this->templates[ $id ] ) ) {
 			throw new \ValueError( 'A template with the specified ID already exists in the registry.' );
