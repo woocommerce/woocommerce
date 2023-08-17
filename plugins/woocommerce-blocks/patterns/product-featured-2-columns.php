@@ -10,7 +10,7 @@
 <div class="wp-block-columns alignwide">
 	<!-- wp:column {"width":"66.66%"} -->
 	<div class="wp-block-column" style="flex-basis:66.66%">
-		<!-- wp:query {"queryId":7,"query":{"perPage":"4","pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":2},"namespace":"woocommerce/product-query"} -->
+		<!-- wp:query {"query":{"perPage":"4","pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":2},"namespace":"woocommerce/product-query"} -->
 		<div class="wp-block-query">
 			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
 			<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"bottom":"24px","top":"0"}}}} /-->

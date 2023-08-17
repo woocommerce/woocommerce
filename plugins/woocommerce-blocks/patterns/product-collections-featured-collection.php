@@ -21,7 +21,7 @@
 
 	<!-- wp:column {"verticalAlignment":"center","width":"66.66%"} -->
 	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:66.66%">
-		<!-- wp:query {"queryId":5,"query":{"perPage":"3","pages":0,"offset":0,"postType":"product","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
+		<!-- wp:query {"query":{"perPage":"3","pages":0,"offset":0,"postType":"product","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 		<div class="wp-block-query">
 			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
 
