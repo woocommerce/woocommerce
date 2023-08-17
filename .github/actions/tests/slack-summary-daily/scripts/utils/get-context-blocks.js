@@ -1,6 +1,10 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
+/**
+ * @param {string} blocksDir
+ * @returns {any[][]}
+ */
 const readContextBlocksFromJsonFiles = ( blocksDir ) => {
 	const jsonsDir = path.resolve( blocksDir );
 	const jsons = fs.readdirSync( jsonsDir );
