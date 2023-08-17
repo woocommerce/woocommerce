@@ -13,10 +13,7 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { Notice } from '../../components/notice';
-import {
-	hasAttributesUsedForVariations,
-	isSelectedTabApplicableForOptionsNotice,
-} from '../../utils';
+import { hasAttributesUsedForVariations } from '../../utils';
 
 export interface NoticeBlockAttributes extends BlockAttributes {
 	buttonText: string;
@@ -57,8 +54,7 @@ export function Edit( {
 	);
 
 	const isOptionsNoticeVisible =
-		hasAttributesUsedForVariations( productAttributes ) &&
-		isSelectedTabApplicableForOptionsNotice( context?.selectedTab );
+		hasAttributesUsedForVariations( productAttributes );
 
 	return (
 		<div { ...blockProps }>
