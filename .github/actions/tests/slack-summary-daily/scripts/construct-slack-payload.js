@@ -19,15 +19,15 @@ module.exports = ( { core } ) => {
 
 		const blocks = [
 			{
-				type: 'divider',
-			},
-			{
 				type: 'header',
 				text: {
 					type: 'plain_text',
 					text: 'Daily test results',
 					emoji: true,
 				},
+			},
+			{
+				type: 'divider',
 			},
 			{
 				type: 'context',
