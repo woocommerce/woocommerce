@@ -45,9 +45,7 @@ export function Edit( {
 						isSecondary={ true }
 						onClick={ () =>
 							navigateTo( {
-								url: getNewPath(
-									{ tab: 'variations' },
-								),
+								url: getNewPath( { tab: 'variations' } ),
 							} )
 						}
 					>
