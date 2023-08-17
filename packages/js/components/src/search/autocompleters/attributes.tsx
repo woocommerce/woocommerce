@@ -61,7 +61,7 @@ const completer: AutoCompleter = {
 
 		return [ nameOption ];
 	},
-	getOptionLabel( attribute, query ) {
+	getOptionLabel( attribute, query ): React.ReactNode {
 		const match = computeSuggestionMatch( attribute.name, query );
 
 		return (

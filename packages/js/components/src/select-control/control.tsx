@@ -6,7 +6,7 @@ import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { Icon, search } from '@wordpress/icons';
 import classnames from 'classnames';
-import { isArray } from 'lodash';
+import { isArray, isString } from 'lodash';
 import {
 	RefObject,
 	ChangeEvent,
@@ -53,7 +53,7 @@ type Props = {
 	/**
 	 * Function called when the input is blurred.
 	 */
-	onBlur?: () => void;
+	onBlur?: ( event: FocusEvent< HTMLInputElement > ) => void;
 	/**
 	 * Function called when selected results change, passed result list.
 	 */
@@ -189,11 +189,11 @@ class Control extends Component< Props, State > {
 		};
 	}
 
-	onBlur() {
+	onBlur( event: FocusEvent< HTMLInputElement > ) {
 		const { onBlur } = this.props;
 
 		if ( typeof onBlur === 'function' ) {
-			onBlur();
+			onBlur( event );
 		}
 
 		this.setState( { isActive: false } );
@@ -305,7 +305,11 @@ class Control extends Component< Props, State > {
 			selected,
 		} = this.props;
 		const selectedValue =
-			isArray( selected ) && selected.length ? selected[ 0 ].label : '';
+			isArray( selected ) &&
+			selected.length &&
+			isString( selected[ 0 ].label )
+				? selected[ 0 ].label
+				: '';
 
 		// Show the selected value for simple select dropdowns.
 		if ( ! multiple && ! isFocused && ! inlineTags ) {

@@ -83,7 +83,7 @@ class Tags extends Component< Props > {
 							<Tag
 								key={ item.key }
 								id={ item.key }
-								label={ item.label }
+								label={ item.label as string }
 								// @ts-expect-error key is a string or undefined here
 								remove={ this.removeResult }
 								screenReaderLabel={ screenReaderLabel }

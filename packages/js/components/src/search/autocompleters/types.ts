@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ReactNode, ReactElement } from 'react';
+import { ReactElement } from 'react';
 
 // Options may be of any type or shape.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +34,10 @@ export type AutoCompleter = {
 	/* A function that returns a key to be used for the option. */
 	getOptionIdentifier: ( option: CompleterOption ) => string | number;
 	/* A function that returns the label for a given option. A label may be a string or a mixed array of strings, elements, and components. */
-	getOptionLabel: ( option: CompleterOption, query: string ) => ReactNode;
+	getOptionLabel: (
+		option: CompleterOption,
+		query: string
+	) => string | React.ReactNode;
 	/* A function that takes an option and responds with how the option should be completed. By default, the result is a value to be inserted in the text. However, a completer may explicitly declare how a completion should be treated by returning an object with action and value properties. */
 	getOptionCompletion: FnGetOptionCompletion;
 	/* A function that returns the keywords for the specified option. */
@@ -47,7 +50,7 @@ export type AutoCompleter = {
 	getFreeTextOptions?: ( query: string ) => [
 		{
 			key: string;
-			label: JSX.Element;
+			label: JSX.Element | string;
 			value: unknown;
 		}
 	];

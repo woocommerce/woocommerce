@@ -11,7 +11,11 @@ import {
 } from '@wordpress/element';
 import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { PLUGINS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	InstallPluginsResponse,
+	PluginSelectors,
+} from '@woocommerce/data';
 
 type PluginsProps = {
 	onComplete: (
@@ -52,8 +56,11 @@ export const Plugins = ( {
 	const [ hasBeenClicked, setHasBeenClicked ] = useState( false );
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 	const { isRequesting } = useSelect( ( select ) => {
-		const { getActivePlugins, getInstalledPlugins, isPluginsRequesting } =
-			select( PLUGINS_STORE_NAME );
+		const {
+			getActivePlugins,
+			getInstalledPlugins,
+			isPluginsRequesting,
+		}: PluginSelectors = select( PLUGINS_STORE_NAME );
 
 		return {
 			isRequesting:
@@ -62,7 +69,7 @@ export const Plugins = ( {
 			activePlugins: getActivePlugins(),
 			installedPlugins: getInstalledPlugins(),
 		};
-	} );
+	}, [] );
 
 	const handleErrors = useCallback(
 		( errors: unknown, response: InstallPluginsResponse ) => {
@@ -92,10 +99,10 @@ export const Plugins = ( {
 			}
 
 			installAndActivatePlugins( pluginSlugs )
-				.then( ( response ) => {
+				.then( ( response: InstallPluginsResponse ) => {
 					handleSuccess( response.data.activated, response );
 				} )
-				.catch( ( response ) => {
+				.catch( ( response: InstallPluginsResponse ) => {
 					setHasBeenClicked( false );
 					handleErrors( response.errors, response );
 				} );

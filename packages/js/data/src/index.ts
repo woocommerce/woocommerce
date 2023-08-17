@@ -241,7 +241,7 @@ export interface WCDataSelector {
 }
 
 // Other exports
-export { OptionsSelectors, ProductVariationSelectors };
+export { OptionsSelectors, ProductVariationSelectors, PluginSelectors };
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';

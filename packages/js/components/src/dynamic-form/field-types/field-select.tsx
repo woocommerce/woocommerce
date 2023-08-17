@@ -39,6 +39,7 @@ export const SelectField: React.FC< ControlProps > = ( {
 			label={ label }
 			options={ transformedOptions }
 			{ ...props }
+			onChange={ ( selected ) => props.onChange( selected as string ) }
 		/>
 	);
 };

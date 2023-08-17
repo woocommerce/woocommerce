@@ -60,7 +60,7 @@ type Props = {
 	/**
 	 * Function to add regex expression to the filter the results, passed the search query.
 	 */
-	getSearchExpression?: ( query: string ) => RegExp;
+	getSearchExpression?: ( query: string ) => string;
 	/**
 	 * Help text to be appended beneath the input.
 	 */
@@ -155,7 +155,7 @@ type Props = {
 	/**
 	 * On Blur callback.
 	 */
-	onBlur?: () => void;
+	onBlur?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 };
 
 type State = {
@@ -324,7 +324,10 @@ export class SelectControl extends Component< Props, State > {
 		if ( multiple || Array.isArray( selected ) ) {
 			onChange!( newValue, query );
 		} else {
-			onChange!( newValue.length > 0 ? newValue[ 0 ].key : '', query );
+			onChange!(
+				newValue.length > 0 ? ( newValue[ 0 ].key as string ) : '',
+				query
+			);
 		}
 	}
 
@@ -611,8 +614,9 @@ export class SelectControl extends Component< Props, State > {
 	}
 }
 
-export default compose(
+const ComposedSelectControl = compose(
 	withSpokenMessages,
 	withInstanceId,
 	withFocusOutside // this MUST be the innermost HOC as it calls handleFocusOutside
-)( SelectControl );
+)( SelectControl ) as React.FC< Props >;
+export default ComposedSelectControl;

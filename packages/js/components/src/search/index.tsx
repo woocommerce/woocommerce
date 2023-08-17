@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component } from '@wordpress/element';
-import { noop } from 'lodash';
+import { isArray, noop } from 'lodash';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
@@ -26,13 +26,14 @@ import {
 	variations,
 	AutoCompleter,
 	OptionCompletionValue,
+	CompleterOption,
 } from './autocompleters';
 
 type Option = {
 	key: string | number;
-	label: React.ReactNode;
-	keywords: string[];
-	value: unknown;
+	label: string | React.ReactNode;
+	keywords?: string[];
+	value?: unknown;
 };
 
 type SearchType =
@@ -62,7 +63,7 @@ type Props = {
 		| string
 		| Array< {
 				key: number | string;
-				label?: string;
+				label: string;
 		  } >;
 	inlineTags?: boolean;
 	showClearButton?: boolean;
@@ -72,7 +73,7 @@ type Props = {
 };
 
 type State = {
-	options: unknown[];
+	options: Option[];
 };
 
 /**
@@ -224,13 +225,13 @@ export class Search extends Component< Props, State > {
 		}
 	}
 
-	getFormattedOptions( options: unknown[], query: string ) {
+	getFormattedOptions( options: CompleterOption[], query: string ) {
 		const autocompleter = this.getAutocompleter();
 		const formattedOptions: Option[] = [];
 
 		options.forEach( ( option ) => {
 			const formattedOption = {
-				key: autocompleter.getOptionIdentifier( option ),
+				key: autocompleter.getOptionIdentifier( option ) as string,
 				label: autocompleter.getOptionLabel( option, query ),
 				keywords: autocompleter
 					.getOptionKeywords( option )
@@ -243,9 +244,9 @@ export class Search extends Component< Props, State > {
 		return formattedOptions;
 	}
 
-	fetchOptions( previousOptions: unknown[], query: string ) {
+	fetchOptions( previousOptions: Option[], query: string | null ) {
 		if ( ! query ) {
-			return [];
+			return Promise.resolve( [] as Option[] );
 		}
 
 		const autocompleterOptions = this.getAutocompleter().options;
@@ -263,23 +264,25 @@ export class Search extends Component< Props, State > {
 		} );
 	}
 
-	updateSelected( selected: Option[] ) {
+	updateSelected( selected: string | Option[] ) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { onChange = ( _option: unknown[] ) => {} } = this.props;
-		const autocompleter = this.getAutocompleter();
+		if ( isArray( selected ) ) {
+			const autocompleter = this.getAutocompleter();
 
-		const formattedSelections = selected.map<
-			Option | OptionCompletionValue
-		>( ( option ) => {
-			return option.value
-				? autocompleter.getOptionCompletion( option.value )
-				: option;
-		} );
+			const formattedSelections = selected.map<
+				Option | OptionCompletionValue
+			>( ( option ) => {
+				return option.value
+					? autocompleter.getOptionCompletion( option.value )
+					: option;
+			} );
 
-		onChange( formattedSelections );
+			onChange( formattedSelections );
+		}
 	}
 
-	appendFreeTextSearch( options: unknown[], query: string ) {
+	appendFreeTextSearch( options: Option[], query: string | null ) {
 		const { allowFreeTextSearch } = this.props;
 
 		if ( ! query || ! query.length ) {
