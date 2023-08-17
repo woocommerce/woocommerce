@@ -32,6 +32,7 @@
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
+		"@slack/web-api": "^6.1.0",
 		"@types/jest": "^27.4.1",
 		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
