@@ -13,20 +13,26 @@ module.exports = async ( { context, core, github } ) => {
 	} = require( './utils' );
 
 	const create_blockGroup_header = async () => {
-		const response = await github.rest.actions.getWorkflowRun( {
-			owner: context.repo.owner,
-			repo: context.repo.repo,
-			run_id: GITHUB_RUN_ID,
-		} );
-		const runStartedAt = new Date( response.data.run_started_at );
-		const intlDateTimeFormatOptions = {
-			dateStyle: 'full',
-			timeStyle: 'long',
+		const getRunStartDate = async () => {
+			const response = await github.rest.actions.getWorkflowRun( {
+				owner: context.repo.owner,
+				repo: context.repo.repo,
+				run_id: GITHUB_RUN_ID,
+			} );
+			const runStartedAt = new Date( response.data.run_started_at );
+			const intlDateTimeFormatOptions = {
+				dateStyle: 'full',
+				timeStyle: 'long',
+			};
+			const date = new Intl.DateTimeFormat(
+				'en-US',
+				intlDateTimeFormatOptions
+			).format( runStartedAt );
+
+			return date;
 		};
-		const date = new Intl.DateTimeFormat(
-			'en-US',
-			intlDateTimeFormatOptions
-		).format( runStartedAt );
+
+		const readableDate = await getRunStartDate();
 
 		const blocks = [
 			{
@@ -45,7 +51,7 @@ module.exports = async ( { context, core, github } ) => {
 				elements: [
 					{
 						type: 'mrkdwn',
-						text: `*Run started:* ${ date }`,
+						text: `*Run started:* ${ readableDate }`,
 					},
 				],
 			},
