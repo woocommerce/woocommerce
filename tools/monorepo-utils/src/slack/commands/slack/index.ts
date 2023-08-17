@@ -16,4 +16,6 @@ const program = new Command( 'slack' )
 	.description( 'Slack message sending utilities' )
 	.addCommand( slackMessageCommand, { isDefault: true } );
 
+console.log( 'test' );
+
 export default program;
