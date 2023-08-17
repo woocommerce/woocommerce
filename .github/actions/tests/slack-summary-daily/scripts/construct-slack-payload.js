@@ -1,4 +1,4 @@
-module.exports = ( { core } ) => {
+module.exports = async ( { context, core, github } ) => {
 	const {
 		API_RESULT,
 		E2E_RESULT,
@@ -12,10 +12,21 @@ module.exports = ( { core } ) => {
 		readContextBlocksFromJsonFiles,
 	} = require( './utils' );
 
-	const create_blockGroup_header = () => {
-		const date = new Intl.DateTimeFormat( 'en-US', {
+	const create_blockGroup_header = async () => {
+		const response = await github.rest.actions.getWorkflowRun( {
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			run_id: GITHUB_RUN_ID,
+		} );
+		const runStartedAt = new Date( response.data.run_started_at );
+		const intlDateTimeFormatOptions = {
 			dateStyle: 'full',
-		} ).format( Date.now() );
+			timeStyle: 'long',
+		};
+		const date = new Intl.DateTimeFormat(
+			'en-US',
+			intlDateTimeFormatOptions
+		).format( runStartedAt );
 
 		const blocks = [
 			{
@@ -103,7 +114,7 @@ module.exports = ( { core } ) => {
 		return blocks;
 	};
 
-	const blockGroup_header = create_blockGroup_header();
+	const blockGroup_header = await create_blockGroup_header();
 	const blockGroup_nightlySite = create_blockGroup_nightlySite();
 	const blockGroups_plugins =
 		readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH );

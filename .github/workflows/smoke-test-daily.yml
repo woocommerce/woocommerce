@@ -369,7 +369,7 @@ jobs:
               with:
                   script: |
                     const script = require('./.github/actions/tests/slack-summary-daily/scripts/construct-slack-payload.js');
-                    script( { core } );
+                    await script( { context, core, github } );
               env:
                   API_RESULT: ${{ needs.api-tests.outputs.test-result }}
                   E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result }}
