@@ -1,17 +1,25 @@
 /**
+ * External dependencies
+ */
+import { BlockConfiguration } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
-import initBlock from '../../utils/init-block';
-import metadata from './block.json';
-import { Edit } from './edit';
+import { initBlock } from '../../utils/init-block';
+import blockConfiguration from './block.json';
+import { Edit, TabBlockAttributes } from './edit';
 
-const { name } = metadata;
+const { name, ...metadata } =
+	blockConfiguration as BlockConfiguration< TabBlockAttributes >;
 
 export { metadata, name };
 
-export const settings = {
+export const settings: Partial< BlockConfiguration< TabBlockAttributes > > = {
 	example: {},
 	edit: Edit,
 };
 
-export const init = () => initBlock( { name, metadata, settings } );
+export function init() {
+	initBlock( { name, metadata, settings } );
+}

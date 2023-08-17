@@ -24,9 +24,10 @@ runs:
       run: |
         sla_timestamp=$(date -d "+ 5 hours" -u +%s)
         echo "sla_timestamp=$sla_timestamp" >> $GITHUB_OUTPUT
-    - name: Notify Slack
+    - name: Notify Slack Open
       uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
-      id: notify
+      id: notify-open
+      if: steps.get_pr_status.outputs.pr_status == 'open'
       with:
           slack-bot-user-oauth-access-token: ${{ inputs.TEST_ASSISTANCE_BOT_TOKEN }}
           slack-channel: ${{ inputs.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
@@ -34,5 +35,17 @@ runs:
               <!subteam^${{ inputs.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}>, there is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
               <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
               *SLA:* <!date^${{ steps.calculate_sla.outputs.sla_timestamp }}^{date_short_pretty} at {time}|5 hours from now>
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+    - name: Notify Slack Merged
+      uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
+      id: notify-merged
+      if: steps.get_pr_status.outputs.pr_status == 'merged'
+      with:
+          slack-bot-user-oauth-access-token: ${{ inputs.TEST_ASSISTANCE_BOT_TOKEN }}
+          slack-channel: ${{ inputs.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
+          slack-text: |
+              There is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
+              <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false

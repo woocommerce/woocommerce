@@ -2,6 +2,8 @@
 
 namespace WooCommerceDocs\Manifest;
 
+use WooCommerceDocs\Data\DocsStore;
+
 /**
  * Class ManifestProcessor
  *
@@ -13,8 +15,12 @@ class ManifestProcessor {
 	 *
 	 * @param Object $manifest The manifest to process.
 	 * @param int    $logger_action_id The logger action ID.
+	 * @param Object $previous_manifest The previous manifest.
 	 */
-	public static function process_manifest( $manifest, $logger_action_id ) {
+	public static function process_manifest( $manifest, $logger_action_id, $previous_manifest = null ) {
+		if ( $previous_manifest ) {
+			PostRemover::remove_deleted_posts( $manifest, $previous_manifest, $logger_action_id );
+		}
 		self::process_categories( $manifest['categories'], $logger_action_id );
 	}
 
@@ -41,6 +47,7 @@ class ManifestProcessor {
 				}
 
 				$content = wp_remote_retrieve_body( $response );
+
 				$post_id = PostCreator::create_or_update_post_from_manifest_entry( $post, $content, $category['category_title'], $logger_action_id );
 
 				wp_set_post_categories( $post_id, array( $term['term_id'] ) );
@@ -51,6 +58,24 @@ class ManifestProcessor {
 				self::process_categories( $category['categories'], $logger_action_id, $term['term_id'] );
 			}
 		}
+	}
+
+	/**
+	 * Recusively collect post IDs from a manifest.
+	 *
+	 * @param Object $manifest The manifest to process.
+	 */
+	public static function collect_doc_ids_from_manifest( $manifest ) {
+		$doc_ids = array();
+		foreach ( $manifest['categories'] as $category ) {
+			foreach ( $category['posts'] as $post ) {
+				$doc_ids[] = $post['id'];
+			}
+			$subcategory_ids = self::collect_doc_ids_from_manifest( $category );
+			$doc_ids         = array_merge( $doc_ids, $subcategory_ids );
+		}
+
+		return $doc_ids;
 	}
 }
 

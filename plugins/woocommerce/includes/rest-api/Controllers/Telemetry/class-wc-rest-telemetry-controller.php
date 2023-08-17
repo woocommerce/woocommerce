@@ -81,7 +81,22 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 		}
 
 		$platform = $new['platform'];
-		if ( ! $data[ $platform ] || version_compare( $new['version'], $data[ $platform ]['version'], '>=' ) ) {
+
+		if ( isset( $data[ $platform ] ) ) {
+			$existing_usage = $data[ $platform ];
+
+			// Sets the installation date only if it has not been set before.
+			if ( isset( $new['installation_date'] ) && ! isset( $existing_usage['installation_date'] ) ) {
+				$data[ $platform ]['installation_date'] = $new['installation_date'];
+			}
+
+			if ( version_compare( $new['version'], $existing_usage['version'], '>=' ) ) {
+				$data[ $platform ]['version']   = $new['version'];
+				$data[ $platform ]['last_used'] = $new['last_used'];
+			}
+		} else {
+			// Only sets `first_used` when the platform usage data hasn't been set before.
+			$new['first_used'] = $new['last_used'];
 			$data[ $platform ] = $new;
 		}
 
@@ -109,10 +124,19 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 			return;
 		}
 
-		return array(
-			'platform'  => sanitize_text_field( $platform ),
-			'version'   => sanitize_text_field( $version ),
-			'last_used' => gmdate( 'c' ),
+		// The installation date could be null from earlier mobile client versions.
+		$installation_date = $request->get_param( 'installation_date' );
+
+		return array_filter(
+			array(
+				'platform'          => sanitize_text_field( $platform ),
+				'version'           => sanitize_text_field( $version ),
+				'last_used'         => gmdate( 'c' ),
+				'installation_date' => isset( $installation_date ) ? get_gmt_from_date( $installation_date, 'c' ) : null,
+			),
+			function( $value ) {
+				return null !== $value;
+			}
 		);
 	}
 
@@ -123,18 +147,25 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 	 */
 	public function get_collection_params() {
 		return array(
-			'platform' => array(
+			'platform'          => array(
 				'description'       => __( 'Platform to track.', 'woocommerce' ),
 				'required'          => true,
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'version'  => array(
+			'version'           => array(
 				'description'       => __( 'Platform version to track.', 'woocommerce' ),
 				'required'          => true,
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'installation_date' => array(
+				'description'       => __( 'Installation date of the WooCommerce mobile app.', 'woocommerce' ),
+				'required'          => false, // For backward compatibility.
+				'type'              => 'string',
+				'format'            => 'date-time',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);

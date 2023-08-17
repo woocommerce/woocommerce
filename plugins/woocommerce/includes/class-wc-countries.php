@@ -592,7 +592,7 @@ class WC_Countries {
 					'TW'      => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
 					'UG'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}, {country}",
 					'US'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state_code} {postcode}\n{country}",
-					'VN'      => "{name}\n{company}\n{address_1}\n{city}\n{country}",
+					'VN'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 				)
 			);
 		}

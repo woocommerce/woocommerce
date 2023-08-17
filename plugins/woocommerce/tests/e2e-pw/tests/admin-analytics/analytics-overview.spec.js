@@ -30,12 +30,13 @@ let /**
 	 */
 	page;
 
-const basicAuth = () => {
-	const base64String = Buffer.from(
-		`${ admin.username }:${ admin.password }`
-	).toString( 'base64' );
+const base64String = Buffer.from(
+	`${ admin.username }:${ admin.password }`
+).toString( 'base64' );
 
-	return `Basic ${ base64String }`;
+const headers = {
+	Authorization: `Basic ${ base64String }`,
+	cookie: '',
 };
 
 const hidePerformanceSection = async () => {
@@ -47,10 +48,6 @@ const hidePerformanceSection = async () => {
 			const dashboard_sections = JSON.stringify( [
 				{ key: 'store-performance', isVisible: false },
 			] );
-			const headers = {
-				Authorization: basicAuth(),
-				cookie: '',
-			};
 			const data = {
 				id: userId,
 				woocommerce_meta: {
@@ -88,11 +85,6 @@ const resetSections = async () => {
 			const request = page.request;
 			const url = `/wp-json/wp/v2/users/${ userId }`;
 			const params = { _locale: 'user' };
-			const headers = {
-				Authorization: basicAuth(),
-				cookie: '',
-			};
-
 			const data = {
 				id: userId,
 				woocommerce_meta: {
@@ -129,11 +121,14 @@ test.describe( 'Analytics pages', () => {
 
 		await test.step( `Send GET request to get the current user id`, async () => {
 			const request = page.request;
-			const response = await request.get( '/wp-json/wp/v2/users' );
-			const responseJson = await response.json();
-			const { id } = responseJson.find(
-				( { slug } ) => slug === admin.username
-			);
+			const data = {
+				_fields: 'id',
+			};
+			const response = await request.get( '/wp-json/wp/v2/users/me', {
+				data,
+				headers,
+			} );
+			const { id } = await response.json();
 
 			userId = id;
 		} );

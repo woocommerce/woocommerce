@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a bug where WC_ABSPATH is used when the WooCommerce instance might not have defined it yet.
