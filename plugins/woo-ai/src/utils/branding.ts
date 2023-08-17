@@ -4,8 +4,19 @@
 import apiFetch from '@wordpress/api-fetch';
 
 // Define the expected shape of the API response
-type ApiResponse = {
+type ApiResponseSingleValue = {
 	value: string;
+};
+
+type ApiResponseItem = {
+	id: string;
+	value: string;
+};
+
+export type BrandingSettings = {
+	brandingEnabled: boolean;
+	toneOfVoice: string;
+	businessDescription: string;
 };
 
 /**
@@ -15,10 +26,40 @@ type ApiResponse = {
  */
 export async function getToneOfVoice(): Promise< string > {
 	try {
-		const { value } = await apiFetch< ApiResponse >( {
+		const { value } = await apiFetch< ApiResponseSingleValue >( {
 			path: '/wc/v3/settings/woo-ai/tone-of-voice',
 		} );
 		return value;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
+/**
+ * Fetch all Woo AI branding settings.
+ *
+ * @return {Promise<BrandingSettings>} A promise that resolves with all branding settings.
+ */
+export async function getAllBrandingSettings(): Promise< BrandingSettings > {
+	try {
+		const response = await apiFetch< ApiResponseItem[] >( {
+			path: '/wc/v3/settings/woo-ai',
+		} );
+
+		const brandingEnabled = response.find(
+			( setting ) => setting.id === 'branding_enabled'
+		)?.value;
+		const toneOfVoice = response.find(
+			( setting ) => setting.id === 'tone-of-voice'
+		)?.value;
+		const businessDescription = response.find(
+			( setting ) => setting.id === 'store-description'
+		)?.value;
+		return {
+			brandingEnabled: brandingEnabled === 'yes' ? true : false,
+			toneOfVoice: toneOfVoice || '',
+			businessDescription: businessDescription || '',
+		};
 	} catch ( error ) {
 		throw error;
 	}
@@ -31,7 +72,7 @@ export async function getToneOfVoice(): Promise< string > {
  */
 export async function getBusinessDescription(): Promise< string > {
 	try {
-		const { value } = await apiFetch< ApiResponse >( {
+		const { value } = await apiFetch< ApiResponseSingleValue >( {
 			path: '/wc/v3/settings/woo-ai/store-description',
 		} );
 		return value;

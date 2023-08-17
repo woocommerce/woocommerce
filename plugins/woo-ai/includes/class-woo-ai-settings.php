@@ -106,6 +106,14 @@ class Woo_AI_Settings {
 	 */
 	public function add_woo_ai_settings_group_settings( $settings ) {
 		$settings[] = array(
+			'id'          => 'branding_enabled',
+			'option_key'  => self::WOO_AI_ENABLED_OPTION_KEY,
+			'label'       => __( 'Woo AI Personalization', 'woocommerce' ),
+			'description' => __( 'This enables Woo AI Store Branding features like tone of voice when generating content.', 'woocommerce' ),
+			'default'     => 'no',
+			'type'        => 'checkbox',
+		);
+		$settings[] = array(
 			'id'          => 'tone-of-voice',
 			'option_key'  => self::TONE_OF_VOICE_OPTION_KEY,
 			'label'       => __( 'Storewide Tone of Voice', 'woocommerce' ),
@@ -164,15 +172,15 @@ class Woo_AI_Settings {
 
 		$settings_ai[] = array(
 			'id'    => self::WOO_AI_TITLE_OPTION_KEY,
-			'title' => __( 'Artificial Intelligence', 'woocommerce' ),
-			'desc'  => __( "Save time by automating mundane parts of store management. This information will make AI-generated content, visuals, and settings more aligned with your store's goals and identity.", 'woocommerce' ),
+			'title' => __( 'Woo AI Personalization', 'woocommerce' ),
+			'desc'  => __( "Empower your store with AI-driven content that truly reflects your brand.\nBy providing additional context, like your store's tone of voice and a brief business description, our AI adapts its output to fit seamlessly with your brand's identity.", 'woocommerce' ),
 			'type'  => 'title',
 		);
 
 		$settings_ai[] = array(
 			'id'      => self::WOO_AI_ENABLED_OPTION_KEY,
-			'title'   => __( 'Enable AI', 'woocommerce' ),
-			'desc'    => __( 'Enable AI features in your store', 'woocommerce' ),
+			'title'   => __( 'Activate Personalization', 'woocommerce' ),
+			'desc'    => __( "Turn on advanced AI features to craft content that aligns with your store's personality and goals.", 'woocommerce' ),
 			'type'    => 'checkbox',
 			'default' => 'yes',
 		);

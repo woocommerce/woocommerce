@@ -228,16 +228,18 @@ export function WriteItForMeButtonContainer() {
 			);
 		}
 
-		if ( brandingData?.toneOfVoice ) {
-			instructions.push(
-				`Generate the description using a ${ brandingData.toneOfVoice } tone.`
-			);
-		}
+		if ( brandingData?.brandingEnabled ) {
+			if ( brandingData?.toneOfVoice ) {
+				instructions.push(
+					`Generate the description using a ${ brandingData.toneOfVoice } tone.`
+				);
+			}
 
-		if ( brandingData?.businessDescription ) {
-			instructions.push(
-				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
-			);
+			if ( brandingData?.businessDescription ) {
+				instructions.push(
+					`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
+				);
+			}
 		}
 
 		return instructions.join( '\n' );
