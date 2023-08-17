@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 export const BLOCK_EDITOR_TOUR_SHOWN_OPTION =
@@ -10,7 +10,7 @@ export const BLOCK_EDITOR_TOUR_SHOWN_OPTION =
 export const useBlockEditorTourOptions = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { shouldTourBeShown } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		const wasTourShown =
@@ -22,7 +22,7 @@ export const useBlockEditorTourOptions = () => {
 		return {
 			shouldTourBeShown: ! wasTourShown,
 		};
-	} );
+	}, [] );
 
 	const dismissModal = () => {
 		updateOptions( {

@@ -6,7 +6,9 @@ import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
+	ProductsSelectors,
 	PRODUCTS_STORE_NAME,
+	ProductVariationSelectors,
 	WCDataSelector,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
@@ -31,15 +33,17 @@ export const ProductTitle: React.FC = () => {
 	const { values } = useFormContext< Product >();
 	const { productId, variationId } = useParams();
 	const { isLoading, persistedName, productVariation } = useSelect(
-		( select: WCDataSelector ) => {
+		( select ) => {
 			const {
 				getProduct,
 				hasFinishedResolution: hasProductFinishedResolution,
-			} = select( PRODUCTS_STORE_NAME );
+			}: ProductsSelectors = select( PRODUCTS_STORE_NAME );
 			const {
 				getProductVariation,
 				hasFinishedResolution: hasProductVariationFinishedResolution,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			}: ProductVariationSelectors = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
 			const product = productId
 				? getProduct( parseInt( productId, 10 ) )
 				: null;
@@ -75,7 +79,8 @@ export const ProductTitle: React.FC = () => {
 				productVariation: variation,
 				isLoading: isProductLoading || isVariationLoading,
 			};
-		}
+		},
+		[]
 	);
 
 	const productTitle = getProductTitle(

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { WPDataSelector } from '../types';
+import { WPDataSelector, WPDataSelectors } from '../types';
 import { getResourceName, getResourcePrefix } from '../utils';
 import { SettingsState, Settings } from './types';
 
@@ -132,4 +132,4 @@ export type SettingsSelectors = {
 		typeof getLastSettingsErrorForGroup
 	>;
 	getSettingsError: WPDataSelector< typeof getSettingsError >;
-};
+} & WPDataSelectors;

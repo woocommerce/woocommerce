@@ -14,7 +14,7 @@ import {
 	useUserPreferences,
 	getVisibleTasks,
 	TaskListType,
-	WCDataSelector,
+	OnboardingSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, useSlot } from '@woocommerce/experimental';
@@ -57,12 +57,14 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 	cesHeader = true,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
-	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+	const { profileItems } = useSelect( ( select ) => {
+		const { getProfileItems }: OnboardingSelectors = select(
+			ONBOARDING_STORE_NAME
+		);
 		return {
 			profileItems: getProfileItems(),
 		};
-	} );
+	}, [] );
 	const {
 		hideTaskList,
 		visitedTask,

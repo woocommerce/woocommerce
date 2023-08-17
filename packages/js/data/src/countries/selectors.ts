@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { WPDataSelector, WPDataSelectors } from '../types';
 import { CountriesState } from './types';
 
 export const getLocales = ( state: CountriesState ) => {
@@ -23,3 +24,12 @@ export const getCountry = ( state: CountriesState, code: string ) => {
 export const geolocate = ( state: CountriesState ) => {
 	return state.geolocation;
 };
+
+// Types
+export type CountriesSelectors = {
+	getLocales: WPDataSelector< typeof getLocales >;
+	getLocale: WPDataSelector< typeof getLocale >;
+	getCountries: WPDataSelector< typeof getCountries >;
+	getCountry: WPDataSelector< typeof getCountry >;
+	geolocate: WPDataSelector< typeof geolocate >;
+} & WPDataSelectors;

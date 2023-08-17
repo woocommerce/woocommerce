@@ -8,6 +8,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	DeprecatedTaskType,
+	OnboardingSelectors,
 } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 
@@ -19,12 +20,14 @@ const DeprecatedWooOnboardingTaskFills = () => {
 	);
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
-			),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+			isResolving: (
+				select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
+			 ).isResolving( 'getTaskLists' ),
+			taskLists: (
+				select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
+			 ).getTaskLists(),
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( taskLists && taskLists.length > 0 ) {

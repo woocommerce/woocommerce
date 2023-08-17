@@ -7,6 +7,8 @@ import { useState, useEffect } from '@wordpress/element';
 import {
 	PLUGINS_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
+	PluginSelectors,
+	PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -55,9 +57,12 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
-		const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
-		const activePlugins: string[] =
-			select( PLUGINS_STORE_NAME ).getActivePlugins();
+		const { getPaymentGateway }: PaymentSelectors = select(
+			PAYMENT_GATEWAYS_STORE_NAME
+		);
+		const activePlugins: string[] = (
+			select( PLUGINS_STORE_NAME ) as PluginSelectors
+		 ).getActivePlugins();
 		const isActive = activePlugins && activePlugins.includes( pluginSlug );
 		let paymentGatewayData;
 		if ( isActive ) {
@@ -70,7 +75,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 			gatewayIsActive: isActive,
 			paymentGateway: paymentGatewayData,
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if (

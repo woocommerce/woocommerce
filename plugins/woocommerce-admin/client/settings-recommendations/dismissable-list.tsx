@@ -3,7 +3,7 @@
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { createContext, useContext } from '@wordpress/element';
@@ -56,7 +56,7 @@ export const DismissableList: React.FC< {
 	className?: string;
 } > = ( { children, className, dismissOptionName } ) => {
 	const isVisible = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		const hasFinishedResolving = hasFinishedResolution( 'getOption', [
@@ -66,7 +66,7 @@ export const DismissableList: React.FC< {
 		const isDismissed = getOption( dismissOptionName ) === 'yes';
 
 		return hasFinishedResolving && ! isDismissed;
-	} );
+	}, [] );
 
 	if ( ! isVisible ) {
 		return null;

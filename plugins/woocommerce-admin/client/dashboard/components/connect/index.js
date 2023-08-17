@@ -3,30 +3,47 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
+import { Fragment, useEffect, useRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { withDispatch, withSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
-export class Connect extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isConnecting: false,
+export function Connect( {
+	setIsPending = () => {},
+	onError,
+	onConnect,
+	hasErrors,
+	onSkip,
+	skipText,
+	onAbort,
+	abortText,
+} ) {
+	const { createNotice } = useDispatch( 'core/notices' );
+	const prevIsRequesting = useRef( null );
+	const { error, isRequesting, jetpackConnectUrl } = useSelect( () => {
+		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
+			select( PLUGINS_STORE_NAME );
+
+		const queryArgs = {
+			redirect_url: props.redirectUrl || window.location.href,
 		};
 
-		this.connectJetpack = this.connectJetpack.bind( this );
-		props.setIsPending( true );
-	}
+		return {
+			error: getPluginsError( 'getJetpackConnectUrl' ) || '',
+			isRequesting: isPluginsRequesting( 'getJetpackConnectUrl' ),
+			jetpackConnectUrl: getJetpackConnectUrl( queryArgs ),
+		};
+	} );
+	const [ isConnecting, setIsConnecting ] = useState( false );
 
-	componentDidUpdate( prevProps ) {
-		const { createNotice, error, isRequesting, onError, setIsPending } =
-			this.props;
+	useEffect( () => {
+		setIsPending( true );
+	}, [] );
 
-		if ( prevProps.isRequesting && ! isRequesting ) {
+	useEffect( () => {
+		if ( prevIsRequesting.current && ! isRequesting ) {
 			setIsPending( false );
 		}
+		prevIsRequesting.current = isRequesting;
 
 		if ( error && error !== prevProps.error ) {
 			if ( onError ) {
@@ -34,66 +51,45 @@ export class Connect extends Component {
 			}
 			createNotice( 'error', error );
 		}
-	}
+	}, [ isRequesting, error ] );
 
-	async connectJetpack() {
-		const { jetpackConnectUrl, onConnect } = this.props;
-
-		this.setState(
-			{
-				isConnecting: true,
-			},
-			() => {
-				if ( onConnect ) {
-					onConnect();
-				}
-				window.location = jetpackConnectUrl;
+	async function connectJetpack() {
+		setIsConnecting( true, () => {
+			if ( onConnect ) {
+				onConnect();
 			}
-		);
+			window.location = jetpackConnectUrl;
+		} );
 	}
 
-	render() {
-		const {
-			hasErrors,
-			isRequesting,
-			onSkip,
-			skipText,
-			onAbort,
-			abortText,
-		} = this.props;
-
-		return (
-			<Fragment>
-				{ hasErrors ? (
-					<Button
-						isPrimary
-						onClick={ () => window.location.reload() }
-					>
-						{ __( 'Retry', 'woocommerce' ) }
-					</Button>
-				) : (
-					<Button
-						disabled={ isRequesting }
-						isBusy={ this.state.isConnecting }
-						isPrimary
-						onClick={ this.connectJetpack }
-					>
-						{ __( 'Connect', 'woocommerce' ) }
-					</Button>
-				) }
-				{ onSkip && (
-					<Button onClick={ onSkip }>
-						{ skipText || __( 'No thanks', 'woocommerce' ) }
-					</Button>
-				) }
-				{ onAbort && (
-					<Button onClick={ onAbort }>
-						{ abortText || __( 'Abort', 'woocommerce' ) }
-					</Button>
-				) }
-			</Fragment>
-		);
-	}
+	return (
+		<Fragment>
+			{ hasErrors ? (
+				<Button isPrimary onClick={ () => window.location.reload() }>
+					{ __( 'Retry', 'woocommerce' ) }
+				</Button>
+			) : (
+				<Button
+					disabled={ isRequesting }
+					isBusy={ isConnecting }
+					isPrimary
+					onClick={ connectJetpack }
+				>
+					{ __( 'Connect', 'woocommerce' ) }
+				</Button>
+			) }
+			{ onSkip && (
+				<Button onClick={ onSkip }>
+					{ skipText || __( 'No thanks', 'woocommerce' ) }
+				</Button>
+			) }
+			{ onAbort && (
+				<Button onClick={ onAbort }>
+					{ abortText || __( 'Abort', 'woocommerce' ) }
+				</Button>
+			) }
+		</Fragment>
+	);
 }
 
 Connect.propTypes = {
@@ -155,29 +151,4 @@ Connect.defaultProps = {
 	setIsPending: () => {},
 };
 
-export default compose(
-	withSelect( ( select, props ) => {
-		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
-			select( PLUGINS_STORE_NAME );
-
-		const queryArgs = {
-			redirect_url: props.redirectUrl || window.location.href,
-		};
-		const isRequesting = isPluginsRequesting( 'getJetpackConnectUrl' );
-		const error = getPluginsError( 'getJetpackConnectUrl' ) || '';
-		const jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
-
-		return {
-			error,
-			isRequesting,
-			jetpackConnectUrl,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			createNotice,
-		};
-	} )
-)( Connect );
+export default Connect;

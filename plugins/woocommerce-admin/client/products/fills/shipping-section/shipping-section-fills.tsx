@@ -10,7 +10,11 @@ import {
 	__experimentalShippingDimensionsImage as ShippingDimensionsImage,
 	ShippingDimensionsImageProps,
 } from '@woocommerce/product-editor';
-import { PartialProduct, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	PartialProduct,
+	OPTIONS_STORE_NAME,
+	OptionsSelectors,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
@@ -48,7 +52,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 	const { parseNumber } = useProductHelper();
 
 	const { dimensionUnit, hasResolvedUnits } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 		return {
 			dimensionUnit: getOption( 'woocommerce_dimension_unit' ),

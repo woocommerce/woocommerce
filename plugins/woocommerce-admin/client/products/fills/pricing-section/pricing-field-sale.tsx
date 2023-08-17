@@ -10,7 +10,11 @@ import {
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useState, useEffect } from '@wordpress/element';
-import { Product, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	Product,
+	OPTIONS_STORE_NAME,
+	OptionsSelectors,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { format as formatDate } from '@wordpress/date';
@@ -41,12 +45,12 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	const { getInputProps, values, setValues } = useFormContext< Product >();
 
 	const { dateFormat, timeFormat } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption }: OptionsSelectors = select( OPTIONS_STORE_NAME );
 		return {
 			dateFormat: ( getOption( 'date_format' ) as string ) || 'F j, Y',
 			timeFormat: ( getOption( 'time_format' ) as string ) || 'H:i',
 		};
-	} );
+	}, [] );
 
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig, formatAmount } = context;

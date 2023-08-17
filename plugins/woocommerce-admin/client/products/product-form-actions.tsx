@@ -62,7 +62,7 @@ export const ProductFormActions: React.FC = () => {
 			//@ts-ignore Types don't appear to be working correctly on this package.
 			isSmallViewport: select( store ).isViewportMatch( '< medium' ),
 		};
-	} );
+	}, [] );
 
 	const getProductDataForTracks = () => {
 		return {

@@ -3,7 +3,11 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	OnboardingSelectors,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -19,12 +23,12 @@ export const DefaultProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
 	taskListId,
 } ) => {
 	const { loading, tasksCount, completedCount } = useSelect( ( select ) => {
-		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
-			taskListId
-		);
-		const finishedResolution = select(
-			ONBOARDING_STORE_NAME
-		).hasFinishedResolution( 'getTaskList', [ taskListId ] );
+		const taskList = (
+			select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
+		 ).getTaskList( taskListId );
+		const finishedResolution = (
+			select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
+		 ).hasFinishedResolution( 'getTaskList', [ taskListId ] );
 		const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
 		return {
@@ -33,7 +37,7 @@ export const DefaultProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
 			completedCount: visibleTasks?.filter( ( task ) => task.isComplete )
 				.length,
 		};
-	} );
+	}, [] );
 
 	if ( loading ) {
 		return null;

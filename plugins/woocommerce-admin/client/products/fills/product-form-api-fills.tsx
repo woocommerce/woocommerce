@@ -5,7 +5,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useSelect, resolveSelect } from '@wordpress/data';
 import {
 	EXPERIMENTAL_PRODUCT_FORM_STORE_NAME,
-	WCDataSelector,
+	ProductFormSelectors,
 } from '@woocommerce/data';
 import { registerCoreProductFields } from '@woocommerce/components';
 
@@ -18,13 +18,15 @@ import { Fields } from './product-form-api-field-fills';
 import { Sections } from './product-form-api-section-fills';
 
 const Form = () => {
-	const { formData } = useSelect( ( select: WCDataSelector ) => {
+	const { formData } = useSelect( ( select ) => {
 		return {
-			formData: select(
-				EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
-			).getProductForm(),
+			formData: (
+				select(
+					EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+				) as ProductFormSelectors
+			 ).getProductForm(),
 		};
-	} );
+	}, [] );
 
 	return (
 		<>

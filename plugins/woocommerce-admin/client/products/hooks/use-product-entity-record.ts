@@ -16,7 +16,15 @@ export function useProductEntityRecord(
 
 	useEffect( () => {
 		const getRecordPromise: Promise< Product > = productId
-			? resolveSelect( 'core' ).getEntityRecord< Product >(
+			? (
+					resolveSelect( 'core' ) as {
+						getEntityRecord: < T >(
+							prefix: string,
+							type: string,
+							id: number
+						) => Promise< T >;
+					}
+			   ).getEntityRecord< Product >(
 					'postType',
 					'product',
 					Number.parseInt( productId, 10 )

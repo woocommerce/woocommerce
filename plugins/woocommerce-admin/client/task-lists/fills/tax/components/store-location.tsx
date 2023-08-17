@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SettingsSelectors, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -47,7 +47,7 @@ export const StoreLocation: React.FC< {
 				getSettings,
 				hasFinishedResolution,
 				isUpdateSettingsRequesting,
-			} = select( SETTINGS_STORE_NAME );
+			}: SettingsSelectors = select( SETTINGS_STORE_NAME );
 
 			return {
 				generalSettings: getSettings( 'general' )?.general,
@@ -56,7 +56,8 @@ export const StoreLocation: React.FC< {
 				] ),
 				isUpdating: isUpdateSettingsRequesting( 'general' ),
 			};
-		}
+		},
+		[]
 	);
 
 	useEffect( () => {

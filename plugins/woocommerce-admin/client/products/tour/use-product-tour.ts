@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
@@ -12,7 +12,7 @@ export const useProductTour = () => {
 	const [ isTouring, setIsTouring ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { isModalHidden } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		return {
@@ -22,7 +22,7 @@ export const useProductTour = () => {
 					PRODUCT_TOUR_MODAL_HIDDEN,
 				] ),
 		};
-	} );
+	}, [] );
 
 	const dismissModal = () => {
 		updateOptions( {

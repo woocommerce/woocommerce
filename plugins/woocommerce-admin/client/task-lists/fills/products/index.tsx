@@ -10,7 +10,7 @@ import { Button } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SettingsSelectors, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -60,7 +60,8 @@ export const Products = () => {
 	] = useState( false );
 
 	const { isStoreInUS } = useSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { getSettings }: SettingsSelectors =
+			select( SETTINGS_STORE_NAME );
 		const { general: settings = {} } = getSettings( 'general' );
 
 		const country =
@@ -71,7 +72,7 @@ export const Products = () => {
 		return {
 			isStoreInUS: getCountryCode( country ) === 'US',
 		};
-	} );
+	}, [] );
 
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()

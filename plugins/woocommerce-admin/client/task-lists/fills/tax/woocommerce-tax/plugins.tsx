@@ -4,7 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	InstallPluginsResponse,
+	OptionsSelectors,
+} from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -30,7 +34,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 		const wcConnectOptions = getOption( 'wc_connect_options' );
 
@@ -47,7 +51,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					wcConnectOptions?.tos_accepted ) ||
 				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( ! tosAccepted || pluginsToActivate.length ) {

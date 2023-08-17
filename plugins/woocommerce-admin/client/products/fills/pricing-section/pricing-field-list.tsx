@@ -6,7 +6,11 @@ import { formatCurrencyDisplayValue } from '@woocommerce/product-editor';
 import { useFormContext, Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
-import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	Product,
+	SettingsSelectors,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -36,7 +40,7 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 
 	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
 		( select ) => {
-			const { getSettings, hasFinishedResolution } =
+			const { getSettings, hasFinishedResolution }: SettingsSelectors =
 				select( SETTINGS_STORE_NAME );
 			return {
 				isResolving: ! hasFinishedResolution( 'getSettings', [
@@ -47,7 +51,8 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 					getSettings( 'general' )?.general
 						?.woocommerce_calc_taxes === 'yes',
 			};
-		}
+		},
+		[]
 	);
 
 	const regularPriceProps = getInputProps(

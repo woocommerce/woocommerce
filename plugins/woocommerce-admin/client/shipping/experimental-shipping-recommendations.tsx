@@ -7,6 +7,9 @@ import {
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
+	SettingsSelectors,
+	PluginSelectors,
+	OnboardingSelectors,
 } from '@woocommerce/data';
 
 /**
@@ -26,16 +29,19 @@ const ShippingRecommendations: React.FC = () => {
 		isJetpackConnected,
 		isSellingDigitalProductsOnly,
 	} = useSelect( ( select ) => {
-		const settings = select( SETTINGS_STORE_NAME ).getSettings( 'general' );
+		const settings = (
+			select( SETTINGS_STORE_NAME ) as SettingsSelectors
+		 ).getSettings( 'general' );
 
 		const {
 			getActivePlugins,
 			getInstalledPlugins,
 			isJetpackConnected: _isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		}: PluginSelectors = select( PLUGINS_STORE_NAME );
 
-		const profileItems = select( ONBOARDING_STORE_NAME ).getProfileItems()
-			.product_types;
+		const profileItems = (
+			select( ONBOARDING_STORE_NAME ) as OnboardingSelectors
+		 ).getProfileItems().product_types;
 
 		return {
 			activePlugins: getActivePlugins(),
@@ -47,7 +53,7 @@ const ShippingRecommendations: React.FC = () => {
 			isSellingDigitalProductsOnly:
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
 		};
-	} );
+	}, [] );
 
 	if (
 		activePlugins.includes( 'woocommerce-services' ) &&

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { PluginSelectors, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
@@ -20,8 +20,12 @@ const WooCommerceServicesItem: React.FC< {
 } > = ( { onSetupClick, pluginsBeingSetup } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const isSiteConnectedToJetpack = useSelect( ( select ) =>
-		select( PLUGINS_STORE_NAME ).isJetpackConnected()
+	const isSiteConnectedToJetpack = useSelect(
+		( select ) =>
+			(
+				select( PLUGINS_STORE_NAME ) as PluginSelectors
+			 ).isJetpackConnected(),
+		[]
 	);
 
 	const handleSetupClick = () => {

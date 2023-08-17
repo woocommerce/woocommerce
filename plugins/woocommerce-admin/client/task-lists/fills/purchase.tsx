@@ -7,7 +7,12 @@ import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useState, useCallback } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	OnboardingSelectors,
+	ONBOARDING_STORE_NAME,
+	PluginSelectors,
+	PLUGINS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,17 +31,18 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
 		( select ) => {
-			const { getProductTypes, getProfileItems } = select(
-				ONBOARDING_STORE_NAME
-			);
-			const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+			const { getProductTypes, getProfileItems }: OnboardingSelectors =
+				select( ONBOARDING_STORE_NAME );
+			const { getInstalledPlugins }: PluginSelectors =
+				select( PLUGINS_STORE_NAME );
 
 			return {
 				installedPlugins: getInstalledPlugins(),
 				productTypes: getProductTypes(),
 				profileItems: getProfileItems(),
 			};
-		}
+		},
+		[]
 	);
 
 	const toggleCartModal = useCallback( () => {

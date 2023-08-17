@@ -7,7 +7,11 @@ import { useFormContext } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { moreVertical } from '@wordpress/icons';
-import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
+import {
+	OptionsSelectors,
+	OPTIONS_STORE_NAME,
+	Product,
+} from '@woocommerce/data';
 import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 
 /**
@@ -24,7 +28,8 @@ import './product-more-menu.scss';
 export const ProductMoreMenu = () => {
 	const { values } = useFormContext< Product >();
 	const { resolving: isLoading } = useSelect( ( select ) => {
-		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
+		const { hasFinishedResolution }: OptionsSelectors =
+			select( OPTIONS_STORE_NAME );
 
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			ALLOW_TRACKING_OPTION_NAME,
@@ -33,7 +38,7 @@ export const ProductMoreMenu = () => {
 		return {
 			resolving,
 		};
-	} );
+	}, [] );
 
 	if ( isLoading ) {
 		return null;

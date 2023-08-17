@@ -7,6 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import {
 	OPTIONS_STORE_NAME,
+	SettingsSelectors,
 	SETTINGS_STORE_NAME,
 	TaskType,
 } from '@woocommerce/data';
@@ -53,7 +54,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving, taxSettings } = useSelect(
 		( select ) => {
-			const { getSettings, hasFinishedResolution } =
+			const { getSettings, hasFinishedResolution }: SettingsSelectors =
 				select( SETTINGS_STORE_NAME );
 			return {
 				generalSettings: getSettings( 'general' ).general,
@@ -62,7 +63,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				] ),
 				taxSettings: getSettings( 'tax' ).tax || {},
 			};
-		}
+		},
+		[]
 	);
 
 	const onManual = useCallback( async () => {

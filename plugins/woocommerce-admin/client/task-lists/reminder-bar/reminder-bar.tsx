@@ -8,6 +8,8 @@ import {
 	OPTIONS_STORE_NAME,
 	TaskType,
 	getVisibleTasks,
+	OptionsSelectors,
+	OnboardingSelectors,
 } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -98,11 +100,11 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		const {
 			getTaskList,
 			hasFinishedResolution: onboardingHasFinishedResolution,
-		} = select( ONBOARDING_STORE_NAME );
+		}: OnboardingSelectors = select( ONBOARDING_STORE_NAME );
 		const {
 			getOption,
 			hasFinishedResolution: optionHasFinishedResolution,
-		} = select( OPTIONS_STORE_NAME );
+		}: OptionsSelectors = select( OPTIONS_STORE_NAME );
 		const reminderBarHiddenOption = getOption( REMINDER_BAR_HIDDEN_OPTION );
 		const taskList = getTaskList( taskListId );
 		const taskListIsResolved = onboardingHasFinishedResolution(
@@ -130,7 +132,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 				? visibleTasks?.length - completedTasks.length
 				: null,
 		};
-	} );
+	}, [] );
 
 	const query = getQuery() as { [ key: string ]: string };
 	const isHomescreen =

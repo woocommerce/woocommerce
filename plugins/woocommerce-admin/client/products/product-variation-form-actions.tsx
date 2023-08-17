@@ -7,6 +7,7 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
+	ProductVariationsActions,
 } from '@woocommerce/data';
 import { preventLeavingProductForm } from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
@@ -25,7 +26,7 @@ export const ProductVariationFormActions: React.FC = () => {
 	const { productId, variationId } = useParams();
 	const { isDirty, isValidForm, values } =
 		useFormContext< ProductVariation >();
-	const { updateProductVariation } = useDispatch(
+	const { updateProductVariation }: ProductVariationsActions = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -35,8 +36,9 @@ export const ProductVariationFormActions: React.FC = () => {
 
 	const onSave = async () => {
 		setIsSaving( true );
-		updateProductVariation< Promise< ProductVariation > >(
+		updateProductVariation(
 			{ id: variationId, product_id: productId, context: 'edit' },
+			// @ts-expect-error second parameter does not seem to get passed through types.
 			{
 				...values,
 				manage_stock:

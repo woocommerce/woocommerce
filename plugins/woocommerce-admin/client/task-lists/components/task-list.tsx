@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
 import {
 	getVisibleTasks,
+	OnboardingSelectors,
 	ONBOARDING_STORE_NAME,
 	TaskListType,
 } from '@woocommerce/data';
@@ -43,12 +44,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	query,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems }: OnboardingSelectors = select(
+			ONBOARDING_STORE_NAME
+		);
 
 		return {
 			profileItems: getProfileItems(),
 		};
-	} );
+	}, [] );
 	const prevQueryRef = useRef( query );
 	const visibleTasks = getVisibleTasks( tasks );
 	const { layoutString } = useLayoutContext();

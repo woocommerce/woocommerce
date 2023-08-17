@@ -183,13 +183,16 @@ import { ProductAttributeTermsSelectors } from './product-attribute-terms/types'
 import { ProductVariationSelectors } from './product-variations/selectors';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
+import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
+import { SettingsSelectors } from './settings/selectors';
+import { CountriesSelectors } from './countries/selectors';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
 export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof SETTINGS_STORE_NAME
-	? WPDataSelectors
+	? SettingsSelectors
 	: T extends typeof PLUGINS_STORE_NAME
 	? PluginSelectors
 	: T extends typeof ONBOARDING_STORE_NAME
@@ -211,7 +214,7 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	: T extends typeof ITEMS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof COUNTRIES_STORE_NAME
-	? WPDataSelectors
+	? CountriesSelectors
 	: T extends typeof PRODUCTS_STORE_NAME
 	? ProductsSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
@@ -234,14 +237,27 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? TaxClassSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
 	? ProductFormSelectors
-	: never;
+	: {};
 
 export interface WCDataSelector {
-	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T >;
+	< T extends WCDataStoreName >( storeName: T ): CurriedSelectorsOf< T > &
+		WCSelectorType< T >;
 }
 
 // Other exports
-export { OptionsSelectors, ProductVariationSelectors, PluginSelectors };
+export {
+	OptionsSelectors,
+	ProductVariationSelectors,
+	PluginSelectors,
+	PaymentSelectors,
+	OnboardingSelectors,
+	WPDataSelectors,
+	SettingsSelectors,
+	CountriesSelectors,
+	ProductsSelectors,
+	ProductFormSelectors,
+	TaxClassSelectors,
+};
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';

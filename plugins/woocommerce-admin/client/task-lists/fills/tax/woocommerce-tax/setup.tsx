@@ -6,6 +6,9 @@ import { difference } from 'lodash';
 import { useEffect, useState } from '@wordpress/element';
 import { Stepper } from '@woocommerce/components';
 import {
+	OptionsSelectors,
+	PluginSelectors,
+	SettingsSelectors,
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
@@ -48,9 +51,12 @@ export const Setup: React.FC< SetupProps > = ( {
 		[]
 	);
 	const { activePlugins, isResolving } = useSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+		const { getSettings }: SettingsSelectors =
+			select( SETTINGS_STORE_NAME );
+		const { hasFinishedResolution }: OptionsSelectors =
+			select( OPTIONS_STORE_NAME );
+		const { getActivePlugins }: PluginSelectors =
+			select( PLUGINS_STORE_NAME );
 
 		return {
 			activePlugins: getActivePlugins(),
@@ -63,7 +69,7 @@ export const Setup: React.FC< SetupProps > = ( {
 					'wc_connect_options',
 				] ),
 		};
-	} );
+	}, [] );
 	const [ stepIndex, setStepIndex ] = useState( 0 );
 
 	useEffect( () => {

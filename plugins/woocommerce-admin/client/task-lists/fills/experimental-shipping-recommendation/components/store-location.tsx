@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SettingsSelectors, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -21,7 +21,7 @@ export const StoreLocation: React.FC< {
 	const { updateAndPersistSettingsForGroup } =
 		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving } = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } =
+		const { getSettings, hasFinishedResolution }: SettingsSelectors =
 			select( SETTINGS_STORE_NAME );
 
 		return {
@@ -30,7 +30,7 @@ export const StoreLocation: React.FC< {
 				'general',
 			] ),
 		};
-	} );
+	}, [] );
 
 	useEffect( () => {
 		if ( isResolving || ! hasCompleteAddress( generalSettings || {} ) ) {

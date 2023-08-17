@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { PluginSelectors, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import ExternalIcon from 'gridicons/dist/external';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore VisuallyHidden is present, it's just not typed
@@ -99,8 +99,12 @@ export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
-	const activePlugins = useSelect( ( select ) =>
-		select( PLUGINS_STORE_NAME ).getActivePlugins()
+	const activePlugins = useSelect(
+		( select ) =>
+			(
+				select( PLUGINS_STORE_NAME ) as PluginSelectors
+			 ).getActivePlugins(),
+		[]
 	);
 
 	if ( activePlugins.includes( 'woocommerce-services' ) ) {

@@ -4,7 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	OnboardingSelectors,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -21,12 +25,12 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 } ) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
 		( select ) => {
-			const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
-				taskListId
-			);
-			const finishedResolution = select(
-				ONBOARDING_STORE_NAME
-			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
+			const { getTaskList, hasFinishedResolution }: OnboardingSelectors =
+				select( ONBOARDING_STORE_NAME );
+			const taskList = getTaskList( taskListId );
+			const finishedResolution = hasFinishedResolution( 'getTaskList', [
+				taskListId,
+			] );
 			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
 			return {
@@ -41,7 +45,8 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 							task.isVisited && task.id !== 'store_details'
 					).length > 0,
 			};
-		}
+		},
+		[]
 	);
 
 	const title = useMemo( () => {

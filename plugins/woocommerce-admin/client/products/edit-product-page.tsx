@@ -7,8 +7,11 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProduct,
 	Product,
+	ProductsSelectors,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
+	ProductFormSelectors,
+	ProductVariationSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useRef } from '@wordpress/element';
@@ -36,13 +39,18 @@ const EditProductPage: React.FC = () => {
 				hasFinishedResolution: hasProductFinishedResolution,
 				isPending,
 				getPermalinkParts,
-			} = select( PRODUCTS_STORE_NAME );
-			const { hasFinishedResolution: hasProductFormFinishedResolution } =
-				select( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME );
+			}: ProductsSelectors = select( PRODUCTS_STORE_NAME );
+			const {
+				hasFinishedResolution: hasProductFormFinishedResolution,
+			}: ProductFormSelectors = select(
+				EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+			);
 			const {
 				getProductVariation,
 				hasFinishedResolution: hasProductVariationFinishedResolution,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			}: ProductVariationSelectors = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
 			if ( productId ) {
 				const retrievedProduct = getProduct(
 					parseInt( productId, 10 ),
@@ -90,7 +98,8 @@ const EditProductPage: React.FC = () => {
 				isLoading: false,
 				isPendingAction: false,
 			};
-		}
+		},
+		[]
 	);
 
 	useEffect( () => {

@@ -9,6 +9,9 @@ import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
 	PartialProduct,
 	ProductShippingClass,
+	ProductShippingClassesActions,
+	ProductShippingClassSelectors,
+	WPDataActions,
 } from '@woocommerce/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -87,21 +90,26 @@ export const ShippingClassField: React.FC<
 
 	const { shippingClasses, hasResolvedShippingClasses } = useSelect(
 		( select ) => {
-			const { getProductShippingClasses, hasFinishedResolution } = select(
+			const {
+				getProductShippingClasses,
+				hasFinishedResolution,
+			}: ProductShippingClassSelectors = select(
 				EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 			);
 			return {
 				hasResolvedShippingClasses: hasFinishedResolution(
 					'getProductShippingClasses'
 				),
-				shippingClasses:
-					getProductShippingClasses< ProductShippingClass[] >(),
+				shippingClasses: getProductShippingClasses(),
 			};
 		},
 		[]
 	);
 
-	const { createProductShippingClass, invalidateResolution } = useDispatch(
+	const {
+		createProductShippingClass,
+		invalidateResolution,
+	}: ProductShippingClassesActions & WPDataActions = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -190,9 +198,9 @@ export const ShippingClassField: React.FC<
 						shippingClasses
 					) }
 					onAdd={ ( shippingClassValues ) =>
-						createProductShippingClass<
-							Promise< ProductShippingClass >
-						>( shippingClassValues )
+						createProductShippingClass(
+							shippingClassValues as ProductShippingClass
+						)
 							.then( ( value ) => {
 								recordEvent(
 									'product_new_shipping_class_modal_add_button_click'

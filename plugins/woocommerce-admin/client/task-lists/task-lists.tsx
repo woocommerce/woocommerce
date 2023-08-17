@@ -11,7 +11,7 @@ import {
 	OPTIONS_STORE_NAME,
 	TaskListType,
 	TaskType,
-	WCDataSelector,
+	OnboardingSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -40,16 +40,14 @@ export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const { isResolving, taskLists } = useSelect(
-		( select: WCDataSelector ) => {
-			return {
-				isResolving: ! select(
-					ONBOARDING_STORE_NAME
-				).hasFinishedResolution( 'getTaskLists' ),
-				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-			};
-		}
-	);
+	const { isResolving, taskLists } = useSelect( ( select ) => {
+		const { hasFinishedResolution, getTaskLists }: OnboardingSelectors =
+			select( ONBOARDING_STORE_NAME );
+		return {
+			isResolving: ! hasFinishedResolution( 'getTaskLists' ),
+			taskLists: getTaskLists(),
+		};
+	}, [] );
 
 	const getCurrentTask = () => {
 		if ( ! task ) {

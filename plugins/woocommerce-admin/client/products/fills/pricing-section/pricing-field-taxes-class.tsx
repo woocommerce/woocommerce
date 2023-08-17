@@ -6,7 +6,7 @@ import { useFormContext, Link } from '@woocommerce/components';
 import {
 	Product,
 	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,
-	TaxClass,
+	TaxClassSelectors,
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { RadioControl } from '@wordpress/components';
@@ -22,14 +22,14 @@ export const PricingTaxesClassField = () => {
 
 	const { isResolving: isTaxClassesResolving, taxClasses } = useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getTaxClasses } = select(
-				EXPERIMENTAL_TAX_CLASSES_STORE_NAME
-			);
+			const { hasFinishedResolution, getTaxClasses }: TaxClassSelectors =
+				select( EXPERIMENTAL_TAX_CLASSES_STORE_NAME );
 			return {
 				isResolving: ! hasFinishedResolution( 'getTaxClasses' ),
-				taxClasses: getTaxClasses< TaxClass[] >(),
+				taxClasses: getTaxClasses(),
 			};
-		}
+		},
+		[]
 	);
 
 	const taxClassProps = getInputProps( 'tax_class' );

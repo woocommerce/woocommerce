@@ -6,7 +6,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WCDataSelector, WEEK } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
@@ -55,8 +55,8 @@ export const TaskListCompletedHeader: React.FC<
 	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] =
 		useState( false );
 	const { storeAgeInWeeks, cesShownForActions, canShowCustomerEffortScore } =
-		useSelect( ( select: WCDataSelector ) => {
-			const { getOption, hasFinishedResolution } =
+		useSelect( ( select ) => {
+			const { getOption, hasFinishedResolution }: OptionsSelectors =
 				select( OPTIONS_STORE_NAME );
 
 			if ( customerEffortScore ) {
@@ -86,7 +86,7 @@ export const TaskListCompletedHeader: React.FC<
 				};
 			}
 			return {};
-		} );
+		}, [] );
 
 	useEffect( () => {
 		if ( hasSubmittedScore ) {

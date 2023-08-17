@@ -14,7 +14,7 @@ import {
 	ProfileItems,
 	GetJetpackAuthUrlResponse,
 } from './types';
-import { WPDataSelectors } from '../types';
+import { WPDataSelector, WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
 
 export const getFreeExtensions = (
@@ -119,4 +119,5 @@ export type OnboardingSelectors = {
 	getTaskLists: () => ReturnType< typeof getTaskLists >;
 	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
 	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
+	getProductTypes: WPDataSelector< typeof getProductTypes >;
 } & WPDataSelectors;

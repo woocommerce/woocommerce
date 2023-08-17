@@ -3,7 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, PartialProduct } from '@woocommerce/data';
+import {
+	OptionsSelectors,
+	OPTIONS_STORE_NAME,
+	PartialProduct,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
 import {
@@ -18,7 +22,7 @@ export const ShippingDimensionsWeightField = () => {
 	const { formatNumber, parseNumber } = useProductHelper();
 
 	const { weightUnit, hasResolvedUnits } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 		return {
 			weightUnit: getOption( 'woocommerce_weight_unit' ),

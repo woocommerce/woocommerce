@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { COUNTRIES_STORE_NAME, CountriesSelectors } from '@woocommerce/data';
 import { Fragment, useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
@@ -67,7 +67,7 @@ const StoreLocation = ( {
 	validate = defaultValidate,
 }: StoreLocationProps ) => {
 	const { hasFinishedResolution } = useSelect( ( select ) => {
-		const countryStore = select( COUNTRIES_STORE_NAME );
+		const countryStore: CountriesSelectors = select( COUNTRIES_STORE_NAME );
 		countryStore.getCountries();
 		return {
 			getLocale: countryStore.getLocale,
@@ -76,7 +76,7 @@ const StoreLocation = ( {
 				countryStore.hasFinishedResolution( 'getLocales' ) &&
 				countryStore.hasFinishedResolution( 'getCountries' ),
 		};
-	} );
+	}, [] );
 	const [ isSubmitting, setSubmitting ] = useState( false );
 	const onSubmit = async ( values: FormValues ) => {
 		setSubmitting( true );

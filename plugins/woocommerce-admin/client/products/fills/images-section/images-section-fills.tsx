@@ -13,7 +13,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { ImagesGalleryField } from './index';
 import { IMAGES_SECTION_ID, TAB_GENERAL_ID, PLUGIN_ID } from '../constants';
 
 import './images-section.scss';
@@ -54,12 +53,5 @@ export const ImagesSectionFills = () => (
 				}
 			/>
 		</WooProductSectionItem>
-		<WooProductFieldItem
-			id="gallery"
-			sections={ [ { name: IMAGES_SECTION_ID, order: 1 } ] }
-			pluginId={ PLUGIN_ID }
-		>
-			<ImagesGalleryField />
-		</WooProductFieldItem>
 	</>
 );

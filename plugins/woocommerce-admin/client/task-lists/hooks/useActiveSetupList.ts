@@ -2,11 +2,14 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { OnboardingSelectors, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 export const useActiveSetupTasklist = () => {
 	const { activeSetuplist } = useSelect( ( select ) => {
-		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+		const { getTaskLists }: OnboardingSelectors = select(
+			ONBOARDING_STORE_NAME
+		);
+		const taskLists = getTaskLists();
 
 		const visibleSetupList = taskLists.filter(
 			( list ) => list.id === 'setup' && list.isVisible
@@ -17,7 +20,7 @@ export const useActiveSetupTasklist = () => {
 				? visibleSetupList[ 0 ].id
 				: null,
 		};
-	} );
+	}, [] );
 
 	return activeSetuplist;
 };

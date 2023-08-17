@@ -8,6 +8,9 @@ import {
 	PLUGINS_STORE_NAME,
 	Extension,
 	ExtensionList,
+	PluginSelectors,
+	OnboardingSelectors,
+	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -106,14 +109,16 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 		null
 	);
 	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins }: PluginsStoreActions =
+		useDispatch( PLUGINS_STORE_NAME );
 	const { activePlugins, freeExtensions, installedPlugins, isResolving } =
 		useSelect( ( select ) => {
-			const { getActivePlugins, getInstalledPlugins } =
+			const { getActivePlugins, getInstalledPlugins }: PluginSelectors =
 				select( PLUGINS_STORE_NAME );
-			const { getFreeExtensions, hasFinishedResolution } = select(
-				ONBOARDING_STORE_NAME
-			);
+			const {
+				getFreeExtensions,
+				hasFinishedResolution,
+			}: OnboardingSelectors = select( ONBOARDING_STORE_NAME );
 
 			return {
 				activePlugins: getActivePlugins(),
@@ -121,7 +126,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 				installedPlugins: getInstalledPlugins(),
 				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
 			};
-		} );
+		}, [] );
 
 	const [ installedExtensions, pluginLists ] = useMemo(
 		() =>

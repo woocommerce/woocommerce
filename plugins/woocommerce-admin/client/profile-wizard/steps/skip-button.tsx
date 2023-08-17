@@ -7,7 +7,11 @@ import { Icon, info } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	OptionsSelectors,
+	OPTIONS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -29,9 +33,10 @@ const SkipButton: React.FC< {
 
 	const trackingAllowed = useSelect(
 		( select ) =>
-			select( OPTIONS_STORE_NAME ).getOption(
+			( select( OPTIONS_STORE_NAME ) as OptionsSelectors ).getOption(
 				'woocommerce_allow_tracking'
-			) === 'yes'
+			) === 'yes',
+		[]
 	);
 
 	const [ isSkipSetupPopoverVisible, setSkipSetupPopoverVisibility ] =

@@ -4,7 +4,7 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { MenuItem } from '@wordpress/components';
 import {
 	ALLOW_TRACKING_OPTION_NAME,
@@ -26,7 +26,7 @@ export const ClassicEditorMenuItem = ( {
 	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
 
 	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		const allowTrackingOption =
@@ -40,7 +40,7 @@ export const ClassicEditorMenuItem = ( {
 			allowTracking: allowTrackingOption === 'yes',
 			resolving,
 		};
-	} );
+	}, [] );
 
 	const _feature_nonce = getAdminSetting( '_feature_nonce' );
 

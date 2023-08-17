@@ -6,7 +6,9 @@ import { Button, Card, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
+	ProductQuery,
 	ProductVariation,
+	ProductVariationSelectors,
 } from '@woocommerce/data';
 import {
 	getProductStockStatus,
@@ -66,8 +68,12 @@ export const Variations: React.FC = () => {
 				getProductVariations,
 				hasFinishedResolution,
 				getProductVariationsTotalCount,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-			const requestParams = {
+			}: ProductVariationSelectors = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
+			const requestParams: Partial< ProductQuery > & {
+				product_id: number;
+			} = {
 				product_id: productId,
 				page: currentPage,
 				per_page: perPage,
@@ -78,10 +84,8 @@ export const Variations: React.FC = () => {
 				isLoading: ! hasFinishedResolution( 'getProductVariations', [
 					requestParams,
 				] ),
-				variations:
-					getProductVariations< ProductVariation[] >( requestParams ),
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
+				variations: getProductVariations( requestParams ),
+				totalCount: getProductVariationsTotalCount( requestParams ),
 			};
 		},
 		[ currentPage, perPage, productId ]
@@ -113,7 +117,7 @@ export const Variations: React.FC = () => {
 			...prevState,
 			[ variationId ]: true,
 		} ) );
-		updateProductVariation< Promise< ProductVariation > >(
+		updateProductVariation(
 			{ product_id: productId, id: variationId },
 			{ status }
 		).finally( () =>
