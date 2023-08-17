@@ -47,8 +47,6 @@ export function Edit( {
 							navigateTo( {
 								url: getNewPath(
 									{ tab: 'variations' },
-									'/add-product',
-									{}
 								),
 							} )
 						}
