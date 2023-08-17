@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry;
 
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+
 /**
  * Block template registry.
  */
@@ -33,11 +35,17 @@ final class BlockTemplateRegistry {
     /**
      * Register a single template.
      *
-     * @param array $template Template layout.
+     * @param string $id Template ID.
+     * @param array  $template Template layout.
      */
-    public function register( $template_class ) {
+    public function register( string $id, string $template_class ) {
         $template = new $template_class();
-        $this->templates[ $template->get_id() ] = $template;
+
+        if ( isset( $this->templates[ $id ] ) ) {
+			throw new \ValueError( 'A template with the specified ID already exists in the registry.' );
+		}
+
+        $this->templates[ $id ] = $template;
     }
 
     /**
@@ -52,7 +60,7 @@ final class BlockTemplateRegistry {
      *
      * @param string $id ID of the template
      */
-    public function get_registered( $id ): array {
+    public function get_registered( $id ): BlockTemplateInterface {
         return isset( $this->templates[ $id ] ) ? $this->templates[ $id ] : null;
     }
 
