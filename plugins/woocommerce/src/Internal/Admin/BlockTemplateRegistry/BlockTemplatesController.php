@@ -39,7 +39,6 @@ class BlockTemplatesController {
         foreach ( $templates as $template ) {
             add_filter( 'pre_get_block_templates', function( $query_result, $query, $template_type ) use( $template ) {
                 if ( ! isset( $query['area'] ) || $query['area'] !== $template->get_area() ) {
-                    wp_die($template->get_area());
                     return $query_result;
                 }
 
