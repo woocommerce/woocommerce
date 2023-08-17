@@ -192,7 +192,7 @@ class ProductButton extends AbstractBlock {
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				strtr(
-					'<div class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
+					'<div data-wc-interactive class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
 						{div_directives}
 					>
 					<{html_element}
