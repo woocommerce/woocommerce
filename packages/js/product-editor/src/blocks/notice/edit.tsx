@@ -18,34 +18,15 @@ import { hasAttributesUsedForVariations } from '../../utils';
 export interface NoticeBlockAttributes extends BlockAttributes {
 	buttonText: string;
 	content: string;
-	id: string;
-	isSelected?: boolean;
 	title: string;
 	type: 'error-type' | 'success' | 'warning' | 'info';
 }
 
 export function Edit( {
-	setAttributes,
 	attributes,
-	context,
-}: BlockEditProps< NoticeBlockAttributes > & {
-	context?: {
-		selectedTab?: string | null;
-	};
-} ) {
+}: BlockEditProps< NoticeBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const {
-		buttonText,
-		content,
-		id,
-		isSelected: contextIsSelected,
-		title,
-		type = 'info',
-	} = attributes;
-	const isSelected = context?.selectedTab === id;
-	if ( isSelected !== contextIsSelected ) {
-		setAttributes( { isSelected } );
-	}
+	const { buttonText, content, title, type = 'info' } = attributes;
 
 	const [ productAttributes ] = useEntityProp< Product[ 'attributes' ] >(
 		'postType',
