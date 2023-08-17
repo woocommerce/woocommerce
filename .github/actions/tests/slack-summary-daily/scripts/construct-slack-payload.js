@@ -17,7 +17,7 @@ module.exports = ( { core } ) => {
 			dateStyle: 'full',
 		} ).format( Date.now() );
 
-		const block = [
+		const blocks = [
 			{
 				type: 'divider',
 			},
@@ -71,7 +71,7 @@ module.exports = ( { core } ) => {
 			},
 		];
 
-		return block;
+		return blocks;
 	};
 
 	const create_blockGroup_nightlySite = () => {
@@ -79,7 +79,7 @@ module.exports = ( { core } ) => {
 		const emoji_E2E = selectEmoji( E2E_RESULT );
 		const emoji_k6 = selectEmoji( k6_RESULT );
 
-		const block = [
+		const blocks = [
 			{
 				type: 'section',
 				text: {
@@ -101,7 +101,7 @@ module.exports = ( { core } ) => {
 			},
 		];
 
-		return block;
+		return blocks;
 	};
 
 	const blockGroup_header = create_blockGroup_header();
