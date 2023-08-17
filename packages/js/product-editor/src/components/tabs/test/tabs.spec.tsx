@@ -24,6 +24,13 @@ jest.mock( '@woocommerce/navigation', () => ( {
 	getQuery: jest.fn().mockReturnValue( {} ),
 } ) );
 
+const blockProps = {
+	setAttributes: () => {},
+	className: '',
+	clientId: '',
+	isSelected: false,
+};
+
 function MockTabs( { onChange = jest.fn() } ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const mockContext = {
@@ -39,15 +46,18 @@ function MockTabs( { onChange = jest.fn() } ) {
 				} }
 			/>
 			<Tab
-				attributes={ { id: 'test1', title: 'Test button 1' } }
+				{ ...blockProps }
+				attributes={ { id: 'test1', title: 'Test button 1', order: 1 } }
 				context={ mockContext }
 			/>
 			<Tab
-				attributes={ { id: 'test2', title: 'Test button 2' } }
+				{ ...blockProps }
+				attributes={ { id: 'test2', title: 'Test button 2', order: 2 } }
 				context={ mockContext }
 			/>
 			<Tab
-				attributes={ { id: 'test3', title: 'Test button 3' } }
+				{ ...blockProps }
+				attributes={ { id: 'test3', title: 'Test button 3', order: 3 } }
 				context={ mockContext }
 			/>
 		</SlotFillProvider>

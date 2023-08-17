@@ -22,8 +22,9 @@ none
 # Logs
 logs/
 
-# Eslint Cache
+# Eslint
 .eslintcache
+eslint_report.json
 
 # Environment files
 wp-cli.local.yml
@@ -81,6 +82,9 @@ plugins/woocommerce/includes/react-admin/feature-config.php
 
 # PHP lint
 phpcs-report.xml
+
+#PHP Unit
+.phpunit.result.cache
 
 # Allure directories
 allure-report

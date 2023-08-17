@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
 import { createElement } from '@wordpress/element';
@@ -11,6 +11,8 @@ import {
 	QueryProductAttribute,
 	ProductAttribute,
 	WCDataSelector,
+	ProductAttributesActions,
+	WPDataActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import {
@@ -38,6 +40,7 @@ type AttributeInputFieldProps = {
 	placeholder?: string;
 	disabled?: boolean;
 	ignoredAttributeIds?: number[];
+	createNewAttributesAsGlobal?: boolean;
 };
 
 function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
@@ -51,7 +54,12 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	label,
 	disabled,
 	ignoredAttributeIds = [],
+	createNewAttributesAsGlobal = false,
 } ) => {
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute, invalidateResolution } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as ProductAttributesActions & WPDataActions;
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
@@ -99,6 +107,35 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		return filteredItems;
 	};
 
+	const addNewAttribute = ( attribute: NarrowedQueryAttribute ) => {
+		recordEvent( 'product_attribute_add_custom_attribute', {
+			source: TRACKS_SOURCE,
+		} );
+		if ( createNewAttributesAsGlobal ) {
+			createProductAttribute( { name: attribute.name } ).then(
+				( newAttr ) => {
+					invalidateResolution( 'getProductAttributes' );
+					onChange( { ...newAttr, options: [] } );
+				},
+				( error ) => {
+					let message = __(
+						'Failed to create new attribute.',
+						'woocommerce'
+					);
+					if ( error.code === 'woocommerce_rest_cannot_create' ) {
+						message = error.message;
+					}
+
+					createErrorNotice( message, {
+						explicitDismiss: true,
+					} );
+				}
+			);
+		} else {
+			onChange( attribute.name );
+		}
+	};
+
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
@@ -112,19 +149,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			selected={ value }
 			onSelect={ ( attribute ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
-					recordEvent( 'product_attribute_add_custom_attribute', {
-						source: TRACKS_SOURCE,
+					addNewAttribute( attribute );
+				} else {
+					onChange( {
+						id: attribute.id,
+						name: attribute.name,
+						options: [],
 					} );
 				}
-				onChange(
-					isNewAttributeListItem( attribute )
-						? attribute.name
-						: {
-								id: attribute.id,
-								name: attribute.name,
-								options: [],
-						  }
-				);
 			} }
 			onRemove={ () => onChange() }
 			__experimentalOpenMenuOnFocus

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Enable HPOS through the `wp option` command.

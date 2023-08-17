@@ -55,7 +55,7 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 -   [ ] Dev - Development related task
 -   [ ] Tweak - A minor adjustment to the codebase
 -   [ ] Performance - Address performance issues
--   [ ] Enhancement
+-   [ ] Enhancement - Improvement to existing functionality
 
 #### Message <!-- Add a changelog message here -->
 

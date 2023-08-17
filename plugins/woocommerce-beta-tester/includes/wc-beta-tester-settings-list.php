@@ -1,8 +1,17 @@
 <?php
 /**
- * List of settings to be exported.
+ * WooCommerce Beta Tester settings list functions.
+ *
+ * @package WC_Beta_Tester
  */
 
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Gets the list of settings that can be edited.
+ *
+ * @return string[]
+ */
 function wc_beta_tester_setting_list() {
 	$settings_list = array(
 		'date_format',
@@ -122,7 +131,7 @@ function wc_beta_tester_setting_list() {
 		'woocommerce_trash_pending_orders',
 		'woocommerce_unforce_ssl_checkout',
 		'woocommerce_version',
-		'woocommerce_weight_unit'
+		'woocommerce_weight_unit',
 	);
 	return apply_filters( 'wc_beta_tester_setting_list', $settings_list );
 }

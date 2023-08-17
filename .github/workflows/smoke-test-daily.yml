@@ -25,6 +25,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
             BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            API_BASE_URL: ${{ secrets.SMOKE_TEST_API_URL }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
@@ -55,7 +56,7 @@ jobs:
               env:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate API Test report.
               if: success() || failure()

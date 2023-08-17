@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refactored some core profiler utils out to reuse them in customise your store.

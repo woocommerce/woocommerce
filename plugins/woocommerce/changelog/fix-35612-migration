@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add migration to move incorrectly stored payment token IDS to HPOS tables from postmeta.

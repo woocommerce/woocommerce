@@ -68,6 +68,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
@@ -106,6 +107,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
+		$this->disable_cot_sync();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
 		$post_data             = get_post( $post_order_id, ARRAY_A );
@@ -501,6 +503,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		global $wpdb;
 
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 
 		// Tests trashing of orders.
 		$order = $this->create_complex_cot_order();
@@ -1217,6 +1220,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Direct write to metadata should propagate to the orders table when reading.
 	 */
 	public function test_read_with_direct_meta_write() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
@@ -1240,6 +1244,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1275,6 +1280,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
@@ -1872,6 +1878,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_legacy_getters_setters() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order_id = OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
@@ -1997,10 +2004,42 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
+	 * @testDox Test that inserting with strict SQL mode is also supported.
+	 */
+	public function test_order_create_with_strict_mode_and_null_values() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
+		// Set SQL mode to strict to disallow 0 dates.
+		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$this->assertTrue( $order->get_id() > 0 );
+
+		// Let's also repeat with sync off.
+		$this->enable_cot_sync();
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		$this->assertTrue( $order->get_id() > 0 );
+		$order = wc_get_order( $order->get_id() );
+		$post  = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_date_modified()->format( 'Y-m-d H:i:s' ), $post->post_date );
+
+		// phpcs:ignore -- Hardcoded value.
+		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+	}
+
+	/**
 	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->sut->backfill_post_record( $order );
 		$this->enable_cot_sync();
@@ -2328,6 +2367,54 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
+	 * @testDox Test that orders token are stored in the correct meta table
+	 */
+	public function test_payment_token_stored_in_correct_table() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+		$order = wc_create_order();
+		$order->save();
+
+		$token1 = WC_Helper_Payment_Token::create_eCheck_token();
+		$token2 = WC_Helper_Payment_Token::create_eCheck_token();
+		$order->add_payment_token( $token1 );
+		$order->add_payment_token( $token2 );
+		$order->save();
+
+		$token_ids = $order->get_payment_tokens();
+		$this->assertEquals( array( $token1->get_id(), $token2->get_id() ), $token_ids );
+
+		$token_ids = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_value FROM {$wpdb->prefix}wc_orders_meta WHERE order_id = %d AND meta_key = '_payment_tokens'",
+				$order->get_id()
+			)
+		);
+		$token_ids = maybe_unserialize( $token_ids );
+		$this->assertEquals( array( $token1->get_id(), $token2->get_id() ), $token_ids );
+	}
+
+	/**
+	 * Before 7.9.0, payment tokens were stored in the post meta table. This test checks that we can read them anyway.
+	 */
+	public function test_payment_token_is_read_when_stored_in_post_meta() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( false );
+		$order = wc_create_order();
+		$order->save();
+
+		$token1   = WC_Helper_Payment_Token::create_eCheck_token();
+		$token2   = WC_Helper_Payment_Token::create_eCheck_token();
+		$token_ar = array( $token1->get_id(), $token2->get_id() );
+		update_post_meta( $order->get_id(), '_payment_tokens', $token_ar );
+		$order->set_version( '7.9.0' );
+
+		$token_ids = $order->get_payment_tokens();
+		$this->assertEquals( $token_ar, $token_ids );
+	}
+
+	/**
 	 * @testWith [true]
 	 *           [false]
 	 * @testDox An exception thrown while populating the properties of an order is captured and logged as a warning.
@@ -2496,4 +2583,162 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
 	}
+
+	/**
+	 * @testDox Test that adding meta, while in callback for adding another meta also works as expected.
+	 */
+	public function test_backfill_does_not_trigger_read_on_sync_with_filters() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
+	}
+
+	/**
+	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * @param int    $meta_id Meta ID.
+	 * @param int    $post_id Post ID.
+	 * @param string $meta_key Meta key.
+	 * @param string $meta_value Meta value.
+	 */
+	public function add_meta_when_meta_added( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( 'test_key' === $meta_key ) {
+			$order = wc_get_order( $post_id );
+			$order->add_meta_data( 'test_key_2', 'test_value_2' );
+			$order->save_meta_data();
+			$order->add_meta_data( 'test_key_3', 'test_value_3' );
+			$order->save();
+		}
+	}
+
+	/**
+	 * @testDox When creating a new order, test that we are not backfilling stale data when there is a postmeta hooks that modifies data on the order.
+	 */
+	public function test_backfill_does_not_trigger_when_creating_orders_with_filter() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		add_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ), 10, 4 );
+		$order = new WC_Order();
+		$order->set_customer_id( 1 );
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
+		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
+	}
+
+	/**
+	 * @testDox When sync is enabled, order data can be saved and retrieved as expected.
+	 */
+	public function test_order_data_saved_correctly_with_sync() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = new WC_Order();
+		$order->save();
+
+		$order->set_customer_id( 1 ); // Change a custom table column.
+		$order->set_billing_address_1( 'test' ); // Change an address column and a meta row.
+		$order->set_download_permissions_granted( true ); // Change an operational data column.
+		$order->add_meta_data( 'test_key', 'test_value' );
+
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+	}
+
+	/**
+	 * @testDox Checks that order new/updated hooks are fired at appropriate times in HPOS (vs CPT).
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_order_hooks_vs_cpt( $cot_is_authoritative = true ) {
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->disable_cot_sync();
+
+		$new_count = $update_count = 0;
+
+		$callback = function( $order_id ) use ( &$new_count, &$update_count ) {
+			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
+			$update_count += 'woocommerce_update_order' === current_action() ? 1 : 0;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+		add_action( 'woocommerce_update_order', $callback );
+
+		// Creating a new order should trigger 'woocommerce_new_order' but not 'woocommerce_update_order'.
+		$order = new WC_Order();
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 0, $update_count );
+
+		// An update to the order should only trigger 'woocommerce_update_order'.
+		$order->set_billing_city( 'Los Angeles' );
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 1, $update_count );
+
+		// Updating datastore-level props should not trigger anything.
+		$order->get_data_store()->set_download_permissions_granted( $order->get_id(), true );
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 1, $update_count );
+
+		// Trashing should not fire an update.
+		$order->get_data_store()->delete( $order );
+		$this->assertEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( 1, $update_count );
+
+		// Untrashing should not fire an update.
+		if ( $cot_is_authoritative ) {
+			$order = wc_get_order( $order->get_id() ); // Refresh order.
+			$order->get_data_store()->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order->get_id() );
+			$order = wc_get_order( $order->get_id() ); // Refresh order.
+		}
+		$this->assertNotEquals( $order->get_status(), 'trash' );
+		$this->assertEquals( 1, $update_count );
+
+		// An auto-draft order should not trigger 'woocommerce_new_order' until first saved with a valid status.
+		if ( $cot_is_authoritative ) {
+			$order = new WC_Order();
+			$order->set_status( 'auto-draft' );
+			$order->save();
+
+			$this->assertEquals( 1, $new_count );
+			$this->assertEquals( 1, $update_count );
+
+			$order->set_status( 'on-hold' );
+			$order->save();
+
+			$this->assertEquals( 2, $new_count );
+			$this->assertEquals( 1, $update_count );
+		}
+
+		remove_action( 'woocommerce_new_order', $callback );
+		remove_action( 'woocommerce_update_order', $callback );
+	}
+
+
 }
