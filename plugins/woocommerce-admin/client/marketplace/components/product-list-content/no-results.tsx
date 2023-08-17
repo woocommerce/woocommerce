@@ -90,7 +90,7 @@ export default function NoResults(): JSX.Element {
 					alt={ __( 'No results.', 'woocommerce' ) }
 				/>
 				<div className="woocommerce-marketplace__no-results__description">
-					<p className="woocommerce-marketplace__no-results__description--bold">
+					<h3 className="woocommerce-marketplace__no-results__description--bold">
 						{ sprintf(
 							// translators: %s: search term
 							__(
@@ -99,7 +99,7 @@ export default function NoResults(): JSX.Element {
 							),
 							noResultsTerm
 						) }
-					</p>
+					</h3>
 					<p>
 						{ __(
 							'Try searching again using a different term, or take a look at some of our most popular extensions below.',
