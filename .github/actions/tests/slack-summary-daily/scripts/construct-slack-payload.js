@@ -45,7 +45,7 @@ module.exports = async ( { context, core, github } ) => {
 				elements: [
 					{
 						type: 'mrkdwn',
-						text: `*Date:* ${ date }`,
+						text: `*Run started:* ${ date }`,
 					},
 				],
 			},
