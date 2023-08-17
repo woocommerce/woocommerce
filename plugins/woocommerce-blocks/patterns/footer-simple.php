@@ -16,7 +16,7 @@
 			<!-- wp:group {"style":{"spacing":{"blockGap":"32px"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"}} -->
 			<div class="wp-block-group">
 				<!-- wp:site-logo /-->
-				<!-- wp:woocommerce/customer-account /-->
+				<!-- wp:woocommerce/customer-account {"fontSize":"small"} /-->
 				<!-- wp:navigation -->
 				<!-- /wp:navigation -->
 			</div>
