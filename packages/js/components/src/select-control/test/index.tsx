@@ -172,7 +172,10 @@ describe( 'SelectControl', () => {
 	it( 'changes the options on search', async () => {
 		const queriedOptions: Option[] = [];
 		// eslint-disable-next-line @typescript-eslint/no-shadow
-		const queryOptions = async ( options: Option[], searchedQuery: string | null ) => {
+		const queryOptions = async (
+			options: Option[],
+			searchedQuery: string | null
+		) => {
 			if ( searchedQuery === 'test' ) {
 				queriedOptions.push( {
 					key: 'test-option',
@@ -258,7 +261,7 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					isSearchable
-					selected={ options[ 0 ].key }
+					selected={ options[ 0 ].key as string }
 					options={ options }
 					onSearch={ async () => options }
 					onFilter={ () => options }
@@ -289,7 +292,7 @@ describe( 'SelectControl', () => {
 					<SelectControl
 						isSearchable
 						showAllOnFocus
-						selected={ options[ 2 ].key }
+						selected={ options[ 2 ].key as string }
 						options={ options }
 						onSearch={ async () => options }
 						onFilter={ () => options }
@@ -316,7 +319,7 @@ describe( 'SelectControl', () => {
 					<SelectControl
 						isSearchable
 						showAllOnFocus
-						selected={ options[ 2 ].key }
+						selected={ options[ 2 ].key as string }
 						options={ options }
 						onSearch={ async () => options }
 						onFilter={ () => options }
@@ -383,7 +386,7 @@ describe( 'SelectControl', () => {
 				const { getByRole } = render(
 					<SelectControl
 						isSearchable
-						selected={ options[ 0 ].key }
+						selected={ options[ 0 ].key as string }
 						options={ options }
 						onSearch={ async () => options }
 						onFilter={ () => options }
@@ -410,7 +413,7 @@ describe( 'SelectControl', () => {
 			/>
 		);
 
-		expect( getByText( options[ 1 ].label ) ).toBeInTheDocument();
+		expect( getByText( options[ 1 ].label as string ) ).toBeInTheDocument();
 	} );
 
 	describe( 'keyboard interaction', () => {
@@ -443,7 +446,7 @@ describe( 'SelectControl', () => {
 					options={ options }
 					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ options[ 1 ].key }
+					selected={ options[ 1 ].key as string }
 					excludeSelectedOptions={ false }
 				/>
 			);
@@ -468,7 +471,7 @@ describe( 'SelectControl', () => {
 					options={ options }
 					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ options[ options.length - 1 ].key }
+					selected={ options[ options.length - 1 ].key as string }
 					excludeSelectedOptions={ false }
 				/>
 			);

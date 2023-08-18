@@ -12,13 +12,27 @@ import { useDispatch } from '@wordpress/data';
 
 import { Plugins } from '../index';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest
-		.fn()
-		.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
-	useSelect: jest.fn().mockReturnValue( false ),
-} ) );
+jest.mock( '@woocommerce/data', () => {
+	return {
+		PLUGINS_STORE_NAME: '',
+	};
+} );
+jest.mock( '@wordpress/components', () => {
+	return {
+		Button: ( { children, onClick } ) => (
+			<button onClick={ onClick }>{ children }</button>
+		),
+	};
+} );
+
+jest.mock( '@wordpress/data', () => {
+	return {
+		useDispatch: jest
+			.fn()
+			.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
+		useSelect: jest.fn().mockReturnValue( false ),
+	};
+} );
 
 describe( 'Rendering', () => {
 	afterAll( () => {
@@ -138,8 +152,9 @@ describe( 'Installing and activating errors', () => {
 		};
 
 		// Get the mocked installAndActivatePlugins function.
-		const { installAndActivatePlugins } = useDispatch();
-		installAndActivatePlugins.mockRejectedValue( response );
+		useDispatch.mockReturnValue( {
+			installAndActivatePlugins: jest.fn().mockRejectedValue( response ),
+		} );
 
 		const onComplete = jest.fn();
 		const onError = jest.fn();

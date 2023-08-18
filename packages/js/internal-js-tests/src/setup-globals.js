@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { setLocaleData } from '@wordpress/i18n';
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import 'regenerator-runtime/runtime';
 
 // Mock the config module to avoid errors like:
@@ -128,7 +128,7 @@ setLocaleData(
 );
 
 // Mock core/notices store for components dispatching core notices
-registerStore( 'core/notices', {
+const store = createReduxStore( 'core/notices', {
 	reducer: () => {
 		return {};
 	},
@@ -137,3 +137,4 @@ registerStore( 'core/notices', {
 	},
 	selectors: {},
 } );
+register( store );

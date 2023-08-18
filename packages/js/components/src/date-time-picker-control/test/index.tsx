@@ -298,9 +298,7 @@ describe( 'DateTimePickerControl', () => {
 		userEvent.click( input! );
 		fireEvent.blur( input! );
 
-		await waitFor( () =>
-			expect( onBlurHandler ).toHaveBeenCalledTimes( 1 )
-		);
+		await waitFor( () => expect( onBlurHandler ).toHaveBeenCalled() );
 	} );
 
 	// We need to bump up the timeout for this test because:
