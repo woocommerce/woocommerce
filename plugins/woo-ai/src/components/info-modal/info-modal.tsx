@@ -3,13 +3,12 @@
  */
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
-import React, { useEffect, useState } from 'react';
 
 /**
  * Internal dependencies
  */
-
 import TourSpotlight from '../tour-spotlight/tour-spotlight';
+import './info-modal.scss';
 
 interface InfoModalProps {
 	id: string;
@@ -30,16 +29,7 @@ export const InfoModal: React.FC< InfoModalProps > = ( {
 
 	const { set } = useDispatch( preferencesStore );
 
-	const [ isPageLoaded, setIsPageLoaded ] = useState( false );
-
-	useEffect( () => {
-		window.onload = function () {
-			setIsPageLoaded( true );
-		};
-	}, [] );
-
-	if ( ! isPageLoaded || ! anchorElement || hasBeenDismissedBefore )
-		return null;
+	if ( ! anchorElement || hasBeenDismissedBefore ) return null;
 
 	const closeTour = () => {
 		set( 'woo-ai-plugin', `modalDismissed-${ id }`, true );
@@ -51,6 +41,7 @@ export const InfoModal: React.FC< InfoModalProps > = ( {
 			description={ message }
 			onDismiss={ closeTour }
 			reference={ '#postexcerpt' }
+			className={ `${ id }-spotlight` }
 		/>
 	);
 };

@@ -7026,7 +7026,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-syntax-jsx@7.21.4(@babel/core@7.17.8):
     resolution: {integrity: sha512-5hewiLct5OKyh6PLKEYaFclcqtIgCb6bmELouxjF6up5q3Sov7rOayW4RwhbaBL0dit8rA80GNfY+UuDp2mBbQ==}
@@ -7035,7 +7035,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.22.5
     dev: true
 
   /@babel/plugin-syntax-jsx@7.21.4(@babel/core@7.21.3):
@@ -13112,7 +13112,7 @@ packages:
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
     dependencies:
       '@gar/promisify': 1.1.3
-      semver: 7.5.0
+      semver: 7.5.3
     dev: true
 
   /@npmcli/git@2.1.0:
@@ -13124,7 +13124,7 @@ packages:
       npm-pick-manifest: 6.1.1
       promise-inflight: 1.0.1(bluebird@3.7.2)
       promise-retry: 2.0.1
-      semver: 7.5.0
+      semver: 7.5.3
       which: 2.0.2
     transitivePeerDependencies:
       - bluebird
@@ -13156,7 +13156,7 @@ packages:
       cacache: 15.3.0
       json-parse-even-better-errors: 2.3.1
       pacote: 12.0.3
-      semver: 7.5.0
+      semver: 7.5.3
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -15808,9 +15808,9 @@ packages:
     resolution: {integrity: sha512-4biZIWWzoWlCarMZmTpqcJNgo/RBesYZwGFbQeXiGYsswuvfWARZnW9RE9aUEMZ4XPn7B1N3EKkWcdcWe/K2tg==}
     dependencies:
       '@babel/generator': 7.21.3
-      '@babel/parser': 7.21.3
+      '@babel/parser': 7.22.10
       '@babel/preset-env': 7.20.2(@babel/core@7.21.3)
-      '@babel/types': 7.22.4
+      '@babel/types': 7.22.10
       '@mdx-js/mdx': 1.6.22
       '@types/lodash': 4.14.184
       js-string-escape: 1.0.1
@@ -22961,7 +22961,7 @@ packages:
     resolution: {integrity: sha512-Y1IQok9821cC9onCx5otgFfRm7Lm+I+wwxOx738M/WLPZ9Q42m4IG5W0FNX8WLL2gYMZo3JkuXIH2DOpWM+qwA==}
     engines: {node: '>=8'}
     dependencies:
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.22.5
       '@istanbuljs/load-nyc-config': 1.1.0
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-instrument: 5.1.0
@@ -37502,7 +37502,7 @@ packages:
       nopt: 5.0.0
       npmlog: 6.0.2
       rimraf: 3.0.2
-      semver: 7.5.0
+      semver: 7.5.3
       tar: 6.1.11
       which: 2.0.2
     transitivePeerDependencies:
@@ -37721,7 +37721,7 @@ packages:
     resolution: {integrity: sha512-09OmyDkNLYwqKPOnbI8exiOZU2GVVmQp7tgez2BPi5OZC8M82elDAps7sxC4l//uSUtotWqoEIDwjRvWH4qz8w==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.0
+      semver: 7.5.3
     dev: true
 
   /npm-normalize-package-bin@1.0.1:
@@ -37738,7 +37738,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       hosted-git-info: 4.0.2
-      semver: 7.5.0
+      semver: 7.5.3
       validate-npm-package-name: 3.0.0
     dev: true
 
@@ -37783,7 +37783,7 @@ packages:
       npm-install-checks: 4.0.0
       npm-normalize-package-bin: 1.0.1
       npm-package-arg: 8.1.5
-      semver: 7.5.0
+      semver: 7.5.3
     dev: true
 
   /npm-registry-fetch@12.0.2:

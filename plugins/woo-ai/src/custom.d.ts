@@ -5,3 +5,4 @@ declare module '*.svg' {
 
 declare module '@wordpress/data';
 declare module '@wordpress/preferences';
+declare module '@wordpress/notices';
