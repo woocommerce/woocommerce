@@ -201,11 +201,11 @@ jobs:
                   C_USER: ${{ secrets.WX_DAILY_CUST_USER }}
                   C_PW: ${{ secrets.WX_DAILY_CUST_PW }}
                   C_UID: ${{ secrets.WX_DAILY_CUST_ID }}
-                  P_SKU woo-fasion-hat
-                  P_URL hat
+                  P_SKU: woo-fasion-hat
+                  P_URL: hat
                   P_ID: 22733
-                  P_TERM shirt
-                  P_CAT Clothing
+                  P_TERM: shirt
+                  P_CAT: Clothing
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-wx-requests.js
 
