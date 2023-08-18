@@ -2,22 +2,31 @@
  * External dependencies
  */
 import { createBlock, BlockInstance } from '@wordpress/blocks';
-import { select, dispatch } from '@wordpress/data';
+import { select, dispatch, subscribe } from '@wordpress/data';
+import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import {
+	AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
+	getInitialStatusLSValue,
+} from './constants';
+import {
 	getProductsBlockClientIds,
 	checkIfBlockCanBeInserted,
 	postTemplateHasSupportForGridView,
-	type TransformBlock,
-	type IsBlockType,
-	type ProductGridLayout,
-	type ProductGridLayoutTypes,
-	type PostTemplateLayout,
-	type PostTemplateLayoutTypes,
+	getUpgradeStatus,
+	setUpgradeStatus,
 } from './migration-utils';
+import type {
+	TransformBlock,
+	IsBlockType,
+	ProductGridLayout,
+	ProductGridLayoutTypes,
+	PostTemplateLayout,
+	PostTemplateLayoutTypes,
+} from './types';
 
 const mapAttributes = ( attributes: Record< string, unknown > ) => {
 	const { query, namespace, ...restAttributes } = attributes;
@@ -41,7 +50,7 @@ const mapAttributes = ( attributes: Record< string, unknown > ) => {
 			isProductCollectionBlock: true,
 			...restQuery,
 		},
-		displayUpgradeNotice: true,
+		convertedFromProducts: true,
 	};
 };
 
@@ -194,9 +203,7 @@ const replaceProductsBlocks = ( productsBlockClientIds: string[] ) => {
 	return !! results.length && results.every( ( result ) => !! result );
 };
 
-export const replaceProductsWithProductCollection = (
-	unsubscribe?: () => void
-) => {
+export const replaceProductsWithProductCollection = () => {
 	const queryBlocksCount =
 		select( 'core/block-editor' ).getGlobalBlockCount( 'core/query' );
 	if ( queryBlocksCount === 0 ) {
@@ -211,10 +218,32 @@ export const replaceProductsWithProductCollection = (
 		return;
 	}
 
-	const replaced = replaceProductsBlocks( productsBlockClientIds );
+	replaceProductsBlocks( productsBlockClientIds );
+};
 
-	if ( unsubscribe && replaced ) {
-		// @todo: unsubscribe on user reverting migration
+export const manualUpdate = () => {
+	setUpgradeStatus( getInitialStatusLSValue() );
+	replaceProductsWithProductCollection();
+};
+
+let unsubscribe: ( () => void ) | undefined;
+export const disableAutoUpdate = () => {
+	if ( unsubscribe ) {
 		unsubscribe();
+	}
+};
+export const enableAutoUpdate = () => {
+	if ( isWpVersion( '6.1', '>=' ) ) {
+		const { status } = getUpgradeStatus();
+
+		if (
+			AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION &&
+			status !== 'reverted' &&
+			! unsubscribe
+		) {
+			unsubscribe = subscribe( () => {
+				replaceProductsWithProductCollection();
+			}, 'core/block-editor' );
+		}
 	}
 };

@@ -1,15 +1,19 @@
 /**
  * External dependencies
  */
-import type { ElementType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { useSelect, subscribe } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
+import { type ElementType } from '@wordpress/element';
 import { ProductQueryFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { EditorBlock, isNumber } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
-import { isWpVersion, getSettingWithCoercion } from '@woocommerce/settings';
+import {
+	manualUpdate,
+	MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
+} from '@woocommerce/blocks/migration-products-to-product-collection';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 import { ProductQueryBlockQuery } from '@woocommerce/blocks/product-query/types';
 import {
 	FormTokenField,
@@ -39,14 +43,11 @@ import {
 	QUERY_DEFAULT_ATTRIBUTES,
 	QUERY_LOOP_ID,
 	STOCK_STATUS_OPTIONS,
-	AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
-	MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
 } from './constants';
 import { AttributesFilter } from './inspector-controls/attributes-filter';
 import { PopularPresets } from './inspector-controls/popular-presets';
 import { ProductSelector } from './inspector-controls/product-selector';
 import { UpgradeNotice } from './inspector-controls/upgrade-notice';
-import { replaceProductsWithProductCollection } from '../shared/scripts';
 
 import './editor.scss';
 
@@ -237,9 +238,7 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 		<>
 			<InspectorControls>
 				{ MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && (
-					<UpgradeNotice
-						upgradeBlock={ replaceProductsWithProductCollection }
-					/>
+					<UpgradeNotice upgradeBlock={ manualUpdate } />
 				) }
 				{ allowedControls?.includes( 'presets' ) && (
 					<PopularPresets { ...props } />
@@ -289,16 +288,3 @@ export const withProductQueryControls =
 	};
 
 addFilter( 'editor.BlockEdit', QUERY_LOOP_ID, withProductQueryControls );
-
-if ( isWpVersion( '6.1', '>=' ) ) {
-	let unsubscribe: ( () => void ) | undefined;
-	if ( AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && ! unsubscribe ) {
-		unsubscribe = subscribe( () => {
-			replaceProductsWithProductCollection( () => {
-				if ( unsubscribe ) {
-					unsubscribe();
-				}
-			} );
-		}, 'core/block-editor' );
-	}
-}

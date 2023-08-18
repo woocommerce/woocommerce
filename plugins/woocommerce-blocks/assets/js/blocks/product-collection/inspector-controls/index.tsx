@@ -1,14 +1,20 @@
 /**
  * External dependencies
  */
-import type { ElementType } from 'react';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { type ElementType, useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
+import {
+	enableAutoUpdate,
+	revertMigration,
+	getUpgradeStatus,
+	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
+	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
+} from '@woocommerce/blocks/migration-products-to-product-collection';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -34,7 +40,6 @@ import TaxonomyControls from './taxonomy-controls';
 import HandPickedProductsControl from './hand-picked-products-control';
 import AuthorControl from './author-control';
 import DisplayLayoutControl from './display-layout-control';
-import { replaceProductCollectionWithProducts } from '../../shared/scripts';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -106,29 +111,92 @@ const ProductCollectionInspectorControls = (
 
 export default ProductCollectionInspectorControls;
 
-const isProductCollection = (
-	block: EditorBlock< ProductCollectionAttributes >
-) => block.name === metadata.name;
+// Trigger Auto Upgrade of Products only once when module is loaded.
+// This triggers subscription but only if:
+// - auto update is enabled
+// - user haven't reverted the migration
+// - no other subscription is in place
+enableAutoUpdate();
+
+const isProductCollection = ( blockName: string ) =>
+	blockName === metadata.name;
+
+const lessThanThresholdSinceUpdate = ( t: number ) => {
+	// Xh * 60m * 60s * 1000ms
+	const xHoursFromT = t + HOURS_TO_DISPLAY_UPGRADE_NOTICE * 60 * 60 * 1000;
+	return Date.now() < xHoursFromT;
+};
+
+const displayedLessThanThreshold = ( displayCount = 0 ) => {
+	return displayCount <= UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD;
+};
+
+// Upgrade Notice should be displayed only if:
+// - block is converted from Products
+// - user haven't acknowledged seeing the notice
+// - less than X hours since the notice was first displayed
+// - notice was displayed less than X times
+const shouldDisplayUpgradeNotice = ( props ) => {
+	const { attributes } = props;
+	const { convertedFromProducts } = attributes;
+	const { status, time, displayCount } = getUpgradeStatus();
+
+	return (
+		convertedFromProducts &&
+		status === 'notseen' &&
+		lessThanThresholdSinceUpdate( time ) &&
+		displayedLessThanThreshold( displayCount )
+	);
+};
+
+// Block should be unmarked as converted from Products if:
+// block is converted from Products and either:
+// - user acknowledged seeing the notice
+// - it's more than X hours since the notice was first displayed
+// - notice was displayed more than X times
+// We do that to prevent showing the notice again after Products on
+// other page were updated or local storage was cleared or user
+// switched to another machine/browser etc.
+const shouldBeUnmarkedAsConverted = ( props ) => {
+	const { attributes } = props;
+	const { convertedFromProducts } = attributes;
+	const { status, time, displayCount } = getUpgradeStatus();
+
+	return (
+		convertedFromProducts &&
+		( status === 'seen' ||
+			! lessThanThresholdSinceUpdate( time ) ||
+			! displayedLessThanThreshold( displayCount ) )
+	);
+};
 
 export const withUpgradeNoticeControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: EditorBlock< ProductCollectionAttributes > ) => {
-		return isProductCollection( props ) ? (
+	( props: BlockEditProps< ProductCollectionAttributes > ) => {
+		if ( ! isProductCollection( props.name ) ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		const displayUpgradeNotice = shouldDisplayUpgradeNotice( props );
+		const unmarkAsConverted = shouldBeUnmarkedAsConverted( props );
+
+		if ( unmarkAsConverted ) {
+			props.setAttributes( { convertedFromProducts: false } );
+		}
+
+		return (
 			<>
-				<InspectorControls>
-					{ props.attributes.displayUpgradeNotice && (
-						<UpgradeNotice
-							{ ...props }
-							revertMigration={
-								replaceProductCollectionWithProducts
-							}
-						/>
-					) }
-				</InspectorControls>
+				{ displayUpgradeNotice && (
+					<InspectorControls>
+						{
+							<UpgradeNotice
+								revertMigration={ revertMigration }
+							/>
+						}
+					</InspectorControls>
+				) }
 				<BlockEdit { ...props } />
 			</>
-		) : (
-			<BlockEdit { ...props } />
 		);
 	};
 
