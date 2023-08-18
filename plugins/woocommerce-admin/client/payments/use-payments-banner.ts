@@ -19,6 +19,7 @@ export const usePaymentsBanner = () => {
 		installedPaymentGateways,
 		paymentGatewaySuggestions,
 		hasFinishedResolution,
+		// @ts-expect-error - We can't use generic because WCDataSelector is not compatible with the type.
 	} = useSelect( ( select: WCDataSelector ) => {
 		return {
 			installedPaymentGateways: select(

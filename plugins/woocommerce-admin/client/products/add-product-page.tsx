@@ -19,6 +19,7 @@ import './add-edit-product-page.scss';
 import './fills';
 
 const AddProductPage: React.FC = () => {
+	// @ts-expect-error - We can't use a generic because WCDataSelector is not compatible with the type.
 	const { isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { hasFinishedResolution: hasProductFormFinishedResolution } =
 			select( EXPERIMENTAL_PRODUCT_FORM_STORE_NAME );

@@ -13,6 +13,7 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	Plugin,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import ExternalIcon from 'gridicons/dist/external';
@@ -48,7 +49,8 @@ const PaymentRecommendations: React.FC = () => {
 		paymentGatewaySuggestions,
 		isResolving,
 	} = useSelect(
-		( select ) => {
+		// @ts-expect-error - We can't use generic because WCDataSelector is not compatible with the type.
+		( select: WCDataSelector ) => {
 			const installingGatewayId =
 				isInstalled && getPluginSlug( installingPlugin );
 			return {
