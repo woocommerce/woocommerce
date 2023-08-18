@@ -43,7 +43,7 @@
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/notices": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
-		"@wordpress/preferences": "^3.15.0",
+		"@wordpress/preferences": "wp-6.0",
 		"debug": "^4.3.3",
 		"prop-types": "^15.8.1",
 		"react-query": "^3.39.3"
