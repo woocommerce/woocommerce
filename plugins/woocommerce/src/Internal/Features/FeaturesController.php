@@ -218,7 +218,6 @@ class FeaturesController {
 						'Enable this feature to track and credit channels and campaigns that contribute to orders on your site.',
 						'woocommerce'
 					),
-					'is_experimental'    => true,
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
 					'is_legacy'          => true,
