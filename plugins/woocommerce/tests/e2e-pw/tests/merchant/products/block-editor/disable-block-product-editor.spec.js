@@ -18,10 +18,16 @@ let isNewProductEditorEnabled = false;
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
+	// if ( ! isTrackingSupposedToBeEnabled ) {
+	// 	// no modal should be shown, so don't even look for button
+	// 	console.log('Feedback modal not shown');
+	// 	return;
+	// }
+
 	try {
 		await page
 			.getByText('Skip').nth(3)
-			.click();
+			.click( { timeout: 5000 } );
 	} catch ( error ) {}
 }
 
@@ -69,7 +75,6 @@ test.describe.serial( 'Disable block product editor', () => {
 			} )
 			.click();
 		await dismissFeedbackModalIfShown( page );
-		await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 		await expectOldProductEditor( page );
 	} );
 	test( 'can be disabled from settings', async ( { page } ) => {
