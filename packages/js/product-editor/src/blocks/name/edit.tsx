@@ -78,6 +78,7 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 		// @ts-ignore
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
+
 			if ( productId ) {
 				const parts = getPermalinkParts( productId );
 				return {

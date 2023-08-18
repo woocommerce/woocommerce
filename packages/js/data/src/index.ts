@@ -183,7 +183,6 @@ import { ProductAttributeTermsSelectors } from './product-attribute-terms/types'
 import { ProductVariationSelectors } from './product-variations/selectors';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
-import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import { SettingsSelectors } from './settings/selectors';
 import { CountriesSelectors } from './countries/selectors';
 
@@ -240,8 +239,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	: {};
 
 export interface WCDataSelector {
-	< T extends WCDataStoreName >( storeName: T ): CurriedSelectorsOf< T > &
-		WCSelectorType< T >;
+	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T > &
+		WPDataSelectors;
 }
 
 // Other exports
