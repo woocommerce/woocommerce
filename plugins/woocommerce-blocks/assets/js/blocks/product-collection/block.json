@@ -21,7 +21,7 @@
 		"displayLayout": {
 			"type": "object"
 		},
-		"displayUpgradeNotice": {
+		"convertedFromProducts": {
 			"type": "boolean",
 			"default": false
 		}
