@@ -11,7 +11,7 @@ import {
 	useRef,
 	createPortal,
 } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 const REVIEWED_DEFAULTS_OPTION =
@@ -38,7 +38,8 @@ const useShowShippingTour = () => {
 		hasCreatedDefaultShippingZones,
 		hasReviewedDefaultShippingOptions,
 		isLoading,
-	} = useSelect( ( select ) => {
+		// @ts-expect-error - We can't pass a generic here because WCDataSelector is not compatible with the type expected.
+	} = useSelect( ( select: WCDataSelector ) => {
 		const { hasFinishedResolution, getOption } =
 			select( OPTIONS_STORE_NAME );
 
