@@ -4,6 +4,7 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { useCallback } from '@wordpress/element';
+import { WPDataSelectors } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -67,9 +68,13 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	}, [ invalidateResolution ] );
 
 	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getRegisteredChannels } =
-			select( STORE_KEY );
-		const state = getRegisteredChannels< RegisteredChannelsState >();
+		const {
+			hasFinishedResolution,
+			getRegisteredChannels,
+		}: {
+			getRegisteredChannels: () => RegisteredChannelsState;
+		} & WPDataSelectors = select( STORE_KEY );
+		const state = getRegisteredChannels();
 
 		return {
 			loading: ! hasFinishedResolution( 'getRegisteredChannels', [] ),
@@ -77,5 +82,5 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 			error: state.error,
 			refetch,
 		};
-	} );
+	}, [] );
 };

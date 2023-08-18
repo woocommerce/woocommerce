@@ -9,7 +9,6 @@ import {
 	Product,
 	ProductsSelectors,
 	PRODUCTS_STORE_NAME,
-	WCDataSelector,
 	ProductFormSelectors,
 	ProductVariationSelectors,
 } from '@woocommerce/data';
@@ -33,7 +32,7 @@ const EditProductPage: React.FC = () => {
 	const previousProductRef = useRef< PartialProduct >();
 	const formRef = useRef< FormRef< Partial< Product > > >( null );
 	const { product, isLoading, isPendingAction, productVariation } = useSelect(
-		( select: WCDataSelector ) => {
+		( select ) => {
 			const {
 				getProduct,
 				hasFinishedResolution: hasProductFinishedResolution,

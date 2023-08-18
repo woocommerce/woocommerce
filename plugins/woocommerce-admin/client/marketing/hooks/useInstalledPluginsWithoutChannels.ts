@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { WPDataSelectors } from '@woocommerce/data';
 import { chain } from 'lodash';
 
 /**
@@ -27,12 +28,16 @@ export const useInstalledPluginsWithoutChannels =
 	(): UseInstalledPluginsWithoutChannels => {
 		const { installedPlugins, activatingPlugins } = useSelect(
 			( select ) => {
-				const { getInstalledPlugins, getActivatingPlugins } =
-					select( STORE_KEY );
+				const {
+					getInstalledPlugins,
+					getActivatingPlugins,
+				}: {
+					getInstalledPlugins: () => InstalledPlugin[];
+					getActivatingPlugins: () => string[];
+				} & WPDataSelectors = select( STORE_KEY );
 
 				return {
-					installedPlugins:
-						getInstalledPlugins< InstalledPlugin[] >(),
+					installedPlugins: getInstalledPlugins(),
 					activatingPlugins: getActivatingPlugins(),
 				};
 			},

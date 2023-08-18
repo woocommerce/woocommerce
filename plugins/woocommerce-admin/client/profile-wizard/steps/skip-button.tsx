@@ -69,8 +69,6 @@ const SkipButton: React.FC< {
 		<>
 			{ showUsageModal && (
 				<UsageModal
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore -- ignoring it for now as UsageModal is not in ts yet.
 					onContinue={ () => {
 						skipProfiler();
 					} }

@@ -9,7 +9,7 @@ import {
 	TextareaControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -38,13 +38,13 @@ function ExitSurveyModal( {}: {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const dismissedIncentives = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption }: OptionsSelectors = select( OPTIONS_STORE_NAME );
 		return (
 			( getOption(
 				'wcpay_welcome_page_incentives_dismissed'
 			) as string[] ) || []
 		);
-	} );
+	}, [] );
 
 	const closeModal = async () => {
 		setOpen( false );

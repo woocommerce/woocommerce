@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { WPDataSelectors } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -35,11 +36,16 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
-			const campaignsState = getCampaigns< CampaignsState >(
-				page,
-				perPage
-			);
+			const {
+				hasFinishedResolution,
+				getCampaigns,
+			}: {
+				getCampaigns: (
+					page: number,
+					perPage: number
+				) => CampaignsState;
+			} & WPDataSelectors = select( STORE_KEY );
+			const campaignsState = getCampaigns( page, perPage );
 
 			const convert = ( campaign: APICampaign ): Campaign => {
 				const channel = channels?.find(

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { WPDataSelectors } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -12,8 +13,14 @@ import { Post } from './types';
 export const useBlogPosts = ( category: string ) => {
 	return useSelect(
 		( select ) => {
-			const { getBlogPosts, getBlogPostsError, isResolving } =
-				select( STORE_KEY );
+			const {
+				getBlogPosts,
+				getBlogPostsError,
+				isResolving,
+			}: {
+				getBlogPosts: < T >( category: string ) => T;
+				getBlogPostsError: ( category: string ) => Error;
+			} & WPDataSelectors = select( STORE_KEY );
 
 			return {
 				isLoading: isResolving( 'getBlogPosts', [ category ] ),

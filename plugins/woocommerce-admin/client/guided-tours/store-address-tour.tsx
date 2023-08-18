@@ -4,7 +4,7 @@
 import { FunctionComponent } from 'react';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OptionsSelectors, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -20,7 +20,7 @@ const STORE_POSTCODE_SETTINGS_OPTION = 'woocommerce_store_postcode';
 
 const useShowStoreLocationTour = () => {
 	const { hasFilledStoreAddress, isLoading } = useSelect( ( select ) => {
-		const { hasFinishedResolution, getOption } =
+		const { hasFinishedResolution, getOption }: OptionsSelectors =
 			select( OPTIONS_STORE_NAME );
 
 		return {
@@ -39,7 +39,7 @@ const useShowStoreLocationTour = () => {
 				getOption( STORE_CITY_SETTINGS_OPTION ) !== '' &&
 				getOption( STORE_POSTCODE_SETTINGS_OPTION ) !== '',
 		};
-	} );
+	}, [] );
 
 	return {
 		isLoading,

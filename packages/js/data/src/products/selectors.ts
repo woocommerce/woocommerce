@@ -69,8 +69,8 @@ export const getProducts = createSelector(
 
 export const getProductsTotalCount = (
 	state: ProductState,
-	query: ProductQuery,
-	defaultValue = undefined
+	query: Partial< ProductQuery >,
+	defaultValue: number | undefined = undefined
 ) => {
 	const resourceName = getTotalProductCountResourceName( query );
 	const totalCount = state.productsCount.hasOwnProperty( resourceName )

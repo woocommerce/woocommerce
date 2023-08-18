@@ -74,4 +74,5 @@ export type PluginSelectors = {
 	getJetpackConnectionData: WPDataSelector< typeof getJetpackConnectionData >;
 	isJetpackConnected: WPDataSelector< typeof isJetpackConnected >;
 	isPluginsRequesting: WPDataSelector< typeof isPluginsRequesting >;
+	getPluginInstallState: WPDataSelector< typeof getPluginInstallState >;
 } & WPDataSelectors;

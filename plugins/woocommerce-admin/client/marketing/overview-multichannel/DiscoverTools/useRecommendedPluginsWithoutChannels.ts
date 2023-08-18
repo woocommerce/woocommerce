@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { WPDataSelectors } from '@woocommerce/data';
 import { differenceWith } from 'lodash';
 
 /**
@@ -49,8 +50,12 @@ export const useRecommendedPluginsWithoutChannels =
 			loading: loadingRecommendedPlugins,
 			data: dataRecommendedPlugins,
 		} = useSelect( ( select ) => {
-			const { getRecommendedPlugins, hasFinishedResolution } =
-				select( STORE_KEY );
+			const {
+				getRecommendedPlugins,
+				hasFinishedResolution,
+			}: {
+				getRecommendedPlugins: < T >( category: string ) => T;
+			} & WPDataSelectors = select( STORE_KEY );
 
 			return {
 				loading: ! hasFinishedResolution( selector, [ category ] ),

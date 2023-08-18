@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useDispatch, useSelect } from '@wordpress/data';
+import { WPDataSelectors } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 
 /**
@@ -41,11 +42,15 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 		invalidateResolution( 'getCampaignTypes', [] );
 	}, [ invalidateResolution ] );
 
-	return useSelect< UseCampaignTypes >(
+	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaignTypes } =
-				select( STORE_KEY );
-			const campaignTypesState = getCampaignTypes< CampaignTypesState >();
+			const {
+				hasFinishedResolution,
+				getCampaignTypes,
+			}: {
+				getCampaignTypes: () => CampaignTypesState;
+			} & WPDataSelectors = select( STORE_KEY );
+			const campaignTypesState = getCampaignTypes();
 
 			return {
 				loading: ! hasFinishedResolution( 'getCampaignTypes', [] ),

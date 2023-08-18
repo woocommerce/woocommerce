@@ -8,5 +8,5 @@ export type FormInputProps = {
 	onChange: ( value: FormValue ) => void;
 	onBlur: () => void;
 	className: string;
-	help: string | null;
+	help?: string;
 };

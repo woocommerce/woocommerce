@@ -329,10 +329,6 @@ export function StoreAddress( {
 		setValue
 	);
 
-	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
-		return locale.hasOwnProperty( key );
-	};
-
 	useEffect( () => {
 		if ( locale ) {
 			storeAddressFields.forEach( ( field ) => {
@@ -341,11 +337,7 @@ export function StoreAddress( {
 					.toLowerCase();
 				const props = getInputProps( field );
 
-				if (
-					isLocaleKey( fieldKey ) &&
-					locale[ fieldKey ]?.hidden &&
-					props.value?.length > 0
-				) {
+				if ( locale[ fieldKey ]?.hidden && props.value?.length > 0 ) {
 					// Clear hidden field.
 					setValue( field, '' );
 				}
@@ -356,11 +348,12 @@ export function StoreAddress( {
 		return <Spinner />;
 	}
 
+	const countryStateInputProps = getInputProps( 'countryState' );
+
 	return (
 		<div className="woocommerce-store-address-fields">
 			<SelectControl
 				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
-				required
 				autoComplete="new-password" // disable autocomplete and autofill
 				getSearchExpression={ ( query: string ) => {
 					return new RegExp(
@@ -372,7 +365,12 @@ export function StoreAddress( {
 				excludeSelectedOptions={ false }
 				showAllOnFocus
 				isSearchable
-				{ ...getInputProps( 'countryState' ) }
+				{ ...countryStateInputProps }
+				onChange={ ( value ) => {
+					if ( typeof value === 'string' ) {
+						countryStateInputProps.onChange( value );
+					}
+				} }
 				controlClassName={ getInputProps( 'countryState' ).className }
 			>
 				{ countryStateAutofill }

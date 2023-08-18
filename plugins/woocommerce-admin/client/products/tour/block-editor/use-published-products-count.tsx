@@ -1,10 +1,14 @@
 /**
  * External dependencies
  */
-import { PRODUCTS_STORE_NAME, ProductsSelectors } from '@woocommerce/data';
+import {
+	PRODUCTS_STORE_NAME,
+	ProductsSelectors,
+	ProductQuery,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
-const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
+const PUBLISHED_PRODUCTS_QUERY_PARAMS: Partial< ProductQuery > = {
 	status: 'publish',
 	_fields: [ 'id' ],
 };
