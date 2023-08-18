@@ -66,9 +66,12 @@ export const BusinessLocation = ( {
 					options={ context.countries }
 					excludeSelectedOptions={ false }
 					help={ <Icon icon={ chevronDown } /> }
-					onChange={ ( results: Array< CountryStateOption > ) => {
-						if ( results.length ) {
-							setStoreCountry( results[ 0 ] );
+					onChange={ ( results ) => {
+						if ( Array.isArray( results ) && results.length ) {
+							setStoreCountry(
+								// Cast unavoidable until SelectControl is enhanced to have generic args.
+								results[ 0 ] as CountryStateOption
+							);
 						}
 					} }
 					selected={ storeCountry ? [ storeCountry ] : [] }

@@ -7,7 +7,7 @@ import {
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 } from '@woocommerce/product-editor';
-import { Product } from '@woocommerce/data';
+import { Product, WCDataSelector } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { useSelect } from '@wordpress/data';
@@ -31,8 +31,10 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
 
 	const { type, status } = useSelect(
-		( select ) => {
+		// @ts-expect-error - we don't have a good way to cast select.
+		( select: WCDataSelector ) => {
 			const { getEntityRecord } = select( 'core' );
+			// @ts-expect-error - it looks like we're not passing a required argument, but I don't want to change runtime behavior.
 			return getEntityRecord( 'postType', 'product', id ) as Product;
 		},
 		[ id ]

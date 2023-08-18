@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME, Country } from '@woocommerce/data';
+import {
+	COUNTRIES_STORE_NAME,
+	Country,
+	WCDataSelector,
+} from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
@@ -299,7 +303,8 @@ export function StoreAddress( {
 }: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
 	const { locale, hasFinishedResolution, countries, loadingCountries } =
-		useSelect( ( select ) => {
+		// @ts-expect-error: We don't have a nice way to cast the selector type to the correct type.
+		useSelect( ( select: WCDataSelector ) => {
 			const {
 				getLocale,
 				getCountries,

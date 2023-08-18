@@ -13,6 +13,7 @@ import { PlaceholderPostTile } from './PlaceholderPostTile';
 import { PostTile } from './PostTile';
 import { useBlogPosts } from './useBlogPosts';
 import './LearnMarketing.scss';
+import { Post } from './types';
 
 const BLOG_POST_CATEGORY = 'marketing';
 const PER_PAGE = 2;
@@ -98,7 +99,7 @@ export const LearnMarketing = () => {
 
 		return posts
 			.slice( ( page - 1 ) * PER_PAGE, page * PER_PAGE )
-			.map( ( post, index ) => {
+			.map( ( post: Post, index: number ) => {
 				return <PostTile key={ index } post={ post } />;
 			} );
 	};

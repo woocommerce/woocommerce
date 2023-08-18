@@ -3,7 +3,7 @@
  */
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import {
 	createElement,
 	createInterpolateElement,
@@ -26,19 +26,22 @@ export const ReportDateTour: React.FC< {
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const { shouldShowTour, isResolving } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-		return {
-			shouldShowTour:
-				getOption( optionName ) !== 'yes' &&
-				getOption( DATE_TYPE_OPTION ) === false,
-			isResolving: ! (
-				hasFinishedResolution( 'getOption', [ optionName ] ) &&
-				hasFinishedResolution( 'getOption', [ DATE_TYPE_OPTION ] )
-			),
-		};
-	} );
+	// @ts-expect-error - We don't have a good way to cast the type of select.
+	const { shouldShowTour, isResolving } = useSelect(
+		( select: WCDataSelector ) => {
+			const { getOption, hasFinishedResolution } =
+				select( OPTIONS_STORE_NAME );
+			return {
+				shouldShowTour:
+					getOption( optionName ) !== 'yes' &&
+					getOption< boolean >( DATE_TYPE_OPTION ) === false,
+				isResolving: ! (
+					hasFinishedResolution( 'getOption', [ optionName ] ) &&
+					hasFinishedResolution( 'getOption', [ DATE_TYPE_OPTION ] )
+				),
+			};
+		}
+	);
 
 	if ( isDismissed || ! shouldShowTour || isResolving ) {
 		return null;

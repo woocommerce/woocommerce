@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -32,7 +32,8 @@ export const JetpackAlreadyInstalledPage: React.FC<
 	const DISMISSED_MOBILE_APP_MODAL_OPTION =
 		'woocommerce_admin_dismissed_mobile_app_modal';
 
-	const { repeatUser, isLoading } = useSelect( ( select ) => {
+	// @ts-expect-error - We don't have a good way to cast the type of select.
+	const { repeatUser, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { hasFinishedResolution, getOption } =
 			select( OPTIONS_STORE_NAME );
 

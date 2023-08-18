@@ -3,7 +3,7 @@
  */
 import { TourKit } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -11,7 +11,8 @@ const FEEDBACK_TOUR_OPTION = 'woocommerce_ces_product_feedback_shown';
 const FEEDBACK_TIMEOUT_MS = 7 * 60 * 1000;
 
 const useShowProductFeedbackTour = (): undefined | boolean => {
-	const { hasShownTour } = useSelect( ( select ) => {
+	// @ts-expect-error - We don't have a good way to cast the type of select.
+	const { hasShownTour } = useSelect( ( select: WCDataSelector ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 
 		return {
