@@ -110,7 +110,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
 		$inner_blocks_formatted_template = array_map(
-			function( Block $block ) {
+			function( BlockInterface $block ) {
 				return $block->get_formatted_template();
 			},
 			$inner_blocks

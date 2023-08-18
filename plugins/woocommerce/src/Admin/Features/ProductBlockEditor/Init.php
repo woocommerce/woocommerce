@@ -6,8 +6,10 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use WP_Block_Editor_Context;
 
@@ -35,6 +37,11 @@ class Init {
 	private $redirection_controller;
 
 	/**
+	 * @var AbstractBlockTemplate
+	 */
+	public $simple_product_template;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -42,6 +49,7 @@ class Init {
 			array_push($this->supported_post_types, 'variable');
 		}
 
+		$this->simple_product_template = new SimpleProductTemplate();
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
@@ -257,7 +265,8 @@ class Init {
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
 			$args['template_lock'] = 'all';
-			$args['template']      = array(
+			$args['template'] = $this->simple_product_template->get_formatted_template();
+			$old_template      = array(
 				array(
 					'woocommerce/product-tab',
 					array(
