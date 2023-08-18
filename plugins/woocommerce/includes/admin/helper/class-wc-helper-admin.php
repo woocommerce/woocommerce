@@ -25,6 +25,7 @@ class WC_Helper_Admin {
 	 */
 	public static function load() {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
+		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 	}
 
 	/**
@@ -82,6 +83,46 @@ class WC_Helper_Admin {
 
 		return $connect_url;
 	}
+
+	/**
+	 * Registers the REST routes for the featured products endpoint.
+	 * This endpoint is used by the WooCommerce > Extensions > Discover
+	 * page.
+	 */
+	public static function register_rest_routes() {
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/featured',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_featured' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
+	}
+
+	/**
+	 * The Extensions page can only be accessed by users with the manage_woocommerce
+	 * capability. So the API mimics that behavior.
+	 */
+	public static function get_permission() {
+		return current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
+	 * Fetch featured procucts from WooCommerce.com and serve them
+	 * as JSON.
+	 */
+	public static function get_featured() {
+		$featured = WC_Admin_Addons::fetch_featured();
+
+		if ( is_wp_error( $featured ) ) {
+			wp_send_json_error( array( 'message' => $featured->get_error_message() ) );
+		}
+
+		wp_send_json( $featured );
+	}
+
 }
 
 WC_Helper_Admin::load();

@@ -1,9 +1,15 @@
 /**
+ * External dependencies
+ */
+import apiFetch from '@wordpress/api-fetch';
+
+/**
  * Internal dependencies
  */
 import { Product } from '../components/product-list/types';
 import { MARKETPLACE_URL } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
+import { LOCALE } from '../../utils/admin-settings';
 
 interface ProductGroup {
 	id: string;
@@ -13,26 +19,28 @@ interface ProductGroup {
 }
 
 // Fetch data for the discover page from the WooCommerce.com API
-const fetchDiscoverPageData = async (): Promise< Array< ProductGroup > > => {
-	const fetchUrl = MARKETPLACE_URL + '/wp-json/wccom-extensions/2.0/featured';
+async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
+	let url = '/wc/v3/marketplace/featured';
 
-	return fetch( fetchUrl )
-		.then( ( response ) => {
-			if ( ! response.ok ) {
-				throw new Error( response.statusText );
-			}
-			return response.json();
-		} )
-		.then( ( json ) => {
-			return json;
-		} )
-		.catch( () => {
-			return [];
-		} );
-};
+	if ( LOCALE.userLocale ) {
+		url = `${ url }?locale=${ LOCALE.userLocale }`;
+	}
+
+	try {
+		return await apiFetch( { path: url.toString() } );
+	} catch ( error ) {
+		return [];
+	}
+}
 
 function fetchCategories(): Promise< CategoryAPIItem[] > {
-	return fetch( MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/categories' )
+	let url = MARKETPLACE_URL + '/wp-json/wccom-extensions/1.0/categories';
+
+	if ( LOCALE.userLocale ) {
+		url = `${ url }?locale=${ LOCALE.userLocale }`;
+	}
+
+	return fetch( url.toString() )
 		.then( ( response ) => {
 			if ( ! response.ok ) {
 				throw new Error( response.statusText );

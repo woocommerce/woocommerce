@@ -25,6 +25,8 @@ export default function NoResults(): JSX.Element {
 	useEffect( () => {
 		if ( query.term ) {
 			setNoResultsTerm( query.term );
+
+			return;
 		}
 
 		if ( query.category ) {
@@ -42,7 +44,7 @@ export default function NoResults(): JSX.Element {
 		setisLoadingProductGroup( true );
 
 		fetchDiscoverPageData()
-			.then( ( products: Array< ProductGroup > ) => {
+			.then( ( products: ProductGroup[] ) => {
 				const mostPopularGroup = products.find(
 					( group ) => group.id === 'most-popular'
 				);

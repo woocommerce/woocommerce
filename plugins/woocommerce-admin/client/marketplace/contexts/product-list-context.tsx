@@ -23,15 +23,9 @@ export const ProductListContext = createContext< ProductListContextType >( {
 	isLoading: false,
 } );
 
-type ProductListContextProviderProps = {
+export function ProductListContextProvider( props: {
 	children: JSX.Element;
-	country?: string;
-	locale?: string;
-};
-
-export function ProductListContextProvider(
-	props: ProductListContextProviderProps
-): JSX.Element {
+} ): JSX.Element {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ productList, setProductList ] = useState< Product[] >( [] );
 
@@ -47,9 +41,9 @@ export function ProductListContextProvider(
 
 		const params = new URLSearchParams();
 
-		params.append( 'term', query.term ?? '' );
-		params.append( 'country', props.country ?? '' );
-		params.append( 'locale', props.locale ?? '' );
+		if ( query.term ) {
+			params.append( 'term', query.term );
+		}
 
 		if ( query.category ) {
 			params.append( 'category', query.category );
@@ -94,7 +88,7 @@ export function ProductListContextProvider(
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [ query, props.country, props.locale ] );
+	}, [ query ] );
 
 	return (
 		<ProductListContext.Provider value={ contextValue }>
