@@ -2,6 +2,7 @@
  * External dependencies
  */
 import stringSimilarity from 'string-similarity';
+import { Option } from '@woocommerce/components/build-types/select-control/types';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import { getMappingRegion } from './location-mapping';
 /**
  * Country state option.
  */
-export type CountryStateOption = {
+export type CountryStateOption = Option & {
 	key: string;
 	label: string;
 };

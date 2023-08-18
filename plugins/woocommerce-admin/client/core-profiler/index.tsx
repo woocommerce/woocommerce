@@ -506,7 +506,7 @@ const getPlugins = async () => {
 	).getFreeExtensions();
 	return (
 		extensionsBundles.find(
-			( bundle ) => bundle.key === 'obw/core-profiler'
+			( bundle: { key: string } ) => bundle.key === 'obw/core-profiler'
 		)?.plugins || []
 	);
 };

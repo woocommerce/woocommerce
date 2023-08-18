@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
+import { Option } from '@woocommerce/components/build-types/select-control/types';
 import { Country } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Type definitions
  */
-export type CountryStateOption = {
+export type CountryStateOption = Option & {
 	key: string;
 	label: string;
 };

@@ -10,14 +10,18 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { findCountryOption, getCountry } from '@woocommerce/onboarding';
+import {
+	CountryStateOption,
+	findCountryOption,
+	getCountry,
+} from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
+import { Option } from '@woocommerce/components/build-types/select-control/types';
 
 /**
  * Internal dependencies
  */
 import { CoreProfilerStateMachineContext, BusinessInfoEvent } from '../index';
-import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 
@@ -29,7 +33,7 @@ export const POSSIBLY_DEFAULT_STORE_NAMES = [
 	'',
 ];
 export type IndustryChoice = ( typeof industryChoices )[ number ][ 'key' ];
-export const industryChoices = [
+export const industryChoices: Option[] = [
 	{
 		label: __( 'Clothing and accessories', 'woocommerce' ),
 		key: 'clothing_and_accessories' as const,
@@ -238,12 +242,8 @@ export const BusinessInfo = ( {
 						options={ industryChoices }
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
-						onChange={ (
-							results: Array<
-								( typeof industryChoices )[ number ]
-							>
-						) => {
-							if ( results.length ) {
+						onChange={ ( results ) => {
+							if ( Array.isArray( results ) && results.length ) {
 								setIndustry( results[ 0 ] );
 							}
 						} }
@@ -273,9 +273,12 @@ export const BusinessInfo = ( {
 						options={ countries }
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
-						onChange={ ( results: Array< CountryStateOption > ) => {
-							if ( results.length ) {
-								setStoreCountry( results[ 0 ] );
+						onChange={ ( results ) => {
+							if ( Array.isArray( results ) && results.length ) {
+								setStoreCountry(
+									// Forced to cast here, select control should take a generic for the type of the options,
+									results[ 0 ] as CountryStateOption
+								);
 							}
 						} }
 						selected={ storeCountry ? [ storeCountry ] : [] }
