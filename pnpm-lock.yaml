@@ -2711,12 +2711,6 @@ importers:
       '@woocommerce/api':
         specifier: ^0.2.0
         version: 0.2.0
-      '@woocommerce/e2e-environment':
-        specifier: ^0.3.0
-        version: link:../../packages/js/e2e-environment
-      '@woocommerce/e2e-utils':
-        specifier: ^0.2.0
-        version: link:../../packages/js/e2e-utils
       '@wordpress/a11y':
         specifier: wp-6.0
         version: 3.6.1
@@ -3598,6 +3592,9 @@ importers:
       '@octokit/types':
         specifier: ^9.2.0
         version: 9.2.0
+      '@slack/web-api':
+        specifier: ^6.9.0
+        version: 6.9.0
       '@types/cli-table':
         specifier: ^0.3.1
         version: 0.3.1
@@ -12439,8 +12436,8 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@babel/core': 7.21.3
-      '@jest/types': 29.5.0
-      '@jridgewell/trace-mapping': 0.3.17
+      '@jest/types': 29.6.1
+      '@jridgewell/trace-mapping': 0.3.19
       babel-plugin-istanbul: 6.1.1
       chalk: 4.1.2
       convert-source-map: 2.0.0
@@ -12448,7 +12445,7 @@ packages:
       graceful-fs: 4.2.9
       jest-haste-map: 29.5.0
       jest-regex-util: 29.4.3
-      jest-util: 29.5.0
+      jest-util: 29.6.2
       micromatch: 4.0.5
       pirates: 4.0.5
       slash: 3.0.0
@@ -13923,6 +13920,11 @@ packages:
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
     dev: false
 
+  /@slack/types@2.8.0:
+    resolution: {integrity: sha512-ghdfZSF0b4NC9ckBA8QnQgC9DJw2ZceDq0BIjjRSv6XAZBXJdWgxIsYz0TYnWSiqsKZGH2ZXbj9jYABZdH3OSQ==}
+    engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
+    dev: false
+
   /@slack/web-api@5.15.0:
     resolution: {integrity: sha512-tjQ8Zqv/Fmj9SOL9yIEd7IpTiKfKHi9DKAkfRVeotoX0clMr3SqQtBqO+KZMX27gm7dmgJsQaDKlILyzdCO+IA==}
     engines: {node: '>= 8.9.0', npm: '>= 5.5.1'}
@@ -13953,6 +13955,25 @@ packages:
       eventemitter3: 3.1.2
       form-data: 2.5.1
       is-electron: 2.2.0
+      is-stream: 1.1.0
+      p-queue: 6.6.2
+      p-retry: 4.6.1
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /@slack/web-api@6.9.0:
+    resolution: {integrity: sha512-RME5/F+jvQmZHkoP+ogrDbixq1Ms1mBmylzuWq4sf3f7GCpMPWoiZ+WqWk+sism3vrlveKWIgO9R4Qg9fiRyoQ==}
+    engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
+    dependencies:
+      '@slack/logger': 3.0.0
+      '@slack/types': 2.8.0
+      '@types/is-stream': 1.1.0
+      '@types/node': 16.18.21
+      axios: 0.27.2
+      eventemitter3: 3.1.2
+      form-data: 2.5.1
+      is-electron: 2.2.2
       is-stream: 1.1.0
       p-queue: 6.6.2
       p-retry: 4.6.1
@@ -21515,6 +21536,15 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: true
+
+  /axios@0.27.2:
+    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
+    dependencies:
+      follow-redirects: 1.15.2(debug@4.3.3)
+      form-data: 4.0.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /axobject-query@2.2.0:
     resolution: {integrity: sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA==}
@@ -30411,6 +30441,10 @@ packages:
     resolution: {integrity: sha512-SpMppC2XR3YdxSzczXReBjqs2zGscWQpBIKqwXYBFic0ERaxNVgwLCHwOLZeESfdJQjX0RDvrJ1lBXX2ij+G1Q==}
     dev: false
 
+  /is-electron@2.2.2:
+    resolution: {integrity: sha512-FO/Rhvz5tuw4MCWkpMzHFKWD2LsfHzIb7i6MdPYZ/KW7AlxawyLkqdy+jPZP1WubqEADE3O4FUENlJHDfQASRg==}
+    dev: false
+
   /is-extendable@0.1.1:
     resolution: {integrity: sha512-5BMULNob1vgFX6EjQw5izWDxrecWK9AM72rugNr0TFldMOi0fj6Jk+zeKIt0xGj4cEfQIJth4w3OKWOJ4f+AFw==}
     engines: {node: '>=0.10.0'}
@@ -37969,7 +38003,7 @@ packages:
       postcss: 8.4.21
       schema-utils: 3.1.1
       semver: 7.5.0
-      webpack: 5.70.0(webpack-cli@4.9.2)
+      webpack: 5.70.0(webpack-cli@3.3.12)
 
   /postcss-loader@4.3.0(postcss@8.4.21)(webpack@5.76.3):
     resolution: {integrity: sha512-M/dSoIiNDOo8Rk0mUqoj4kpGq91gcxCfb9PoyZVdZ76/AuhxylHDYZblNE8o+EQ9AMSASeMFEKxZf5aU6wlx1Q==}

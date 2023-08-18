@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac7ac11b7f88cdc84caed4e4d39dd3b8",
+    "content-hash": "127ad92be9ea7a437010db2ac1946501",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1004,16 +1004,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "10.6.5",
+            "version": "10.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "e05df5d2d7cd6c273ff10cbec424d446be1dbc88"
+                "reference": "f3face768f4892836cf3663f51008611e472d014"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/e05df5d2d7cd6c273ff10cbec424d446be1dbc88",
-                "reference": "e05df5d2d7cd6c273ff10cbec424d446be1dbc88",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/f3face768f4892836cf3663f51008611e472d014",
+                "reference": "f3face768f4892836cf3663f51008611e472d014",
                 "shasum": ""
             },
             "require": {
@@ -1023,11 +1023,14 @@
                 "ext-json": "*"
             },
             "require-dev": {
-                "mockery/mockery": "^1",
-                "phpunit/phpunit": "^8",
+                "mockery/mockery": "1.6.5",
+                "nikic/php-parser": "4.16.0 as 1.0.0",
+                "phpdocumentor/reflection": "3.0.1",
+                "phpunit/php-code-coverage": "9.2.27",
+                "phpunit/phpunit": "9.6.10",
                 "woocommerce/woocommerce-sniffs": "0.1.3",
-                "wp-hooks/generator": "^0.9.0",
-                "yoast/phpunit-polyfills": "^1.0"
+                "wp-hooks/generator": "0.9.0",
+                "yoast/phpunit-polyfills": "2.0.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -1059,9 +1062,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.6.5"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.9.0"
             },
-            "time": "2023-08-09T08:15:17+00:00"
+            "time": "2023-08-15T13:08:36+00:00"
         }
     ],
     "packages-dev": [

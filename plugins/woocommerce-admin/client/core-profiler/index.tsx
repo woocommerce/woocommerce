@@ -108,7 +108,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
+		pluginsShown: string[];
+		pluginsSelected: string[];
+		pluginsUnselected: string[];
 	};
 };
 
@@ -186,6 +188,9 @@ export type CoreProfilerStateMachineContext = {
 	};
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
+	persistBusinessInfoRef?: ReturnType< typeof spawn >;
+	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
+	spawnGeolocationRef?: ReturnType< typeof spawn >;
 };
 
 const getAllowTrackingOption = async () =>
@@ -315,7 +320,6 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 };
 
 const preFetchGeolocation = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
 			() => getGeolocation( context ),
@@ -387,7 +391,6 @@ const updateOnboardingProfileOption = (
 };
 
 const spawnUpdateOnboardingProfileOption = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnUpdateOnboardingProfileOptionRef: (
 		context: CoreProfilerStateMachineContext
 	) =>
@@ -439,7 +442,6 @@ const updateBusinessInfo = async (
 };
 
 const persistBusinessInfo = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	persistBusinessInfoRef: (
 		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
@@ -551,7 +553,7 @@ const updateQueryStep: CoreProfilerMachineAssign = (
 
 const assignPluginsSelected = assign( {
 	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
-		return event.payload.plugins.map( getPluginSlug );
+		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
@@ -1202,7 +1204,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {

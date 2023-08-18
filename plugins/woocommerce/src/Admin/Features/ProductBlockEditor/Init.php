@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple', 'variable' );
+	private $supported_post_types = array( 'simple' );
 
 	/**
 	 * Redirection controller.
@@ -38,6 +38,10 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			array_push($this->supported_post_types, 'variable');
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
@@ -422,6 +426,15 @@ class Init {
 					),
 					array(
 						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
+						array(
 							'woocommerce/product-section',
 							array(
 								'title'       => __( 'Pricing', 'woocommerce' ),
@@ -548,6 +561,15 @@ class Init {
 						'order' => 30,
 					),
 					array(
+						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
 						array(
 							'woocommerce/product-section',
 							array(
@@ -711,6 +733,15 @@ class Init {
 					),
 					array(
 						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
+						array(
 							'woocommerce/product-section',
 							array(
 								'title'       => __( 'Fees & dimensions', 'woocommerce' ),
@@ -790,6 +821,7 @@ class Init {
 			$user_data_fields,
 			array(
 				'variable_product_block_tour_shown',
+				'product_block_variable_options_notice_dismissed',
 			)
 		);
 	}

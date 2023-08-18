@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fixed TS type error for state machine Context in Core Profiler that only got caught after TS5 upgrade

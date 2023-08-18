@@ -1,0 +1,13 @@
+.woocommerce-product-notice {
+	padding: $gap-small $gap;
+	p {
+		color: $gray-900;
+		letter-spacing: 0.24px;
+	}
+	button {
+		letter-spacing: 0.24px;
+	}
+	&.info {
+		background-color: #f0f6fc;
+	}
+}

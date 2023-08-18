@@ -400,6 +400,16 @@ class DefaultFreeExtensions {
 								'value'     => 'SE',
 								'operation' => '=',
 							),
+							array(
+								'type'      => 'base_location_country',
+								'value'     => 'JP',
+								'operation' => '=',
+							),
+							array(
+								'type'      => 'base_location_country',
+								'value'     => 'AE',
+								'operation' => '=',
+							),
 						),
 					),
 					DefaultPaymentGateways::get_rules_for_cbd( false ),

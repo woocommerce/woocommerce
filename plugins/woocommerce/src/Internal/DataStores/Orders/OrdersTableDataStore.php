@@ -2317,6 +2317,11 @@ FROM $order_meta_table
 
 		$this->persist_save( $order );
 
+		// Do not fire 'woocommerce_new_order' for draft statuses for backwards compatibility.
+		if ( 'auto-draft' === $order->get_status( 'edit') ) {
+			return;
+		}
+
 		/**
 		 * Fires when a new order is created.
 		 *
@@ -2353,9 +2358,9 @@ FROM $order_meta_table
 			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
-		$this->update_order_meta( $order );
-
 		$this->persist_order_to_db( $order, $force_all_fields );
+
+		$this->update_order_meta( $order );
 
 		$order->save_meta_data();
 		$order->apply_changes();
@@ -2375,6 +2380,9 @@ FROM $order_meta_table
 	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
+		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
+		$changes         = $order->get_changes();
+
 		// Before updating, ensure date paid is set if missing.
 		if (
 			! $order->get_date_paid( 'edit' )
@@ -2407,6 +2415,18 @@ FROM $order_meta_table
 
 		$order->apply_changes();
 		$this->clear_caches( $order );
+
+		// For backwards compatibility, moving an auto-draft order to a valid status triggers the 'woocommerce_new_order' hook.
+		if ( ! empty( $changes['status'] ) && 'auto-draft' === $previous_status ) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			return;
+		}
+
+		// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
+		if ( ( ! empty( $changes['status'] ) && in_array( 'trash', array( $changes['status'], $previous_status ), true ) )
+			|| ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) {
+			return;
+		}
 
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
