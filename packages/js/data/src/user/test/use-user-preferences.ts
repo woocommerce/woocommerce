@@ -2,29 +2,45 @@
  * External dependencies
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import { registerStore } from '@wordpress/data';
+import {
+	createReduxStore,
+	register,
+	useSelect,
+	useDispatch,
+} from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { useUserPreferences } from '../use-user-preferences';
 
+jest.mock( '@wordpress/data', () => ( {
+	useSelect: jest.fn().mockImplementation( ( func ) =>
+		func( () => ( {
+			getEntity: jest.fn().mockReturnValue( undefined ),
+			getCurrentUser: jest.fn().mockReturnValue( {} ),
+			getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
+			hasStartedResolution: jest.fn().mockReturnValue( false ),
+			hasFinishedResolution: jest.fn().mockReturnValue( false ),
+		} ) )
+	),
+	useDispatch: jest.fn().mockReturnValue( {
+		receiveCurrentUser: jest.fn(),
+		saveUser: jest.fn(),
+	} ),
+} ) );
+
 describe( 'useUserPreferences() hook', () => {
 	it( 'isRequesting is false before resolution has started', () => {
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( false ),
 				hasFinishedResolution: jest.fn().mockReturnValue( false ),
-			},
-			actions: {
-				receiveCurrentUser: jest.fn(),
-				saveUser: jest.fn(),
-			},
-		} );
+			} ) )
+		);
 
 		const { result } = renderHook( () => useUserPreferences() );
 
@@ -32,20 +48,15 @@ describe( 'useUserPreferences() hook', () => {
 	} );
 
 	it( 'isRequesting is false after resolution has ended', () => {
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			},
-			actions: {
-				receiveCurrentUser: jest.fn(),
-				saveUser: jest.fn(),
-			},
-		} );
+			} ) )
+		);
 
 		const { result } = renderHook( () => useUserPreferences() );
 
@@ -53,20 +64,15 @@ describe( 'useUserPreferences() hook', () => {
 	} );
 
 	it( 'isRequesting is true after resolution has started', () => {
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {} ),
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( false ),
-			},
-			actions: {
-				receiveCurrentUser: jest.fn(),
-				saveUser: jest.fn(),
-			},
-		} );
+			} ) )
+		);
 
 		const { result } = renderHook( () => useUserPreferences() );
 
@@ -74,9 +80,8 @@ describe( 'useUserPreferences() hook', () => {
 	} );
 
 	it( 'Returns woocommerce_meta (JSON decoded) at root level', () => {
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					woocommerce_meta: {
@@ -90,12 +95,8 @@ describe( 'useUserPreferences() hook', () => {
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			},
-			actions: {
-				receiveCurrentUser: jest.fn(),
-				saveUser: jest.fn(),
-			},
-		} );
+			} ) )
+		);
 
 		const { result } = renderHook( () => useUserPreferences() );
 
@@ -117,9 +118,8 @@ describe( 'useUserPreferences() hook', () => {
 	} );
 
 	it( 'Handles no valid meta keys', async () => {
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					id: 1,
@@ -127,12 +127,8 @@ describe( 'useUserPreferences() hook', () => {
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			},
-			actions: {
-				receiveCurrentUser: jest.fn(),
-				saveUser: jest.fn(),
-			},
-		} );
+			} ) )
+		);
 
 		const { result } = renderHook( () => useUserPreferences() );
 
@@ -173,9 +169,8 @@ describe( 'useUserPreferences() hook', () => {
 			},
 		} );
 
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getEntity: jest.fn().mockReturnValue( undefined ),
 				getCurrentUser: jest.fn().mockReturnValue( {
 					id: 1,
@@ -183,11 +178,11 @@ describe( 'useUserPreferences() hook', () => {
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			},
-			actions: {
-				receiveCurrentUser,
-				saveUser,
-			},
+			} ) )
+		);
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			receiveCurrentUser,
+			saveUser,
 		} );
 
 		const { result } = renderHook( () => useUserPreferences() );
@@ -233,9 +228,8 @@ describe( 'useUserPreferences() hook', () => {
 		const saveEntityRecord = jest.fn().mockReturnValue( {
 			type: 'BOGUG_SAVE_ENTITY_RECORD',
 		} );
-		registerStore( 'core', {
-			reducer: () => ( {} ),
-			selectors: {
+		( useSelect as jest.Mock ).mockImplementation( ( func ) =>
+			func( () => ( {
 				getCurrentUser: jest.fn().mockReturnValue( {
 					id: 1,
 				} ),
@@ -252,13 +246,12 @@ describe( 'useUserPreferences() hook', () => {
 				getLastEntitySaveError: jest.fn().mockReturnValue( {} ),
 				hasStartedResolution: jest.fn().mockReturnValue( true ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			},
-			actions: {
-				addEntities,
-				receiveCurrentUser,
-				saveEntityRecord,
-				// saveUser() left undefined to simulate WP 5.3.x.
-			},
+			} ) )
+		);
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			addEntities,
+			receiveCurrentUser,
+			saveEntityRecord,
 		} );
 
 		const { result } = renderHook( () => useUserPreferences() );
