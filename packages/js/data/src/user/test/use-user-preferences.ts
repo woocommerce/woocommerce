@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import {
-	createReduxStore,
-	register,
-	useSelect,
-	useDispatch,
-} from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
