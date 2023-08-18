@@ -14,4 +14,7 @@
 		pointer-events: none;
 		color: $gray-600;
 	}
+	.disabled-element-wrapper {
+		cursor: not-allowed;
+	}
 }

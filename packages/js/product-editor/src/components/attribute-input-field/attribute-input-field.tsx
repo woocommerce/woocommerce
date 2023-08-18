@@ -3,9 +3,9 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Spinner, Icon, Tooltip } from '@wordpress/components';
+import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { createElement, Fragment, useMemo } from '@wordpress/element';
+import { createElement, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -201,6 +201,11 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 										...getItemProps( options ),
 										disabled: item.isDisabled || undefined,
 									} ) }
+									tooltipText={
+										item.isDisabled
+											? disabledAttributeMessage
+											: undefined
+									}
 								>
 									{ isNewAttributeListItem( item ) ? (
 										<div className="woocommerce-attribute-input-field__add-new">
@@ -221,12 +226,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 											</span>
 										</div>
 									) : (
-										<>
-											{ item.name }
-											{ item.isDisabled &&
-												disabledAttributeMessage &&
-												` ${ disabledAttributeMessage }` }
-										</>
+										item.name
 									) }
 								</MenuItem>
 							) )

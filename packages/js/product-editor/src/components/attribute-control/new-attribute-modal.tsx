@@ -92,7 +92,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
 	disabledAttributeMessage = __(
-		'(Already used in Attributes)',
+		'Already used in Attributes',
 		'woocommerce'
 	),
 } ) => {

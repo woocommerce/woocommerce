@@ -37,7 +37,7 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				.map( ( attr ) => attr.id ) }
 			uiStrings={ {
 				disabledAttributeMessage: __(
-					'(Already used in Variations)',
+					'Already used in Variations',
 					'woocommerce'
 				),
 			} }
