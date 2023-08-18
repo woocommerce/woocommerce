@@ -203,7 +203,7 @@ jobs:
                   C_UID: ${{ secrets.WX_DAILY_CUST_ID }}
                   P_SKU: woo-fasion-hat
                   P_URL: hat
-                  P_ID: 22733
+                  P_ID: 73
                   P_TERM: shirt
                   P_CAT: Clothing
               run: |
