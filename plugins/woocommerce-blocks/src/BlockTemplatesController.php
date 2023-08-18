@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\SettingsUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateMigrationUtils;
 use \WP_Post;
 
 /**
@@ -766,117 +767,12 @@ class BlockTemplatesController {
 	 * Migrates page content to templates if needed.
 	 */
 	public function maybe_migrate_content() {
-		if ( ! $this->has_migrated_page( 'cart' ) ) {
-			$this->migrate_page( 'cart', CartTemplate::get_placeholder_page() );
+		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'cart' ) ) {
+			BlockTemplateMigrationUtils::migrate_page( 'cart', CartTemplate::get_placeholder_page() );
 		}
-		if ( ! $this->has_migrated_page( 'checkout' ) ) {
-			$this->migrate_page( 'checkout', CheckoutTemplate::get_placeholder_page() );
+		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'checkout' ) ) {
+			BlockTemplateMigrationUtils::migrate_page( 'checkout', CheckoutTemplate::get_placeholder_page() );
 		}
-	}
-
-	/**
-	 * Check if a page has been migrated to a template.
-	 *
-	 * @param string $page_id Page ID.
-	 * @return boolean
-	 */
-	protected function has_migrated_page( $page_id ) {
-		return (bool) get_option( 'has_migrated_' . $page_id, false );
-	}
-
-	/**
-	 * Prepare default page template.
-	 *
-	 * @param \WP_Post $page Page object.
-	 * @return string
-	 */
-	protected function get_default_migrate_page_template( $page ) {
-		$default_template_content  = $this->get_block_template_part( 'header' );
-		$default_template_content .= '
-			<!-- wp:group {"layout":{"inherit":true}} -->
-			<div class="wp-block-group">
-				<!-- wp:heading {"level":1} -->
-				<h1 class="wp-block-heading">' . wp_kses_post( $page->post_title ) . '</h1>
-				<!-- /wp:heading -->
-				' . wp_kses_post( $page->post_content ) . '
-			</div>
-			<!-- /wp:group -->
-		';
-		$default_template_content .= $this->get_block_template_part( 'footer' );
-
-		return $default_template_content;
-	}
-
-	/**
-	 * Migrates a page to a template if needed.
-	 *
-	 * @param string   $page_id Page ID.
-	 * @param \WP_Post $page Page object.
-	 */
-	protected function migrate_page( $page_id, $page ) {
-		if ( ! $page || empty( $page->post_content ) ) {
-			update_option( 'has_migrated_' . $page_id, '1' );
-			return;
-		}
-
-		// Use the page template if it exists, which we'll use over our default template if found.
-		$existing_page_template = BlockTemplateUtils::get_block_template( get_stylesheet() . '//page', 'wp_template' );
-
-		if ( $existing_page_template && ! empty( $existing_page_template->content ) && strstr( $existing_page_template->content, 'wp:post-content' ) ) {
-			// Massage the original content into something we can use. Replace post content with a group block.
-			$pattern          = '/(<!--\s*)wp:post-content(.*?)(\/-->)/';
-			$replacement      = '
-				<!-- wp:group $2 -->
-				<div class="wp-block-group">' . wp_kses_post( $page->post_content ) . '</div>
-				<!-- /wp:group -->
-			';
-			$template_content = preg_replace( $pattern, $replacement, $existing_page_template->content );
-		} else {
-			$template_content = $this->get_default_migrate_page_template( $page );
-		}
-
-		$new_page_template = BlockTemplateUtils::get_block_template( 'woocommerce/woocommerce//' . $page_id, 'wp_template' );
-
-		// Check template validity--template must exist, and custom template must not be present already.
-		if ( ! $new_page_template || $new_page_template->wp_id ) {
-			update_option( 'has_migrated_' . $page_id, '1' );
-			return;
-		}
-
-		$new_page_template_id = wp_insert_post(
-			[
-				'post_name'    => $new_page_template->slug,
-				'post_type'    => 'wp_template',
-				'post_status'  => 'publish',
-				'tax_input'    => array(
-					'wp_theme' => $new_page_template->theme,
-				),
-				'meta_input'   => array(
-					'origin' => $new_page_template->source,
-				),
-				'post_content' => $template_content,
-			],
-			true
-		);
-
-		if ( ! is_wp_error( $new_page_template_id ) ) {
-			update_option( 'has_migrated_' . $page_id, '1' );
-		}
-	}
-
-	/**
-	 * Returns the requested template part.
-	 *
-	 * @param string $part The part to return.
-	 *
-	 * @return string
-	 */
-	protected function get_block_template_part( $part ) {
-		$template_part = BlockTemplateUtils::get_block_template( get_stylesheet() . '//' . $part, 'wp_template_part' );
-		if ( ! $template_part || empty( $template_part->content ) ) {
-			return '';
-		}
-		return $template_part->content;
 	}
 
 	/**
