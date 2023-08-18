@@ -7,17 +7,21 @@ import { select, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { disableAutoUpdate } from './migration-from-products-to-product-collection';
 import {
 	getProductCollectionBlockClientIds,
 	checkIfBlockCanBeInserted,
 	postTemplateHasSupportForGridView,
-	type TransformBlock,
-	type IsBlockType,
-	type ProductGridLayout,
-	type ProductGridLayoutTypes,
-	type PostTemplateLayout,
-	type PostTemplateLayoutTypes,
+	setUpgradeStatus,
 } from './migration-utils';
+import type {
+	TransformBlock,
+	IsBlockType,
+	ProductGridLayout,
+	ProductGridLayoutTypes,
+	PostTemplateLayout,
+	PostTemplateLayoutTypes,
+} from './types';
 
 const VARIATION_NAME = 'woocommerce/product-query';
 
@@ -43,6 +47,10 @@ const mapAttributes = ( attributes ) => {
 
 	if ( woocommerceOnSale ) {
 		mappedQuery.__woocommerceOnSale = woocommerceOnSale;
+	}
+
+	if ( taxQuery ) {
+		mappedQuery.taxQuery = taxQuery;
 	}
 
 	return {
@@ -206,4 +214,13 @@ export const replaceProductCollectionWithProducts = () => {
 		getProductCollectionBlockClientIds( blocks );
 
 	productCollectionBlockClientIds.map( replaceProductCollectionBlock );
+};
+
+export const revertMigration = () => {
+	disableAutoUpdate();
+	setUpgradeStatus( {
+		status: 'reverted',
+		time: Date.now(),
+	} );
+	replaceProductCollectionWithProducts();
 };
