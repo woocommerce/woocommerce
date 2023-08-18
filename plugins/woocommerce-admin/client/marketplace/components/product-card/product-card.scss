@@ -4,7 +4,6 @@
 	&__product-card {
 		padding: $large-gap;
 		border-radius: $grid-unit-05 !important;
-		margin-top: $large-gap;
 
 		&:hover {
 			outline: 1.5px solid var(--wp-admin-theme-color);
@@ -99,8 +98,9 @@
 			display: -webkit-box;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 3;
-			text-overflow: ellipsis;
+			margin: 0;
 			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 		&__price {
@@ -110,7 +110,7 @@
 			text-decoration: none !important;
 			color: $gray-900 !important;
 			font-style: normal;
-			font-weight: 600;
+			font-weight: 500;
 			line-height: $medium-gap;
 		}
 

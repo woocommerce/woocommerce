@@ -2,7 +2,7 @@
 
 .woocommerce-marketplace__search {
 	grid-area: mktpl-search;
-	background: $gray-0;
+	background: $gutenberg-gray-100;
 	border-radius: 2px;
 	display: flex;
 	height: 40px;
@@ -11,6 +11,11 @@
 	input[type='search'] {
 		all: unset;
 		flex-grow: 1;
+	}
+
+	&:focus-within {
+		background: #fff;
+		border: 1.5px solid var(--wp-admin-theme-color, #3858e9);
 	}
 
 	@media (width <= $breakpoint-medium) {
