@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple', 'variable' );
+	private $supported_post_types = array( 'simple' );
 
 	/**
 	 * Redirection controller.
@@ -38,6 +38,10 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			array_push($this->supported_post_types, 'variable');
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
