@@ -285,35 +285,3 @@ function woocommerce_blocks_plugin_outdated_notice() {
 }
 
 add_action( 'admin_notices', 'woocommerce_blocks_plugin_outdated_notice' );
-
-/**
- * Disable the Interactivity API if the required `WP_HTML_Tag_Processor` class
- * doesn't exist, regardless of whether it was enabled manually.
- *
- * @param bool $enabled Current filter value.
- * @return bool True if _also_ the `WP_HTML_Tag_Processor` class was found.
- */
-function woocommerce_blocks_has_wp_html_tag_processor( $enabled ) {
-	return $enabled && class_exists( 'WP_HTML_Tag_Processor' );
-}
-add_filter(
-	'woocommerce_blocks_enable_interactivity_api',
-	'woocommerce_blocks_has_wp_html_tag_processor',
-	999
-);
-
-/**
- * Load and set up the Interactivity API if enabled.
- */
-function woocommerce_blocks_interactivity_setup() {
-	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-	$is_enabled = apply_filters(
-		'woocommerce_blocks_enable_interactivity_api',
-		true
-	);
-
-	if ( $is_enabled ) {
-		require_once __DIR__ . '/src/Interactivity/load.php';
-	}
-}
-add_action( 'plugins_loaded', 'woocommerce_blocks_interactivity_setup' );
