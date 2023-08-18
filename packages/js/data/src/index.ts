@@ -166,7 +166,7 @@ export type WCDataStoreName =
 /**
  * Internal dependencies
  */
-import { WPDataSelectors } from './types';
+import { WPCoreDataSelectors, WPDataSelectors } from './types';
 import { PaymentSelectors } from './payment-gateways/selectors';
 import { ShippingMethodsSelectors } from './shipping-methods/selectors';
 import { PluginSelectors } from './plugins/selectors';
@@ -240,7 +240,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 
 export interface WCDataSelector {
 	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T > &
-		WPDataSelectors;
+		WPDataSelectors &
+		WPCoreDataSelectors;
 }
 
 // Other exports

@@ -1,7 +1,16 @@
+/**
+ * External dependencies
+ */
+import {
+	GetEntityRecord,
+	GetEntityRecords,
+} from '@wordpress/core-data/build-types/selectors';
+
 // Type for the basic selectors built into @wordpress/data, note these
 // types define the interface for the public selectors, so state is not an
 // argument.
 // [wp.data.getSelectors](https://github.com/WordPress/gutenberg/blob/319deee5f4d4838d6bc280e9e2be89c7f43f2509/packages/data/src/store/index.js#L16-L20)
+
 // [selector.js](https://github.com/WordPress/gutenberg/blob/trunk/packages/data/src/redux-store/metadata/selectors.js#L48-L52)
 export type WPDataSelectors = {
 	getIsResolving: ( selector: string, args?: unknown[] ) => boolean;
@@ -9,6 +18,13 @@ export type WPDataSelectors = {
 	hasFinishedResolution: ( selector: string, args?: unknown[] ) => boolean;
 	isResolving: ( selector: string, args?: unknown[] ) => boolean;
 	getCachedResolvers: () => unknown;
+};
+
+// Types for the core-data selectors,.
+// https://github.com/WordPress/gutenberg/blob/trunk/packages/core-data/src/selectors.ts#L277
+export type WPCoreDataSelectors = {
+	getEntityRecord: GetEntityRecord;
+	getEntityRecors: GetEntityRecords;
 };
 
 // [wp.data.getActions](https://github.com/WordPress/gutenberg/blob/319deee5f4d4838d6bc280e9e2be89c7f43f2509/packages/data/src/store/index.js#L31-L35)
