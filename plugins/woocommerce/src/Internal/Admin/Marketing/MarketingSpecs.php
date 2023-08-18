@@ -150,7 +150,7 @@ class MarketingSpecs {
 				'taxonomy' => 'post_tag',
 				'term_id'  => 1377,
 				'argument' => 'tags',
-			)
+			),
 		);
 
 		// Default to the marketing category (if no term is set on the kb component).
