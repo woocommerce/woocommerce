@@ -1,0 +1,23 @@
+name: Markdown Linting
+
+on:
+    pull_request:
+    push:
+        branches: [trunk]
+
+jobs:
+    MDLintingCheck:
+        name: Lint
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+            - name: Install Node dependencies
+              run: npm ci --no-optional
+            - name: Lint
+              run: npm run lint
