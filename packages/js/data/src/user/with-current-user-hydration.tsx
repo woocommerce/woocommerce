@@ -4,11 +4,11 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import { WPDataSelectors } from '../types';
 
 /**
  * Internal dependencies
  */
+import { WPDataSelectors } from '../types';
 import { STORE_NAME } from './constants';
 import { WCUser } from './types';
 

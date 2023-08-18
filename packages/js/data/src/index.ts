@@ -236,7 +236,7 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? TaxClassSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
 	? ProductFormSelectors
-	: {};
+	: never;
 
 export interface WCDataSelector {
 	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T > &

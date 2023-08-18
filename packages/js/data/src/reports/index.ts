@@ -4,7 +4,7 @@
 
 import { registerStore } from '@wordpress/data';
 import { Reducer, AnyAction } from 'redux';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
+import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
-import { WPDataActions, WPDataSelectors } from '../types';
+import { WPDataSelectors } from '../types';
 import {
 	ReportItemObjectInfer,
 	ReportItemsEndpoint,
@@ -24,7 +24,6 @@ import {
 	ReportStatObjectInfer,
 	ReportStatQueryParams,
 } from './types';
-import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
