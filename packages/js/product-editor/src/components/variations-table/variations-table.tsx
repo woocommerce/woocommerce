@@ -2,7 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Spinner, Tooltip } from '@wordpress/components';
+import {
+	Button,
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -15,7 +22,12 @@ import {
 	Tag,
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
-import { useContext, useState, createElement } from '@wordpress/element';
+import {
+	useContext,
+	useState,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
@@ -35,6 +47,7 @@ import {
 	DEFAULT_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
 } from '../../constants';
+import { moreVertical } from '@wordpress/icons';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -266,17 +279,37 @@ export function VariationsTable() {
 								</Tooltip>
 							) }
 
-							<Link
-								href={ getNewPath(
-									{},
-									`/product/${ productId }/variation/${ variation.id }`,
-									{}
-								) }
-								type="wc-admin"
-								className="components-button"
+							<DropdownMenu
+								icon={ moreVertical }
+								label={ __( 'Actions', 'woocommerce' ) }
 							>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Link>
+								{ ( { onClose } ) => (
+									<>
+										<MenuGroup
+											label={ `${ __(
+												'Variation Id: '
+											) } ${ variation.id }` }
+										>
+											<MenuItem onClick={ onClose }>
+												{ __(
+													'Preview',
+													'woocommerce'
+												) }
+											</MenuItem>
+										</MenuGroup>
+										<MenuGroup>
+											<MenuItem
+												isDestructive
+												variant="link"
+												onClick={ onClose }
+												className="woocommerce-product-variations__actions--trash"
+											>
+												{ __( 'Trash', 'woocommerce' ) }
+											</MenuItem>
+										</MenuGroup>
+									</>
+								) }
+							</DropdownMenu>
 						</div>
 					</ListItem>
 				) ) }
