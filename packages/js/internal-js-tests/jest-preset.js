@@ -45,11 +45,13 @@ module.exports = {
 		'<rootDir>/tests/e2e/',
 	],
 	transformIgnorePatterns: [
-		`node_modules/(?!.pnpm/is-plain-obj|is-plain-obj)`,
+		`node_modules/(?!.pnpm|is-plain-obj|memize|is-plain-object)`,
 		'/build/',
 	],
 	transform: {
+		'^.+\\is-plain-object(/dist)?/is-plain-object\\.js$': 'babel-jest',
 		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
+		'^.+\\memize(/dist)?/index\\.js$': 'babel-jest',
 		'^.+\\.[jt]sx?$': 'ts-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',
