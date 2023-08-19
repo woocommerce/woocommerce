@@ -28,26 +28,25 @@ export const MenuItem = < ItemType, >( {
 	item,
 	tooltipText,
 }: MenuItemProps< ItemType > ) => {
+	function renderListItem() {
+		return (
+			<li
+				style={ isActive ? activeStyle : {} }
+				{ ...getItemProps( { item, index } ) }
+				className="woocommerce-experimental-select-control__menu-item"
+			>
+				{ children }
+			</li>
+		);
+	}
+
 	if ( tooltipText ) {
 		return (
 			<Tooltip text={ tooltipText } position="top center">
-				<li
-					style={ isActive ? activeStyle : {} }
-					{ ...getItemProps( { item, index } ) }
-					className="woocommerce-experimental-select-control__menu-item"
-				>
-					{ children }
-				</li>
+				{ renderListItem() }
 			</Tooltip>
 		);
 	}
-	return (
-		<li
-			style={ isActive ? activeStyle : {} }
-			{ ...getItemProps( { item, index } ) }
-			className="woocommerce-experimental-select-control__menu-item"
-		>
-			{ children }
-		</li>
-	);
+
+	return renderListItem();
 };
