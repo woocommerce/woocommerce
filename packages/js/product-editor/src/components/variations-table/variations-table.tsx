@@ -14,14 +14,7 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
 } from '@woocommerce/data';
-import {
-	Link,
-	ListItem,
-	Pagination,
-	Sortable,
-	Tag,
-} from '@woocommerce/components';
-import { getNewPath } from '@woocommerce/navigation';
+import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
 import {
 	useContext,
 	useState,
@@ -29,6 +22,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { moreVertical } from '@wordpress/icons';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -47,7 +41,6 @@ import {
 	DEFAULT_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
 } from '../../constants';
-import { moreVertical } from '@wordpress/icons';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -290,7 +283,9 @@ export function VariationsTable() {
 												'Variation Id: '
 											) } ${ variation.id }` }
 										>
-											<MenuItem onClick={ onClose }>
+											<MenuItem
+												href={ variation.permalink }
+											>
 												{ __(
 													'Preview',
 													'woocommerce'
