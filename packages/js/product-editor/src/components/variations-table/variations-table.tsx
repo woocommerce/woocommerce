@@ -93,7 +93,7 @@ export function VariationsTable() {
 			[ currentPage, perPage, productId ]
 		);
 
-	const { updateProductVariation } = useDispatch(
+	const { updateProductVariation, deleteProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
@@ -123,6 +123,23 @@ export function VariationsTable() {
 			{ product_id: productId, id: variationId },
 			{ status }
 		).finally( () =>
+			setIsUpdating( ( prevState ) => ( {
+				...prevState,
+				[ variationId ]: false,
+			} ) )
+		);
+	}
+
+	function handleDeleteVariationClick( variationId: number ) {
+		if ( isUpdating[ variationId ] ) return;
+		setIsUpdating( ( prevState ) => ( {
+			...prevState,
+			[ variationId ]: true,
+		} ) );
+		deleteProductVariation< Promise< ProductVariation > >( {
+			product_id: productId,
+			id: variationId,
+		} ).finally( () =>
 			setIsUpdating( ( prevState ) => ( {
 				...prevState,
 				[ variationId ]: false,
@@ -296,10 +313,18 @@ export function VariationsTable() {
 											<MenuItem
 												isDestructive
 												variant="link"
-												onClick={ onClose }
-												className="woocommerce-product-variations__actions--trash"
+												onClick={ () => {
+													handleDeleteVariationClick(
+														variation.id
+													);
+													onClose();
+												} }
+												className="woocommerce-product-variations__actions--delete"
 											>
-												{ __( 'Trash', 'woocommerce' ) }
+												{ __(
+													'Delete',
+													'woocommerce'
+												) }
 											</MenuItem>
 										</MenuGroup>
 									</>
