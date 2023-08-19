@@ -3,7 +3,12 @@
  */
 import { Spinner } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
-import { useCallback, useState, createElement } from '@wordpress/element';
+import {
+	useCallback,
+	useState,
+	createElement,
+	useEffect,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -19,32 +24,45 @@ export default function useAsyncFilter< T >( {
 	onFilterEnd,
 	onFilterError,
 	debounceTime,
+	fetchOnMount = false,
 }: UseAsyncFilterInput< T > ): UseAsyncFilterOutput< T > {
 	const [ isFetching, setIsFetching ] = useState( false );
 
-	const handleInputChange = useCallback(
-		function handleInputChangeCallback( value?: string ) {
-			if ( typeof filter === 'function' ) {
-				if ( typeof onFilterStart === 'function' )
-					onFilterStart( value );
+	function doFilter( value?: string ) {
+		if ( typeof filter === 'function' ) {
+			if ( typeof onFilterStart === 'function' ) onFilterStart( value );
 
-				setIsFetching( true );
+			setIsFetching( true );
 
-				filter( value )
-					.then( ( filteredItems ) => {
-						if ( typeof onFilterEnd === 'function' )
-							onFilterEnd( filteredItems, value );
-					} )
-					.catch( ( error: Error ) => {
-						if ( typeof onFilterError === 'function' )
-							onFilterError( error, value );
-					} )
-					.finally( () => {
-						setIsFetching( false );
-					} );
+			filter( value )
+				.then( ( filteredItems ) => {
+					if ( typeof onFilterEnd === 'function' )
+						onFilterEnd( filteredItems, value );
+				} )
+				.catch( ( error: Error ) => {
+					if ( typeof onFilterError === 'function' )
+						onFilterError( error, value );
+				} )
+				.finally( () => {
+					setIsFetching( false );
+				} );
+		}
+	}
+
+	const handleInputChange = useCallback( doFilter, [
+		filter,
+		onFilterStart,
+		onFilterEnd,
+		onFilterError,
+	] );
+
+	useEffect(
+		function doFilterOnMount() {
+			if ( fetchOnMount ) {
+				doFilter();
 			}
 		},
-		[ filter, onFilterStart, onFilterEnd, onFilterError ]
+		[ fetchOnMount ]
 	);
 
 	return {
@@ -69,6 +87,7 @@ export type UseAsyncFilterInput< T > = {
 	onFilterEnd?( filteredItems: T[], value?: string ): void;
 	onFilterError?( error: Error, value?: string ): void;
 	debounceTime?: number;
+	fetchOnMount?: boolean;
 };
 
 export type UseAsyncFilterOutput< T > = Pick<

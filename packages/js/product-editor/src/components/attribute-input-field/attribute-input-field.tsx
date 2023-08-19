@@ -2,15 +2,14 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { resolveSelect, useDispatch } from '@wordpress/data';
 import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement, useCallback, useState } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
 	ProductAttribute,
-	WCDataSelector,
 	ProductAttributesActions,
 	WPDataActions,
 } from '@woocommerce/data';
@@ -19,6 +18,7 @@ import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
+	useAsyncFilter,
 } from '@woocommerce/components';
 
 /**
@@ -51,6 +51,21 @@ function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
 	return attribute.id === -99;
 }
 
+function findLastCreatedAttribute( attributes: QueryProductAttribute[] ) {
+	return [ ...attributes ].sort( ( a, b ) => a.id - b.id ).shift();
+}
+
+function generateSlugFromLastCreatedAttribute(
+	value: string,
+	attribute?: QueryProductAttribute
+) {
+	if ( ! attribute?.slug ) {
+		return undefined;
+	}
+	const incrementalSuffix = +( attribute.slug.split( '-' )[ 1 ] || 0 ) + 1;
+	return `${ value }-${ incrementalSuffix }`;
+}
+
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
 	onChange,
@@ -66,71 +81,76 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	const { createProductAttribute, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as ProductAttributesActions & WPDataActions;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
-		const { getProductAttributes, hasFinishedResolution } = select(
-			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-		);
-		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
-		};
-	} );
 
-	const markedAttributes = useMemo(
-		function setDisabledAttribute() {
-			return (
-				attributes?.map( ( attribute ) => ( {
-					...attribute,
-					isDisabled: disabledAttributeIds.includes( attribute.id ),
-				} ) ) ?? []
-			);
-		},
-		[ attributes, disabledAttributeIds ]
-	);
+	const [ items, setItems ] = useState< NarrowedQueryAttribute[] >( [] );
+	const [ lastCreatedAttribute, setLastCreatedAttribute ] =
+		useState< QueryProductAttribute >();
 
-	const getFilteredItems = (
-		allItems: NarrowedQueryAttribute[],
-		inputValue: string
-	) => {
-		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
-			ignoredAttributeIds.length
-				? ! ignoredAttributeIds.includes( item.id )
-				: true;
+	const { isFetching, ...selectProps } =
+		useAsyncFilter< NarrowedQueryAttribute >( {
+			async filter( inputValue: string = '' ) {
+				const attributes = await resolveSelect(
+					EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+				).getProductAttributes< NarrowedQueryAttribute[] >();
 
-		const filteredItems = allItems.filter(
-			( item ) =>
-				ignoreIdsFilter( item ) &&
-				( item.name || '' )
-					.toLowerCase()
-					.startsWith( inputValue.toLowerCase() )
-		);
+				const filteredByInputValue = inputValue?.trim()
+					? attributes.filter( ( item ) =>
+							item.name
+								?.toLowerCase()
+								.startsWith( inputValue.toLowerCase() )
+					  )
+					: attributes;
 
-		if (
-			inputValue.length > 0 &&
-			! allItems.find(
-				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
-			)
-		) {
-			return [
-				...filteredItems,
-				{
-					id: -99,
-					name: inputValue,
-				},
-			];
-		}
+				setLastCreatedAttribute(
+					findLastCreatedAttribute(
+						attributes as QueryProductAttribute[]
+					)
+				);
 
-		return filteredItems;
-	};
+				const filteredByIgnoredIds = filteredByInputValue.filter(
+					( item ) =>
+						ignoredAttributeIds.length
+							? ! ignoredAttributeIds.includes( item.id )
+							: true
+				);
+
+				const withDisabledMarks = filteredByIgnoredIds.map(
+					( attribute ) => ( {
+						...attribute,
+						isDisabled: disabledAttributeIds.includes(
+							attribute.id
+						),
+					} )
+				);
+
+				if ( ! inputValue?.length ) return withDisabledMarks;
+
+				return [
+					...withDisabledMarks,
+					{
+						id: -99,
+						name: inputValue,
+					},
+				];
+			},
+			onFilterEnd( filteredItems ) {
+				setItems( filteredItems );
+			},
+			fetchOnMount: true,
+		} );
 
 	const addNewAttribute = ( attribute: NarrowedQueryAttribute ) => {
 		recordEvent( 'product_attribute_add_custom_attribute', {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( { name: attribute.name } ).then(
+			createProductAttribute( {
+				name: attribute.name,
+				slug: generateSlugFromLastCreatedAttribute(
+					attribute.name,
+					lastCreatedAttribute
+				),
+			} ).then(
 				( newAttr ) => {
 					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
@@ -156,14 +176,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 
 	return (
 		<SelectControl< NarrowedQueryAttribute >
+			{ ...selectProps }
 			className="woocommerce-attribute-input-field"
-			items={ markedAttributes || [] }
+			items={ items }
 			label={ label || '' }
 			disabled={ disabled }
-			getFilteredItems={ getFilteredItems }
 			placeholder={ placeholder }
-			getItemLabel={ ( item ) => item?.name || '' }
-			getItemValue={ ( item ) => item?.id || '' }
+			getItemLabel={ useCallback( ( item ) => item?.name || '', [] ) }
+			getItemValue={ useCallback( ( item ) => item?.id || '', [] ) }
 			selected={ value }
 			onSelect={ ( attribute ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
@@ -188,7 +208,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			} ) => {
 				return (
 					<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-						{ isLoading ? (
+						{ isFetching ? (
 							<Spinner />
 						) : (
 							renderItems.map( ( item, index: number ) => (
