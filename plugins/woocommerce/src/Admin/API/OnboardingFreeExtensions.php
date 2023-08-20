@@ -103,7 +103,7 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 	}
 
 	private function replace_jetpack_with_jetpack_boost_for_treatment( array $extensions ) {
-		$is_treatment = \WooCommerce\Admin\Experimental_Abtest::in_treatment( 'coreprofiler_jetpack_or_jetpack_boost' );
+		$is_treatment = \WooCommerce\Admin\Experimental_Abtest::in_treatment( 'woocommerce_jetpack_copy' );
 
 		if ( ! $is_treatment ) {
 			return $extensions;
