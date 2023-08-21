@@ -1,27 +1,26 @@
-Data
-====
+# Data
 
 WooCommerce Admin data stores implement the [`SqlQuery` class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/API/Reports/SqlQuery.php). 
 
-### SqlQuery Class
+## SqlQuery Class
 
 The `SqlQuery` class is a SQL Query statement object. Its properties consist of
 
 - A `context` string identifying the context of the query.
 - SQL clause (`type`) string arrays used to construct the SQL statement:
-  - `select`
-  - `from`
-  - `right_join`
-  - `join`
-  - `left_join`
-  - `where`
-  - `where_time`
-  - `group_by`
-  - `having`
-  - `order_by`
-  - `limit`
+    - `select`
+    - `from`
+    - `right_join`
+    - `join`
+    - `left_join`
+    - `where`
+    - `where_time`
+    - `group_by`
+    - `having`
+    - `order_by`
+    - `limit`
 
-### Reports Data Stores
+## Reports Data Stores
 
 The base DataStore `Automattic\WooCommerce\Admin\API\Reports\DataStore` extends the `SqlQuery` class. The implementation data store classes use the following `SqlQuery` instances:
 
@@ -49,7 +48,7 @@ Query contexts are named as follows:
 - Interval Query = Class Context + `_interval`
 - Total Query = Class Context + `_total`
 
-### Filters
+## Filters
 
 When getting the full statement the clause arrays are passed through two filters where `$context` is the query object context and `$type` is:
 
@@ -69,7 +68,7 @@ The filters are:
 
 Example usage
 
-```
+```php
 add_filter( 'woocommerce_analytics_clauses_product_stats_select_total', 'my_custom_product_stats' );
 /**
  * Add sample data to product stats totals.
