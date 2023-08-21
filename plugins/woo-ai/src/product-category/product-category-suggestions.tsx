@@ -14,14 +14,13 @@ import {
 import { MagicButton, RandomLoadingMessage } from '../components';
 import {
 	getCategories,
-	getAllAvailableCategories,
 	selectCategory,
 	generateProductDataInstructions,
 } from '../utils';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { SuggestionPills } from '../components/suggestion-pills';
 import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
-import { recordCategoryTracks } from './utils';
+import { getAvailableCategories, recordCategoryTracks } from './utils';
 
 enum SuggestionsState {
 	Initial,
@@ -46,19 +45,27 @@ export const ProductCategorySuggestions = () => {
 		} );
 	};
 
-	const filterValidCategorySuggestions = (
+	const filterValidCategorySuggestions = async (
 		categorySuggestions: string[]
 	) => {
-		const availableCategories = getAllAvailableCategories();
 		const selectedCategories = getCategories();
 
-		return categorySuggestions.filter( ( suggestion ) => {
-			// return only the suggestions that exist in the list of all available categories and are not already selected
-			return (
-				availableCategories.includes( suggestion ) &&
-				! selectedCategories.includes( suggestion )
-			);
-		} );
+		try {
+			const availableCategories = await getAvailableCategories();
+
+			return categorySuggestions.filter( ( suggestion ) => {
+				// return only the suggestions that exist in the list of all available categories and are not already selected
+				return (
+					availableCategories.includes( suggestion ) &&
+					! selectedCategories.includes( suggestion )
+				);
+			} );
+		} catch ( e ) {
+			// If we can't fetch the available categories, we can't filter the suggestions
+			// eslint-disable-next-line no-console
+			console.error( 'Unable to fetch available categories', e );
+			return [];
+		}
 	};
 
 	const { requestCompletion } = useCompletion( {
@@ -72,10 +79,10 @@ export const ProductCategorySuggestions = () => {
 			} );
 			setSuggestionsState( SuggestionsState.Failed );
 		},
-		onCompletionFinished: ( reason, content ) => {
+		onCompletionFinished: async ( reason, content ) => {
 			try {
 				const parsed = parseCategorySuggestions( content );
-				const filtered = filterValidCategorySuggestions( parsed );
+				const filtered = await filterValidCategorySuggestions( parsed );
 
 				if ( filtered.length === 0 ) {
 					setSuggestionsState( SuggestionsState.None );
@@ -107,8 +114,14 @@ export const ProductCategorySuggestions = () => {
 		} );
 	};
 
-	const buildPrompt = () => {
-		const allAvailableCategories = getAllAvailableCategories().join( ', ' );
+	const buildPrompt = async () => {
+		let availableCategories: string[] = [];
+		try {
+			availableCategories = await getAvailableCategories();
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Unable to fetch available categories', e );
+		}
 
 		const productPropsInstructions = generateProductDataInstructions();
 		const instructions = [
@@ -118,8 +131,11 @@ export const ProductCategorySuggestions = () => {
 			) }, detect the main product category and its subcategories based on the existing available categories.`,
 			"Your goal is to enhance the store's SEO performance and sales.",
 			'Categories can have parents and multi-level children structures like Parent Category > Child Category.',
-			'You will be given a list of available categories and you can only return the best matching categories from this list.',
-			`Available categories are: ${ allAvailableCategories }`,
+			availableCategories
+				? `You will be given a list of available categories and you can only return the best matching categories from this list. Available categories are: ${ availableCategories.join(
+						', '
+				  ) }`
+				: '',
 			"The product's properties are:",
 			...productPropsInstructions.instructions,
 			'Return only a comma-separated list of the product categories, children categories must be separated by >.',
@@ -139,7 +155,7 @@ export const ProductCategorySuggestions = () => {
 			current_categories: getCategories(),
 		} );
 
-		await requestCompletion( buildPrompt() );
+		await requestCompletion( await buildPrompt() );
 	};
 
 	return (
