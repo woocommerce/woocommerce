@@ -31,7 +31,7 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"phpunit/phpunit": "^9.0",
 		"sebastian/comparator": "^4.0",
-		"yoast/phpunit-polyfills": "^1.0"
+		"yoast/phpunit-polyfills": "^1.1"
 	},
 	"config": {
 		"optimize-autoloader": true,
