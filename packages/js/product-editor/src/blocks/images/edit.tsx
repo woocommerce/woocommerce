@@ -84,7 +84,7 @@ export function Edit() {
 					</div>
 				) : (
 					<MediaUploader
-						multipleSelect={ true }
+						multipleSelect={ 'add' }
 						onError={ () => null }
 						onFileUploadChange={ onFileUpload }
 						onMediaGalleryOpen={ () => {
