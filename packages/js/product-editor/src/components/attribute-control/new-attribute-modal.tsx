@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	Fragment,
+	useEffect,
+} from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import {
 	Form,
@@ -31,6 +36,7 @@ import { getProductAttributeObject } from './utils';
 
 type NewAttributeModalProps = {
 	title?: string;
+	description?: string | React.ReactElement;
 	notice?: string;
 	attributeLabel?: string;
 	valueLabel?: string;
@@ -48,6 +54,7 @@ type NewAttributeModalProps = {
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
+	createNewAttributesAsGlobal?: boolean;
 };
 
 type AttributeForm = {
@@ -56,6 +63,7 @@ type AttributeForm = {
 
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
+	description = '',
 	notice = __(
 		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
 		'woocommerce'
@@ -79,6 +87,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
+	createNewAttributesAsGlobal = false,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -199,6 +208,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		}
 	};
 
+	useEffect( function focusFirstAttributeField() {
+		const firstAttributeFieldLabel =
+			document.querySelector< HTMLLabelElement >(
+				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
+			);
+
+		firstAttributeFieldLabel?.focus();
+	}, [] );
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -229,9 +247,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							} }
 							className="woocommerce-new-attribute-modal"
 						>
-							<Notice isDismissible={ false }>
-								<p>{ notice }</p>
-							</Notice>
+							{ notice && (
+								<Notice isDismissible={ false }>
+									<p>{ notice }</p>
+								</Notice>
+							) }
+
+							{ description && <p>{ description }</p> }
 
 							<div className="woocommerce-new-attribute-modal__body">
 								<table className="woocommerce-new-attribute-modal__table">
@@ -292,6 +314,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																			undefined
 																	),
 															] }
+															createNewAttributesAsGlobal={
+																createNewAttributesAsGlobal
+															}
 														/>
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">

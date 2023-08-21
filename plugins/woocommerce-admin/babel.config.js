@@ -1,14 +1,16 @@
-const {
-	babelConfig: e2eBabelConfig,
-} = require( '@woocommerce/e2e-environment' );
-
 module.exports = function ( api ) {
 	api.cache( true );
 
 	return {
-		...e2eBabelConfig,
 		presets: [
-			...e2eBabelConfig.presets,
+			[
+				'@babel/preset-env',
+				{
+					targets: {
+						node: 'current',
+					},
+				},
+			],
 			'@babel/preset-typescript',
 			'@wordpress/babel-preset-default',
 		],

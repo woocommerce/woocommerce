@@ -12,19 +12,19 @@ import crypto from 'crypto';
 import { generatePostFrontMatter } from './generate-frontmatter';
 import { generateFileUrl } from './generate-urls';
 
-interface Category {
+export interface Category {
 	[ key: string ]: unknown;
 	posts?: Post[];
 	categories?: Category[];
 }
 
-interface Post {
+export interface Post {
 	[ key: string ]: unknown;
 }
 
-function generatePageId( filePath: string, prefix = '' ) {
+export function generatePostId( filePath: string, prefix = '' ) {
 	const hash = crypto.createHash( 'sha1' );
-	hash.update( prefix + filePath );
+	hash.update( `${ prefix }/${ filePath }` );
 	return hash.digest( 'hex' );
 }
 
@@ -34,6 +34,7 @@ async function processDirectory(
 	projectName: string,
 	baseUrl: string,
 	baseEditUrl: string,
+	fullPathToDocs: string,
 	checkReadme = true
 ): Promise< Category > {
 	const category: Category = {};
@@ -54,12 +55,16 @@ async function processDirectory(
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
 
+	// If there are markdown files in this directory, add a posts array to the category. Otherwise, assume its a top level category that will contain subcategories.
+	if ( markdownFiles.length > 0 ) {
+		category.posts = [];
+	}
+
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
 			// Skip README.md which we have already processed.
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const fileFrontmatter = generatePostFrontMatter( fileContent );
-			category.posts = [];
 
 			if ( baseUrl.includes( 'github' ) ) {
 				fileFrontmatter.edit_url = generateFileUrl(
@@ -72,6 +77,15 @@ async function processDirectory(
 
 			const post: Post = { ...fileFrontmatter };
 
+			// Generate hash of the post contents.
+			post.hash = crypto
+				.createHash( 'sha256' )
+				.update( JSON.stringify( fileContent ) )
+				.digest( 'hex' );
+
+			// get the folder name of rootDirectory.
+			const relativePath = path.relative( fullPathToDocs, filePath );
+
 			category.posts.push( {
 				...post,
 				url: generateFileUrl(
@@ -80,7 +94,8 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
-				id: generatePageId( filePath, projectName ),
+				filePath,
+				id: generatePostId( relativePath, projectName ),
 			} );
 		}
 	} );
@@ -97,7 +112,8 @@ async function processDirectory(
 			subdirectory,
 			projectName,
 			baseUrl,
-			baseEditUrl
+			baseEditUrl,
+			fullPathToDocs
 		);
 
 		category.categories.push( subcategory );
@@ -113,12 +129,15 @@ export async function generateManifestFromDirectory(
 	baseUrl: string,
 	baseEditUrl: string
 ) {
+	const fullPathToDocs = subDirectory;
+
 	const manifest = await processDirectory(
 		rootDirectory,
 		subDirectory,
 		projectName,
 		baseUrl,
 		baseEditUrl,
+		fullPathToDocs,
 		false
 	);
 

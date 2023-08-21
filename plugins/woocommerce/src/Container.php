@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Proxie
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BlockTemplatesServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -67,6 +68,7 @@ final class Container {
 		OrderAdminServiceProvider::class,
 		FeaturesServiceProvider::class,
 		MarketingServiceProvider::class,
+		BlockTemplatesServiceProvider::class,
 	);
 
 	/**

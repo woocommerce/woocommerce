@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Disable read on sync while backfilling.

@@ -116,13 +116,16 @@ class FeaturesController {
 			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
 			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
 				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+				'is_experimental'    => true,
 				'enabled_by_default' => false,
 			),
 			$hpos_authoritative    => array(
-				'name' => __( 'High performance order storage', 'woocommerce' ),
+				'name'            => __( 'High performance order storage', 'woocommerce' ),
+				'is_experimental' => true,
 			),
 			$hpos_enable_sync      => array(
-				'name' => '',
+				'name'            => '',
+				'is_experimental' => true,
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -132,7 +135,14 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
+		$this->legacy_feature_ids = array(
+			'analytics',
+			'new_navigation',
+			'product_block_editor',
+			// Compatibility for COT is determined by `custom_order_tables'.
+			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+		);
 
 		$this->init_features( $features );
 
@@ -424,7 +434,10 @@ class FeaturesController {
 			case 'new_navigation':
 				return Init::TOGGLE_OPTION_NAME;
 			case 'custom_order_tables':
+			case CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
 				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
+			case DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION:
+				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
 			default:
 				return "woocommerce_feature_{$feature_id}_enabled";
 		}
@@ -774,6 +787,18 @@ class FeaturesController {
 			return $list;
 		}
 
+		return $this->get_incompatible_plugins( $feature_id, $list );
+	}
+
+	/**
+	 * Returns the list of plugins incompatible with a given feature.
+	 *
+	 * @param string $feature_id ID of the feature. Can also be `all` to denote all features.
+	 * @param array  $list       List of plugins to filter.
+	 *
+	 * @return array List of plugins incompatible with the given feature.
+	 */
+	private function get_incompatible_plugins( $feature_id, $list ) {
 		$incompatibles = array();
 
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput

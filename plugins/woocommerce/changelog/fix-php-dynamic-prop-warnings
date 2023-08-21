@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Address more PHP 8.1+ deprecation warnings in wc-admin code.

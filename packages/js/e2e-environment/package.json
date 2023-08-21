@@ -78,8 +78,8 @@
 		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
 		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
 		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"lint": "eslint src --ext=js,ts,tsx",
-		"lint:fix": "eslint src --ext=js,ts,tsx --fix"
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
 	},
 	"bin": {
 		"wc-e2e": "bin/wc-e2e.sh"

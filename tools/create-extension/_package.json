@@ -2,7 +2,7 @@
 	"name": "{{extension_slug}}",
 	"title": "{{extension_name}}",
 	"license": "GPL-3.0-or-later",
-	"version": "0.1.0",
+	"version": "0.0.1",
 	"description": "{{extension_name}}",
 	"scripts": {
 		"build": "wp-scripts build",
@@ -12,7 +12,6 @@
 		"lint:css": "wp-scripts lint-style",
 		"lint:js": "wp-scripts lint-js",
 		"lint:md:docs": "wp-scripts lint-md-docs",
-		"lint:md:js": "wp-scripts lint-md-js",
 		"lint:pkg-json": "wp-scripts lint-pkg-json",
 		"packages-update": "wp-scripts packages-update",
 		"start": "wp-scripts start",
@@ -20,9 +19,10 @@
 		"test:unit": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^12.2.1",
+		"@wordpress/scripts": "^26.10.0",
 		"@woocommerce/eslint-plugin": "latest",
-		"@woocommerce/dependency-extraction-webpack-plugin": "1.6.0"
+		"@woocommerce/dependency-extraction-webpack-plugin": "1.6.0",
+		"prettier": "^2.8.8"
 	},
 	"dependencies": {
 		"@wordpress/hooks": "^3.5.0"
