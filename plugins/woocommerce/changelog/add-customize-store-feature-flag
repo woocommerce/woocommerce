@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Added feature flag that removes store appearance task and adds customize store task when enabled
