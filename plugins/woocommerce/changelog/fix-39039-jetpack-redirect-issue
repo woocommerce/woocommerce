@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-When all plugins are deselected, but Jetpack is already installed and not connected, redirect users to the Jetpack Connect page.
