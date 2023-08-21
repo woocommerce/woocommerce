@@ -23,7 +23,7 @@ Once you're ready to move forward, consider one of the following:
 The WooCommerce ecosystem thrives on community contributions. Whether it's improving documentation, reporting bugs, or contributing code, we greatly appreciate every contribution from our community. 
 
 - To contribute to **the core WooCommerce project**, check out our [Contributing guide](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md).
-- To contribute to **documentation*- please refer to the [documentation style guide](style-guide.md).
+- To contribute to **documentation** please refer to the [documentation style guide](style-guide.md).
 
 ## Support
 
