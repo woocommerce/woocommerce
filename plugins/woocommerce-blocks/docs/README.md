@@ -138,6 +138,7 @@ The following posts from [developer.woocommerce.com](https://developer.woocommer
 
 The following tutorials from [developer.woocommerce.com](https://developer.woocommerce.com/category/tutorials/) help you with extending the WooCommerce Blocks plugin.
 
+-   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
 -   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
 -   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
 -   [Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
