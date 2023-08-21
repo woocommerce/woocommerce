@@ -344,7 +344,19 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url + '&installed_ext_success=1';
+	const url = new URL( event.data.url );
+	url.searchParams.set( 'installed_ext_success', '1' );
+	const selectedPlugin = _context.pluginsSelected.find(
+		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	);
+
+	if ( selectedPlugin ) {
+		const pluginName =
+			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
+		url.searchParams.set( 'plugin_name', pluginName );
+	}
+
+	window.location.href = url.toString();
 };
 
 const updateTrackingOption = async (
