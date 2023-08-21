@@ -13,6 +13,32 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	use BlockContainerTrait;
 
 	/**
+	 * Get the template ID.
+	 */
+	public abstract function get_id(): string;
+
+	/**
+	 * Get the template title.
+	 */
+	public function get_title(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template description.
+	 */
+	public function get_description(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template area.
+	 */
+	public function get_area(): string {
+		return 'uncategorized';
+	}
+
+	/**
 	 * The block cache.
 	 *
 	 * @var BlockInterface[]
