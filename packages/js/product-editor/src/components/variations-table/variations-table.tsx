@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
 	DropdownMenu,
@@ -296,9 +296,14 @@ export function VariationsTable() {
 								{ ( { onClose } ) => (
 									<>
 										<MenuGroup
-											label={ `${ __(
-												'Variation Id: '
-											) } ${ variation.id }` }
+											label={ sprintf(
+												/** Translators: Variation ID */
+												__(
+													'Variation Id: %s',
+													'woocommerce'
+												),
+												variation.id
+											) }
 										>
 											<MenuItem
 												href={ variation.permalink }
