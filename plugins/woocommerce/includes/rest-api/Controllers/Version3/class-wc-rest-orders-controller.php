@@ -224,6 +224,16 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			$object->save();
 
+			// Option to trigger process payment
+			if ($creating) {
+                if (true === $request['process_payment']) {
+                    $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+                    if (isset($available_gateways[$object->get_payment_method()])) {
+                        $available_gateways[$object->get_payment_method()]->process_payment($object->get_id());
+                    }
+                }
+            }
+
 			// Actions for after the order is saved.
 			if ( true === $request['set_paid'] ) {
 				if ( $creating || $object->needs_payment() ) {
