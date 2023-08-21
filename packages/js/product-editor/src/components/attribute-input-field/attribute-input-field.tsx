@@ -51,21 +51,6 @@ function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
 	return attribute.id === -99;
 }
 
-function findLastCreatedAttribute( attributes: QueryProductAttribute[] ) {
-	return [ ...attributes ].sort( ( a, b ) => a.id - b.id ).shift();
-}
-
-function generateSlugFromLastCreatedAttribute(
-	value: string,
-	attribute?: QueryProductAttribute
-) {
-	if ( ! attribute?.slug ) {
-		return undefined;
-	}
-	const incrementalSuffix = +( attribute.slug.split( '-' )[ 1 ] || 0 ) + 1;
-	return `${ value }-${ incrementalSuffix }`;
-}
-
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
 	onChange,
@@ -83,8 +68,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	) as ProductAttributesActions & WPDataActions;
 
 	const [ items, setItems ] = useState< NarrowedQueryAttribute[] >( [] );
-	const [ lastCreatedAttribute, setLastCreatedAttribute ] =
-		useState< QueryProductAttribute >();
 
 	const { isFetching, ...selectProps } =
 		useAsyncFilter< NarrowedQueryAttribute >( {
@@ -100,12 +83,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 								.startsWith( inputValue.toLowerCase() )
 					  )
 					: attributes;
-
-				setLastCreatedAttribute(
-					findLastCreatedAttribute(
-						attributes as QueryProductAttribute[]
-					)
-				);
 
 				const filteredByIgnoredIds = filteredByInputValue.filter(
 					( item ) =>
@@ -146,10 +123,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		if ( createNewAttributesAsGlobal ) {
 			createProductAttribute( {
 				name: attribute.name,
-				slug: generateSlugFromLastCreatedAttribute(
-					attribute.name,
-					lastCreatedAttribute
-				),
+				generate_slug: true,
 			} ).then(
 				( newAttr ) => {
 					invalidateResolution( 'getProductAttributes' );
