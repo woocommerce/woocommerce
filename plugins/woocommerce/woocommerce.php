@@ -14,6 +14,10 @@
  * @package WooCommerce
  */
 
+if ( true === false ) {
+	echo "That's problemattic";
+}
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
