@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * Utility methods used for migrating pages to block templates.
  * {@internal This class and its methods should only be used within the BlockTemplateController.php and is not intended for public use.}
@@ -135,6 +133,13 @@ class BlockTemplateMigrationUtils {
 	 * @return boolean Success.
 	 */
 	protected static function create_custom_template( $template, $content ) {
+
+		$term = get_term_by( 'slug', $template->theme, 'wp_theme', ARRAY_A );
+
+		if ( ! $term ) {
+			$term = wp_insert_term( $template->theme, 'wp_theme' );
+		}
+
 		$template_id = wp_insert_post(
 			[
 				'post_name'    => $template->slug,
@@ -150,6 +155,9 @@ class BlockTemplateMigrationUtils {
 			],
 			true
 		);
+
+		wp_set_post_terms( $template_id, array( $term['term_id'] ), 'wp_theme' );
+
 		return $template_id && ! is_wp_error( $template_id );
 	}
 

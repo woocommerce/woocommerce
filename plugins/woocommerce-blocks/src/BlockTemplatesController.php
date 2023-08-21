@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -767,6 +768,12 @@ class BlockTemplatesController {
 	 * Migrates page content to templates if needed.
 	 */
 	public function maybe_migrate_content() {
+		// Migration should occur on a normal request to ensure every requirement is met.
+		// We are postponing it if WP is in maintenance mode, installing, WC installing or if the request is part of a WP-CLI command.
+		if ( wp_is_maintenance_mode() || ! get_option( 'woocommerce_db_version', false ) || Constants::is_defined( 'WP_SETUP_CONFIG' ) || Constants::is_defined( 'WC_INSTALLING' ) || Constants::is_defined( 'WP_CLI' ) ) {
+			return;
+		}
+
 		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'cart' ) ) {
 			BlockTemplateMigrationUtils::migrate_page( 'cart', CartTemplate::get_placeholder_page() );
 		}
