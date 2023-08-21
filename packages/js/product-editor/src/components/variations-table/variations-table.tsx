@@ -14,6 +14,7 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
 import {
 	useContext,
@@ -40,6 +41,7 @@ import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
 	DEFAULT_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
+	TRACKS_SOURCE,
 } from '../../constants';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
@@ -139,12 +141,18 @@ export function VariationsTable() {
 		deleteProductVariation< Promise< ProductVariation > >( {
 			product_id: productId,
 			id: variationId,
-		} ).finally( () =>
-			setIsUpdating( ( prevState ) => ( {
-				...prevState,
-				[ variationId ]: false,
-			} ) )
-		);
+		} )
+			.then( () => {
+				recordEvent( 'product_variations_delete', {
+					source: TRACKS_SOURCE,
+				} );
+			} )
+			.finally( () =>
+				setIsUpdating( ( prevState ) => ( {
+					...prevState,
+					[ variationId ]: false,
+				} ) )
+			);
 	}
 
 	return (
@@ -292,6 +300,16 @@ export function VariationsTable() {
 							<DropdownMenu
 								icon={ moreVertical }
 								label={ __( 'Actions', 'woocommerce' ) }
+								toggleProps={ {
+									onClick() {
+										recordEvent(
+											'product_variations_menu_view',
+											{
+												source: TRACKS_SOURCE,
+											}
+										);
+									},
+								} }
 							>
 								{ ( { onClose } ) => (
 									<>
@@ -307,6 +325,14 @@ export function VariationsTable() {
 										>
 											<MenuItem
 												href={ variation.permalink }
+												onClick={ () => {
+													recordEvent(
+														'product_variations_preview',
+														{
+															source: TRACKS_SOURCE,
+														}
+													);
+												} }
 											>
 												{ __(
 													'Preview',
