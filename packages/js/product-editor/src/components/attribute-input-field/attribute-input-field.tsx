@@ -28,6 +28,7 @@ import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { TRACKS_SOURCE } from '../../constants';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' > & {
+	slug?: string;
 	isDisabled?: boolean;
 };
 
@@ -198,7 +199,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									tooltipText={
 										item.isDisabled
 											? disabledAttributeMessage
-											: undefined
+											: item.slug
 									}
 								>
 									{ isNewAttributeListItem( item ) ? (
