@@ -16,7 +16,7 @@ class Group extends AbstractBlock implements ContainerInterface {
 	}
 
 	/**
-	 * Add a custom block type to this template.
+	 * Add a section block type to this template.
 	 *
 	 * @param array $block_config The block data.
 	 */
@@ -26,7 +26,7 @@ class Group extends AbstractBlock implements ContainerInterface {
 	}
 
 	/**
-	 * Generate a block ID based on a base.
+	 * Add a block type to this template.
 	 *
 	 * @param array $block_config The block data.
 	 */

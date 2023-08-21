@@ -4,31 +4,27 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlock;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
 
-class Section extends AbstractBlock implements ContainerInterface {
-	use BlockContainerTrait;
+class Section extends ProductBlock implements ContainerInterface {
 
 	function __construct( array $config, &$root_template, ContainerInterface &$parent = null ) {
 		parent::__construct( array_merge( array(  'blockName' => 'woocommerce/product-section' ), $config ), $root_template, $parent );
 	}
 
 	/**
-	 * Generate a block ID based on a base.
+	 * Add a section block type to this template.
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_block( array $block_config ): BlockInterface {
-		$block = new Block( $block_config, $this->get_root_template(), $this );
+	public function add_section( array $block_config ): BlockInterface {
+		$block = new Section( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}
 
 	/**
-	 * Generate a block ID based on a base.
+	 * Adds columns to a template.
 	 *
-	 * @param array $block_config The block data.
+	 * @param array $column_block_configs Column block data.
 	 */
 	public function add_columns( array ...$column_block_configs ): BlockInterface {
 		$columns_block = $this->add_block( [
