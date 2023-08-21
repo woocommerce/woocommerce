@@ -20,4 +20,13 @@ class ProductGallery extends AbstractBlock {
 	protected function get_block_type_style() {
 		return null;
 	}
+
+	/**
+	 * It isn't necessary register block assets because it is a server side block.
+	 */
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+
+		return null;
+	}
 }
