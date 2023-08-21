@@ -2358,9 +2358,9 @@ FROM $order_meta_table
 			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
-		$this->update_order_meta( $order );
-
 		$this->persist_order_to_db( $order, $force_all_fields );
+
+		$this->update_order_meta( $order );
 
 		$order->save_meta_data();
 		$order->apply_changes();
