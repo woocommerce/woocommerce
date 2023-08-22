@@ -49,15 +49,17 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 		>
 			<div>{ attribute.name }</div>
 			<div className="woocommerce-attribute-list-item__options">
-				{ attribute.options.slice( 0, 2 ).map( ( option, index ) => (
-					<div
-						className="woocommerce-attribute-list-item__option-chip"
-						key={ index }
-					>
-						{ option }
-					</div>
-				) ) }
-				{ attribute.options.length > 2 && (
+				{ attribute.options
+					.slice( 0, attribute.options.length > 3 ? 2 : 3 )
+					.map( ( option, index ) => (
+						<div
+							className="woocommerce-attribute-list-item__option-chip"
+							key={ index }
+						>
+							{ option }
+						</div>
+					) ) }
+				{ attribute.options.length > 3 && (
 					<div className="woocommerce-attribute-list-item__option-chip">
 						{ sprintf(
 							__( '+ %i more', 'woocommerce' ),
