@@ -5,7 +5,7 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { createElement } from '@wordpress/element';
+import { createElement, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -27,7 +27,9 @@ import {
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { TRACKS_SOURCE } from '../../constants';
 
-type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' > & {
+	isDisabled?: boolean;
+};
 
 type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
@@ -39,6 +41,8 @@ type AttributeInputFieldProps = {
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
 	ignoredAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 };
@@ -53,6 +57,8 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	placeholder,
 	label,
 	disabled,
+	disabledAttributeIds = [],
+	disabledAttributeMessage,
 	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 } ) => {
@@ -71,6 +77,18 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			attributes: getProductAttributes(),
 		};
 	} );
+
+	const markedAttributes = useMemo(
+		function setDisabledAttribute() {
+			return (
+				attributes?.map( ( attribute ) => ( {
+					...attribute,
+					isDisabled: disabledAttributeIds.includes( attribute.id ),
+				} ) ) ?? []
+			);
+		},
+		[ attributes, disabledAttributeIds ]
+	);
 
 	const getFilteredItems = (
 		allItems: NarrowedQueryAttribute[],
@@ -139,7 +157,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
-			items={ attributes || [] }
+			items={ markedAttributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
 			getFilteredItems={ getFilteredItems }
@@ -179,7 +197,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									index={ index }
 									isActive={ highlightedIndex === index }
 									item={ item }
-									getItemProps={ getItemProps }
+									getItemProps={ ( options ) => ( {
+										...getItemProps( options ),
+										disabled: item.isDisabled || undefined,
+									} ) }
+									tooltipText={
+										item.isDisabled
+											? disabledAttributeMessage
+											: undefined
+									}
 								>
 									{ isNewAttributeListItem( item ) ? (
 										<div className="woocommerce-attribute-input-field__add-new">

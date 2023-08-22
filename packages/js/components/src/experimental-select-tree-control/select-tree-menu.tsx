@@ -104,6 +104,7 @@ export const SelectTreeMenu = ( {
 						}
 					) }
 					position={ position }
+					flip={ false }
 					animate={ false }
 					onFocusOutside={ ( event ) => {
 						if ( isEventOutside( event ) ) {

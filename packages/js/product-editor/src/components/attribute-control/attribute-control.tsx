@@ -48,6 +48,7 @@ type AttributeControlProps = {
 	onNoticeDismiss?: () => void;
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
+	disabledAttributeIds?: number[];
 	uiStrings?: {
 		notice?: string | React.ReactElement;
 		emptyStateSubtitle?: string;
@@ -59,7 +60,8 @@ type AttributeControlProps = {
 		attributeRemoveLabel?: string;
 		attributeRemoveConfirmationMessage?: string;
 		attributeRemoveConfirmationModalMessage?: string;
-		globalAttributeHelperMessage: string;
+		globalAttributeHelperMessage?: string;
+		disabledAttributeMessage?: string;
 	};
 };
 
@@ -80,6 +82,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	uiStrings,
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
+	disabledAttributeIds = [],
 } ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
@@ -279,6 +282,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					onAdd={ handleAdd }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
+					disabledAttributeIds={ disabledAttributeIds }
+					disabledAttributeMessage={
+						uiStrings.disabledAttributeMessage
+					}
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -292,22 +299,26 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					customAttributeHelperMessage={
 						uiStrings.customAttributeHelperMessage
 					}
-					globalAttributeHelperMessage={ createInterpolateElement(
-						uiStrings.globalAttributeHelperMessage,
-						{
-							link: (
-								<Link
-									href={ getAdminLink(
-										'edit.php?post_type=product&page=product_attributes'
-									) }
-									target="_blank"
-									type="wp-admin"
-								>
-									<></>
-								</Link>
-							),
-						}
-					) }
+					globalAttributeHelperMessage={
+						uiStrings.globalAttributeHelperMessage
+							? createInterpolateElement(
+									uiStrings.globalAttributeHelperMessage,
+									{
+										link: (
+											<Link
+												href={ getAdminLink(
+													'edit.php?post_type=product&page=product_attributes'
+												) }
+												target="_blank"
+												type="wp-admin"
+											>
+												<></>
+											</Link>
+										),
+									}
+							  )
+							: undefined
+					}
 					onCancel={ () => {
 						closeEditModal( currentAttribute );
 						onEditModalCancel( currentAttribute );

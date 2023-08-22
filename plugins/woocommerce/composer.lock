@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac7ac11b7f88cdc84caed4e4d39dd3b8",
+    "content-hash": "21dd370a009f4b74c2cabc6ff71f400a",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1004,16 +1004,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "10.6.5",
+            "version": "10.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "e05df5d2d7cd6c273ff10cbec424d446be1dbc88"
+                "reference": "ce9c852dc5d468a45e6e6ea3868ee86cfc05ac74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/e05df5d2d7cd6c273ff10cbec424d446be1dbc88",
-                "reference": "e05df5d2d7cd6c273ff10cbec424d446be1dbc88",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/ce9c852dc5d468a45e6e6ea3868ee86cfc05ac74",
+                "reference": "ce9c852dc5d468a45e6e6ea3868ee86cfc05ac74",
                 "shasum": ""
             },
             "require": {
@@ -1023,11 +1023,14 @@
                 "ext-json": "*"
             },
             "require-dev": {
-                "mockery/mockery": "^1",
-                "phpunit/phpunit": "^8",
+                "mockery/mockery": "1.6.5",
+                "nikic/php-parser": "4.16.0 as 1.0.0",
+                "phpdocumentor/reflection": "3.0.1",
+                "phpunit/php-code-coverage": "9.2.27",
+                "phpunit/phpunit": "9.6.10",
                 "woocommerce/woocommerce-sniffs": "0.1.3",
-                "wp-hooks/generator": "^0.9.0",
-                "yoast/phpunit-polyfills": "^1.0"
+                "wp-hooks/generator": "0.9.0",
+                "yoast/phpunit-polyfills": "2.0.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -1059,9 +1062,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.6.5"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.9.2"
             },
-            "time": "2023-08-09T08:15:17+00:00"
+            "time": "2023-08-21T16:51:12+00:00"
         }
     ],
     "packages-dev": [
@@ -1950,20 +1953,20 @@
         },
         {
             "name": "psr/container",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/container.git",
-                "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf"
+                "reference": "513e0666f7216c7459170d56df27dfcefe1689ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/8622567409010282b7aeebe4bb841fe98b58dcaf",
-                "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/513e0666f7216c7459170d56df27dfcefe1689ea",
+                "reference": "513e0666f7216c7459170d56df27dfcefe1689ea",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.2.0"
+                "php": ">=7.4.0"
             },
             "type": "library",
             "autoload": {
@@ -1992,9 +1995,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/1.1.1"
+                "source": "https://github.com/php-fig/container/tree/1.1.2"
             },
-            "time": "2021-03-05T17:36:06+00:00"
+            "time": "2021-11-05T16:50:12+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -3938,11 +3941,11 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.3"
+        "php": ">=7.4"
     },
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.3"
+        "php": "7.4"
     },
     "plugin-api-version": "2.3.0"
 }
