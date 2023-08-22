@@ -19,8 +19,8 @@ if ( ! function_exists( 'YOUR_PREFIX_add_or_modify_states' ) ) {
    */
   function YOUR_PREFIX_add_or_modify_states( $states ) {
     $states['XX'] = array(
-      'XX1' => __( 'State 1', 'woocommerce' ),
-      'XX2' => __( 'State 2', 'woocommerce' ),
+      'XX1' => __( 'State 1', 'YOUR-TEXTDOMAIN' ),
+      'XX2' => __( 'State 2', 'YOUR-TEXTDOMAIN' ),
     );
 
     return $states;
