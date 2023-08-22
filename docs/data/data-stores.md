@@ -44,7 +44,7 @@ Your data store can also implement other methods to replace direct queries. For 
 
 Let's look at how we would replace the `WC_Coupon_Data_Store_CPT` class with a `WC_Coupon_Data_Store_Custom_Table` class. Our examples will just provide stub functions, instead of a full working solution. Imagine that we would like to store coupons in a table named `wc_coupons` with the following columns:
 
-```
+```text
 id, code, amount, date_created, date_modified, discount_type, description, date_expires, usage_count,individual_use, product_ids, excluded_product_ids, usage_limit, usage_limit_per_user, limit_usage_to_x_items, free_shipping, product_categories, excluded_product_categories, exclude_sale_items, minimum_amount, maximum_amount, email_restrictions, used_by
 ```
 
