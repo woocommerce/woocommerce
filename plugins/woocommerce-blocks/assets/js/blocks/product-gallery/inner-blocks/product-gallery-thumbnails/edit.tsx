@@ -13,15 +13,16 @@ import './editor.scss';
 import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import type {
 	ProductGalleryThumbnailsBlockAttributes,
-	Context,
+	ProductGalleryContext,
 } from '../../types';
 import { ThumbnailsPosition } from './constants';
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-	context,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > & Context ) => {
+interface EditProps
+	extends BlockEditProps< ProductGalleryThumbnailsBlockAttributes > {
+	context: ProductGalleryContext;
+}
+
+export const Edit = ( { attributes, setAttributes, context }: EditProps ) => {
 	const blockProps = useBlockProps();
 
 	const Placeholder = () => {

@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { PagerDisplayModes } from './inner-blocks/product-gallery-pager/constants';
 import { ThumbnailsPosition } from './inner-blocks/product-gallery-thumbnails/constants';
 
 export interface ProductGalleryBlockAttributes {
@@ -13,6 +14,10 @@ export interface ProductGalleryThumbnailsBlockAttributes {
 	thumbnailsPosition: ThumbnailsPosition;
 	thumbnailsNumberOfThumbnails: number;
 	productGalleryClientId: string;
+}
+
+export interface ProductGalleryPagerBlockAttributes {
+	pagerDisplayMode: PagerDisplayModes;
 }
 
 export interface ProductGalleryBlockEditProps {
@@ -36,10 +41,18 @@ export interface ProductGalleryThumbnailsSettingsProps {
 	context: ProductGalleryThumbnailsBlockAttributes;
 }
 
-export interface Context {
-	context: {
-		thumbnailsPosition: ThumbnailsPosition;
-		thumbnailsNumberOfThumbnails: number;
-		productGalleryClientId: string;
-	};
+export interface ProductGalleryContext {
+	thumbnailsPosition: ThumbnailsPosition;
+	thumbnailsNumberOfThumbnails: number;
+	productGalleryClientId: string;
+	pagerDisplayMode: PagerDisplayModes;
 }
+
+export type ProductGalleryPagerContext = Pick<
+	ProductGalleryContext,
+	'productGalleryClientId' | 'pagerDisplayMode'
+>;
+
+export type ProductGalleryAttributes = ProductGalleryThumbnailsBlockAttributes &
+	ProductGalleryBlockAttributes &
+	ProductGalleryPagerBlockAttributes;
