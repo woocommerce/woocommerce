@@ -16,7 +16,7 @@ import {
 	actions as introActions,
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
-import { events as assemblerHubEvents } from './assembler-hub';
+import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -86,10 +86,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'backToHomescreen',
 				},
 				SELECTED_NEW_THEME: {
-					target: '? Appearance Task ?',
+					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
-					target: '? Appearance Task ?',
+					target: 'appearanceTask',
 				},
 			},
 		},
@@ -114,6 +114,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
+			meta: {
+				component: AssemblerHub,
+			},
 			on: {
 				FINISH_CUSTOMIZATION: {
 					target: 'backToHomescreen',
@@ -121,7 +124,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		backToHomescreen: {},
-		'? Appearance Task ?': {},
+		appearanceTask: {},
 	},
 } );
 

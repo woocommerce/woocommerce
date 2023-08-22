@@ -1,0 +1,142 @@
+/**
+ * External dependencies
+ */
+import classnames from 'classnames';
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/**
+ * WordPress dependencies
+ */
+import { useSelect } from '@wordpress/data';
+import {
+	Button,
+	// @ts-ignore No types for this exist yet.
+	__unstableMotion as motion,
+	// @ts-ignore No types for this exist yet.
+	__unstableAnimatePresence as AnimatePresence,
+	// @ts-ignore No types for this exist yet.
+	__experimentalHStack as HStack,
+} from '@wordpress/components';
+import { useReducedMotion } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
+// @ts-ignore No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
+import { decodeEntities } from '@wordpress/html-entities';
+import { forwardRef } from '@wordpress/element';
+// @ts-ignore No types for this exist yet.
+import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
+
+/**
+ * Internal dependencies
+ */
+import { ADMIN_URL } from '~/utils/admin-settings';
+
+const HUB_ANIMATION_DURATION = 0.3;
+
+export const SiteHub = forwardRef(
+	(
+		{
+			isTransparent,
+			...restProps
+		}: {
+			isTransparent: boolean;
+			className: string;
+			as: string;
+			variants: motion.Variants;
+		},
+		ref
+	) => {
+		const { siteTitle } = useSelect( ( select ) => {
+			// @ts-ignore No types for this exist yet.
+			const { getSite } = select( coreStore );
+
+			return {
+				siteTitle: getSite()?.title,
+			};
+		}, [] );
+
+		const disableMotion = useReducedMotion();
+
+		const siteIconButtonProps = {
+			href: `${ ADMIN_URL }admin.php?page=wc-admin`,
+			label: __( 'Go to WooCommerce Home', 'woocommerce' ),
+		};
+
+		return (
+			<motion.div
+				ref={ ref }
+				{ ...restProps }
+				className={ classnames(
+					'edit-site-site-hub',
+					restProps.className
+				) }
+				initial={ false }
+				transition={ {
+					type: 'tween',
+					duration: disableMotion ? 0 : HUB_ANIMATION_DURATION,
+					ease: 'easeOut',
+				} }
+			>
+				<HStack
+					justify="space-between"
+					alignment="center"
+					className="edit-site-site-hub__container"
+				>
+					<HStack
+						justify="flex-start"
+						className="edit-site-site-hub__text-content"
+						spacing="0"
+					>
+						<motion.div
+							className={ classnames(
+								'edit-site-site-hub__view-mode-toggle-container',
+								{
+									'has-transparent-background': isTransparent,
+								}
+							) }
+							layout
+							transition={ {
+								type: 'tween',
+								duration: disableMotion
+									? 0
+									: HUB_ANIMATION_DURATION,
+								ease: 'easeOut',
+							} }
+						>
+							<Button
+								{ ...siteIconButtonProps }
+								className="edit-site-layout__view-mode-toggle"
+							>
+								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+							</Button>
+						</motion.div>
+
+						<AnimatePresence>
+							<motion.div
+								layout={ false }
+								animate={ {
+									opacity: 1,
+								} }
+								exit={ {
+									opacity: 0,
+								} }
+								className={ classnames(
+									'edit-site-site-hub__site-title',
+									{ 'is-transparent': isTransparent }
+								) }
+								transition={ {
+									type: 'tween',
+									duration: disableMotion ? 0 : 0.2,
+									ease: 'easeOut',
+									delay: 0.1,
+								} }
+							>
+								{ decodeEntities( siteTitle ) }
+							</motion.div>
+						</AnimatePresence>
+					</HStack>
+				</HStack>
+			</motion.div>
+		);
+	}
+);
