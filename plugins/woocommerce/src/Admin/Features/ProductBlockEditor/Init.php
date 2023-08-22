@@ -37,6 +37,8 @@ class Init {
 	private $redirection_controller;
 
 	/**
+	 * Simple product block template.
+	 *
 	 * @var AbstractBlockTemplate
 	 */
 	public $simple_product_template;
@@ -46,11 +48,11 @@ class Init {
 	 */
 	public function __construct() {
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push($this->supported_post_types, 'variable');
+			array_push( $this->supported_post_types, 'variable' );
 		}
 
 		$this->simple_product_template = new SimpleProductTemplate();
-		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
+		$this->redirection_controller  = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
@@ -265,7 +267,7 @@ class Init {
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
 			$args['template_lock'] = 'all';
-			$args['template'] = $this->simple_product_template->get_formatted_template();
+			$args['template']      = $this->simple_product_template->get_formatted_template();
 		}
 		return $args;
 	}

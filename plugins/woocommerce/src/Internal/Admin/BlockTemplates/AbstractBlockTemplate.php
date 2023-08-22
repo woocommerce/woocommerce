@@ -15,7 +15,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	/**
 	 * Get the template ID.
 	 */
-	public abstract function get_id(): string;
+	abstract public function get_id(): string;
 
 	/**
 	 * Get the template title.

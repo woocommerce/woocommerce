@@ -1,18 +1,33 @@
 <?php
+/**
+ * WooCommerce Product Group Block class.
+ */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlock;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
 
-class Group extends AbstractBlock implements ContainerInterface {
+/**
+ * Class for Group block.
+ */
+class Group extends ProductBlock implements ContainerInterface {
 	use BlockContainerTrait;
 
-	function __construct( array $config, $root_template, ContainerInterface &$parent = null ) {
-		parent::__construct( array_merge( array(  'blockName' => 'woocommerce/product-tab' ), $config ), $root_template, $parent );
+	/**
+	 * Group Block constructor.
+	 *
+	 * @param array                   $config The block configuration.
+	 * @param BlockTemplateInterface  $root_template The block template that this block belongs to.
+	 * @param ContainerInterface|null $parent The parent block container.
+	 *
+	 * @throws \ValueError If the block configuration is invalid.
+	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
+	 */
+	public function __construct( array $config, $root_template, ContainerInterface &$parent = null ) {
+		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-tab' ), $config ), $root_template, $parent );
 	}
 
 	/**
@@ -22,16 +37,6 @@ class Group extends AbstractBlock implements ContainerInterface {
 	 */
 	public function add_section( array $block_config ): BlockInterface {
 		$block = new Section( $block_config, $this->get_root_template(), $this );
-		return $this->add_inner_block( $block );
-	}
-
-	/**
-	 * Add a block type to this template.
-	 *
-	 * @param array $block_config The block data.
-	 */
-	public function add_block( array $block_config ): BlockInterface {
-		$block = new Block( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}
 }
