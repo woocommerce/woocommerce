@@ -3,7 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	__experimentalUseCompletion as useCompletion,
@@ -29,23 +29,9 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
+import { translateApiErrors as getApiError } from '../utils/apiErrors';
 
 const DESCRIPTION_MAX_LENGTH = 300;
-
-const getApiError = ( error?: string ) => {
-	switch ( error ) {
-		case 'connection_error':
-			return __(
-				'❗ We were unable to reach the experimental service. Please check back in shortly.',
-				'woocommerce'
-			);
-		default:
-			return __(
-				`❗ We encountered an issue with this experimental feature. Please check back in shortly.`,
-				'woocommerce'
-			);
-	}
-};
 
 const recordDescriptionTracks = recordTracksFactory(
 	'description_completion',
@@ -161,12 +147,16 @@ export function WriteItForMeButtonContainer() {
 			);
 		};
 
-		title?.addEventListener( 'keyup', updateTitleHandler );
-		title?.addEventListener( 'change', updateTitleHandler );
+		// We have to keep track of manually typing, pasting, undo/redo, and when description is generated.
+		const eventsToTrack = [ 'keyup', 'change', 'undo', 'redo', 'paste' ];
+		for ( const event of eventsToTrack ) {
+			title?.addEventListener( event, updateTitleHandler );
+		}
 
 		return () => {
-			title?.removeEventListener( 'keyup', updateTitleHandler );
-			title?.removeEventListener( 'change', updateTitleHandler );
+			for ( const event of eventsToTrack ) {
+				title?.removeEventListener( event, updateTitleHandler );
+			}
 		};
 	}, [ titleEl ] );
 
@@ -281,6 +271,14 @@ export function WriteItForMeButtonContainer() {
 			<WriteItForMeBtn
 				disabled={ ! writeItForMeEnabled }
 				onClick={ onWriteItForMeClick }
+				disabledMessage={ sprintf(
+					/* translators: %d: Message shown when short description button is disabled because of a minimum description length */
+					__(
+						'Please create a product title before generating a description. It must be at least %d characters long.',
+						'woocommerce'
+					),
+					MIN_TITLE_LENGTH_FOR_DESCRIPTION
+				) }
 			/>
 			{ shortDescriptionGenerated && (
 				<InfoModal

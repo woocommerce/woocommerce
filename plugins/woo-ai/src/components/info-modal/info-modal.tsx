@@ -3,6 +3,7 @@
  */
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
+import React from 'react';
 
 /**
  * Internal dependencies

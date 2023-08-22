@@ -4,6 +4,7 @@
 import Tour, { TourStepRendererProps } from '@automattic/tour-kit';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import React from 'react';
 
 type TourSpotlightProps = {
 	onDismiss: () => void;

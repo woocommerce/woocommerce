@@ -1,9 +1,7 @@
 /**
  * External dependencies
  */
-import { dispatch } from '@wordpress/data';
 import { render, createRoot } from '@wordpress/element';
-import { store as preferencesStore } from '@wordpress/preferences';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 /**
@@ -12,24 +10,13 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
 import { WriteShortDescriptionButtonContainer } from './product-short-description';
+import setPreferencesPersistence from './utils/preferencesPersistence';
 
 import './index.scss';
 
-// @todo: move to a utils function or something.
-dispatch( preferencesStore ).setPersistenceLayer( {
-	get: async () => {
-		const savedPreferences = window.localStorage.getItem(
-			'woo-ai-plugin-prefs'
-		);
-		return savedPreferences ? JSON.parse( savedPreferences ) : {};
-	},
-	set: ( preferences ) => {
-		window.localStorage.setItem(
-			'woo-ai-plugin-prefs',
-			JSON.stringify( preferences )
-		);
-	},
-} );
+// This sets up loading and saving the plugin's preferences.
+setPreferencesPersistence();
+
 const queryClient = new QueryClient();
 
 const renderComponent = ( Component, rootElement ) => {

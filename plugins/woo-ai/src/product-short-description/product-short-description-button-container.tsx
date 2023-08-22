@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import {
 	__experimentalUseCompletion as useCompletion,
@@ -13,12 +13,13 @@ import { useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import {
-	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	MIN_DESC_LENGTH_FOR_SHORT_DESC,
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
 import { useTinyEditor } from '../hooks';
 import { getPostId, recordTracksFactory } from '../utils';
+import { translateApiErrors as getApiError } from '../utils/apiErrors';
 
 const recordShortDescriptionTracks = recordTracksFactory(
 	'short_description_completion',
@@ -27,29 +28,13 @@ const recordShortDescriptionTracks = recordTracksFactory(
 	} )
 );
 
-// @todo: refactor this to avoid duplication with product-description-button-container.
-const getApiError = ( error?: string ) => {
-	switch ( error ) {
-		case 'connection_error':
-			return __(
-				'❗ We were unable to reach the experimental service. Please check back in shortly.',
-				'woocommerce'
-			);
-		default:
-			return __(
-				`❗ We encountered an issue with this experimental feature. Please check back in shortly.`,
-				'woocommerce'
-			);
-	}
-};
-
 export function WriteShortDescriptionButtonContainer() {
 	const { createWarningNotice } = useDispatch( 'core/notices' );
 
 	const [ fetching, setFetching ] = useState< boolean >( false );
 	const tinyEditor = useTinyEditor();
-	// @todo: does this actually work?
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
+	const [ postContent, setPostContent ] = useState( '' );
 
 	const handleUseCompletionError = ( err: UseCompletionError ) => {
 		createWarningNotice( getApiError( err.code ?? '' ) );
@@ -79,9 +64,27 @@ export function WriteShortDescriptionButtonContainer() {
 		recordShortDescriptionTracks( 'view_button' );
 	}, [] );
 
-	// @todo: what should be the minimum description length rather than hard-coded 50? add a new constant.
+	// This effect sets up the 'init' listener to update the 'isEditorReady' state
+	useEffect( () => {
+		const editor = tinyEditor.getEditorObject();
+		if ( editor ) {
+			// Set the content on initial page load.
+			setPostContent( tinyEditor.getContent() );
+			// Register a listener for the tinyMCE editor to update the postContent state.
+			const changeHandler = () => {
+				setPostContent( tinyEditor.getContent() );
+			};
+			editor.on( 'input', changeHandler );
+			editor.on( 'change', changeHandler );
+			return () => {
+				editor.off( 'input', changeHandler );
+				editor.off( 'change', changeHandler );
+			};
+		}
+	}, [ tinyEditor ] );
+
 	const writeItForMeEnabled =
-		! fetching && tinyEditor.getContent().length >= 0;
+		! fetching && postContent.length >= MIN_DESC_LENGTH_FOR_SHORT_DESC;
 
 	const buildPrompt = (): string => {
 		return [
@@ -117,6 +120,14 @@ export function WriteShortDescriptionButtonContainer() {
 		<WriteItForMeBtn
 			disabled={ ! writeItForMeEnabled }
 			onClick={ onWriteItForMeClick }
+			disabledMessage={ sprintf(
+				/* translators: %d: Message shown when short description button is disabled because of a minimum description length */
+				__(
+					'Please write a product description before generating a short description. It must be at least %d characters long.',
+					'woocommerce'
+				),
+				MIN_DESC_LENGTH_FOR_SHORT_DESC
+			) }
 		/>
 	);
 }

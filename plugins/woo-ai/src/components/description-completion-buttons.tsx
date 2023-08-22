@@ -2,19 +2,22 @@
  * External dependencies
  */
 import React from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
 
 type MagicButtonProps = {
 	title?: string;
 	disabled?: boolean;
 	onClick: () => void;
 	label: string;
+};
+
+type WriteItForMeBtnProps = MagicButtonProps & {
+	disabledMessage?: string;
 };
 
 const MagicButton = ( {
@@ -40,24 +43,14 @@ const MagicButton = ( {
 export const WriteItForMeBtn = ( {
 	disabled,
 	onClick,
-}: Omit< MagicButtonProps, 'title' | 'label' > ) => {
+	disabledMessage,
+}: Omit< WriteItForMeBtnProps, 'title' | 'label' > ) => {
 	return (
 		<MagicButton
 			disabled={ disabled }
 			onClick={ onClick }
 			label={ __( 'Write with AI', 'woocommerce' ) }
-			title={
-				disabled
-					? sprintf(
-							/* translators: %d: Minimum characters for product title */
-							__(
-								'Please create a product title before generating a description. It must be %d characters or longer.',
-								'woocommerce'
-							),
-							MIN_TITLE_LENGTH_FOR_DESCRIPTION
-					  )
-					: undefined
-			}
+			title={ disabled ? disabledMessage : undefined }
 		/>
 	);
 };
@@ -71,7 +64,7 @@ export const StopCompletionBtn = ( {
 			disabled={ disabled }
 			onClick={ onClick }
 			label={ __( 'Stop writing…', 'woocommerce' ) }
-			title={ __( 'Stop generating the description.', 'woocommerce' ) }
+			title={ __( 'Stop generating content.', 'woocommerce' ) }
 		/>
 	);
 };
