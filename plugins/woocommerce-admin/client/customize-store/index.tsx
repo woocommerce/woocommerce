@@ -121,6 +121,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				FINISH_CUSTOMIZATION: {
 					target: 'backToHomescreen',
 				},
+				GO_BACK_TO_DESIGN_WITH_AI: {
+					target: 'designWithAi',
+				},
 			},
 		},
 		backToHomescreen: {},

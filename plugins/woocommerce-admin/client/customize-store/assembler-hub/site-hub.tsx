@@ -1,15 +1,12 @@
+// Reference: https://github.com/WordPress/gutenberg/blob/v16.4.0/packages/edit-site/src/components/site-hub/index.js
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import classnames from 'classnames';
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/**
- * WordPress dependencies
- */
 import { useSelect } from '@wordpress/data';
 import {
-	Button,
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 	// @ts-ignore No types for this exist yet.
@@ -18,7 +15,6 @@ import {
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
 import { useReducedMotion } from '@wordpress/compose';
-import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -29,7 +25,6 @@ import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
 /**
  * Internal dependencies
  */
-import { ADMIN_URL } from '~/utils/admin-settings';
 
 const HUB_ANIMATION_DURATION = 0.3;
 
@@ -56,11 +51,6 @@ export const SiteHub = forwardRef(
 		}, [] );
 
 		const disableMotion = useReducedMotion();
-
-		const siteIconButtonProps = {
-			href: `${ ADMIN_URL }admin.php?page=wc-admin`,
-			label: __( 'Go to WooCommerce Home', 'woocommerce' ),
-		};
 
 		return (
 			<motion.div
@@ -103,12 +93,7 @@ export const SiteHub = forwardRef(
 								ease: 'easeOut',
 							} }
 						>
-							<Button
-								{ ...siteIconButtonProps }
-								className="edit-site-layout__view-mode-toggle"
-							>
-								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
-							</Button>
+							<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
 						</motion.div>
 
 						<AnimatePresence>

@@ -1,9 +1,11 @@
+// Reference: https://github.com/WordPress/gutenberg/blob/v16.4.0/packages/edit-site/src/components/sidebar-navigation-screen/index.js
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import classnames from 'classnames';
+import { useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
@@ -26,8 +28,7 @@ import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-
 /**
  * Internal dependencies
  */
-import { ADMIN_URL } from '~/utils/admin-settings';
-
+import { CustomizeStoreContext } from '../';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -49,6 +50,7 @@ export const SidebarNavigationScreen = ( {
 	description?: React.ReactNode;
 	backPath?: string;
 } ) => {
+	const { sendEvent } = useContext( CustomizeStoreContext );
 	const location = useLocation();
 	const navigator = useNavigator();
 	const icon = isRTL() ? chevronRight : chevronLeft;
@@ -90,12 +92,12 @@ export const SidebarNavigationScreen = ( {
 					) }
 					{ isRoot && (
 						<SidebarButton
+							onClick={ () => {
+								sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
+							} }
 							icon={ icon }
-							label={ __(
-								'Go to WooCommerce Home',
-								'woocommerce'
-							) }
-							href={ `${ ADMIN_URL }/admin.php?page=wc-admin` }
+							label={ __( 'Back', 'woocommerce' ) }
+							showTooltip={ false }
 						/>
 					) }
 					<Heading

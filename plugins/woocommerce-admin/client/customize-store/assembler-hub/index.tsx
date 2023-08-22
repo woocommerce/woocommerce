@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, createContext } from '@wordpress/element';
 import { dispatch, useDispatch } from '@wordpress/data';
 import {
 	__experimentalFetchLinkSuggestions as fetchLinkSuggestions,
@@ -43,9 +43,21 @@ import './style.scss';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
-export type events = { type: 'FINISH_CUSTOMIZATION' };
+type CustomizeStoreComponentProps = Parameters< CustomizeStoreComponent >[ 0 ];
 
-export const AssemblerHub: CustomizeStoreComponent = () => {
+export const CustomizeStoreContext = createContext< {
+	sendEvent: CustomizeStoreComponentProps[ 'sendEvent' ];
+	context: Partial< CustomizeStoreComponentProps[ 'context' ] >;
+} >( {
+	sendEvent: () => {},
+	context: {},
+} );
+
+export type events =
+	| { type: 'FINISH_CUSTOMIZATION' }
+	| { type: 'GO_BACK_TO_DESIGN_WITH_AI' };
+
+export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const { setCanvasMode } = unlock( useDispatch( editSiteStore ) );
 
 	useEffect( () => {
@@ -117,12 +129,14 @@ export const AssemblerHub: CustomizeStoreComponent = () => {
 	}, [ setCanvasMode ] );
 
 	return (
-		<ShortcutProvider style={ { height: '100%' } }>
-			<GlobalStylesProvider>
-				<RouterProvider>
-					<Layout />
-				</RouterProvider>
-			</GlobalStylesProvider>
-		</ShortcutProvider>
+		<CustomizeStoreContext.Provider value={ props }>
+			<ShortcutProvider style={ { height: '100%' } }>
+				<GlobalStylesProvider>
+					<RouterProvider>
+						<Layout />
+					</RouterProvider>
+				</GlobalStylesProvider>
+			</ShortcutProvider>
+		</CustomizeStoreContext.Provider>
 	);
 };

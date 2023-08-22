@@ -85,8 +85,13 @@
 	}
 
 	.edit-site-sidebar-navigation-screen__title-icon,
-	.edit-site-site-hub__view-mode-toggle-container {
+	.edit-site-site-hub__view-mode-toggle-container,
+	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
 		background-color: #fcfcfc;
+	}
+
+	.edit-site-site-icon__image {
+		border-radius: 2px;
 	}
 
 	.edit-site-site-hub__site-title {

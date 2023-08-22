@@ -4,9 +4,10 @@
 /**
  * External dependencies
  */
+import { useContext } from '@wordpress/element';
+
 import { useSelect, useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
-
 import { Button, __experimentalHStack as HStack } from '@wordpress/components';
 import { __, sprintf, _n } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
@@ -24,6 +25,11 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import SaveButton from '@wordpress/edit-site/build-module/components/save-button';
 
+/**
+ * Internal dependencies
+ */
+import { CustomizeStoreContext } from '../';
+
 const { useLocation } = unlock( routerPrivateApis );
 
 const PUBLISH_ON_SAVE_ENTITIES = [
@@ -36,6 +42,7 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 export const SaveHub = () => {
 	const saveNoticeId = 'site-edit-save-notice';
 	const { params } = useLocation();
+	const { sendEvent } = useContext( CustomizeStoreContext );
 
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
@@ -189,7 +196,9 @@ export const SaveHub = () => {
 			return (
 				<Button
 					variant="primary"
-					onClick={ saveCurrentEntity }
+					onClick={ () => {
+						sendEvent( 'FINISH_CUSTOMIZATION' );
+					} }
 					className="edit-site-save-hub__button"
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize

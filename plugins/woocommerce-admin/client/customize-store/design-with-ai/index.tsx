@@ -9,7 +9,7 @@ export const DesignWithAi: CustomizeStoreComponent = ( { sendEvent } ) => {
 		<>
 			<h1>Design with AI</h1>
 			<button onClick={ () => sendEvent( { type: 'THEME_SUGGESTED' } ) }>
-				Back to intro
+				Assembler Hub
 			</button>
 		</>
 	);
