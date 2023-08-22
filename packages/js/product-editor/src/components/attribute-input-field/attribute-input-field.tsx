@@ -108,7 +108,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					.startsWith( inputValue.toLowerCase() )
 		);
 
-		if ( inputValue.length > 0 ) {
+		if (
+			inputValue.length > 0 &&
+			( createNewAttributesAsGlobal ||
+				! allItems.find(
+					( item ) =>
+						item.name.toLowerCase() === inputValue.toLowerCase()
+				) )
+		) {
 			return [
 				...filteredItems,
 				{

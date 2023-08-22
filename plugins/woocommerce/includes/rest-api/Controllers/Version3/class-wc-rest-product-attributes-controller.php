@@ -63,7 +63,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 		$generate_slug = stripslashes( $request['generate_slug'] );
 		$slug          = wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) );
 
-		if ( ! empty( $generate_slug ) ) {
+		if ( ! empty( $generate_slug ) && 'true' === $generate_slug ) {
 			$slug = $this->generate_unique_slug( $request['name'] );
 		}
 
