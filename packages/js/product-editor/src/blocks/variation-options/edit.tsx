@@ -139,6 +139,9 @@ export function Edit() {
 						product_block_variable_options_notice_dismissed: 'yes',
 					} )
 				}
+				disabledAttributeIds={ entityAttributes
+					.filter( ( attr ) => ! attr.variation )
+					.map( ( attr ) => attr.id ) }
 				uiStrings={ {
 					notice,
 					globalAttributeHelperMessage: '',
