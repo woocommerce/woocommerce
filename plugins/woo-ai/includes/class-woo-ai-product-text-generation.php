@@ -89,7 +89,6 @@ class Woo_AI_Product_Text_Generation {
 	 * @param String $editor_id Editor Id.
 	 */
 	public function add_short_description_gpt_button( $editor_id ) {
-		// Check if this is the excerpt editor
 		if ( 'excerpt' !== $editor_id || ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) ) {
 			return;
 		}
