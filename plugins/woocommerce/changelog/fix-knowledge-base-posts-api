@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixes WooCommerce knowledge base API returning empty posts.

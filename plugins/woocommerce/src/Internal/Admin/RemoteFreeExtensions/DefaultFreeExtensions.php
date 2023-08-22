@@ -885,9 +885,9 @@ class DefaultFreeExtensions {
 				'install_priority' => 3,
 			),
 			'jetpack'                       => array(
-				'label'            => __( 'Enhance security with Jetpack', 'woocommerce' ),
+				'label'            => __( 'Boost content creation with Jetpack AI Assistant', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-jetpack.svg', WC_PLUGIN_FILE ),
-				'description'      => __( 'Get auto real-time backups, malware scans, and spam protection.', 'woocommerce' ),
+				'description'      => __( 'Save time on content creation — unlock high-quality blog posts and pages using AI.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/jetpack',
 				'install_priority' => 8,
 			),

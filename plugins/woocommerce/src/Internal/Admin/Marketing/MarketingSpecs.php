@@ -136,34 +136,41 @@ class MarketingSpecs {
 	/**
 	 * Load knowledge base posts from WooCommerce.com
 	 *
-	 * @param string|null $category Category of posts to retrieve.
+	 * @param string|null $term Term of posts to retrieve.
 	 * @return array
 	 */
-	public function get_knowledge_base_posts( ?string $category ): array {
-		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT;
-
-		$categories = array(
-			'marketing' => 1744,
-			'coupons'   => 25202,
+	public function get_knowledge_base_posts( ?string $term ): array {
+		$terms = array(
+			'marketing' => array(
+				'taxonomy' => 'category',
+				'term_id'  => 1744,
+				'argument' => 'categories',
+			),
+			'coupons'   => array(
+				'taxonomy' => 'post_tag',
+				'term_id'  => 1377,
+				'argument' => 'tags',
+			),
 		);
 
-		// Default to marketing category (if no category set on the kb component).
-		if ( ! empty( $category ) && array_key_exists( $category, $categories ) ) {
-			$category_id  = $categories[ $category ];
-			$kb_transient = $kb_transient . '_' . strtolower( $category );
-		} else {
-			$category_id = $categories['marketing'];
+		// Default to the marketing category (if no term is set on the kb component).
+		if ( empty( $term ) || ! array_key_exists( $term, $terms ) ) {
+			$term = 'marketing';
 		}
+
+		$term_id      = $terms[ $term ]['term_id'];
+		$argument     = $terms[ $term ]['argument'];
+		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT . '_' . strtolower( $term );
 
 		$posts = get_transient( $kb_transient );
 
 		if ( false === $posts ) {
 			$request_url = add_query_arg(
 				array(
-					'categories' => $category_id,
-					'page'       => 1,
-					'per_page'   => 8,
-					'_embed'     => 1,
+					$argument  => $term_id,
+					'page'     => 1,
+					'per_page' => 8,
+					'_embed'   => 1,
 				),
 				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
 			);

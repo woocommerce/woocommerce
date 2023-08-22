@@ -158,6 +158,9 @@ export function Edit( {
 					selectedAttributeIds={ variationOptions.map(
 						( attr ) => attr.id
 					) }
+					disabledAttributeIds={ productAttributes
+						.filter( ( attr ) => ! attr.variation )
+						.map( ( attr ) => attr.id ) }
 				/>
 			) }
 		</div>
