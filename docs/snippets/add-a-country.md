@@ -14,7 +14,7 @@ if ( ! function_exists( 'YOUR_PREFIX_add_country_to_countries_list' ) ) {
    */
   function YOUR_PREFIX_add_country_to_countries_list( $countries ) {
     $new_countries = array(
-      'NIRE'  => __( 'Northern Ireland', 'woocommerce' ),
+      'NIRE'  => __( 'Northern Ireland', 'YOUR-TEXTDOMAIN' ),
     );
 
     return array_merge( $countries, $new_countries );
