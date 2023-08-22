@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
@@ -13,7 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
 /**
  * Class for Group block.
  */
-class Group extends ProductBlock implements ContainerInterface {
+class Group extends ProductBlock implements GroupInterface {
 	use BlockContainerTrait;
 
 	/**
@@ -35,7 +34,7 @@ class Group extends ProductBlock implements ContainerInterface {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_section( array $block_config ): BlockInterface {
+	public function add_section( array $block_config ): SectionInterface {
 		$block = new Section( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}

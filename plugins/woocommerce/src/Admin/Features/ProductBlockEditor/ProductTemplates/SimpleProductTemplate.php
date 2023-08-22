@@ -6,12 +6,13 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 
 /**
  * Simple Product Template.
  */
-class SimpleProductTemplate extends AbstractBlockTemplate {
+class SimpleProductTemplate extends AbstractBlockTemplate implements ProductFormTemplateInterface {
 
 	/**
 	 * SimpleProductTemplate constructor.
@@ -49,11 +50,38 @@ class SimpleProductTemplate extends AbstractBlockTemplate {
 	}
 
 	/**
+	 * Get a group block by ID.
+	 *
+	 * @param string $group_id The group block ID.
+	 */
+	public function get_group_by_id( string $group_id ): ?GroupInterface {
+		return $this->get_block( $group_id );
+	}
+
+	/**
+	 * Get a section block by ID.
+	 *
+	 * @param string $section_id The section block ID.
+	 */
+	public function get_section_by_id( string $section_id ): ?SectionInterface {
+		return $this->get_block( $section_id );
+	}
+
+	/**
+	 * Get a block by ID.
+	 *
+	 * @param string $block_id The block block ID.
+	 */
+	public function get_block_by_id( string $block_id ): ?BlockInterface {
+		return $this->get_block( $block_id );
+	}
+
+	/**
 	 * Add a custom block type to this template.
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_group( array $block_config ) {
+	public function add_group( array $block_config ): GroupInterface {
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}
