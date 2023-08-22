@@ -25,5 +25,4 @@ if ( ! function_exists( 'YOUR_PREFIX_change_currency_symbol' ) ) {
   }
   add_filter( 'woocommerce_currency_symbol', 'YOUR_PREFIX_change_currency_symbol', 10, 2 );  
 }
-
 ```
