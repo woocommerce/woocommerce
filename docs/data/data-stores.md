@@ -52,7 +52,7 @@ These column names match 1 to 1 with prop names.
 
 First we would need to create a new data store class to contain our logic:
 
-```
+```php
 /**
  * WC Coupon Data Store: Custom Table.
  */
@@ -65,7 +65,7 @@ Note that we implement the main `WC_Object_Data_Store_Interface` interface as we
 
 We would then define the CRUD handling for these properties:
 
-```
+```php
 /**
  * Method to create a new coupon in the database.
  *
@@ -167,7 +167,7 @@ As mentioned in the structure section, we are responsible for implementing the m
 
 A coupons replacement would look like the following:
 
-```
+```php
 /**
  * Increase usage count for current coupon.
  * 
@@ -221,7 +221,7 @@ public function get_usage_by_user_id( &$coupon, $user_id ) {
 
 Once all the data store methods are defined and logic written, we need to tell WooCommerce to load our new class instead of the built-in class. This is done using the `woocommerce_data_stores` filter. An array of data store slugs is mapped to default WooCommerce classes. Example:
 
-```
+```php
 'coupon'              => 'WC_Coupon_Data_Store_CPT',
 'customer'            => 'WC_Customer_Data_Store',
 'customer-download'   => 'WC_Customer_Download_Data_Store',
@@ -244,7 +244,7 @@ Once all the data store methods are defined and logic written, we need to tell W
 
 We specifically want to target the coupon data store, so we would do something like this:
 
-```
+```php
 function myplugin_set_wc_coupon_data_store( $stores ) {
 	$stores['coupon'] = 'WC_Coupon_Data_Store_Custom_Table';
 	return $stores;
@@ -275,7 +275,7 @@ The [shipping zone data store](https://github.com/woocommerce/woocommerce/blob/t
 
 All you need to do to register your data store is add it to the `woocommerce_data_stores` filter:
 
-```
+```php
 function myplugin_set_my_custom_data_store( $stores ) {
 	$stores['mycustomdata'] = 'WC_My_Custom_Data_Store';
 	return $stores;
@@ -290,7 +290,7 @@ You can then load your data store like any other WooCommerce data store.
 
 Calling a data store is as simple as using the static `WC_Data_Store::load()` method:
 
-```
+```php
 // Load the shipping zone data store.
 $data_store = WC_Data_Store::load( 'shipping-zone' );
 // Get the number of shipping methods for zone ID 4.
@@ -299,14 +299,14 @@ $num_of_methods = $data_store->get_method_count( 4 );
 
 You can also chain methods:
 
-```
+```php
 // Get the number of shipping methods for zone ID 4.
 $num_of_methods = WC_Data_Store::load( 'shipping-zone' )->get_method_count( 4 );
 ```
 
 The `::load()` method works for any data store registered to `woocommerce_data_stores`, so you could load your custom data store:
 
-```
+```php
 $data_store = WC_Data_Store::load( 'mycustomdata' );
 ```
 
