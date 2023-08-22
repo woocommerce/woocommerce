@@ -95,6 +95,7 @@
 		font-style: normal;
 		font-weight: 500;
 		line-height: 20px; /* 153.846% */
+		margin: 0;
 	}
 
 	.edit-site-sidebar-navigation-screen__title {
@@ -145,6 +146,7 @@
 		align-items: center;
 		gap: 8px;
 		align-self: stretch;
+		width: 348px;
 
 		&:hover {
 			background: #ededed;
