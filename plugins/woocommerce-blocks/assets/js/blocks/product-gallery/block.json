@@ -15,7 +15,8 @@
 	"providesContext": {
 		"thumbnailsPosition": "thumbnailsPosition",
 		"thumbnailsNumberOfThumbnails": "thumbnailsNumberOfThumbnails",
-		"productGalleryClientId": "productGalleryClientId"
+		"productGalleryClientId": "productGalleryClientId",
+		"pagerDisplayMode": "pagerDisplayMode"
 	},
 	"attributes": {
 		"thumbnailsPosition": {
@@ -25,6 +26,10 @@
 		"thumbnailsNumberOfThumbnails": {
 			"type": "number",
 			"default": 3
+		},
+		"pagerDisplayMode": {
+			"type": "string",
+			"default": "dots"
 		},
 		"productGalleryClientId": {
 			"type": "string",
