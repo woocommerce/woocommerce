@@ -84,7 +84,7 @@ jQuery( function( $ ) {
 		Cookies.set( 'woocommerce_geo_hash', hash, { expires: 1 / 24 } );
 
 		const urlQuery     = new URL( window.location ).searchParams;
-		const existingHash = urlQuery.get( 'v' )
+		const existingHash = urlQuery.get( 'v' );
 
 		// If the current URL does not contain the expected hash, redirect.
 		if ( existingHash !== hash ) {
