@@ -319,7 +319,7 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
 		pages.push( {
 			container: CustomizeStore,
-			path: '/customize-store',
+			path: '/customize-store/*',
 			breadcrumbs: [
 				...initialBreadcrumbs,
 				__( 'Customize Your Store', 'woocommerce' ),
