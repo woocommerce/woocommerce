@@ -106,11 +106,11 @@
 	}
 
 	/* Sidebar */
-	.edit-site-layout__sidebar {
-		.edit-site-layout__sidebar-region {
-			width: 380px;
-		}
+	.edit-site-layout__sidebar-region {
+		width: 380px;
+	}
 
+	.edit-site-layout__sidebar {
 		.edit-site-sidebar__content > div {
 			padding: 0 16px;
 			overflow-x: hidden;
