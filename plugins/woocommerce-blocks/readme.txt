@@ -81,6 +81,26 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 10.9.2 - 2023-08-21 =
+
+#### Bug Fixes
+
+- Load Interactivity API in `bootstrap.php`. ([10657](https://github.com/woocommerce/woocommerce-blocks/pull/10657))
+- Add to Cart button: fix the layout of View Cart link showing after adding product to cart. ([10675](https://github.com/woocommerce/woocommerce-blocks/pull/10675))
+- Fixed checkout and cart page migration routine for users of block themes so that block templates are also migrated. ([10641](https://github.com/woocommerce/woocommerce-blocks/pull/10641))
+- Fixed a bug causing Cart and Checkout Blocks to be used by default instead of shortcode versions on WC updates. ([10608](https://github.com/woocommerce/woocommerce-blocks/pull/10608))
+
+= 10.9.1 - 2023-08-17 =
+
+#### Enhancements
+
+- Update WooCommerce Blocks brand assets. ([10622](https://github.com/woocommerce/woocommerce-blocks/pull/10622))
+
+#### Bug Fixes
+
+- Fix "On sale" badge class. ([10634](https://github.com/woocommerce/woocommerce-blocks/pull/10634))
+- Remove client side navigation from Products beta block. ([10636](https://github.com/woocommerce/woocommerce-blocks/pull/10636))
+
 = 10.9.0 - 2023-08-14 =
 
 #### Enhancements
