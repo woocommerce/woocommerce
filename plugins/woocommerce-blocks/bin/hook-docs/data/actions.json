@@ -604,46 +604,6 @@
             "args": 3
         },
         {
-            "name": "woocommerce_rest_checkout_process_payment_with_context",
-            "file": "StoreApi/Routes/V1/Checkout.php",
-            "type": "action_reference",
-            "doc": {
-                "description": "Process payment with context.",
-                "long_description": "",
-                "tags": [
-                    {
-                        "name": "hook",
-                        "content": "woocommerce_rest_checkout_process_payment_with_context"
-                    },
-                    {
-                        "name": "throws",
-                        "content": "If there is an error taking payment, an \\Exception object can be thrown with an error message.",
-                        "types": [
-                            "\\Exception"
-                        ]
-                    },
-                    {
-                        "name": "param",
-                        "content": "Holds context for the payment, including order ID and payment method.",
-                        "types": [
-                            "\\Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentContext"
-                        ],
-                        "variable": "$context"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Result object for the transaction.",
-                        "types": [
-                            "\\Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult"
-                        ],
-                        "variable": "$payment_result"
-                    }
-                ],
-                "long_description_html": ""
-            },
-            "args": 1
-        },
-        {
             "name": "woocommerce_shop_loop",
             "file": "BlockTypes/ClassicTemplate.php",
             "type": "action",
@@ -815,6 +775,40 @@
         },
         {
             "name": "woocommerce_store_api_checkout_order_processed",
+            "file": "StoreApi/Routes/V1/CheckoutOrder.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before an order is processed by the Checkout Block/Store API.",
+                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/checkout-order-processed.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_checkout_order_processed",
             "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "action",
             "doc": {
@@ -849,7 +843,7 @@
         },
         {
             "name": "woocommerce_store_api_checkout_update_customer_from_request",
-            "file": "StoreApi/Routes/V1/Checkout.php",
+            "file": "StoreApi/Routes/V1/CheckoutOrder.php",
             "type": "action",
             "doc": {
                 "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
@@ -881,24 +875,24 @@
             "args": 2
         },
         {
-            "name": "woocommerce_store_api_checkout_update_order_from_request",
+            "name": "woocommerce_store_api_checkout_update_customer_from_request",
             "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "action",
             "doc": {
-                "description": "Fires when the Checkout Block/Store API updates an order's from the API request data.",
-                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.",
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
                 "tags": [
                     {
                         "name": "since",
-                        "content": "7.2.0"
+                        "content": "8.2.0"
                     },
                     {
                         "name": "param",
-                        "content": "Order object.",
+                        "content": "Customer object.",
                         "types": [
-                            "\\WC_Order"
+                            "\\WC_Customer"
                         ],
-                        "variable": "$order"
+                        "variable": "$customer"
                     },
                     {
                         "name": "param",
@@ -909,7 +903,7 @@
                         "variable": "$request"
                     }
                 ],
-                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.</p>"
+                "long_description_html": ""
             },
             "args": 2
         },
