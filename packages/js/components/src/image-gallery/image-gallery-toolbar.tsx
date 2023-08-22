@@ -2,17 +2,25 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
+import {
+	Toolbar,
+	ToolbarButton,
+	ToolbarGroup,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	// eslint-disable-next-line @woocommerce/dependency-group
+	ToolbarItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { CoverImageIcon } from './icons';
 import { SortableHandle } from '../sortable';
 import { MediaUploadComponentType } from './types';
+import { ImageGalleryToolbarDropdown } from './image-gallery-toolbar-dropdown';
 
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
@@ -88,31 +96,60 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarGroup>
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
-							icon={ CoverImageIcon }
 							label={ __( 'Set as cover', 'woocommerce' ) }
+						>
+							{ __( 'Set as cover', 'woocommerce' ) }
+						</ToolbarButton>
+					</ToolbarGroup>
+				) }
+				{ isCoverItem && (
+					<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
+						<MediaUploadComponent
+							onSelect={ ( media ) =>
+								replaceItem( childIndex, media as MediaItem )
+							}
+							allowedTypes={ [ 'image' ] }
+							render={ ( { open } ) => (
+								<ToolbarButton onClick={ open }>
+									{ __( 'Replace', 'woocommerce' ) }
+								</ToolbarButton>
+							) }
 						/>
 					</ToolbarGroup>
 				) }
-				<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
-					<MediaUploadComponent
-						onSelect={ ( media ) =>
-							replaceItem( childIndex, media as MediaItem )
-						}
-						allowedTypes={ [ 'image' ] }
-						render={ ( { open } ) => (
-							<ToolbarButton onClick={ open }>
-								{ __( 'Replace', 'woocommerce' ) }
-							</ToolbarButton>
-						) }
-					/>
-				</ToolbarGroup>
-				<ToolbarGroup>
-					<ToolbarButton
-						onClick={ () => removeItem( childIndex ) }
-						icon={ trash }
-						label={ __( 'Remove', 'woocommerce' ) }
-					/>
-				</ToolbarGroup>
+				{ isCoverItem && (
+					<ToolbarGroup>
+						<ToolbarButton
+							onClick={ () => removeItem( childIndex ) }
+							icon={ trash }
+							label={ __( 'Remove', 'woocommerce' ) }
+						/>
+					</ToolbarGroup>
+				) }
+				{ ! isCoverItem && (
+					<ToolbarGroup>
+						<ToolbarItem>
+							{ ( toggleProps: {
+								'data-toolbar-item': boolean;
+								ref: React.ForwardedRef<
+									typeof ImageGalleryToolbarDropdown
+								>;
+							} ) => (
+								<ImageGalleryToolbarDropdown
+									canRemove={ true }
+									onRemove={ () => removeItem( childIndex ) }
+									onReplace={ ( media ) =>
+										replaceItem( childIndex, media )
+									}
+									MediaUploadComponent={
+										MediaUploadComponent
+									}
+									{ ...toggleProps }
+								/>
+							) }
+						</ToolbarItem>
+					</ToolbarGroup>
+				) }
 			</Toolbar>
 		</div>
 	);

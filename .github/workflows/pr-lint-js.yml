@@ -1,0 +1,54 @@
+name: Lint JS packages
+
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+    lint-test-js:
+        name: Lint
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+            # This is required to allow the action to annotate the PR with the linting results.
+            checks: write
+            pull-requests: read
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.6.7'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  # ignore scripts is faster, and postinstall should not be needed for lint.
+                  pnpm install --ignore-scripts
+
+            - name: Lint
+              run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
+              continue-on-error: true
+
+            - name: Collect and Combine Eslint Reports
+              run: node ./.github/workflows/scripts/collect-eslint-reports.js
+
+            - name: Annotate Code Linting Results
+              uses: ataylorme/eslint-annotate-action@a1bf7cb320a18aa53cb848a267ce9b7417221526
+
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  report-json: 'combined_eslint_report.json'

@@ -9,6 +9,8 @@ module.exports = {
 		'../../../packages/js/components/src/**/stories/*.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/experimental components
 		'../../../packages/js/experimental/src/**/stories/*.@(js|tsx)',
+		// WooCommerce Admin / @woocommerce/onboarding components
+		'../../../packages/js/onboarding/src/**/stories/*.@(js|tsx)',
 		'../../../plugins/woocommerce-admin/client/**/stories/*.@(js|tsx)',
 	],
 	addons: [
@@ -44,11 +46,13 @@ module.exports = {
 				? `
 			<link href="experimental-css/style-rtl.css" rel="stylesheet" />
 			<link href="component-css/style-rtl.css" rel="stylesheet" />
+			<link href="onboarding-css/style-rtl.css" rel="stylesheet" />
 			<link href="app-css/style-rtl.css" rel="stylesheet" />
 			`
 				: `
 			<link href="component-css/style.css" rel="stylesheet" />
 			<link href="experimental-css/style.css" rel="stylesheet" />
+			<link href="onboarding-css/style.css" rel="stylesheet" />
 			<link href="app-css/style.css" rel="stylesheet" />
 			`
 		}

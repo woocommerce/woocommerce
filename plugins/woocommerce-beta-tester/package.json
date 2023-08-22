@@ -7,7 +7,7 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.2.1",
+	"version": "2.2.2",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
 		"@types/react": "^17.0.2",
@@ -21,7 +21,7 @@
 		"eslint": "^8.32.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.4.1",
-		"typescript": "^4.9.5",
+		"typescript": "^5.1.6",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
@@ -50,6 +50,9 @@
 			"js": "assets/js/*.js"
 		}
 	},
+  "config": {
+    "build_step": "pnpm run build:zip"
+  },
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
@@ -64,6 +67,8 @@
 		"format:js": "wp-scripts format-js",
 		"lint:css": "wp-scripts lint-style",
 		"lint:css:fix": "wp-scripts lint-style --fix",
+		"lint:php": "composer run-script phpcs",
+		"lint:php:fix": "composer run-script phpcbf",
 		"lint:js": "wp-scripts lint-js",
 		"lint:js:fix": "wp-scripts lint-js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",

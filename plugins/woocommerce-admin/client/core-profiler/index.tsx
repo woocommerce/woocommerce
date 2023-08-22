@@ -38,6 +38,7 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import { findComponentMeta } from '~/utils/xstate/find-component';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -52,9 +53,9 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { Loader } from './pages/Loader';
+import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug } from '~/utils';
+import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -64,7 +65,7 @@ import {
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
-import { findComponentMeta } from './utils/find-component';
+import { ComponentMeta } from './types';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -107,7 +108,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
+		pluginsShown: string[];
+		pluginsSelected: string[];
+		pluginsUnselected: string[];
 	};
 };
 
@@ -185,6 +188,9 @@ export type CoreProfilerStateMachineContext = {
 	};
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
+	persistBusinessInfoRef?: ReturnType< typeof spawn >;
+	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
+	spawnGeolocationRef?: ReturnType< typeof spawn >;
 };
 
 const getAllowTrackingOption = async () =>
@@ -338,25 +344,42 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url + '&installed_ext_success=1';
-};
+	const url = new URL( event.data.url );
+	url.searchParams.set( 'installed_ext_success', '1' );
+	const selectedPlugin = _context.pluginsSelected.find(
+		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	);
 
-const updateTrackingOption = (
-	_context: CoreProfilerStateMachineContext,
-	event: IntroOptInEvent
-) => {
-	if (
-		event.payload.optInDataSharing &&
-		typeof window.wcTracks.enable === 'function'
-	) {
-		window.wcTracks.enable( () => {
-			initializeExPlat();
-		} );
-	} else if ( ! event.payload.optInDataSharing ) {
-		window.wcTracks.isEnabled = false;
+	if ( selectedPlugin ) {
+		const pluginName =
+			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
+		url.searchParams.set( 'plugin_name', pluginName );
 	}
 
-	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	window.location.href = url.toString();
+};
+
+const updateTrackingOption = async (
+	context: CoreProfilerStateMachineContext
+) => {
+	await new Promise< void >( ( resolve ) => {
+		if (
+			context.optInDataSharing &&
+			typeof window.wcTracks.enable === 'function'
+		) {
+			window.wcTracks.enable( () => {
+				initializeExPlat();
+				resolve(); // resolve the promise only after explat is enabled by the callback
+			} );
+		} else {
+			if ( ! context.optInDataSharing ) {
+				window.wcTracks.isEnabled = false;
+			}
+			resolve();
+		}
+	} );
+
+	const trackingValue = context.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
 	} );
@@ -542,7 +565,7 @@ const updateQueryStep: CoreProfilerMachineAssign = (
 
 const assignPluginsSelected = assign( {
 	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
-		return event.payload.plugins.map( getPluginSlug );
+		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
@@ -560,7 +583,6 @@ const coreProfilerMachineActions = {
 	...recordTracksActions,
 	handlePlugins,
 	updateQueryStep,
-	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
@@ -588,6 +610,7 @@ const coreProfilerMachineServices = {
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
+	updateTrackingOption,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -722,11 +745,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				introOptIn: {
 					on: {
 						INTRO_COMPLETED: {
-							target: '#userProfile',
-							actions: [
-								'assignOptInDataSharing',
-								'updateTrackingOption',
-							],
+							target: 'postIntroOptIn',
+							actions: [ 'assignOptInDataSharing' ],
 						},
 						INTRO_SKIPPED: {
 							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
@@ -737,33 +757,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: [
-						{
-							type: 'recordTracksStepViewed',
-							step: 'intro_opt_in',
-						},
-						{ type: 'updateQueryStep', step: 'intro-opt-in' },
-					],
-					exit: actions.choose( [
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_COMPLETED',
-							actions: 'recordTracksIntroCompleted',
-						},
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_SKIPPED',
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									step: 'intro_opt_in',
-								},
-							],
-						},
-					] ),
 					meta: {
 						progress: 20,
 						component: IntroOptIn,
+					},
+				},
+				postIntroOptIn: {
+					invoke: {
+						src: 'updateTrackingOption',
+						onDone: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						},
 					},
 				},
 			},
@@ -1118,7 +1123,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1183,7 +1188,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 				plugins: {
@@ -1211,7 +1216,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {
@@ -1242,7 +1250,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1264,7 +1272,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1295,7 +1303,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1390,7 +1398,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1447,7 +1455,7 @@ export const CoreProfilerController = ( {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
@@ -1465,19 +1473,7 @@ export const CoreProfilerController = ( {
 			? Object.keys( state.value )[ 0 ]
 			: state.value;
 
-	useEffect( () => {
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-profile-wizard__body' );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		return () => {
-			document.body.classList.remove(
-				'woocommerce-profile-wizard__body'
-			);
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-		};
-	} );
+	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
 
 	return (
 		<>

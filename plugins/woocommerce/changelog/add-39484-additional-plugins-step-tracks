@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add plugin installation request track for core profiler

@@ -8,8 +8,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
-
 /**
  * Tests for DataSynchronizer class.
  */

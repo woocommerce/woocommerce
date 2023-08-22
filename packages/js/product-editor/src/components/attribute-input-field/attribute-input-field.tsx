@@ -2,15 +2,17 @@
  * External dependencies
  */
 import { sprintf, __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
-import { createElement } from '@wordpress/element';
+import { createElement, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
 	ProductAttribute,
 	WCDataSelector,
+	ProductAttributesActions,
+	WPDataActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import {
@@ -25,7 +27,9 @@ import {
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { TRACKS_SOURCE } from '../../constants';
 
-type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' > & {
+	isDisabled?: boolean;
+};
 
 type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
@@ -37,7 +41,10 @@ type AttributeInputFieldProps = {
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
 	ignoredAttributeIds?: number[];
+	createNewAttributesAsGlobal?: boolean;
 };
 
 function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
@@ -50,8 +57,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	placeholder,
 	label,
 	disabled,
+	disabledAttributeIds = [],
+	disabledAttributeMessage,
 	ignoredAttributeIds = [],
+	createNewAttributesAsGlobal = false,
 } ) => {
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute, invalidateResolution } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as ProductAttributesActions & WPDataActions;
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
@@ -63,6 +77,18 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			attributes: getProductAttributes(),
 		};
 	} );
+
+	const markedAttributes = useMemo(
+		function setDisabledAttribute() {
+			return (
+				attributes?.map( ( attribute ) => ( {
+					...attribute,
+					isDisabled: disabledAttributeIds.includes( attribute.id ),
+				} ) ) ?? []
+			);
+		},
+		[ attributes, disabledAttributeIds ]
+	);
 
 	const getFilteredItems = (
 		allItems: NarrowedQueryAttribute[],
@@ -99,10 +125,39 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		return filteredItems;
 	};
 
+	const addNewAttribute = ( attribute: NarrowedQueryAttribute ) => {
+		recordEvent( 'product_attribute_add_custom_attribute', {
+			source: TRACKS_SOURCE,
+		} );
+		if ( createNewAttributesAsGlobal ) {
+			createProductAttribute( { name: attribute.name } ).then(
+				( newAttr ) => {
+					invalidateResolution( 'getProductAttributes' );
+					onChange( { ...newAttr, options: [] } );
+				},
+				( error ) => {
+					let message = __(
+						'Failed to create new attribute.',
+						'woocommerce'
+					);
+					if ( error.code === 'woocommerce_rest_cannot_create' ) {
+						message = error.message;
+					}
+
+					createErrorNotice( message, {
+						explicitDismiss: true,
+					} );
+				}
+			);
+		} else {
+			onChange( attribute.name );
+		}
+	};
+
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
-			items={ attributes || [] }
+			items={ markedAttributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
 			getFilteredItems={ getFilteredItems }
@@ -112,19 +167,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			selected={ value }
 			onSelect={ ( attribute ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
-					recordEvent( 'product_attribute_add_custom_attribute', {
-						source: TRACKS_SOURCE,
+					addNewAttribute( attribute );
+				} else {
+					onChange( {
+						id: attribute.id,
+						name: attribute.name,
+						options: [],
 					} );
 				}
-				onChange(
-					isNewAttributeListItem( attribute )
-						? attribute.name
-						: {
-								id: attribute.id,
-								name: attribute.name,
-								options: [],
-						  }
-				);
 			} }
 			onRemove={ () => onChange() }
 			__experimentalOpenMenuOnFocus
@@ -147,7 +197,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									index={ index }
 									isActive={ highlightedIndex === index }
 									item={ item }
-									getItemProps={ getItemProps }
+									getItemProps={ ( options ) => ( {
+										...getItemProps( options ),
+										disabled: item.isDisabled || undefined,
+									} ) }
+									tooltipText={
+										item.isDisabled
+											? disabledAttributeMessage
+											: undefined
+									}
 								>
 									{ isNewAttributeListItem( item ) ? (
 										<div className="woocommerce-attribute-input-field__add-new">

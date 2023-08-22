@@ -5,14 +5,14 @@
 		border-bottom: 0 !important;
 	}
 
-	.wp-switch-editor
-	{
+	.wp-switch-editor {
 		position: relative;
 		z-index: 1;
 	}
 }
 
 #wpcontent {
+
 	.woo-ai-feedback-snackbar-action {
 		font-size: 1.4em;
 	}
@@ -21,16 +21,18 @@
 		margin-left: 10px;
 	}
 
-	.components-snackbar__action:has( .woo-ai-feedback-snackbar-action) {
+	.components-snackbar__action:has(.woo-ai-feedback-snackbar-action) {
 		text-decoration: none;
 	}
 }
 
 .wp-media-buttons {
-	.woo-ai-write-it-for-me-btn  {
+
+	.woo-ai-write-it-for-me-btn {
 		min-width: 126px;
 
 		&[disabled] {
+
 			img {
 				opacity: 0.2;
 			}

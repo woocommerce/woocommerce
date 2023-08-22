@@ -57,8 +57,8 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"lint": "eslint src --ext=js,ts,tsx",
-		"lint:fix": "eslint src --ext=js,ts,tsx --fix"
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

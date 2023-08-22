@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple', 'variable' );
+	private $supported_post_types = array( 'simple' );
 
 	/**
 	 * Redirection controller.
@@ -38,6 +38,10 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			array_push($this->supported_post_types, 'variable');
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
@@ -46,6 +50,7 @@ class Init {
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
 				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 			}
+			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 
@@ -371,6 +376,20 @@ class Init {
 									),
 								),
 								array(
+									'woocommerce/product-catalog-visibility-field',
+									array(
+										'label'     => __( 'Hide in product catalog', 'woocommerce' ),
+										'visibilty' => 'search',
+									),
+								),
+								array(
+									'woocommerce/product-catalog-visibility-field',
+									array(
+										'label'     => __( 'Hide from search results', 'woocommerce' ),
+										'visibilty' => 'catalog',
+									),
+								),
+								array(
 									'woocommerce/product-checkbox-field',
 									array(
 										'label'    => __( 'Enable product reviews', 'woocommerce' ),
@@ -406,6 +425,15 @@ class Init {
 						'order' => 20,
 					),
 					array(
+						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
 						array(
 							'woocommerce/product-section',
 							array(
@@ -533,6 +561,15 @@ class Init {
 						'order' => 30,
 					),
 					array(
+						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
 						array(
 							'woocommerce/product-section',
 							array(
@@ -696,6 +733,15 @@ class Init {
 					),
 					array(
 						array(
+							'woocommerce/product-has-variations-notice',
+							array(
+								'id'         => 'wc-product-notice-has-options',
+								'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+								'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+								'type'       => 'info',
+							),
+						),
+						array(
 							'woocommerce/product-section',
 							array(
 								'title'       => __( 'Fees & dimensions', 'woocommerce' ),
@@ -747,6 +793,13 @@ class Init {
 										),
 										array( array( 'woocommerce/product-variations-options-field' ) ),
 									),
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variations', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variation-items-field' ) ),
+									),
 								),
 							),
 						),
@@ -755,6 +808,22 @@ class Init {
 			}
 		}
 		return $args;
+	}
+
+	/**
+	 * Adds fields so that we can store user preferences for the variations block.
+	 *
+	 * @param array $user_data_fields User data fields.
+	 * @return array
+	 */
+	public function add_user_data_fields( $user_data_fields ) {
+		return array_merge(
+			$user_data_fields,
+			array(
+				'variable_product_block_tour_shown',
+				'product_block_variable_options_notice_dismissed',
+			)
+		);
 	}
 
 	/**

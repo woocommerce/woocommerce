@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { useEffect } from '@wordpress/element';
+
 export * from './plugins';
 export * from './slot-fill-ordering';
 
@@ -90,4 +95,23 @@ export const getTimeFrame = ( timeInMs ) => {
 			return timeFrame.name;
 		}
 	}
+};
+
+/**
+ * Goes into fullscreen mode when the component is loaded
+ *
+ * @param {string[]} classes - classes to add to document.body
+ */
+export const useFullScreen = ( classes ) => {
+	useEffect( () => {
+		document.body.classList.remove( 'woocommerce-admin-is-loading' );
+		document.body.classList.add( classes );
+		document.body.classList.add( 'woocommerce-admin-full-screen' );
+		document.body.classList.add( 'is-wp-toolbar-disabled' );
+		return () => {
+			document.body.classList.remove( classes );
+			document.body.classList.remove( 'woocommerce-admin-full-screen' );
+			document.body.classList.remove( 'is-wp-toolbar-disabled' );
+		};
+	} );
 };
