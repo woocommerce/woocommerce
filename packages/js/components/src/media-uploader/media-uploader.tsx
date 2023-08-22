@@ -24,7 +24,7 @@ type MediaUploaderProps = {
 	MediaUploadComponent?: < T extends boolean = false >(
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
-	multipleSelect?: boolean;
+	multipleSelect?: boolean | string;
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
@@ -96,6 +96,7 @@ export const MediaUploader = ( {
 						<MediaUploadComponent
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
+							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
 							render={ ( { open } ) => (
 								<Button

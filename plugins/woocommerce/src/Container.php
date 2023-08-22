@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Downlo
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketplaceServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
@@ -24,6 +25,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Proxie
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BlockTemplatesServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -67,6 +69,8 @@ final class Container {
 		OrderAdminServiceProvider::class,
 		FeaturesServiceProvider::class,
 		MarketingServiceProvider::class,
+		MarketplaceServiceProvider::class,
+		BlockTemplatesServiceProvider::class,
 	);
 
 	/**

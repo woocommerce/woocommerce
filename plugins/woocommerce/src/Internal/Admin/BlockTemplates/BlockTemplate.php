@@ -11,6 +11,13 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
  */
 class BlockTemplate extends AbstractBlockTemplate {
 	/**
+	 * Get the template ID.
+	 */
+	public function get_id(): string {
+		return 'woocommerce-block-template';
+	}
+
+	/**
 	 * Generate a block ID based on a base.
 	 *
 	 * @param array $block_config The block data.
