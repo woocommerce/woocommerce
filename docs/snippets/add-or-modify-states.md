@@ -1,4 +1,4 @@
-# Add or modify States
+# Add or modify states
 
 > This is a **Developer level** doc. If you are unfamiliar with code and resolving potential conflicts, select a [WooExpert or Developer](https://woocommerce.com/customizations/) for assistance. We are unable to provide support for customizations under our [Support Policy](http://www.woocommerce.com/support-policy/).
 
