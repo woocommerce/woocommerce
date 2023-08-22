@@ -13,14 +13,37 @@ import { createElement } from '@wordpress/element';
  */
 import Container from '../';
 
-jest.mock( '@wordpress/data', () => {
-	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@wordpress/data' );
-
+jest.mock( '@woocommerce/data', () => {
 	return {
-		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
+		useUser: jest.fn().mockReturnValue( {
+			currentUserCan: jest.fn(),
+		} ),
+	};
+} );
+jest.mock( '@wordpress/components', () => {
+	return {
+		Button: () => <div></div>,
+	};
+} );
+jest.mock( '@woocommerce/components', () => {
+	return {
+		SelectControl: jest.fn(),
+	};
+} );
+jest.mock( '@woocommerce/navigation', () => {
+	const actual = jest.requireActual( '@woocommerce/navigation' );
+	return {
+		addHistoryListener: actual.addHistoryListener,
+		getHistory: actual.getHistory,
+	};
+} );
+jest.mock( '@wordpress/data', () => {
+	return {
 		useSelect: jest.fn().mockReturnValue( {} ),
+		useDispatch: jest.fn().mockReturnValue( {
+			addFavorite: jest.fn(),
+			removeFavorite: jest.fn(),
+		} ),
 	};
 } );
 

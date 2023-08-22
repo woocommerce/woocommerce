@@ -22,6 +22,12 @@ const defaultValues = {
 	startTour,
 };
 
+jest.mock( '@woocommerce/product-editor', () => ( {
+	__experimentalUseFeedbackBar: jest.fn().mockReturnValue( {
+		maybeShowFeedbackBar: jest.fn(),
+	} ),
+} ) );
+
 jest.mock( '../use-product-tour', () => {
 	return {
 		useProductTour: jest.fn(),
