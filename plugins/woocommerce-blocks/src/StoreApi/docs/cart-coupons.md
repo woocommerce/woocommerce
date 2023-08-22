@@ -171,3 +171,4 @@ curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/coupons
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart-coupons.md)
 
 <!-- /FEEDBACK -->
+

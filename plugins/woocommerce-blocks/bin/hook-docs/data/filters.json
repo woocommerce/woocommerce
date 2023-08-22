@@ -121,6 +121,30 @@
             "args": 1
         },
         {
+            "name": "loop_shop_per_page",
+            "file": "BlockTypes/ProductQuery.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "loop_shop_per_page",
+            "file": "BlockTypes/ProductCollection.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
             "name": "wc_session_expiration",
             "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
             "type": "filter",
@@ -248,6 +272,39 @@
                 "long_description_html": ""
             },
             "args": 4
+        },
+        {
+            "name": "woocommerce_add_to_cart_quantity",
+            "file": "BlockTypes/ProductButton.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the change the quantity to add to cart.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "10.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The default quantity.",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\BlockTypes\\number"
+                        ],
+                        "variable": "$default_quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The product id.",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\BlockTypes\\number"
+                        ],
+                        "variable": "$product_id"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_add_to_cart_sold_individually_quantity",
@@ -735,6 +792,47 @@
             "args": 1
         },
         {
+            "name": "woocommerce_cart_item_permalink",
+            "file": "StoreApi/Schemas/V1/CartItemSchema.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter the product permalink.",
+                "long_description": "This is a hook taken from the legacy cart/mini-cart templates that allows the permalink to be changed for a product. This is specific to the cart endpoint.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product permalink.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$product_permalink"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item array.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item key.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_item_key"
+                    }
+                ],
+                "long_description_html": "<p>This is a hook taken from the legacy cart/mini-cart templates that allows the permalink to be changed for a product. This is specific to the cart endpoint.</p>"
+            },
+            "args": 3
+        },
+        {
             "name": "woocommerce_disable_compatibility_layer",
             "file": "Templates/AbstractTemplateCompatibility.php",
             "type": "filter",
@@ -934,6 +1032,88 @@
             "args": 1
         },
         {
+            "name": "woocommerce_pay_order_product_has_enough_stock",
+            "file": "StoreApi/Utilities/OrderController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether or not the product has enough stock.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "True if has enough stock.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "since",
+                        "content": "9.8.0-dev"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_pay_order_product_in_stock",
+            "file": "StoreApi/Utilities/OrderController.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters whether or not the product is in stock for this pay for order.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "True if in stock.",
+                        "types": [
+                            "boolean"
+                        ],
+                        "variable": ""
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "since",
+                        "content": "9.8.0-dev"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
             "name": "woocommerce_registration_errors",
             "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "filter",
@@ -1101,6 +1281,39 @@
                 "long_description_html": "<p>Allows controlling the display of the page title.</p>"
             },
             "args": 1
+        },
+        {
+            "name": "woocommerce_single_product_image_thumbnail_html",
+            "file": "BlockTypes/ProductGalleryThumbnails.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filter the HTML markup for a single product image thumbnail in the gallery.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "The HTML markup for the thumbnail.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$thumbnail_html"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The attachment ID of the thumbnail.",
+                        "types": [
+                            "int"
+                        ],
+                        "variable": "$attachment_id"
+                    },
+                    {
+                        "name": "since",
+                        "content": "7.9.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_store_api_add_to_cart_data",
@@ -1286,66 +1499,6 @@
                 "long_description_html": ""
             },
             "args": 1
-        },
-        {
-            "name": "woocommerce_variation_option_name",
-            "file": "StoreApi/Schemas/V1/CartItemSchema.php",
-            "type": "filter",
-            "doc": {
-                "description": "Filters the variation option name.",
-                "long_description": "Filters the variation option name for custom option slugs.",
-                "tags": [
-                    {
-                        "name": "since",
-                        "content": "2.5.0"
-                    },
-                    {
-                        "name": "internal",
-                        "content": "Matches filter name in WooCommerce core."
-                    },
-                    {
-                        "name": "param",
-                        "content": "The name to display.",
-                        "types": [
-                            "string"
-                        ],
-                        "variable": "$value"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Unused because this is not a variation taxonomy.",
-                        "types": [
-                            "null"
-                        ],
-                        "variable": "$unused"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Taxonomy or product attribute name.",
-                        "types": [
-                            "string"
-                        ],
-                        "variable": "$taxonomy"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Product data.",
-                        "types": [
-                            "\\WC_Product"
-                        ],
-                        "variable": "$product"
-                    },
-                    {
-                        "name": "return",
-                        "content": "",
-                        "types": [
-                            "string"
-                        ]
-                    }
-                ],
-                "long_description_html": "<p>Filters the variation option name for custom option slugs.</p>"
-            },
-            "args": 4
         }
     ]
 }

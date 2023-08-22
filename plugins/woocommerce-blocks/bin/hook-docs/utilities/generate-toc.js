@@ -12,11 +12,14 @@ const generateToc = ( hooks ) => {
 				const heading = isDeprecated
 					? `~~${ hookName }~~`
 					: `${ hookName }`;
-
 				let anchor = heading
 					.trim()
 					.toLowerCase()
+					.replace( /\(\)/g, '' )
+					.replace( /\{\$(.*?)->(.*?)}/g, '$1-$2' )
+					.replace( /\{\$(.*?)}/g, '$1' )
 					.replace( /[^\w\- ]+/g, ' ' )
+					.trim()
 					.replace( /\s+/g, '-' )
 					.replace( /\-+$/, '' );
 				if ( usedHeaders.indexOf( anchor ) !== -1 ) {
@@ -28,7 +31,6 @@ const generateToc = ( hooks ) => {
 					anchor = anchor + '-' + i;
 				}
 				usedHeaders.push( anchor );
-
 				return `[${ hook.name }](#${ anchor })`;
 			} ),
 		},

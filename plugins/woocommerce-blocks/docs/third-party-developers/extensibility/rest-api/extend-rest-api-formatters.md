@@ -142,3 +142,4 @@ alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
 
 <!-- /FEEDBACK -->
+

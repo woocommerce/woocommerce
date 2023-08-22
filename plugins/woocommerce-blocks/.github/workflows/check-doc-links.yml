@@ -11,18 +11,23 @@ concurrency:
 permissions: {}
 
 jobs:
-    markdown-link-check:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        steps:
-            - uses: actions/checkout@v3
-            - uses: gaurav-nelson/github-action-markdown-link-check@v1
-              with:
-                  use-quiet-mode: 'yes'
-                  use-verbose-mode: 'no'
-                  config-file: '.github/workflows/check-doc-links-config.json'
-                  folder-path: './docs'
-                  file-path: './README.md'
-                  max-depth: 3
-                  base-branch: 'trunk'
+  markdown_link_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Run markdown-link-check
+        run: |
+          find ./docs -path ./docs/internal-developers/testing/releases -prune -o -name "*.md" -print0 | xargs -0 -n1 markdown-link-check -c .github/workflows/check-doc-links-config.json
+
