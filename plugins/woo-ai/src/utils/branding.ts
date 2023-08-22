@@ -14,7 +14,6 @@ type ApiResponseItem = {
 };
 
 export type BrandingSettings = {
-	brandingEnabled: boolean;
 	toneOfVoice: string;
 	businessDescription: string;
 };
@@ -46,9 +45,6 @@ export async function getAllBrandingSettings(): Promise< BrandingSettings > {
 			path: '/wc/v3/settings/woo-ai',
 		} );
 
-		const brandingEnabled = response.find(
-			( setting ) => setting.id === 'branding_enabled'
-		)?.value;
 		const toneOfVoice = response.find(
 			( setting ) => setting.id === 'tone-of-voice'
 		)?.value;
@@ -56,7 +52,6 @@ export async function getAllBrandingSettings(): Promise< BrandingSettings > {
 			( setting ) => setting.id === 'store-description'
 		)?.value;
 		return {
-			brandingEnabled: brandingEnabled === 'yes' ? true : false,
 			toneOfVoice: toneOfVoice || '',
 			businessDescription: businessDescription || '',
 		};

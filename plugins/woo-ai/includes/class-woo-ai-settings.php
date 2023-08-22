@@ -42,7 +42,6 @@ class Woo_AI_Settings {
 	private const WOO_AI_OPTIONS_PREFIX        = 'woo_ai_';
 	private const STORE_DESCRIPTION_OPTION_KEY = self::WOO_AI_OPTIONS_PREFIX . 'describe_store_description';
 	private const TONE_OF_VOICE_OPTION_KEY     = self::WOO_AI_OPTIONS_PREFIX . 'tone_of_voice_select';
-	private const WOO_AI_ENABLED_OPTION_KEY    = self::WOO_AI_OPTIONS_PREFIX . 'enable_checkbox';
 	private const WOO_AI_TITLE_OPTION_KEY      = self::WOO_AI_OPTIONS_PREFIX . 'title';
 
 	/**
@@ -57,7 +56,6 @@ class Woo_AI_Settings {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_settings_script' ) );
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_woo_ai_settings' ), 10, 2 );
 		add_filter( 'woocommerce_settings_groups', array( $this, 'add_woo_ai_settings_group' ) );
 		add_filter( 'woocommerce_settings-woo-ai', array( $this, 'add_woo_ai_settings_group_settings' ) );
@@ -170,14 +168,6 @@ class Woo_AI_Settings {
 		);
 
 		$settings_ai[] = array(
-			'id'      => self::WOO_AI_ENABLED_OPTION_KEY,
-			'title'   => __( 'Activate Personalization', 'woocommerce' ),
-			'desc'    => __( "Turn on advanced AI features to craft content that aligns with your store's personality and goals.", 'woocommerce' ),
-			'type'    => 'checkbox',
-			'default' => 'yes',
-		);
-
-		$settings_ai[] = array(
 			'id'      => self::TONE_OF_VOICE_OPTION_KEY,
 			'name'    => __( 'Tone of voice', 'woocommerce' ),
 			'desc'    => __( 'Select the tone of voice for the AI', 'woocommerce' ),
@@ -203,42 +193,5 @@ class Woo_AI_Settings {
 		);
 
 		return $settings_ai;
-	}
-
-	/**
-	 * Enqueue the styles and JS
-	 */
-	public function add_woo_ai_settings_script() {
-		global $pagenow;
-
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( 'admin.php' !== $pagenow || ( isset( $_GET['page'] ) && 'wc-settings' !== $_GET['page'] ) ) {
-			return;
-		}
-
-		$script_path = '/../build/settings.js';
-		$script_url  = plugins_url( $script_path, __FILE__ );
-		$version     = Constants::get_constant( 'WC_VERSION' );
-
-		wp_register_script(
-			'woo-ai-settings',
-			$script_url,
-			array( 'jquery' ),
-			$version,
-			true
-		);
-
-		wp_enqueue_script( 'woo-ai-settings' );
-
-		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/settings.css' );
-
-		wp_register_style(
-			'woo-ai-settings',
-			plugins_url( '/../build/settings.css', __FILE__ ),
-			array(),
-			$css_file_version
-		);
-
-		wp_enqueue_style( 'woo-ai-settings' );
 	}
 }
