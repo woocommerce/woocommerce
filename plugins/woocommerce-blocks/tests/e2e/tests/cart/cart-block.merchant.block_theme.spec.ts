@@ -12,6 +12,7 @@ const blockData: BlockData = {
 		editor: {
 			block: '.wp-block-woocommerce-cart',
 			insertButton: "//button//span[text()='Cart']",
+			shippingBlock: '.wp-block-woocommerce-shipping-calculator',
 		},
 		frontend: {
 			block: '.wp-block-woocommerce-cart',
@@ -20,7 +21,8 @@ const blockData: BlockData = {
 };
 
 test.describe( 'Merchant → Cart', () => {
-	const blockSelectorInEditor = blockData.selectors.editor.block;
+	// `as string` is safe here because we know the variable is a string, it is defined above.
+	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	test.describe( 'in page editor', () => {
 		test.beforeEach( async ( { editorUtils, admin } ) => {
@@ -31,14 +33,15 @@ test.describe( 'Merchant → Cart', () => {
 			await editorUtils.enterEditMode();
 		} );
 
-		test( 'it renders without crashing', async ( { editorUtils } ) => {
+		test( 'renders without crashing and can only be inserted once', async ( {
+			page,
+			editorUtils,
+		} ) => {
 			const blockPresence = await editorUtils.getBlockByName(
 				blockData.slug
 			);
 			expect( blockPresence ).toBeTruthy();
-		} );
 
-		test( 'can only be inserted once', async ( { page, editorUtils } ) => {
 			await editorUtils.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
 			const cartBlockButton = page.getByRole( 'option', {
@@ -140,7 +143,7 @@ test.describe( 'Merchant → Cart', () => {
 			await expect( filledCartAudioButton ).toBeHidden();
 		} );
 
-		test( 'shows empty cart when changing the view', async ( {
+		test( 'shows empty cart when changing the view and allows toggling of shipping calculator', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -184,6 +187,24 @@ test.describe( 'Merchant → Cart', () => {
 					blockData.selectors.editor.block +
 						' [data-type="woocommerce/empty-cart-block"]'
 				)
+			).toBeHidden();
+
+			await editor.selectBlocks(
+				await editorUtils.getBlockByName(
+					'woocommerce/cart-order-summary-shipping-block'
+				)
+			);
+			await editor.openDocumentSettingsSidebar();
+			const shippingLabel = editorUtils.page.getByLabel(
+				'Shipping calculator'
+			);
+			await shippingLabel.check();
+			await expect(
+				editor.canvas.getByText( 'Change address' )
+			).toBeVisible();
+			await shippingLabel.uncheck();
+			await expect(
+				editor.canvas.getByText( 'Change address' )
 			).toBeHidden();
 		} );
 	} );
