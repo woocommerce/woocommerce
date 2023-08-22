@@ -13,7 +13,7 @@ if ( ! function_exists( 'YOUR_PREFIX_rename_country' ) ) {
    * @return array $countries Updated country name(s)
    */
   function YOUR_PREFIX_rename_country( $countries ) {
-     $countries['IE'] = 'Ireland';
+     $countries['IE'] = __( 'Ireland', 'YOUR-TEXTDOMAIN' ),
 
      return $countries;
   }
