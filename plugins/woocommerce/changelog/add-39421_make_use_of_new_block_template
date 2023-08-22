@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update the simple product template structure to make use of the new BlockTemplateInterface structure.
