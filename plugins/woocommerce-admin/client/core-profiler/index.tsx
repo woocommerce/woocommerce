@@ -53,7 +53,7 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { Loader } from './pages/Loader';
+import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
 import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
@@ -108,7 +108,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
+		pluginsShown: string[];
+		pluginsSelected: string[];
+		pluginsUnselected: string[];
 	};
 };
 
@@ -342,7 +344,19 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url + '&installed_ext_success=1';
+	const url = new URL( event.data.url );
+	url.searchParams.set( 'installed_ext_success', '1' );
+	const selectedPlugin = _context.pluginsSelected.find(
+		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	);
+
+	if ( selectedPlugin ) {
+		const pluginName =
+			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
+		url.searchParams.set( 'plugin_name', pluginName );
+	}
+
+	window.location.href = url.toString();
 };
 
 const updateTrackingOption = async (
@@ -551,7 +565,7 @@ const updateQueryStep: CoreProfilerMachineAssign = (
 
 const assignPluginsSelected = assign( {
 	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
-		return event.payload.plugins.map( getPluginSlug );
+		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
@@ -1109,7 +1123,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1174,7 +1188,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 				plugins: {
@@ -1202,7 +1216,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {
@@ -1233,7 +1250,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1255,7 +1272,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1286,7 +1303,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1381,7 +1398,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},

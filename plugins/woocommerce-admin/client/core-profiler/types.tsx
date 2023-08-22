@@ -6,7 +6,7 @@ import { CoreProfilerStateMachineContext } from '.';
 export type ComponentMeta = {
 	/** React component that is rendered when state matches the location this meta key is defined */
 	component: ( arg0: ComponentProps ) => JSX.Element;
-	/** number between 0 - 100 */
+	/** Number between 0 - 100 */
 	progress: number;
 };
 

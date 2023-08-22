@@ -14,7 +14,7 @@
 		}
 	],
 	"require": {
-		"php": ">=7.3",
+		"php": ">=7.4",
 		"automattic/jetpack-autoloader": "2.11.18",
 		"automattic/jetpack-config": "1.15.2",
 		"automattic/jetpack-connection": "1.51.7",
@@ -23,7 +23,7 @@
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.6.2",
-		"woocommerce/woocommerce-blocks": "10.6.5"
+		"woocommerce/woocommerce-blocks": "10.9.2"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -42,7 +42,7 @@
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.3"
+			"php": "7.4"
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,

@@ -106,14 +106,6 @@ class Woo_AI_Settings {
 	 */
 	public function add_woo_ai_settings_group_settings( $settings ) {
 		$settings[] = array(
-			'id'          => 'branding_enabled',
-			'option_key'  => self::WOO_AI_ENABLED_OPTION_KEY,
-			'label'       => __( 'Woo AI Personalization', 'woocommerce' ),
-			'description' => __( 'This enables Woo AI Store Branding features like tone of voice when generating content.', 'woocommerce' ),
-			'default'     => 'no',
-			'type'        => 'checkbox',
-		);
-		$settings[] = array(
 			'id'          => 'tone-of-voice',
 			'option_key'  => self::TONE_OF_VOICE_OPTION_KEY,
 			'label'       => __( 'Storewide Tone of Voice', 'woocommerce' ),
