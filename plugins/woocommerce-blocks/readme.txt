@@ -222,6 +222,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix image overlapping in mobile in the Editor for the `Discount banner with image`. ([10108](https://github.com/woocommerce/woocommerce-blocks/pull/10108))
 - Fix: Return null or object for ImageAttachmentSchema response. ([9962](https://github.com/woocommerce/woocommerce-blocks/pull/9962))
 
+= 10.6.6. - 2023-08-22 =
+
+#### Bug Fixes
+
+- Fix: Made migration migrate block templates in the current theme. (https://github.com/woocommerce/woocommerce-blocks/pull/10641)
+- Fixed a bug causing  Cart and Checkout Blocks to be used by default instead of shortcode versions on WC updates. (https://github.com/woocommerce/woocommerce-blocks/pull/10608)
+
 = 10.6.5 - 2023-08-09 =
 
 #### Bug Fixes
