@@ -133,7 +133,10 @@ abstract class DataSourcePoller {
 			$this->merge_specs( $specs_from_data_source, $specs, $url );
 		}
 
-		$specs_group            = get_transient( $this->args['transient_name'] ) ?: array();
+		$specs_group = get_transient( $this->args['transient_name'] );
+		if ( false === $specs_group ) {
+			$specs_group = array();
+		}
 		$locale                 = get_user_locale();
 		$specs_group[ $locale ] = $specs;
 		// Persist the specs as a transient.
