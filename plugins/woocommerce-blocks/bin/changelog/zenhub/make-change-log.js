@@ -9,24 +9,24 @@ const { fetchAllPullRequests } = require( './requests' );
 let ready = false;
 
 const makeChangeLog = async () => {
-	if ( ! pkg.changelog.zhApiToken || ! pkg.changelog.ghApiToken ) {
+	if ( ! pkg.changelog.zhApiToken || ! pkg.changelog.githubToken ) {
 		const zenhubSet = pkg.changelog.zhApiToken
 			? chalk.green( 'set' )
 			: chalk.red( 'not set' );
-		const githubSet = pkg.changelog.ghApiToken
+		const githubSet = pkg.changelog.githubToken
 			? chalk.green( 'set' )
 			: chalk.red( 'not set' );
 		console.log( `${ chalk.yellow( 'Zenhub Token:' ) } ${ zenhubSet }` );
-		console.log( `${ chalk.yellow( 'Github Token:' ) } ${ githubSet }` );
+		console.log( `${ chalk.yellow( 'GitHub Token:' ) } ${ githubSet }` );
 		console.log( '' );
 		console.log(
 			chalk.yellow(
-				'This program requires an api token from Github and Zenhub.'
+				'This program requires an api token from GitHub and Zenhub.'
 			)
 		);
 		console.log(
 			chalk.yellow(
-				'You can create and get a Github token here: https://github.com/settings/tokens'
+				'You can create and get a GitHub token here: https://github.com/settings/tokens'
 			)
 		);
 		console.log(
@@ -37,13 +37,13 @@ const makeChangeLog = async () => {
 		console.log( '' );
 		console.log(
 			chalk.yellow(
-				'Token scope for Github will require read permissions on public_repo, admin:org, and user.'
+				'Token scope for GitHub will require read permissions on public_repo, admin:org, and user.'
 			)
 		);
 		console.log( '' );
 		console.log(
 			chalk.yellow(
-				'Export the github token as variable called GH_API_TOKEN and the Zenhub token as a variable called ZH_API_TOKEN from your bash profile.'
+				'Export the github token as variable called GITHUB_TOKEN and the Zenhub token as a variable called ZH_API_TOKEN from your bash profile.'
 			)
 		);
 		console.log( '' );
@@ -52,7 +52,7 @@ const makeChangeLog = async () => {
 	} else {
 		console.log(
 			chalk.green(
-				'Detected that ZH_API_TOKEN and GH_API_TOKEN values are set.'
+				'Detected that ZH_API_TOKEN and GITHUB_TOKEN values are set.'
 			)
 		);
 		ready = true;

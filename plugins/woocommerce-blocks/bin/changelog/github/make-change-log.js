@@ -9,7 +9,7 @@ const { fetchAllPullRequests } = require( './requests' );
 let ready = false;
 
 const makeChangeLog = async () => {
-	if ( ! pkg.changelog.ghApiToken ) {
+	if ( ! pkg.changelog.githubToken ) {
 		console.log(
 			chalk.yellow(
 				'This program requires an api token. You can create one here: '
@@ -24,14 +24,14 @@ const makeChangeLog = async () => {
 		console.log( '' );
 		console.log(
 			chalk.yellow(
-				'Export the token as variable called GH_API_TOKEN from your bash profile.'
+				'Export the token as variable called GITHUB_TOKEN from your bash profile.'
 			)
 		);
 		console.log( '' );
 
 		ready = await promptly.confirm( 'Are you ready to continue? ' );
 	} else {
-		console.log( chalk.green( 'Detected GH_API_TOKEN is set.' ) );
+		console.log( chalk.green( 'Detected GITHUB_TOKEN is set.' ) );
 		ready = true;
 	}
 
