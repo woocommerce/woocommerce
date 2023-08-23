@@ -307,6 +307,7 @@ describe( 'AttributeInputField', () => {
 			queryByText( 'Create "Co"' )?.click();
 			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
+				generate_slug: true,
 			} );
 			await waitFor( () => {
 				expect( invalidateResolutionMock ).toHaveBeenCalledWith(
@@ -352,6 +353,7 @@ describe( 'AttributeInputField', () => {
 			queryByText( 'Create "Co"' )?.click();
 			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
+				generate_slug: true,
 			} );
 			await waitFor( () => {
 				expect( createErrorNoticeMock ).toHaveBeenCalledWith(

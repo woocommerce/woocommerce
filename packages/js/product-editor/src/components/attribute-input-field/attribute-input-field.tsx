@@ -28,6 +28,7 @@ import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { TRACKS_SOURCE } from '../../constants';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' > & {
+	slug?: string;
 	isDisabled?: boolean;
 };
 
@@ -109,9 +110,11 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 
 		if (
 			inputValue.length > 0 &&
-			! allItems.find(
-				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
-			)
+			( createNewAttributesAsGlobal ||
+				! allItems.find(
+					( item ) =>
+						item.name.toLowerCase() === inputValue.toLowerCase()
+				) )
 		) {
 			return [
 				...filteredItems,
@@ -130,7 +133,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( { name: attribute.name } ).then(
+			createProductAttribute( {
+				name: attribute.name,
+				generate_slug: true,
+			} ).then(
 				( newAttr ) => {
 					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
@@ -204,7 +210,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									tooltipText={
 										item.isDisabled
 											? disabledAttributeMessage
-											: undefined
+											: item.slug
 									}
 								>
 									{ isNewAttributeListItem( item ) ? (
