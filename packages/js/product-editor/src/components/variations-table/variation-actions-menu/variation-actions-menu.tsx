@@ -78,21 +78,44 @@ export function VariationActionsMenu( {
 								</MenuItem>
 							) }
 							renderContent={ () => (
-								<MenuGroup
-									label={ __( 'List price', 'woocommerce' ) }
-								>
-									<MenuItem
-										onClick={ () => {
-											handlePropmt( 'regular_price' );
-											onClose();
-										} }
-									>
-										{ __(
-											'Set list price',
+								<div className="components-dropdown-menu__menu">
+									<MenuGroup
+										label={ __(
+											'List price',
 											'woocommerce'
 										) }
-									</MenuItem>
-								</MenuGroup>
+									>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt( 'regular_price' );
+												onClose();
+											} }
+										>
+											{ __(
+												'Set list price',
+												'woocommerce'
+											) }
+										</MenuItem>
+									</MenuGroup>
+									<MenuGroup
+										label={ __(
+											'Sale price',
+											'woocommerce'
+										) }
+									>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt( 'sale_price' );
+												onClose();
+											} }
+										>
+											{ __(
+												'Set sale price',
+												'woocommerce'
+											) }
+										</MenuItem>
+									</MenuGroup>
+								</div>
 							) }
 						/>
 					</MenuGroup>
