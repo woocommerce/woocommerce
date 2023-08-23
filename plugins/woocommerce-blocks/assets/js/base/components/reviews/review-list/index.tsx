@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import type { BlockAttributes } from '@wordpress/blocks';
+import { ReviewBlockAttributes } from '@woocommerce/blocks/reviews/attributes';
 
 /**
  * Internal dependencies
@@ -10,9 +10,8 @@ import type { BlockAttributes } from '@wordpress/blocks';
 import ReviewListItem from '../review-list-item';
 import type { Review } from '../types';
 import './style.scss';
-
 interface ReviewListProps {
-	attributes: BlockAttributes;
+	attributes: ReviewBlockAttributes;
 	reviews: Review[];
 }
 
@@ -20,8 +19,11 @@ const ReviewList = ( {
 	attributes,
 	reviews,
 }: ReviewListProps ): JSX.Element => {
-	const showAvatars = getSetting( 'showAvatars', true );
-	const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
+	const showAvatars = getSetting< boolean >( 'showAvatars', true );
+	const reviewRatingsEnabled = getSetting< boolean >(
+		'reviewRatingsEnabled',
+		true
+	);
 	const showReviewImage =
 		( showAvatars || attributes.imageType === 'product' ) &&
 		attributes.showReviewImage;
