@@ -30,6 +30,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	 * create more than one attribute with the same name.
 	 *
 	 * @param string $attribute_name The attribute name to generate a slug for.
+	 * @return string The auto-generated slug
 	 */
 	private function generate_unique_slug( $attribute_name ) {
 		global $wpdb;
