@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues
