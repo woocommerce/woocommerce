@@ -31,7 +31,11 @@ function parsePercentage( value: string ) {
 	return Number( stringNumber );
 }
 
-function addFixedOrPercentage( value: string, fixedOrPercentage: string ) {
+function addFixedOrPercentage(
+	value: string,
+	fixedOrPercentage: string,
+	increaseOrDecrease: 1 | -1 = 1
+) {
 	if ( isPercentage( fixedOrPercentage ) ) {
 		if ( Number.isNaN( Number( value ) ) ) {
 			return 0;
@@ -40,7 +44,10 @@ function addFixedOrPercentage( value: string, fixedOrPercentage: string ) {
 		if ( percentage === undefined ) {
 			return Number( value );
 		}
-		return Number( value ) + Number( value ) * ( percentage / 100 );
+		return (
+			Number( value ) +
+			Number( value ) * ( percentage / 100 ) * increaseOrDecrease
+		);
 	}
 	if ( Number.isNaN( Number( value ) ) ) {
 		if ( Number.isNaN( Number( fixedOrPercentage ) ) ) {
@@ -48,7 +55,7 @@ function addFixedOrPercentage( value: string, fixedOrPercentage: string ) {
 		}
 		return Number( fixedOrPercentage );
 	}
-	return Number( value ) + Number( fixedOrPercentage );
+	return Number( value ) + Number( fixedOrPercentage ) * increaseOrDecrease;
 }
 
 export function VariationActionsMenu( {
@@ -152,6 +159,29 @@ export function VariationActionsMenu( {
 										>
 											{ __(
 												'Increase list price',
+												'woocommerce'
+											) }
+										</MenuItem>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt(
+													'regular_price',
+													__(
+														'Enter a value (fixed or %)',
+														'woocommerce'
+													),
+													( value ) =>
+														addFixedOrPercentage(
+															variation.regular_price,
+															value,
+															-1
+														)?.toFixed( 2 )
+												);
+												onClose();
+											} }
+										>
+											{ __(
+												'Decrease list price',
 												'woocommerce'
 											) }
 										</MenuItem>
