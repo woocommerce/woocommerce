@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import ReadMore from '@woocommerce/base-components/read-more';
-import type { BlockAttributes } from '@wordpress/blocks';
+import { ReviewBlockAttributes } from '@woocommerce/blocks/reviews/attributes';
 
 /**
  * Internal dependencies
@@ -154,8 +154,9 @@ function getReviewRating( review: Review ): JSX.Element {
 		</div>
 	);
 }
+
 interface ReviewListItemProps {
-	attributes: BlockAttributes;
+	attributes: ReviewBlockAttributes;
 	review?: Review;
 }
 
