@@ -469,6 +469,7 @@ class CustomOrdersTableController {
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
 		$sync_complete           = 0 === $sync_status['current_pending_count'];
 		$disabled_option         = array();
+		// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
 			$disabled_option = array( 'yes' );
 		}
