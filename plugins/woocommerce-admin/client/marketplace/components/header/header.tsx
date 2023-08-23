@@ -1,8 +1,4 @@
 /**
- * External dependencies
- */
-
-/**
  * Internal dependencies
  */
 import './header.scss';
@@ -11,13 +7,7 @@ import HeaderAccount from '../header-account/header-account';
 import Tabs from '../tabs/tabs';
 import Search from '../search/search';
 
-export interface HeaderProps {
-	selectedTab?: string | undefined;
-	setSelectedTab: ( value: string ) => void;
-}
-
-export default function Header( props: HeaderProps ) {
-	const { selectedTab, setSelectedTab } = props;
+export default function Header() {
 	return (
 		<header className="woocommerce-marketplace__header">
 			<HeaderTitle />
@@ -25,8 +15,6 @@ export default function Header( props: HeaderProps ) {
 				additionalClassNames={ [
 					'woocommerce-marketplace__header-tabs',
 				] }
-				selectedTab={ selectedTab }
-				setSelectedTab={ setSelectedTab }
 			/>
 			<Search />
 			<div className="woocommerce-marketplace__header-meta">
