@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096 # development build takes a lot of memory 
+
 jobs:
   build:
     name: Nightly builds
