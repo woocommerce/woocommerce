@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
 import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -90,11 +89,7 @@ export function IframeEditor( {
 	const settings = __settings || parentEditorSettings;
 
 	return (
-		<div
-			className={ classNames( 'woocommerce-iframe-editor', {
-				'has-fixed-toolbar': true,
-			} ) }
-		>
+		<div className="woocommerce-iframe-editor">
 			<EditorContext.Provider
 				value={ {
 					hasRedo,
