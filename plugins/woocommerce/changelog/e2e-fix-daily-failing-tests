@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fixes a failing e2e test in our daily test runs.
