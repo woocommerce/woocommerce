@@ -26,6 +26,7 @@ export function VariationActionsMenu( {
 }: VariationActionsMenuProps ) {
 	function handlePropmt( propertyName: keyof ProductVariation ) {
 		const value = window.prompt( __( 'Enter a value', 'woocommerce' ) );
+		if ( value === null ) return;
 
 		onChange( {
 			[ propertyName ]: value,
