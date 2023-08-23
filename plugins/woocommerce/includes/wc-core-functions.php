@@ -1094,11 +1094,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 			$value
 		);
 
-		if ( version_compare( PHP_VERSION, '7.3.0', '>=' ) ) {
-			setcookie( $name, $value, $options );
-		} else {
-			setcookie( $name, $value, $options['expires'], $options['path'], $options['domain'], $options['secure'], $options['httponly'] );
-		}
+		setcookie( $name, $value, $options );
 	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
@@ -2507,15 +2503,7 @@ function wc_decimal_to_fraction( $decimal ) {
  * @return float
  */
 function wc_round_discount( $value, $precision ) {
-	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return NumberUtil::round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
-	}
-
-	if ( PHP_ROUND_HALF_DOWN === WC_DISCOUNT_ROUNDING_MODE ) {
-		return wc_legacy_round_half_down( $value, $precision );
-	}
-
-	return NumberUtil::round( $value, $precision );
+	return NumberUtil::round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 }
 
 /**

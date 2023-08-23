@@ -49,6 +49,12 @@
 		align-items: center;
 		justify-content: flex-end;
 
+		&--delete {
+			&.components-button.components-menu-item__button.is-link {
+				text-decoration: none;
+			}
+		}
+
 		.components-button {
 			position: relative;
 			color: var(--wp-admin-theme-color);
@@ -63,8 +69,14 @@
 			}
 		}
 
-		.components-button svg {
-			fill: none;
+		.components-button {
+			&.components-dropdown-menu__toggle.has-icon svg {
+				fill: inherit;
+			}
+
+			svg {
+				fill: none;
+			}
 		}
 
 		.components-button--visible {
