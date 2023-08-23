@@ -115,7 +115,7 @@
 		"ie 8",
 		"ie 9"
 	],
-	"dependencies": {
+	"dependencies": {		
 		"@playwright/test": "^1.37.1",
 		"@wordpress/browserslist-config": "wp-6.2"
 	}

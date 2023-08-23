@@ -36,7 +36,7 @@
 		"@wordpress/components": "wp-6.2",
 		"@wordpress/element": "wp-6.2",
 		"@wordpress/i18n": "wp-6.2",
-		"classnames": "^2.3.1",
+		"classnames": "^2.3.1",		
 		"gridicons": "^3.4.0",
 		"react": "^17.0.2",
 		"string-similarity": "4.0.4"
