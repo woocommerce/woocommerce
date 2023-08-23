@@ -133,12 +133,23 @@ class FeaturesController {
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
+			'marketplace'          => array(
+				'name'               => __( 'Marketplace', 'woocommerce' ),
+				'description'        => __(
+					'New, faster way to find extensions and themes for your WooCommerce store',
+					'woocommerce'
+				),
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+			),
 		);
 
 		$this->legacy_feature_ids = array(
 			'analytics',
 			'new_navigation',
 			'product_block_editor',
+			'marketplace',
 			// Compatibility for COT is determined by `custom_order_tables'.
 			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
