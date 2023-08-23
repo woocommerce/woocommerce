@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure that the full discount is ignored in free shipping minimum order calculations when ignore_discount setting is enabled

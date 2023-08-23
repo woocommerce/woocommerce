@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add filter `woocommerce_pre_delete_{object_type}` which allows preventing deletion.'
