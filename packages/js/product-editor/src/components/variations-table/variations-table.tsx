@@ -1,29 +1,16 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import {
-	Button,
-	DropdownMenu,
-	MenuGroup,
-	MenuItem,
-	Spinner,
-	Tooltip,
-} from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
-import {
-	useContext,
-	useState,
-	createElement,
-	Fragment,
-} from '@wordpress/element';
+import { useContext, useState, createElement } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { moreVertical } from '@wordpress/icons';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -43,6 +30,7 @@ import {
 	PRODUCT_VARIATION_TITLE_LIMIT,
 	TRACKS_SOURCE,
 } from '../../constants';
+import { VariationActionsMenu } from './variation-actions-menu';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -296,71 +284,11 @@ export function VariationsTable() {
 									</Button>
 								</Tooltip>
 							) }
-
-							<DropdownMenu
-								icon={ moreVertical }
-								label={ __( 'Actions', 'woocommerce' ) }
-								toggleProps={ {
-									onClick() {
-										recordEvent(
-											'product_variations_menu_view',
-											{
-												source: TRACKS_SOURCE,
-											}
-										);
-									},
-								} }
-							>
-								{ ( { onClose } ) => (
-									<>
-										<MenuGroup
-											label={ sprintf(
-												/** Translators: Variation ID */
-												__(
-													'Variation Id: %s',
-													'woocommerce'
-												),
-												variation.id
-											) }
-										>
-											<MenuItem
-												href={ variation.permalink }
-												onClick={ () => {
-													recordEvent(
-														'product_variations_preview',
-														{
-															source: TRACKS_SOURCE,
-														}
-													);
-												} }
-											>
-												{ __(
-													'Preview',
-													'woocommerce'
-												) }
-											</MenuItem>
-										</MenuGroup>
-										<MenuGroup>
-											<MenuItem
-												isDestructive
-												variant="link"
-												onClick={ () => {
-													handleDeleteVariationClick(
-														variation.id
-													);
-													onClose();
-												} }
-												className="woocommerce-product-variations__actions--delete"
-											>
-												{ __(
-													'Delete',
-													'woocommerce'
-												) }
-											</MenuItem>
-										</MenuGroup>
-									</>
-								) }
-							</DropdownMenu>
+							<VariationActionsMenu
+								variation={ variation }
+								onChange={ () => {} }
+								onDelete={ handleDeleteVariationClick }
+							/>
 						</div>
 					</ListItem>
 				) ) }
