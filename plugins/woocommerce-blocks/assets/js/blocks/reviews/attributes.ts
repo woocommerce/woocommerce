@@ -1,3 +1,9 @@
+/**
+ * External dependencies
+ */
+import { BlockAttributes } from '@wordpress/blocks';
+import { Review } from '@woocommerce/base-components/reviews/types';
+
 export default {
 	/**
 	 * Toggle for edit mode in the block preview.
@@ -99,4 +105,20 @@ export default {
 		type: 'array',
 		default: null,
 	},
+};
+
+export type ReviewBlockAttributes = BlockAttributes & {
+	editMode: boolean;
+	imageType: string;
+	orderby: string;
+	reviewsOnLoadMore: number;
+	reviewsOnPageLoad: number;
+	showLoadMore: boolean;
+	showOrderby: boolean;
+	showReviewDate: boolean;
+	showReviewerName: boolean;
+	showReviewImage: boolean;
+	showReviewRating: boolean;
+	showReviewContent: boolean;
+	previewReviews: Review[];
 };
