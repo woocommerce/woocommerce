@@ -144,7 +144,7 @@ export function VariationsTable() {
 			...prevState,
 			[ variationId ]: true,
 		} ) );
-		deleteProductVariation< Promise< ProductVariation > >( {
+		deleteProductVariation( {
 			product_id: productId,
 			id: variationId,
 		} )

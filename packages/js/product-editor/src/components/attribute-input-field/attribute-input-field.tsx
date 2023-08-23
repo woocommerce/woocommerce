@@ -81,7 +81,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	const markedAttributes = useMemo(
 		function setDisabledAttribute() {
 			return (
-				attributes?.map( ( attribute ) => ( {
+				attributes?.map( ( attribute: NarrowedQueryAttribute ) => ( {
 					...attribute,
 					isDisabled: disabledAttributeIds.includes( attribute.id ),
 				} ) ) ?? []
