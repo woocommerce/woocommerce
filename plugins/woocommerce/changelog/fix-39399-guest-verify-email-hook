@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Be more precise when checking submission data from the email verification form on the order confirmation screen.
