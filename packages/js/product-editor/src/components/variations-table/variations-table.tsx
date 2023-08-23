@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
@@ -87,6 +87,9 @@ export function VariationsTable() {
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( 'core/notices' );
+
 	if ( ! variations && isLoading ) {
 		return (
 			<div className="woocommerce-product-variations__loading">
@@ -135,12 +138,24 @@ export function VariationsTable() {
 		updateProductVariation< Promise< ProductVariation > >(
 			{ product_id: productId, id: variationId },
 			variation
-		).finally( () =>
-			setIsUpdating( ( prevState ) => ( {
-				...prevState,
-				[ variationId ]: false,
-			} ) )
-		);
+		)
+			.then( () => {
+				createSuccessNotice(
+					/* translators: The updated variations count */
+					sprintf( __( '%s variation/s updated.', 'woocommerce' ), 1 )
+				);
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to save variation.', 'woocommerce' )
+				);
+			} )
+			.finally( () =>
+				setIsUpdating( ( prevState ) => ( {
+					...prevState,
+					[ variationId ]: false,
+				} ) )
+			);
 	}
 
 	return (
