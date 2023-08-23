@@ -225,6 +225,29 @@ export function VariationActionsMenu( {
 												'woocommerce'
 											) }
 										</MenuItem>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt(
+													'sale_price',
+													__(
+														'Enter a value (fixed or %)',
+														'woocommerce'
+													),
+													( value ) =>
+														addFixedOrPercentage(
+															variation.sale_price,
+															value,
+															-1
+														)?.toFixed( 2 )
+												);
+												onClose();
+											} }
+										>
+											{ __(
+												'Decrease sale price',
+												'woocommerce'
+											) }
+										</MenuItem>
 									</MenuGroup>
 								</div>
 							) }
