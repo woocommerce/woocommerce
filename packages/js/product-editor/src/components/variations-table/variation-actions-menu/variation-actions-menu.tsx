@@ -68,6 +68,7 @@ export function VariationActionsMenu( {
 		label: string = __( 'Enter a value', 'woocommerce' ),
 		parser: ( value: string ) => unknown = ( value ) => value
 	) {
+		// eslint-disable-next-line no-alert
 		const value = window.prompt( label );
 		if ( value === null ) return;
 
