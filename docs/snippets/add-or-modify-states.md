@@ -4,8 +4,7 @@ Add this code to your child theme’s `functions.php` file or via a plugin that 
 
 Add your own or modify shipping states in WooCommerce.
 
-> **Note**
-> You must replace both instances of XX with your country code. This means each state id in the array must have your two letter country code before the number you assign to the state.
+> Note: you **must** replace both instances of XX with your country code. This means each state id in the array must have your two letter country code before the number you assign to the state.
 
 ```php
 if ( ! function_exists( 'YOUR_PREFIX_add_or_modify_states' ) ) {
