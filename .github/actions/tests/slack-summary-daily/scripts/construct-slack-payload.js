@@ -107,7 +107,7 @@ module.exports = async ( { context, core, github } ) => {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: '*Smoke tests on daily build*',
+					text: '<https://woocommerce.github.io/woocommerce-test-reports/daily|*Smoke tests on daily build*>',
 				},
 			},
 			{
@@ -131,14 +131,14 @@ module.exports = async ( { context, core, github } ) => {
 	const blockGroup_nightlySite = create_blockGroup_nightlySite();
 	const blockGroups_plugins =
 		readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH );
-	const blocks_payload = [
+	const blocks_all = [
 		...blockGroup_header,
 		...blockGroup_nightlySite,
 		...blockGroups_plugins.flat(),
 	];
 	const payload = {
 		text: 'Daily test results',
-		blocks: blocks_payload,
+		blocks: blocks_all,
 	};
 	const payload_stringified = JSON.stringify( payload );
 
