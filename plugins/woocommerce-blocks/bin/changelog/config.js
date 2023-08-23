@@ -17,14 +17,14 @@ const DEFAULTS = {
 	changelogSrcType: changelogSrcTypes.MILESTONE,
 	devNoteLabel: 'dev-note',
 	repo: '',
-	ghApiToken: '',
+	githubToken: '',
 	zhApiToken: '',
 };
 
 pkg.changelog = pkg.changelog || DEFAULTS;
 
 config.merge( { ...DEFAULTS, ...pkg.changelog } );
-config.env( [ 'GH_API_TOKEN', 'ZH_API_TOKEN' ] );
+config.env( [ 'GITHUB_TOKEN', 'ZH_API_TOKEN' ] );
 config.argv( Object.keys( DEFAULTS ) );
 
 const REPO = config.get( 'repo' );
