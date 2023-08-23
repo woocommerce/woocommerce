@@ -19,17 +19,53 @@ import { recordEvent } from '@woocommerce/tracks';
 import { VariationActionsMenuProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 
+function isPercentage( value: string ) {
+	return value.endsWith( '%' );
+}
+
+function parsePercentage( value: string ) {
+	const stringNumber = value.substring( 0, value.length - 1 );
+	if ( Number.isNaN( Number( stringNumber ) ) ) {
+		return undefined;
+	}
+	return Number( stringNumber );
+}
+
+function addFixedOrPercentage( value: string, fixedOrPercentage: string ) {
+	if ( isPercentage( fixedOrPercentage ) ) {
+		if ( Number.isNaN( Number( value ) ) ) {
+			return 0;
+		}
+		const percentage = parsePercentage( fixedOrPercentage );
+		if ( percentage === undefined ) {
+			return Number( value );
+		}
+		return Number( value ) + Number( value ) * ( percentage / 100 );
+	}
+	if ( Number.isNaN( Number( value ) ) ) {
+		if ( Number.isNaN( Number( fixedOrPercentage ) ) ) {
+			return undefined;
+		}
+		return Number( fixedOrPercentage );
+	}
+	return Number( value ) + Number( fixedOrPercentage );
+}
+
 export function VariationActionsMenu( {
 	variation,
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
-	function handlePropmt( propertyName: keyof ProductVariation ) {
-		const value = window.prompt( __( 'Enter a value', 'woocommerce' ) );
+	function handlePropmt(
+		propertyName: keyof ProductVariation,
+		label: string = __( 'Enter a value', 'woocommerce' ),
+		parser: ( value: string ) => unknown = ( value ) => value
+	) {
+		const value = window.prompt( label );
 		if ( value === null ) return;
 
 		onChange( {
-			[ propertyName ]: value,
+			[ propertyName ]: parser( value.trim() ),
 		} );
 	}
 
@@ -94,6 +130,28 @@ export function VariationActionsMenu( {
 										>
 											{ __(
 												'Set list price',
+												'woocommerce'
+											) }
+										</MenuItem>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt(
+													'regular_price',
+													__(
+														'Enter a value (fixed or %)',
+														'woocommerce'
+													),
+													( value ) =>
+														addFixedOrPercentage(
+															variation.regular_price,
+															value
+														)?.toFixed( 2 )
+												);
+												onClose();
+											} }
+										>
+											{ __(
+												'Increase list price',
 												'woocommerce'
 											) }
 										</MenuItem>
