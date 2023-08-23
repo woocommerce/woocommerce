@@ -63,7 +63,7 @@ export function VariationActionsMenu( {
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
-	function handlePropmt(
+	function handlePrompt(
 		propertyName: keyof ProductVariation,
 		label: string = __( 'Enter a value', 'woocommerce' ),
 		parser: ( value: string ) => unknown = ( value ) => value
@@ -132,7 +132,7 @@ export function VariationActionsMenu( {
 									>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt( 'regular_price' );
+												handlePrompt( 'regular_price' );
 												onClose();
 											} }
 										>
@@ -143,7 +143,7 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt(
+												handlePrompt(
 													'regular_price',
 													__(
 														'Enter a value (fixed or %)',
@@ -165,7 +165,7 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt(
+												handlePrompt(
 													'regular_price',
 													__(
 														'Enter a value (fixed or %)',
@@ -195,7 +195,7 @@ export function VariationActionsMenu( {
 									>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt( 'sale_price' );
+												handlePrompt( 'sale_price' );
 												onClose();
 											} }
 										>
@@ -206,7 +206,7 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt(
+												handlePrompt(
 													'sale_price',
 													__(
 														'Enter a value (fixed or %)',
@@ -228,7 +228,7 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt(
+												handlePrompt(
 													'sale_price',
 													__(
 														'Enter a value (fixed or %)',
@@ -251,7 +251,7 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
-												handlePropmt(
+												handlePrompt(
 													'date_on_sale_from_gmt',
 													__(
 														'Sale start date (YYYY-MM-DD format or leave blank)',
