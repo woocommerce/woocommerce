@@ -223,22 +223,22 @@ jobs:
               id: create-block-json
               uses: actions/github-script@v6
               with:
-                script: |
-                    const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
-                    script( { core } );
+                  script: |
+                      const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
+                      script( { core } );
               env:
-                    UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
-                    E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
-                    PLUGIN_NAME: ${{ matrix.plugin }}
-                    PLUGIN_SLUG: ${{ matrix.slug }}
-        
+                  UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
+                  E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  PLUGIN_SLUG: ${{ matrix.slug }}
+
             - name: Upload JSON file as artifact
               if: success() || failure()
               uses: actions/upload-artifact@v3
               with:
                   name: ${{ env.PLUGIN_SLACK_BLOCKS_ARTIFACT }}
                   path: ${{ steps.create-block-json.outputs.path }}
-        
+
     trunk-results:
         name: Publish report on smoke tests on nightly build
         if: |
@@ -368,8 +368,8 @@ jobs:
               uses: actions/github-script@v6
               with:
                   script: |
-                    const script = require('./.github/actions/tests/slack-summary-daily/scripts/construct-slack-payload.js');
-                    await script( { context, core, github } );
+                      const script = require('./.github/actions/tests/slack-summary-daily/scripts/construct-slack-payload.js');
+                      await script( { context, core, github } );
               env:
                   API_RESULT: ${{ needs.api-tests.outputs.test-result }}
                   E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result }}
@@ -384,4 +384,3 @@ jobs:
                   payload: ${{ steps.construct-slack-payload.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-        
