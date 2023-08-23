@@ -10,6 +10,7 @@ import {
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { chevronRight, moreVertical } from '@wordpress/icons';
+import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -20,8 +21,17 @@ import { TRACKS_SOURCE } from '../../../constants';
 
 export function VariationActionsMenu( {
 	variation,
+	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
+	function handlePropmt( propertyName: keyof ProductVariation ) {
+		const value = window.prompt( __( 'Enter a value', 'woocommerce' ) );
+
+		onChange( {
+			[ propertyName ]: value,
+		} );
+	}
+
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
@@ -71,7 +81,12 @@ export function VariationActionsMenu( {
 								<MenuGroup
 									label={ __( 'List price', 'woocommerce' ) }
 								>
-									<MenuItem>
+									<MenuItem
+										onClick={ () => {
+											handlePropmt( 'regular_price' );
+											onClose();
+										} }
+									>
 										{ __(
 											'Set list price',
 											'woocommerce'

@@ -100,26 +100,6 @@ export function VariationsTable() {
 		);
 	}
 
-	function handleCustomerVisibilityClick(
-		variationId: number,
-		status: 'private' | 'publish'
-	) {
-		if ( isUpdating[ variationId ] ) return;
-		setIsUpdating( ( prevState ) => ( {
-			...prevState,
-			[ variationId ]: true,
-		} ) );
-		updateProductVariation< Promise< ProductVariation > >(
-			{ product_id: productId, id: variationId },
-			{ status }
-		).finally( () =>
-			setIsUpdating( ( prevState ) => ( {
-				...prevState,
-				[ variationId ]: false,
-			} ) )
-		);
-	}
-
 	function handleDeleteVariationClick( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
 		setIsUpdating( ( prevState ) => ( {
@@ -141,6 +121,26 @@ export function VariationsTable() {
 					[ variationId ]: false,
 				} ) )
 			);
+	}
+
+	function handleVariationChange(
+		variationId: number,
+		variation: Partial< ProductVariation >
+	) {
+		if ( isUpdating[ variationId ] ) return;
+		setIsUpdating( ( prevState ) => ( {
+			...prevState,
+			[ variationId ]: true,
+		} ) );
+		updateProductVariation< Promise< ProductVariation > >(
+			{ product_id: productId, id: variationId },
+			variation
+		).finally( () =>
+			setIsUpdating( ( prevState ) => ( {
+				...prevState,
+				[ variationId ]: false,
+			} ) )
+		);
 	}
 
 	return (
@@ -239,9 +239,9 @@ export function VariationsTable() {
 											isUpdating[ variation.id ]
 										}
 										onClick={ () =>
-											handleCustomerVisibilityClick(
+											handleVariationChange(
 												variation.id,
-												'publish'
+												{ status: 'publish' }
 											)
 										}
 									>
@@ -270,9 +270,9 @@ export function VariationsTable() {
 											isUpdating[ variation.id ]
 										}
 										onClick={ () =>
-											handleCustomerVisibilityClick(
+											handleVariationChange(
 												variation.id,
-												'private'
+												{ status: 'private' }
 											)
 										}
 									>
@@ -286,7 +286,9 @@ export function VariationsTable() {
 							) }
 							<VariationActionsMenu
 								variation={ variation }
-								onChange={ () => {} }
+								onChange={ ( value ) =>
+									handleVariationChange( variation.id, value )
+								}
 								onDelete={ handleDeleteVariationClick }
 							/>
 						</div>
