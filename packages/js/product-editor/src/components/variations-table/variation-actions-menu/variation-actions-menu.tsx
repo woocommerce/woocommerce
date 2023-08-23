@@ -248,6 +248,23 @@ export function VariationActionsMenu( {
 												'woocommerce'
 											) }
 										</MenuItem>
+										<MenuItem
+											onClick={ () => {
+												handlePropmt(
+													'date_on_sale_from_gmt',
+													__(
+														'Sale start date (YYYY-MM-DD format or leave blank)',
+														'woocommerce'
+													)
+												);
+												onClose();
+											} }
+										>
+											{ __(
+												'Schedule sale',
+												'woocommerce'
+											) }
+										</MenuItem>
 									</MenuGroup>
 								</div>
 							) }
