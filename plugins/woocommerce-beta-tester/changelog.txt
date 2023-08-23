@@ -1,5 +1,40 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2023-08-23 - version 2.2.4
+* Patch - check for WC_ADMIN_APP constant before using it
+* Patch - Fix a bug where between WC installs the beta tester would crash trying to log.
+* Patch - Fix a bug where WC_ABSPATH is used when the WooCommerce instance might not have defined it yet.
+* Patch - Fix rest api filter to allow any strings in replacement
+* Minor - Add a basic UI screen for installing from live branches (disabled in prod)
+* Minor - Add a userscript that allows creation of JN sites from Github branches.
+* Minor - Add a wp cli command for activating live branches.
+* Minor - Add feature to install and activate live branches.
+* Minor - Add SlotFill Examples feature
+* Minor - Add trunk as installable branch to live branches feature.
+* Minor - Add userscript option to install wc smooth generator.
+* Minor - Enable the live branches feature.
+* Minor - Fixing mismatched dependencies between @types/react-dom and react-dom
+* Minor - Update the live branches UI to improve finding and installing branches.
+* Minor - Declare compatibility for custom order table and product block editor features.
+* Minor - Update README to separate WooCommerce Admin Tester
+* Minor - Add support for installing WC trunk via live branches.
+* Patch - Bump required PHP version to 7.4
+* Patch - Consolidate wp-prettier version with rest of monorepo.
+* Minor - Release woocommerce-beta-tester with bugfixes from #39441
+* Minor - Sync @wordpress package versions via syncpack.
+* Patch - Update eslint to 8.32.0 across the monorepo.
+* Minor - Update pnpm monorepo-wide to 8.6.5
+* Minor - Update pnpm to 8.6.7
+* Minor - Update pnpm to version 8.
+* Minor - Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues
+* Patch - Update `wp-env` to version 8.2.0.
+* Minor - Upgrade TypeScript to 5.1.6
+* Patch - Correct spelling errors
+* Patch - Remove api code folder that was duplicated
+* Minor - Adjust option modal so that longer option names are fully shown.
+* Minor - Alphabetize the features list, and use toggle controls instead of buttons.
+* Minor - Reload page when toggling new-product-management-experience and product-block-editor
+
 2022-10-11 - version 2.1.0
 * Dev - Add WooCommerce Admin Helper Tester functionality to Beta Tester
 
