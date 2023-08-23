@@ -57,6 +57,7 @@
 		box-sizing: border-box;
 		margin-left: 0px;
 		width: 100%;
+		min-height: 47px;
 		> .block-editor-block-toolbar.is-showing-movers:before {
 			display: none;
 		}
