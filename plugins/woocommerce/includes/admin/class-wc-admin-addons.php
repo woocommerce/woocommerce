@@ -64,8 +64,24 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	public static function render_featured() {
+		$featured = self::fetch_featured();
+
+		if ( is_wp_error( $featured ) ) {
+			self::output_empty( $featured->get_error_message() );
+		}
+
+		self::output_featured( $featured );
+	}
+
+	/**
+	 * Fetch featured products from WCCOM's the Featured 2.0 Endpoint and cache the data for a day.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch_featured() {
 		$locale   = get_user_locale();
 		$featured = self::get_locale_data_from_transient( 'wc_addons_featured', $locale );
+
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -96,9 +112,7 @@ class WC_Admin_Addons {
 					? __( 'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.', 'woocommerce' )
 					: $raw_featured->get_error_message();
 
-				self::output_empty( $message );
-
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
@@ -117,18 +131,15 @@ class WC_Admin_Addons {
 					$response_code
 				);
 
-				self::output_empty( $message );
-
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
-				self::output_empty( $message );
 
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			if ( $featured ) {
@@ -136,7 +147,7 @@ class WC_Admin_Addons {
 			}
 		}
 
-		self::output_featured( $featured );
+		return $featured;
 	}
 
 	/**

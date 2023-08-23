@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Downlo
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketplaceServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
@@ -68,6 +69,7 @@ final class Container {
 		OrderAdminServiceProvider::class,
 		FeaturesServiceProvider::class,
 		MarketingServiceProvider::class,
+		MarketplaceServiceProvider::class,
 		BlockTemplatesServiceProvider::class,
 	);
 
