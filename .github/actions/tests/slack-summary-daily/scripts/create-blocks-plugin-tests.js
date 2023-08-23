@@ -5,13 +5,14 @@ module.exports = ( { core } ) => {
 
 	const emoji_UPLOAD = selectEmoji( UPLOAD_RESULT );
 	const emoji_E2E = selectEmoji( E2E_RESULT );
+	const reportURL = `https://woocommerce.github.io/woocommerce-test-reports/daily/${ PLUGIN_SLUG }/e2e`;
 
 	const blockGroup = [
 		{
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `*${ PLUGIN_NAME }*`,
+				text: `<${ reportURL }|*${ PLUGIN_NAME }*>`,
 			},
 		},
 		{

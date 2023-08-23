@@ -12,6 +12,8 @@ module.exports = async ( { context, core, github } ) => {
 		readContextBlocksFromJsonFiles,
 	} = require( './utils' );
 
+	const URL_GITHUB_RUN_LOG = `https://github.com/woocommerce/woocommerce/actions/runs/${ GITHUB_RUN_ID }`;
+
 	const create_blockGroup_header = async () => {
 		const getRunStartDate = async () => {
 			const response = await github.rest.actions.getWorkflowRun( {
@@ -69,7 +71,7 @@ module.exports = async ( { context, core, github } ) => {
 				elements: [
 					{
 						type: 'mrkdwn',
-						text: `*GitHub run logs:* <https://github.com/woocommerce/woocommerce/actions/runs/${ GITHUB_RUN_ID }|${ GITHUB_RUN_ID }>`,
+						text: `*GitHub run logs:* <${ URL_GITHUB_RUN_LOG }|${ GITHUB_RUN_ID }>`,
 					},
 				],
 			},
@@ -94,6 +96,11 @@ module.exports = async ( { context, core, github } ) => {
 		const emoji_API = selectEmoji( API_RESULT );
 		const emoji_E2E = selectEmoji( E2E_RESULT );
 		const emoji_k6 = selectEmoji( k6_RESULT );
+		const url_API =
+			'https://woocommerce.github.io/woocommerce-test-reports/daily/nightly-site/api';
+		const url_E2E =
+			'https://woocommerce.github.io/woocommerce-test-reports/daily/nightly-site/e2e';
+		const url_k6 = URL_GITHUB_RUN_LOG;
 
 		const blocks = [
 			{
@@ -108,7 +115,7 @@ module.exports = async ( { context, core, github } ) => {
 				elements: [
 					{
 						type: 'mrkdwn',
-						text: `API ${ emoji_API }\tE2E ${ emoji_E2E }\tk6 ${ emoji_k6 }`,
+						text: `<${ url_API }|API> ${ emoji_API }\t<${ url_E2E }|E2E> ${ emoji_E2E }\t<${ url_k6 }|k6> ${ emoji_k6 }`,
 					},
 				],
 			},
@@ -124,12 +131,14 @@ module.exports = async ( { context, core, github } ) => {
 	const blockGroup_nightlySite = create_blockGroup_nightlySite();
 	const blockGroups_plugins =
 		readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH );
+	const blocks_payload = [
+		...blockGroup_header,
+		...blockGroup_nightlySite,
+		...blockGroups_plugins.flat(),
+	];
 	const payload = {
-		blocks: [
-			...blockGroup_header,
-			...blockGroup_nightlySite,
-			...blockGroups_plugins.flat(),
-		],
+		text: 'Daily test results',
+		blocks: blocks_payload,
 	};
 	const payload_stringified = JSON.stringify( payload );
 
