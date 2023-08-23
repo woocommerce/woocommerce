@@ -18,7 +18,7 @@ export const productApiFetchMiddleware = () => {
 	// This is needed to ensure that we use the correct namespace for the entity data store
 	// without disturbing the rest_namespace outside of the product block editor.
 	apiFetch.use( ( options, next ) => {
-		const versionTwoRegex = new RegExp( '^/wp/v2/product' );
+		const versionTwoRegex = new RegExp( '^/wp/v2/product(?!_)' );
 		if (
 			options.path &&
 			versionTwoRegex.test( options?.path ) &&

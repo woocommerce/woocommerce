@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add delete option to generate variations API, to auto delete unmatched variations.

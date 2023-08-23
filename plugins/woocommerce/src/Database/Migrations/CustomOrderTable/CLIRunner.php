@@ -86,13 +86,6 @@ class CLIRunner {
 	}
 
 	/**
-	 * Helper method to log warning that feature is not yet production ready.
-	 */
-	private function log_production_warning() {
-		WP_CLI::log( __( 'This feature is not production ready yet. Make sure you are not running these commands in your production environment.', 'woocommerce' ) );
-	}
-
-	/**
 	 * Count how many orders have yet to be migrated into the custom orders table.
 	 *
 	 * ## EXAMPLES
@@ -156,7 +149,6 @@ class CLIRunner {
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
 	public function sync( $args = array(), $assoc_args = array() ) {
-		$this->log_production_warning();
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
@@ -266,7 +258,6 @@ class CLIRunner {
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
 	public function migrate( $args = array(), $assoc_args = array() ) {
-		$this->log_production_warning();
 		WP_CLI::log( __( 'Migrate command is deprecated. Please use `sync` instead.', 'woocommerce' ) );
 	}
 
@@ -319,7 +310,6 @@ class CLIRunner {
 	 */
 	public function verify_cot_data( $args = array(), $assoc_args = array() ) {
 		global $wpdb;
-		$this->log_production_warning();
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
