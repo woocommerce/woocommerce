@@ -24,13 +24,14 @@ class Group extends ProductBlock implements GroupInterface {
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
+	 * @throws \InvalidArgumentException If blockName key and value are passed into block configuration.
 	 */
 	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
 		if ( ! empty( $config['blockName'] ) ) {
 			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-tab".' );
 		}
-		if ( $config['id'] && ( empty( $config['attributes']) || empty( $config['attributes']['id']))) {
-			$config['attributes'] = empty( $config['attributes']) ? [] : $config['attributes'];
+		if ( $config['id'] && ( empty( $config['attributes'] ) || empty( $config['attributes']['id'] ) ) ) {
+			$config['attributes']       = empty( $config['attributes'] ) ? [] : $config['attributes'];
 			$config['attributes']['id'] = $config['id'];
 		}
 		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-tab' ), $config ), $root_template, $parent );

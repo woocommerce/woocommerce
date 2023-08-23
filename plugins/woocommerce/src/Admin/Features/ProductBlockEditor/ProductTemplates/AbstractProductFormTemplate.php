@@ -13,6 +13,7 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	 * Get a group block by ID.
 	 *
 	 * @param string $group_id The group block ID.
+	 * @throws \UnexpectedValueException If block is not of type GroupInterface.
 	 */
 	public function get_group_by_id( string $group_id ): ?GroupInterface {
 		$group = $this->get_block( $group_id );
@@ -26,6 +27,7 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	 * Get a section block by ID.
 	 *
 	 * @param string $section_id The section block ID.
+	 * @throws \UnexpectedValueException If block is not of type SectionInterface.
 	 */
 	public function get_section_by_id( string $section_id ): ?SectionInterface {
 		$section = $this->get_block( $section_id );

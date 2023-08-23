@@ -15,12 +15,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL' => 'general',
+		'GENERAL'      => 'general',
 		'ORGANIZATION' => 'organization',
-		'PRICING' => 'pricing',
-		'INVENTORY' => 'inventory',
-		'SHIPPING' => 'shipping',
-		'VARIATIONS' => 'variations'
+		'PRICING'      => 'pricing',
+		'INVENTORY'    => 'inventory',
+		'SHIPPING'     => 'shipping',
+		'VARIATIONS'   => 'variations',
 	);
 
 	/**
@@ -109,10 +109,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
 			$this->add_group(
 				[
-					'id' => $this::GROUP_IDS['VARIATIONS'],
-					'order' => 50,
+					'id'         => $this::GROUP_IDS['VARIATIONS'],
+					'order'      => 50,
 					'attributes' => [
-						'title' => __('Variations', 'woocommerce'),
+						'title' => __( 'Variations', 'woocommerce' ),
 					],
 				]
 			);
@@ -242,7 +242,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * Adds the organization group blocks to the template.
 	 */
 	private function add_organization_group_blocks() {
-		$organization_group =  $this->get_group_by_id( $this::GROUP_IDS['ORGANIZATION'] );
+		$organization_group = $this->get_group_by_id( $this::GROUP_IDS['ORGANIZATION'] );
 		// Product Catalog Section.
 		$product_catalog_section = $organization_group->add_section(
 			[
@@ -707,7 +707,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * Adds the variation group blocks to the template.
 	 */
 	private function add_variation_group_blocks() {
-		$variation_group  = $this->get_group_by_id( $this::GROUP_IDS['VARIATIONS'] );
+		$variation_group = $this->get_group_by_id( $this::GROUP_IDS['VARIATIONS'] );
 		if ( ! $variation_group ) {
 			return;
 		}

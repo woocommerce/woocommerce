@@ -22,6 +22,7 @@ class Section extends ProductBlock implements SectionInterface {
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
+	 * @throws \InvalidArgumentException If blockName key and value are passed into block configuration.
 	 */
 	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
 		if ( ! empty( $config['blockName'] ) ) {

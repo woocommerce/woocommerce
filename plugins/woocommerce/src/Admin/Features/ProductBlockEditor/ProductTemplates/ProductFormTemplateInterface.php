@@ -21,7 +21,7 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	/**
 	 * Gets Group block by id.
 	 *
-	 * @param string $group_id
+	 * @param string $group_id group id.
 	 * @return GroupInterface|null
 	 */
 	public function get_group_by_id( string $group_id ): ?GroupInterface;
@@ -29,7 +29,7 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	/**
 	 * Gets Section block by id.
 	 *
-	 * @param string $section_id
+	 * @param string $section_id section id.
 	 * @return SectionInterface|null
 	 */
 	public function get_section_by_id( string $section_id ): ?SectionInterface;
@@ -37,7 +37,7 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	/**
 	 * Gets Block by id.
 	 *
-	 * @param string $block_id
+	 * @param string $block_id block id.
 	 * @return BlockInterface|null
 	 */
 	public function get_block_by_id( string $block_id ): ?BlockInterface;
