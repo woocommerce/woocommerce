@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use WP_Block_Editor_Context;
 

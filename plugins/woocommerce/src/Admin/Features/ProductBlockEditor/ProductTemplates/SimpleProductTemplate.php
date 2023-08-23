@@ -6,26 +6,34 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 
 /**
  * Simple Product Template.
  */
-class SimpleProductTemplate extends AbstractBlockTemplate implements ProductFormTemplateInterface {
+class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
+	/**
+	 * The context name used to identify the editor.
+	 */
+	const GROUP_IDS = array(
+		'GENERAL' => 'general',
+		'ORGANIZATION' => 'organization',
+		'PRICING' => 'pricing',
+		'INVENTORY' => 'inventory',
+		'SHIPPING' => 'shipping',
+		'VARIATIONS' => 'variations'
+	);
 
 	/**
 	 * SimpleProductTemplate constructor.
 	 */
 	public function __construct() {
+		$this->add_group_blocks();
 		$this->add_general_group_blocks();
 		$this->add_organization_group_blocks();
 		$this->add_pricing_group_blocks();
 		$this->add_inventory_group_blocks();
 		$this->add_shipping_group_blocks();
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			$this->add_variation_group_blocks();
-		}
+		$this->add_variation_group_blocks();
 	}
 
 	/**
@@ -50,56 +58,72 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	}
 
 	/**
-	 * Get a group block by ID.
-	 *
-	 * @param string $group_id The group block ID.
+	 * Adds the group blocks to the template.
 	 */
-	public function get_group_by_id( string $group_id ): ?GroupInterface {
-		return $this->get_block( $group_id );
-	}
-
-	/**
-	 * Get a section block by ID.
-	 *
-	 * @param string $section_id The section block ID.
-	 */
-	public function get_section_by_id( string $section_id ): ?SectionInterface {
-		return $this->get_block( $section_id );
-	}
-
-	/**
-	 * Get a block by ID.
-	 *
-	 * @param string $block_id The block block ID.
-	 */
-	public function get_block_by_id( string $block_id ): ?BlockInterface {
-		return $this->get_block( $block_id );
-	}
-
-	/**
-	 * Add a custom block type to this template.
-	 *
-	 * @param array $block_config The block data.
-	 */
-	public function add_group( array $block_config ): GroupInterface {
-		$block = new Group( $block_config, $this->get_root_template(), $this );
-		return $this->add_inner_block( $block );
+	private function add_group_blocks() {
+		$this->add_group(
+			[
+				'id'         => $this::GROUP_IDS['GENERAL'],
+				'order'      => 10,
+				'attributes' => [
+					'title' => __( 'General', 'woocommerce' ),
+				],
+			]
+		);
+		$this->add_group(
+			[
+				'id'         => $this::GROUP_IDS['ORGANIZATION'],
+				'order'      => 15,
+				'attributes' => [
+					'title' => __( 'Organization', 'woocommerce' ),
+				],
+			]
+		);
+		$this->add_group(
+			[
+				'id'         => $this::GROUP_IDS['PRICING'],
+				'order'      => 20,
+				'attributes' => [
+					'title' => __( 'Pricing', 'woocommerce' ),
+				],
+			]
+		);
+		$this->add_group(
+			[
+				'id'         => $this::GROUP_IDS['INVENTORY'],
+				'order'      => 30,
+				'attributes' => [
+					'title' => __( 'Inventory', 'woocommerce' ),
+				],
+			]
+		);
+		$this->add_group(
+			[
+				'id'         => $this::GROUP_IDS['SHIPPING'],
+				'order'      => 40,
+				'attributes' => [
+					'title' => __( 'Shipping', 'woocommerce' ),
+				],
+			]
+		);
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			$this->add_group(
+				[
+					'id' => $this::GROUP_IDS['VARIATIONS'],
+					'order' => 50,
+					'attributes' => [
+						'title' => __('Variations', 'woocommerce'),
+					],
+				]
+			);
+		}
 	}
 
 	/**
 	 * Adds the general group blocks to the template.
 	 */
 	private function add_general_group_blocks() {
-		$general_group = $this->add_group(
-			[
-				'id'         => 'general',
-				'order'      => 10,
-				'attributes' => [
-					'id'    => 'general',
-					'title' => __( 'General', 'woocommerce' ),
-				],
-			]
-		);
+		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
@@ -148,6 +172,7 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 				'attributes' => [
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
+					/* translators: PricingTab: This is a link tag to the pricing tab. */
 					'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
 				],
 			]
@@ -217,16 +242,7 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	 * Adds the organization group blocks to the template.
 	 */
 	private function add_organization_group_blocks() {
-		$organization_group = $this->add_group(
-			[
-				'id'         => 'organization',
-				'order'      => 15,
-				'attributes' => [
-					'id'    => 'organization',
-					'title' => __( 'Organization', 'woocommerce' ),
-				],
-			]
-		);
+		$organization_group =  $this->get_group_by_id( $this::GROUP_IDS['ORGANIZATION'] );
 		// Product Catalog Section.
 		$product_catalog_section = $organization_group->add_section(
 			[
@@ -305,22 +321,12 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	 * Adds the pricing group blocks to the template.
 	 */
 	private function add_pricing_group_blocks() {
-		$pricing_group = $this->add_group(
-			[
-				'id'         => 'pricing',
-				'order'      => 20,
-				'attributes' => [
-					'id'    => 'pricing',
-					'title' => __( 'Pricing', 'woocommerce' ),
-				],
-			]
-		);
+		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$pricing_group->add_block(
 			[
-				'id'         => 'product_variation_notice_pricing_tab',
+				'id'         => 'pricing-has-variations-notice',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'attributes' => [
-					'id'         => 'wc-product-notice-has-options',
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
@@ -332,6 +338,7 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 			[
 				'id'         => 'product-pricing-section',
 				'attributes' => [
+					'title'       => __( 'Pricing', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
 						__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
@@ -462,22 +469,12 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	 * Adds the inventory group blocks to the template.
 	 */
 	private function add_inventory_group_blocks() {
-		$inventory_group = $this->add_group(
-			[
-				'id'         => 'inventory',
-				'order'      => 30,
-				'attributes' => [
-					'id'    => 'inventory',
-					'title' => __( 'Inventory', 'woocommerce' ),
-				],
-			]
-		);
+		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
 		$inventory_group->add_block(
 			[
 				'id'         => 'product_variation_notice_inventory_tab',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'attributes' => [
-					'id'         => 'wc-product-notice-has-options',
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
@@ -665,22 +662,12 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	 * Adds the shipping group blocks to the template.
 	 */
 	private function add_shipping_group_blocks() {
-		$shipping_group = $this->add_group(
-			[
-				'id'         => 'shipping',
-				'order'      => 40,
-				'attributes' => [
-					'id'    => 'shipping',
-					'title' => __( 'Shipping', 'woocommerce' ),
-				],
-			]
-		);
+		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
 		$shipping_group->add_block(
 			[
 				'id'         => 'product_variation_notice_shipping_tab',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'attributes' => [
-					'id'         => 'wc-product-notice-has-options',
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
@@ -720,16 +707,10 @@ class SimpleProductTemplate extends AbstractBlockTemplate implements ProductForm
 	 * Adds the variation group blocks to the template.
 	 */
 	private function add_variation_group_blocks() {
-		$variation_group  = $this->add_group(
-			[
-				'id'         => 'variations',
-				'order'      => 50,
-				'attributes' => [
-					'id'    => 'variations',
-					'title' => __( 'Variations', 'woocommerce' ),
-				],
-			]
-		);
+		$variation_group  = $this->get_group_by_id( $this::GROUP_IDS['VARIATIONS'] );
+		if ( ! $variation_group ) {
+			return;
+		}
 		$variation_fields = $variation_group->add_block(
 			[
 				'id'         => 'product_variation-field-group',

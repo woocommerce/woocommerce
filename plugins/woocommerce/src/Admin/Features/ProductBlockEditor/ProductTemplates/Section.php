@@ -23,7 +23,10 @@ class Section extends ProductBlock implements SectionInterface {
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 */
-	public function __construct( array $config, &$root_template, ContainerInterface &$parent = null ) {
+	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
+		if ( ! empty( $config['blockName'] ) ) {
+			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-section".' );
+		}
 		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-section' ), $config ), $root_template, $parent );
 	}
 
