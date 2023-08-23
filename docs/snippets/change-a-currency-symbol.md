@@ -17,7 +17,7 @@ if ( ! function_exists( 'YOUR_PREFIX_change_currency_symbol' ) ) {
    * @return string $currency_symbol Updated currency symbol(s).
    */  
   function YOUR_PREFIX_change_currency_symbol( $currency_symbol, $currency ) {
-    switch( $currency ) {
+    switch ( $currency ) {
       case 'AUD': $currency_symbol = 'AUD$'; break;
     }
 
