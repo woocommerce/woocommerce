@@ -36,7 +36,6 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
 		'no_secure_connection'               => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
 		'redirect_download_method'           => 'redirect_download_method_notice',
 		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
@@ -425,46 +424,13 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about WordPress and PHP minimum requirements.
+	 * 
+	 * @deprecated 8.2.0 WordPress and PHP minimum requirements notices are no longer shown.
 	 *
 	 * @since 3.6.5
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
-			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
-			return;
-		}
-
-		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
-		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
-
-		// Both PHP and WordPress up to date version => no notice.
-		if ( ! $old_php && ! $old_wp ) {
-			return;
-		}
-
-		if ( $old_php && $old_wp ) {
-			$msg = sprintf(
-				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION,
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		} elseif ( $old_php ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum PHP version */
-				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION
-			);
-		} elseif ( $old_wp ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		}
-
-		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
 	}
 
 	/**
