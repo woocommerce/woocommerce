@@ -1,8 +1,8 @@
 .woocommerce-iframe-editor {
 	box-sizing: border-box;
 	display: flex;
-    flex-direction: column;
-    height: 100%;
+	flex-direction: column;
+	height: 100%;
 
 	&__main {
 		align-items: flex-start;
@@ -55,5 +55,15 @@
 		border-bottom: 1px solid $gray-400;
 		border-right: 1px solid $gray-400;
 		box-sizing: border-box;
+		margin-left: 0px;
+		width: 100%;
+		> .block-editor-block-toolbar.is-showing-movers:before {
+			display: none;
+		}
+
+		.block-editor-block-toolbar__group-expand-fixed-toolbar,
+		.block-editor-block-toolbar__group-collapse-fixed-toolbar {
+			display: none;
+		}
 	}
 }

@@ -115,19 +115,15 @@ export function HeaderToolbar( {
 					}
 					showTooltip
 				/>
-				{ isWideViewport && (
-					<>
-						{ isLargeViewport && (
-							<ToolbarItem
-								as={ ToolSelector }
-								disabled={ isTextModeEnabled }
-							/>
-						) }
-						<ToolbarItem as={ EditorHistoryUndo } />
-						<ToolbarItem as={ EditorHistoryRedo } />
-						<ToolbarItem as={ DocumentOverview } />
-					</>
+				{ isLargeViewport && (
+					<ToolbarItem
+						as={ ToolSelector }
+						disabled={ isTextModeEnabled }
+					/>
 				) }
+				<ToolbarItem as={ EditorHistoryUndo } />
+				<ToolbarItem as={ EditorHistoryRedo } />
+				<ToolbarItem as={ DocumentOverview } />
 			</div>
 			<div className="woocommerce-iframe-editor__header-toolbar-right">
 				<ToolbarItem
