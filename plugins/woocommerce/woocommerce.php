@@ -11,6 +11,8 @@
  * Requires at least: 6.2
  * Requires PHP: 7.3
  *
+ * Woo: 18734002369816:624a1b9ba2fe66bb06d84bcdd401c6a6
+ *
  * @package WooCommerce
  */
 
