@@ -65,7 +65,7 @@ export function myAccountOrders() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Orders' title": ( response ) =>
-				response.body.includes( 'class="woocommerce-orders-table' ),
+				response.body.includes( '>Orders</h1>' ),
 		} );
 		my_account_order_id = findBetween(
 			response.body,
@@ -95,7 +95,7 @@ export function myAccountOrders() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Order number' title": ( response ) =>
-				response.body.includes( `${ my_account_order_id }</` ),
+				response.body.includes( `${ my_account_order_id }</h1>` ),
 		} );
 	} );
 
