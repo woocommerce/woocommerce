@@ -132,8 +132,8 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					}
 					onRemove={ () => setCategoryParent( null ) }
 					onInputChange={ ( value ) => {
-						debouncedSearch( value );
 						setCategoryParentTypedValue( value || '' );
+						debouncedSearch( value );
 					} }
 					createValue={ categoryParentTypedValue }
 				/>
