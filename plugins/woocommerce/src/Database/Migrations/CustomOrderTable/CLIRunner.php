@@ -156,6 +156,16 @@ class CLIRunner {
 			return;
 		}
 
+		if ( ! $this->synchronizer->check_orders_table_exists() ) {
+			WP_CLI::warning( __( 'Custom order tables does not exist, creating...', 'woocommerce' ) );
+			$this->synchronizer->create_database_tables();
+			if ( $this->synchronizer->check_orders_table_exists() ) {
+				WP_CLI::success( __( 'Custom order tables were created successfully.', 'woocommerce' ) );
+			} else {
+				WP_CLI::error( __( 'Custom order tables could not be created.', 'woocommerce' ) );
+			}
+		}
+
 		$order_count = $this->count_unmigrated();
 
 		// Abort if there are no orders to migrate.
@@ -709,8 +719,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		$is_new_shop = \WC_Install::is_new_install();
 		if ( $assoc_args['for-new-shop'] && ! $is_new_shop ) {
-			WP_CLI::warning( __( '[Failed] This is not a new shop, but --for-new-shop flag was passed.', 'woocommerce' ) );
-			$enable_hpos = false;
+			WP_CLI::error( __( '[Failed] This is not a new shop, but --for-new-shop flag was passed.', 'woocommerce' ) );
 		}
 
 		/** Feature controller instance @var FeaturesController $feature_controller */
@@ -759,12 +768,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				WP_CLI::warning( __( 'Sync is already enabled.', 'woocommerce' ) );
 			} else {
 				$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, true );
-				WP_CLI::log( __( 'Sync enabled.', 'woocommerce' ) );
+				WP_CLI::success( __( 'Sync enabled.', 'woocommerce' ) );
 			}
 		}
 
 		if ( ! $enable_hpos ) {
-			WP_CLI::error( __( 'HPOS could not be enabled, see the errors above', 'woocommerce' ) );
+			WP_CLI::error( __( 'HPOS pre-checks failed, please see the errors above', 'woocommerce' ) );
 			return;
 		}
 
@@ -774,7 +783,11 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::warning( __( 'HPOS is already enabled.', 'woocommerce' ) );
 		} else {
 			$feature_controller->change_feature_enable( 'custom_order_tables', true );
-			WP_CLI::log( __( 'HPOS enabled.', 'woocommerce' ) );
+			if ( $cot_status->custom_orders_table_usage_is_enabled() ) {
+				WP_CLI::success( __( 'HPOS enabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::error( __( 'HPOS could not be enabled.', 'woocommerce' ) );
+			}
 		}
 	}
 
@@ -829,15 +842,23 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::warning( __( 'HPOS is already disabled.', 'woocommerce' ) );
 		} else {
 			$feature_controller->change_feature_enable( 'custom_order_tables', false );
-			WP_CLI::log( __( 'HPOS disabled.', 'woocommerce' ) );
+			if ( $cot_status->custom_orders_table_usage_is_enabled() ) {
+				return WP_CLI::warning( __( 'HPOS could not be disabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::success( __( 'HPOS disabled.', 'woocommerce' ) );
+			}
 		}
 
 		if ( $assoc_args['with-sync'] ) {
 			if ( ! $data_synchronizer->data_sync_is_enabled() ) {
-				return WP_CLI::warning( __( 'Sync is already enabled.', 'woocommerce' ) );
+				return WP_CLI::warning( __( 'Sync is already disabled.', 'woocommerce' ) );
 			}
 			$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, false );
-			WP_CLI::log( __( 'Sync disabled.', 'woocommerce' ) );
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				return WP_CLI::warning( __( 'Sync could not be disabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::success( __( 'Sync disabled.', 'woocommerce' ) );
+			}
 		}
 	}
 
