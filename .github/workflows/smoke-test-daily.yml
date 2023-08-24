@@ -162,20 +162,6 @@ jobs:
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
               continue-on-error: true
 
-            - name: Update performance Woo Express test site with E2E test
-              working-directory: plugins/woocommerce
-              env:
-                  BASE_URL: ${{ secrets.WX_DAILY_ADMIN_URL }}/
-                  ADMIN_USER: ${{ secrets.WX_DAILY_ADMIN_USER }}
-                  ADMIN_PASSWORD: ${{ secrets.WX_DAILY_ADMIN_PW }}
-                  CUSTOMER_USER: ${{ secrets.WX_DAILY_ADMIN_USER }}
-                  CUSTOMER_PASSWORD: ${{ secrets.WX_DAILY_ADMIN_PW }}
-                  UPDATE_WC: nightly
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-              run: |
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-              continue-on-error: true
-
             - name: Install k6
               run: |
                   curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
