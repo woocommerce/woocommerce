@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Temporary fix to WooPayments incentives logic to do extra order queries when an incentive has been dismissed.
+
+
