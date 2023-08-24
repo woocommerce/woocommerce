@@ -81,7 +81,9 @@ type MutableProperties = Partial<
 type ProductVariationActions = CrudActions<
 	'ProductVariation',
 	ProductVariation,
-	MutableProperties
+	MutableProperties,
+	undefined,
+	{ product_id: string | number; context?: string }
 >;
 
 export type Selectors = CrudSelectors<

@@ -44,24 +44,37 @@ export type CrudActions<
 	ResourceName,
 	ItemType,
 	MutableProperties,
-	RequiredFields extends keyof MutableProperties | undefined = undefined
+	RequiredFields extends keyof MutableProperties | undefined = undefined,
+	ItemQueryType extends Params = {}
 > = MapActions<
 	{
-		create: ( query: Partial< ItemType > ) => Item;
-		update: ( query: Partial< ItemType >, data: MutableProperties ) => Item;
+		create: (
+			query: ( RequiredFields extends keyof MutableProperties
+				? WithRequiredProperty<
+						Partial< MutableProperties >,
+						RequiredFields
+				  >
+				: Partial< MutableProperties > ) &
+				ItemQueryType
+		) => Item;
+		update: (
+			query: Partial< ItemType > & ItemQueryType,
+			data: RequiredFields extends keyof MutableProperties
+				? WithRequiredProperty<
+						Partial< MutableProperties >,
+						RequiredFields
+				  >
+				: Partial< MutableProperties >
+		) => Item;
 	},
 	ResourceName,
-	RequiredFields extends keyof MutableProperties
-		? WithRequiredProperty< Partial< MutableProperties >, RequiredFields >
-		: Partial< MutableProperties >,
 	Generator< unknown, ItemType >
 > &
 	MapActions<
 		{
-			delete: ( id: IdType ) => Item;
+			delete: ( idQuery: IdQuery ) => Item;
 		},
 		ResourceName,
-		IdType,
 		Generator< unknown, ItemType >
 	>;
 
@@ -138,10 +151,15 @@ export type MapResolveSelectors<
 	) => Promise< ReturnType< A[ actionCreator ] > >;
 };
 
-export type MapActions< Type, ResourceName, ParamType, ReturnType > = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MapActions<
+	Type extends Record< string, ( ...args: any[] ) => any >,
+	ResourceName,
+	ReturnType
+> = {
 	[ Property in keyof Type as `${ Lowercase<
 		string & Property
 	> }${ Capitalize< string & ResourceName > }` ]: (
-		x: ParamType
+		...args: Parameters< Type[ Property ] >
 	) => ReturnType;
 };

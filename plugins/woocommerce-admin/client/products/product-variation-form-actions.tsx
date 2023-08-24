@@ -37,8 +37,11 @@ export const ProductVariationFormActions: React.FC = () => {
 	const onSave = async () => {
 		setIsSaving( true );
 		updateProductVariation(
-			{ id: variationId, product_id: productId, context: 'edit' },
-			// @ts-expect-error second parameter does not seem to get passed through types.
+			{
+				id: variationId ? parseInt( variationId, 10 ) : undefined,
+				product_id: productId || '',
+				context: 'edit',
+			},
 			{
 				...values,
 				manage_stock:

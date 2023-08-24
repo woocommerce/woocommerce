@@ -128,7 +128,6 @@ export function VariationsTable() {
 		} ) );
 		updateProductVariation(
 			{ product_id: productId, id: variationId },
-			// @ts-expect-error second attribute is not correctly getting passed through.
 			{ status }
 		).finally( () =>
 			setIsUpdating( ( prevState ) => ( {
