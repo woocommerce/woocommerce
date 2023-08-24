@@ -8,9 +8,6 @@
 	"keywords": [ "products", "notice" ],
 	"textdomain": "default",
 	"attributes": {
-		"id": {
-			"type": "string"
-		},
 		"title": {
 			"type": "string"
 		},

@@ -52,7 +52,7 @@ trait BlockContainerTrait {
 
 		usort(
 			$sorted_inner_blocks,
-			function( Block $a, Block $b ) {
+			function( BlockInterface $a, BlockInterface $b ) {
 				return $a->get_order() <=> $b->get_order();
 			}
 		);
