@@ -162,11 +162,25 @@ jobs:
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
               continue-on-error: true
 
+            - name: Update performance Woo Express test site with E2E test
+              working-directory: plugins/woocommerce
+              env:
+                  BASE_URL: ${{ secrets.WX_DAILY_ADMIN_URL }}/
+                  ADMIN_USER: ${{ secrets.WX_DAILY_ADMIN_USER }}
+                  ADMIN_PASSWORD: ${{ secrets.WX_DAILY_ADMIN_PW }}
+                  CUSTOMER_USER: ${{ secrets.WX_DAILY_ADMIN_USER }}
+                  CUSTOMER_PASSWORD: ${{ secrets.WX_DAILY_ADMIN_PW }}
+                  UPDATE_WC: nightly
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+              run: |
+                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
+              continue-on-error: true
+
             - name: Install k6
               run: |
                   curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
-            - name: Run k6 smoke tests
+            - name: Run k6 smoke tests against performance test site
               env:
                   URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
@@ -177,6 +191,23 @@ jobs:
                   P_ID: 22733
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+
+            - name: Run k6 smoke tests against Woo Express test site
+              env:
+                  URL: ${{ secrets.WX_DAILY_ADMIN_URL }}
+                  HOST: ${{ secrets.WX_DAILY_ADMIN_HOST }}
+                  A_USER: ${{ secrets.WX_DAILY_ADMIN_USER }}
+                  A_PW: ${{ secrets.WX_DAILY_ADMIN_PW }}
+                  C_USER: ${{ secrets.WX_DAILY_CUST_USER }}
+                  C_PW: ${{ secrets.WX_DAILY_CUST_PW }}
+                  C_UID: ${{ secrets.WX_DAILY_CUST_ID }}
+                  P_SKU: woo-fasion-hat
+                  P_URL: hat
+                  P_ID: 73
+                  P_TERM: shirt
+                  P_CAT: Clothing
+              run: |
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-wx-requests.js
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
