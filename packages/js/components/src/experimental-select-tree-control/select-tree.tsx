@@ -70,6 +70,7 @@ export const SelectTree = function SelectTree( {
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
+	const [ inputValue, setInputValue ] = useState( '' );
 	const isReadOnly = ! isOpen && ! isFocused;
 
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
@@ -78,11 +79,19 @@ export const SelectTree = function SelectTree( {
 		'aria-autocomplete': 'list',
 		'aria-controls': `${ props.id }-menu`,
 		autoComplete: 'off',
-		onFocus: () => {
+		onFocus: ( event ) => {
 			if ( ! isOpen ) {
 				setIsOpen( true );
 			}
 			setIsFocused( true );
+			if (
+				Array.isArray( props.selected ) &&
+				props.selected?.some(
+					( item: Item ) => item.label === event.target.value
+				)
+			) {
+				setInputValue( '' );
+			}
 		},
 		onBlur: ( event ) => {
 			if ( isOpen && isEventOutside( event ) ) {
@@ -107,9 +116,14 @@ export const SelectTree = function SelectTree( {
 				recalculateInputValue();
 			}
 		},
-		onChange: ( event ) =>
-			onInputChange && onInputChange( event.target.value ),
+		onChange: ( event ) => {
+			if ( onInputChange ) {
+				onInputChange( event.target.value );
+			}
+			setInputValue( event.target.value );
+		},
 		placeholder,
+		value: inputValue,
 	};
 
 	return (
