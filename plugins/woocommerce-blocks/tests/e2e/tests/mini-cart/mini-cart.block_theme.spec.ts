@@ -1,132 +1,79 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { Page } from '@playwright/test';
 
-const blockData: BlockData = {
-	name: 'woocommerce/mini-cart',
-	mainClass: '.wc-block-mini-cart',
-	selectors: {
-		frontend: {
-			drawer: '.wc-block-mini-cart__drawer',
-			drawerCloseButton: 'button[aria-label="Close"]',
+const openMiniCart = async ( page: Page ) => {
+	await page.getByLabel( 'items in cart,' ).hover();
+	await page.getByLabel( 'items in cart,' ).click();
+};
+
+test.describe( `Mini Cart Block`, () => {
+	/**
+	 * This is a workaround to run tests in isolation.
+	 * Ideally, the test should be run in isolation by default. But we're
+	 * overriding the storageState in config which make all tests run with admin
+	 * user.
+	 */
+	test.use( {
+		storageState: {
+			origins: [],
+			cookies: [],
 		},
-		editor: {},
-	},
-};
-
-const getMiniCartButton = async ( { page } ) => {
-	return page.getByLabel( '0 items in cart, total price of $0.00' );
-};
-
-test.describe( `${ blockData.name } Block`, () => {
-	test.describe( `standalone`, () => {
-		test.beforeEach( async ( { admin, page, editor } ) => {
-			await admin.createNewPost( { legacyCanvas: true } );
-			await editor.insertBlock( { name: blockData.name } );
-			await editor.publishPost();
-			const url = new URL( page.url() );
-			const postId = url.searchParams.get( 'post' );
-			await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
-		} );
-
-		test( 'should open the empty cart drawer', async ( { page } ) => {
-			const miniCartButton = await getMiniCartButton( { page } );
-
-			await miniCartButton.click();
-
-			await expect(
-				page.locator( blockData.selectors.frontend.drawer ).first()
-			).toHaveText( 'Your cart is currently empty!' );
-		} );
-
-		test( 'should close the drawer when clicking on the close button', async ( {
-			page,
-		} ) => {
-			const miniCartButton = await getMiniCartButton( { page } );
-
-			await miniCartButton.click();
-
-			await expect(
-				page.locator( blockData.selectors.frontend.drawer ).first()
-			).toHaveText( 'Your cart is currently empty!' );
-
-			// Wait for the drawer to fully open.
-			await page.waitForSelector(
-				blockData.selectors.frontend.drawerCloseButton
-			);
-
-			const closeButton = page.locator(
-				blockData.selectors.frontend.drawerCloseButton
-			);
-
-			await closeButton?.click();
-
-			// Wait for the drawer to fully close.
-			await page.waitForSelector( blockData.selectors.frontend.drawer, {
-				state: 'detached',
-			} );
-
-			expect(
-				await page
-					.locator( blockData.selectors.frontend.drawer )
-					.count()
-			).toEqual( 0 );
-		} );
-
-		test( 'should close the drawer when clicking outside the drawer', async ( {
-			page,
-		} ) => {
-			const miniCartButton = await getMiniCartButton( { page } );
-
-			await miniCartButton.click();
-
-			await expect(
-				page.locator( blockData.selectors.frontend.drawer ).first()
-			).toHaveText( 'Your cart is currently empty!' );
-
-			// Wait for the drawer to fully open.
-			await page.waitForSelector(
-				blockData.selectors.frontend.drawerCloseButton
-			);
-
-			await page.mouse.click( 50, 200 );
-
-			// Wait for the drawer to fully close.
-			await page.waitForSelector( blockData.selectors.frontend.drawer, {
-				state: 'detached',
-			} );
-
-			expect(
-				await page
-					.locator( blockData.selectors.frontend.drawer )
-					.count()
-			).toEqual( 0 );
-		} );
 	} );
 
-	test.describe( `with All products Block`, () => {
-		test.beforeEach( async ( { admin, page, editor } ) => {
-			await admin.createNewPost( { legacyCanvas: true } );
-			await editor.insertBlock( { name: blockData.name } );
-			await editor.insertBlock( { name: 'woocommerce/all-products' } );
-			await editor.publishPost();
-			const url = new URL( page.url() );
-			const postId = url.searchParams.get( 'post' );
-			await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
-		} );
+	test.beforeEach( async ( { page } ) => {
+		await page.goto( `/mini-cart-block`, { waitUntil: 'commit' } );
+	} );
 
-		test( 'should open the filled cart drawer', async ( { page } ) => {
-			const miniCartButton = await getMiniCartButton( { page } );
+	test( 'should open the empty cart drawer', async ( { page } ) => {
+		await openMiniCart( page );
 
-			await page.click( 'text=Add to cart' );
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart is currently empty!'
+		);
+	} );
 
-			await miniCartButton.click();
+	test( 'should close the drawer when clicking on the close button', async ( {
+		page,
+	} ) => {
+		await openMiniCart( page );
 
-			await expect(
-				page.locator( '.wc-block-mini-cart__title' ).first()
-			).toHaveText( 'Your cart (1 item)' );
-		} );
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart is currently empty!'
+		);
+
+		await page.getByRole( 'button', { name: 'Close' } ).click();
+
+		await expect( page.getByRole( 'dialog' ) ).toHaveCount( 0 );
+	} );
+
+	test( 'should close the drawer when clicking outside the drawer', async ( {
+		page,
+	} ) => {
+		await openMiniCart( page );
+
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart is currently empty!'
+		);
+
+		await expect(
+			page.getByRole( 'button', { name: 'Close' } )
+		).toBeInViewport();
+
+		await page.mouse.click( 50, 200 );
+
+		await expect( page.getByRole( 'dialog' ) ).toHaveCount( 0 );
+	} );
+
+	test( 'should open the filled cart drawer', async ( { page } ) => {
+		await page.click( 'text=Add to cart' );
+
+		await openMiniCart( page );
+
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart (1 item)'
+		);
 	} );
 } );

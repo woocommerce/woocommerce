@@ -49,7 +49,7 @@ test.describe( `${ blockData.name }`, () => {
 		] );
 
 		await page.goto( blockData.productPage, {
-			waitUntil: 'networkidle',
+			waitUntil: 'commit',
 		} );
 
 		const blockFrontend = await frontendUtils.getBlockByName(
