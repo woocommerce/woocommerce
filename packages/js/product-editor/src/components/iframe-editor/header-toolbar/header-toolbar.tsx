@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { plus } from '@wordpress/icons';
 import {
 	createElement,
-	Fragment,
 	useRef,
 	useCallback,
 	useContext,
@@ -46,7 +45,6 @@ export function HeaderToolbar( {
 }: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
-	const isWideViewport = useViewportMatch( 'wide' );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
 	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
