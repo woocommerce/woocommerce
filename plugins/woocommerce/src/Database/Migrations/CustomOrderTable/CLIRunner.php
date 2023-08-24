@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WP_CLI;
 
 /**
@@ -60,6 +61,8 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) );
 		WP_CLI::add_command( 'wc cot sync', array( $this, 'sync' ) );
 		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
+		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
+		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
 	}
 
 	/**
@@ -153,6 +156,16 @@ class CLIRunner {
 			return;
 		}
 
+		if ( ! $this->synchronizer->check_orders_table_exists() ) {
+			WP_CLI::warning( __( 'Custom order tables does not exist, creating...', 'woocommerce' ) );
+			$this->synchronizer->create_database_tables();
+			if ( $this->synchronizer->check_orders_table_exists() ) {
+				WP_CLI::success( __( 'Custom order tables were created successfully.', 'woocommerce' ) );
+			} else {
+				WP_CLI::error( __( 'Custom order tables could not be created.', 'woocommerce' ) );
+			}
+		}
+
 		$order_count = $this->count_unmigrated();
 
 		// Abort if there are no orders to migrate.
@@ -236,6 +249,7 @@ class CLIRunner {
 	}
 
 	/**
+	 * [Deprecated] Use `wp wc cot sync` instead.
 	 * Copy order data into the postmeta table.
 	 *
 	 * Note that this could dramatically increase the size of your postmeta table, but is recommended
@@ -659,6 +673,190 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ][] = $row['meta_value'];
 		}
 		return $clubbed_data;
+	}
+
+	/**
+	 * Set custom order tables (HPOS) to authoritative if: 1). HPOS and posts tables are in sync, or, 2). This is a new shop (in this case also create tables). Additionally, all installed WC plugins should be compatible.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--for-new-shop]
+	 * : Enable only if this is a new shop, irrespective of whether tables are in sync.
+	 * ---
+	 * default: false
+	 * ---
+	 *
+	 * [--with-sync]
+	 * : Also enables sync (if it's currently not enabled).
+	 * ---
+	 * default: false
+	 * ---
+	 *
+	 * ### EXAMPLES
+	 *
+	 *      # Enable HPOS on new shops.
+	 *      wp wc cot enable --for-new-shop
+	 *
+	 * @param array $args Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 *
+	 * @return void
+	 */
+	public function enable( array $args = array(), array $assoc_args = array() ) {
+		$assoc_args = wp_parse_args(
+			$assoc_args,
+			array(
+				'for-new-shop' => false,
+				'with-sync'    => false,
+			)
+		);
+
+		$enable_hpos = true;
+		WP_CLI::log( __( 'Running pre-enable checks...', 'woocommerce' ) );
+
+		$is_new_shop = \WC_Install::is_new_install();
+		if ( $assoc_args['for-new-shop'] && ! $is_new_shop ) {
+			WP_CLI::error( __( '[Failed] This is not a new shop, but --for-new-shop flag was passed.', 'woocommerce' ) );
+		}
+
+		/** Feature controller instance @var FeaturesController $feature_controller */
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
+		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
+			WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the Data storage for orders section.', 'woocommerce' ) );
+			$enable_hpos = false;
+		}
+
+		/** DataSynchronizer instance @var DataSynchronizer $data_synchronizer */
+		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		$pending_orders    = $data_synchronizer->get_total_pending_count();
+		$table_exists      = $data_synchronizer->check_orders_table_exists();
+
+		if ( ! $table_exists ) {
+			WP_CLI::warning( __( 'Orders table does not exist. Creating...', 'woocommerce' ) );
+			if ( $is_new_shop || 0 === $pending_orders ) {
+				$data_synchronizer->create_database_tables();
+				if ( $data_synchronizer->check_orders_table_exists() ) {
+					WP_CLI::log( __( 'Orders table created.', 'woocommerce' ) );
+					$table_exists = true;
+				} else {
+					WP_CLI::warning( __( '[Failed] Orders table could not be created.', 'woocommerce' ) );
+					$enable_hpos = false;
+				}
+			} else {
+				WP_CLI::warning( __( '[Failed] The orders table does not exist and this is not a new shop. Please create the table by going to WooCommerce > Settings > Advanced > Features and enabling sync.', 'woocommerce' ) );
+				$enable_hpos = false;
+			}
+		}
+
+		if ( $pending_orders > 0 ) {
+			WP_CLI::warning(
+				sprintf(
+					// translators: %s is the command to run (wp wc cot sync).
+					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
+					'wp wc cot sync',
+				)
+			);
+			$enable_hpos = false;
+		}
+
+		if ( $assoc_args['with-sync'] && $table_exists ) {
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				WP_CLI::warning( __( 'Sync is already enabled.', 'woocommerce' ) );
+			} else {
+				$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, true );
+				WP_CLI::success( __( 'Sync enabled.', 'woocommerce' ) );
+			}
+		}
+
+		if ( ! $enable_hpos ) {
+			WP_CLI::error( __( 'HPOS pre-checks failed, please see the errors above', 'woocommerce' ) );
+			return;
+		}
+
+		/** CustomOrdersTableController instance @var CustomOrdersTableController $cot_status */
+		$cot_status = wc_get_container()->get( CustomOrdersTableController::class );
+		if ( $cot_status->custom_orders_table_usage_is_enabled() ) {
+			WP_CLI::warning( __( 'HPOS is already enabled.', 'woocommerce' ) );
+		} else {
+			$feature_controller->change_feature_enable( 'custom_order_tables', true );
+			if ( $cot_status->custom_orders_table_usage_is_enabled() ) {
+				WP_CLI::success( __( 'HPOS enabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::error( __( 'HPOS could not be enabled.', 'woocommerce' ) );
+			}
+		}
+	}
+
+	/**
+	 * Disables custom order tables (HPOS) and posts to authoritative if HPOS and post tables are in sync.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--with-sync]
+	 * : Also disables sync (if it's currently enabled).
+	 * ---
+	 * default: false
+	 * ---
+	 *
+	 * ### EXAMPLES
+	 *
+	 *  # Disable HPOS.
+	 *  wp wc cot disable
+	 *
+	 * @param array $args Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function disable( $args, $assoc_args ) {
+		$assoc_args = wp_parse_args(
+			$assoc_args,
+			array(
+				'with-sync' => false,
+			)
+		);
+
+		WP_CLI::log( __( 'Running pre-disable checks...', 'woocommerce' ) );
+
+		/** DataSynchronizer instance @var DataSynchronizer $data_synchronizer */
+		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		$pending_orders    = $data_synchronizer->get_total_pending_count();
+		if ( $pending_orders > 0 ) {
+			return WP_CLI::error(
+				sprintf(
+					// translators: %s is the command to run (wp wc cot sync).
+					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
+					'wp wc cot sync',
+				)
+			);
+		}
+
+		/** FeaturesController instance @var FeaturesController $feature_controller */
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+
+		/** CustomOrdersTableController instance @var CustomOrdersTableController $cot_status */
+		$cot_status = wc_get_container()->get( CustomOrdersTableController::class );
+		if ( ! $cot_status->custom_orders_table_usage_is_enabled() ) {
+			WP_CLI::warning( __( 'HPOS is already disabled.', 'woocommerce' ) );
+		} else {
+			$feature_controller->change_feature_enable( 'custom_order_tables', false );
+			if ( $cot_status->custom_orders_table_usage_is_enabled() ) {
+				return WP_CLI::warning( __( 'HPOS could not be disabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::success( __( 'HPOS disabled.', 'woocommerce' ) );
+			}
+		}
+
+		if ( $assoc_args['with-sync'] ) {
+			if ( ! $data_synchronizer->data_sync_is_enabled() ) {
+				return WP_CLI::warning( __( 'Sync is already disabled.', 'woocommerce' ) );
+			}
+			$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, false );
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				return WP_CLI::warning( __( 'Sync could not be disabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::success( __( 'Sync disabled.', 'woocommerce' ) );
+			}
+		}
 	}
 
 }
