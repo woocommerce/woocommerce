@@ -22,7 +22,6 @@ import { customizeStoreStateMachineEvents } from '..';
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
 	| typeof BusinessInfoDescription
-	| typeof BusinessInfoDescription
 	| typeof ApiCallLoader
 	| typeof LookAndFeel
 	| typeof ToneOfVoice;
