@@ -2,12 +2,12 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 
 /**
  * Interface for block containers.
  */
-interface SectionInterface extends ContainerInterface {
+interface SectionInterface extends BlockInterface {
 
 	/**
 	 * Adds a new section block.

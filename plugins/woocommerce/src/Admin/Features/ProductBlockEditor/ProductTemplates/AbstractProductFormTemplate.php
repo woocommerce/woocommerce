@@ -18,7 +18,7 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function get_group_by_id( string $group_id ): ?GroupInterface {
 		$group = $this->get_block( $group_id );
 		if ( $group && ! $group instanceof GroupInterface ) {
-			throw new \UnexpectedValueException( 'The block must return an instance of GroupInterface.' );
+			throw new \UnexpectedValueException( 'Block with specified ID is not a group.' );
 		}
 		return $group;
 	}
@@ -32,7 +32,7 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function get_section_by_id( string $section_id ): ?SectionInterface {
 		$section = $this->get_block( $section_id );
 		if ( $section && ! $section instanceof SectionInterface ) {
-			throw new \UnexpectedValueException( 'The block must return an instance of SectionInterface.' );
+			throw new \UnexpectedValueException( 'Block with specified ID is not a section.' );
 		}
 		return $section;
 	}

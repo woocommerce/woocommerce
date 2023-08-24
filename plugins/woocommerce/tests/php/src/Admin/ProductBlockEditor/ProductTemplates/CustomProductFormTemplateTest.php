@@ -21,9 +21,8 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_group_by_id() {
 		$template = new CustomProductFormTemplate();
-		$block = $template->get_group_by_id('general' );
-		$formatted_template = $block->get_formatted_template();
-		$this->assertEquals( $formatted_template[1]['title'], 'General' );
+		$block = $template->get_group_by_id( 'general' );
+		$this->assertEquals( $block->get_attributes()['title'], 'General' );
 	}
 
 	/**
@@ -41,9 +40,8 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_section_by_id() {
 		$template = new CustomProductFormTemplate();
-		$block = $template->get_section_by_id('product-pricing-section' );
-		$formatted_template = $block->get_formatted_template();
-		$this->assertEquals( $formatted_template[1]['title'], 'Pricing' );
+		$block = $template->get_section_by_id( 'product-pricing-section' );
+		$this->assertEquals( $block->get_attributes()['title'], 'Pricing' );
 	}
 
 	/**
@@ -52,7 +50,7 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	public function test_get_section_by_id_with_block_id() {
 		$template = new CustomProductFormTemplate();
 		$this->expectException( \UnexpectedValueException::class );
-		$template->get_section_by_id('product-pricing-group-pricing-columns' );
+		$template->get_section_by_id( 'product-pricing-group-pricing-columns' );
 	}
 
 	/**
@@ -60,9 +58,8 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_block_by_id() {
 		$template = new CustomProductFormTemplate();
-		$block = $template->get_block_by_id('product-name' );
-		$formatted_template = $block->get_formatted_template();
-		$this->assertEquals( $formatted_template[1]['name'], 'Product name' );
+		$block = $template->get_block_by_id( 'product-name' );
+		$this->assertEquals( $block->get_attributes()['name'], 'Product name' );
 	}
 
 	/**
@@ -70,17 +67,16 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_add_custom_block_to_section() {
 		$template = new CustomProductFormTemplate();
-		$block = $template->get_section_by_id('product-pricing-section' );
-		$block->add_block( [
+		$block = $template->get_section_by_id( 'product-pricing-section' );
+		$new_block = $block->add_block( [
 			'id'        => 'test-block-id',
 			'blockName' => 'test-block-name',
 			'attributes' => [
 				'name' => 'A name'
 			]
 		] );
-		$formatted_template = $block->get_formatted_template();
-		$nested_block_count = count( $formatted_template[2] );
-		$this->assertEquals( $formatted_template[2][ $nested_block_count - 1 ][1]['name'], 'A name' );
+
+		$this->assertEquals( $new_block->get_parent(), $block );
 	}
 
 	/**
@@ -88,7 +84,7 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_add_custom_group() {
 		$template = new CustomProductFormTemplate();
-		$template->add_group( [
+		$new_group = $template->add_group( [
 			'id'        => 'new-group',
 			'order'     => 0,
 			'attributes' => [
@@ -96,8 +92,7 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 			]
 		] );
 
-		$formatted_template = $template->get_formatted_template();
-		$this->assertEquals( $formatted_template[ 0 ][1]['title'], 'Group title' );
+		$this->assertEquals( $new_group->get_parent(), $template );
 	}
 
 	/**
@@ -121,7 +116,7 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_passing_blockname_to_add_section() {
 		$template = new CustomProductFormTemplate();
-		$group = $template->get_group_by_id('general' );
+		$group = $template->get_group_by_id( 'general' );
 		$this->expectException( \InvalidArgumentException::class );
 		$group->add_section( [
 			'id'        => 'new-section',
