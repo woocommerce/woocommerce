@@ -49,10 +49,10 @@ export interface useCollectionOptions {
 	isEditor?: boolean;
 }
 
-export const useCollection = (
+export const useCollection = < T >(
 	options: useCollectionOptions
 ): {
-	results: unknown;
+	results: T[];
 	isLoading: boolean;
 } => {
 	const {
@@ -68,7 +68,7 @@ export const useCollection = (
 				'the resource properties.'
 		);
 	}
-	const currentResults = useRef< { results: unknown; isLoading: boolean } >( {
+	const currentResults = useRef< { results: T[]; isLoading: boolean } >( {
 		results: [],
 		isLoading: true,
 	} );
@@ -102,7 +102,7 @@ export const useCollection = (
 			}
 
 			return {
-				results: store.getCollection< T >( ...args ),
+				results: store.getCollection< T[] >( ...args ),
 				isLoading: ! store.hasFinishedResolution(
 					'getCollection',
 					args
