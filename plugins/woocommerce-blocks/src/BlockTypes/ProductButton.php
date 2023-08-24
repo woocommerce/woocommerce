@@ -61,7 +61,6 @@ class ProductButton extends AbstractBlock {
 	 */
 	public function dequeue_add_to_cart_scripts() {
 		wp_dequeue_script( 'wc-add-to-cart' );
-		wp_dequeue_script( 'wc-add-to-cart-variation' );
 	}
 
 	/**
