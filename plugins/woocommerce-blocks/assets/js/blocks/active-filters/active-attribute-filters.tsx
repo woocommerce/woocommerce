@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import {
 	AttributeObject,
+	AttributeTerm,
 	isAttributeQueryCollection,
 	isAttributeTermCollection,
 	isBoolean,
@@ -47,7 +48,7 @@ const ActiveAttributeFilters = ( {
 	displayStyle,
 	isLoadingCallback,
 }: ActiveAttributeFiltersProps ) => {
-	const { results, isLoading } = useCollection( {
+	const { results, isLoading } = useCollection< AttributeTerm >( {
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject.id ],
