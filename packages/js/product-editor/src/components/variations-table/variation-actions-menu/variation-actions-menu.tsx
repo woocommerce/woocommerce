@@ -258,6 +258,13 @@ export function VariationActionsMenu( {
 														'woocommerce'
 													)
 												);
+												handlePrompt(
+													'date_on_sale_to_gmt',
+													__(
+														'Sale end date (YYYY-MM-DD format or leave blank)',
+														'woocommerce'
+													)
+												);
 												onClose();
 											} }
 										>
