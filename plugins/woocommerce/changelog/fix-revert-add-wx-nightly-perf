@@ -1,5 +1,4 @@
 Significance: patch
-Type: add
-Comment: Updated perf test and workflow for extra site
-
+Type: fix
+Comment: Revert previous addition to add Updated perf test and workflow for extra site
 
