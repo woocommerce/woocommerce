@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Temporary fix to avoid doing extra order queries when a WooPayments incentive has been dismissed.
-
-
