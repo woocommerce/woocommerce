@@ -257,6 +257,7 @@ class CLIRunner {
 	}
 
 	/**
+	 * [Deprecated] Use `wp wc cot sync` instead.
 	 * Copy order data into the postmeta table.
 	 *
 	 * Note that this could dramatically increase the size of your postmeta table, but is recommended
@@ -685,11 +686,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	}
 
 	/**
-	 * Set custom order tables (HPOS) to authoritative if:
-	 * 1. HPOS and posts tables are in sync, or,
-	 * 2. This is a new shop (in this case also create tables).
-	 * and
-	 * 3. All installed WC plugins are compatible.
+	 * Set custom order tables (HPOS) to authoritative if: 1). HPOS and posts tables are in sync, or, 2). This is a new shop (in this case also create tables). Additionally, all installed WC plugins should be compatible.
 	 *
 	 * ## OPTIONS
 	 *
