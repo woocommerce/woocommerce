@@ -69,7 +69,7 @@ class WcPayWelcomePage {
 		}
 
 		// Temporary solution until we improve the dismiss and cache logic.
-		if (false !== get_option( 'wcpay_welcome_page_incentives_dismissed', false )) {
+		if ( false !== get_option( 'wcpay_welcome_page_incentives_dismissed', false ) ) {
 			return false;
 		}
 
@@ -160,7 +160,7 @@ class WcPayWelcomePage {
 		}
 
 		// Return early if the incentive must not be visible.
-		if ( !$this->must_be_visible() ) {
+		if ( ! $this->must_be_visible() ) {
 			return $settings;
 		}
 
@@ -177,7 +177,7 @@ class WcPayWelcomePage {
 	 */
 	public function allowed_promo_notes( $promo_notes = [] ): array {
 		// Return early if the incentive must not be visible.
-		if ( !$this->must_be_visible() ) {
+		if ( ! $this->must_be_visible() ) {
 			return $promo_notes;
 		}
 
