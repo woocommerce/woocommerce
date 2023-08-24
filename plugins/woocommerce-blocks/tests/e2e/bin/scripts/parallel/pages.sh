@@ -53,3 +53,6 @@ post_id=$(wp post create \
 	--post_title='Privacy'
 )
 wp option update wp_page_for_privacy_policy $post_id
+
+# Create renaming WooCommerce pages using tool
+wp wc tool run install_pages --user=1
