@@ -68,6 +68,11 @@ class WcPayWelcomePage {
 			return false;
 		}
 
+		// Temporary solution until we improve the dismiss and cache logic.
+		if ( false !== get_option( 'wcpay_welcome_page_incentives_dismissed', false ) ) {
+			return false;
+		}
+
 		// The WooPayments plugin must not be active.
 		if ( $this->is_wcpay_active() ) {
 			return false;
@@ -154,8 +159,8 @@ class WcPayWelcomePage {
 			return $settings;
 		}
 
-		// Return early if there is no eligible incentive.
-		if ( empty( $this->get_incentive() ) ) {
+		// Return early if the incentive must not be visible.
+		if ( ! $this->must_be_visible() ) {
 			return $settings;
 		}
 
@@ -171,8 +176,8 @@ class WcPayWelcomePage {
 	 * @return array
 	 */
 	public function allowed_promo_notes( $promo_notes = [] ): array {
-		// Return early if there is no eligible incentive.
-		if ( empty( $this->get_incentive() ) ) {
+		// Return early if the incentive must not be visible.
+		if ( ! $this->must_be_visible() ) {
 			return $promo_notes;
 		}
 
