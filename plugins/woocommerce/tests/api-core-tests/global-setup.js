@@ -1,4 +1,4 @@
-const { site } = require( '../e2e-pw/utils' );
+const { site } = require( './utils' );
 
 module.exports = async ( config ) => {
 	// If BASE_URL is configured, we can assume we're on CI
