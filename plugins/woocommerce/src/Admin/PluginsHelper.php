@@ -305,14 +305,14 @@ class PluginsHelper {
 			$logger && $logger->installed( $plugin, $time[ $plugin ] );
 		}
 
-		$logger && $logger->complete();
-
 		$data = array(
 			'installed' => $installed_plugins,
 			'results'   => $results,
 			'errors'    => $errors,
 			'time'      => $time,
 		);
+
+		$logger && $logger->complete( $data );
 
 		return $data;
 	}
