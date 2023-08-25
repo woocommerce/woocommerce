@@ -1,26 +1,19 @@
-# Debugging
-
-
+# Resources for debugging
 
 ## WordPress
 
-WordPress itself has a basic toolset for debugging. It's usually a good place to start.
+A good place to start is usually the debugging tools built into WordPress itself:
 
 * [Debugging in WordPress](https://wordpress.org/documentation/article/debugging-in-wordpress/)
 
 ## Logging
 
-https://woocommerce.com/document/create-a-plugin/#section-19
+WooCommerce has a logging system that can be very helpful for finding and tracking errors on your site:
 
-https://woocommerce.com/document/create-a-plugin/#section-22
+* [Logging in WooCommerce](../utilities/logging.md#debugging-with-the-logger)
 
 ## Xdebug
 
+If you're using `wp-env` to run a local development environment (this is the recommended method for the WooCommerce monorepo), you can activate Xdebug and then use an IDE like VS Code or PhpStorm to set breakpoints and step through the code as it executes:
+
 * [Using Xdebug](https://github.com/WordPress/gutenberg/tree/trunk/packages/env#using-xdebug)
-
-## Helper functions
-
-wc_print_r
-https://github.com/woocommerce/woocommerce/blob/53c93ab4496968a1e45a08573ca52e21f16e8e47/plugins/woocommerce/includes/wc-core-functions.php#L2056-L2087
-
-
