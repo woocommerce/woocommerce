@@ -16,9 +16,13 @@ import {
 export const CORE_NAME = 'core/post-excerpt';
 export const VARIATION_NAME = 'woocommerce/product-collection/product-summary';
 
-registerElementVariation( CORE_NAME, {
-	blockDescription: BLOCK_DESCRIPTION,
-	blockIcon: <Icon icon={ page } />,
-	blockTitle: BLOCK_TITLE,
-	variationName: VARIATION_NAME,
-} );
+const registerProductSummary = () => {
+	registerElementVariation( CORE_NAME, {
+		blockDescription: BLOCK_DESCRIPTION,
+		blockIcon: <Icon icon={ page } />,
+		blockTitle: BLOCK_TITLE,
+		variationName: VARIATION_NAME,
+	} );
+};
+
+export default registerProductSummary;

@@ -1,18 +1,28 @@
 /**
  * External dependencies
  */
-import { registerBlockVariation } from '@wordpress/blocks';
+import {
+	registerBlockVariation,
+	type BlockVariationScope,
+} from '@wordpress/blocks';
 
 interface VariationDetails {
 	blockDescription: string;
 	blockIcon: JSX.Element;
 	blockTitle: string;
 	variationName: string;
+	scope: BlockVariationScope[];
 }
 
 export function registerElementVariation(
 	coreName: string,
-	{ blockDescription, blockIcon, blockTitle, variationName }: VariationDetails
+	{
+		blockDescription,
+		blockIcon,
+		blockTitle,
+		variationName,
+		scope,
+	}: VariationDetails
 ) {
 	registerBlockVariation( coreName, {
 		description: blockDescription,
@@ -26,6 +36,6 @@ export function registerElementVariation(
 		attributes: {
 			__woocommerceNamespace: variationName,
 		},
-		scope: [ 'block', 'inserter' ],
+		scope,
 	} );
 }
