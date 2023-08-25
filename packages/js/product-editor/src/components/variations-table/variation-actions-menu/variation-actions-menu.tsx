@@ -85,7 +85,7 @@ export function VariationActionsMenu( {
 				onClick() {
 					recordEvent( 'product_variations_menu_view', {
 						source: TRACKS_SOURCE,
-						variationId: variation.id,
+						variation_id: variation.id,
 					} );
 				},
 			} }
@@ -104,7 +104,7 @@ export function VariationActionsMenu( {
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
-									variationId: variation.id,
+									variation_id: variation.id,
 								} );
 							} }
 						>
@@ -121,7 +121,7 @@ export function VariationActionsMenu( {
 											'product_variations_menu_pricing_click',
 											{
 												source: TRACKS_SOURCE,
-												variationId: variation.id,
+												variation_id: variation.id,
 											}
 										);
 										onToggle();
@@ -148,7 +148,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'list_price_set',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -161,7 +161,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'list_price_set',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -183,7 +183,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'list_price_increase',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -199,7 +199,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'list_price_increase',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -224,7 +224,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'list_price_decrease',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -240,7 +240,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'list_price_increase',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -273,7 +273,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'sale_price_set',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -286,7 +286,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'sale_price_set',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -308,7 +308,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'sale_price_increase',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -324,7 +324,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'sale_price_increase',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -349,7 +349,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'sale_price_decrease',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -365,7 +365,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'sale_price_decrease',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -391,7 +391,7 @@ export function VariationActionsMenu( {
 													{
 														source: TRACKS_SOURCE,
 														action: 'sale_price_schedule',
-														variationId:
+														variation_id:
 															variation.id,
 													}
 												);
@@ -407,7 +407,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'sale_price_schedule',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
@@ -426,7 +426,7 @@ export function VariationActionsMenu( {
 															{
 																source: TRACKS_SOURCE,
 																action: 'sale_price_schedule',
-																variationId:
+																variation_id:
 																	variation.id,
 															}
 														);
