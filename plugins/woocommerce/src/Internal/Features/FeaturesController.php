@@ -114,12 +114,12 @@ class FeaturesController {
 				'disable_ui'      => false,
 			),
 			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
-				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+			'custom_order_tables'    => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
+				'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
 				'enabled_by_default' => false,
 			),
 			$hpos_authoritative    => array(
-				'name'            => __( 'High performance order storage', 'woocommerce' ),
+				'name'             => __( 'High-Performance Order Storage', 'woocommerce' ),
 			),
 			$hpos_enable_sync      => array(
 				'name'            => '',

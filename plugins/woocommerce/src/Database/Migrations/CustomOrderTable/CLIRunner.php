@@ -723,7 +723,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
-			WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the Data storage for orders section.', 'woocommerce' ) );
+			WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the "Order data storage" section.', 'woocommerce' ) );
 			$enable_hpos = false;
 		}
 
