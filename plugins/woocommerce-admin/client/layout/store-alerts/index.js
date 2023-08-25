@@ -81,8 +81,9 @@ export class StoreAlerts extends Component {
 
 						// navigate to previous alert to avoid an out of bounds error in case it's the last alert from the array
 						this.previousAlert();
-
-						await triggerNoteAction( alert.id, action.id );
+						if ( alert.id && action.id ) {
+							await triggerNoteAction( alert.id, action.id );
+						}
 						if (
 							url &&
 							url !== '#' &&
