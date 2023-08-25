@@ -54,7 +54,14 @@ Loader.Layout = ( {
 				className
 			) }
 		>
-			{ children }
+			<div
+				className={ classNames(
+					'woocommerce-onboarding-loader-container',
+					className
+				) }
+			>
+				{ children }
+			</div>
 		</div>
 	);
 };
