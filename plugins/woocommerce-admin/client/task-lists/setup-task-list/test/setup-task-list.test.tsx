@@ -10,6 +10,28 @@ import { TaskType } from '@woocommerce/data';
  */
 import { SetupTaskList } from '../setup-task-list';
 
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useDispatch: jest.fn().mockReturnValue( {} ),
+		useSelect: jest.fn().mockReturnValue( {
+			profileItems: {
+				wccom_connected: null,
+			},
+		} ),
+	};
+} );
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );

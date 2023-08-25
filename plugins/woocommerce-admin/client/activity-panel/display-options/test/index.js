@@ -22,7 +22,14 @@ jest.mock( '@wordpress/data', () => {
 
 	return {
 		__esModule: true,
-		...originalModule,
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
 		useSelect: jest.fn().mockReturnValue( {
 			defaultHomescreenLayout: 'single_column',
 			taskListComplete: false,

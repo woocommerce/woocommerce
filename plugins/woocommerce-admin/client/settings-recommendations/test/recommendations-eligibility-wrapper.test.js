@@ -10,10 +10,20 @@ import { useSelect } from '@wordpress/data';
  */
 import RecommendationsEligibilityWrapper from '../recommendations-eligibility-wrapper';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn(),
+	};
+} );
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUser: jest.fn(),

@@ -9,6 +9,21 @@ import { render } from '@testing-library/react';
 import { Setup } from '..';
 import { enqueueScript } from '~/utils/enqueue-script';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 jest.mock( '@woocommerce/components', () => {
 	const originalModule = jest.requireActual( '@woocommerce/components' );
 

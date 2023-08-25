@@ -32,13 +32,15 @@ jest.mock( '@woocommerce/admin-layout', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
-	useUserPreferences: jest.fn().mockReturnValue( {
-		updateUserPreferences: () => {},
-	} ),
-} ) );
+jest.mock( '@woocommerce/data', () => {
+	return {
+		...jest.requireActual( '@woocommerce/data' ),
+		useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
+		useUserPreferences: jest.fn().mockReturnValue( {
+			updateUserPreferences: () => {},
+		} ),
+	};
+} );
 
 // We aren't testing the <DisplayOptions /> component here.
 jest.mock( '../display-options', () => ( {
@@ -55,7 +57,14 @@ jest.mock( '@wordpress/data', () => {
 
 	return {
 		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
 		useSelect: jest.fn().mockReturnValue( {} ),
 	};
 } );

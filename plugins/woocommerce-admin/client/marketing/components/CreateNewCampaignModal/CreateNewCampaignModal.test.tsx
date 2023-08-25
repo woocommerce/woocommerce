@@ -10,6 +10,23 @@ import userEvent from '@testing-library/user-event';
 import { useCampaignTypes, useRecommendedChannels } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn().mockReturnValue( {
+			getPluginInstallState: jest.fn(),
+		} ),
+	};
+} );
+
 jest.mock( '@woocommerce/components', () => {
 	const originalModule = jest.requireActual( '@woocommerce/components' );
 

@@ -9,6 +9,24 @@ import { createElement } from '@wordpress/element';
  */
 import { Connect } from '../index.js';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useDispatch: jest.fn().mockReturnValue( {
+			createNotice: jest.fn(),
+		} ),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 describe( 'Rendering', () => {
 	it( 'should render an abort button when the abort handler is provided', async () => {
 		const { container } = render(

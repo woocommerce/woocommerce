@@ -9,6 +9,21 @@ import { createElement } from '@wordpress/element';
  */
 import { Configure, validateFields } from '../Configure';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 const mockGateway = {
 	id: 'mock-gateway',
 	title: 'Mock Gateway',

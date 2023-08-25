@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
+import { useContext } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -22,16 +21,24 @@ import { CurrencyContext } from '@woocommerce/currency';
  */
 import { LOCALE } from '~/utils/admin-settings';
 
-class ReportFilters extends Component {
-	constructor() {
-		super();
-		this.onDateSelect = this.onDateSelect.bind( this );
-		this.onFilterSelect = this.onFilterSelect.bind( this );
-		this.onAdvancedFilterAction = this.onAdvancedFilterAction.bind( this );
-	}
+function ReportFilters( {
+	report,
+	advancedFilters,
+	filters,
+	path,
+	query,
+	showDatePicker,
+} ) {
+	const Currency = useContext( CurrencyContext );
+	const { defaultDateRange } = useSelect( ( select ) => {
+		const { woocommerce_default_date_range } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		return { defaultDateRange: woocommerce_default_date_range };
+	} );
+	const { addCesSurveyForAnalytics } = useDispatch( CES_STORE_KEY );
 
-	onDateSelect( data ) {
-		const { report, addCesSurveyForAnalytics } = this.props;
+	function onDateSelect( data ) {
 		addCesSurveyForAnalytics();
 		recordEvent( 'datepicker_update', {
 			report,
@@ -39,9 +46,7 @@ class ReportFilters extends Component {
 		} );
 	}
 
-	onFilterSelect( data ) {
-		const { report, addCesSurveyForAnalytics } = this.props;
-
+	function onFilterSelect( data ) {
 		// This event gets triggered in the following cases.
 		// 1. Select "Single product" and choose a product.
 		// 2. Select "Comparison" or any other filter types.
@@ -72,8 +77,7 @@ class ReportFilters extends Component {
 		recordEvent( 'analytics_filter', eventProperties );
 	}
 
-	onAdvancedFilterAction( action, data ) {
-		const { report, addCesSurveyForAnalytics } = this.props;
+	function onAdvancedFilterAction( action, data ) {
 		switch ( action ) {
 			case 'add':
 				recordEvent( 'analytics_filters_add', {
@@ -113,64 +117,40 @@ class ReportFilters extends Component {
 		}
 	}
 
-	render() {
-		const {
-			advancedFilters,
-			filters,
-			path,
-			query,
-			showDatePicker,
-			defaultDateRange,
-		} = this.props;
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query,
-			defaultDateRange
-		);
-		const { primary: primaryDate, secondary: secondaryDate } =
-			getCurrentDates( query, defaultDateRange );
-		const dateQuery = {
-			period,
-			compare,
-			before,
-			after,
-			primaryDate,
-			secondaryDate,
-		};
-		const Currency = this.context;
+	const { period, compare, before, after } = getDateParamsFromQuery(
+		query,
+		defaultDateRange
+	);
+	const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates(
+		query,
+		defaultDateRange
+	);
+	const dateQuery = {
+		period,
+		compare,
+		before,
+		after,
+		primaryDate,
+		secondaryDate,
+	};
 
-		return (
-			<Filters
-				query={ query }
-				siteLocale={ LOCALE.siteLocale }
-				currency={ Currency.getCurrencyConfig() }
-				path={ path }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
-				showDatePicker={ showDatePicker }
-				onDateSelect={ this.onDateSelect }
-				onFilterSelect={ this.onFilterSelect }
-				onAdvancedFilterAction={ this.onAdvancedFilterAction }
-				dateQuery={ dateQuery }
-				isoDateFormat={ isoDateFormat }
-			/>
-		);
-	}
+	return (
+		<Filters
+			query={ query }
+			siteLocale={ LOCALE.siteLocale }
+			currency={ Currency.getCurrencyConfig() }
+			path={ path }
+			filters={ filters }
+			advancedFilters={ advancedFilters }
+			showDatePicker={ showDatePicker }
+			onDateSelect={ onDateSelect }
+			onFilterSelect={ onFilterSelect }
+			onAdvancedFilterAction={ onAdvancedFilterAction }
+			dateQuery={ dateQuery }
+			isoDateFormat={ isoDateFormat }
+		/>
+	);
 }
-
-ReportFilters.contextType = CurrencyContext;
-
-export default compose(
-	withSelect( ( select ) => {
-		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
-		return { defaultDateRange };
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
-		return { addCesSurveyForAnalytics };
-	} )
-)( ReportFilters );
 
 ReportFilters.propTypes = {
 	/**
@@ -198,3 +178,5 @@ ReportFilters.propTypes = {
 	 */
 	report: PropTypes.string.isRequired,
 };
+
+export default ReportFilters;

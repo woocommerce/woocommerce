@@ -10,11 +10,21 @@ import userEvent from '@testing-library/user-event';
  */
 import { DismissableList, DismissableListHeading } from '../dismissable-list';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn(),
+		useDispatch: jest.fn(),
+	};
+} );
 
 const DismissableListMock = ( { children } ) => (
 	<DismissableList dismissOptionName="dismissable_option_mock">

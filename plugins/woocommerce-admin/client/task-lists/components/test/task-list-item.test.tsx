@@ -17,7 +17,14 @@ import { TaskListItem } from '../task-list-item';
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
 	return {
-		...originalModule,
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
 		useDispatch: jest.fn(),
 	};
 } );

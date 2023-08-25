@@ -10,13 +10,23 @@ import { recordEvent } from '@woocommerce/tracks';
 
 import { PaymentGatewaySuggestions } from '../index';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn().mockImplementation( () => ( {
-		updatePaymentGateway: jest.fn(),
-	} ) ),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn(),
+		useDispatch: jest.fn().mockImplementation( () => ( {
+			updatePaymentGateway: jest.fn(),
+		} ) ),
+	};
+} );
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 

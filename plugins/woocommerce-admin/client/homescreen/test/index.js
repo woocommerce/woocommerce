@@ -27,6 +27,21 @@ jest.mock( '../activity-panel', () => ( {
 	ActivityPanel: jest.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
 } ) );
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUserPreferences: jest.fn().mockReturnValue( {} ),

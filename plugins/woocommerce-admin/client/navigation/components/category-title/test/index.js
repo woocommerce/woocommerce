@@ -9,6 +9,27 @@ import { createElement } from '@wordpress/element';
  */
 import CategoryTitle from '../';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useDispatch: jest.fn().mockReturnValue( {
+			addFavorite: jest.fn(),
+			removeFavorite: jest.fn(),
+		} ),
+		useSelect: jest.fn().mockReturnValue( {
+			favorites: [],
+		} ),
+	};
+} );
+
 describe( 'CategoryTitle', () => {
 	test( 'should render the category title without the option to favorite for the primary menu', () => {
 		const { container, queryByText } = render(

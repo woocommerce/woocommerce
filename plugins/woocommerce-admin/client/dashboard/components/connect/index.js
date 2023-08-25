@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Fragment, useEffect, useRef } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 export function Connect( {
@@ -16,23 +17,29 @@ export function Connect( {
 	skipText,
 	onAbort,
 	abortText,
+	redirectUrl,
 } ) {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const prevIsRequesting = useRef( null );
-	const { error, isRequesting, jetpackConnectUrl } = useSelect( () => {
-		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
-			select( PLUGINS_STORE_NAME );
+	const { error, isRequesting, jetpackConnectUrl } = useSelect(
+		( select ) => {
+			const {
+				getJetpackConnectUrl,
+				isPluginsRequesting,
+				getPluginsError,
+			} = select( PLUGINS_STORE_NAME );
 
-		const queryArgs = {
-			redirect_url: props.redirectUrl || window.location.href,
-		};
+			const queryArgs = {
+				redirect_url: redirectUrl || window.location.href,
+			};
 
-		return {
-			error: getPluginsError( 'getJetpackConnectUrl' ) || '',
-			isRequesting: isPluginsRequesting( 'getJetpackConnectUrl' ),
-			jetpackConnectUrl: getJetpackConnectUrl( queryArgs ),
-		};
-	} );
+			return {
+				error: getPluginsError( 'getJetpackConnectUrl' ) || '',
+				isRequesting: isPluginsRequesting( 'getJetpackConnectUrl' ),
+				jetpackConnectUrl: getJetpackConnectUrl( queryArgs ),
+			};
+		}
+	);
 	const [ isConnecting, setIsConnecting ] = useState( false );
 
 	useEffect( () => {
@@ -93,10 +100,6 @@ export function Connect( {
 }
 
 Connect.propTypes = {
-	/**
-	 * Method to create a displayed notice.
-	 */
-	createNotice: PropTypes.func.isRequired,
 	/**
 	 * Human readable error message.
 	 */

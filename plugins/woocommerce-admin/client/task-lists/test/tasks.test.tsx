@@ -20,7 +20,14 @@ jest.mock( '@wordpress/data', () => {
 
 	return {
 		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
 		useDispatch: jest.fn().mockReturnValue( {} ),
 		useSelect: jest.fn().mockReturnValue( {} ),
 	};

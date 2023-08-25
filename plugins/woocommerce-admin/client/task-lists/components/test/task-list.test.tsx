@@ -11,6 +11,24 @@ import { TaskType } from '@woocommerce/data';
 import { TaskList } from '../task-list';
 import { TaskListItemProps } from '../task-list-item';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn().mockReturnValue( {
+			profileItems: {
+				wccom_connected: null,
+			},
+		} ),
+	};
+} );
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );

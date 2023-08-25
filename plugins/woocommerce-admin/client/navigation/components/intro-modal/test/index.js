@@ -101,7 +101,7 @@ describe( 'IntroModal', () => {
 
 		render( <IntroModal /> );
 
-		fireEvent.click( screen.queryByLabelText( 'Close dialog' ) );
+		fireEvent.click( screen.queryByLabelText( 'Close' ) );
 
 		expect(
 			screen.queryByText( 'A new navigation for WooCommerce' )

@@ -19,33 +19,45 @@ jest.mock( '../utils', () => ( {
 	redirectToWCSSettings: jest.fn(),
 } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn().mockImplementation( ( fn ) =>
-		fn( () => ( {
-			getActivePlugins: jest.fn().mockReturnValue( [] ),
-			getInstalledPlugins: jest.fn().mockReturnValue( [] ),
-			isPluginsRequesting: jest.fn().mockReturnValue( false ),
-			getSettings: () => ( {
-				general: {
-					woocommerce_default_country: 'US',
-				},
-			} ),
-			getCountries: () => [],
-			getLocales: () => [],
-			getLocale: () => 'en',
-			hasFinishedResolution: () => true,
-			getOption: ( key: string ) => {
-				return {
-					wc_connect_options: {
-						tos_accepted: true,
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn().mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getActivePlugins: jest.fn().mockReturnValue( [] ),
+				getPluginsError: jest.fn(),
+				getInstalledPlugins: jest.fn().mockReturnValue( [] ),
+				isPluginsRequesting: jest.fn().mockReturnValue( false ),
+				getJetpackConnectUrl: jest.fn().mockReturnValue( '' ),
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: 'US',
 					},
-					woocommerce_setup_jetpack_opted_in: 1,
-				}[ key ];
-			},
-		} ) )
-	),
-} ) );
+				} ),
+				getCountries: () => [],
+				getLocales: () => [],
+				getLocale: () => 'en',
+				hasFinishedResolution: () => true,
+				getOption: ( key: string ) => {
+					return {
+						wc_connect_options: {
+							tos_accepted: true,
+						},
+						woocommerce_setup_jetpack_opted_in: 1,
+					}[ key ];
+				},
+			} ) )
+		),
+	};
+} );
 
 const taskProps: TaskProps = {
 	onComplete: () => {},

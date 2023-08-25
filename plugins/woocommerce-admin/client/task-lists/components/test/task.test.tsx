@@ -36,13 +36,29 @@ const task: TaskType = {
  */
 import { Task } from '../task';
 
+jest.mock( '@woocommerce/admin-layout', () => ( {
+	WooHeaderNavigationItem: jest
+		.fn()
+		.mockImplementation( ( { children } ) => children ),
+	WooHeaderPageTitle: jest
+		.fn()
+		.mockImplementation( ( { children } ) => children ),
+} ) );
+
 jest.mock( '@wordpress/data', () => {
 	// Require the original module to not be mocked...
 	const originalModule = jest.requireActual( '@wordpress/data' );
 
 	return {
 		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
 		useDispatch: jest.fn(),
 		useSelect: jest.fn().mockReturnValue( {} ),
 	};

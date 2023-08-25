@@ -25,7 +25,10 @@ jest.mock( '@wordpress/data', () => {
 			}
 			return mocked;
 		}, {} ),
-		useDispatch: jest.fn().mockReturnValue( {} ),
+		useDispatch: jest.fn().mockReturnValue( {
+			addFavorite: jest.fn(),
+			removeFavorite: jest.fn(),
+		} ),
 		useSelect: jest.fn().mockReturnValue( {} ),
 	};
 } );
