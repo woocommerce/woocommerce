@@ -158,6 +158,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const openEditModal = ( attribute: ProductAttribute ) => {
+		recordEvent( 'product_options_edit', {
+			source: TRACKS_SOURCE,
+			attribute: attribute.name,
+		} );
 		setCurrentAttributeId( getAttributeId( attribute ) );
 		onEditModalOpen( attribute );
 	};
