@@ -85,6 +85,7 @@ export function VariationActionsMenu( {
 				onClick() {
 					recordEvent( 'product_variations_menu_view', {
 						source: TRACKS_SOURCE,
+						variationId: variation.id,
 					} );
 				},
 			} }
@@ -103,6 +104,7 @@ export function VariationActionsMenu( {
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
+									variationId: variation.id,
 								} );
 							} }
 						>
@@ -114,7 +116,16 @@ export function VariationActionsMenu( {
 							position="middle right"
 							renderToggle={ ( { isOpen, onToggle } ) => (
 								<MenuItem
-									onClick={ onToggle }
+									onClick={ () => {
+										recordEvent(
+											'product_variations_menu_pricing_click',
+											{
+												source: TRACKS_SOURCE,
+												variationId: variation.id,
+											}
+										);
+										onToggle();
+									} }
 									aria-expanded={ isOpen }
 									icon={ chevronRight }
 									iconPosition="right"
@@ -132,7 +143,31 @@ export function VariationActionsMenu( {
 									>
 										<MenuItem
 											onClick={ () => {
-												handlePrompt( 'regular_price' );
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'list_price_set',
+														variationId:
+															variation.id,
+													}
+												);
+												handlePrompt(
+													'regular_price',
+													undefined,
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'list_price_set',
+																variationId:
+																	variation.id,
+															}
+														);
+														return value;
+													}
+												);
 												onClose();
 											} }
 										>
@@ -143,17 +178,36 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'list_price_increase',
+														variationId:
+															variation.id,
+													}
+												);
 												handlePrompt(
 													'regular_price',
 													__(
 														'Enter a value (fixed or %)',
 														'woocommerce'
 													),
-													( value ) =>
-														addFixedOrPercentage(
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'list_price_increase',
+																variationId:
+																	variation.id,
+															}
+														);
+														return addFixedOrPercentage(
 															variation.regular_price,
 															value
-														)?.toFixed( 2 )
+														)?.toFixed( 2 );
+													}
 												);
 												onClose();
 											} }
@@ -165,18 +219,37 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'list_price_decrease',
+														variationId:
+															variation.id,
+													}
+												);
 												handlePrompt(
 													'regular_price',
 													__(
 														'Enter a value (fixed or %)',
 														'woocommerce'
 													),
-													( value ) =>
-														addFixedOrPercentage(
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'list_price_increase',
+																variationId:
+																	variation.id,
+															}
+														);
+														return addFixedOrPercentage(
 															variation.regular_price,
 															value,
 															-1
-														)?.toFixed( 2 )
+														)?.toFixed( 2 );
+													}
 												);
 												onClose();
 											} }
@@ -195,7 +268,31 @@ export function VariationActionsMenu( {
 									>
 										<MenuItem
 											onClick={ () => {
-												handlePrompt( 'sale_price' );
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'sale_price_set',
+														variationId:
+															variation.id,
+													}
+												);
+												handlePrompt(
+													'sale_price',
+													undefined,
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'sale_price_set',
+																variationId:
+																	variation.id,
+															}
+														);
+														return value;
+													}
+												);
 												onClose();
 											} }
 										>
@@ -206,17 +303,36 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'sale_price_increase',
+														variationId:
+															variation.id,
+													}
+												);
 												handlePrompt(
 													'sale_price',
 													__(
 														'Enter a value (fixed or %)',
 														'woocommerce'
 													),
-													( value ) =>
-														addFixedOrPercentage(
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'sale_price_increase',
+																variationId:
+																	variation.id,
+															}
+														);
+														return addFixedOrPercentage(
 															variation.sale_price,
 															value
-														)?.toFixed( 2 )
+														)?.toFixed( 2 );
+													}
 												);
 												onClose();
 											} }
@@ -228,18 +344,37 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'sale_price_decrease',
+														variationId:
+															variation.id,
+													}
+												);
 												handlePrompt(
 													'sale_price',
 													__(
 														'Enter a value (fixed or %)',
 														'woocommerce'
 													),
-													( value ) =>
-														addFixedOrPercentage(
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'sale_price_decrease',
+																variationId:
+																	variation.id,
+															}
+														);
+														return addFixedOrPercentage(
 															variation.sale_price,
 															value,
 															-1
-														)?.toFixed( 2 )
+														)?.toFixed( 2 );
+													}
 												);
 												onClose();
 											} }
@@ -251,19 +386,52 @@ export function VariationActionsMenu( {
 										</MenuItem>
 										<MenuItem
 											onClick={ () => {
+												recordEvent(
+													'product_variations_menu_pricing_select',
+													{
+														source: TRACKS_SOURCE,
+														action: 'sale_price_schedule',
+														variationId:
+															variation.id,
+													}
+												);
 												handlePrompt(
 													'date_on_sale_from_gmt',
 													__(
 														'Sale start date (YYYY-MM-DD format or leave blank)',
 														'woocommerce'
-													)
+													),
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'sale_price_schedule',
+																variationId:
+																	variation.id,
+															}
+														);
+														return value;
+													}
 												);
 												handlePrompt(
 													'date_on_sale_to_gmt',
 													__(
 														'Sale end date (YYYY-MM-DD format or leave blank)',
 														'woocommerce'
-													)
+													),
+													( value ) => {
+														recordEvent(
+															'product_variations_menu_pricing_update',
+															{
+																source: TRACKS_SOURCE,
+																action: 'sale_price_schedule',
+																variationId:
+																	variation.id,
+															}
+														);
+														return value;
+													}
 												);
 												onClose();
 											} }
