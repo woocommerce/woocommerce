@@ -18,6 +18,8 @@ final class BlockTemplateRegistry {
 
 	/**
 	 * Templates.
+	 *
+	 * @var array
 	 */
 	protected $templates = array();
 
@@ -35,8 +37,9 @@ final class BlockTemplateRegistry {
 	/**
 	 * Register a single template.
 	 *
-	 * @param string $id Template ID.
-	 * @param array  $template Template layout.
+	 * @param BlockTemplateInterface $template Template to register.
+	 *
+	 * @throws \ValueError If a template with the same ID already exists.
 	 */
 	public function register( BlockTemplateInterface $template ) {
 		$id = $template->get_id();
@@ -58,7 +61,7 @@ final class BlockTemplateRegistry {
 	/**
 	 * Get a single registered template.
 	 *
-	 * @param string $id ID of the template
+	 * @param string $id ID of the template.
 	 */
 	public function get_registered( $id ): BlockTemplateInterface {
 		return isset( $this->templates[ $id ] ) ? $this->templates[ $id ] : null;
