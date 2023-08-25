@@ -9,7 +9,8 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
-		"multiple": false
+		"multiple": false,
+		"interactivity": true
 	},
 	"textdomain": "woo-gutenberg-products-block",
 	"providesContext": {
@@ -47,5 +48,6 @@
 			"type": "boolean",
 			"default": false
 		}
-	}
+	},
+	"viewScript": "wc-product-gallery-interactivity-frontend"
 }
