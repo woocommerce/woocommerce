@@ -461,6 +461,7 @@ class CustomOrdersTableController {
 			'disabled'    => $disabled_option,
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
+			'row_class' => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 		);
 	}
 
@@ -495,12 +496,13 @@ class CustomOrdersTableController {
 		}
 
 		return array(
-			'id'       => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			'title'    => '',
-			'type'     => 'checkbox',
-			'desc'     => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'    => $sync_enabled,
-			'desc_tip' => $sync_message,
+			'id'        => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'title'     => '',
+			'type'      => 'checkbox',
+			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
+			'value'     => $sync_enabled,
+			'desc_tip'  => $sync_message,
+			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}
 }
