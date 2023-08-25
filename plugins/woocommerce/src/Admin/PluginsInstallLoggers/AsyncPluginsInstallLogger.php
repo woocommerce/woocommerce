@@ -14,13 +14,19 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 */
 	private $option_name;
 
+	/*
+	 * $var int $started_time time when the logger was created.
+	 */
+	private $started_time;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param string $option_name option name.
 	 */
 	public function __construct( string $option_name ) {
-		$this->option_name = $option_name;
+		$this->option_name  = $option_name;
+		$this->started_time = time();
 		add_option(
 			$this->option_name,
 			array(
@@ -135,14 +141,98 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	/**
 	 * Record completed_time.
 	 *
+	 * @param array $data return data from install_plugins().
 	 * @return void
 	 */
-	public function complete() {
+	public function complete( $data = array() ) {
 		$option = $this->get();
 
 		$option['complete_time'] = time();
 		$option['status']        = 'complete';
 
+		$this->track( $data );
 		$this->update( $option );
+	}
+
+	private function get_plugin_track_key( $id ) {
+		$slug = explode( ':', $id )[0];
+		$key  = preg_match( '/^woocommerce(-|_)payments$/', $slug )
+			? 'wcpay'
+			: explode( ':', str_replace( '-', '_', $slug ) )[0];
+		return $key;
+	}
+
+	/**
+	 * Returns time frame for a given time in milliseconds.
+	 *
+	 * @param int $timeInMs - time in milliseconds
+	 *
+	 * @return string - Time frame.
+	 */
+	function get_timeframe( $timeInMs ) {
+		$timeFrames = [
+			[
+				'name' => '0-2s',
+				'max'  => 2,
+			],
+			[
+				'name' => '2-5s',
+				'max'  => 5,
+			],
+			[
+				'name' => '5-10s',
+				'max'  => 10,
+			],
+			[
+				'name' => '10-15s',
+				'max'  => 15,
+			],
+			[
+				'name' => '15-20s',
+				'max'  => 20,
+			],
+			[
+				'name' => '20-30s',
+				'max'  => 30,
+			],
+			[
+				'name' => '30-60s',
+				'max'  => 60,
+			],
+			[ 'name' => '>60s' ],
+		];
+
+		foreach ( $timeFrames as $timeFrame ) {
+			if ( ! isset( $timeFrame['max'] ) ) {
+				return $timeFrame['name'];
+			}
+			if ( $timeInMs < $timeFrame['max'] * 1000 ) {
+				return $timeFrame['name'];
+			}
+		}
+	}
+
+
+	private function track( $data ) {
+		$track_data = array(
+			'success'              => true,
+			'installed_extensions' => array_map(
+				function( $extension ) {
+					return $this->get_plugin_track_key( $extension );
+				},
+				$data['installed']
+			),
+			'total_time'           => $this->get_timeframe( ( time() - $this->started_time ) * 1000 ),
+		);
+
+		foreach ( $data['installed'] as $plugin ) {
+			if ( ! isset( $data['time'][ $plugin ] ) ) {
+				continue;
+			}
+
+			$track_data[ 'install_time_' . $this->get_plugin_track_key( $plugin ) ] = $this->get_timeframe( $data['time'][ $plugin ] );
+		}
+
+		wc_admin_record_tracks_event( 'coreprofiler_store_extensions_installed_and_activated', $track_data );
 	}
 }
