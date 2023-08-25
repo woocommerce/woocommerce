@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add woocommerce pay order before payment action
+Adds new action hook `woocommerce_pay_order_before_payment` to the `checkout/form-pay.php` template.
