@@ -10,10 +10,20 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { PaymentsBannerWrapper } from '../payment-settings-banner';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn(),
+	};
+} );
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 

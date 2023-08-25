@@ -21,11 +21,22 @@ const ProductShippingSection = ( {}: { product?: PartialProduct } ) => (
 );
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn(),
+		useDispatch: jest.fn(),
+	};
+} );
 
 function getShippingClassDialog() {
 	return screen.getByRole( 'dialog' );

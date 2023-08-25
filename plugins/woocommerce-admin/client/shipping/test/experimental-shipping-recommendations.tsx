@@ -9,10 +9,20 @@ import { useSelect } from '@wordpress/data';
  */
 import ShippingRecommendations from '../experimental-shipping-recommendations';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useSelect: jest.fn(),
+	};
+} );
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 	DismissableList: ( ( { children } ) => children ) as React.FC,
 	DismissableListHeading: ( ( { children } ) => children ) as React.FC,

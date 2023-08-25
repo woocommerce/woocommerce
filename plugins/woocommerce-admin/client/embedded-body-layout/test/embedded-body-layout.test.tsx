@@ -12,12 +12,22 @@ import { EmbeddedBodyLayout } from '../embedded-body-layout';
 jest.mock( '@woocommerce/customer-effort-score', () => ( {
 	triggerExitPageCesSurvey: jest.fn(),
 } ) );
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	resolveSelect: jest.fn().mockReturnValue( {
-		getOption: jest.fn(),
-	} ),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		resolveSelect: jest.fn().mockReturnValue( {
+			getOption: jest.fn(),
+		} ),
+	};
+} );
 jest.mock( '@woocommerce/data', () => ( {
 	useUser: () => ( {
 		currentUserCan: jest.fn(),

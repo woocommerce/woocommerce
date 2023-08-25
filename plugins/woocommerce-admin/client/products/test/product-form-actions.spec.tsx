@@ -22,10 +22,21 @@ const deleteProductAndRedirect = jest.fn();
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
-	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
-} ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} as Record< string, unknown > ),
+		useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
+		useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
+	};
+} );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 jest.mock( '@woocommerce/admin-layout', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
