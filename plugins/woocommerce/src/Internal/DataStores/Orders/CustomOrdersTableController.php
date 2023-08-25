@@ -485,8 +485,8 @@ class CustomOrdersTableController {
 			$sync_message = sprintf(
 				// translators: %d: number of pending orders.
 				_n(
-					'%d order pending to be synchronized. You can switch order data storage only when the posts and orders tables are in sync.',
-					'%d orders pending to be synchronized. You can switch order data storage only when the posts and orders tables are in sync.',
+					'%d order pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+					'%d orders pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
 					$sync_status['current_pending_count'],
 					'woocommerce'
 				),
