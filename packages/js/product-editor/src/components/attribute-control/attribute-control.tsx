@@ -191,7 +191,16 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		closeNewModal();
 	};
 
-	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+	const handleEdit = ( updatedAttribute: EnhancedProductAttribute ) => {
+		recordEvent( 'product_options_update', {
+			source: TRACKS_SOURCE,
+			attribute: updatedAttribute.name,
+			values: updatedAttribute.options,
+			default: updatedAttribute.isDefault,
+			visible: updatedAttribute.visible,
+			filter: true, // default true until attribute filter gets implemented
+		} );
+
 		const updatedAttributes = value.map( ( attr ) => {
 			if (
 				getAttributeId( attr ) === getAttributeId( updatedAttribute )
