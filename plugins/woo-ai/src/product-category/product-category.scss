@@ -23,4 +23,15 @@
     display: flex;
     align-items: center;
   }
+
+  &__new-list {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+
+    li {
+      margin-bottom: 0;
+    }
+  }
 }

@@ -29,11 +29,18 @@ enum SuggestionsState {
 	Complete,
 	None,
 }
+type FilteredSuggestions = {
+	newCategories: string[];
+	existingCategories: string[];
+};
 
 export const ProductCategorySuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.Initial );
 	const [ suggestions, setSuggestions ] = useState< string[] >( [] );
+	const [ newCategorySuggestions, setNewCategorySuggestions ] = useState<
+		string[]
+	>( [] );
 
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
@@ -47,25 +54,34 @@ export const ProductCategorySuggestions = () => {
 
 	const filterValidCategorySuggestions = async (
 		categorySuggestions: string[]
-	) => {
+	): Promise< FilteredSuggestions > => {
 		const selectedCategories = getCategories();
+
+		const newCategories: string[] = [];
+		const existingCategories: string[] = [];
 
 		try {
 			const availableCategories = await getAvailableCategories();
 
-			return categorySuggestions.filter( ( suggestion ) => {
-				// return only the suggestions that exist in the list of all available categories and are not already selected
-				return (
-					availableCategories.includes( suggestion ) &&
-					! selectedCategories.includes( suggestion )
-				);
+			categorySuggestions.forEach( ( suggestion ) => {
+				if ( selectedCategories.includes( suggestion ) ) {
+					return;
+				}
+				if ( availableCategories.includes( suggestion ) ) {
+					existingCategories.push( suggestion );
+				} else {
+					newCategories.push( suggestion );
+				}
 			} );
 		} catch ( e ) {
-			// If we can't fetch the available categories, we can't filter the suggestions
 			// eslint-disable-next-line no-console
 			console.error( 'Unable to fetch available categories', e );
-			return [];
 		}
+
+		return {
+			newCategories,
+			existingCategories,
+		};
 	};
 
 	const { requestCompletion } = useCompletion( {
@@ -82,9 +98,13 @@ export const ProductCategorySuggestions = () => {
 		onCompletionFinished: async ( reason, content ) => {
 			try {
 				const parsed = parseCategorySuggestions( content );
-				const filtered = await filterValidCategorySuggestions( parsed );
+				const { newCategories, existingCategories } =
+					await filterValidCategorySuggestions( parsed );
 
-				if ( filtered.length === 0 ) {
+				if (
+					newCategories.length === 0 &&
+					existingCategories.length === 0
+				) {
 					setSuggestionsState( SuggestionsState.None );
 				} else {
 					setSuggestionsState( SuggestionsState.Complete );
@@ -93,10 +113,12 @@ export const ProductCategorySuggestions = () => {
 				recordCategoryTracks( 'stop', {
 					reason: 'finished',
 					suggestions: parsed,
-					valid_suggestions: filtered,
+					existing_suggestions: existingCategories,
+					new_suggestions: newCategories,
 				} );
 
-				setSuggestions( filtered );
+				setSuggestions( existingCategories );
+				setNewCategorySuggestions( newCategories );
 			} catch ( e ) {
 				setSuggestionsState( SuggestionsState.Failed );
 				throw new Error( 'Unable to parse suggestions' );
@@ -128,14 +150,14 @@ export const ProductCategorySuggestions = () => {
 			'You are a WooCommerce SEO and marketing expert.',
 			`Using the product's ${ productPropsInstructions.includedProps.join(
 				', '
-			) }, detect the main product category and its subcategories based on the existing available categories.`,
-			"Your goal is to enhance the store's SEO performance and sales.",
+			) } suggest suitable product categories.`,
 			'Categories can have parents and multi-level children structures like Parent Category > Child Category.',
 			availableCategories
-				? `You will be given a list of available categories and you can only return the best matching categories from this list. Available categories are: ${ availableCategories.join(
+				? `You will be given a list of available categories. Find the best matching categories from this list. Available categories are: ${ availableCategories.join(
 						', '
 				  ) }`
 				: '',
+			"If no match is found, use the Google standard taxonomy hierarchy to suggest better product categories to store's SEO performance and sales.",
 			"The product's properties are:",
 			...productPropsInstructions.instructions,
 			'Return only a comma-separated list of the product categories, children categories must be separated by >.',
@@ -149,6 +171,7 @@ export const ProductCategorySuggestions = () => {
 
 	const fetchProductSuggestions = async () => {
 		setSuggestions( [] );
+		setNewCategorySuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 
 		recordCategoryTracks( 'start', {
@@ -166,6 +189,27 @@ export const ProductCategorySuggestions = () => {
 						suggestions={ suggestions }
 						onSuggestionClick={ handleSuggestionClick }
 					/>
+				) }
+			{ newCategorySuggestions.length > 0 &&
+				suggestionsState !== SuggestionsState.Fetching && (
+					<div className={ `wc-product-category-suggestions__new` }>
+						<p>
+							{ __(
+								'Consider adding these categories to your store:',
+								'woocommerce'
+							) }
+						</p>
+						<ul className="wc-product-category-suggestions__new-list">
+							{ newCategorySuggestions.map( ( suggestion ) => (
+								<li
+									className="woocommerce-pill"
+									key={ suggestion }
+								>
+									{ suggestion }
+								</li>
+							) ) }
+						</ul>
+					</div>
 				) }
 			{ suggestionsState === SuggestionsState.Fetching && (
 				<div className="wc-product-category-suggestions__loading notice notice-info">
@@ -201,7 +245,7 @@ export const ProductCategorySuggestions = () => {
 					</p>
 				</div>
 			) }
-			{ suggestionsState === SuggestionsState.Initial && (
+			{ suggestionsState !== SuggestionsState.Fetching && (
 				<MagicButton
 					onClick={ fetchProductSuggestions }
 					label={ __( 'Suggest categories using AI', 'woocommerce' ) }
