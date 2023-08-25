@@ -16,9 +16,13 @@ import {
 export const CORE_NAME = 'core/post-title';
 export const VARIATION_NAME = 'woocommerce/product-collection/product-title';
 
-registerElementVariation( CORE_NAME, {
-	blockDescription: BLOCK_DESCRIPTION,
-	blockIcon: <Icon icon={ heading } />,
-	blockTitle: BLOCK_TITLE,
-	variationName: VARIATION_NAME,
-} );
+const registerProductTitle = () => {
+	registerElementVariation( CORE_NAME, {
+		blockDescription: BLOCK_DESCRIPTION,
+		blockIcon: <Icon icon={ heading } />,
+		blockTitle: BLOCK_TITLE,
+		variationName: VARIATION_NAME,
+	} );
+};
+
+export default registerProductTitle;
