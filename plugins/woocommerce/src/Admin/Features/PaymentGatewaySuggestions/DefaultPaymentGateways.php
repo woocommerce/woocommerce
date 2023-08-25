@@ -757,7 +757,7 @@ class DefaultPaymentGateways {
 				'id'          => 'woocommerce_payments',
 				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments. Test',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
