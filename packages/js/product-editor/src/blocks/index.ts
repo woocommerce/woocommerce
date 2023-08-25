@@ -25,3 +25,4 @@ export { init as initVariations } from './variations';
 export { init as initRequirePassword } from './password';
 export { init as initVariationItems } from './variation-items';
 export { init as initVariationOptions } from './variation-options';
+export { init as initNotice } from './notice';

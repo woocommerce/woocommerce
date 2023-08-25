@@ -301,6 +301,7 @@ class WC_Shortcode_Checkout {
 
 		// For non-guest orders, require the user to be logged in before showing this page.
 		if ( $order_customer_id && get_current_user_id() !== $order_customer_id ) {
+			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
 			wc_print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
 			woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );
 			return;
@@ -308,6 +309,7 @@ class WC_Shortcode_Checkout {
 
 		// For guest orders, request they verify their email address (unless we can identify them via the active user session).
 		if ( self::guest_should_verify_email( $order, 'order-received' ) ) {
+			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
 			wc_get_template(
 				'checkout/form-verify-email.php',
 				array(

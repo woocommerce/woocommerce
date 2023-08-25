@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
@@ -11,6 +10,32 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
  */
 abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	use BlockContainerTrait;
+
+	/**
+	 * Get the template ID.
+	 */
+	abstract public function get_id(): string;
+
+	/**
+	 * Get the template title.
+	 */
+	public function get_title(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template description.
+	 */
+	public function get_description(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template area.
+	 */
+	public function get_area(): string {
+		return 'uncategorized';
+	}
 
 	/**
 	 * The block cache.
@@ -84,7 +109,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
 		$inner_blocks_formatted_template = array_map(
-			function( Block $block ) {
+			function( BlockInterface $block ) {
 				return $block->get_formatted_template();
 			},
 			$inner_blocks

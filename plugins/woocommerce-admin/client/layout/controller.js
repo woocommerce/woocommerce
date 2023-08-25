@@ -57,6 +57,9 @@ const MarketingOverviewMultichannel = lazy( () =>
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
 );
+const Marketplace = lazy( () =>
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -72,6 +75,10 @@ const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
 	)
+);
+
+const CustomizeStore = lazy( () =>
+	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -170,6 +177,25 @@ export const getPages = () => {
 				id: 'woocommerce-marketing-overview',
 			},
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( isFeatureEnabled( 'marketplace' ) ) {
+		pages.push( {
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
+			path: '/extensions',
+			breadcrumbs: [
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-marketplace',
+			},
 		} );
 	}
 
@@ -285,6 +311,18 @@ export const getPages = () => {
 			breadcrumbs: [
 				...initialBreadcrumbs,
 				__( 'Profiler', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
+		pages.push( {
+			container: CustomizeStore,
+			path: '/customize-store',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Customize Your Store', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );

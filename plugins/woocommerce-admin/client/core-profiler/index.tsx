@@ -38,6 +38,7 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import { findComponentMeta } from '~/utils/xstate/find-component';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -52,9 +53,9 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { Loader } from './pages/Loader';
+import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug } from '~/utils';
+import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -64,7 +65,7 @@ import {
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
-import { findComponentMeta } from './utils/find-component';
+import { ComponentMeta } from './types';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -107,7 +108,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
+		pluginsShown: string[];
+		pluginsSelected: string[];
+		pluginsUnselected: string[];
 	};
 };
 
@@ -185,6 +188,9 @@ export type CoreProfilerStateMachineContext = {
 	};
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
+	persistBusinessInfoRef?: ReturnType< typeof spawn >;
+	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
+	spawnGeolocationRef?: ReturnType< typeof spawn >;
 };
 
 const getAllowTrackingOption = async () =>
@@ -314,7 +320,6 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 };
 
 const preFetchGeolocation = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
 			() => getGeolocation( context ),
@@ -339,7 +344,19 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url + '&installed_ext_success=1';
+	const url = new URL( event.data.url );
+	url.searchParams.set( 'installed_ext_success', '1' );
+	const selectedPlugin = _context.pluginsSelected.find(
+		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	);
+
+	if ( selectedPlugin ) {
+		const pluginName =
+			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
+		url.searchParams.set( 'plugin_name', pluginName );
+	}
+
+	window.location.href = url.toString();
 };
 
 const updateTrackingOption = async (
@@ -386,7 +403,6 @@ const updateOnboardingProfileOption = (
 };
 
 const spawnUpdateOnboardingProfileOption = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnUpdateOnboardingProfileOptionRef: (
 		context: CoreProfilerStateMachineContext
 	) =>
@@ -438,7 +454,6 @@ const updateBusinessInfo = async (
 };
 
 const persistBusinessInfo = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	persistBusinessInfoRef: (
 		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
@@ -550,7 +565,7 @@ const updateQueryStep: CoreProfilerMachineAssign = (
 
 const assignPluginsSelected = assign( {
 	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
-		return event.payload.plugins.map( getPluginSlug );
+		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
@@ -1108,7 +1123,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1173,7 +1188,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 				plugins: {
@@ -1201,7 +1216,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {
@@ -1232,7 +1250,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1254,7 +1272,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1285,7 +1303,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1380,7 +1398,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1437,7 +1455,7 @@ export const CoreProfilerController = ( {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
@@ -1455,19 +1473,7 @@ export const CoreProfilerController = ( {
 			? Object.keys( state.value )[ 0 ]
 			: state.value;
 
-	useEffect( () => {
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-profile-wizard__body' );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		return () => {
-			document.body.classList.remove(
-				'woocommerce-profile-wizard__body'
-			);
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-		};
-	} );
+	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
 
 	return (
 		<>

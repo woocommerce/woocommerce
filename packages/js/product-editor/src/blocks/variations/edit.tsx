@@ -35,12 +35,7 @@ import {
 } from '../../hooks/use-product-attributes';
 import { getAttributeId } from '../../components/attribute-control/utils';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
-
-function hasAttributesUsedForVariations(
-	productAttributes: Product[ 'attributes' ]
-) {
-	return productAttributes.some( ( { variation } ) => variation );
-}
+import { hasAttributesUsedForVariations } from '../../utils';
 
 function getFirstOptionFromEachAttribute(
 	attributes: Product[ 'attributes' ]
@@ -163,6 +158,9 @@ export function Edit( {
 					selectedAttributeIds={ variationOptions.map(
 						( attr ) => attr.id
 					) }
+					disabledAttributeIds={ productAttributes
+						.filter( ( attr ) => ! attr.variation )
+						.map( ( attr ) => attr.id ) }
 				/>
 			) }
 		</div>

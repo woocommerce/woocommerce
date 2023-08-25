@@ -238,6 +238,9 @@ class WC_Install {
 		'7.7.0' => array(
 			'wc_update_770_remove_multichannel_marketing_feature_options',
 		),
+		'8.1.0' => array(
+			'wc_update_810_migrate_transactional_metadata_for_hpos',
+		),
 	);
 
 	/**

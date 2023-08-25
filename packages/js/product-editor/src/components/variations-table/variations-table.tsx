@@ -1,30 +1,36 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Button, Spinner, Tooltip } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	Button,
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
 import {
-	Link,
-	ListItem,
-	Pagination,
-	Sortable,
-	Tag,
-} from '@woocommerce/components';
-import { getNewPath } from '@woocommerce/navigation';
-import { useContext, useState, createElement } from '@wordpress/element';
+	useContext,
+	useState,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { moreVertical } from '@wordpress/icons';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId, useEntityProp } from '@wordpress/core-data';
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -35,6 +41,7 @@ import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
 	DEFAULT_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
+	TRACKS_SOURCE,
 } from '../../constants';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
@@ -47,54 +54,60 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const [ entityAttributes ] = useEntityProp< ProductAttribute[] >(
-		'postType',
-		'product',
-		'attributes'
-	);
-	const variableAttributeTags = entityAttributes
-		.filter( ( attr ) => attr.variation )
-		.map( ( attr ) => attr.options )
-		.flat();
 
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { isLoading, variations, totalCount } = useSelect(
-		( select ) => {
-			const {
-				getProductVariations,
-				hasFinishedResolution,
-				getProductVariationsTotalCount,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-			const requestParams = {
-				product_id: productId,
-				page: currentPage,
-				per_page: perPage,
-				order: 'asc',
-				orderby: 'menu_order',
-			};
-			return {
-				isLoading: ! hasFinishedResolution( 'getProductVariations', [
-					requestParams,
-				] ),
-				variations:
-					getProductVariations< ProductVariation[] >( requestParams ),
-				totalCount:
-					getProductVariationsTotalCount< number >( requestParams ),
-			};
-		},
-		[ currentPage, perPage, productId ]
-	);
+	const { isLoading, variations, totalCount, isGeneratingVariations } =
+		useSelect(
+			( select ) => {
+				const {
+					getProductVariations,
+					hasFinishedResolution,
+					getProductVariationsTotalCount,
+					isGeneratingVariations: getIsGeneratingVariations,
+				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+				const requestParams = {
+					product_id: productId,
+					page: currentPage,
+					per_page: perPage,
+					order: 'asc',
+					orderby: 'menu_order',
+				};
+				return {
+					isLoading: ! hasFinishedResolution(
+						'getProductVariations',
+						[ requestParams ]
+					),
+					isGeneratingVariations: getIsGeneratingVariations( {
+						product_id: productId,
+					} ),
+					variations:
+						getProductVariations< ProductVariation[] >(
+							requestParams
+						),
+					totalCount:
+						getProductVariationsTotalCount< number >(
+							requestParams
+						),
+				};
+			},
+			[ currentPage, perPage, productId ]
+		);
 
-	const { updateProductVariation } = useDispatch(
+	const { updateProductVariation, deleteProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
-	if ( ! variations || isLoading ) {
+	if ( ! variations && isLoading ) {
 		return (
-			<div className="woocommerce-product-variations is-loading">
+			<div className="woocommerce-product-variations__loading">
 				<Spinner />
+				{ isGeneratingVariations && (
+					<span>
+						{ __( 'Generating variations…', 'woocommerce' ) }
+					</span>
+				) }
 			</div>
 		);
 	}
@@ -119,51 +132,77 @@ export function VariationsTable() {
 		);
 	}
 
+	function handleDeleteVariationClick( variationId: number ) {
+		if ( isUpdating[ variationId ] ) return;
+		setIsUpdating( ( prevState ) => ( {
+			...prevState,
+			[ variationId ]: true,
+		} ) );
+		deleteProductVariation< Promise< ProductVariation > >( {
+			product_id: productId,
+			id: variationId,
+		} )
+			.then( () => {
+				recordEvent( 'product_variations_delete', {
+					source: TRACKS_SOURCE,
+				} );
+			} )
+			.finally( () =>
+				setIsUpdating( ( prevState ) => ( {
+					...prevState,
+					[ variationId ]: false,
+				} ) )
+			);
+	}
+
 	return (
 		<div className="woocommerce-product-variations">
+			{ isLoading ||
+				( isGeneratingVariations && (
+					<div className="woocommerce-product-variations__loading">
+						<Spinner />
+						{ isGeneratingVariations && (
+							<span>
+								{ __(
+									'Generating variations…',
+									'woocommerce'
+								) }
+							</span>
+						) }
+					</div>
+				) ) }
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__attributes">
-							{ variation.attributes
-								.filter( ( attribute ) =>
-									variableAttributeTags.includes(
-										attribute.option
-									)
-								)
-								.map( ( attribute ) => {
-									const tag = (
-										/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-										/* @ts-ignore Additional props are not required. */
-										<Tag
-											id={ attribute.id }
-											className="woocommerce-product-variations__attribute"
-											key={ attribute.id }
-											label={ truncate(
-												attribute.option,
-												{
-													length: PRODUCT_VARIATION_TITLE_LIMIT,
-												}
-											) }
-											screenReaderLabel={
-												attribute.option
-											}
-										/>
-									);
+							{ variation.attributes.map( ( attribute ) => {
+								const tag = (
+									/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+									/* @ts-ignore Additional props are not required. */
+									<Tag
+										id={ attribute.id }
+										className="woocommerce-product-variations__attribute"
+										key={ attribute.id }
+										label={ truncate( attribute.option, {
+											length: PRODUCT_VARIATION_TITLE_LIMIT,
+										} ) }
+										screenReaderLabel={ attribute.option }
+									/>
+								);
 
-									return attribute.option.length <=
-										PRODUCT_VARIATION_TITLE_LIMIT ? (
-										tag
-									) : (
-										<Tooltip
-											key={ attribute.id }
-											text={ attribute.option }
-											position="top center"
-										>
-											<span>{ tag }</span>
-										</Tooltip>
-									);
-								} ) }
+								return attribute.option.length <=
+									PRODUCT_VARIATION_TITLE_LIMIT ? (
+									tag
+								) : (
+									<Tooltip
+										key={ attribute.id }
+										text={ attribute.option }
+										position="top center"
+									>
+										<span>{ tag }</span>
+									</Tooltip>
+								);
+							} ) }
 						</div>
 						<div
 							className={ classnames(
@@ -258,17 +297,70 @@ export function VariationsTable() {
 								</Tooltip>
 							) }
 
-							<Link
-								href={ getNewPath(
-									{},
-									`/product/${ productId }/variation/${ variation.id }`,
-									{}
-								) }
-								type="wc-admin"
-								className="components-button"
+							<DropdownMenu
+								icon={ moreVertical }
+								label={ __( 'Actions', 'woocommerce' ) }
+								toggleProps={ {
+									onClick() {
+										recordEvent(
+											'product_variations_menu_view',
+											{
+												source: TRACKS_SOURCE,
+											}
+										);
+									},
+								} }
 							>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Link>
+								{ ( { onClose } ) => (
+									<>
+										<MenuGroup
+											label={ sprintf(
+												/** Translators: Variation ID */
+												__(
+													'Variation Id: %s',
+													'woocommerce'
+												),
+												variation.id
+											) }
+										>
+											<MenuItem
+												href={ variation.permalink }
+												onClick={ () => {
+													recordEvent(
+														'product_variations_preview',
+														{
+															source: TRACKS_SOURCE,
+														}
+													);
+												} }
+											>
+												{ __(
+													'Preview',
+													'woocommerce'
+												) }
+											</MenuItem>
+										</MenuGroup>
+										<MenuGroup>
+											<MenuItem
+												isDestructive
+												variant="link"
+												onClick={ () => {
+													handleDeleteVariationClick(
+														variation.id
+													);
+													onClose();
+												} }
+												className="woocommerce-product-variations__actions--delete"
+											>
+												{ __(
+													'Delete',
+													'woocommerce'
+												) }
+											</MenuItem>
+										</MenuGroup>
+									</>
+								) }
+							</DropdownMenu>
 						</div>
 					</ListItem>
 				) ) }

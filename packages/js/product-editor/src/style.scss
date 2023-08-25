@@ -1,38 +1,40 @@
 /* Editor */
 
-@import 'components/editor/style.scss';
-@import 'components/block-editor/style.scss';
+@import "components/editor/style.scss";
+@import "components/block-editor/style.scss";
 
 /* Structural */
 
-@import 'components/tabs/style.scss';
-@import 'components/product-section-layout/style.scss';
-@import 'components/header/style.scss';
-@import 'components/footer/style.scss';
-@import 'components/add-new-shipping-class-modal/style.scss';
+@import "components/tabs/style.scss";
+@import "components/product-section-layout/style.scss";
+@import "components/header/style.scss";
+@import "components/footer/style.scss";
+@import "components/add-new-shipping-class-modal/style.scss";
 
 /* Components */
 
-@import 'components/content-preview/style.scss';
-@import 'components/radio-field/style.scss';
-@import 'components/iframe-editor/style.scss';
-@import 'components/details-categories-field/style.scss';
-@import 'components/details-categories-field/create-category-modal.scss';
-@import 'components/modal-editor/style.scss';
-@import 'components/feedback-bar/style.scss';
-@import 'components/product-mvp-feedback-modal/style.scss';
-@import 'components/edit-product-link-modal/style.scss';
-@import 'components/edit-product-link-modal/style.scss';
-@import 'components/details-categories-field/style.scss';
-@import 'components/details-categories-field/create-category-modal.scss';
-@import 'components/attribute-control/attribute-field.scss';
-@import 'components/attribute-control/edit-attribute-modal.scss';
-@import 'components/attribute-control/new-attribute-modal.scss';
-@import 'components/attribute-input-field/attribute-input-field.scss';
-@import 'components/attribute-list-item/attribute-list-item.scss';
-@import 'components/attribute-term-input-field/attribute-term-input-field.scss';
-@import 'components/variations-table/styles.scss';
+@import "components/content-preview/style.scss";
+@import "components/radio-field/style.scss";
+@import "components/notice/style.scss";
+@import "components/iframe-editor/style.scss";
+@import "components/details-categories-field/style.scss";
+@import "components/details-categories-field/create-category-modal.scss";
+@import "components/modal-editor/style.scss";
+@import "components/feedback-bar/style.scss";
+@import "components/product-mvp-feedback-modal/style.scss";
+@import "components/edit-product-link-modal/style.scss";
+@import "components/edit-product-link-modal/style.scss";
+@import "components/details-categories-field/style.scss";
+@import "components/details-categories-field/create-category-modal.scss";
+@import "components/attribute-control/attribute-field.scss";
+@import "components/attribute-control/edit-attribute-modal.scss";
+@import "components/attribute-control/new-attribute-modal.scss";
+@import "components/attribute-control/remove-confirmation-modal.scss";
+@import "components/attribute-input-field/attribute-input-field.scss";
+@import "components/attribute-list-item/attribute-list-item.scss";
+@import "components/attribute-term-input-field/attribute-term-input-field.scss";
+@import "components/variations-table/styles.scss";
 
 /* Field Blocks */
 
-@import 'blocks/style.scss'
+@import "blocks/style.scss";

@@ -2,26 +2,12 @@
 const { test, expect } = require('@playwright/test');
 const { getShippingZoneExample } = require( '../../data' );
 const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
+const shouldSkip = API_BASE_URL != undefined;
 /**
  * Tests for the WooCommerce Shipping zones API.
  * @group api
  * @group shipping
  */
-skipTestIfCI();
 
 test.describe( 'Shipping zones API tests', () => {
 
@@ -184,8 +170,13 @@ test.describe( 'Shipping zones API tests', () => {
 
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
 		expect( putResponseStateOnly.status() ).toEqual( 200 );
-		expect( putResponseStateOnlyJSON).toHaveLength(0);
 
+		// external host starts with default shipping region
+		if ( ! shouldSkip ) {
+		expect( putResponseStateOnlyJSON).toHaveLength(0);
+		} else {
+			expect( putResponseStateOnlyJSON ).toHaveLength(1);
+		}
 	} );
 
 	test( 'can delete a shipping zone', async ({request}) => {

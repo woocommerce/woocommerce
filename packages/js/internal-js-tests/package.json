@@ -23,7 +23,7 @@
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",

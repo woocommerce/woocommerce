@@ -1,0 +1,7 @@
+.woocommerce-product-notice {
+	margin-top: $gap + $gap-large * 2;
+	button {
+		pointer-events: all;
+		cursor: pointer;
+	}
+}

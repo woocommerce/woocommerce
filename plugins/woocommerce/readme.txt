@@ -3,8 +3,8 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo
 Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, checkout, payments, woo, woo commerce, e-commerce, store
 Requires at least: 6.2
 Tested up to: 6.3
-Requires PHP: 7.3
-Stable tag: 8.0.1
+Requires PHP: 7.4
+Stable tag: 8.0.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -136,7 +136,7 @@ Check out [Frequently Asked Questions](https://docs.woocommerce.com/document/fre
 
 = Minimum Requirements =
 
-* PHP 7.3 or greater is required (PHP 8.0 or greater is recommended)
+* PHP 7.4 or greater is required (PHP 8.0 or greater is recommended)
 * MySQL 5.6 or greater, OR MariaDB version 10.1 or greater, is required
 
 Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) for a detailed list of server requirements.
@@ -163,6 +163,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.1.0 2023-XX-XX =
+= 8.2.0 2023-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
