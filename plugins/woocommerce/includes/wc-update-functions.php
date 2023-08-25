@@ -2603,7 +2603,7 @@ function wc_update_810_migrate_transactional_metadata_for_hpos() {
 
 	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 	if ( ! $data_synchronizer->get_table_exists() ) {
-		return true;
+		return false;
 	}
 
 	$orders_table      = OrdersTableDataStore::get_orders_table_name();
