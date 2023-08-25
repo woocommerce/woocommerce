@@ -120,9 +120,11 @@ class FeaturesController {
 			),
 			$hpos_authoritative    => array(
 				'name'             => __( 'High-Performance Order Storage', 'woocommerce' ),
+				'order'            => 10,
 			),
 			$hpos_enable_sync      => array(
 				'name'            => '',
+				'order'            => 9,
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -592,6 +594,15 @@ class FeaturesController {
 		$features = $this->get_features( true );
 
 		$feature_ids              = array_keys( $features );
+		usort( $feature_ids, function( $feature_id_a, $feature_id_b ) use ( $features ) {
+			if ( ! isset( $features[ $feature_id_a ]['order'] ) ) {
+				$features[ $feature_id_a ]['order'] = 0;
+			}
+			if ( ! isset( $features[ $feature_id_b ]['order'] ) ) {
+				$features[ $feature_id_b ]['order'] = 0;
+			}
+			return $features[ $feature_id_b ]['order'] <=> $features[ $feature_id_a ]['order'];
+		} );
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
 			function( $feature_id ) use ( $features ) {
