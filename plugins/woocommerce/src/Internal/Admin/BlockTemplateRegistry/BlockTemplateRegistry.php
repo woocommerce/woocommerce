@@ -53,7 +53,7 @@ final class BlockTemplateRegistry {
 		 *
 		 * @param BlockTemplateInterface $template Template that was registered.
 		 *
-		 * @since 8.1.0
+		 * @since 8.2.0
 		 */
 		do_action( 'woocommerce_block_template_register', $template );
 
