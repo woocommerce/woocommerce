@@ -2163,16 +2163,6 @@ FROM $order_meta_table
 			'_wp_trash_meta_time'   => time(),
 		);
 
-		foreach ( $trash_metadata as $meta_key => $meta_value ) {
-			$this->add_meta(
-				$order,
-				(object) array(
-					'key'   => $meta_key,
-					'value' => $meta_value,
-				)
-			);
-		}
-
 		$wpdb->update(
 			self::get_orders_table_name(),
 			array(
@@ -2185,6 +2175,16 @@ FROM $order_meta_table
 		);
 
 		$order->set_status( 'trash' );
+
+		foreach ( $trash_metadata as $meta_key => $meta_value ) {
+			$this->add_meta(
+				$order,
+				(object) array(
+					'key'   => $meta_key,
+					'value' => $meta_value,
+				)
+			);
+		}
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( $data_synchronizer->data_sync_is_enabled() ) {
@@ -2794,6 +2794,8 @@ CREATE TABLE $meta_table (
 	 */
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+		$this->update_date_modified( $object );
+		$this->clear_caches( $object );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2814,6 +2816,8 @@ CREATE TABLE $meta_table (
 	 */
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$this->update_date_modified( $object );
+		$this->clear_caches( $object );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2834,6 +2838,8 @@ CREATE TABLE $meta_table (
 	 */
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+		$this->update_date_modified( $object );
+		$this->clear_caches( $object );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2842,5 +2848,19 @@ CREATE TABLE $meta_table (
 		}
 
 		return $update_meta;
+	}
+
+	/**
+	 * Update date modified, but try to be efficient about it. Use some heuristic to not do it too often.
+	 *
+	 * @param WC_Abstract_Order $order Order object.
+	 */
+	protected function update_date_modified( $order ) {
+		$current_date_time = new \WC_DateTime( 'now', new \DateTimeZone( 'GMT' ) );
+		// Prevent this happening multiple time in same request.
+		if ( $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+			$order->save();
+		}
 	}
 }
