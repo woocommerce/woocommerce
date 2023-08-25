@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: fix
 
-No longer fatals on order-received page when provided with the id of a refund
+Avoid a fatal error on the order received page if the order ID is not for a valid order.
