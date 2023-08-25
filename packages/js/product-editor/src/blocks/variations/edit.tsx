@@ -6,6 +6,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { Product, ProductAttribute } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	createElement,
 	useState,
@@ -36,6 +37,7 @@ import {
 import { getAttributeId } from '../../components/attribute-control/utils';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 import { hasAttributesUsedForVariations } from '../../utils';
+import { TRACKS_SOURCE } from '../../constants';
 
 function getFirstOptionFromEachAttribute(
 	attributes: Product[ 'attributes' ]
@@ -101,15 +103,22 @@ export function Edit( {
 	};
 
 	const handleAdd = ( newOptions: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...newOptions.filter(
-				( newAttr ) =>
-					! variationOptions.find(
-						( attr: ProductAttribute ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newOptions.filter(
+			( newAttr ) =>
+				! variationOptions.some(
+					( attr: ProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( attr )
+				)
+		);
+		recordEvent( 'product_options_add', {
+			source: TRACKS_SOURCE,
+			options: addedAttributesOnly.map( ( attribute ) => ( {
+				attribute: attribute.name,
+				values: attribute.options,
+			} ) ),
+		} );
+
+		handleChange( addedAttributesOnly );
 		closeNewModal();
 	};
 

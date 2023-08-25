@@ -31,6 +31,7 @@ import {
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
@@ -167,16 +168,21 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...value,
-			...newAttributes.filter(
-				( newAttr ) =>
-					! value.find(
-						( attr ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newAttributes.filter(
+			( newAttr ) =>
+				! value.some(
+					( current: ProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( current )
+				)
+		);
+		recordEvent( 'product_options_add', {
+			source: TRACKS_SOURCE,
+			options: addedAttributesOnly.map( ( attribute ) => ( {
+				attribute: attribute.name,
+				values: attribute.options,
+			} ) ),
+		} );
+		handleChange( [ ...value, ...addedAttributesOnly ] );
 		onAdd( newAttributes );
 		closeNewModal();
 	};
