@@ -13,7 +13,7 @@ import { CORE_NAME as PRODUCT_SUMMARY_ID } from './elements/product-summary';
 
 const EXTENDED_CORE_ELEMENTS = [ PRODUCT_SUMMARY_ID, PRODUCT_TITLE_ID ];
 
-function registerProductQueryElementsNamespace(
+function registerProductCollectionElementsNamespace(
 	props: Block,
 	blockName: string
 ) {
@@ -36,6 +36,6 @@ if ( isWpVersion( '6.1', '>=' ) ) {
 	addFilter(
 		'blocks.registerBlockType',
 		'core/custom-class-name/attribute',
-		registerProductQueryElementsNamespace
+		registerProductCollectionElementsNamespace
 	);
 }
