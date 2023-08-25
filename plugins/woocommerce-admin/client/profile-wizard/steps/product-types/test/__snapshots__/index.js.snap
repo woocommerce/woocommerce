@@ -24,20 +24,20 @@ exports[`ProductTypes should render product types 1`] = `
       </p>
     </div>
     <div
-      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Card"
     >
       <div
-        class="css-mgwsf4-View-Content em57xhy0"
+        class="css-mgwsf4-View-Content e19lxcc00"
       >
         <div
-          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
+          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius e19lxcc00"
           data-wp-c16t="true"
           data-wp-component="CardBody"
         >
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -81,7 +81,7 @@ exports[`ProductTypes should render product types 1`] = `
                 </button>
                 
                 <span
-                  class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base em57xhy0"
+                  class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="Text"
                 >
@@ -98,7 +98,7 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -123,7 +123,7 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-flex components-card__footer components-card-footer css-16c019y-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
+          class="components-flex components-card__footer components-card-footer css-o3vlpy-View-Flex-base-ItemsRow-Footer-borderRadius-borderColor-medium-borderless e19lxcc00"
           data-wp-c16t="true"
           data-wp-component="CardFooter"
         >
@@ -139,13 +139,13 @@ you can purchase and install it later.
       </div>
       <div
         aria-hidden="true"
-        class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+        class="components-elevation css-15t1t3g-View-Elevation-sx-Base-elevationClassName e19lxcc00"
         data-wp-c16t="true"
         data-wp-component="Elevation"
       />
       <div
         aria-hidden="true"
-        class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+        class="components-elevation css-15t1t3g-View-Elevation-sx-Base-elevationClassName e19lxcc00"
         data-wp-c16t="true"
         data-wp-component="Elevation"
       />
@@ -220,20 +220,20 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
       </p>
     </div>
     <div
-      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Card"
     >
       <div
-        class="css-mgwsf4-View-Content em57xhy0"
+        class="css-mgwsf4-View-Content e19lxcc00"
       >
         <div
-          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
+          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius e19lxcc00"
           data-wp-c16t="true"
           data-wp-component="CardBody"
         >
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -277,7 +277,7 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
                 </button>
                 
                 <span
-                  class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base em57xhy0"
+                  class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="Text"
                 >
@@ -294,7 +294,7 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
               class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -319,7 +319,7 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-flex components-card__footer components-card-footer css-16c019y-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
+          class="components-flex components-card__footer components-card-footer css-o3vlpy-View-Flex-base-ItemsRow-Footer-borderRadius-borderColor-medium-borderless e19lxcc00"
           data-wp-c16t="true"
           data-wp-component="CardFooter"
         >
@@ -335,13 +335,13 @@ you can purchase and install it later.
       </div>
       <div
         aria-hidden="true"
-        class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+        class="components-elevation css-15t1t3g-View-Elevation-sx-Base-elevationClassName e19lxcc00"
         data-wp-c16t="true"
         data-wp-component="Elevation"
       />
       <div
         aria-hidden="true"
-        class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+        class="components-elevation css-15t1t3g-View-Elevation-sx-Base-elevationClassName e19lxcc00"
         data-wp-c16t="true"
         data-wp-component="Elevation"
       />

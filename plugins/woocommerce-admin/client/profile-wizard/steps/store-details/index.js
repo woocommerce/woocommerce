@@ -12,9 +12,8 @@ import {
 	Spinner,
 	Popover,
 } from '@wordpress/components';
-import { Component, useRef } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useState, useRef, useEffect, useContext } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Form, TextControl } from '@woocommerce/components';
 import {
 	COUNTRIES_STORE_NAME,
@@ -57,48 +56,97 @@ const LoadingPlaceholder = () => (
 	</div>
 );
 
-export class StoreDetails extends Component {
-	constructor( props ) {
-		super( props );
+function StoreDetails( props ) {
+	const [ showUsageModal, setShowUsageModal ] = useState( false );
+	const [ skipping, setSkipping ] = useState( false );
+	const [ isSkipSetupPopoverVisible, setIsSkipSetupPopoverVisible ] =
+		useState( false );
+	const changedFormValues = useRef( {} );
+	const Currency = useContext( CurrencyContext );
 
-		this.state = {
-			showUsageModal: false,
-			skipping: false,
-			isSkipSetupPopoverVisible: false,
+	const { invalidateResolutionForStoreSelector, updateProfileItems } =
+		useDispatch( ONBOARDING_STORE_NAME );
+	const { updateAndPersistSettingsForGroup } =
+		useDispatch( SETTINGS_STORE_NAME );
+	const data = useSelect( ( select ) => {
+		const { getSettings, getSettingsError, isUpdateSettingsRequesting } =
+			select( SETTINGS_STORE_NAME );
+		const {
+			getProfileItems,
+			isOnboardingRequesting,
+			getEmailPrefill,
+			hasFinishedResolution: hasFinishedResolutionOnboarding,
+		} = select( ONBOARDING_STORE_NAME );
+		const {
+			getLocale,
+			getLocales,
+			getCountries,
+			hasFinishedResolution: hasFinishedResolutionCountries,
+		} = select( COUNTRIES_STORE_NAME );
+		const { isResolving } = select( OPTIONS_STORE_NAME );
+
+		const profileItems = getProfileItems();
+		const emailPrefill = getEmailPrefill();
+
+		const { general: settings = {} } = getSettings( 'general' );
+		const isBusy =
+			isOnboardingRequesting( 'updateProfileItems' ) ||
+			isUpdateSettingsRequesting( 'general' ) ||
+			isResolving( 'getOption', [ 'woocommerce_allow_tracking' ] );
+		const isLoading =
+			! hasFinishedResolutionOnboarding( 'getProfileItems' ) ||
+			! hasFinishedResolutionOnboarding( 'getEmailPrefill' ) ||
+			! hasFinishedResolutionCountries( 'getLocales' ) ||
+			! hasFinishedResolutionCountries( 'getCountries' );
+		const errorsRef = useRef( {
+			settings: null,
+		} );
+		errorsRef.current = {
+			settings: getSettingsError( 'general' ),
+		};
+		// Check if a store country is set so that we don't default
+		// to WooCommerce's default country of the US:CA.
+		const countryState = profileItems.is_store_country_set
+			? settings.woocommerce_default_country
+			: '';
+
+		getCountries();
+		getLocales();
+
+		const initialValues = {
+			addressLine1: settings.woocommerce_store_address || '',
+			addressLine2: settings.woocommerce_store_address_2 || '',
+			city: settings.woocommerce_store_city || '',
+			countryState,
+			postCode: settings.woocommerce_store_postcode || '',
+
+			// By default, the marketing checkbox should be unticked by default to comply with WordPress.org plugin review guidelines.
+			isAgreeMarketing:
+				typeof profileItems.is_agree_marketing === 'boolean'
+					? profileItems.is_agree_marketing
+					: false,
+			storeEmail:
+				typeof profileItems.store_email === 'string'
+					? profileItems.store_email
+					: emailPrefill,
 		};
 
-		this.onContinue = this.onContinue.bind( this );
-		this.onSubmit = this.onSubmit.bind( this );
-		this.validateStoreDetails = this.validateStoreDetails.bind( this );
-		this.onFormValueChange = this.onFormValueChange.bind( this );
-		this.changedFormValues = {};
-	}
+		return {
+			getLocale,
+			initialValues,
+			isLoading,
+			profileItems,
+			isBusy,
+			settings,
+			errorsRef,
+		};
+	} );
 
-	componentDidUpdate() {
-		if (
-			this.props.isLoading === false &&
-			Object.keys( this.changedFormValues ).length === 0
-		) {
-			// Make a copy of the initialValues.
-			// The values in this object gets updated on onFormValueChange.
-			this.changedFormValues = { ...this.props.initialValues };
-			this.props.trackStepValueChanges(
-				this.props.step.key,
-				this.props.initialValues,
-				this.changedFormValues,
-				() => {
-					this.onContinue( this.changedFormValues );
-				}
-			);
-		}
-	}
-
-	deriveCurrencySettings( countryState ) {
+	function deriveCurrencySettings( countryState ) {
 		if ( ! countryState ) {
 			return null;
 		}
 
-		const Currency = this.context;
 		const country = getCountryCode( countryState );
 		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
 			'onboarding',
@@ -111,32 +159,20 @@ export class StoreDetails extends Component {
 		);
 	}
 
-	onSubmit() {
-		this.setState( {
-			showUsageModal: true,
-			skipping: false,
-		} );
+	function onSubmit() {
+		setShowUsageModal( true );
+		setSkipping( false );
 	}
 
-	onFormValueChange( changedFormValue ) {
-		this.changedFormValues[ changedFormValue.name ] =
+	function onFormValueChange( changedFormValue ) {
+		changedFormValues.current[ changedFormValue.name ] =
 			changedFormValue.value;
 	}
 
-	async onContinue( values ) {
-		const {
-			createNotice,
-			updateProfileItems,
-			updateAndPersistSettingsForGroup,
-			profileItems,
-			settings,
-			errorsRef,
-		} = this.props;
+	async function onContinue( values ) {
+		const { profileItems, settings, errorsRef } = data;
 
-		const currencySettings = this.deriveCurrencySettings(
-			values.countryState
-		);
-		const Currency = this.context;
+		const currencySettings = deriveCurrencySettings( values.countryState );
 		Currency.setCurrency( currencySettings );
 
 		recordEvent( 'storeprofiler_store_details_continue', {
@@ -223,9 +259,27 @@ export class StoreDetails extends Component {
 		);
 	}
 
-	validateStoreDetails( values ) {
-		const { getLocale } = this.props;
-		const locale = getLocale( values.countryState );
+	useEffect( () => {
+		if (
+			data.isLoading === false &&
+			Object.keys( changedFormValues.current ).length === 0
+		) {
+			// Make a copy of the initialValues.
+			// The values in this object gets updated on onFormValueChange.
+			changedFormValues.current = { ...data.initialValues };
+			props.trackStepValueChanges(
+				props.step.key,
+				data.initialValues,
+				changedFormValues.current,
+				() => {
+					onContinue( changedFormValues.current );
+				}
+			);
+		}
+	}, [ data.isLoading, data.initialValues ] );
+
+	function validateStoreDetails( values ) {
+		const locale = data.getLocale( values.countryState );
 		const validateAddress = getStoreAddressValidator( locale );
 		const errors = validateAddress( values );
 
@@ -246,277 +300,153 @@ export class StoreDetails extends Component {
 		return errors;
 	}
 
-	render() {
-		const { showUsageModal, skipping, isSkipSetupPopoverVisible } =
-			this.state;
-		const {
-			skipProfiler,
-			isLoading,
-			isBusy,
-			initialValues,
-			invalidateResolutionForStoreSelector,
-		} = this.props;
+	const { skipProfiler } = props;
 
-		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
-		const skipSetupText = __(
-			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce'
-		);
-		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
+	/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
+	const skipSetupText = __(
+		'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
+		'woocommerce'
+	);
+	/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
-		if ( isLoading ) {
-			return (
-				<div className="woocommerce-profile-wizard__store-details">
-					<LoadingPlaceholder />
-				</div>
-			);
-		}
-
+	if ( data.isLoading ) {
 		return (
 			<div className="woocommerce-profile-wizard__store-details">
-				<div className="woocommerce-profile-wizard__step-header">
-					<Text
-						variant="title.small"
-						as="h2"
-						size="20"
-						lineHeight="28px"
-					>
-						{ __( 'Welcome to WooCommerce', 'woocommerce' ) }
-					</Text>
-					<Text variant="body" as="p">
-						{ __(
-							'Tell us where you run your business to help us configure currency, shipping, taxes, and more in a fully automated way.',
-							'woocommerce'
-						) }
-					</Text>
-				</div>
-
-				<Form
-					initialValues={ initialValues }
-					onSubmit={ this.onSubmit }
-					validate={ this.validateStoreDetails }
-					onChange={ this.onFormValueChange }
-				>
-					{ ( {
-						getInputProps,
-						handleSubmit,
-						values,
-						isValidForm,
-						setValue,
-					} ) => (
-						<Card>
-							{ showUsageModal && (
-								<UsageModal
-									onContinue={ () => {
-										if ( skipping ) {
-											skipProfiler();
-										} else {
-											this.onContinue( values ).then(
-												() => this.props.goToNextStep()
-											);
-										}
-									} }
-									onClose={ () =>
-										this.setState( {
-											showUsageModal: false,
-											skipping: false,
-										} )
-									}
-								/>
-							) }
-							<CardBody>
-								<StoreAddress
-									getInputProps={ getInputProps }
-									setValue={ setValue }
-								/>
-
-								<TextControl
-									label={
-										values.isAgreeMarketing
-											? __(
-													'Email address',
-													'woocommerce'
-											  )
-											: __(
-													'Email address',
-													'woocommerce'
-											  )
-									}
-									required={ values.isAgreeMarketing }
-									autoComplete="email"
-									{ ...getInputProps( 'storeEmail' ) }
-								/>
-								<FlexItem>
-									<div className="woocommerce-profile-wizard__newsletter-signup">
-										<CheckboxControl
-											label={
-												<>
-													{ __(
-														'Get tips, product updates and inspiration straight to your mailbox.',
-														'woocommerce'
-													) }{ ' ' }
-													<span className="woocommerce-profile-wizard__powered-by-mailchimp">
-														{ __(
-															'Powered by Mailchimp',
-															'woocommerce'
-														) }
-													</span>
-												</>
-											}
-											{ ...getInputProps(
-												'isAgreeMarketing'
-											) }
-										/>
-									</div>
-								</FlexItem>
-							</CardBody>
-							<CardFooter justify="center">
-								<Button
-									isPrimary
-									onClick={ handleSubmit }
-									isBusy={ isBusy }
-									disabled={ ! isValidForm || isBusy }
-									aria-disabled={ ! isValidForm || isBusy }
-								>
-									{ __( 'Continue', 'woocommerce' ) }
-								</Button>
-							</CardFooter>
-						</Card>
-					) }
-				</Form>
-				<div className="woocommerce-profile-wizard__footer">
-					<Button
-						isLink
-						className="woocommerce-profile-wizard__footer-link"
-						onClick={ () => {
-							invalidateResolutionForStoreSelector(
-								'getTaskLists'
-							);
-							this.setState( {
-								showUsageModal: true,
-								skipping: true,
-							} );
-							return false;
-						} }
-					>
-						{ __( 'Skip setup store details', 'woocommerce' ) }
-					</Button>
-					<Button
-						isTertiary
-						label={ skipSetupText }
-						onClick={ () =>
-							this.setState( { isSkipSetupPopoverVisible: true } )
-						}
-					>
-						<Icon icon={ info } />
-					</Button>
-					{ isSkipSetupPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isSkipSetupPopoverVisible: false,
-								} )
-							}
-						>
-							{ skipSetupText }
-						</Popover>
-					) }
-				</div>
+				<LoadingPlaceholder />
 			</div>
 		);
 	}
+	return (
+		<div className="woocommerce-profile-wizard__store-details">
+			<div className="woocommerce-profile-wizard__step-header">
+				<Text variant="title.small" as="h2" size="20" lineHeight="28px">
+					{ __( 'Welcome to WooCommerce', 'woocommerce' ) }
+				</Text>
+				<Text variant="body" as="p">
+					{ __(
+						'Tell us where you run your business to help us configure currency, shipping, taxes, and more in a fully automated way.',
+						'woocommerce'
+					) }
+				</Text>
+			</div>
+
+			<Form
+				initialValues={ data.initialValues }
+				onSubmit={ onSubmit }
+				validate={ validateStoreDetails }
+				onChange={ onFormValueChange }
+			>
+				{ ( {
+					getInputProps,
+					handleSubmit,
+					values,
+					isValidForm,
+					setValue,
+				} ) => (
+					<Card>
+						{ showUsageModal && (
+							<UsageModal
+								onContinue={ () => {
+									if ( skipping ) {
+										skipProfiler();
+									} else {
+										onContinue( values ).then( () =>
+											props.goToNextStep()
+										);
+									}
+								} }
+								onClose={ () => {
+									setShowUsageModal( false );
+									setSkipping( false );
+								} }
+							/>
+						) }
+						<CardBody>
+							<StoreAddress
+								getInputProps={ getInputProps }
+								setValue={ setValue }
+							/>
+
+							<TextControl
+								label={
+									values.isAgreeMarketing
+										? __( 'Email address', 'woocommerce' )
+										: __( 'Email address', 'woocommerce' )
+								}
+								required={ values.isAgreeMarketing }
+								autoComplete="email"
+								{ ...getInputProps( 'storeEmail' ) }
+							/>
+							<FlexItem>
+								<div className="woocommerce-profile-wizard__newsletter-signup">
+									<CheckboxControl
+										label={
+											<>
+												{ __(
+													'Get tips, product updates and inspiration straight to your mailbox.',
+													'woocommerce'
+												) }{ ' ' }
+												<span className="woocommerce-profile-wizard__powered-by-mailchimp">
+													{ __(
+														'Powered by Mailchimp',
+														'woocommerce'
+													) }
+												</span>
+											</>
+										}
+										{ ...getInputProps(
+											'isAgreeMarketing'
+										) }
+									/>
+								</div>
+							</FlexItem>
+						</CardBody>
+						<CardFooter justify="center">
+							<Button
+								isPrimary
+								onClick={ handleSubmit }
+								isBusy={ data.isBusy }
+								disabled={ ! isValidForm || data.isBusy }
+								aria-disabled={ ! isValidForm || data.isBusy }
+							>
+								{ __( 'Continue', 'woocommerce' ) }
+							</Button>
+						</CardFooter>
+					</Card>
+				) }
+			</Form>
+			<div className="woocommerce-profile-wizard__footer">
+				<Button
+					isLink
+					className="woocommerce-profile-wizard__footer-link"
+					onClick={ () => {
+						invalidateResolutionForStoreSelector( 'getTaskLists' );
+						setShowUsageModal( true );
+						setSkipping( true );
+						return false;
+					} }
+				>
+					{ __( 'Skip setup store details', 'woocommerce' ) }
+				</Button>
+				<Button
+					isTertiary
+					label={ skipSetupText }
+					onClick={ () => setIsSkipSetupPopoverVisible( true ) }
+				>
+					<Icon icon={ info } />
+				</Button>
+				{ isSkipSetupPopoverVisible && (
+					<Popover
+						focusOnMount="container"
+						position="top center"
+						onClose={ () => setIsSkipSetupPopoverVisible( false ) }
+					>
+						{ skipSetupText }
+					</Popover>
+				) }
+			</div>
+		</div>
+	);
 }
 
-StoreDetails.contextType = CurrencyContext;
-
-export default compose(
-	withSelect( ( select ) => {
-		const { getSettings, getSettingsError, isUpdateSettingsRequesting } =
-			select( SETTINGS_STORE_NAME );
-		const {
-			getProfileItems,
-			isOnboardingRequesting,
-			getEmailPrefill,
-			hasFinishedResolution: hasFinishedResolutionOnboarding,
-		} = select( ONBOARDING_STORE_NAME );
-		const {
-			getLocale,
-			getLocales,
-			getCountries,
-			hasFinishedResolution: hasFinishedResolutionCountries,
-		} = select( COUNTRIES_STORE_NAME );
-		const { isResolving } = select( OPTIONS_STORE_NAME );
-
-		const profileItems = getProfileItems();
-		const emailPrefill = getEmailPrefill();
-
-		const { general: settings = {} } = getSettings( 'general' );
-		const isBusy =
-			isOnboardingRequesting( 'updateProfileItems' ) ||
-			isUpdateSettingsRequesting( 'general' ) ||
-			isResolving( 'getOption', [ 'woocommerce_allow_tracking' ] );
-		const isLoading =
-			! hasFinishedResolutionOnboarding( 'getProfileItems' ) ||
-			! hasFinishedResolutionOnboarding( 'getEmailPrefill' ) ||
-			! hasFinishedResolutionCountries( 'getLocales' ) ||
-			! hasFinishedResolutionCountries( 'getCountries' );
-		const errorsRef = useRef( {
-			settings: null,
-		} );
-		errorsRef.current = {
-			settings: getSettingsError( 'general' ),
-		};
-		// Check if a store country is set so that we don't default
-		// to WooCommerce's default country of the US:CA.
-		const countryState = profileItems.is_store_country_set
-			? settings.woocommerce_default_country
-			: '';
-
-		getCountries();
-		getLocales();
-
-		const initialValues = {
-			addressLine1: settings.woocommerce_store_address || '',
-			addressLine2: settings.woocommerce_store_address_2 || '',
-			city: settings.woocommerce_store_city || '',
-			countryState,
-			postCode: settings.woocommerce_store_postcode || '',
-
-			// By default, the marketing checkbox should be unticked by default to comply with WordPress.org plugin review guidelines.
-			isAgreeMarketing:
-				typeof profileItems.is_agree_marketing === 'boolean'
-					? profileItems.is_agree_marketing
-					: false,
-			storeEmail:
-				typeof profileItems.store_email === 'string'
-					? profileItems.store_email
-					: emailPrefill,
-		};
-
-		return {
-			getLocale,
-			initialValues,
-			isLoading,
-			profileItems,
-			isBusy,
-			settings,
-			errorsRef,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-		const { invalidateResolutionForStoreSelector, updateProfileItems } =
-			dispatch( ONBOARDING_STORE_NAME );
-		const { updateAndPersistSettingsForGroup } =
-			dispatch( SETTINGS_STORE_NAME );
-
-		return {
-			createNotice,
-			invalidateResolutionForStoreSelector,
-			updateProfileItems,
-			updateAndPersistSettingsForGroup,
-		};
-	} )
-)( StoreDetails );
+export { StoreDetails };

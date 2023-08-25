@@ -39,21 +39,23 @@ Object {
           data-testid="core-profiler-loading-screen"
         >
           <svg
-            class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+            class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
             focusable="false"
+            height="16"
             role="presentation"
             viewBox="0 0 100 100"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle
-              class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+              class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
               cx="50"
               cy="50"
               r="50"
               vector-effect="non-scaling-stroke"
             />
             <path
-              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
               d="m 50 0 a 50 50 0 0 1 50 50"
               vector-effect="non-scaling-stroke"
             />
@@ -71,21 +73,23 @@ Object {
         data-testid="core-profiler-loading-screen"
       >
         <svg
-          class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+          class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
           focusable="false"
+          height="16"
           role="presentation"
           viewBox="0 0 100 100"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle
-            class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+            class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
             cx="50"
             cy="50"
             r="50"
             vector-effect="non-scaling-stroke"
           />
           <path
-            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
             d="m 50 0 a 50 50 0 0 1 50 50"
             vector-effect="non-scaling-stroke"
           />
@@ -186,21 +190,23 @@ Object {
           data-testid="core-profiler-loading-screen"
         >
           <svg
-            class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+            class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
             focusable="false"
+            height="16"
             role="presentation"
             viewBox="0 0 100 100"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle
-              class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+              class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
               cx="50"
               cy="50"
               r="50"
               vector-effect="non-scaling-stroke"
             />
             <path
-              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
               d="m 50 0 a 50 50 0 0 1 50 50"
               vector-effect="non-scaling-stroke"
             />
@@ -218,21 +224,23 @@ Object {
         data-testid="core-profiler-loading-screen"
       >
         <svg
-          class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+          class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
           focusable="false"
+          height="16"
           role="presentation"
           viewBox="0 0 100 100"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle
-            class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+            class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
             cx="50"
             cy="50"
             r="50"
             vector-effect="non-scaling-stroke"
           />
           <path
-            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
             d="m 50 0 a 50 50 0 0 1 50 50"
             vector-effect="non-scaling-stroke"
           />
@@ -417,7 +425,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -562,7 +570,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -706,21 +714,23 @@ Object {
           data-testid="core-profiler-loading-screen"
         >
           <svg
-            class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+            class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
             focusable="false"
+            height="16"
             role="presentation"
             viewBox="0 0 100 100"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle
-              class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+              class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
               cx="50"
               cy="50"
               r="50"
               vector-effect="non-scaling-stroke"
             />
             <path
-              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
               d="m 50 0 a 50 50 0 0 1 50 50"
               vector-effect="non-scaling-stroke"
             />
@@ -738,21 +748,23 @@ Object {
         data-testid="core-profiler-loading-screen"
       >
         <svg
-          class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+          class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
           focusable="false"
+          height="16"
           role="presentation"
           viewBox="0 0 100 100"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle
-            class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+            class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
             cx="50"
             cy="50"
             r="50"
             vector-effect="non-scaling-stroke"
           />
           <path
-            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
             d="m 50 0 a 50 50 0 0 1 50 50"
             vector-effect="non-scaling-stroke"
           />
@@ -937,7 +949,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1082,7 +1094,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1613,21 +1625,23 @@ Object {
           data-testid="core-profiler-loading-screen"
         >
           <svg
-            class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+            class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
             focusable="false"
+            height="16"
             role="presentation"
             viewBox="0 0 100 100"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle
-              class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+              class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
               cx="50"
               cy="50"
               r="50"
               vector-effect="non-scaling-stroke"
             />
             <path
-              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
               d="m 50 0 a 50 50 0 0 1 50 50"
               vector-effect="non-scaling-stroke"
             />
@@ -1645,21 +1659,23 @@ Object {
         data-testid="core-profiler-loading-screen"
       >
         <svg
-          class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+          class="components-spinner css-17rkb14-StyledSpinner ea4tfvq2"
           focusable="false"
+          height="16"
           role="presentation"
           viewBox="0 0 100 100"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle
-            class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+            class="css-mx768t-SpinnerTrack-commonPathProps ea4tfvq1"
             cx="50"
             cy="50"
             r="50"
             vector-effect="non-scaling-stroke"
           />
           <path
-            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps ea4tfvq0"
             d="m 50 0 a 50 50 0 0 1 50 50"
             vector-effect="non-scaling-stroke"
           />
@@ -1844,7 +1860,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1989,7 +2005,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"

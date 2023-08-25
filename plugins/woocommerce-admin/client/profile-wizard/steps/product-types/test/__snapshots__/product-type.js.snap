@@ -30,7 +30,7 @@ exports[`ProductType should render the product type 1`] = `
     </button>
     
     <span
-      class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base em57xhy0"
+      class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Text"
     >
@@ -77,7 +77,7 @@ exports[`ProductType should render the product type with monthly prices 1`] = `
     </button>
     
     <span
-      class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base em57xhy0"
+      class="components-truncate components-text woocommerce-pill css-1g4vivm-View-Text-sx-Base e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Text"
     >

@@ -30,7 +30,7 @@ import { BusinessDetailsStep } from './steps/business-details';
 import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
-import StoreDetails from './steps/store-details';
+import { StoreDetails } from './steps/store-details';
 import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 

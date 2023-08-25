@@ -3,6 +3,8 @@
  */
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -28,35 +30,52 @@ const testProps = {
 		isAgreeMarketing: true,
 		storeEmail: 'wordpress@example.com',
 	},
-	getLocale: jest.fn(),
-	isLoading: false,
-	createNotice: jest.fn(),
-	profileItems: {},
-	updateAndPersistSettingsForGroup: jest.fn(),
+	trackStepValueChanges: jest.fn(),
 	goToNextStep: jest.fn(),
+};
+
+const useSelectData = {
+	profileItems: {},
+	isLoading: false,
 	errorsRef: {
 		current: {},
+	},
+	countries: [
+		{
+			code: 'US',
+			name: 'United States',
+			states: [],
+		},
+	],
+	locale: 'en_US',
+	loadingCountries: false,
+	hasFinishedResolution: true,
+	getLocale: jest.fn(),
+	initialValues: {
+		addressLine1: '',
+		addressLine2: '',
+		city: '',
+		countryState: '',
+		postCode: '',
+		isAgreeMarketing: true,
+		storeEmail: 'wordpress@example.com',
 	},
 };
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
-
 	return {
-		__esModule: true,
-		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {
-			locale: 'en_US',
-			countries: [
-				{
-					code: 'US',
-					name: 'United States',
-					states: [],
-				},
-			],
-			loadingCountries: false,
-			hasFinishedResolution: true,
-		} ),
+		...Object.keys( originalModule ).reduce( ( mocked, key ) => {
+			try {
+				mocked[ key ] = originalModule[ key ];
+			} catch ( e ) {
+				mocked[ key ] = jest.fn();
+			}
+			return mocked;
+		}, {} ),
+		useSelect: jest.fn().mockImplementation( () => ( {
+			...useSelectData,
+		} ) ),
 	};
 } );
 
@@ -74,17 +93,14 @@ describe( 'StoreDetails', () => {
 	} );
 
 	it( 'should enable the "Continue" button when the mandatory field (Country / Region) is filled', () => {
-		const { getByRole } = render(
-			<StoreDetails
-				{ ...{
-					...testProps,
-					initialValues: {
-						...testProps.initialValues,
-						countryState: 'US',
-					},
-				} }
-			/>
-		);
+		useSelect.mockReturnValue( {
+			...useSelectData,
+			initialValues: {
+				...testProps.initialValues,
+				countryState: 'US',
+			},
+		} );
+		const { getByRole } = render( <StoreDetails { ...testProps } /> );
 
 		expect(
 			getByRole( 'button', { name: 'Continue' } )

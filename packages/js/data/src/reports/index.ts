@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { Reducer, AnyAction } from 'redux';
 import { SelectFromMap } from '@automattic/data-stores';
 
@@ -27,13 +27,14 @@ import {
 export * from './types';
 export type { State };
 
-registerStore( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
 	selectors,
 	resolvers,
 } );
+register( store );
 
 export const REPORTS_STORE_NAME = STORE_NAME;
 
