@@ -173,7 +173,7 @@ test.describe( 'Shipping zones API tests', () => {
 
 		// external host starts with default shipping region
 		if ( ! shouldSkip ) {
-		expect( putResponseStateOnlyJSON).toHaveLength(0);
+			expect( putResponseStateOnlyJSON).toHaveLength(0);
 		} else {
 			expect( putResponseStateOnlyJSON ).toHaveLength(1);
 		}
@@ -192,10 +192,13 @@ test.describe( 'Shipping zones API tests', () => {
 		expect( deleteResponse.status() ).toEqual( 200 );
 		expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
 
-		//call API to attempt to retrieve the deleted shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
-		//validate response
-		expect( response.status() ).toEqual( 404 );
+		// only run on wp-env because caching on external hosts makes unreliable
+		if ( ! shouldSkip ) {
+			//call API to attempt to retrieve the deleted shipping zone
+			const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+			//validate response
+			expect( response.status() ).toEqual( 404 );
+		}
 	} );
 
 
