@@ -48,6 +48,15 @@ final class BlockTemplateRegistry {
 			throw new \ValueError( 'A template with the specified ID already exists in the registry.' );
 		}
 
+		/**
+		 * Fires when a template is registered.
+		 *
+		 * @param BlockTemplateInterface $template Template that was registered.
+		 *
+		 * @since 8.1.0
+		 */
+		do_action( 'woocommerce_block_template_register', $template );
+
 		$this->templates[ $id ] = $template;
 	}
 
