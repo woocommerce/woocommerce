@@ -12,13 +12,13 @@ Each panel has an orange indicator denoting "unread" items.
 
 ![Activity Panels Button on Mobile](images/activity-panels-mobile-view.png)
 
-On mobile devices, all of the panels get collapsed under the Woo logo.
+On mobile devices, all the panels get collapsed under the Woo logo.
 
 ## Inbox Panel
 
 ![Inbox Activity Panel](images/activity-panels-inbox.png)
 
-This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day to day tasks of managing and optimizing a store.
+This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day-to-day tasks of managing and optimizing a store.
 
 ## Orders Panel
 
@@ -54,7 +54,7 @@ If no Products require attention, the panel will reflect that state.
 
 ![Product Stock Settings](images/activity-panels-stock-settings.png)
 
-If you don't see the Stock Panel and expect to, double check your settings at WooCommerce > Settings > Products > Inventory. Ensure that "enable stock management" is checked.
+If you don't see the Stock Panel and expect to, double-check your settings at WooCommerce > Settings > Products > Inventory. Ensure that "enable stock management" is checked.
 
 ## Reviews Panel
 
@@ -70,7 +70,7 @@ The Reviews Panel will reflect when there are no Reviews pending moderation.
 
 ![Product Reviews Settings](images/activity-panels-reviews-settings.png)
 
-If you don't see the Reviews Panel and expect to, double check your settings at WooCommerce > Settings > Products. Ensure that "enable product reviews" is checked.
+If you don't see the Reviews Panel and expect to, double-check your settings at WooCommerce > Settings > Products. Ensure that "enable product reviews" is checked.
 
 ## WordPress Notices Panel
 

@@ -134,7 +134,7 @@ private function hooks() {
 
 Now if we refresh our product screen, we can see our new field.
 
-If we add data and save the product, then the new meta data is inserted into the database.
+If we add data and save the product, then the new metadata is inserted into the database.
 
 At this point you have a working extension that saves a custom field for a product as product meta.
 Showing the field in the store
@@ -201,7 +201,7 @@ Below is a bonus task if you are interested in variable products. Feel free to c
 
 ## How to handle variable products?
 
-The above example was done with a simple product. But what if we have variations, for example, a T-Shirt in multiple sizes and we wanted to store different stock information for each variant? WooCommerce lets us do that with the [variable product type](https://woocommerce.com/document/variable-product/).
+The above example was done with a simple product. But what if we have variations, for example, a T-Shirt in multiple sizes, and we wanted to store different stock information for each variant? WooCommerce lets us do that with the [variable product type](https://woocommerce.com/document/variable-product/).
 
 A variable product type has variations as its children. To add a custom field to a variation, we can use the `woocommerce_variation_options_inventory` hook, and to save `woocommerce_save_product_variation` so let’s update our `hooks()` method with the new action hooks like so:
 

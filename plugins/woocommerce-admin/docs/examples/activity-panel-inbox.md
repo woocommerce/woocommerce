@@ -21,7 +21,7 @@ The second category is what we’re focusing on in this example - and what we ex
 
 <img src="images/activity-panel-inbox.png" width="400" title="Activity Panel Inbox" alt="Activity Panel Inbox" />
 
-This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
+This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day-to-day tasks of managing and optimizing a store.
 
 Each notice or “note” has a type represented by an icon (Gridicon), a title, content, a timestamp and one or two actions (action title + link).
 
@@ -37,8 +37,8 @@ There are some constraints extensions should follow when working with the inbox:
 1. Be aware that notes are stored in the database using the locale in effect when the note was added to the inbox. Also be aware that you can use content_data property of a note in a hook context to “re-localize” notes on the fly into new locales.
 1. Feel free to use the content_data property to store other things too - it isn’t just limited to things needed for “re-localization” - and it is backed by a longtext column in the database.
 1. Notes can have 0, 1, or 2 action buttons. Action buttons have URLs. They can either be complete URLs (like in the case of an external link) or partial URLs (like in the case of an admin page on the site) - in the case of partial URLs you’ll want to give a string that is the same as what you’d supply to WordPress core’s admin_url function. You can even include query parameters in that string.
-1. You should store your extension’s name (slug) in the source property of the note. WooCommerce will store ‘woocommerce’ there. For example, the “Panda Payments” extension could use a name like “panda-payments” - this makes it easier to use built in functions to get (or delete) all notes with a certain name.
-1. You can use the name property of a note to store a sub-type of note. For example, if the Panda Payments extension generates notes for both connection problems AND for new features, they might both have ‘panda-payments’ in the source property but then use ‘connection-problem’ and ‘new-feature’ in the name property to distinguish between the two types of notes.
+1. You should store your extension’s name (slug) in the source property of the note. WooCommerce will store ‘woocommerce’ there. For example, the “Panda Payments” extension could use a name like “panda-payments” - this makes it easier to use built-in functions to get (or delete) all notes with a certain name.
+1. You can use the name property of a note to store a subtype of note. For example, if the Panda Payments extension generates notes for both connection problems AND for new features, they might both have ‘panda-payments’ in the source property but then use ‘connection-problem’ and ‘new-feature’ in the name property to distinguish between the two types of notes.
 1. Icons are Gridicons. You can find a gallery [here](https://automattic.github.io/gridicons/)
 1. As a best practice, have your extension remove its notes on deactivation or at least uninstall.
 
