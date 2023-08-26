@@ -50,7 +50,7 @@ export function ShippingMenuItem( {
 								}
 							);
 							handlePrompt(
-								'dimensions.length',
+								'dimensions',
 								undefined,
 								( value ) => {
 									recordEvent(
@@ -61,7 +61,10 @@ export function ShippingMenuItem( {
 											variation_id: variation.id,
 										}
 									);
-									return value;
+									return {
+										...variation.dimensions,
+										length: value,
+									};
 								}
 							);
 							onClose();
@@ -80,7 +83,7 @@ export function ShippingMenuItem( {
 								}
 							);
 							handlePrompt(
-								'dimensions.width',
+								'dimensions',
 								undefined,
 								( value ) => {
 									recordEvent(
@@ -91,7 +94,10 @@ export function ShippingMenuItem( {
 											variation_id: variation.id,
 										}
 									);
-									return value;
+									return {
+										...variation.dimensions,
+										width: value,
+									};
 								}
 							);
 							onClose();
@@ -110,7 +116,7 @@ export function ShippingMenuItem( {
 								}
 							);
 							handlePrompt(
-								'dimensions.height',
+								'dimensions',
 								undefined,
 								( value ) => {
 									recordEvent(
@@ -121,7 +127,10 @@ export function ShippingMenuItem( {
 											variation_id: variation.id,
 										}
 									);
-									return value;
+									return {
+										...variation.dimensions,
+										height: value,
+									};
 								}
 							);
 							onClose();
