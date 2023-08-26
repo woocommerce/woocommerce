@@ -36,7 +36,7 @@ The report table allows sorting by the following columns:
 
 - Coupon code
 - Orders (Number of orders)
-- Amount Dsicounted
+- Amount Discounted
 
 ### Report Links
 

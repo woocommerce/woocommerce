@@ -14,7 +14,7 @@ If you removed a dashboard section, or you have an extension installed that adds
 ## Performance Indicator Section
 By default the Performance Indicators section is what appears at the top of your dashboard below the Date Picker. Each performance indicator will display a label informing you of the statistic that is being presented, the value of that statistic for the date range selected, a percentage change over the prior period along with a trend arrow of up/down/same, and the value for the previous period that is being compared.
 
-Beyond giving you a quick glimpse into the statistic, Peroformance Indicators also act as a quick shortcut to dive deeper into the data behind the stat. For example, clicking on the Total sales indicator will open up the Revenue Report for the date range that has been selected on the Dashboard. From there you can view associated charts, and tabular data for deeper analysis.
+Beyond giving you a quick glimpse into the statistic, Performance Indicators also act as a quick shortcut to dive deeper into the data behind the stat. For example, clicking on the Total sales indicator will open up the Revenue Report for the date range that has been selected on the Dashboard. From there you can view associated charts, and tabular data for deeper analysis.
 
 Using the customization menu in the top right corner of the section, you can toggle the display of the following default performance indicators:
 

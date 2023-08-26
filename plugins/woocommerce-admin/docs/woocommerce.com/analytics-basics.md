@@ -46,7 +46,7 @@ The _Summary Number_ tab gives you a quick view at the total figure for that met
 ### Chart
 ![Analytics Chart](analytics-basics-chart.png)
 
-The charts on report pages offer quite a few options to customize the visualiztion of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
+The charts on report pages offer quite a few options to customize the visualization of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
 
 | Length of Date Range  | Interval Options  |
 |---|---|
