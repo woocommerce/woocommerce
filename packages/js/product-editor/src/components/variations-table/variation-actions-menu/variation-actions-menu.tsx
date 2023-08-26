@@ -18,6 +18,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { VariationActionsMenuProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
+import { ShippingMenuItem } from '../shipping-menu-item';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -444,6 +445,12 @@ export function VariationActionsMenu( {
 									</MenuGroup>
 								</div>
 							) }
+						/>
+
+						<ShippingMenuItem
+							variation={ variation }
+							handlePrompt={ handlePrompt }
+							onClose={ onClose }
 						/>
 					</MenuGroup>
 					<MenuGroup>
