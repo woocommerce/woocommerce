@@ -1,0 +1,46 @@
+{
+	"name": "@woocommerce/integrate-plugin",
+	"version": "0.1.0",
+	"description": "WooCommerce plugin integration scripts.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"plugin"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/integrate-plugin/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "index.js",
+	"bin": {
+		"woo-integrate-plugin": "./index.js"
+	},
+	"dependencies": {
+		"@wordpress/create-block": "^4.24.0",
+		"commander": "^9.2.0",
+		"execa": "^4.0.2",
+		"inquirer": "^7.1.0",
+		"npm-package-arg": "^8.1.5",
+		"write-pkg": "^4.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	}
+}
