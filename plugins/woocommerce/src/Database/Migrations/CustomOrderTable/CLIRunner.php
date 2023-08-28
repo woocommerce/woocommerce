@@ -73,7 +73,7 @@ class CLIRunner {
 	 * @return bool Whether the COT feature is enabled.
 	 */
 	private function is_enabled( $log = true ) : bool {
-		if ( ! $this->controller->is_feature_visible() ) {
+		if ( ! $this->controller->custom_orders_table_usage_is_enabled() ) {
 			if ( $log ) {
 				WP_CLI::log(
 					sprintf(
@@ -85,7 +85,7 @@ class CLIRunner {
 			}
 		}
 
-		return $this->controller->is_feature_visible();
+		return $this->controller->custom_orders_table_usage_is_enabled();
 	}
 
 	/**
