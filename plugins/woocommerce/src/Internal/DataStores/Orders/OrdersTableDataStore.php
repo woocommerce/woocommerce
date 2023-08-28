@@ -2852,7 +2852,7 @@ CREATE TABLE $meta_table (
 	 * @param \WC_Meta_Data     $meta  Metadata object.
 	 */
 	protected function after_meta_change( &$order, $meta ) {
-		$current_date_time = new \WC_DateTime( 'now', new \DateTimeZone( 'GMT' ) );
+		$current_date_time = new \WC_DateTime( current_time( 'mysql'), new \DateTimeZone( 'GMT' ) );
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 		$this->clear_caches( $order );
 
