@@ -44,21 +44,13 @@ const config: ExtendedPlaywrightTestConfig = {
 	projects: [
 		{
 			name: 'blockThemeConfiguration',
+			testDir: '.',
 			testMatch: /block-theme.setup.ts/,
 		},
 		{
 			name: 'blockTheme',
 			testMatch: /.*.block_theme.spec.ts/,
 			dependencies: [ 'blockThemeConfiguration' ],
-		},
-		{
-			name: 'classicThemeConfiguration',
-			testMatch: /classic-theme.setup.ts/,
-		},
-		{
-			name: 'classicTheme',
-			testMatch: /.*.classic_theme.spec.ts/,
-			dependencies: [ 'classicThemeConfiguration' ],
 		},
 	],
 };

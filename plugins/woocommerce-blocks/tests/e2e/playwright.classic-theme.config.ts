@@ -19,14 +19,14 @@ export default defineConfig( {
 	workers: 1,
 	projects: [
 		{
-			name: 'blockThemeConfiguration',
+			name: 'classicThemeConfiguration',
 			testDir: '.',
-			testMatch: /block-theme.setup.ts/,
+			testMatch: /classic-theme.setup.ts/,
 		},
 		{
-			name: 'blockThemeWithGlobalSideEffects',
-			testMatch: /.*.block_theme.side_effects.spec.ts/,
-			dependencies: [ 'blockThemeConfiguration' ],
+			name: 'classicTheme',
+			testMatch: /.*.classic_theme.spec.ts/,
+			dependencies: [ 'classicThemeConfiguration' ],
 		},
 	],
 } );
