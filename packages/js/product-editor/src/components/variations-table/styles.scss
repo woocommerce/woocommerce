@@ -5,15 +5,9 @@
 
 	&__header {
 		padding-bottom: $grid-unit-30;
-		display: grid;
-		grid-template-columns: 44px auto 25% 25% 88px;
-		border-bottom: 1px solid $gray-200;
-	}
-
-	> div {
 		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
+		align-items: center;
+		border-bottom: 1px solid $gray-200;
 	}
 
 	&__selection {

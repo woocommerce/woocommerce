@@ -45,6 +45,10 @@ export function useSelection() {
 		};
 	}
 
+	function onClearSelection() {
+		setSelectedItems( {} );
+	}
+
 	return {
 		selectedItems,
 		areAllSelected,
@@ -52,5 +56,6 @@ export function useSelection() {
 		isSelected,
 		onSelectItem,
 		onSelectAll,
+		onClearSelection,
 	};
 }

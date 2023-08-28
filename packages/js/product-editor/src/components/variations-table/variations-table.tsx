@@ -54,6 +54,7 @@ export function VariationsTable() {
 		hasSelection,
 		onSelectAll,
 		onSelectItem,
+		onClearSelection,
 	} = useSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
@@ -201,6 +202,20 @@ export function VariationsTable() {
 						}
 						onChange={ onSelectAll( variationIds ) }
 					/>
+				</div>
+				<div>
+					<Button
+						variant="tertiary"
+						onClick={ () => onSelectAll( variationIds )( true ) }
+					>
+						{ __( 'Select all', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="tertiary"
+						onClick={ () => onClearSelection() }
+					>
+						{ __( 'Clear selection', 'woocommerce' ) }
+					</Button>
 				</div>
 			</div>
 			<Sortable>
