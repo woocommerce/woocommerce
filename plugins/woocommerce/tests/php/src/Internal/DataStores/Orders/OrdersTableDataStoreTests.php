@@ -2743,6 +2743,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	/**
 	 * @testDox Stale data is not read when sync is off, but then switched on again after a while.
 	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $different_request Whether to simulate different requests (as much as we can in a unit test)
 	 */
