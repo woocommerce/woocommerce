@@ -6,7 +6,7 @@
  * External dependencies
  */
 import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useContext } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
@@ -15,6 +15,12 @@ import {
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
 
+/**
+ * Internal dependencies
+ */
+import { LogoBlockContext } from './logo-block-context';
+
+let MemoizedBlockList: typeof BlockList | null = null;
 const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -42,10 +48,14 @@ function ScaledBlockPreview( {
 	additionalStyles,
 	onClickNavigationItem,
 }: ScaledBlockPreviewProps ) {
+	const { setClientId: setLogoBlockClientId } =
+		useContext( LogoBlockContext );
+
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
 	}
 
+	// @ts-ignore No types for this exist yet.
 	const [ contentResizeListener, { height: contentHeight } ] =
 		useResizeObserver();
 
@@ -157,6 +167,17 @@ function ScaledBlockPreview( {
 								true
 							);
 						} );
+
+						// Get the current logo block client ID. This is used for the logo settings.
+						const siteLogo = bodyElement.querySelector(
+							'.wp-block-site-logo'
+						);
+
+						const blockClientId = siteLogo
+							? siteLogo.getAttribute( 'data-block' )
+							: null;
+
+						setLogoBlockClientId( blockClientId );
 					};
 
 					// Stop mousemove event listener to disable block tool insertion feature.
