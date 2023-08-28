@@ -65,6 +65,17 @@ export class EditorUtils {
 		);
 	}
 
+	async closeModalByName( name: string ) {
+		const isModalOpen = await this.page.getByLabel( name ).isVisible();
+
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( isModalOpen ) {
+			await this.page
+				.getByLabel( name )
+				.getByRole( 'button', { name: 'Close' } )
+				.click();
+		}
+	}
 	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
 		await this.page.evaluate(
 			( { name: _name, nameToInsert: _nameToInsert } ) => {
