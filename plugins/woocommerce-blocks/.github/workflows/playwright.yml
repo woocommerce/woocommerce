@@ -14,6 +14,7 @@ jobs:
       matrix:
         config: [
           { name: Normal, file: playwright.config.ts, resultPath: test-results },
+          { name: Classic, file: playwright.classic-theme.config.ts, resultPath: test-results-classic-theme },
           { name: SideEffects, file: playwright.side-effects.config.ts, resultPath: test-results-side-effects },
         ]
     steps:
