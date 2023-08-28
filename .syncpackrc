@@ -112,7 +112,10 @@
 		{
 			"dependencies": [
 				"@wordpress/block**",
-				"@wordpress/viewport"
+				"@wordpress/viewport",
+				"@wordpress/interface",
+				"@wordpress/router",
+				"@wordpress/edit-site"
 			],
 			"packages": [
 				"@woocommerce/product-editor",
