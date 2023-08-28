@@ -27,22 +27,10 @@ import type {
 	AddToCartButtonPlaceholderAttributes,
 } from './types';
 
-/**
- * Product Button Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {Object} [props.product]   Product.
- * @param {Object} [props.style]     Object contains CSS Styles.
- * @param {string} [props.className] String contains CSS class.
- * @param {Object} [props.textAlign] Text alignment.
- *
- * @return {*} The component.
- */
 const AddToCartButton = ( {
 	product,
 	className,
 	style,
-	textAlign,
 }: AddToCartButtonAttributes ): JSX.Element => {
 	const {
 		id,
@@ -117,9 +105,6 @@ const AddToCartButton = ( {
 				{
 					loading: addingToCart,
 					added: addedToCart,
-				},
-				{
-					[ `has-text-align-${ textAlign }` ]: textAlign,
 				}
 			) }
 			style={ style }
@@ -129,15 +114,6 @@ const AddToCartButton = ( {
 	);
 };
 
-/**
- * Product Button Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {Object} [props.style]     Object contains CSS Styles.
- * @param {string} [props.className] String contains CSS class.
- *
- * @return {*} The component.
- */
 const AddToCartButtonPlaceholder = ( {
 	className,
 	style,
@@ -158,14 +134,6 @@ const AddToCartButtonPlaceholder = ( {
 	);
 };
 
-/**
- * Product Button Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {string} [props.className] CSS Class name for the component.
- * @param {string} [props.textAlign] Text alignment.
- * @return {*} The component.
- */
 export const Block = ( props: BlockAttributes ): JSX.Element => {
 	const { className, textAlign } = props;
 	const styleProps = useStyleProps( props );
@@ -181,9 +149,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 				{
 					[ `${ parentClassName }__product-add-to-cart` ]:
 						parentClassName,
-				},
-				{
-					[ `has-text-align-${ textAlign }` ]: textAlign,
+					[ `align-${ textAlign }` ]: textAlign,
 				}
 			) }
 		>
