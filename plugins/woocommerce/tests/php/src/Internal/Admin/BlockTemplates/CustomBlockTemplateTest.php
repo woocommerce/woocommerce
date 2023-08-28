@@ -62,4 +62,29 @@ class CustomBlockTemplateTest extends WC_Unit_Test_Case {
 		$block = $template->get_block( 'test-block-name' );
 		$this->assertInstanceOf( CustomBlock::class, $block );
 	}
+
+	/**
+	 * Test that a custom block can be removed as expected.
+	 */
+	public function test_remove_custom_block() {
+		$template = new CustomBlockTemplate();
+
+		$template->add_custom_block(
+			[
+				'id'        => 'test-block-name-1',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->add_custom_block(
+			[
+				'id'        => 'test-block-name-2',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->remove_block( 'test-block-name-1' );
+
+		$this->assertNull( $template->get_block( 'test-block-name-1' ) );
+	}
 }
