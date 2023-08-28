@@ -20,7 +20,6 @@ import {
  */
 import { LogoBlockContext } from './logo-block-context';
 
-let MemoizedBlockList: typeof BlockList | null = null;
 const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
