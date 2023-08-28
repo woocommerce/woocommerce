@@ -58,6 +58,7 @@
 		"@wordpress/a11y": "wp-6.0",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/base-styles": "wp-6.0",
+		"@wordpress/blob": "wp-6.0",
 		"@wordpress/blocks": "^11.17.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
