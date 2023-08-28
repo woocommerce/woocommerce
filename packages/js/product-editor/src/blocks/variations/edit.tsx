@@ -70,10 +70,10 @@ export function Edit( {
 			productId: useEntityId( 'postType', 'product' ),
 			onChange( values ) {
 				setProductAttributes( values );
-				setDefaultProductAttributes(
-					getFirstOptionFromEachAttribute( values )
-				);
-				generateProductVariations( values );
+				const defaultAttributes =
+					getFirstOptionFromEachAttribute( values );
+				setDefaultProductAttributes( defaultAttributes );
+				generateProductVariations( values, defaultAttributes );
 			},
 		}
 	);

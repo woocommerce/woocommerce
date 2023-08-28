@@ -83,7 +83,7 @@ export function useProductAttributes( {
 		variation: boolean,
 		startPosition: number
 	): ProductAttribute[] => {
-		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
+		return atts.map( ( { terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
 			position: startPosition + index,
