@@ -56,6 +56,14 @@
 		}
 	}
 
+	&.align-left {
+		align-items: flex-start;
+	}
+
+	&.align-right {
+		align-items: flex-end;
+	}
+
 	.wc-block-components-product-button__button {
 		border-style: none;
 		display: inline-flex;
