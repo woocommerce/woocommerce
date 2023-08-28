@@ -21,7 +21,7 @@ You are an extension developer, and to allow users to interact with your extensi
 
 You may use the `IntegrationRegistry` to register an `IntegrationInterface` this will be a class that will handle the enqueuing of scripts, styles, and data. You may have a different `IntegrationInterface` for each block (Mini-Cart, Cart and Checkout), or you may use the same one, it is entirely dependent on your use case.
 
-You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks both pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationRegistry.php) to the callback.
+You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationRegistry.php) to the callback.
 
 You may then use the `register` method on this object to register your `IntegrationInterface`.
 
@@ -171,7 +171,7 @@ class WooCommerce_Example_Plugin_Integration implements IntegrationInterface {
 }
 ```
 
-As mentioned, we will need register our `IntegrationInterface` with WooCommerce Blocks, as we want our scripts to be included when either the Mini-Cart, Cart or Checkout is used, we need to register callbacks for two actions.
+As mentioned, we will need register our `IntegrationInterface` with WooCommerce Blocks, as we want our scripts to be included when either the Mini-Cart, Cart or Checkout is used, we need to register callbacks for three actions.
 
 ```php
 add_action(
