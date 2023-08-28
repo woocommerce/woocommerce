@@ -223,4 +223,20 @@ export class EditorUtils {
 			.locator( '.edit-site-canvas-spinner' )
 			.waitFor( { state: 'hidden' } );
 	}
+
+	async setLayoutOption(
+		option:
+			| 'Align Top'
+			| 'Align Bottom'
+			| 'Align Middle'
+			| 'Stretch to Fill'
+	) {
+		const button = this.page.locator(
+			"button[aria-label='Change vertical alignment']"
+		);
+
+		await button.click();
+
+		await this.page.getByText( option ).click();
+	}
 }

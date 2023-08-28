@@ -58,23 +58,30 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		ob_start();
-		woocommerce_show_product_sale_flash();
-		$sale_badge_html = ob_get_clean();
+		$processor = new \WP_HTML_Tag_Processor( $content );
+		$processor->next_tag();
+		$processor->remove_class( 'wp-block-woocommerce-product-gallery-large-image' );
+		$content = $processor->get_updated_html();
 
-		ob_start();
-		remove_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
-		woocommerce_show_product_images();
-		$product_image_gallery_html = ob_get_clean();
-		add_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
-
-		$product   = $previous_product;
-		$classname = $attributes['className'] ?? '';
-		return sprintf(
-			'<div class="wp-block-woocommerce-product-gallery-large-image %1$s">%2$s %3$s</div>',
-			esc_attr( $classname ),
-			$sale_badge_html,
-			$product_image_gallery_html
+		return strtr(
+			'<div class="wp-block-woocommerce-product-gallery-large-image">
+				{image}
+				<div class="wp-block-woocommerce-product-gallery-large-image__content">
+					{content}
+				</div>
+			</div>',
+			array(
+				'{image}'   => wp_get_attachment_image(
+					$product->get_image_id(),
+					'full',
+					false,
+					array(
+						'class' => 'wp-block-woocommerce-product-gallery-large-image__image',
+					)
+				),
+				'{content}' => $content,
+			)
 		);
+
 	}
 }
