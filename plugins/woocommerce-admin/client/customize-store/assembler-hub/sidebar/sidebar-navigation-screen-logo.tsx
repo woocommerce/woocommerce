@@ -359,17 +359,36 @@ const LogoEdit = ( {
 
 export const SidebarNavigationScreenLogo = () => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
-	const { clientId } = useContext( LogoBlockContext );
-	const attributes: LogoAttributes = useSelect(
+	const {
+		logoBlock: { clientId, isLoading: isLogoBlockLoading },
+	} = useContext( LogoBlockContext );
+
+	const {
+		attributes,
+		isAttributesLoading,
+	}: {
+		attributes: LogoAttributes;
+		isAttributesLoading: boolean;
+	} = useSelect(
 		( select ) => {
 			const logoBlocks =
 				// @ts-ignore No types for this exist yet.
 				select( blockEditorStore ).getBlocksByClientId( clientId );
 
-			if ( logoBlocks.length && logoBlocks[ 0 ] !== null ) {
-				return logoBlocks[ 0 ].attributes;
+			const _isAttributesLoading =
+				! logoBlocks.length || logoBlocks[ 0 ] === null;
+
+			if ( _isAttributesLoading ) {
+				return {
+					attributes: {},
+					isAttributesLoading: _isAttributesLoading,
+				};
 			}
-			return {};
+
+			return {
+				attributes: logoBlocks[ 0 ].attributes,
+				isAttributesLoading: _isAttributesLoading,
+			};
 		},
 		[ clientId ]
 	);
@@ -420,7 +439,11 @@ export const SidebarNavigationScreenLogo = () => {
 		updateBlockAttributes( clientId, newAttributes );
 	};
 
-	const isLoading = siteLogoId === undefined || isRequestingMediaItem;
+	const isLoading =
+		siteLogoId === undefined ||
+		isRequestingMediaItem ||
+		isLogoBlockLoading ||
+		isAttributesLoading;
 
 	return (
 		<SidebarNavigationScreen

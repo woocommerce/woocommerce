@@ -47,8 +47,7 @@ function ScaledBlockPreview( {
 	additionalStyles,
 	onClickNavigationItem,
 }: ScaledBlockPreviewProps ) {
-	const { setClientId: setLogoBlockClientId } =
-		useContext( LogoBlockContext );
+	const { setLogoBlock } = useContext( LogoBlockContext );
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
@@ -176,7 +175,10 @@ function ScaledBlockPreview( {
 							? siteLogo.getAttribute( 'data-block' )
 							: null;
 
-						setLogoBlockClientId( blockClientId );
+						setLogoBlock( {
+							clientId: blockClientId,
+							isLoading: false,
+						} );
 					};
 
 					// Stop mousemove event listener to disable block tool insertion feature.
@@ -198,6 +200,10 @@ function ScaledBlockPreview( {
 					return () => {
 						observer.disconnect();
 						possiblyRemoveAllListeners();
+						setLogoBlock( {
+							clientId: null,
+							isLoading: true,
+						} );
 					};
 				}, [] ) }
 				aria-hidden

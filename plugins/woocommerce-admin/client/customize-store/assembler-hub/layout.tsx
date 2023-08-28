@@ -45,9 +45,13 @@ const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 const ANIMATION_DURATION = 0.5;
 
 export const Layout = () => {
-	const [ logoBlockClientId, setLogoBlockClientId ] = useState<
-		string | null
-	>( null );
+	const [ logoBlock, setLogoBlock ] = useState< {
+		clientId: string | null;
+		isLoading: boolean;
+	} >( {
+		clientId: null,
+		isLoading: true,
+	} );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
 
@@ -61,8 +65,8 @@ export const Layout = () => {
 	return (
 		<LogoBlockContext.Provider
 			value={ {
-				clientId: logoBlockClientId,
-				setClientId: setLogoBlockClientId,
+				logoBlock,
+				setLogoBlock,
 			} }
 		>
 			<div className={ classnames( 'edit-site-layout' ) }>
