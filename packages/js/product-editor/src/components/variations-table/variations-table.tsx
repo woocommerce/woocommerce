@@ -36,7 +36,7 @@ import {
 	TRACKS_SOURCE,
 } from '../../constants';
 import { VariationActionsMenu } from './variation-actions-menu';
-import { useVariationsSelection } from '../../hooks/use-variations-selection';
+import { useSelection } from '../../hooks/use-selection';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -48,7 +48,13 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
-	const [ selectedVariations, onSelectVariations ] = useVariationsSelection();
+	const {
+		areAllSelected,
+		isSelected,
+		hasSelection,
+		onSelectAll,
+		onSelectItem,
+	} = useSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
@@ -109,6 +115,8 @@ export function VariationsTable() {
 			</div>
 		);
 	}
+
+	const variationIds = variations.map( ( { id } ) => id );
 
 	function handleDeleteVariationClick( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
@@ -181,17 +189,28 @@ export function VariationsTable() {
 						) }
 					</div>
 				) ) }
+			<div className="woocommerce-product-variations__header">
+				<div className="woocommerce-product-variations__selection">
+					<CheckboxControl
+						value="all"
+						checked={ areAllSelected( variationIds ) }
+						// @ts-ignore Property 'indeterminate' does not exist
+						indeterminate={
+							! areAllSelected( variationIds ) &&
+							hasSelection( variationIds )
+						}
+						onChange={ onSelectAll( variationIds ) }
+					/>
+				</div>
+			</div>
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__selection">
 							<CheckboxControl
-								checked={ selectedVariations[ variation.id ] }
-								onChange={ ( isChecked ) =>
-									onSelectVariations( {
-										[ variation.id ]: isChecked,
-									} )
-								}
+								value={ variation.id }
+								checked={ isSelected( variation.id ) }
+								onChange={ onSelectItem( variation.id ) }
 							/>
 						</div>
 						<div className="woocommerce-product-variations__attributes">

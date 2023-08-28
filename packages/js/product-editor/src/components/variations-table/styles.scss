@@ -3,6 +3,13 @@
 	flex-direction: column;
 	position: relative;
 
+	&__header {
+		padding-bottom: $grid-unit-30;
+		display: grid;
+		grid-template-columns: 44px auto 25% 25% 88px;
+		border-bottom: 1px solid $gray-200;
+	}
+
 	> div {
 		display: flex;
 		flex-direction: column;
