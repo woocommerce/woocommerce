@@ -352,7 +352,7 @@ export function VariationActionsMenu( {
 	function inventorySubMenu( onClose: () => void ) {
 		return (
 			<div className="components-dropdown-menu__menu">
-				<MenuGroup label={ __( 'Update stock', 'woocommerce' ) }>
+				<MenuGroup label={ __( 'Inventory actions', 'woocommerce' ) }>
 					<MenuItem
 						onClick={ () => {
 							recordEvent(
@@ -367,15 +367,19 @@ export function VariationActionsMenu( {
 								'stock_quantity',
 								undefined,
 								( value ) => {
+									const stockQuantity = Number( value );
+									if ( Number.isNaN( stockQuantity ) ) {
+										return undefined;
+									}
 									recordEvent(
 										'product_variations_menu_inventory_update',
 										{
 											source: TRACKS_SOURCE,
-											action: 'stock_quantitye_set',
+											action: 'stock_quantity_set',
 											variation_id: variation.id,
 										}
 									);
-									return value;
+									return stockQuantity;
 								},
 								{
 									manage_stock: true,
@@ -478,14 +482,18 @@ export function VariationActionsMenu( {
 								undefined,
 								( value ) => {
 									recordEvent(
-										'product_variations_menu_inventory_update',
+										'product_variations_menu_inventory_select',
 										{
 											source: TRACKS_SOURCE,
 											action: 'low_stock_amount_set',
 											variation_id: variation.id,
 										}
 									);
-									return value;
+									const lowStockAmount = Number( value );
+									if ( Number.isNaN( lowStockAmount ) ) {
+										return undefined;
+									}
+									return lowStockAmount;
 								},
 								{
 									manage_stock: true,
@@ -591,6 +599,7 @@ export function VariationActionsMenu( {
 					<MenuGroup>
 						<MenuItem
 							isDestructive
+							label={ __( 'Delete variation', 'woocommerce' ) }
 							variant="link"
 							onClick={ () => {
 								onDelete( variation.id );
