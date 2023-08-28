@@ -240,7 +240,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				className="woocommerce-add-attribute-list-item__add-button"
 				onClick={ () => {
 					openNewModal();
-					recordEvent( 'product_add_attributes_click' );
+					recordEvent( 'product_options_add_button_click', {
+						source: TRACKS_SOURCE,
+					} );
 				} }
 			>
 				{ uiStrings.newAttributeListItemLabel }
