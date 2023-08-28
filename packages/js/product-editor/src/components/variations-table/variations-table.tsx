@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Spinner, Tooltip } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -31,6 +36,7 @@ import {
 	TRACKS_SOURCE,
 } from '../../constants';
 import { VariationActionsMenu } from './variation-actions-menu';
+import { useVariationsSelection } from '../../hooks/use-variations-selection';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -42,6 +48,7 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
+	const [ selectedVariations, onSelectVariations ] = useVariationsSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
@@ -177,6 +184,16 @@ export function VariationsTable() {
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
+						<div className="woocommerce-product-variations__selection">
+							<CheckboxControl
+								checked={ selectedVariations[ variation.id ] }
+								onChange={ ( isChecked ) =>
+									onSelectVariations( {
+										[ variation.id ]: isChecked,
+									} )
+								}
+							/>
+						</div>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => {
 								const tag = (

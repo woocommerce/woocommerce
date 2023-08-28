@@ -9,6 +9,14 @@
 		flex-grow: 1;
 	}
 
+	&__selection {
+		.components-checkbox-control__input[type="checkbox"] {
+			&:not(:checked):not(:focus) {
+				border-color: $gray-600;
+			}
+		}
+	}
+
 	&__loading {
 		display: flex;
 		flex-direction: column;
@@ -90,7 +98,7 @@
 
 	.woocommerce-list-item {
 		display: grid;
-		grid-template-columns: auto 25% 25% 88px;
+		grid-template-columns: 44px auto 25% 25% 88px;
 		padding: 0;
 		min-height: calc($grid-unit * 9);
 		border: none;
