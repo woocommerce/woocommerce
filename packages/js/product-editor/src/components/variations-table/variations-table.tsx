@@ -206,12 +206,14 @@ export function VariationsTable() {
 				<div>
 					<Button
 						variant="tertiary"
+						disabled={ areAllSelected( variationIds ) }
 						onClick={ () => onSelectAll( variationIds )( true ) }
 					>
 						{ __( 'Select all', 'woocommerce' ) }
 					</Button>
 					<Button
 						variant="tertiary"
+						disabled={ ! hasSelection( variationIds ) }
 						onClick={ () => onClearSelection() }
 					>
 						{ __( 'Clear selection', 'woocommerce' ) }
