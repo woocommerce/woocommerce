@@ -2785,8 +2785,8 @@ CREATE TABLE $meta_table (
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing at least ->id).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
 	 */
@@ -2806,13 +2806,13 @@ CREATE TABLE $meta_table (
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing ->key and ->value).
 	 *
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		$meta->id = $this->data_store_meta->add_meta( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
 		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
@@ -2821,14 +2821,14 @@ CREATE TABLE $meta_table (
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
-		return $meta->id;
+		return $add_meta;
 	}
 
 	/**
 	 * Update meta.
 	 *
-	 * @param  WC_Data       $object WC_Data object.
-	 * @param  \WC_Meta_Data $meta (containing ->id, ->key and ->value).
+	 * @param WC_Data   $object WC_Data object.
+	 * @param \stdClass $meta (containing ->id, ->key and ->value).
 	 *
 	 * @return
 	 */
@@ -2852,7 +2852,7 @@ CREATE TABLE $meta_table (
 	 * @param \WC_Meta_Data     $meta  Metadata object.
 	 */
 	protected function after_meta_change( &$order, $meta ) {
-		$current_date_time = new \WC_DateTime( current_time( 'mysql'), new \DateTimeZone( 'GMT' ) );
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 		$this->clear_caches( $order );
 
