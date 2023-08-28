@@ -19,7 +19,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { VariationActionsMenuProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 import { ShippingMenuItem } from '../shipping-menu-item';
-import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-status';
+import { InventoryMenuItem } from '../inventory-menu-item';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -349,166 +349,6 @@ export function VariationActionsMenu( {
 		);
 	}
 
-	function inventorySubMenu( onClose: () => void ) {
-		return (
-			<div className="components-dropdown-menu__menu">
-				<MenuGroup label={ __( 'Inventory actions', 'woocommerce' ) }>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'stock_quantity_set',
-									variation_id: variation.id,
-								}
-							);
-							handlePrompt(
-								'stock_quantity',
-								undefined,
-								( value ) => {
-									const stockQuantity = Number( value );
-									if ( Number.isNaN( stockQuantity ) ) {
-										return undefined;
-									}
-									recordEvent(
-										'product_variations_menu_inventory_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'stock_quantity_set',
-											variation_id: variation.id,
-										}
-									);
-									return stockQuantity;
-								},
-								{
-									manage_stock: true,
-								}
-							);
-							onClose();
-						} }
-					>
-						{ __( 'Update stock', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'manage_stock_toggle',
-									variation_id: variation.id,
-								}
-							);
-							onChange( {
-								manage_stock: ! variation.manage_stock,
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Toggle "track quantity"', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'set_status_in_stock',
-									variation_id: variation.id,
-								}
-							);
-							onChange( {
-								stock_status: PRODUCT_STOCK_STATUS_KEYS.instock,
-								manage_stock: false,
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set status to In stock', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'set_status_out_of_stock',
-									variation_id: variation.id,
-								}
-							);
-							onChange( {
-								stock_status:
-									PRODUCT_STOCK_STATUS_KEYS.outofstock,
-								manage_stock: false,
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set status to Out of stock', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'set_status_on_back_order',
-									variation_id: variation.id,
-								}
-							);
-							onChange( {
-								stock_status:
-									PRODUCT_STOCK_STATUS_KEYS.onbackorder,
-								manage_stock: false,
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set status to On back order', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_inventory_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'low_stock_amount_set',
-									variation_id: variation.id,
-								}
-							);
-							handlePrompt(
-								'low_stock_amount',
-								undefined,
-								( value ) => {
-									recordEvent(
-										'product_variations_menu_inventory_select',
-										{
-											source: TRACKS_SOURCE,
-											action: 'low_stock_amount_set',
-											variation_id: variation.id,
-										}
-									);
-									const lowStockAmount = Number( value );
-									if ( Number.isNaN( lowStockAmount ) ) {
-										return undefined;
-									}
-									return lowStockAmount;
-								},
-								{
-									manage_stock: true,
-								}
-							);
-							onClose();
-						} }
-					>
-						{ __( 'Edit low stock threshold', 'woocommerce' ) }
-					</MenuItem>
-				</MenuGroup>
-			</div>
-		);
-	}
-
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
@@ -567,28 +407,11 @@ export function VariationActionsMenu( {
 							) }
 							renderContent={ () => pricingSubMenu( onClose ) }
 						/>
-						<Dropdown
-							position="middle right"
-							renderToggle={ ( { isOpen, onToggle } ) => (
-								<MenuItem
-									onClick={ () => {
-										recordEvent(
-											'product_variations_menu_inventory_click',
-											{
-												source: TRACKS_SOURCE,
-												variation_id: variation.id,
-											}
-										);
-										onToggle();
-									} }
-									aria-expanded={ isOpen }
-									icon={ chevronRight }
-									iconPosition="right"
-								>
-									{ __( 'Inventory', 'woocommerce' ) }
-								</MenuItem>
-							) }
-							renderContent={ () => inventorySubMenu( onClose ) }
+						<InventoryMenuItem
+							variation={ variation }
+							handlePrompt={ handlePrompt }
+							onChange={ onChange }
+							onClose={ onClose }
 						/>
 						<ShippingMenuItem
 							variation={ variation }
