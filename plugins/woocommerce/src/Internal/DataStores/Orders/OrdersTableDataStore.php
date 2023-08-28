@@ -2853,7 +2853,7 @@ CREATE TABLE $meta_table (
 	 */
 	protected function after_meta_change( &$order, $meta ) {
 		$current_date_time = new \WC_DateTime( 'now', new \DateTimeZone( 'GMT' ) );
-		$meta->apply_changes();
+		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
