@@ -81,6 +81,11 @@
 		background-color: #fcfcfc;
 	}
 
+	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
+		align-items: center;
+		display: flex;
+	}
+
 	.edit-site-site-hub__site-title {
 		color: $gray-900;
 		font-size: 0.8125rem;
@@ -210,7 +215,7 @@
 		}
 	}
 
-	.block-library-site-logo__inspector-upload-container {
+	button.block-library-site-logo__inspector-upload-container {
 		margin: 12px 0 32px;
 		display: flex;
 		padding: 32px;
@@ -228,6 +233,12 @@
 		}
 	}
 
+	.woocommerce-customize-store__sidebar-logo-container {
+		margin: 12px 0 32px;
+		width: 324px;
+		padding: 32px;
+	}
+
 	.woocommerce-customize-store__sidebar-logo-content {
 		.components-toggle-control {
 			margin-bottom: 24px;
@@ -239,6 +250,17 @@
 				font-weight: 400;
 				line-height: 16px; /* 123.077% */
 				margin-bottom: 0;
+			}
+
+			.components-form-toggle:not(.is-checked) {
+				.components-form-toggle__track {
+					background-color: $gray-600;
+				}
+			}
+
+			.components-form-toggle__thumb {
+				background-color: #fff;
+				border-color: #fff;
 			}
 		}
 
