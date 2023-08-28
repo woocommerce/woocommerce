@@ -37,6 +37,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			<button onClick={ () => sendEvent( { type: 'DESIGN_WITH_AI' } ) }>
 				Design with AI
 			</button>
+			<button
+				onClick={ () => sendEvent( { type: 'SELECTED_ACTIVE_THEME' } ) }
+			>
+				Assembler Hub
+			</button>
 		</>
 	);
 };
