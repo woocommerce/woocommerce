@@ -63,10 +63,9 @@ export const generateProductVariations = function* (
 	const { key } = parseId( idQuery, urlParameters );
 	yield generateProductVariationsRequest( key );
 
-	let updatedProduct: Product | undefined = undefined;
 	if ( saveAttributes ) {
 		try {
-			updatedProduct = yield controls.dispatch(
+			yield controls.dispatch(
 				'core',
 				'saveEntityRecord',
 				'postType',
