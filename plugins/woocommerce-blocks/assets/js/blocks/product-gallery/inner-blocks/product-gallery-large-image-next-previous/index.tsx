@@ -7,16 +7,16 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import icon from './icon';
 import { Edit } from './edit';
-import { Save } from './save';
 import metadata from './block.json';
 import './style.scss';
+import { Save } from './save';
+import { Icon } from './icons';
 
 if ( isExperimentalBuild() ) {
 	// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
 	registerBlockType( metadata, {
-		icon,
+		icon: Icon,
 		edit: Edit,
 		save: Save,
 	} );

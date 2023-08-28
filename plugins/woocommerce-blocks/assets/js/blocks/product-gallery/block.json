@@ -17,6 +17,7 @@
 		"thumbnailsPosition": "thumbnailsPosition",
 		"thumbnailsNumberOfThumbnails": "thumbnailsNumberOfThumbnails",
 		"productGalleryClientId": "productGalleryClientId",
+		"nextPreviousButtonsPosition": "nextPreviousButtonsPosition",
 		"pagerDisplayMode": "pagerDisplayMode"
 	},
 	"attributes": {
@@ -47,6 +48,10 @@
 		"fullScreenOnClick": {
 			"type": "boolean",
 			"default": false
+		},
+		"nextPreviousButtonsPosition":{
+			"type": "string",
+			"default": "insideTheImage"
 		}
 	},
 	"viewScript": "wc-product-gallery-interactivity-frontend"
