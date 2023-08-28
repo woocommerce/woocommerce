@@ -56,9 +56,7 @@ export function InventoryMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<MenuGroup
-						label={ __( 'Inventory actions', 'woocommerce' ) }
-					>
+					<MenuGroup>
 						<MenuItem
 							onClick={ () => {
 								recordEvent(
