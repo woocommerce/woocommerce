@@ -195,7 +195,7 @@ export function VariationsTable() {
 					<CheckboxControl
 						value="all"
 						checked={ areAllSelected( variationIds ) }
-						// @ts-ignore Property 'indeterminate' does not exist
+						// @ts-expect-error Property 'indeterminate' does not exist
 						indeterminate={
 							! areAllSelected( variationIds ) &&
 							hasSelection( variationIds )
