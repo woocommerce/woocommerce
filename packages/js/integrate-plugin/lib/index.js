@@ -59,8 +59,6 @@ program
                     ...optionsValues,
                 };
 
-				console.log(answers);
-
                 await scaffold( answers );
 
 			} catch ( error ) {
