@@ -4,8 +4,9 @@
 const { existsSync } = require( 'fs' );
 const initPackageJSON = require( './init-package-json' );
 const initWPScripts = require( './init-wp-scripts' );
+const initWebpackConfig = require( './init-webpack-config' );
 const initWPEnv = require( './init-wp-env' );
-const { code, info, success, error } = require( '../node_modules/@wordpress/create-block/lib/log' );
+const { code, info, success } = require( '../node_modules/@wordpress/create-block/lib/log' );
 const path = require( 'path' );
 
 module.exports = async (
@@ -25,7 +26,7 @@ module.exports = async (
 ) => {
 	info( '' );
 	info( `Integrating ${ name } with WooCommerce build scripts.` );
-	console.log( textdomain );
+
 	const view = {
 		$schema,
 		apiVersion,
@@ -38,27 +39,20 @@ module.exports = async (
 		customPackageJSON,
 		customBlockJSON,
 	};
-	console.log(view);
-
 	if ( ! existsSync( path.join( process.cwd(), 'package.json' ) ) ) {
 		await initPackageJSON( view );
-	} else {
-		console.log('should append to existing');
-		// @todo Append to existing package json.
 	}
 
 	if ( wpScripts ) {
 		await initWPScripts( view );
+		await initWebpackConfig( view );
 	}
 
 	if ( wpEnv ) {
 		await initWPEnv( view );
 	}
 
-	// @todo Check for webpack.config.js
-
 	info( '' );
-
 	success( `Done: WordPress plugin ${ name } integrated with WooCommerce build scripts.` );
 
 	if ( wpScripts ) {
