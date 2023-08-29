@@ -6,6 +6,8 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Caches\OrderDataCache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -1997,24 +1999,41 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+		return $this->get_possibly_cached_order_data(
+			'refunds',
+			fn() => wc_get_orders(
+				array(
+					'type'   => 'shop_order_refund',
+					'parent' => $this->get_id(),
+					'limit'  => -1,
+				)
+			)
+		);
+	}
 
-		if ( false !== $cached_data ) {
+	/**
+	 * Tries to get a piece of cached data for a given order, and if not yet cached,
+	 * uses the supplied callback to get the authoritative data and then includes it
+	 * as part of the cached data for the order.
+	 *
+	 * @param string   $data_array_key The key of the piece of data to get.
+	 * @param callable $get_authoritative_data_callback The callback to invoke if the required piece of data is not cached yet.
+	 * @return mixed The piece of data either retrieved or introduced in the cache.
+	 */
+	private function get_possibly_cached_order_data( string $data_array_key, callable $get_authoritative_data_callback ) {
+		$order_id               = $this->get_id();
+		$cache                  = wc_get_container()->get( OrderDataCache::class );
+		$full_cached_order_data = $cache->get( $order_id ) ?? array( 'order_id' => $order_id );
+		$cached_data            = $full_cached_order_data[ $data_array_key ] ?? null;
+
+		if ( null !== $cached_data ) {
 			return $cached_data;
 		}
 
-		$this->refunds = wc_get_orders(
-			array(
-				'type'   => 'shop_order_refund',
-				'parent' => $this->get_id(),
-				'limit'  => -1,
-			)
-		);
-
-		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
-
-		return $this->refunds;
+		$authoritative_data                        = $get_authoritative_data_callback();
+		$full_cached_order_data[ $data_array_key ] = $authoritative_data;
+		$cache->set( $full_cached_order_data );
+		return $authoritative_data;
 	}
 
 	/**
@@ -2024,18 +2043,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_total_refunded() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_refunded' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$total_refunded = $this->data_store->get_total_refunded( $this );
-
-		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
-
-		return $total_refunded;
+		return $this->get_possibly_cached_order_data(
+			'total_refunded',
+			fn() => $this->data_store->get_total_refunded( $this )
+		);
 	}
 
 	/**
@@ -2045,18 +2056,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax_refunded() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_tax_refunded' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$total_refunded = $this->data_store->get_total_tax_refunded( $this );
-
-		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
-
-		return $total_refunded;
+		return $this->get_possibly_cached_order_data(
+			'total_tax_refunded',
+			fn() => $this->data_store->get_total_tax_refunded( $this )
+		);
 	}
 
 	/**
@@ -2066,18 +2069,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_shipping_refunded() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_refunded' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$total_refunded = $this->data_store->get_total_shipping_refunded( $this );
-
-		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
-
-		return $total_refunded;
+		return $this->get_possibly_cached_order_data(
+			'total_shipping_refunded',
+			fn() => $this->data_store->get_total_shipping_refunded( $this )
+		);
 	}
 
 	/**
