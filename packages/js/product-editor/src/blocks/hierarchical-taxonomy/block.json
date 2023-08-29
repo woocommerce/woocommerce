@@ -12,7 +12,7 @@
 			"type": "string",
 			"__experimentalRole": "content"
 		},
-		"taxonomyNamePlural": {
+		"taxonomyNameOnEntity": {
 			"type": "string",
 			"__experimentalRole": "content"
 		},

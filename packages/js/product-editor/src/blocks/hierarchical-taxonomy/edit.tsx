@@ -23,7 +23,8 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
-	const { label, taxonomyName, taxonomyNamePlural, createTitle } = attributes;
+	const { label, taxonomyName, taxonomyNameOnEntity, createTitle } =
+		attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
@@ -43,7 +44,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const [ selectedEntries, setSelectedEntries ] = useEntityProp< Taxonomy[] >(
 		'postType',
 		'product',
-		taxonomyNamePlural
+		taxonomyNameOnEntity
 	);
 
 	const mappedEntries = selectedEntries.map( ( b ) => ( {
