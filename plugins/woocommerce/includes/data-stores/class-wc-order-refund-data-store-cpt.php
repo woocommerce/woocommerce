@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Caches\OrderDataCache;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -40,23 +42,45 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	);
 
 	/**
+	 * Method to create a refund in the database.
+	 *
+	 * @param \WC_Abstract_Order $refund Refund object.
+	 */
+	public function create( &$refund ) {
+		$this->remove_from_order_data_cache( $refund );
+		parent::create( $refund );
+	}
+
+	/**
+	 * Update refund in database.
+	 *
+	 * @param \WC_Order $refund Refund object.
+	 */
+	public function update( &$refund ) {
+		$this->remove_from_order_data_cache( $refund );
+		parent::update( $refund );
+	}
+
+	/**
 	 * Delete a refund - no trash is supported.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order $refund Order object.
 	 * @param array    $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$order, $args = array() ) {
-		$id               = $order->get_id();
-		$parent_order_id  = $order->get_parent_id();
+	public function delete( &$refund, $args = array() ) {
+		$id               = $refund->get_id();
+		$parent_order_id  = $refund->get_parent_id();
 		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
 
 		if ( ! $id ) {
 			return;
 		}
 
+		$this->remove_from_order_data_cache( $refund );
+
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
-		$order->set_id( 0 );
+		$refund->set_id( 0 );
 		do_action( 'woocommerce_delete_order_refund', $id );
 	}
 
@@ -119,5 +143,14 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 			__( 'Refund &ndash; %s', 'woocommerce' ),
 			( new DateTime( 'now' ) )->format( _x( 'M d, Y @ h:i A', 'Order date parsed by DateTime::format', 'woocommerce' ) ) // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment, WordPress.WP.I18n.UnorderedPlaceholdersText
 		);
+	}
+
+	/**
+	 * Deletes the order data cached for the order corresponding to a given refund.
+	 *
+	 * @param \WC_Order $refund Refund object whose order will get its associated data deleted.
+	 */
+	private function remove_from_order_data_cache( $refund ) {
+		wc_get_container()->get( OrderDataCache::class )->remove( $refund->get_parent_id() );
 	}
 }
