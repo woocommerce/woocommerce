@@ -855,12 +855,36 @@ class BlockTemplatesController {
 	 * @return string THe actual permalink assigned to the page. May differ from $permalink if it was already taken.
 	 */
 	protected function sync_endpoint_with_page( $page, $page_slug, $permalink ) {
-		$matching_page = get_page_by_path( $permalink );
+		$matching_page = get_page_by_path( $permalink, OBJECT, 'page' );
+
+		/**
+		 * Filters whether to attempt to guess a redirect URL for a 404 request.
+		 *
+		 * Returning a false value from the filter will disable the URL guessing
+		 * and return early without performing a redirect.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool $do_redirect_guess Whether to attempt to guess a redirect URL
+		 *                                for a 404 request. Default true.
+		 */
+		if ( ! $matching_page instanceof WP_Post && apply_filters( 'do_redirect_guess_404_permalink', true ) ) {
+			// If it is a subpage and url guessing is on, then we will need to get it via post_name as path will not match.
+			$query = new \WP_Query(
+				[
+					'post_type' => 'page',
+					'name'      => $permalink,
+				]
+			);
+
+			$matching_page = $query->have_posts() ? $query->posts[0] : null;
+		}
 
 		if ( $matching_page && 'publish' === $matching_page->post_status ) {
 			// Existing page matches given permalink; use its ID.
 			update_option( 'woocommerce_' . $page_slug . '_page_id', $matching_page->ID );
-			return $permalink;
+
+			return get_page_uri( $matching_page );
 		}
 
 		// No matching page; either update current page (by ID stored in option table) or create a new page.
@@ -884,8 +908,9 @@ class BlockTemplatesController {
 
 		// Get post again in case slug was updated with a suffix.
 		if ( $updated_page_id && ! is_wp_error( $updated_page_id ) ) {
-			return get_post( $updated_page_id )->post_name;
+			return get_page_uri( get_post( $updated_page_id ) );
 		}
+
 		return $permalink;
 	}
 }
