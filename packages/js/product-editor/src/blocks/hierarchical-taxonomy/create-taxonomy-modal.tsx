@@ -15,7 +15,7 @@ import {
 	__experimentalSelectTreeControl as SelectTree,
 	TreeItemType as Item,
 } from '@woocommerce/components';
-import { useDebounce } from '@wordpress/compose';
+import { useDebounce, useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
@@ -27,7 +27,7 @@ type CreateTaxonomyModalProps = {
 	taxonomyName: string;
 	title: string;
 	onCancel: () => void;
-	onCreate: ( brand: Taxonomy ) => void;
+	onCreate: ( taxonomy: Taxonomy ) => void;
 };
 
 export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
@@ -65,7 +65,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 
 	const onSave = async () => {
 		try {
-			const newBrand: Taxonomy = await saveEntityRecord(
+			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
 				taxonomyName,
 				{
@@ -76,7 +76,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					throwOnError: true,
 				}
 			);
-			onCreate( newBrand );
+			onCreate( newTaxonomy );
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch ( e: any ) {
 			if ( e.message ) {
@@ -96,9 +96,9 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		<Modal
 			title={ title }
 			onRequestClose={ onCancel }
-			className="woocommerce-create-new-brand-modal"
+			className="woocommerce-create-new-taxonomy-modal"
 		>
-			<div className="woocommerce-create-new-brand-modal__wrapper">
+			<div className="woocommerce-create-new-taxonomy-modal__wrapper">
 				<TextControl
 					label={ __( 'Name', 'woocommerce' ) }
 					name="Tops"
@@ -117,10 +117,15 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 							),
 						}
 					) }
-					id="parent-brand-field"
-					items={ allEntries.map( ( brand ) => ( {
-						label: brand.name,
-						value: String( brand.id ),
+					id={
+						useInstanceId(
+							SelectTree,
+							'parent-taxonomy-select'
+						) as string
+					}
+					items={ allEntries.map( ( taxonomy ) => ( {
+						label: taxonomy.name,
+						value: String( taxonomy.id ),
 					} ) ) }
 					shouldNotRecursivelySelect
 					selected={
@@ -146,7 +151,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					} }
 					createValue={ categoryParentTypedValue }
 				/>
-				<div className="woocommerce-create-new-brand-modal__buttons">
+				<div className="woocommerce-create-new-taxonomy-modal__buttons">
 					<Button
 						isSecondary
 						onClick={ onCancel }
