@@ -1,9 +1,16 @@
 /**
  * External dependencies
  */
+<<<<<<< HEAD
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
 import { Sender } from 'xstate';
+=======
+import { TextareaControl, Button, Disabled } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { ProgressBar } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
+>>>>>>> f352fabc1e (Add Tell us a bit more about your business page)
 
 /**
  * Internal dependencies
@@ -78,10 +85,76 @@ export const DesignWithAiController = ( {}: {
 };
 
 //loader should send event 'THEME_SUGGESTED' when it's done
+
 export const DesignWithAi: CustomizeStoreComponent = ( { sendEvent } ) => {
+	const [ siteDescription, setSiteDescription ] = useState< string >( '' );
+
 	return (
-		<>
-			<DesignWithAiController sendEventToParent={ sendEvent } />
-		</>
+		<div>
+			<ProgressBar
+				percent={ 20 }
+				color={ 'var(--wp-admin-theme-color)' }
+				bgcolor={ 'transparent' }
+			/>
+
+			<div className="woocommerce-cys-design-with-ai woocommerce-cys-layout">
+				<div className="woocommerce-cys-page">
+					<h1>
+						{ __(
+							'Tell us a bit more about your business',
+							'woocommerce'
+						) }
+					</h1>
+					<TextareaControl
+						onChange={ ( text ) => {
+							setSiteDescription( text );
+						} }
+						value={ siteDescription }
+						placeholder={ __(
+							'E.g., At Cool Cat Shades, we sell sunglasses specially designed for our stylish feline friends. Designed and developed with a cat’s comfort in mind, our range of sunglasses are fashionable accessories our furry friends can wear all day. We currently offer 50 different styles and variations of shades, with plans to add more in the near future.',
+							'woocommerce'
+						) }
+					/>
+					<div className="woocommerce-cys-design-with-ai-guide">
+						<p>
+							{ __(
+								'The more detail you provide, the better job our AI can do! Try to include: ',
+								'woocommerce'
+							) }
+						</p>
+						<ul>
+							<li>
+								{ __( 'What you want to sell', 'woocommerce' ) }
+							</li>
+							<li>
+								{ __(
+									'How many products you plan on displaying',
+									'woocommerce'
+								) }
+							</li>
+							<li>
+								{ __(
+									'What makes your business unique',
+									'woocommerce'
+								) }
+							</li>
+							<li>
+								{ __(
+									'Who your target audience is',
+									'woocommerce'
+								) }
+							</li>
+						</ul>
+					</div>
+					<Button
+						variant="primary"
+						onClick={ () => {} }
+						disabled={ siteDescription === '' }
+					>
+						{ __( 'Continue', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		</div>
 	);
 };
