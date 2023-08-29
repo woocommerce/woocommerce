@@ -10,6 +10,7 @@ import './tax';
 import './woocommerce-payments';
 import './purchase';
 import './deprecated-tasks';
+import './customize-store-tasklist-item';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {

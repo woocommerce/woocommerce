@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * This is the main class that controls the custom orders tables feature. Its responsibilities are:
  *
- * - Allowing to enable and disable the feature while it's in development (show_feature method)
  * - Displaying UI components (entries in the tools page and in settings)
  * - Providing the proper data store for orders via 'woocommerce_order_data_store' hook
  *
@@ -157,40 +156,13 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Checks if the feature is visible (so that dedicated entries will be added to the debug tools page).
-	 *
-	 * @return bool True if the feature is visible.
-	 */
-	public function is_feature_visible(): bool {
-		return true;
-	}
-
-	/**
-	 * Makes the feature visible, so that dedicated entries will be added to the debug tools page.
-	 *
-	 * This method shouldn't be used anymore, see the FeaturesController class.
-	 */
-	public function show_feature() {
-		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
-		wc_doing_it_wrong(
-			$class_and_method,
-			sprintf(
-				// translators: %1$s the name of the class and method used.
-				__( '%1$s: The visibility of the custom orders table feature is now handled by the WooCommerce features engine. See the FeaturesController class, or go to WooCommerce - Settings - Advanced - Features.', 'woocommerce' ),
-				$class_and_method
-			),
-			'7.0'
-		);
-	}
-
-	/**
 	 * Is the custom orders table usage enabled via settings?
 	 * This can be true only if the feature is enabled and a table regeneration has been completed.
 	 *
 	 * @return bool True if the custom orders table usage is enabled
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
-		return $this->is_feature_visible() && get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
+		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**

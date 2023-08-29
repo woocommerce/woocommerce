@@ -180,7 +180,14 @@ class Events {
 					$note = clone $note_from_db;
 					$note->set_title( $note_from_class->get_title() );
 					$note->set_content( $note_from_class->get_content() );
-					$note->set_actions( $note_from_class->get_actions() );
+					$actions = $note_from_class->get_actions();
+					foreach ( $actions as $action ) {
+						$matching_action = $note->get_action( $action->name );
+						if ( $matching_action && $matching_action->id ) {
+							$action->id = $matching_action->id;
+						}
+					}
+					$note->set_actions( $actions );
 					return $note;
 				}
 				break;

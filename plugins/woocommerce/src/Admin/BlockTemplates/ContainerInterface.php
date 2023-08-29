@@ -15,4 +15,18 @@ interface ContainerInterface {
 	 * Get the block configuration as a formatted template.
 	 */
 	public function get_formatted_template(): array;
+
+	/**
+	 * Removes a block from the container.
+	 *
+	 * @param string $block_id The block ID.
+	 *
+	 * @throws \UnexpectedValueException If the block container is not an ancestor of the block.
+	 */
+	public function remove_block( string $block_id );
+
+	/**
+	 * Removes all blocks from the container.
+	 */
+	public function remove_blocks();
 }
