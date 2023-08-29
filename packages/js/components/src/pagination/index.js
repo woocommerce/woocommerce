@@ -174,7 +174,9 @@ class Pagination extends Component {
 
 	renderPerPagePicker() {
 		// @todo Replace this with a styleized Select drop-down/control?
-		const pickerOptions = PER_PAGE_OPTIONS.map( ( option ) => {
+		const pickerOptions = (
+			this.props.perPageOptions || PER_PAGE_OPTIONS
+		).map( ( option ) => {
 			return { value: option, label: option };
 		} );
 
@@ -200,7 +202,8 @@ class Pagination extends Component {
 
 		if ( this.pageCount <= 1 ) {
 			return (
-				( total > PER_PAGE_OPTIONS[ 0 ] && (
+				( total >
+					( this.props.perPageOptions || PER_PAGE_OPTIONS )[ 0 ] && (
 					<div className={ classes }>
 						{ this.renderPerPagePicker() }
 					</div>
@@ -256,6 +259,10 @@ Pagination.propTypes = {
 	 * Whether the page arrows label should be rendered.
 	 */
 	showPageArrowsLabel: PropTypes.bool,
+	/**
+	 * Whether the page arrows label should be rendered.
+	 */
+	perPageOptions: PropTypes.arrayOf( PropTypes.number ),
 };
 
 Pagination.defaultProps = {
@@ -264,6 +271,7 @@ Pagination.defaultProps = {
 	showPagePicker: true,
 	showPerPagePicker: true,
 	showPageArrowsLabel: true,
+	perPageOptions: PER_PAGE_OPTIONS,
 };
 
 export default Pagination;

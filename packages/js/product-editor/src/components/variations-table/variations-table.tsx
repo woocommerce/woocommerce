@@ -36,7 +36,7 @@ import HiddenIcon from './hidden-icon';
 import VisibleIcon from './visible-icon';
 import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
-	DEFAULT_PER_PAGE_OPTION,
+	DEFAULT_VARIATION_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
 	TRACKS_SOURCE,
 } from '../../constants';
@@ -50,7 +50,9 @@ const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
 export function VariationsTable() {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
-	const [ perPage, setPerPage ] = useState( DEFAULT_PER_PAGE_OPTION );
+	const [ perPage, setPerPage ] = useState(
+		DEFAULT_VARIATION_PER_PAGE_OPTION
+	);
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
@@ -242,20 +244,16 @@ export function VariationsTable() {
 
 	return (
 		<div className="woocommerce-product-variations">
-			{ isLoading ||
-				( isGeneratingVariations && (
-					<div className="woocommerce-product-variations__loading">
-						<Spinner />
-						{ isGeneratingVariations && (
-							<span>
-								{ __(
-									'Generating variations…',
-									'woocommerce'
-								) }
-							</span>
-						) }
-					</div>
-				) ) }
+			{ ( isLoading || isGeneratingVariations ) && (
+				<div className="woocommerce-product-variations__loading">
+					<Spinner />
+					{ isGeneratingVariations && (
+						<span>
+							{ __( 'Generating variations…', 'woocommerce' ) }
+						</span>
+					) }
+				</div>
+			) }
 			<div className="woocommerce-product-variations__header">
 				<div className="woocommerce-product-variations__selection">
 					<CheckboxControl
@@ -296,7 +294,7 @@ export function VariationsTable() {
 					/>
 				</div>
 			</div>
-			<Sortable>
+			<Sortable className="woocommerce-product-variations__table">
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__selection">
@@ -450,6 +448,7 @@ export function VariationsTable() {
 				showPagePicker={ false }
 				onPageChange={ setCurrentPage }
 				onPerPageChange={ setPerPage }
+				perPageOptions={ [ 5, 10, 25 ] }
 			/>
 		</div>
 	);

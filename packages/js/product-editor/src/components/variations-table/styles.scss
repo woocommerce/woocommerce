@@ -1,5 +1,7 @@
 @import "./variations-actions-menu/styles.scss";
 
+$table-row-height: calc($grid-unit * 9);
+
 .woocommerce-product-variations {
 	display: flex;
 	flex-direction: column;
@@ -10,6 +12,11 @@
 		display: flex;
 		align-items: center;
 		border-bottom: 1px solid $gray-200;
+	}
+
+	&__table {
+		height: $table-row-height * 5;
+		overflow: auto;
 	}
 
 	&__selection {
@@ -107,7 +114,7 @@
 		display: grid;
 		grid-template-columns: 44px auto 25% 25% 88px;
 		padding: 0;
-		min-height: calc($grid-unit * 9);
+		min-height: $table-row-height;
 		border: none;
 	}
 

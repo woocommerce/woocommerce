@@ -18,7 +18,7 @@ import { useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { DEFAULT_PER_PAGE_OPTION } from '../../constants';
+import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../constants';
 
 export const VariableProductTour: React.FC = () => {
 	const [ isTourOpen, setIsTourOpen ] = useState( false );
@@ -33,7 +33,7 @@ export const VariableProductTour: React.FC = () => {
 			const requestParams = {
 				product_id: productId,
 				page: 1,
-				per_page: DEFAULT_PER_PAGE_OPTION,
+				per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
 				order: 'asc',
 				orderby: 'menu_order',
 			};
