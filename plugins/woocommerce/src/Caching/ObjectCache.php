@@ -166,7 +166,7 @@ abstract class ObjectCache {
 	 * @param object|array    $object The new object that will replace the already cached one.
 	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
 	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
-	 * @return bool True on success, false on error or if no object wiith the supplied id was cached.
+	 * @return bool True on success, false on error or if no object with the supplied id was cached.
 	 * @throws CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
 	public function update_if_cached( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
