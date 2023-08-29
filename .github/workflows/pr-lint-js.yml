@@ -39,7 +39,7 @@ jobs:
                   # ignore scripts is faster, and postinstall should not be needed for lint.
                   pnpm install --ignore-scripts
 
-            - name: Lint JS
+            - name: Lint JS and CSS
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
             - name: Collect and Combine Eslint Reports
