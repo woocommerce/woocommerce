@@ -26,8 +26,6 @@ import {
 import { ThemeCard } from './intro/theme-cards';
 import './style.scss';
 
-import './style.scss';
-
 export type customizeStoreStateMachineEvents =
 	| introEvents
 	| designWithAiEvents
