@@ -29,25 +29,6 @@ import {
 import { AttributeControl } from '../../components/attribute-control';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
-function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
-	return values.reduce< Product[ 'default_attributes' ] >(
-		( prevDefaultAttributes, currentAttribute ) => {
-			if ( currentAttribute.isDefault ) {
-				return [
-					...prevDefaultAttributes,
-					{
-						id: currentAttribute.id,
-						name: currentAttribute.name,
-						option: currentAttribute.options[ 0 ],
-					},
-				];
-			}
-			return prevDefaultAttributes;
-		},
-		[]
-	);
-}
-
 export function Edit() {
 	const blockProps = useBlockProps();
 	const { generateProductVariations } = useProductVariationsHelper();
