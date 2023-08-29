@@ -24,6 +24,7 @@ import {
 	customizeStoreStateMachineContext,
 } from './types';
 import { ThemeCard } from './intro/theme-cards';
+import './style.scss';
 
 import './style.scss';
 
