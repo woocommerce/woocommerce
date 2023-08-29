@@ -16,3 +16,19 @@
 		padding-right: 0;
 	}
 }
+
+body.woocommerce-customize-store  {
+	margin-top: 0 !important; 
+	.woocommerce-layout__primary {
+		margin: 0 !important;
+	}
+	.woocommerce-layout__main {
+		padding: 0;
+	}
+}
+
+.woocommerce-cys-layout {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
