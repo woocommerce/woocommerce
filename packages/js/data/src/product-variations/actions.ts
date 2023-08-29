@@ -17,11 +17,7 @@ import type {
 	GenerateRequest,
 } from './types';
 import CRUD_ACTIONS from './crud-actions';
-import {
-	Product,
-	ProductAttribute,
-	ProductDefaultAttribute,
-} from '../products/types';
+import { ProductAttribute, ProductDefaultAttribute } from '../products/types';
 
 export function generateProductVariationsError( key: IdType, error: unknown ) {
 	return {
@@ -54,7 +50,7 @@ export const generateProductVariations = function* (
 		default_attributes?: ProductDefaultAttribute[];
 	},
 	data: GenerateRequest,
-	saveAttributes: boolean = true
+	saveAttributes = true
 ) {
 	const urlParameters = getUrlParameters(
 		WC_PRODUCT_VARIATIONS_NAMESPACE,
