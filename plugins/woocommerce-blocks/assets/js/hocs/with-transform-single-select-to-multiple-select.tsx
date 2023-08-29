@@ -6,21 +6,21 @@
 // eslint-disable-next-line
 import { FunctionComponent } from '@wordpress/element';
 
-type SelectedOption = number | string | null | number[] | string[];
+export type SelectedOption = number | string | null | number[] | string[];
 
-interface OriginalComponentProps {
+export interface WithMaybeSelectedOption {
 	selected?: SelectedOption;
 }
 
 /**
  * HOC that transforms a single select to a multiple select.
- *
- * @param {FunctionComponent< Record< string, unknown > >} OriginalComponent Component being wrapped.
  */
-const withTransformSingleSelectToMultipleSelect = (
-	OriginalComponent: FunctionComponent< Record< string, unknown > >
+const withTransformSingleSelectToMultipleSelect = <
+	T extends Record< string, unknown >
+>(
+	OriginalComponent: FunctionComponent< T & WithMaybeSelectedOption >
 ) => {
-	return ( props: OriginalComponentProps ): JSX.Element => {
+	return ( props: T & WithMaybeSelectedOption ): JSX.Element => {
 		let { selected } = props;
 		selected = selected === undefined ? null : selected;
 		const isNil = selected === null;
