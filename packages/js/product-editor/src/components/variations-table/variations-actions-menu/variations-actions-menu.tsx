@@ -10,9 +10,11 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  * Internal dependencies
  */
 import { VariationsActionsMenuProps } from './types';
+import { UpdateStockMenuItem } from '../update-stock-menu-item';
 
 export function VariationsActionsMenu( {
 	disabled,
+	onChange,
 	onDelete,
 }: VariationsActionsMenuProps ) {
 	return (
@@ -33,13 +35,10 @@ export function VariationsActionsMenu( {
 			renderContent={ ( { onClose } ) => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
-						<MenuItem
-							onClick={ () => {
-								onClose();
-							} }
-						>
-							{ __( 'Update stock', 'woocommerce' ) }
-						</MenuItem>
+						<UpdateStockMenuItem
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<MenuItem

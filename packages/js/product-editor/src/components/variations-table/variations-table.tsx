@@ -43,6 +43,7 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
+import { identity } from 'lodash';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -186,6 +187,39 @@ export function VariationsTable() {
 			);
 	}
 
+	function handleUpdateAll( variation: Partial< ProductVariation > ) {
+		batchUpdateProductVariations< { update: [] } >(
+			{ product_id: productId },
+			{
+				update: variations
+					.filter( ( variation ) => isSelected( variation.id ) )
+					.map( ( { id } ) => ( {
+						...variation,
+						id,
+					} ) ),
+			}
+		)
+			.then( ( response ) =>
+				invalidateResolution( 'getProductVariations', [
+					requestParams,
+				] ).then( () => response )
+			)
+			.then( ( response ) => {
+				createSuccessNotice(
+					/* translators: The updated variations count */
+					sprintf(
+						__( '%s variation/s updated.', 'woocommerce' ),
+						response.update.length
+					)
+				);
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to update variations.', 'woocommerce' )
+				);
+			} );
+	}
+
 	function handleDeleteAll() {
 		batchUpdateProductVariations< { delete: [] } >(
 			{ product_id: productId },
@@ -213,8 +247,7 @@ export function VariationsTable() {
 				createErrorNotice(
 					__( 'Failed to delete variations.', 'woocommerce' )
 				);
-			} )
-			.finally( () => {} );
+			} );
 	}
 
 	return (
@@ -265,6 +298,7 @@ export function VariationsTable() {
 				<div>
 					<VariationsActionsMenu
 						disabled={ ! hasSelection( variationIds ) }
+						onChange={ handleUpdateAll }
 						onDelete={ handleDeleteAll }
 					/>
 				</div>
