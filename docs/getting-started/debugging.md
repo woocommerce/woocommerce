@@ -10,7 +10,7 @@ A good place to start is usually the debugging tools built into WordPress itself
 
 WooCommerce has a logging system that can be very helpful for finding and tracking errors on your site:
 
-* [Logging in WooCommerce](../utilities/logging.md#debugging-with-the-logger)
+* [Logging in WooCommerce](../utilities/logging.md)
 
 ## Xdebug
 
