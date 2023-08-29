@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a filter to OrdersTableQuery to allow overriding of HPOS queries.
