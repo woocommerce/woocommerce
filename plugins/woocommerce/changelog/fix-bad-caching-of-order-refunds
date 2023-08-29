@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix caching of refund data by introducing a new order data cache
