@@ -2,4 +2,6 @@
  * External dependencies
  */
 
-export type VariationsActionsMenuProps = {};
+export type VariationsActionsMenuProps = {
+	disabled?: boolean;
+};

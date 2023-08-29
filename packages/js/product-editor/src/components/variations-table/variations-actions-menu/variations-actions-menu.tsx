@@ -11,12 +11,15 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  */
 import { VariationsActionsMenuProps } from './types';
 
-export function VariationsActionsMenu( {}: VariationsActionsMenuProps ) {
+export function VariationsActionsMenu( {
+	disabled,
+}: VariationsActionsMenuProps ) {
 	return (
 		<Dropdown
 			position="bottom right"
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button
+					disabled={ disabled }
 					aria-expanded={ isOpen }
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="secondary"

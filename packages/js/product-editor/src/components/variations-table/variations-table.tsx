@@ -222,7 +222,7 @@ export function VariationsTable() {
 				</div>
 				<div>
 					<VariationsActionsMenu
-					// disabled={ ! hasSelection( variationIds ) }
+						disabled={ ! hasSelection( variationIds ) }
 					/>
 				</div>
 			</div>
