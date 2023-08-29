@@ -49,24 +49,22 @@ export function ShippingMenuItem( {
 									variation_id: variation.id,
 								}
 							);
-							handlePrompt(
-								'dimensions',
-								undefined,
-								( value ) => {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_length_set',
-											variation_id: variation.id,
-										}
-									);
-									return {
+							handlePrompt( undefined, ( value ) => {
+								recordEvent(
+									'product_variations_menu_shipping_update',
+									{
+										source: TRACKS_SOURCE,
+										action: 'dimensions_length_set',
+										variation_id: variation.id,
+									}
+								);
+								return {
+									dimensions: {
 										...variation.dimensions,
 										length: value,
-									};
-								}
-							);
+									},
+								};
+							} );
 							onClose();
 						} }
 					>
@@ -82,24 +80,22 @@ export function ShippingMenuItem( {
 									variation_id: variation.id,
 								}
 							);
-							handlePrompt(
-								'dimensions',
-								undefined,
-								( value ) => {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_width_set',
-											variation_id: variation.id,
-										}
-									);
-									return {
+							handlePrompt( undefined, ( value ) => {
+								recordEvent(
+									'product_variations_menu_shipping_update',
+									{
+										source: TRACKS_SOURCE,
+										action: 'dimensions_width_set',
+										variation_id: variation.id,
+									}
+								);
+								return {
+									dimensions: {
 										...variation.dimensions,
 										width: value,
-									};
-								}
-							);
+									},
+								};
+							} );
 							onClose();
 						} }
 					>
@@ -115,24 +111,22 @@ export function ShippingMenuItem( {
 									variation_id: variation.id,
 								}
 							);
-							handlePrompt(
-								'dimensions',
-								undefined,
-								( value ) => {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_height_set',
-											variation_id: variation.id,
-										}
-									);
-									return {
+							handlePrompt( undefined, ( value ) => {
+								recordEvent(
+									'product_variations_menu_shipping_update',
+									{
+										source: TRACKS_SOURCE,
+										action: 'dimensions_height_set',
+										variation_id: variation.id,
+									}
+								);
+								return {
+									dimensions: {
 										...variation.dimensions,
 										height: value,
-									};
-								}
-							);
+									},
+								};
+							} );
 							onClose();
 						} }
 					>
@@ -148,7 +142,7 @@ export function ShippingMenuItem( {
 									variation_id: variation.id,
 								}
 							);
-							handlePrompt( 'weight', undefined, ( value ) => {
+							handlePrompt( undefined, ( value ) => {
 								recordEvent(
 									'product_variations_menu_shipping_update',
 									{
@@ -157,7 +151,7 @@ export function ShippingMenuItem( {
 										variation_id: variation.id,
 									}
 								);
-								return value;
+								return { weight: value };
 							} );
 							onClose();
 						} }
