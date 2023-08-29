@@ -55,10 +55,8 @@ function addFixedOrPercentage(
 export type PricingMenuItemProps = {
 	variation: ProductVariation;
 	handlePrompt(
-		propertyName: keyof ProductVariation,
 		label?: string,
-		parser?: ( value: string ) => unknown,
-		additionalProps?: Partial< ProductVariation >
+		parser?: ( value: string ) => Partial< ProductVariation >
 	): void;
 	onClose(): void;
 };
@@ -100,21 +98,19 @@ export function PricingMenuItem( {
 										variation_id: variation.id,
 									}
 								);
-								handlePrompt(
-									'regular_price',
-									undefined,
-									( value ) => {
-										recordEvent(
-											'product_variations_menu_pricing_update',
-											{
-												source: TRACKS_SOURCE,
-												action: 'list_price_set',
-												variation_id: variation.id,
-											}
-										);
-										return value;
-									}
-								);
+								handlePrompt( undefined, ( value ) => {
+									recordEvent(
+										'product_variations_menu_pricing_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'list_price_set',
+											variation_id: variation.id,
+										}
+									);
+									return {
+										regular_price: value,
+									};
+								} );
 								onClose();
 							} }
 						>
@@ -131,7 +127,6 @@ export function PricingMenuItem( {
 									}
 								);
 								handlePrompt(
-									'regular_price',
 									__(
 										'Enter a value (fixed or %)',
 										'woocommerce'
@@ -145,10 +140,12 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return addFixedOrPercentage(
-											variation.regular_price,
-											value
-										)?.toFixed( 2 );
+										return {
+											regular_price: addFixedOrPercentage(
+												variation.regular_price,
+												value
+											)?.toFixed( 2 ),
+										};
 									}
 								);
 								onClose();
@@ -167,7 +164,6 @@ export function PricingMenuItem( {
 									}
 								);
 								handlePrompt(
-									'regular_price',
 									__(
 										'Enter a value (fixed or %)',
 										'woocommerce'
@@ -181,11 +177,13 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return addFixedOrPercentage(
-											variation.regular_price,
-											value,
-											-1
-										)?.toFixed( 2 );
+										return {
+											regular_price: addFixedOrPercentage(
+												variation.regular_price,
+												value,
+												-1
+											)?.toFixed( 2 ),
+										};
 									}
 								);
 								onClose();
@@ -205,21 +203,19 @@ export function PricingMenuItem( {
 										variation_id: variation.id,
 									}
 								);
-								handlePrompt(
-									'sale_price',
-									undefined,
-									( value ) => {
-										recordEvent(
-											'product_variations_menu_pricing_update',
-											{
-												source: TRACKS_SOURCE,
-												action: 'sale_price_set',
-												variation_id: variation.id,
-											}
-										);
-										return value;
-									}
-								);
+								handlePrompt( undefined, ( value ) => {
+									recordEvent(
+										'product_variations_menu_pricing_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'sale_price_set',
+											variation_id: variation.id,
+										}
+									);
+									return {
+										sale_price: value,
+									};
+								} );
 								onClose();
 							} }
 						>
@@ -236,7 +232,6 @@ export function PricingMenuItem( {
 									}
 								);
 								handlePrompt(
-									'sale_price',
 									__(
 										'Enter a value (fixed or %)',
 										'woocommerce'
@@ -250,10 +245,12 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return addFixedOrPercentage(
-											variation.sale_price,
-											value
-										)?.toFixed( 2 );
+										return {
+											sale_price: addFixedOrPercentage(
+												variation.sale_price,
+												value
+											)?.toFixed( 2 ),
+										};
 									}
 								);
 								onClose();
@@ -272,7 +269,6 @@ export function PricingMenuItem( {
 									}
 								);
 								handlePrompt(
-									'sale_price',
 									__(
 										'Enter a value (fixed or %)',
 										'woocommerce'
@@ -286,11 +282,13 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return addFixedOrPercentage(
-											variation.sale_price,
-											value,
-											-1
-										)?.toFixed( 2 );
+										return {
+											sale_price: addFixedOrPercentage(
+												variation.sale_price,
+												value,
+												-1
+											)?.toFixed( 2 ),
+										};
 									}
 								);
 								onClose();
@@ -309,7 +307,6 @@ export function PricingMenuItem( {
 									}
 								);
 								handlePrompt(
-									'date_on_sale_from_gmt',
 									__(
 										'Sale start date (YYYY-MM-DD format or leave blank)',
 										'woocommerce'
@@ -323,11 +320,12 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return value;
+										return {
+											date_on_sale_from_gmt: value,
+										};
 									}
 								);
 								handlePrompt(
-									'date_on_sale_to_gmt',
 									__(
 										'Sale end date (YYYY-MM-DD format or leave blank)',
 										'woocommerce'
@@ -341,7 +339,9 @@ export function PricingMenuItem( {
 												variation_id: variation.id,
 											}
 										);
-										return value;
+										return {
+											date_on_sale_to_gmt: value,
+										};
 									}
 								);
 								onClose();

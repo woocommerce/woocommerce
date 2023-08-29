@@ -23,19 +23,18 @@ export function VariationActionsMenu( {
 	onDelete,
 }: VariationActionsMenuProps ) {
 	function handlePrompt(
-		propertyName: keyof ProductVariation,
 		label: string = __( 'Enter a value', 'woocommerce' ),
-		parser: ( value: string ) => unknown = ( value ) => value,
-		additionalProps: Partial< ProductVariation > = {}
+		parser: ( value: string ) => Partial< ProductVariation > | null = () =>
+			null
 	) {
 		// eslint-disable-next-line no-alert
 		const value = window.prompt( label );
 		if ( value === null ) return;
 
-		onChange( {
-			[ propertyName ]: parser( value.trim() ),
-			...additionalProps,
-		} );
+		const updates = parser( value.trim() );
+		if ( updates ) {
+			onChange( updates );
+		}
 	}
 
 	return (

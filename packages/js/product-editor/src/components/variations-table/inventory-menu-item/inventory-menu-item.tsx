@@ -17,10 +17,8 @@ import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-stat
 export type InventoryMenuItemProps = {
 	variation: ProductVariation;
 	handlePrompt(
-		propertyName: keyof ProductVariation,
 		label?: string,
-		parser?: ( value: string ) => unknown,
-		additionalProps?: Partial< ProductVariation >
+		parser?: ( value: string ) => Partial< ProductVariation > | null
 	): void;
 	onChange( values: Partial< ProductVariation > ): void;
 	onClose(): void;
@@ -67,28 +65,24 @@ export function InventoryMenuItem( {
 										variation_id: variation.id,
 									}
 								);
-								handlePrompt(
-									'stock_quantity',
-									undefined,
-									( value ) => {
-										const stockQuantity = Number( value );
-										if ( Number.isNaN( stockQuantity ) ) {
-											return undefined;
-										}
-										recordEvent(
-											'product_variations_menu_inventory_update',
-											{
-												source: TRACKS_SOURCE,
-												action: 'stock_quantity_set',
-												variation_id: variation.id,
-											}
-										);
-										return stockQuantity;
-									},
-									{
-										manage_stock: true,
+								handlePrompt( undefined, ( value ) => {
+									const stockQuantity = Number( value );
+									if ( Number.isNaN( stockQuantity ) ) {
+										return {};
 									}
-								);
+									recordEvent(
+										'product_variations_menu_inventory_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'stock_quantity_set',
+											variation_id: variation.id,
+										}
+									);
+									return {
+										stock_quantity: stockQuantity,
+										manage_stock: true,
+									};
+								} );
 								onClose();
 							} }
 						>
@@ -188,28 +182,24 @@ export function InventoryMenuItem( {
 										variation_id: variation.id,
 									}
 								);
-								handlePrompt(
-									'low_stock_amount',
-									undefined,
-									( value ) => {
-										recordEvent(
-											'product_variations_menu_inventory_select',
-											{
-												source: TRACKS_SOURCE,
-												action: 'low_stock_amount_set',
-												variation_id: variation.id,
-											}
-										);
-										const lowStockAmount = Number( value );
-										if ( Number.isNaN( lowStockAmount ) ) {
-											return undefined;
+								handlePrompt( undefined, ( value ) => {
+									recordEvent(
+										'product_variations_menu_inventory_select',
+										{
+											source: TRACKS_SOURCE,
+											action: 'low_stock_amount_set',
+											variation_id: variation.id,
 										}
-										return lowStockAmount;
-									},
-									{
-										manage_stock: true,
+									);
+									const lowStockAmount = Number( value );
+									if ( Number.isNaN( lowStockAmount ) ) {
+										return null;
 									}
-								);
+									return {
+										low_stock_amount: lowStockAmount,
+										manage_stock: true,
+									};
+								} );
 								onClose();
 							} }
 						>
