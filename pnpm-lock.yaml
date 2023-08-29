@@ -4158,7 +4158,7 @@ packages:
       '@wordpress/element': 4.20.0
       '@wordpress/i18n': 4.40.0
       '@wordpress/icons': 9.31.0
-      '@wordpress/primitives': 3.38.0
+      '@wordpress/primitives': 3.8.0
       '@wordpress/react-i18n': 3.8.0
       classnames: 2.3.1
       debug: 4.3.4(supports-color@9.2.2)
@@ -7197,7 +7197,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -18881,7 +18881,7 @@ packages:
       '@wordpress/babel-plugin-import-jsx-pragma': 3.2.0(@babel/core@7.21.3)
       '@wordpress/browserslist-config': 4.1.3
       '@wordpress/element': 4.20.0
-      '@wordpress/warning': 2.40.0
+      '@wordpress/warning': 2.28.0
       browserslist: 4.19.3
       core-js: 3.29.1
     transitivePeerDependencies:
@@ -18983,7 +18983,7 @@ packages:
       '@wordpress/token-list': 2.28.0
       '@wordpress/url': 3.41.0
       '@wordpress/warning': 2.40.0
-      '@wordpress/wordcount': 3.40.0
+      '@wordpress/wordcount': 3.28.0
       classnames: 2.3.1
       colord: 2.9.2
       diff: 4.0.2
@@ -19217,7 +19217,7 @@ packages:
       '@wordpress/style-engine': 0.15.0
       '@wordpress/token-list': 2.28.0
       '@wordpress/url': 3.41.0
-      '@wordpress/warning': 2.40.0
+      '@wordpress/warning': 2.34.0
       '@wordpress/wordcount': 3.28.0
       change-case: 4.1.2
       classnames: 2.3.1
@@ -19319,7 +19319,7 @@ packages:
       '@wordpress/icons': 9.31.0
       '@wordpress/keycodes': 3.40.0
       '@wordpress/notices': 3.28.0(react@17.0.2)
-      '@wordpress/primitives': 3.38.0
+      '@wordpress/primitives': 3.17.0
       '@wordpress/reusable-blocks': 3.17.0(@babel/core@7.17.8)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/rich-text': 5.17.0(react@17.0.2)
       '@wordpress/server-side-render': 3.17.0(@babel/core@7.17.8)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
@@ -21996,6 +21996,15 @@ packages:
     dependencies:
       prettier: /wp-prettier@2.8.5
 
+  /@wordpress/primitives@3.17.0:
+    resolution: {integrity: sha512-alFOs74tqKeP2ByRqVOT9QYjXPLVZV+hM+8myusCN+60VB0hCTrUwTktFTAkftGbfpjoBOTe46pQ5eS/BZ1u/A==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.21.0
+      '@wordpress/element': 4.20.0
+      classnames: 2.3.1
+    dev: false
+
   /@wordpress/primitives@3.38.0:
     resolution: {integrity: sha512-quRkAzZknTCqrBI/HvJ2Eas0x1irU6m2GbV/8opyZoE/2BAN+W07JgDhE8Aukd+3q03nfpKPeRJAO1dZ4/Vnuw==}
     engines: {node: '>=12'}
@@ -22010,6 +22019,15 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/element': 4.4.1
+      classnames: 2.3.1
+    dev: false
+
+  /@wordpress/primitives@3.8.0:
+    resolution: {integrity: sha512-XOtNtYseCkdGwMWQT9bl4rMAlIX1cNByIFVsDGRVjA58qW3oghZgEJH41R/eCEVkU5z3YKhnflS096y0Xg1ZtA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.21.0
+      '@wordpress/element': 4.20.0
       classnames: 2.3.1
     dev: false
 
@@ -22777,6 +22795,14 @@ packages:
   /@wordpress/warning@1.4.2:
     resolution: {integrity: sha512-MjrkSp6Jyfx+92AE32A83P503noUtGb6//BYUH4GiWzzzSNhDHgbQ0UcOJwJaEYK166DxSNpMk/JXc4YENi1Cw==}
     dev: true
+
+  /@wordpress/warning@2.28.0:
+    resolution: {integrity: sha512-6EnZBKHGJsCcgbYOqD/JX3R5B48u3Zmm3Ha1vUpJE9rIHjq8ALM9zG2bYqkTw4mieEs5TvlDOkS3tYoH+S+wsQ==}
+    engines: {node: '>=12'}
+
+  /@wordpress/warning@2.34.0:
+    resolution: {integrity: sha512-y1zYJjj0oydNrET+xD2ji6O4OA7MN+ugqSYvkuITMf+0tcPZfH4BdW0wMQgy1QjDGd6HPH8C3xH4Omhn+NFr5g==}
+    engines: {node: '>=12'}
 
   /@wordpress/warning@2.40.0:
     resolution: {integrity: sha512-y/XdIq38m8gyotK7t8/n14VDccN9IQ9FihiUlhP3Dk46kZd9w5kBqaStd3jux2ZXSWCim9fZ3KkH03a2rNCsaA==}
@@ -23787,10 +23813,10 @@ packages:
     peerDependencies:
       eslint: '>= 4.12.1'
     dependencies:
-      '@babel/code-frame': 7.16.7
-      '@babel/parser': 7.17.8
-      '@babel/traverse': 7.17.3
-      '@babel/types': 7.17.0
+      '@babel/code-frame': 7.18.6
+      '@babel/parser': 7.21.3
+      '@babel/traverse': 7.21.3
+      '@babel/types': 7.22.4
       eslint: 7.32.0
       eslint-visitor-keys: 1.3.0
       resolve: 1.20.0
