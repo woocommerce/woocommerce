@@ -22,7 +22,8 @@ export const BusinessInfoDescription = ( {
 	sendEvent: ( event: businessInfoDescriptionCompleteEvent ) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
-	const [ siteDescription, setSiteDescription ] = useState( '' );
+	const [ businessInfoDescription, setBusinessInfoDescription ] =
+		useState( '' );
 
 	return (
 		<div>
@@ -41,10 +42,10 @@ export const BusinessInfoDescription = ( {
 						) }
 					</h1>
 					<TextareaControl
-						onChange={ ( text ) => {
-							setSiteDescription( text );
+						onChange={ ( businessInfo ) => {
+							setBusinessInfoDescription( businessInfo );
 						} }
-						value={ siteDescription }
+						value={ businessInfoDescription }
 						placeholder={ __(
 							'E.g., At Cool Cat Shades, we sell sunglasses specially designed for our stylish feline friends. Designed and developed with a cat’s comfort in mind, our range of sunglasses are fashionable accessories our furry friends can wear all day. We currently offer 50 different styles and variations of shades, with plans to add more in the near future.',
 							'woocommerce'
@@ -83,8 +84,13 @@ export const BusinessInfoDescription = ( {
 					</div>
 					<Button
 						variant="primary"
-						onClick={ () => {} }
-						disabled={ siteDescription === '' }
+						onClick={ () => {
+							sendEvent( {
+								type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE',
+								payload: businessInfoDescription,
+							} );
+						} }
+						disabled={ businessInfoDescription === '' }
 					>
 						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
