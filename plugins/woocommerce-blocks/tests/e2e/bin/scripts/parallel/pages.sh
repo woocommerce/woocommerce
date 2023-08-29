@@ -8,6 +8,16 @@ post_id=$(wp post create \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
+	--post_title='Shop' \
+)
+wp option update woocommerce_shop_page_id $post_id
+
+post_id=$(wp post create \
+	--porcelain \
+	--menu_order=1 \
+	--post_type=page \
+	--post_status=publish \
+	--post_author=1 \
 	--post_title='Cart block' \
 	${script_dir}/cart.html
 )
