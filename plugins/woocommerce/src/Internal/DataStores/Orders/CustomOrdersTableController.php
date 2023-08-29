@@ -28,6 +28,11 @@ class CustomOrdersTableController {
 	use AccessiblePrivateMethods;
 
 	/**
+	 * The hook that fires for the recurring event to check for pending order syncs.
+	 */
+	public const SYNC_CHECK_EVENT_HOOK = 'woocommerce_custom_orders_table_check_for_pending_syncs';
+
+	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
 	public const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
@@ -120,6 +125,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
+		self::add_action( self::SYNC_CHECK_EVENT_HOOK, array( $this, 'check_for_pending_syncs' ) );
 	}
 
 	/**
@@ -347,9 +353,36 @@ class CustomOrdersTableController {
 		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+			as_schedule_recurring_action(
+				time() + HOUR_IN_SECONDS,
+				6 * HOUR_IN_SECONDS,
+				self::SYNC_CHECK_EVENT_HOOK
+			);
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
+			as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
 		}
+	}
+
+	/**
+	 * When sync is turned on, check to see if there are any pending syncs and if so, queue the processor.
+	 *
+	 * Runs as a callback for SYNC_CHECK_EVENT_HOOK.
+	 *
+	 * @return void
+	 */
+	private function check_for_pending_syncs() {
+		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
+			as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
+			return;
+		}
+
+		$sync_status = $this->data_synchronizer->get_sync_status();
+		if ( $sync_status['current_pending_count'] <= 0 ) {
+			return;
+		}
+
+		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 	}
 
 	/**
