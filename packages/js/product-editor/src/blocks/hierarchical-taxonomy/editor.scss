@@ -1,0 +1,23 @@
+.components-modal__screen-overlay {
+	.woocommerce-create-new-brand-modal {
+		min-width: 650px;
+		overflow: visible;
+
+		&__buttons {
+			margin-top: 36px;
+			display: flex;
+			flex-direction: row;
+			gap: 8px;
+			justify-content: flex-end;
+		}
+
+		.brand-field-dropdown {
+			&__menu {
+				padding: 0;
+				border: none;
+			}
+		}
+	}
+}
+
+

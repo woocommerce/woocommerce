@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/hierarchical-taxonomy-field",
+	"title": "Hierarchical taxonomy",
+	"category": "widgets",
+	"description": "A block that displays a hierarchical taxonomy field, allowing to search, select, and create new entries",
+	"keywords": [ "hierarchical", "taxonomy"],
+	"textdomain": "default",
+	"attributes": {
+		"taxonomyName": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"taxonomyNamePlural": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"label": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"createTitle": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}

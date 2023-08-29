@@ -1,0 +1,159 @@
+/**
+ * External dependencies
+ */
+import type { BlockAttributes } from '@wordpress/blocks';
+import { useBlockProps } from '@wordpress/block-editor';
+import {
+	createElement,
+	useState,
+	Fragment,
+	useCallback,
+	useEffect,
+} from '@wordpress/element';
+import '@woocommerce/settings';
+import { __experimentalSelectTreeControl as SelectTreeControl } from '@woocommerce/components';
+import { useEntityProp } from '@wordpress/core-data';
+import { useDebounce, useInstanceId } from '@wordpress/compose';
+/**
+ * Internal dependencies
+ */
+import { CreateTaxonomyModal } from './create-taxonomy-modal';
+import { Taxonomy } from './types';
+import useTaxonomySearch from './use-taxonomy-search';
+
+export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+	const blockProps = useBlockProps();
+	const { label, taxonomyName, taxonomyNamePlural, createTitle } = attributes;
+	const [ searchValue, setSearchValue ] = useState( '' );
+	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
+
+	const { searchEntity, isResolving } = useTaxonomySearch( taxonomyName );
+	const searchDelayed = useDebounce(
+		useCallback( ( val ) => {
+			setSearchValue( val );
+			searchEntity( val || '' ).then( setAllEntries );
+		}, [] ),
+		150
+	);
+
+	useEffect( () => {
+		searchDelayed( '' );
+	}, [] );
+
+	const [ selectedEntries, setSelectedEntries ] = useEntityProp< Taxonomy[] >(
+		'postType',
+		'product',
+		taxonomyNamePlural
+	);
+
+	const mappedEntries = selectedEntries.map( ( b ) => ( {
+		value: String( b.id ),
+		label: b.name,
+	} ) );
+
+	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
+
+	const mappedAllEntries = allEntries.map( ( taxonomy ) => ( {
+		parent:
+			taxonomy.parent && taxonomy.parent > 0
+				? String( taxonomy.parent )
+				: undefined,
+		label: taxonomy.name,
+		value: String( taxonomy.id ),
+	} ) );
+
+	return (
+		<div { ...blockProps }>
+			<>
+				<SelectTreeControl
+					id={
+						useInstanceId(
+							SelectTreeControl,
+							'woocommerce-taxonomy-select'
+						) as string
+					}
+					label={ label }
+					isLoading={ isResolving }
+					multiple
+					createValue={ searchValue }
+					onInputChange={ searchDelayed }
+					shouldNotRecursivelySelect
+					shouldShowCreateButton={ ( typedValue ) =>
+						! typedValue ||
+						mappedAllEntries.findIndex(
+							( taxonomy ) =>
+								taxonomy.label.toLowerCase() ===
+								typedValue.toLowerCase()
+						) === -1
+					}
+					onCreateNew={ () => setShowCreateNewModal( true ) }
+					items={ mappedAllEntries }
+					selected={ mappedEntries }
+					onSelect={ ( selectedItems ) => {
+						if ( Array.isArray( selectedItems ) ) {
+							setSelectedEntries( [
+								...selectedItems.map( ( i ) => ( {
+									id: +i.value,
+									name: i.label,
+									parent: +( i.parent || 0 ),
+								} ) ),
+								...selectedEntries,
+							] );
+						} else {
+							setSelectedEntries( [
+								{
+									id: +selectedItems.value,
+									name: selectedItems.label,
+									parent: +( selectedItems.parent || 0 ),
+								},
+								...selectedEntries,
+							] );
+						}
+					} }
+					onRemove={ ( removedItems ) => {
+						if ( Array.isArray( removedItems ) ) {
+							setSelectedEntries(
+								selectedEntries.filter(
+									( taxonomy ) =>
+										! removedItems.find(
+											( item ) =>
+												item.value ===
+												String( taxonomy.id )
+										)
+								)
+							);
+						} else {
+							setSelectedEntries(
+								selectedEntries.filter(
+									( taxonomy ) =>
+										String( taxonomy.id ) !==
+										removedItems.value
+								)
+							);
+						}
+					} }
+				></SelectTreeControl>
+				{ showCreateNewModal && (
+					<CreateTaxonomyModal
+						taxonomyName={ taxonomyName }
+						title={ createTitle }
+						onCancel={ () => setShowCreateNewModal( false ) }
+						onCreate={ ( taxonomy ) => {
+							setShowCreateNewModal( false );
+							setSearchValue( '' );
+							setSelectedEntries( [
+								{
+									id: taxonomy.id,
+									name: taxonomy.name,
+									parent: taxonomy.parent,
+								},
+								...selectedEntries,
+							] );
+						} }
+						initialName={ searchValue }
+					/>
+				) }
+			</>
+		</div>
+	);
+}
