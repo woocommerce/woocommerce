@@ -4,10 +4,10 @@
 		overflow: visible;
 
 		&__buttons {
-			margin-top: 36px;
+			margin-top: $gap-larger;
 			display: flex;
 			flex-direction: row;
-			gap: 8px;
+			gap: $gap-smaller;
 			justify-content: flex-end;
 		}
 	}
