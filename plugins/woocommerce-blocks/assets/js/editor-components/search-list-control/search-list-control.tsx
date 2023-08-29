@@ -101,14 +101,14 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 	);
 };
 
-const SelectedListItems = ( {
+const SelectedListItems = < T extends object = object >( {
 	isLoading,
 	isSingle,
 	selected,
 	messages,
 	onChange,
 	onRemove,
-}: SearchListControlProps & {
+}: SearchListControlProps< T > & {
 	messages: SearchListMessages;
 	onRemove: ( itemId: string | number ) => () => void;
 } ) => {
@@ -148,14 +148,14 @@ const SelectedListItems = ( {
 	);
 };
 
-const ListItemsContainer = ( {
+const ListItemsContainer = < T extends object = object >( {
 	filteredList,
 	search,
 	onSelect,
 	instanceId,
 	useExpandedPanelId,
 	...props
-}: SearchListItemsContainerProps ) => {
+}: SearchListItemsContainerProps< T > ) => {
 	const { messages, renderItem, selected, isSingle } = props;
 	const renderItemCallback = renderItem || defaultRenderListItem;
 
@@ -194,7 +194,9 @@ const ListItemsContainer = ( {
 /**
  * Component to display a searchable, selectable list of items.
  */
-export const SearchListControl = ( props: SearchListControlProps ) => {
+export const SearchListControl = < T extends object = object >(
+	props: SearchListControlProps< T >
+) => {
 	const {
 		className = '',
 		isCompact,
@@ -250,22 +252,25 @@ export const SearchListControl = ( props: SearchListControlProps ) => {
 	);
 
 	const onSelect = useCallback(
-		( item: SearchListItemProps | SearchListItemProps[] ) => () => {
-			if ( Array.isArray( item ) ) {
-				onChange( item );
-				return;
-			}
+		( item: SearchListItemProps< T > | SearchListItemProps< T >[] ) =>
+			() => {
+				if ( Array.isArray( item ) ) {
+					onChange( item );
+					return;
+				}
 
-			if ( selected.findIndex( ( { id } ) => id === item.id ) !== -1 ) {
-				onRemove( item.id )();
-				return;
-			}
-			if ( isSingle ) {
-				onChange( [ item ] );
-			} else {
-				onChange( [ ...selected, item ] );
-			}
-		},
+				if (
+					selected.findIndex( ( { id } ) => id === item.id ) !== -1
+				) {
+					onRemove( item.id )();
+					return;
+				}
+				if ( isSingle ) {
+					onChange( [ item ] );
+				} else {
+					onChange( [ ...selected, item ] );
+				}
+			},
 		[ isSingle, onRemove, onChange, selected ]
 	);
 

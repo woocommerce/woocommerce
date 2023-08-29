@@ -8,6 +8,7 @@ export * from './checkout';
 export * from './contexts';
 export * from './currency';
 export * from './events';
+export * from './hocs';
 export * from './hooks';
 export * from './notices';
 export * from './objects';

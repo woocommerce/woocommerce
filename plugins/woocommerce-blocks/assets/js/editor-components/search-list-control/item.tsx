@@ -40,7 +40,7 @@ const ItemLabel = ( props: { item: SearchListItemProps; search: string } ) => {
 	);
 };
 
-export const SearchListItem = ( {
+export const SearchListItem = < T extends object = object >( {
 	countLabel,
 	className,
 	depth = 0,
@@ -53,7 +53,7 @@ export const SearchListItem = ( {
 	selected,
 	useExpandedPanelId,
 	...props
-}: renderItemArgs ): JSX.Element => {
+}: renderItemArgs< T > ): JSX.Element => {
 	const [ expandedPanelId, setExpandedPanelId ] = useExpandedPanelId;
 	const showCount =
 		countLabel !== undefined &&
@@ -165,6 +165,7 @@ export const SearchListItem = ( {
 			{ isSingle ? (
 				<>
 					<input
+						{ ...props }
 						type="radio"
 						id={ id }
 						name={ name }
@@ -172,13 +173,13 @@ export const SearchListItem = ( {
 						onChange={ onSelect( item ) }
 						checked={ isSelected }
 						className="woocommerce-search-list__item-input"
-						{ ...props }
 					></input>
 
 					<ItemLabel item={ item } search={ search } />
 				</>
 			) : (
 				<CheckboxControl
+					{ ...props }
 					id={ id }
 					name={ name }
 					className="woocommerce-search-list__item-input"
@@ -189,7 +190,6 @@ export const SearchListItem = ( {
 					) }
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
-					{ ...props }
 				/>
 			) }
 
