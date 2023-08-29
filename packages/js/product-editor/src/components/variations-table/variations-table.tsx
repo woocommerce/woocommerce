@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Spinner, Tooltip } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -31,6 +36,7 @@ import {
 	TRACKS_SOURCE,
 } from '../../constants';
 import { VariationActionsMenu } from './variation-actions-menu';
+import { useSelection } from '../../hooks/use-selection';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -42,6 +48,14 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
+	const {
+		areAllSelected,
+		isSelected,
+		hasSelection,
+		onSelectAll,
+		onSelectItem,
+		onClearSelection,
+	} = useSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
 	const context = useContext( CurrencyContext );
@@ -102,6 +116,8 @@ export function VariationsTable() {
 			</div>
 		);
 	}
+
+	const variationIds = variations.map( ( { id } ) => id );
 
 	function handleDeleteVariationClick( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
@@ -174,9 +190,46 @@ export function VariationsTable() {
 						) }
 					</div>
 				) ) }
+			<div className="woocommerce-product-variations__header">
+				<div className="woocommerce-product-variations__selection">
+					<CheckboxControl
+						value="all"
+						checked={ areAllSelected( variationIds ) }
+						// @ts-expect-error Property 'indeterminate' does not exist
+						indeterminate={
+							! areAllSelected( variationIds ) &&
+							hasSelection( variationIds )
+						}
+						onChange={ onSelectAll( variationIds ) }
+					/>
+				</div>
+				<div>
+					<Button
+						variant="tertiary"
+						disabled={ areAllSelected( variationIds ) }
+						onClick={ () => onSelectAll( variationIds )( true ) }
+					>
+						{ __( 'Select all', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="tertiary"
+						disabled={ ! hasSelection( variationIds ) }
+						onClick={ () => onClearSelection() }
+					>
+						{ __( 'Clear selection', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
+						<div className="woocommerce-product-variations__selection">
+							<CheckboxControl
+								value={ variation.id }
+								checked={ isSelected( variation.id ) }
+								onChange={ onSelectItem( variation.id ) }
+							/>
+						</div>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => {
 								const tag = (
