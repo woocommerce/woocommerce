@@ -43,7 +43,6 @@ The Inbox provides informational, useful, and supplemental content to the user, 
 
     - Notices that require action, extension setup tasks, or regular feedback notices.
 
-**Examples**
+### Examples
 
 ![an example of two inbox notifications listed under the "Inbox" section of the admin](_media/inbox-examples.png)
-

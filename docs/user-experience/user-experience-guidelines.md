@@ -16,7 +16,7 @@ Plugins which draw on WordPress’ core design aesthetic will benefit from futur
 - [Figma for WordPress](https://www.google.com/url?q=https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/&sa=D&source=editors&ust=1692895324240568&usg=AOvVaw1iTxXh4YpA9AZlAACquK3g) | ([WordPress Design Library Figma](https://www.google.com/url?q=https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library?type%3Ddesign%26node-id%3D7-42%26t%3Dm8IgUWrqfZX0GNCh-0&sa=D&source=editors&ust=1692895324240869&usg=AOvVaw0N2Y5nktcq9dypK8N68nMD))
 - [WooCommerce Component Library](https://www.google.com/url?q=https://woocommerce.github.io/woocommerce-admin/%23/&sa=D&source=editors&ust=1692895324241224&usg=AOvVaw0rXxnruNoF8alalpaev9yD)
 
-## See more: 
+## Explore User Experience Guidlines 
 
 - [Best Practices](/docs/user-experience/best-practices.md)
 - [Colors](/docs/user-experience/colors.md)

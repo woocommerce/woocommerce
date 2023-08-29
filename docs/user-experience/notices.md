@@ -28,7 +28,6 @@ The placement of feedback is vital so the user notices it. For example, when val
 
 **Informational Message**: When it’s necessary to provide information before the user executes any action on the screen. Examples can be limitations within a time period or when a global setting limits actions on the current screen.
 
-**Examples**
+### Examples
 
 ![an example of an informational message as a notice](_media/informational-notice.png)
-

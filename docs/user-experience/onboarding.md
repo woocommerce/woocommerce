@@ -25,4 +25,3 @@ If no action is required for setup it’s best to rely on other onboarding aids 
 **Avoid dead end links and pages**. There should always be a way forward or back.
 
 **Error Handling and Messaging**. If users encounter an error during setup, provide a clear and useful notification with clear and easily understood information on what went wrong and how to fix it.
-
