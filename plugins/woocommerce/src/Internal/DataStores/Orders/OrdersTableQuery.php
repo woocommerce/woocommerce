@@ -198,6 +198,39 @@ class OrdersTableQuery {
 		// TODO: args to be implemented.
 		unset( $this->args['customer_note'], $this->args['name'] );
 
+		/**
+		 * Filters the orders array before the query takes place.
+		 *
+		 * Return a non-null value to bypass the HPOS default order queries.
+		 *
+		 * If the query includes limits via the `limit`, `page`, or `offset` arguments, we
+		 * require the `found_orders` and `max_num_pages` properties to also be set. 
+		 *
+		 * @since 8.2.0
+		 *
+		 * @param array $order_data {
+		 *     An array of order data.
+		 *     @type int[] $orders        Return an array of order IDs data to short-circuit the HPOS query,
+		 *                                or null to allow HPOS to run its normal query.
+		 *     @type int   $found_orders  The number of orders found.
+		 *     @type int   $max_num_pages The number of pages.
+		 * }
+		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
+		 */
+		[ $this->orders, $this->found_orders, $this->max_num_pages ] = apply_filters( 'woocommerce_hpos_pre_query', null, array( $this ) );
+		// Return early if we orders were set by the filter.
+		if ( null !== $this->orders ) {
+			// Require data for pagination iff args for $this->limits are set. 
+			if ( $this->arg_isset( 'limit' ) || $this->arg_isset( 'page' ) || $this->arg_isset( 'offset' ) ) {
+				if ( null !== $this->found_orders && null !== $this->max_num_pages ) {
+					return;
+				}
+			} else {
+				return;
+			}
+			// Something was set by the filter, but not all required data was set -- reset the orders and continue as normal.
+			$this->orders = null;
+		}
 		$this->build_query();
 		$this->run_query();
 	}
