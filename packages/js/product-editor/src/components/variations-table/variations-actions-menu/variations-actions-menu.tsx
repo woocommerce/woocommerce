@@ -13,6 +13,7 @@ import { VariationsActionsMenuProps } from './types';
 
 export function VariationsActionsMenu( {
 	disabled,
+	onDelete,
 }: VariationsActionsMenuProps ) {
 	return (
 		<Dropdown
@@ -45,6 +46,7 @@ export function VariationsActionsMenu( {
 							isDestructive
 							variant="link"
 							onClick={ () => {
+								onDelete();
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"
