@@ -26,6 +26,7 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 type CreateTaxonomyModalProps = {
 	initialName?: string;
+	hierarchical?: boolean;
 	taxonomyName: string;
 	title: string;
 	onCancel: () => void;
@@ -37,6 +38,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	onCreate,
 	initialName,
 	taxonomyName,
+	hierarchical = true,
 	title,
 } ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
@@ -96,6 +98,11 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 
 	const id = useInstanceId( BaseControl, 'taxonomy_name' ) as string;
 
+	const selectId = useInstanceId(
+		SelectTree,
+		'parent-taxonomy-select'
+	) as string;
+
 	return (
 		<Modal
 			title={ title }
@@ -117,52 +124,49 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 						onChange={ setName }
 					/>
 				</BaseControl>
-				<SelectTree
-					isLoading={ isResolving }
-					label={ createInterpolateElement(
-						__( 'Parent <optional/>', 'woocommerce' ),
-						{
-							optional: (
-								<span className="woocommerce-product-form__optional-input">
-									{ __( '(optional)', 'woocommerce' ) }
-								</span>
-							),
+				{ hierarchical && (
+					<SelectTree
+						isLoading={ isResolving }
+						label={ createInterpolateElement(
+							__( 'Parent <optional/>', 'woocommerce' ),
+							{
+								optional: (
+									<span className="woocommerce-product-form__optional-input">
+										{ __( '(optional)', 'woocommerce' ) }
+									</span>
+								),
+							}
+						) }
+						id={ selectId }
+						items={ allEntries.map( ( taxonomy ) => ( {
+							label: taxonomy.name,
+							value: String( taxonomy.id ),
+						} ) ) }
+						shouldNotRecursivelySelect
+						selected={
+							parent
+								? {
+										value: String( parent.id ),
+										label: parent.name,
+								  }
+								: undefined
 						}
-					) }
-					id={
-						useInstanceId(
-							SelectTree,
-							'parent-taxonomy-select'
-						) as string
-					}
-					items={ allEntries.map( ( taxonomy ) => ( {
-						label: taxonomy.name,
-						value: String( taxonomy.id ),
-					} ) ) }
-					shouldNotRecursivelySelect
-					selected={
-						parent
-							? {
-									value: String( parent.id ),
-									label: parent.name,
-							  }
-							: undefined
-					}
-					onSelect={ ( item: Item ) =>
-						item &&
-						setParent( {
-							id: +item.value,
-							name: item.label,
-							parent: item.parent ? +item.parent : 0,
-						} )
-					}
-					onRemove={ () => setParent( null ) }
-					onInputChange={ ( value ) => {
-						searchDelayed( value );
-						setCategoryParentTypedValue( value || '' );
-					} }
-					createValue={ categoryParentTypedValue }
-				/>
+						onSelect={ ( item: Item ) =>
+							item &&
+							setParent( {
+								id: +item.value,
+								name: item.label,
+								parent: item.parent ? +item.parent : 0,
+							} )
+						}
+						onRemove={ () => setParent( null ) }
+						onInputChange={ ( value ) => {
+							searchDelayed( value );
+							setCategoryParentTypedValue( value || '' );
+						} }
+						createValue={ categoryParentTypedValue }
+					/>
+				) }
 				<div className="woocommerce-create-new-taxonomy-modal__buttons">
 					<Button
 						isSecondary

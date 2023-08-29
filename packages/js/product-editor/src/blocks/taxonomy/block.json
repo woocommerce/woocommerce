@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/hierarchical-taxonomy-field",
-	"title": "Hierarchical taxonomy",
+	"name": "woocommerce/taxonomy-field",
+	"title": "Taxonomy",
 	"category": "widgets",
-	"description": "A block that displays a hierarchical taxonomy field, allowing to search, select, and create new entries",
-	"keywords": [ "hierarchical", "taxonomy"],
+	"description": "A block that displays a taxonomy field, allowing to search, select, and create new entries",
+	"keywords": [ "taxonomy"],
 	"textdomain": "default",
 	"attributes": {
 		"taxonomyName": {
@@ -22,6 +22,11 @@
 		},
 		"createTitle": {
 			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"hierarchical": {
+			"type": "boolean",
+			"default": false,
 			"__experimentalRole": "content"
 		}
 	},

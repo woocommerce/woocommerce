@@ -21,14 +21,33 @@ import { CreateTaxonomyModal } from './create-taxonomy-modal';
 import { Taxonomy } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+interface TaxonomyBlockAttributes extends BlockAttributes {
+	label: string;
+	taxonomyName: string;
+	taxonomyNameOnEntity: string;
+	createTitle: string;
+	hierarchical: boolean;
+}
+
+export function Edit( {
+	attributes,
+}: {
+	attributes: TaxonomyBlockAttributes;
+} ) {
 	const blockProps = useBlockProps();
-	const { label, taxonomyName, taxonomyNameOnEntity, createTitle } =
-		attributes;
+	const {
+		label,
+		taxonomyName,
+		taxonomyNameOnEntity,
+		createTitle,
+		hierarchical,
+	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
-	const { searchEntity, isResolving } = useTaxonomySearch( taxonomyName );
+	const { searchEntity, isResolving } = useTaxonomySearch( taxonomyName, {
+		fetchParents: hierarchical,
+	} );
 	const searchDelayed = useDebounce(
 		useCallback( ( val ) => {
 			setSearchValue( val );
@@ -56,7 +75,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 
 	const mappedAllEntries = allEntries.map( ( taxonomy ) => ( {
 		parent:
-			taxonomy.parent && taxonomy.parent > 0
+			hierarchical && taxonomy.parent && taxonomy.parent > 0
 				? String( taxonomy.parent )
 				: undefined,
 		label: taxonomy.name,
@@ -137,6 +156,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 				{ showCreateNewModal && (
 					<CreateTaxonomyModal
 						taxonomyName={ taxonomyName }
+						hierarchical={ hierarchical }
 						title={ createTitle }
 						onCancel={ () => setShowCreateNewModal( false ) }
 						onCreate={ ( taxonomy ) => {
