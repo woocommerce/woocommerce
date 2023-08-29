@@ -6,6 +6,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderDataCache;
 use WC_Meta_Data;
 
 /**
@@ -77,6 +78,8 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			return;
 		}
 
+		$this->remove_from_order_data_cache( $refund );
+
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
 		$refund->set_id( 0 );
 
@@ -128,6 +131,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 * @param \WC_Abstract_Order $refund Refund object.
 	 */
 	public function create( &$refund ) {
+		$this->remove_from_order_data_cache( $refund );
 		$refund->set_status( 'completed' ); // Refund are always marked completed.
 		$this->persist_save( $refund );
 	}
@@ -138,11 +142,12 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 * @param \WC_Order $refund Refund object.
 	 */
 	public function update( &$refund ) {
+		$this->remove_from_order_data_cache( $refund );
 		$this->persist_updates( $refund );
 	}
 
 	/**
-	 * Helper method that updates post meta based on an refund object.
+	 * Helper method that updates post meta based on a refund object.
 	 * Mostly used for backwards compatibility purposes in this datastore.
 	 *
 	 * @param \WC_Order $refund Refund object.
@@ -196,7 +201,6 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		);
 	}
 
-
 	/**
 	 * Returns data store object to use backfilling.
 	 *
@@ -206,4 +210,12 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		return new \WC_Order_Refund_Data_Store_CPT();
 	}
 
+	/**
+	 * Deletes the order data cached for the order corresponding to a given refund.
+	 *
+	 * @param \WC_Order $refund Refund object whose order will get its associated data deleted.
+	 */
+	private function remove_from_order_data_cache( $refund ) {
+		wc_get_container()->get( OrderDataCache::class )->remove( $refund->get_parent_id() );
+	}
 }

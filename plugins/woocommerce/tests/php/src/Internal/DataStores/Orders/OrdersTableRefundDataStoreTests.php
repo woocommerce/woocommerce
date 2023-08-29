@@ -3,16 +3,19 @@
  * File containing the class WP_Test_WC_Order_Refund.
  */
 
+use Automattic\WooCommerce\Caches\OrderDataCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableRefundDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Caching\InMemoryCacheEngine;
 
 /**
  * Class OrdersTableRefundDataStoreTests.
  */
 class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
-	use \Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+	use HPOSToggleTrait;
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -48,10 +51,20 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->order_data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator         = wc_get_container()->get( PostsToOrdersMigrationController::class );
 		$this->cpt_data_store   = new WC_Order_Refund_Data_Store_CPT();
+
+		add_filter( 'wc_object_cache_get_engine', fn()=>new InMemoryCacheEngine() );
 	}
 
 	/**
-	 * Test that we are able to create refund.
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		remove_all_filters( 'wc_object_cache_get_engine' );
+	}
+
+	/**
+	 * @testdox Test that we are able to create a refund.
 	 */
 	public function test_create_refund() {
 		$order  = OrderHelper::create_complex_data_store_order( $this->order_data_store );
@@ -75,7 +88,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that refunds can be backfilled correctly.
+	 * @testdox Test that refunds can be backfilled correctly.
 	 */
 	public function test_refunds_backfill() {
 		$this->enable_cot_sync();
@@ -102,7 +115,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that refund props are set as expected with HPOS enabled.
+	 * @testdox Test that refund props are set as expected with HPOS enabled.
 	 */
 	public function test_refund_data_is_set() {
 		$this->toggle_cot_feature_and_usage( true );
@@ -127,4 +140,43 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEquals( $user->ID, $refreshed_refund->get_data()['refunded_by'] );
 	}
 
+	/**
+	 * @testdox Creating a refund deletes cached data related to the parent order.
+	 */
+	public function test_creating_refund_deletes_cached_order_data() {
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		$order_data_cache = wc_get_container()->get( OrderDataCache::class );
+		$order_data_cache->set( array( 'order_id' => $order_id ) );
+
+		$refund = new \WC_Order_Refund();
+		$refund->set_parent_id( $order_id );
+		$this->sut->create( $refund );
+
+		$this->assertFalse( $order_data_cache->is_cached( $order_id ) );
+	}
+
+	/**
+	 * @testdox Updating or deleting a refund deletes cached data related to the parent order.
+	 *
+	 * @testWith ["update", "delete"]
+	 *
+	 * @param string $operation The operation to perform (the name of a public method in the tested class).
+	 */
+	public function test_updating_or_deleting_refund_deletes_cached_order_data( string $operation ) {
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		$refund = new \WC_Order_Refund();
+		$refund->set_parent_id( $order_id );
+		$this->sut->create( $refund );
+
+		$order_data_cache = wc_get_container()->get( OrderDataCache::class );
+		$order_data_cache->set( array( 'order_id' => $order_id ) );
+
+		$this->sut->$operation( $refund );
+
+		$this->assertFalse( $order_data_cache->is_cached( $order_id ) );
+	}
 }
