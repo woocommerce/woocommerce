@@ -90,6 +90,7 @@ export type {
 	ProductVariation,
 	ProductVariationAttribute,
 	ProductVariationImage,
+	ProductVariationQuery,
 } from './product-variations/types';
 export {
 	QueryProductAttribute,

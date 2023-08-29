@@ -46,13 +46,10 @@ export const BlockEditor = ( {} ) => {
 		};
 	}, [] );
 
-	const [ blocks ]: [ BlockInstance[] ] = useEntityBlockEditor(
-		'postType',
-		templateType
-	);
+	const [ blocks ] = useEntityBlockEditor( 'postType', templateType );
 
 	// // See packages/block-library/src/page-list/edit.js.
-	const { records: pages } = useEntityRecords( 'postType', 'page', {
+	const { records: pages } = useEntityRecords< Page >( 'postType', 'page', {
 		per_page: MAX_PAGE_COUNT,
 		_fields: [ 'id', 'link', 'menu_order', 'parent', 'title', 'type' ],
 		// TODO: When https://core.trac.wordpress.org/ticket/39037 REST API support for multiple orderby
@@ -64,13 +61,13 @@ export const BlockEditor = ( {} ) => {
 
 	const onClickNavigationItem = ( event: MouseEvent ) => {
 		const clickedPage =
-			pages.find(
+			pages?.find(
 				( page: Page ) =>
 					page.link === ( event.target as HTMLAnchorElement ).href
 			) ||
 			// Fallback to page title if the link is not found. This is needed for a bug in the block library
 			// See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817
-			pages.find(
+			pages?.find(
 				( page: Page ) =>
 					page.title.rendered ===
 					( event.target as HTMLAnchorElement ).innerText

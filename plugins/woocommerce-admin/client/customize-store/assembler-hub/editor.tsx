@@ -68,6 +68,7 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 	return (
 		<>
 			{ isLoading ? <CanvasSpinner /> : null }
+			{ /* @ts-expect-error id can be optional */ }
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
 					kind="postType"

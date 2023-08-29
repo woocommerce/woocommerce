@@ -5,7 +5,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner, Tooltip } from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductVariationQuery,
 	ProductVariation,
+	ProductVariationsActions,
+	ProductVariationSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
@@ -54,8 +57,12 @@ export function VariationsTable() {
 					hasFinishedResolution,
 					getProductVariationsTotalCount,
 					isGeneratingVariations: getIsGeneratingVariations,
-				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-				const requestParams = {
+				}: ProductVariationSelectors = select(
+					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				);
+				const requestParams: Partial< ProductVariationQuery > & {
+					product_id: number;
+				} = {
 					product_id: productId,
 					page: currentPage,
 					per_page: perPage,
@@ -68,22 +75,20 @@ export function VariationsTable() {
 						[ requestParams ]
 					),
 					isGeneratingVariations: getIsGeneratingVariations( {
+						id: productId,
 						product_id: productId,
 					} ),
-					variations:
-						getProductVariations< ProductVariation[] >(
-							requestParams
-						),
-					totalCount:
-						getProductVariationsTotalCount< number >(
-							requestParams
-						),
+					variations: getProductVariations( requestParams ),
+					totalCount: getProductVariationsTotalCount( requestParams ),
 				};
 			},
 			[ currentPage, perPage, productId ]
 		);
 
-	const { updateProductVariation, deleteProductVariation } = useDispatch(
+	const {
+		updateProductVariation,
+		deleteProductVariation,
+	}: ProductVariationsActions = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
@@ -109,7 +114,7 @@ export function VariationsTable() {
 			...prevState,
 			[ variationId ]: true,
 		} ) );
-		deleteProductVariation< Promise< ProductVariation > >( {
+		deleteProductVariation( {
 			product_id: productId,
 			id: variationId,
 		} )
@@ -135,7 +140,7 @@ export function VariationsTable() {
 			...prevState,
 			[ variationId ]: true,
 		} ) );
-		updateProductVariation< Promise< ProductVariation > >(
+		updateProductVariation(
 			{ product_id: productId, id: variationId },
 			variation
 		)

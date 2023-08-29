@@ -72,7 +72,7 @@ export type ProductVariation = Omit<
 	manage_stock: boolean | 'parent';
 };
 
-type Query = Omit< ProductQuery, 'name' >;
+export type ProductVariationQuery = Omit< ProductQuery, 'name' >;
 
 type MutableProperties = Partial<
 	Omit< ProductVariation, ReadOnlyProperties >
@@ -90,7 +90,7 @@ export type Selectors = CrudSelectors<
 	'ProductVariation',
 	'ProductVariations',
 	ProductVariation,
-	Partial< Query > & { product_id: string | number },
+	Partial< ProductVariationQuery > & { product_id: string | number },
 	MutableProperties
 >;
 

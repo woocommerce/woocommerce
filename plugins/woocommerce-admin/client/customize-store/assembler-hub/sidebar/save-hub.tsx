@@ -89,17 +89,12 @@ export const SaveHub = () => {
 				return {
 					dirtyCurrentEntity: calcDirtyCurrentEntity,
 					isDirty: dirtyEntityRecords.length > 0,
-					isSaving: dirtyEntityRecords.some(
-						( record: {
-							kind: string;
-							name: string;
-							key: string;
-						} ) =>
-							isSavingEntityRecord(
-								record.kind,
-								record.name,
-								record.key
-							)
+					isSaving: dirtyEntityRecords.some( ( record ) =>
+						isSavingEntityRecord(
+							record.kind,
+							record.name,
+							record.key
+						)
 					),
 					countUnsavedChanges: dirtyEntityRecords.length,
 				};
@@ -120,13 +115,11 @@ export const SaveHub = () => {
 		if ( ! dirtyCurrentEntity ) return;
 
 		removeNotice( saveNoticeId );
-		const { kind, name, key, property } = dirtyCurrentEntity;
+		const { kind, name, key } = dirtyCurrentEntity;
 
 		try {
 			if ( dirtyCurrentEntity.kind === 'root' && name === 'site' ) {
-				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
-					property,
-				] );
+				await saveSpecifiedEntityEdits( 'root', 'site', undefined );
 			} else {
 				if (
 					PUBLISH_ON_SAVE_ENTITIES.some(
