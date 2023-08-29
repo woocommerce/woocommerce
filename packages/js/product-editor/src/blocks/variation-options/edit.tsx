@@ -72,9 +72,10 @@ export function Edit() {
 		allAttributes: entityAttributes,
 		isVariationAttributes: true,
 		productId: useEntityId( 'postType', 'product' ),
-		onChange( values ) {
+		onChange( values, defaultAttributes ) {
 			setEntityAttributes( values );
-			generateProductVariations( values );
+			setEntityDefaultAttributes( defaultAttributes );
+			generateProductVariations( values, defaultAttributes );
 		},
 	} );
 
@@ -130,12 +131,7 @@ export function Edit() {
 					attributes,
 					entityDefaultAttributes,
 				] ) }
-				onChange={ ( values ) => {
-					handleChange( values );
-					setEntityDefaultAttributes(
-						manageDefaultAttributes( values )
-					);
-				} }
+				onChange={ handleChange }
 				createNewAttributesAsGlobal={ true }
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>

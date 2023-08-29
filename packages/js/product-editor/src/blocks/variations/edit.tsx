@@ -39,16 +39,6 @@ import { useProductVariationsHelper } from '../../hooks/use-product-variations-h
 import { hasAttributesUsedForVariations } from '../../utils';
 import { TRACKS_SOURCE } from '../../constants';
 
-function getFirstOptionFromEachAttribute(
-	attributes: Product[ 'attributes' ]
-): Product[ 'default_attributes' ] {
-	return attributes.map( ( attribute ) => ( {
-		id: attribute.id,
-		name: attribute.name,
-		option: attribute.options[ 0 ],
-	} ) );
-}
-
 export function Edit( {
 	attributes,
 }: BlockEditProps< VariationsBlockAttributes > ) {
@@ -68,10 +58,8 @@ export function Edit( {
 			allAttributes: productAttributes,
 			isVariationAttributes: true,
 			productId: useEntityId( 'postType', 'product' ),
-			onChange( values ) {
+			onChange( values, defaultAttributes ) {
 				setProductAttributes( values );
-				const defaultAttributes =
-					getFirstOptionFromEachAttribute( values );
 				setDefaultProductAttributes( defaultAttributes );
 				generateProductVariations( values, defaultAttributes );
 			},
