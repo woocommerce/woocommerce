@@ -95,6 +95,8 @@ export const BlockEditor = ( {} ) => {
 	);
 
 	if ( location.params.path === '/customize-store/homepage' ) {
+		// When assembling the homepage preview, we need to render the blocks in a different way than the rest of the pages.
+		// Because we want to show a action bar when hovering over a pattern. This is not needed for the rest of the pages and will cause an issue with logo editing.
 		return (
 			<div className="woocommerce-customize-store__block-editor">
 				{ blocks.map( ( block, index ) => {
@@ -134,6 +136,7 @@ export const BlockEditor = ( {} ) => {
 								settings={ settings }
 								additionalStyles={ additionalStyles }
 								onClickNavigationItem={ onClickNavigationItem }
+								// Use sub registry because we have multiple previews
 								useSubRegistry={ true }
 							/>
 						</div>
@@ -150,6 +153,7 @@ export const BlockEditor = ( {} ) => {
 					settings={ settings }
 					additionalStyles={ '' }
 					onClickNavigationItem={ onClickNavigationItem }
+					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
 				/>
 			</div>

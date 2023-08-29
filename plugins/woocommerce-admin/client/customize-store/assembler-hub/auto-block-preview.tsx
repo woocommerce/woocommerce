@@ -166,7 +166,9 @@ function ScaledBlockPreview( {
 							);
 						} );
 
-						// Get the current logo block client ID. This is used for the logo settings.
+						// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
+						// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
+						// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
 						const siteLogo = bodyElement.querySelector(
 							'.wp-block-site-logo'
 						);
