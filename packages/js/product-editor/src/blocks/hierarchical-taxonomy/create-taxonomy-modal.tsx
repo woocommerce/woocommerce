@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, TextControl } from '@wordpress/components';
+import { BaseControl, Button, Modal, TextControl } from '@wordpress/components';
 import {
 	useState,
 	useEffect,
@@ -16,6 +16,8 @@ import {
 	TreeItemType as Item,
 } from '@woocommerce/components';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
+import classNames from 'classnames';
+
 /**
  * Internal dependencies
  */
@@ -57,13 +59,14 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		searchDelayed( '' );
 	}, [] );
 
-	const { createNotice } = useDispatch( 'core/notices' );
 	const { saveEntityRecord } = useDispatch( 'core' );
 	const [ isCreating, setIsCreating ] = useState( false );
+	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const [ name, setName ] = useState( initialName || '' );
 	const [ parent, setParent ] = useState< Taxonomy | null >( null );
 
 	const onSave = async () => {
+		setErrorMessage( null );
 		try {
 			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
@@ -79,18 +82,19 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 			onCreate( newTaxonomy );
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch ( e: any ) {
+			setIsCreating( false );
 			if ( e.message ) {
-				createNotice( 'error', e.message );
+				setErrorMessage( e.message );
 			} else {
-				createNotice(
-					'error',
+				setErrorMessage(
 					__( `Failed to create taxonomy`, 'woocommerce' )
 				);
+				throw e;
 			}
-			setIsCreating( false );
-			onCancel();
 		}
 	};
+
+	const id = useInstanceId( BaseControl, 'taxonomy_name' ) as string;
 
 	return (
 		<Modal
@@ -99,12 +103,20 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 			className="woocommerce-create-new-taxonomy-modal"
 		>
 			<div className="woocommerce-create-new-taxonomy-modal__wrapper">
-				<TextControl
+				<BaseControl
+					id={ id }
 					label={ __( 'Name', 'woocommerce' ) }
-					name="Tops"
-					value={ name }
-					onChange={ setName }
-				/>
+					help={ errorMessage }
+					className={ classNames( {
+						'has-error': errorMessage,
+					} ) }
+				>
+					<TextControl
+						id={ id }
+						value={ name }
+						onChange={ setName }
+					/>
+				</BaseControl>
 				<SelectTree
 					isLoading={ isResolving }
 					label={ createInterpolateElement(

@@ -11,6 +11,14 @@
 			justify-content: flex-end;
 		}
 	}
-}
+	.has-error {
+		.components-text-control__input {
+			border-color: $studio-red-50;
+		}
 
+		.components-base-control__help {
+			color: $studio-red-50;
+		}
+	}
+}
 
