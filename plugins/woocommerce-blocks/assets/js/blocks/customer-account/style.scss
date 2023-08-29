@@ -17,6 +17,7 @@
 
 .wp-block-woocommerce-customer-account {
 	display: flex;
+	padding: em($gap-smaller);
 
 	a {
 		text-decoration: none !important;
