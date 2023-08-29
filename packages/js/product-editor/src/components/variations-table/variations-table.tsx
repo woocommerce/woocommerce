@@ -37,6 +37,7 @@ import {
 } from '../../constants';
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
+import { VariationsActionsMenu } from './variations-actions-menu';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -203,7 +204,7 @@ export function VariationsTable() {
 						onChange={ onSelectAll( variationIds ) }
 					/>
 				</div>
-				<div>
+				<div className="woocommerce-product-variations__filters">
 					<Button
 						variant="tertiary"
 						disabled={ areAllSelected( variationIds ) }
@@ -218,6 +219,11 @@ export function VariationsTable() {
 					>
 						{ __( 'Clear selection', 'woocommerce' ) }
 					</Button>
+				</div>
+				<div>
+					<VariationsActionsMenu
+					// disabled={ ! hasSelection( variationIds ) }
+					/>
 				</div>
 			</div>
 			<Sortable>
