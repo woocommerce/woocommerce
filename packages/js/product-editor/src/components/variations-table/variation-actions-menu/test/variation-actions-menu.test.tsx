@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, fireEvent, getByRole } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import React, { createElement } from 'react';
