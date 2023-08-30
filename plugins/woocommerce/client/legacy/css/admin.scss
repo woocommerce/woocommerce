@@ -4090,6 +4090,14 @@ table.wc-shipping-classes {
 		width: 25%;
 	}
 
+	.shipping-zone-actions {
+		width: 10%;
+
+		a.wc-shipping-zone-delete {
+			color: #a00;
+		}
+	}
+
 	.wc-shipping-class-description,
 	.wc-shipping-class-name,
 	.wc-shipping-class-slug,
@@ -4101,7 +4109,6 @@ table.wc-shipping-classes {
 			width: 100%;
 		}
 
-		a.wc-shipping-zone-delete,
 		a.wc-shipping-class-delete {
 			color: #a00;
 		}

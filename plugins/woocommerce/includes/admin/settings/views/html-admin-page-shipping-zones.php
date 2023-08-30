@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping method(s)', 'woocommerce' ); ?></th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody class="wc-shipping-zone-rows"></tbody>
@@ -47,6 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</ul>
 			</td>
+			<td class="shipping-zone-actions" />
 		</tr>
 	</tbody>
 </table>
@@ -74,15 +76,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td width="1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
 			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
-			<div class="row-actions">
+			<!-- <div class="row-actions">
 				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
-			</div>
+			</div> -->
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
 		</td>
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
+		</td>
+		<td class="shipping-zone-actions">
+			<div>
+				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 	</tr>
 </script>
