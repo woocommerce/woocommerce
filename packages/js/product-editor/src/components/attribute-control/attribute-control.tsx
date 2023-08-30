@@ -195,7 +195,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		recordEvent( 'product_options_update', {
 			source: TRACKS_SOURCE,
 			attribute: updatedAttribute.name,
-			values: updatedAttribute.options,
+			values: updatedAttribute.terms?.map( ( term ) => term.name ),
 			default: updatedAttribute.isDefault,
 			visible: updatedAttribute.visible,
 			filter: true, // default true until attribute filter gets implemented
