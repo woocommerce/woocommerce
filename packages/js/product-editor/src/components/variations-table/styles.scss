@@ -1,3 +1,5 @@
+@import "./variations-actions-menu/styles.scss";
+
 .woocommerce-product-variations {
 	display: flex;
 	flex-direction: column;
@@ -16,6 +18,10 @@
 				border-color: $gray-600;
 			}
 		}
+	}
+
+	&__filters {
+		flex: 1 0 auto;
 	}
 
 	&__loading {

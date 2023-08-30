@@ -33,7 +33,7 @@ describe( 'VariationActionsMenu', () => {
 	it( 'should trigger product_variations_menu_view track when dropdown toggled', () => {
 		const { getByRole } = render(
 			<VariationActionsMenu
-				variation={ mockVariation }
+				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -51,7 +51,7 @@ describe( 'VariationActionsMenu', () => {
 	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
 		const { queryByText, getByRole } = render(
 			<VariationActionsMenu
-				variation={ mockVariation }
+				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -65,7 +65,7 @@ describe( 'VariationActionsMenu', () => {
 	it( 'should call onDelete when Delete menuItem is clicked', async () => {
 		const { getByRole, getByText } = render(
 			<VariationActionsMenu
-				variation={ mockVariation }
+				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -79,7 +79,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should open Inventory sub-menu if Inventory is clicked with click track', async () => {
 			const { queryByText, getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -106,7 +106,7 @@ describe( 'VariationActionsMenu', () => {
 			window.prompt = jest.fn().mockReturnValue( '10' );
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -141,7 +141,7 @@ describe( 'VariationActionsMenu', () => {
 			window.prompt = jest.fn().mockReturnValue( null );
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -175,7 +175,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should call onChange with toggled manage_stock when toggle "track quantity" is clicked', async () => {
 			const { getByRole, getByText, rerender } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -198,7 +198,7 @@ describe( 'VariationActionsMenu', () => {
 			onChangeMock.mockClear();
 			rerender(
 				<VariationActionsMenu
-					variation={ { ...mockVariation, manage_stock: true } }
+					selection={ { ...mockVariation, manage_stock: true } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -214,7 +214,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should call onChange with toggled stock_status when toggle "Set status to In stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -240,7 +240,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should call onChange with toggled stock_status when toggle "Set status to Out of stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -266,7 +266,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should call onChange with toggled stock_status when toggle "Set status to On back order" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -293,7 +293,7 @@ describe( 'VariationActionsMenu', () => {
 			window.prompt = jest.fn().mockReturnValue( '7' );
 			const { getByRole, getByText } = render(
 				<VariationActionsMenu
-					variation={ { ...mockVariation } }
+					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
