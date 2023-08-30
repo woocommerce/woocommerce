@@ -190,13 +190,13 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Check if the WooPayments payment gateway is active and set up,
+	 * Check if the WooPayments payment gateway is active and set up or was at some point,
 	 * or there are orders processed with it, at some moment.
 	 *
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
-		// First, get the store value, if it exists.
+		// First, get the stored value, if it exists.
 		// This way we avoid costly DB queries and API calls.
 		// Basically, we only want to know if WooPayments was in use in the past.
 		// Since the past can't be changed, neither can this value.
@@ -210,7 +210,8 @@ class WcPayWelcomePage {
 		$had_wcpay = false;
 
 		// We consider the store to have WooPayments if there is meaningful account data in the WooPayments account cache.
-		// This implies that WooPayments is or was active at some point and that it was connected.
+		// This implies that WooPayments was active at some point and that it was connected.
+		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
 		if ( $this->has_wcpay_account_data() ) {
 			$had_wcpay = true;
 		}
