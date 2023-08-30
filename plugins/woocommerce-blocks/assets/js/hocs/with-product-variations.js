@@ -10,7 +10,7 @@ import { getProductVariations } from '@woocommerce/editor-components/utils';
 /**
  * Internal dependencies
  */
-import { formatError } from '../base/utils/errors.js';
+import { formatError } from '../base/utils/errors';
 
 /**
  * HOC that queries variations for a component.
