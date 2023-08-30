@@ -117,6 +117,9 @@ const restrictedImports = [
 ];
 
 module.exports = {
+	env: {
+		browser: true,
+	},
 	root: true,
 	extends: [
 		'plugin:@woocommerce/eslint-plugin/recommended',

@@ -7,7 +7,7 @@ import { getAttributes, getTerms } from '@woocommerce/editor-components/utils';
 /**
  * Internal dependencies
  */
-import { formatError } from '../base/utils/errors.js';
+import { formatError } from '../base/utils/errors';
 
 /**
  * Get attribute data (name, taxonomy etc) from server data.

@@ -124,7 +124,9 @@ export interface SearchListControlProps< T extends object = object > {
 	// Callback fired when the search field is used.
 	onSearch?: ( ( search: string ) => void ) | undefined;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
-	renderItem?: ( ( args: renderItemArgs< T > ) => JSX.Element ) | undefined;
+	renderItem?:
+		| ( ( args: renderItemArgs< T > ) => JSX.Element | null )
+		| undefined;
 	// The list of currently selected items.
 	selected: SearchListItem< T >[];
 	// Whether to show a text field or a token field as search

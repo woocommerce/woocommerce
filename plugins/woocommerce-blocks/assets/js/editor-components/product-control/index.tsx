@@ -197,7 +197,7 @@ const ProductControl = (
 		} else if ( showVariations ) {
 			return renderItemWithVariations;
 		}
-		return undefined;
+		return () => null;
 	};
 
 	if ( error ) {

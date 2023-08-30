@@ -8,7 +8,7 @@ import { getCategory } from '@woocommerce/editor-components/utils';
 /**
  * Internal dependencies
  */
-import { formatError } from '../base/utils/errors.js';
+import { formatError } from '../base/utils/errors';
 
 /**
  * HOC that queries a category for a component.
