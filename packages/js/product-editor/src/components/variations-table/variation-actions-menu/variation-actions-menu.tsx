@@ -78,8 +78,7 @@ export function VariationActionsMenu( {
 							onClose={ onClose }
 						/>
 						<InventoryMenuItem
-							variation={ selection }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
