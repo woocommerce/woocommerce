@@ -13,7 +13,7 @@ import type {
 /**
  * Internal dependencies
  */
-import { formatError } from '../base/utils/errors.js';
+import { formatError } from '../base/utils/errors';
 
 interface WithSearchedProductProps {
 	selected: number[];
