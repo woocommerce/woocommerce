@@ -43,7 +43,6 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
-import { identity } from 'lodash';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -192,7 +191,7 @@ export function VariationsTable() {
 			{ product_id: productId },
 			{
 				update: variations
-					.filter( ( variation ) => isSelected( variation.id ) )
+					.filter( ( { id } ) => isSelected( id ) )
 					.map( ( { id } ) => ( {
 						...variation,
 						id,
@@ -206,8 +205,8 @@ export function VariationsTable() {
 			)
 			.then( ( response ) => {
 				createSuccessNotice(
-					/* translators: The updated variations count */
 					sprintf(
+						/* translators: The updated variations count */
 						__( '%s variation/s updated.', 'woocommerce' ),
 						response.update.length
 					)
@@ -236,8 +235,8 @@ export function VariationsTable() {
 			)
 			.then( ( response ) => {
 				createSuccessNotice(
-					/* translators: The updated variations count */
 					sprintf(
+						/* translators: The updated variations count */
 						__( '%s variation/s updated.', 'woocommerce' ),
 						response.delete.length
 					)
