@@ -278,6 +278,17 @@ class WcPayWelcomePage {
 			return $this->incentive;
 		}
 
+		// Get the cached data.
+		$cache = get_transient( self::TRANSIENT_NAME );
+
+		// If the cached data is not expired and it's a WP_Error,
+		// it means there was an API error previously and we should not retry just yet.
+		if ( is_wp_error( $cache ) ) {
+			// Initialize the in-memory cache and return it.
+			$this->incentive = [];
+
+			return $this->incentive;
+		}
 		$store_context = [
 			// Store ISO-2 country code, e.g. `US`.
 			'country'      => WC()->countries->get_base_country(),
@@ -343,9 +354,15 @@ class WcPayWelcomePage {
 
 		// Return early if there is an error, waiting 6 hours before the next attempt.
 		if ( is_wp_error( $response ) ) {
-			// Store a null value in the transient so we know this is due to an API error.
-			set_transient( self::TRANSIENT_NAME, null, HOUR_IN_SECONDS * 6 );
-			// Initialize the in-memory cache.
+			// Store a trimmed down, lightweight error.
+			$error = new \WP_Error(
+				$response->get_error_code(),
+				$response->get_error_message(),
+				wp_remote_retrieve_response_code( $response )
+			);
+			// Store the error in the transient so we know this is due to an API error.
+			set_transient( self::TRANSIENT_NAME, $error, HOUR_IN_SECONDS * 6 );
+			// Initialize the in-memory cache and return it.
 			$this->incentive = [];
 
 			return $this->incentive;
