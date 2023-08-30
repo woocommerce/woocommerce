@@ -10,5 +10,12 @@
 
   &__select-suggestion.button {
     border-radius: 28px;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
   }
 }
