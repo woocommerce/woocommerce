@@ -725,13 +725,19 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		$variation_fields->add_block(
+		$variation_options_section = $variation_fields->add_block(
 			[
-				'id'         => 'product-variation-options',
-				'blockName'  => 'woocommerce/product-variations-options-field',
+				'id'         => 'product-variation-options-section',
+				'blockName'  => 'woocommerce/product-section',
 				'attributes' => [
 					'title' => __( 'Variation options', 'woocommerce' ),
 				],
+			]
+		);
+		$variation_options_section->add_block(
+			[
+				'id'        => 'product-variation-options',
+				'blockName' => 'woocommerce/product-variations-options-field',
 			]
 		);
 		$variation_section = $variation_fields->add_block(
