@@ -11,8 +11,10 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  */
 import { VariationsActionsMenuProps } from './types';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
+import { PricingMenuItem } from '../pricing-menu-item';
 
 export function VariationsActionsMenu( {
+	selection,
 	disabled,
 	onChange,
 	onDelete,
@@ -36,6 +38,14 @@ export function VariationsActionsMenu( {
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
 						<UpdateStockMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+					</MenuGroup>
+					<MenuGroup>
+						<PricingMenuItem
+							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
@@ -45,7 +55,7 @@ export function VariationsActionsMenu( {
 							isDestructive
 							variant="link"
 							onClick={ () => {
-								onDelete();
+								onDelete( selection );
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"

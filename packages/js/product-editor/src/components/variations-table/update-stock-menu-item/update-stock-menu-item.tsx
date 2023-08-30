@@ -10,36 +10,55 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { TRACKS_SOURCE } from '../../../constants';
-import { UpdateStockMenuItemProps } from './types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+import { VariationActionsMenuItemProps } from '../types';
 
 export function UpdateStockMenuItem( {
-	variation,
+	selection,
 	onChange,
 	onClose,
-}: UpdateStockMenuItemProps ) {
+}: VariationActionsMenuItemProps ) {
 	return (
 		<MenuItem
 			onClick={ () => {
+				const ids = Array.isArray( selection )
+					? selection.map( ( { id } ) => id )
+					: selection.id;
+
 				recordEvent( 'product_variations_menu_inventory_select', {
 					source: TRACKS_SOURCE,
 					action: 'stock_quantity_set',
-					variation_id: variation?.id,
+					variation_id: ids,
 				} );
-				handlePrompt().then( ( value ) => {
-					const stockQuantity = Number( value );
-					if ( Number.isNaN( stockQuantity ) ) {
-						return;
-					}
-					recordEvent( 'product_variations_menu_inventory_update', {
-						source: TRACKS_SOURCE,
-						action: 'stock_quantity_set',
-						variation_id: variation?.id,
-					} );
-					onChange( {
-						stock_quantity: stockQuantity,
-						manage_stock: true,
-					} );
+				handlePrompt( {
+					onOk( value ) {
+						const stockQuantity = Number( value );
+						if ( Number.isNaN( stockQuantity ) ) {
+							return;
+						}
+						recordEvent(
+							'product_variations_menu_inventory_update',
+							{
+								source: TRACKS_SOURCE,
+								action: 'stock_quantity_set',
+								variation_id: ids,
+							}
+						);
+						if ( Array.isArray( selection ) ) {
+							onChange(
+								selection.map( ( { id } ) => ( {
+									id,
+									stock_quantity: stockQuantity,
+									manage_stock: true,
+								} ) )
+							);
+						} else {
+							onChange( {
+								stock_quantity: stockQuantity,
+								manage_stock: true,
+							} );
+						}
+					},
 				} );
 				onClose();
 			} }

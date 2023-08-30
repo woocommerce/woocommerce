@@ -186,17 +186,10 @@ export function VariationsTable() {
 			);
 	}
 
-	function handleUpdateAll( variation: Partial< ProductVariation > ) {
+	function handleUpdateAll( update: Partial< ProductVariation >[] ) {
 		batchUpdateProductVariations< { update: [] } >(
 			{ product_id: productId },
-			{
-				update: variations
-					.filter( ( { id } ) => isSelected( id ) )
-					.map( ( { id } ) => ( {
-						...variation,
-						id,
-					} ) ),
-			}
+			{ update }
 		)
 			.then( ( response ) =>
 				invalidateResolution( 'getProductVariations', [
@@ -219,13 +212,11 @@ export function VariationsTable() {
 			} );
 	}
 
-	function handleDeleteAll() {
+	function handleDeleteAll( values: Partial< ProductVariation >[] ) {
 		batchUpdateProductVariations< { delete: [] } >(
 			{ product_id: productId },
 			{
-				delete: variations
-					.filter( ( variation ) => isSelected( variation.id ) )
-					.map( ( { id } ) => id ),
+				delete: values.map( ( { id } ) => id ),
 			}
 		)
 			.then( ( response ) =>
@@ -296,6 +287,9 @@ export function VariationsTable() {
 				</div>
 				<div>
 					<VariationsActionsMenu
+						selection={ variations.filter( ( variation ) =>
+							isSelected( variation.id )
+						) }
 						disabled={ ! hasSelection( variationIds ) }
 						onChange={ handleUpdateAll }
 						onDelete={ handleDeleteAll }
@@ -435,11 +429,13 @@ export function VariationsTable() {
 								</Tooltip>
 							) }
 							<VariationActionsMenu
-								variation={ variation }
+								selection={ variation }
 								onChange={ ( value ) =>
 									handleVariationChange( variation.id, value )
 								}
-								onDelete={ handleDeleteVariationClick }
+								onDelete={ ( { id } ) =>
+									handleDeleteVariationClick( id )
+								}
 							/>
 						</div>
 					</ListItem>

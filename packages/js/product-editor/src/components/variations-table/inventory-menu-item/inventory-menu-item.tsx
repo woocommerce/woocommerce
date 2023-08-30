@@ -57,7 +57,7 @@ export function InventoryMenuItem( {
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
 						<UpdateStockMenuItem
-							variation={ variation }
+							selection={ variation }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
