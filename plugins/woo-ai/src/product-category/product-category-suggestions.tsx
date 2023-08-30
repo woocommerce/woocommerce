@@ -2,25 +2,22 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-import {
-	__experimentalUseCompletion as useCompletion,
-	UseCompletionError,
-} from '@woocommerce/ai';
+import { useCallback, useEffect, useState } from '@wordpress/element';
+import { UseCompletionError } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
  */
-import { MagicButton, RandomLoadingMessage } from '../components';
 import {
-	getCategories,
-	selectCategory,
-	generateProductDataInstructions,
-} from '../utils';
+	MagicButton,
+	RandomLoadingMessage,
+	SuggestionPills,
+} from '../components';
+import { getCategories, selectCategory } from '../utils';
 import AlertIcon from '../../assets/images/icons/alert.svg';
-import { SuggestionPills } from '../components/suggestion-pills';
-import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 import { getAvailableCategories, recordCategoryTracks } from './utils';
+import { useNewCategorySuggestions } from './useNewCategorySuggestions';
+import { useExistingCategorySuggestions } from './useExistingCategorySuggestions';
 
 enum SuggestionsState {
 	Initial,
@@ -29,228 +26,294 @@ enum SuggestionsState {
 	Complete,
 	None,
 }
-type FilteredSuggestions = {
-	newCategories: string[];
-	existingCategories: string[];
-};
 
 export const ProductCategorySuggestions = () => {
-	const [ suggestionsState, setSuggestionsState ] =
+	const [ existingSuggestionsState, setExistingSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.Initial );
-	const [ suggestions, setSuggestions ] = useState< string[] >( [] );
-	const [ newCategorySuggestions, setNewCategorySuggestions ] = useState<
+	const [ newSuggestionsState, setNewSuggestionsState ] =
+		useState< SuggestionsState >( SuggestionsState.Initial );
+	const [ existingSuggestions, setExistingSuggestions ] = useState<
 		string[]
 	>( [] );
+	const [ newSuggestions, setNewSuggestions ] = useState< string[] >( [] );
 
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
 	}, [] );
 
-	const parseCategorySuggestions = ( categorySuggestions: string ) => {
-		return categorySuggestions.split( ',' ).map( ( suggestion ) => {
-			return suggestion.trim();
-		} );
+	/**
+	 * Check if a suggestion is valid.
+	 *
+	 * @param suggestion         The suggestion to check.
+	 * @param selectedCategories The currently selected categories.
+	 */
+	const isSuggestionValid = (
+		suggestion: string,
+		selectedCategories: string[]
+	) => {
+		return (
+			suggestion !== __( 'Uncategorized', 'woocommerce' ) &&
+			! selectedCategories.includes( suggestion )
+		);
 	};
 
-	const filterValidCategorySuggestions = async (
-		categorySuggestions: string[]
-	): Promise< FilteredSuggestions > => {
+	/**
+	 * Filter the category suggestions.
+	 *
+	 * @param  categorySuggestions The category suggestions to filter.
+	 * @param  onlyAvailable       Whether to return only the categories that are available (already exist) on the store.
+	 *
+	 * @return {Promise<string[]>} The filtered category suggestions.
+	 */
+	const filterCategorySuggestions = async (
+		categorySuggestions: string[],
+		onlyAvailable = false
+	): Promise< string[] > => {
 		const selectedCategories = getCategories();
 
-		const newCategories: string[] = [];
-		const existingCategories: string[] = [];
+		if ( onlyAvailable ) {
+			try {
+				const availableCategories = await getAvailableCategories();
 
-		try {
-			const availableCategories = await getAvailableCategories();
-
-			categorySuggestions.forEach( ( suggestion ) => {
-				if ( selectedCategories.includes( suggestion ) ) {
-					return;
-				}
-				if ( availableCategories.includes( suggestion ) ) {
-					existingCategories.push( suggestion );
-				} else {
-					newCategories.push( suggestion );
-				}
-			} );
-		} catch ( e ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Unable to fetch available categories', e );
+				return categorySuggestions.filter(
+					( suggestion ) =>
+						isSuggestionValid( suggestion, selectedCategories ) &&
+						availableCategories.includes( suggestion )
+				);
+			} catch ( e ) {
+				// eslint-disable-next-line no-console
+				console.error( 'Unable to fetch available categories.', e );
+				return [];
+			}
 		}
 
-		return {
-			newCategories,
-			existingCategories,
-		};
+		return categorySuggestions.filter( ( suggestion ) =>
+			isSuggestionValid( suggestion, selectedCategories )
+		);
 	};
 
-	const { requestCompletion } = useCompletion( {
-		feature: WOO_AI_PLUGIN_FEATURE_NAME,
-		onStreamError: ( error: UseCompletionError ) => {
-			// eslint-disable-next-line no-console
-			console.debug( 'Streaming error encountered', error );
-			recordCategoryTracks( 'stop', {
-				reason: 'error',
-				error: error.code ?? error.message,
-			} );
-			setSuggestionsState( SuggestionsState.Failed );
-		},
-		onCompletionFinished: async ( reason, content ) => {
-			try {
-				const parsed = parseCategorySuggestions( content );
-				const { newCategories, existingCategories } =
-					await filterValidCategorySuggestions( parsed );
+	/**
+	 * Callback for when the existing category suggestions have been generated.
+	 *
+	 * @param {string[]} existingCategorySuggestions The existing category suggestions.
+	 */
+	const onExistingCategorySuggestionsGenerated = async (
+		existingCategorySuggestions: string[]
+	) => {
+		const filtered = await filterCategorySuggestions(
+			existingCategorySuggestions,
+			true
+		);
 
-				if (
-					newCategories.length === 0 &&
-					existingCategories.length === 0
-				) {
-					setSuggestionsState( SuggestionsState.None );
-				} else {
-					setSuggestionsState( SuggestionsState.Complete );
-				}
+		if ( filtered.length === 0 ) {
+			setExistingSuggestionsState( SuggestionsState.None );
+		} else {
+			setExistingSuggestionsState( SuggestionsState.Complete );
+		}
+		setExistingSuggestions( filtered );
 
-				recordCategoryTracks( 'stop', {
-					reason: 'finished',
-					suggestions: parsed,
-					existing_suggestions: existingCategories,
-					new_suggestions: newCategories,
-				} );
-
-				setSuggestions( existingCategories );
-				setNewCategorySuggestions( newCategories );
-			} catch ( e ) {
-				setSuggestionsState( SuggestionsState.Failed );
-				throw new Error( 'Unable to parse suggestions' );
-			}
-		},
-	} );
-
-	const handleSuggestionClick = ( suggestion: string ) => {
-		// remove the selected item from the list of suggestions
-		setSuggestions( suggestions.filter( ( s ) => s !== suggestion ) );
-		selectCategory( suggestion );
-
-		recordCategoryTracks( 'select', {
-			selected_category: suggestion,
+		recordCategoryTracks( 'stop', {
+			reason: 'finished',
+			suggestions_type: 'existing',
+			suggestions: existingCategorySuggestions,
+			valid_suggestions: filtered,
 		} );
 	};
 
-	const buildPrompt = async () => {
-		let availableCategories: string[] = [];
-		try {
-			availableCategories = await getAvailableCategories();
-		} catch ( e ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Unable to fetch available categories', e );
+	/**
+	 * Callback for when the new category suggestions have been generated.
+	 *
+	 * @param {string[]} newCategorySuggestions
+	 */
+	const onNewCategorySuggestionsGenerated = async (
+		newCategorySuggestions: string[]
+	) => {
+		const filtered = await filterCategorySuggestions(
+			newCategorySuggestions
+		);
+
+		if ( filtered.length === 0 ) {
+			setNewSuggestionsState( SuggestionsState.None );
+		} else {
+			setNewSuggestionsState( SuggestionsState.Complete );
 		}
+		setNewSuggestions( filtered );
 
-		const productPropsInstructions = generateProductDataInstructions();
-		const instructions = [
-			'You are a WooCommerce SEO and marketing expert.',
-			`Using the product's ${ productPropsInstructions.includedProps.join(
-				', '
-			) } suggest suitable product categories.`,
-			'Categories can have parents and multi-level children structures like Parent Category > Child Category.',
-			availableCategories
-				? `You will be given a list of available categories. Find the best matching categories from this list. Available categories are: ${ availableCategories.join(
-						', '
-				  ) }`
-				: '',
-			"If no match is found, use the Google standard taxonomy hierarchy to suggest better product categories to store's SEO performance and sales.",
-			"The product's properties are:",
-			...productPropsInstructions.instructions,
-			'Return only a comma-separated list of the product categories, children categories must be separated by >.',
-			'Here is an example of a valid response:',
-			'Parent Category 1 > Subcategory 1, Parent Category 2 > Subcategory 2 > Another Subcategory 2',
-			'Do not output the example response. Respond only with the suggested categories. Do not say anything else.',
-		];
-
-		return instructions.join( '\n' );
+		recordCategoryTracks( 'stop', {
+			reason: 'finished',
+			suggestions_type: 'new',
+			suggestions: newCategorySuggestions,
+			valid_suggestions: filtered,
+		} );
 	};
 
+	/**
+	 * Callback for when an error occurs while generating the existing category suggestions.
+	 *
+	 * @param {UseCompletionError} error
+	 */
+	const onExistingCatSuggestionError = ( error: UseCompletionError ) => {
+		// eslint-disable-next-line no-console
+		console.debug( 'Streaming error encountered', error );
+		recordCategoryTracks( 'stop', {
+			reason: 'error',
+			suggestions_type: 'existing',
+			error: error.code ?? error.message,
+		} );
+		setExistingSuggestionsState( SuggestionsState.Failed );
+	};
+
+	/**
+	 * Callback for when an error occurs while generating the new category suggestions.
+	 *
+	 * @param {UseCompletionError} error
+	 */
+	const onNewCatSuggestionError = ( error: UseCompletionError ) => {
+		// eslint-disable-next-line no-console
+		console.debug( 'Streaming error encountered', error );
+		recordCategoryTracks( 'stop', {
+			reason: 'error',
+			suggestions_type: 'new',
+			error: error.code ?? error.message,
+		} );
+		setNewSuggestionsState( SuggestionsState.Failed );
+	};
+
+	const { fetchSuggestions: fetchExistingCategorySuggestions } =
+		useExistingCategorySuggestions(
+			onExistingCategorySuggestionsGenerated,
+			onExistingCatSuggestionError
+		);
+
+	const { fetchSuggestions: fetchNewCategorySuggestions } =
+		useNewCategorySuggestions(
+			onNewCategorySuggestionsGenerated,
+			onNewCatSuggestionError
+		);
+
+	/**
+	 * Callback for when an existing category suggestion is clicked.
+	 *
+	 * @param {string} suggestion The suggestion that was clicked.
+	 */
+	const handleExistingSuggestionClick = useCallback(
+		( suggestion: string ) => {
+			// remove the selected item from the list of suggestions
+			setExistingSuggestions(
+				existingSuggestions.filter( ( s ) => s !== suggestion )
+			);
+			selectCategory( suggestion );
+
+			recordCategoryTracks( 'select', {
+				selected_category: suggestion,
+				suggestions_type: 'existing',
+			} );
+		},
+		[ existingSuggestions ]
+	);
+
+	/**
+	 * Callback for when a new category suggestion is clicked.
+	 *
+	 * @param {string} suggestion The suggestion that was clicked.
+	 */
+	const handleNewSuggestionClick = useCallback(
+		( suggestion: string ) => {
+			// remove the selected item from the list of suggestions
+			setNewSuggestions(
+				newSuggestions.filter( ( s ) => s !== suggestion )
+			);
+
+			recordCategoryTracks( 'select', {
+				selected_category: suggestion,
+				suggestions_type: 'new',
+			} );
+		},
+		[ newSuggestions ]
+	);
+
 	const fetchProductSuggestions = async () => {
-		setSuggestions( [] );
-		setNewCategorySuggestions( [] );
-		setSuggestionsState( SuggestionsState.Fetching );
+		setExistingSuggestions( [] );
+		setNewSuggestions( [] );
+		setExistingSuggestionsState( SuggestionsState.Fetching );
+		setNewSuggestionsState( SuggestionsState.Fetching );
 
 		recordCategoryTracks( 'start', {
 			current_categories: getCategories(),
 		} );
 
-		await requestCompletion( await buildPrompt() );
+		await Promise.all( [
+			fetchExistingCategorySuggestions(),
+			fetchNewCategorySuggestions(),
+		] );
 	};
 
 	return (
 		<div className="wc-product-category-suggestions">
-			{ suggestions.length > 0 &&
-				suggestionsState !== SuggestionsState.Fetching && (
+			{ existingSuggestions.length > 0 &&
+				existingSuggestionsState !== SuggestionsState.Fetching && (
 					<SuggestionPills
-						suggestions={ suggestions }
-						onSuggestionClick={ handleSuggestionClick }
+						suggestions={ existingSuggestions }
+						onSuggestionClick={ handleExistingSuggestionClick }
 					/>
 				) }
-			{ newCategorySuggestions.length > 0 &&
-				suggestionsState !== SuggestionsState.Fetching && (
-					<div className={ `wc-product-category-suggestions__new` }>
-						<p>
-							{ __(
-								'Consider adding these categories to your store:',
-								'woocommerce'
-							) }
-						</p>
-						<ul className="wc-product-category-suggestions__new-list">
-							{ newCategorySuggestions.map( ( suggestion ) => (
-								<li
-									className="woocommerce-pill"
-									key={ suggestion }
-								>
-									{ suggestion }
-								</li>
-							) ) }
-						</ul>
-					</div>
+			{ newSuggestions.length > 0 &&
+				newSuggestionsState !== SuggestionsState.Fetching && (
+					<SuggestionPills
+						suggestions={ newSuggestions }
+						onSuggestionClick={ handleNewSuggestionClick }
+					/>
 				) }
-			{ suggestionsState === SuggestionsState.Fetching && (
+			{ ( existingSuggestionsState === SuggestionsState.Fetching ||
+				newSuggestionsState === SuggestionsState.Fetching ) && (
 				<div className="wc-product-category-suggestions__loading notice notice-info">
 					<p className="wc-product-category-suggestions__loading-message">
 						<RandomLoadingMessage
 							isLoading={
-								suggestionsState === SuggestionsState.Fetching
+								existingSuggestionsState ===
+									SuggestionsState.Fetching ||
+								newSuggestionsState ===
+									SuggestionsState.Fetching
 							}
 						/>
 					</p>
 				</div>
 			) }
-			{ suggestionsState === SuggestionsState.None && (
-				<div className="wc-product-category-suggestions__no-match notice notice-warning">
-					<p>
-						{ __(
-							'Unable to generate a matching category for the product.',
+			{ existingSuggestionsState === SuggestionsState.None &&
+				newSuggestionsState === SuggestionsState.None && (
+					<div className="wc-product-category-suggestions__no-match notice notice-warning">
+						<p>
+							{ __(
+								'Unable to generate a matching category for the product. Please try including more information about the product in the title and description.',
+								'woocommerce'
+							) }
+						</p>
+					</div>
+				) }
+			{ existingSuggestionsState === SuggestionsState.Failed &&
+				newSuggestionsState === SuggestionsState.Failed && (
+					<div
+						className={ `wc-product-category-suggestions__error notice notice-error` }
+					>
+						<p className="wc-product-category-suggestions__error-message">
+							<img src={ AlertIcon } alt="" />
+							{ __(
+								`We're currently experiencing high demand for our experimental feature. Please check back in shortly!`,
+								'woocommerce'
+							) }
+						</p>
+					</div>
+				) }
+			{ existingSuggestionsState !== SuggestionsState.Fetching &&
+				newSuggestionsState !== SuggestionsState.Fetching && (
+					<MagicButton
+						onClick={ fetchProductSuggestions }
+						label={ __(
+							'Suggest categories using AI',
 							'woocommerce'
 						) }
-					</p>
-				</div>
-			) }
-			{ suggestionsState === SuggestionsState.Failed && (
-				<div
-					className={ `wc-product-category-suggestions__error notice notice-error` }
-				>
-					<p className="wc-product-category-suggestions__error-message">
-						<img src={ AlertIcon } alt="" />
-						{ __(
-							`We're currently experiencing high demand for our experimental feature. Please check back in shortly!`,
-							'woocommerce'
-						) }
-					</p>
-				</div>
-			) }
-			{ suggestionsState !== SuggestionsState.Fetching && (
-				<MagicButton
-					onClick={ fetchProductSuggestions }
-					label={ __( 'Suggest categories using AI', 'woocommerce' ) }
-				/>
-			) }
+					/>
+				) }
 		</div>
 	);
 };
