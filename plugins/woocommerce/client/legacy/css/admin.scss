@@ -4042,30 +4042,6 @@ table.wc-shipping-classes {
 		&:hover::before {
 			color: #333;
 		}
-
-		// &::before {
-		// 	content: "\f11c";
-		// 	font-family: "Dashicons";
-		// 	color: #999;
-		// 	width: 7px;
-		// 	float: left;
-		// 	height: 100%;
-		// 	transform: rotate(90deg);
-		// }
-		// &::after {
-		// 	content: "\f11c";
-		// 	font-family: "Dashicons";
-		// 	color: #999;
-		// 	display: block;
-		// 	width: 7px;
-		// 	float: left;
-		// 	height: 100%;
-		// 	transform: rotate(90deg);
-		// }
-
-		// &:hover::before, &:hover::after {
-		// 	color: #333;
-		// }
 	}
 
 	td.wc-shipping-zone-worldwide {
