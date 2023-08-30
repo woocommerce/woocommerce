@@ -14,6 +14,7 @@ import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 import { InventoryMenuItem } from '../inventory-menu-item';
+import { ShippingMenuItem } from '../shipping-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,
@@ -57,6 +58,11 @@ export function VariationsActionsMenu( {
 							onClose={ onClose }
 						/>
 						<InventoryMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+						<ShippingMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
