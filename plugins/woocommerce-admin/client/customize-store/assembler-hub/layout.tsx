@@ -51,8 +51,6 @@ export const Layout = () => {
 	const disableMotion = useReducedMotion();
 	const [ canvasResizer, canvasSize ] = useResizeObserver();
 	const isEditorLoading = useIsSiteEditorLoading();
-	const [ isResizableFrameOversized, setIsResizableFrameOversized ] =
-		useState( false );
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
@@ -67,7 +65,7 @@ export const Layout = () => {
 					variants={ {
 						view: { x: 0 },
 					} }
-					isTransparent={ isResizableFrameOversized }
+					isTransparent={ false }
 					className="edit-site-layout__hub"
 				/>
 			</motion.div>
@@ -113,11 +111,7 @@ export const Layout = () => {
 								initial={ false }
 								layout="position"
 								className={ classnames(
-									'edit-site-layout__canvas',
-									{
-										'is-right-aligned':
-											isResizableFrameOversized,
-									}
+									'edit-site-layout__canvas'
 								) }
 								transition={ {
 									type: 'tween',
@@ -137,12 +131,7 @@ export const Layout = () => {
 												24 /* $canvas-padding */,
 											height: canvasSize.height,
 										} }
-										isOversized={
-											isResizableFrameOversized
-										}
-										setIsOversized={
-											setIsResizableFrameOversized
-										}
+										isOversized={ false }
 										innerContentStyle={ {
 											background:
 												gradientValue ??

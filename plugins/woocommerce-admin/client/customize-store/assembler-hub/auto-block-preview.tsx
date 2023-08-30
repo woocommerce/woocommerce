@@ -12,13 +12,15 @@ import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
 	BlockList,
-	MemoizedBlockList,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
 
 const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
+
+// This is used to avoid rendering the block list if the sizes change.
+let MemoizedBlockList: typeof BlockList | undefined;
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -59,7 +61,7 @@ function ScaledBlockPreview( {
 	}, [ settings.styles ] );
 
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
-	const RenderedBlockList = MemoizedBlockList || pure( BlockList );
+	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
 	const scale = containerWidth / viewportWidth;
 
 	return (
@@ -223,7 +225,7 @@ function ScaledBlockPreview( {
 					` }
 				</style>
 				{ contentResizeListener }
-				<RenderedBlockList renderAppender={ false } />
+				<MemoizedBlockList renderAppender={ false } />
 			</Iframe>
 		</DisabledProvider>
 	);
