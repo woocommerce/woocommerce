@@ -151,8 +151,8 @@ export type MapResolveSelectors<
 	) => Promise< ReturnType< A[ actionCreator ] > >;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MapActions<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	Type extends Record< string, ( ...args: any[] ) => any >,
 	ResourceName,
 	ReturnType
