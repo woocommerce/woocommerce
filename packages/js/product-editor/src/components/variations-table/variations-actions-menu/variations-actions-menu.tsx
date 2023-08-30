@@ -12,6 +12,7 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
 import { VariationsActionsMenuProps } from './types';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
+import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,
@@ -38,6 +39,11 @@ export function VariationsActionsMenu( {
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
 						<UpdateStockMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+						<SetListPriceMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }

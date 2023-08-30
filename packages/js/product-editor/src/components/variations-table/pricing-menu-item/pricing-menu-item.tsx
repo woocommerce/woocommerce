@@ -13,6 +13,7 @@ import { chevronRight } from '@wordpress/icons';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
+import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -84,45 +85,11 @@ export function PricingMenuItem( {
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup label={ __( 'List price', 'woocommerce' ) }>
-						<MenuItem
-							onClick={ () => {
-								recordEvent(
-									'product_variations_menu_pricing_select',
-									{
-										source: TRACKS_SOURCE,
-										action: 'list_price_set',
-										variation_id: ids,
-									}
-								);
-								handlePrompt( {
-									onOk( value ) {
-										recordEvent(
-											'product_variations_menu_pricing_update',
-											{
-												source: TRACKS_SOURCE,
-												action: 'list_price_set',
-												variation_id: ids,
-											}
-										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													regular_price: value,
-												} ) )
-											);
-										} else {
-											onChange( {
-												regular_price: value,
-											} );
-										}
-									},
-								} );
-								onClose();
-							} }
-						>
-							{ __( 'Set list price', 'woocommerce' ) }
-						</MenuItem>
+						<SetListPriceMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 						<MenuItem
 							onClick={ () => {
 								recordEvent(
