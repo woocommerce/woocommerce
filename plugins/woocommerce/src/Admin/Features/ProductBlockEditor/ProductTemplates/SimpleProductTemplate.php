@@ -280,6 +280,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_catalog_section->add_block(
 			[
+				'id'         => 'product-tags',
+				'blockName'  => 'woocommerce/product-tag-field',
+				'attributes' => [
+					'name' => 'tags',
+				],
+			]
+		);
+		$product_catalog_section->add_block(
+			[
 				'id'         => 'product-catalog-search-visibility',
 				'blockName'  => 'woocommerce/product-catalog-visibility-field',
 				'order'      => 20,

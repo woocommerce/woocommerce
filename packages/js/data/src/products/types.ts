@@ -7,6 +7,7 @@ import { Schema } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductCategory } from '../product-categories/types';
+import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
@@ -120,6 +121,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	status: Status;
 	stock_quantity: number;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	tags: Pick< ProductTag, 'id' | 'name' >[];
 	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
 	tax_status: 'taxable' | 'shipping' | 'none';
 	total_sales: number;
