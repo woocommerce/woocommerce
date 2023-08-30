@@ -86,21 +86,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
+							<th></th>
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<td colspan="4">
-								<button type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
-							</td>
-						</tr>
-					</tfoot>
 					<tbody class="wc-shipping-zone-method-rows"></tbody>
 				</table>
 			</td>
 		</tr>
 	</tbody>
 </table>
+<div class="wc-shipping-zone-add-method">
+	<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+</div>
+
 
 <?php do_action( 'woocommerce_shipping_zone_after_methods_table', $zone ); ?>
 
@@ -121,14 +119,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
 			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
-			<div class="row-actions">
-				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
-			</div>
 		</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">
 			<strong class="wc-shipping-zone-method-type">{{ data.method_title }}</strong>
 			{{{ data.method_description }}}
+		</td>
+		<td class="shipping-zone-actions">
+			<div>
+				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 	</tr>
 </script>

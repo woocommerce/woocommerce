@@ -3887,6 +3887,12 @@ table {
 	}
 }
 
+@media (min-width: 784px) {
+	.wc-shipping-zone-add-method {
+		margin-left: 235px;
+	}
+}
+
 .wc-shipping-zones-heading .page-title-action {
 	display: inline-block;
 }
@@ -4066,9 +4072,10 @@ table.wc-shipping-classes {
 	}
 
 	.shipping-zone-actions {
-		width: 10%;
+		width: 13%;
 
-		a.wc-shipping-zone-delete {
+		a.wc-shipping-zone-delete,
+		a.wc-shipping-zone-method-delete {
 			color: #a00;
 		}
 	}
@@ -4156,10 +4163,6 @@ table.wc-shipping-classes {
 
 	.wc-shipping-zone-method-title {
 		width: 25%;
-
-		.wc-shipping-zone-method-delete {
-			color: red;
-		}
 	}
 
 	.wc-shipping-zone-method-enabled {
