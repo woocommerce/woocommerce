@@ -41,7 +41,8 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 			$template
 		);
 
-		$block->add_custom_inner_block();
+		$block->add_custom_inner_block( 'a' );
+		$block->add_custom_inner_block( 'b' );
 
 		$this->assertSame(
 			[
@@ -50,12 +51,55 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 				[
 					[
 						'custom-inner-block',
-						[],
+						[
+							'title' => 'a',
+						],
+					],
+					[
+						'custom-inner-block',
+						[
+							'title' => 'b',
+						],
 					],
 				],
 			],
 			$block->get_formatted_template(),
 			'Failed asserting that the inner block was added'
+		);
+	}
+
+	/**
+	 * Test that a custom block is removed as expected.
+	 */
+	public function test_remove_custom_inner_block() {
+		$template = new BlockTemplate();
+		$block    = new CustomBlock(
+			[
+				'blockName' => 'test-block-name',
+			],
+			$template
+		);
+
+		$block->add_custom_inner_block( 'a' );
+		$block->add_custom_inner_block( 'b' );
+
+		$template->remove_block( 'custom-inner-block-1' );
+
+		$this->assertSame(
+			[
+				'test-block-name',
+				[],
+				[
+					[
+						'custom-inner-block',
+						[
+							'title' => 'b',
+						],
+					],
+				],
+			],
+			$block->get_formatted_template(),
+			'Failed asserting that the inner block was removed'
 		);
 	}
 }

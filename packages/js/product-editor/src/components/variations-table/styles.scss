@@ -3,10 +3,19 @@
 	flex-direction: column;
 	position: relative;
 
-	> div {
+	&__header {
+		padding-bottom: $grid-unit-30;
 		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
+		align-items: center;
+		border-bottom: 1px solid $gray-200;
+	}
+
+	&__selection {
+		.components-checkbox-control__input[type="checkbox"] {
+			&:not(:checked):not(:focus) {
+				border-color: $gray-600;
+			}
+		}
 	}
 
 	&__loading {
@@ -90,7 +99,7 @@
 
 	.woocommerce-list-item {
 		display: grid;
-		grid-template-columns: auto 25% 25% 88px;
+		grid-template-columns: 44px auto 25% 25% 88px;
 		padding: 0;
 		min-height: calc($grid-unit * 9);
 		border: none;

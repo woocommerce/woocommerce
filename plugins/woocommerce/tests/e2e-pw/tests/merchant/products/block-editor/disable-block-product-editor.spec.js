@@ -18,20 +18,14 @@ let isNewProductEditorEnabled = false;
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
-	// if ( ! isTrackingSupposedToBeEnabled ) {
-	// 	// no modal should be shown, so don't even look for button
-	// 	console.log('Feedback modal not shown');
-	// 	return;
-	// }
-
 	try {
-		await page
-			.getByText('Skip').nth(3)
-			.click( { timeout: 5000 } );
+		await page.getByText( 'Skip' ).nth( 3 ).click( { timeout: 5000 } );
 	} catch ( error ) {}
 }
 
-test.describe.serial( 'Disable block product editor', () => {
+test.describe.configure( { mode: 'serial' } );
+
+test.describe( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {

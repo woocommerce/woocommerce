@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Cleanup: remove the unused is_feature_visible and show_feature methods.
