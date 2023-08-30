@@ -18,6 +18,9 @@
 	@include loader();
 }
 
+$font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
+"Helvetica Neue", sans-serif;
+
 .wc-addons-wrap {
 	.marketplace-header {
 		background-image: url(../images/marketplace-header-bg@2x.png);
@@ -214,9 +217,6 @@
 	/**
 	 * Marketplace related variables
  	 */
-	$font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
-		"Helvetica Neue", sans-serif;
-
 	$font-sf-pro-display: sans-serif;
 
 	h1.search-form-title {
@@ -3895,6 +3895,28 @@ table {
 	display: inline-block;
 }
 
+.wc-shipping-zone-heading-help-text {
+	max-width: 800px;
+}
+
+.wc-shipping-zone-heading-help-text {
+	font-family: $font-sf-pro-text;
+	color: #3C434A;
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 19px;
+}
+
+.wc-shipping-zone-help-text {
+	font-family: $font-sf-pro-text;
+	color: #3C434A;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 17px;
+}
+
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
@@ -4030,20 +4052,17 @@ table.wc-shipping-classes {
 		text-align: center;
 
 		&::before {
-			content: "\f333";
-			font-family: "Dashicons";
-			text-align: center;
-			line-height: 1;
-			color: #999;
+			content: "";
+			mask: url(../images/icons/move-icon.svg);
+			background-color: #999;
 			display: block;
 			width: 17px;
 			float: left;
-			height: 100%;
-			line-height: 24px;
+			height: 24px;
 		}
 
 		&:hover::before {
-			color: #333;
+			background-color: #333;
 		}
 	}
 
@@ -4069,6 +4088,16 @@ table.wc-shipping-classes {
 		width: 25%;
 	}
 
+	.shipping-zone-actions {
+		width: 13%;
+
+		a.wc-shipping-zone-delete,
+		a.wc-shipping-zone-method-delete,
+		a.wc-shipping-class-delete {
+			color: #a00;
+		}
+	}
+
 	.wc-shipping-class-description,
 	.wc-shipping-class-name,
 	.wc-shipping-class-slug,
@@ -4078,11 +4107,6 @@ table.wc-shipping-classes {
 		select,
 		textarea {
 			width: 100%;
-		}
-
-		a.wc-shipping-zone-delete,
-		a.wc-shipping-class-delete {
-			color: #a00;
 		}
 
 		a.wc-shipping-zone-delete:hover,
@@ -4105,20 +4129,21 @@ table.wc-shipping-classes {
 		ul {
 			position: relative;
 			padding-right: 32px;
+			display: flex;
+			flex-wrap: wrap;
 
 			li {
 				color: #555;
 				display: inline;
 				margin: 0;
 			}
+		}
 
-			li::before {
-				content: ", ";
-			}
-
-			li:first-child::before {
-				content: "";
-			}
+		.wc-shipping-zone-method {
+			background-color: #dcdcdc;
+			margin: 0 3px 3px 0;
+			padding: 5px 9px;
+			border-radius: 5px;
 		}
 
 		.add_shipping_method {
@@ -4152,10 +4177,6 @@ table.wc-shipping-classes {
 
 	.wc-shipping-zone-method-title {
 		width: 25%;
-
-		.wc-shipping-zone-method-delete {
-			color: red;
-		}
 	}
 
 	.wc-shipping-zone-method-enabled {
@@ -4243,7 +4264,7 @@ table.wc-shipping-classes {
 
 		tr {
 			th {
-				width: 30%;
+				width: 40%;
 				position: relative;
 
 				.woocommerce-help-tip {
@@ -4268,6 +4289,7 @@ table.wc-shipping-classes {
 					width: auto;
 					min-width: 16px;
 				}
+				width: 40%;
 			}
 
 			td,
@@ -5547,7 +5569,7 @@ img.help_tip {
 	:not(#variable_product_options_inner),
 	&#product_attributes {
 		.toolbar:not(.expand-close-hidden) {
-		  border-bottom: 1px solid #eee;
+			border-bottom: 1px solid #eee;
 		}
 	}
 	.toolbar {
@@ -6985,6 +7007,7 @@ table.bar_chart {
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
+		width: 50%;
 		max-width: 100%;
 		min-width: 500px;
 
@@ -6994,8 +7017,11 @@ table.bar_chart {
 	}
 
 	&.wc-backbone-modal-shipping-method-settings .wc-backbone-modal-content {
-		width: 75%;
 		min-width: 500px;
+	}
+
+	&.wc-backbone-modal-add-shipping-method .wc-backbone-modal-content article {
+		min-height: 180px
 	}
 
 	.select2-container {
@@ -7417,8 +7443,8 @@ table.bar_chart {
 			color: var(--wp-admin-theme-color, #007cba);
 		}
 
-		.select2-container.select2-container--focus
-		.select2-selection--single,
+		.select2-container.select2-container--focus .select2-selection--single,
+		.select2-container.select2-container--open .select2-selection--single,
 		.select2-container.select2-container--open
 		.select2-selection--single,
 		.select2-container.select2-container--open
@@ -7428,7 +7454,7 @@ table.bar_chart {
 		}
 
 		.select2-container--default
-		.select2-results__option--highlighted[aria-selected],
+			.select2-results__option--highlighted[aria-selected],
 		.select2-container--default
 		.select2-results__option--highlighted[data-selected] {
 			background-color: var(--wp-admin-theme-color, #007cba);
