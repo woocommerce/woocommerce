@@ -116,7 +116,7 @@ class BlockTemplatesController {
 						$settings['original_render_callback'] = $settings['render_callback'];
 						$settings['render_callback']          = function( $attributes, $content ) use ( $settings ) {
 							// The shortcode has already been rendered, so look for the cart/checkout HTML.
-							if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
+							if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
 								// Return early before wpautop runs again.
 								return $content;
 							}
