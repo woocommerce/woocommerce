@@ -246,14 +246,21 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function is_incentive_dismissed(): bool {
+		$dismissed_incentives = get_option( 'wcpay_welcome_page_incentives_dismissed', [] );
+
+		// If there are no dismissed incentives, return early.
+		if ( empty( $dismissed_incentives ) ) {
+			return false;
+		}
+
 		// Return early if there is no eligible incentive.
-		if ( empty( $this->get_incentive() ) ) {
+		$incentive = $this->get_incentive();
+		if ( empty( $incentive ) ) {
 			return true;
 		}
 
-		$dismissed_incentives = get_option( 'wcpay_welcome_page_incentives_dismissed', [] );
-
-		if ( in_array( $this->get_incentive()['id'], $dismissed_incentives, true ) ) {
+		// Search the incentive ID in the dismissed incentives list.
+		if ( in_array( $incentive['id'], $dismissed_incentives, true ) ) {
 			return true;
 		}
 
