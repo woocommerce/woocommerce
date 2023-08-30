@@ -31,6 +31,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			businessInfoDescription: {
 				descriptionText: '',
 			},
+
 			lookAndFeel: {
 				choice: '',
 			},
@@ -83,6 +84,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
+								actions: [ 'assignLookAndFeel' ],
 								target: 'postLookAndFeel',
 							},
 						},
@@ -109,6 +111,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
+								actions: [ 'assignToneOfVoice' ],
 								target: 'postToneOfVoice',
 							},
 						},

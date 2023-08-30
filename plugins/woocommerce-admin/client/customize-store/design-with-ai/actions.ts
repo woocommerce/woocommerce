@@ -10,7 +10,11 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 } from './types';
-import { businessInfoDescriptionCompleteEvent } from './pages';
+import {
+	businessInfoDescriptionCompleteEvent,
+	lookAndFeelCompleteEvent,
+	toneOfVoiceCompleteEvent,
+} from './pages';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -23,6 +27,31 @@ const assignBusinessInfoDescription = assign<
 		};
 	},
 } );
+
+const assignLookAndFeel = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	lookAndFeel: ( context, event: unknown ) => {
+		return {
+			choice: ( event as lookAndFeelCompleteEvent ).payload,
+		};
+	},
+} );
+
+const assignToneOfVoice = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	lookAndFeel: ( context, event: unknown ) => {
+		return {
+			choice: ( event as toneOfVoiceCompleteEvent ).payload,
+		};
+	},
+} );
+
 export const actions = {
 	assignBusinessInfoDescription,
+	assignLookAndFeel,
+	assignToneOfVoice,
 };
