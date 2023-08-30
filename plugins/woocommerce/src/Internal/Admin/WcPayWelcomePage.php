@@ -289,6 +289,19 @@ class WcPayWelcomePage {
 
 			return $this->incentive;
 		}
+
+		// If we have a transient cache that is not expired, use it if it is not older than an hour
+		// without checking for the store context hash.
+		// This is a safeguard to avoid making, at every WP admin page load,
+		// the store context SQL queries that might be expensive/slow in some cases
+		// (mostly sites with a huge number of orders and no HPOS).
+		if ( false !== $cache && ! empty( $cache['timestamp'] ) && intval( $cache['timestamp'] ) > time() - HOUR_IN_SECONDS ) {
+			$this->incentive = $cache['incentive'] ?? [];
+
+			return $this->incentive;
+		}
+
+		// Gather the store context data.
 		$store_context = [
 			// Store ISO-2 country code, e.g. `US`.
 			'country'      => WC()->countries->get_base_country(),
@@ -317,25 +330,16 @@ class WcPayWelcomePage {
 
 		// Use the transient cached incentive if it exists, it is not expired,
 		// and the store context hasn't changed since we last requested from the WooPayments API (based on context hash).
-		$transient_cache = get_transient( self::TRANSIENT_NAME );
-		if ( false !== $transient_cache ) {
-			if ( is_null( $transient_cache ) ) {
-				// This means there was an error and we shouldn't retry just yet.
-				// Initialize the in-memory cache.
-				$this->incentive = [];
-			} elseif ( ! empty( $transient_cache['context_hash'] ) && is_string( $transient_cache['context_hash'] )
-				&& hash_equals( $store_context_hash, $transient_cache['context_hash'] ) ) {
+		if ( false !== $cache
+			&& ! empty( $cache['context_hash'] ) && is_string( $cache['context_hash'] )
+			&& hash_equals( $store_context_hash, $cache['context_hash'] ) ) {
 
-				// We have a store context hash and it matches with the current context one.
-				// We can use the cached incentive data.
-				// Store the incentive in the in-memory cache.
-				$this->incentive = $transient_cache['incentive'] ?? [];
-			}
+			// We have a store context hash and it matches with the current context one.
+			// We can use the cached incentive data.
+			// Store the incentive in the in-memory cache and return it.
+			$this->incentive = $cache['incentive'] ?? [];
 
-			// If the in-memory cache has been set, return it.
-			if ( isset( $this->incentive ) ) {
-				return $this->incentive;
-			}
+			return $this->incentive;
 		}
 
 		// By this point, we have an expired transient or the store context has changed.
@@ -347,9 +351,9 @@ class WcPayWelcomePage {
 
 		$response = wp_remote_get(
 			$url,
-			array(
+			[
 				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-			)
+			]
 		);
 
 		// Return early if there is an error, waiting 6 hours before the next attempt.
@@ -392,19 +396,21 @@ class WcPayWelcomePage {
 		// Skip transient cache if `cache-for` header equals zero.
 		if ( '0' === $cache_for ) {
 			// If we have a transient cache that is not expired, delete it so there are no leftovers.
-			if ( false !== $transient_cache ) {
+			if ( false !== $cache ) {
 				delete_transient( self::TRANSIENT_NAME );
 			}
 
 			return $this->incentive;
 		}
 
-		// Store incentive in transient cache (together with the context hash) for the given number of seconds or 24h.
+		// Store incentive in transient cache (together with the context hash) for the given number of seconds
+		// or 1 day in seconds. Also attach a timestamp to the transient data so we know when we last fetched.
 		set_transient(
 			self::TRANSIENT_NAME,
 			[
 				'incentive'    => $this->incentive,
 				'context_hash' => $store_context_hash,
+				'timestamp'    => time(),
 			],
 			! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS
 		);
