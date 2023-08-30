@@ -22,31 +22,9 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import {
-	EnhancedProductAttribute,
-	useProductAttributes,
-} from '../../hooks/use-product-attributes';
+import { useProductAttributes } from '../../hooks/use-product-attributes';
 import { AttributeControl } from '../../components/attribute-control';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
-
-function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
-	return values.reduce< Product[ 'default_attributes' ] >(
-		( prevDefaultAttributes, currentAttribute ) => {
-			if ( currentAttribute.isDefault ) {
-				return [
-					...prevDefaultAttributes,
-					{
-						id: currentAttribute.id,
-						name: currentAttribute.name,
-						option: currentAttribute.options[ 0 ],
-					},
-				];
-			}
-			return prevDefaultAttributes;
-		},
-		[]
-	);
-}
 
 export function Edit() {
 	const blockProps = useBlockProps();
@@ -72,9 +50,10 @@ export function Edit() {
 		allAttributes: entityAttributes,
 		isVariationAttributes: true,
 		productId: useEntityId( 'postType', 'product' ),
-		onChange( values ) {
+		onChange( values, defaultAttributes ) {
 			setEntityAttributes( values );
-			generateProductVariations( values );
+			setEntityDefaultAttributes( defaultAttributes );
+			generateProductVariations( values, defaultAttributes );
 		},
 	} );
 
@@ -130,12 +109,7 @@ export function Edit() {
 					attributes,
 					entityDefaultAttributes,
 				] ) }
-				onChange={ ( values ) => {
-					handleChange( values );
-					setEntityDefaultAttributes(
-						manageDefaultAttributes( values )
-					);
-				} }
+				onChange={ handleChange }
 				createNewAttributesAsGlobal={ true }
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
