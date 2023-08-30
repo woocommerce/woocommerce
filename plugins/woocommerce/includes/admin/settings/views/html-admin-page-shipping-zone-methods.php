@@ -24,8 +24,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<th scope="row" class="titledesc">
 					<label for="zone_name">
 						<?php esc_html_e( 'Zone name', 'woocommerce' ); ?>
-						<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 					</label>
+					<p class="wc-shipping-zone-help-text">
+						<?php esc_html_e( 'This is the name of the zone for your reference.', 'woocommerce' ); ?>
+					</p>
 				</th>
 				<td class="forminp">
 					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name( 'edit' ) ); ?>" placeholder="<?php esc_attr_e( 'Zone name', 'woocommerce' ); ?>">
@@ -35,8 +37,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<th scope="row" class="titledesc">
 					<label for="zone_locations">
 						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
-						<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 					</label>
+					<p class="wc-shipping-zone-help-text">
+						<?php esc_html_e( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
+					</p>
 				</th>
 				<td class="forminp">
 					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_attr_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
@@ -75,8 +79,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th scope="row" class="titledesc">
 				<label>
 					<?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?>
-					<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 				</label>
+				<p class="wc-shipping-zone-help-text">
+					<?php esc_html_e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?>
+				</p>
 			</th>
 			<td class="">
 				<table class="wc-shipping-zone-methods widefat">
@@ -86,12 +92,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tfoot>
 						<tr>
-							<td colspan="4">
-								<button type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+							<td colspan="5">
+								<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 							</td>
 						</tr>
 					</tfoot>
@@ -121,14 +128,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
 			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
-			<div class="row-actions">
-				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
-			</div>
 		</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">
 			<strong class="wc-shipping-zone-method-type">{{ data.method_title }}</strong>
 			{{{ data.method_description }}}
+		</td>
+		<td class="shipping-zone-actions">
+			<div>
+				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 	</tr>
 </script>
@@ -159,7 +168,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
@@ -169,7 +178,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </script>
 
 <script type="text/template" id="tmpl-wc-modal-add-shipping-method">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-add-shipping-method">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
@@ -198,7 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+						<button id="btn-next" class="button button-primary button-large"><?php esc_html_e( 'Configure shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
