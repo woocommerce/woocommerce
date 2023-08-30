@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use ActionScheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -354,17 +355,47 @@ class CustomOrdersTableController {
 		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
-			if ( ! as_has_scheduled_action( self::SYNC_CHECK_EVENT_HOOK ) ) {
-				as_schedule_recurring_action(
-					time() + HOUR_IN_SECONDS,
-					6 * HOUR_IN_SECONDS,
-					self::SYNC_CHECK_EVENT_HOOK
-				);
-			}
+			$this->maybe_schedule_pending_sync_check();
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
-			as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
+			$this->maybe_unschedule_pending_sync_check();
 		}
+	}
+
+	/**
+	 * Schedule a recurring event to check for pending order syncs.
+	 *
+	 * Wrapper to avoid throwing an error if Action Scheduler isn't initialized yet.
+	 *
+	 * @return void
+	 */
+	private function maybe_schedule_pending_sync_check() {
+		if ( ! ActionScheduler::is_initialized() ) {
+			return;
+		}
+
+		if ( ! as_has_scheduled_action( self::SYNC_CHECK_EVENT_HOOK ) ) {
+			as_schedule_recurring_action(
+				time() + HOUR_IN_SECONDS,
+				6 * HOUR_IN_SECONDS,
+				self::SYNC_CHECK_EVENT_HOOK
+			);
+		}
+	}
+
+	/**
+	 * Remove any previously scheduled events to check for pending order syncs.
+	 *
+	 * Wrapper to avoid throwing an error if Action Scheduler isn't initialized yet.
+	 *
+	 * @return void
+	 */
+	private function maybe_unschedule_pending_sync_check() {
+		if ( ! ActionScheduler::is_initialized() ) {
+			return;
+		}
+
+		as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
 	}
 
 	/**
@@ -376,7 +407,7 @@ class CustomOrdersTableController {
 	 */
 	private function check_for_pending_syncs() {
 		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
-			as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
+			$this->maybe_unschedule_pending_sync_check();
 			return;
 		}
 
