@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-const inquirer = require( 'inquirer' );
 const program = require( 'commander' );
 
 /**
@@ -42,6 +41,7 @@ program
 			}
 		) => {
 			await checkSystemRequirements( engines );
+
 			try {
 				const optionsValues = Object.fromEntries(
 					Object.entries( {

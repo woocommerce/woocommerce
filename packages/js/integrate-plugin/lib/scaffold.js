@@ -22,6 +22,8 @@ module.exports = async (
 		customScripts,
 		customPackageJSON,
 		customBlockJSON,
+		version,
+		description,
 	}
 ) => {
 	info( '' );
@@ -38,6 +40,8 @@ module.exports = async (
 		customScripts,
 		customPackageJSON,
 		customBlockJSON,
+		version,
+		description,
 	};
 	if ( ! existsSync( path.join( process.cwd(), 'package.json' ) ) ) {
 		await initPackageJSON( view );
