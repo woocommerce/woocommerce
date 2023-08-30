@@ -56,7 +56,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 		// Verify that the specified shipping classes were saved
 		for ( const { name, slug, description } of shippingClasses ) {
 			await expect(
-				page.locator( `text=${ name } Edit | Remove` )
+				page.getByText(`${ name }`, { exact: true })
 			).toBeVisible();
 			await expect( page.locator( `text=${ slug }` ) ).toBeVisible();
 			// account for blank description

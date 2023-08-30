@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2 class="wc-shipping-zones-heading">
 	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
-	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action button-primary"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
 </h2>
-<p><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text"><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>
@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping method(s)', 'woocommerce' ); ?></th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody class="wc-shipping-zone-rows"></tbody>
@@ -24,9 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td width="1%" class="wc-shipping-zone-worldwide"></td>
 			<td class="wc-shipping-zone-name">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
-				<div class="row-actions">
-					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Manage shipping methods', 'woocommerce' ); ?></a>
-				</div>
 			</td>
 			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
 			<td class="wc-shipping-zone-methods">
@@ -42,10 +40,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 						}
 					} else {
-						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+						echo '<li>' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 					}
 					?>
 				</ul>
+			</td>
+			<td class="shipping-zone-actions">
+				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
 	</tbody>
@@ -74,15 +75,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td width="1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
 			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
-			<div class="row-actions">
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
-			</div>
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
 		</td>
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
+		</td>
+		<td class="shipping-zone-actions">
+			<div>
+				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 	</tr>
 </script>
