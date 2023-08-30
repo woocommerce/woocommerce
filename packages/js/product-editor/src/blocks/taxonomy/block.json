@@ -23,11 +23,6 @@
 		"createTitle": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"hierarchical": {
-			"type": "boolean",
-			"default": false,
-			"__experimentalRole": "content"
 		}
 	},
 	"supports": {
