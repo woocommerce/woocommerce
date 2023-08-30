@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { useState } from '@wordpress/element';
 
 export type usePaginationProps = {
