@@ -61,12 +61,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	value = [],
 	onChange,
 } ) => {
-	const {
-		isSearching,
-		tagsSelectList,
-		searchTags,
-		getFilteredItemsForSelectTree,
-	} = useTagSearch();
+	const { isSearching, tagsSelectList, searchTags } = useTagSearch();
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
@@ -128,11 +123,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 						( item ) => item.name === typedValue
 					) === -1
 				}
-				items={ getFilteredItemsForSelectTree(
-					mapFromTagsToTreeItems( tagsSelectList ),
-					searchValue,
-					mapFromTagsToTreeItems( value )
-				) }
+				items={ mapFromTagsToTreeItems( tagsSelectList ) }
 				selected={ mapFromTagsToTreeItems( value ) }
 				onSelect={ ( selectedItems ) => {
 					if ( Array.isArray( selectedItems ) ) {
