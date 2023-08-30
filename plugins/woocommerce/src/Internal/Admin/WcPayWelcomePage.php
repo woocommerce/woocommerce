@@ -12,7 +12,8 @@ use Automattic\WooCommerce\Admin\PageController;
  * @package Automattic\WooCommerce\Admin\Features
  */
 class WcPayWelcomePage {
-	const TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
+	const CACHE_TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
+	const HAD_WCPAY_OPTION_NAME = 'wcpay_was_in_use';
 
 	/**
 	 * Plugin instance.
@@ -195,14 +196,27 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
+		// First, get the store value, if it exists.
+		// This way we avoid costly DB queries and API calls.
+		// Basically, we only want to know if WooPayments was in use in the past.
+		// Since the past can't be changed, neither can this value.
+		$had_wcpay = get_option( self::HAD_WCPAY_OPTION_NAME );
+		if ( false !== $had_wcpay ) {
+			return $had_wcpay === 'yes';
+		}
+
+		// We need to determine the value.
+		// Start with the assumption that the store didn't have WooPayments in use.
+		$had_wcpay = false;
+
 		// We consider the store to have WooPayments if there is meaningful account data in the WooPayments account cache.
 		// This implies that WooPayments is or was active at some point and that it was connected.
 		if ( $this->has_wcpay_account_data() ) {
-			return true;
+			$had_wcpay = true;
 		}
 
 		// If there is at least one order processed with WooPayments, we consider the store to have WooPayments.
-		if ( ! empty(
+		if ( false === $had_wcpay && ! empty(
 			wc_get_orders(
 				[
 					'payment_method' => 'woocommerce_payments',
@@ -211,10 +225,13 @@ class WcPayWelcomePage {
 				]
 			)
 		) ) {
-			return true;
+			$had_wcpay = true;
 		}
 
-		return false;
+		// Store the value for future use.
+		update_option( self::HAD_WCPAY_OPTION_NAME, $had_wcpay ? 'yes' : 'no' );
+
+		return $had_wcpay;
 	}
 
 	/**
@@ -279,7 +296,7 @@ class WcPayWelcomePage {
 		}
 
 		// Get the cached data.
-		$cache = get_transient( self::TRANSIENT_NAME );
+		$cache = get_transient( self::CACHE_TRANSIENT_NAME );
 
 		// If the cached data is not expired and it's a WP_Error,
 		// it means there was an API error previously and we should not retry just yet.
@@ -354,7 +371,7 @@ class WcPayWelcomePage {
 				wp_remote_retrieve_response_code( $response )
 			);
 			// Store the error in the transient so we know this is due to an API error.
-			set_transient( self::TRANSIENT_NAME, $error, HOUR_IN_SECONDS * 6 );
+			set_transient( self::CACHE_TRANSIENT_NAME, $error, HOUR_IN_SECONDS * 6 );
 			// Initialize the in-memory cache and return it.
 			$this->incentive = [];
 
@@ -386,7 +403,7 @@ class WcPayWelcomePage {
 		if ( '0' === $cache_for ) {
 			// If we have a transient cache that is not expired, delete it so there are no leftovers.
 			if ( false !== $cache ) {
-				delete_transient( self::TRANSIENT_NAME );
+				delete_transient( self::CACHE_TRANSIENT_NAME );
 			}
 
 			return $this->incentive;
@@ -395,7 +412,7 @@ class WcPayWelcomePage {
 		// Store incentive in transient cache (together with the context hash) for the given number of seconds
 		// or 1 day in seconds. Also attach a timestamp to the transient data so we know when we last fetched.
 		set_transient(
-			self::TRANSIENT_NAME,
+			self::CACHE_TRANSIENT_NAME,
 			[
 				'incentive'    => $this->incentive,
 				'context_hash' => $store_context_hash,
