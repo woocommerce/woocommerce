@@ -56,7 +56,7 @@ export const ToneOfVoice = ( {
 				bgcolor={ 'transparent' }
 			/>
 
-			<div className="woocommerce-cys-design-with-ai-look-and-feel woocommerce-cys-layout">
+			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
 						{ __( 'How would you like to sound?', 'woocommerce' ) }
