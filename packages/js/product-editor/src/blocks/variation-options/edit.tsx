@@ -22,10 +22,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import {
-	EnhancedProductAttribute,
-	useProductAttributes,
-} from '../../hooks/use-product-attributes';
+import { useProductAttributes } from '../../hooks/use-product-attributes';
 import { AttributeControl } from '../../components/attribute-control';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
