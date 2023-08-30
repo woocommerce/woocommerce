@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2 class="wc-shipping-zones-heading">
 	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
-	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action button-primary"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
 </h2>
 <p><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
 <table class="wc-shipping-zones widefat">
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 						}
 					} else {
-						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+						echo '<li>' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 					}
 					?>
 				</ul>
