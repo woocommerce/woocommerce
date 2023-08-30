@@ -9,6 +9,7 @@ module.exports = async ( view ) => {
     const {
         includesOutputTemplates,
         includesDir,
+        pluginOutputTemplates,
         srcOutputTemplates,
         srcDir,
     } = view;
@@ -33,7 +34,18 @@ module.exports = async ( view ) => {
             async ( outputFile ) => 
                 await writeOutputTemplate(
                     srcOutputTemplates[ outputFile ],
-                    path.join( srcDir, outputFile ),
+                    join( srcDir, outputFile ),
+                    view
+                )
+        )
+    );
+
+    await Promise.all(
+        Object.keys( pluginOutputTemplates ).map(
+            async ( outputFile ) => 
+                await writeOutputTemplate(
+                    pluginOutputTemplates[ outputFile ],
+                    outputFile,
                     view
                 )
         )
