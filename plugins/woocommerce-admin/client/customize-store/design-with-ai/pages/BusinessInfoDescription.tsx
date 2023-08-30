@@ -17,7 +17,6 @@ export type businessInfoDescriptionCompleteEvent = {
 };
 export const BusinessInfoDescription = ( {
 	sendEvent,
-	context,
 }: {
 	sendEvent: ( event: businessInfoDescriptionCompleteEvent ) => void;
 	context: designWithAiStateMachineContext;
