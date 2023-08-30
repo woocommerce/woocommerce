@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix edgecase performance issues around incentives caching. [#39958](https://github.com/woocommerce/woocommerce/pull/39958)
 * Fix - Add migration to move incorrectly stored payment token IDS to HPOS tables from postmeta. [[#39828]](https://github.com/woocommerce/woocommerce/pull/39828)
 * Fix - Address more PHP 8.1+ deprecation warnings in wc-admin code. [[#39828]](https://github.com/woocommerce/woocommerce/pull/39828)
 * Fix - Adds display of postcodes to Vietnam addresses. [[#39828]](https://github.com/woocommerce/woocommerce/pull/39828)
