@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
 import classNames from 'classnames';
@@ -24,6 +24,12 @@ export function PageArrowsWithPicker( {
 }: PageArrowsWithPickerProps ) {
 	const instanceId = uniqueId( 'woocommerce-pagination-page-picker-' );
 	const [ inputValue, setInputValue ] = useState( currentPage );
+
+	useEffect( () => {
+		if ( currentPage !== inputValue ) {
+			setInputValue( currentPage );
+		}
+	}, [ currentPage ] );
 
 	function onInputChange( event: React.FormEvent< HTMLInputElement > ) {
 		setInputValue( parseInt( event.currentTarget.value, 10 ) );
