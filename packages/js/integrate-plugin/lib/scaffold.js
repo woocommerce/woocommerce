@@ -2,14 +2,20 @@
  * External dependencies
  */
 const { existsSync } = require( 'fs' );
+const { code, info, success } = require( '../node_modules/@wordpress/create-block/lib/log' );
+const path = require( 'path' );
+
+/**
+ * Internal dependencies
+ */
 const initPackageJSON = require( './init-package-json' );
 const initWPScripts = require( './init-wp-scripts' );
 const initWebpackConfig = require( './init-webpack-config' );
 const initWPEnv = require( './init-wp-env' );
-const { code, info, success } = require( '../node_modules/@wordpress/create-block/lib/log' );
-const path = require( 'path' );
+const initTemplate = require( './init-template' );
 
 module.exports = async (
+	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates },
 	{
 		$schema,
 		apiVersion,
@@ -24,6 +30,9 @@ module.exports = async (
 		customBlockJSON,
 		version,
 		description,
+		template,
+		includesDir,
+		srcDir,
 	}
 ) => {
 	info( '' );
@@ -42,7 +51,16 @@ module.exports = async (
 		customBlockJSON,
 		version,
 		description,
+		includesDir,
+		srcDir,
+		includesOutputTemplates,
+		srcOutputTemplates,
+		pluginOutputTemplates,
 	};
+	if ( template ) {
+		initTemplate( view );
+	}
+
 	if ( ! existsSync( path.join( process.cwd(), 'package.json' ) ) ) {
 		await initPackageJSON( view );
 	}
@@ -59,6 +77,7 @@ module.exports = async (
 	info( '' );
 	success( `Done: WordPress plugin ${ name } integrated with WooCommerce build scripts.` );
 
+	// @todo We should check that these were successfully added before showing each of these commands.
 	if ( wpScripts ) {
 		info( '' );
 		info( 'You can run several commands inside:' );

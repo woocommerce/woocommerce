@@ -12,8 +12,7 @@ const log = require( '../node_modules/@wordpress/create-block/lib/log' );
 const { engines, version } = require( '../package.json' );
 const scaffold = require( './scaffold' );
 const getPluginData = require( './get-plugin-data' );
-
-const DEFAULT_VALUES = {};
+const { getDefaultValues, getPluginTemplate } = require( './templates' );
 
 const commandName = `woo-integrate-plugin`;
 program
@@ -32,34 +31,69 @@ program
 		'--no-wp-scripts',
 		'disable integration with `@wordpress/scripts` package'
 	)
+	.option(
+		'-t, --template <name>',
+		'project template type name; allowed values: "standard", "es5", the name of an external npm package, or the path to a local directory',
+		'standard'
+	)
+	.option( '--variant <variant>', 'the variant of the template to use' )
 	.option( '--wp-env', 'enable integration with `@wordpress/env` package' )
+	.option( '--includes-dir <dir>', 'the path to the includes directory with backend logic' )
+	.option( '--src-dir <dir>', 'the path to the src directory with client-side logic' )
 	.action(
 		async (
 			{
 				wpScripts,
 				wpEnv,
+				template,
+				variant,
+				includesDir,
+				srcDir,
 			}
 		) => {
 			await checkSystemRequirements( engines );
 
 			try {
+				const pluginTemplate = await getPluginTemplate( template );
+				const availableVariants = Object.keys(
+					pluginTemplate.variants
+				);
+				if ( variant && ! availableVariants.includes( variant ) ) {
+					if ( ! availableVariants.length ) {
+						throw new CLIError(
+							`"${ variant }" variant was selected. This template does not have any variants!`
+						);
+					}
+					throw new CLIError(
+						`"${ variant }" is not a valid variant for this template. Available variants are: ${ availableVariants.join(
+							', '
+						) }.`
+					);
+				}
+
 				const optionsValues = Object.fromEntries(
 					Object.entries( {
-						wpScripts,
+						includesDir,
+						srcDir,
+						template,
 						wpEnv,
+						wpScripts,
 					} ).filter( ( [ , value ] ) => value !== undefined )
 				);
 
 				const pluginData = getPluginData();
 
-				// @todo Get defaults from create-block.
+				const defaultValues = getDefaultValues(
+					pluginTemplate,
+					variant
+				);
                 const answers = {
-                    ...DEFAULT_VALUES,
+                    ...defaultValues,
 					...pluginData,
                     ...optionsValues,
                 };
 
-                await scaffold( answers );
+                await scaffold( pluginTemplate, answers );
 
 			} catch ( error ) {
 				if ( error instanceof CLIError ) {
