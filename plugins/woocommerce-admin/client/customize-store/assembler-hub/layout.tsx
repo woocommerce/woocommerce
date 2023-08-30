@@ -20,8 +20,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
-import ResizableFrame from '@wordpress/edit-site/build-module/components/resizable-frame';
-// @ts-ignore No types for this exist yet.
 import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
 // @ts-ignore No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
@@ -39,6 +37,7 @@ import { Editor } from './editor';
 import Sidebar from './sidebar';
 import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
+import ResizableFrame from './resizable-frame';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -59,6 +58,8 @@ export const Layout = () => {
 	const disableMotion = useReducedMotion();
 	const [ canvasResizer, canvasSize ] = useResizeObserver();
 	const isEditorLoading = useIsSiteEditorLoading();
+	const [ isResizableFrameOversized, setIsResizableFrameOversized ] =
+		useState( false );
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
@@ -145,7 +146,12 @@ export const Layout = () => {
 													24 /* $canvas-padding */,
 												height: canvasSize.height,
 											} }
-											isOversized={ false }
+											isOversized={
+												isResizableFrameOversized
+											}
+											setIsOversized={
+												setIsResizableFrameOversized
+											}
 											innerContentStyle={ {
 												background:
 													gradientValue ??
