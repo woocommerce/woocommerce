@@ -26,7 +26,7 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 type CreateTaxonomyModalProps = {
 	initialName?: string;
-	hierarchical?: boolean;
+	hierarchical: boolean;
 	slug: string;
 	title: string;
 	onCancel: () => void;
@@ -38,7 +38,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	onCreate,
 	initialName,
 	slug,
-	hierarchical = true,
+	hierarchical,
 	title,
 } ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
@@ -75,7 +75,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 				slug,
 				{
 					name,
-					parent: parent ? parent.id : 0,
+					parent: parent ? parent.id : null,
 				},
 				{
 					throwOnError: true,

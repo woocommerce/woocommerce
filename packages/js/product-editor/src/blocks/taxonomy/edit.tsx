@@ -14,6 +14,8 @@ import '@woocommerce/settings';
 import { __experimentalSelectTreeControl as SelectTreeControl } from '@woocommerce/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
+import { useSelect } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
@@ -26,7 +28,6 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 	slug: string;
 	property: string;
 	createTitle: string;
-	hierarchical: boolean;
 }
 
 export function Edit( {
@@ -35,6 +36,13 @@ export function Edit( {
 	attributes: TaxonomyBlockAttributes;
 } ) {
 	const blockProps = useBlockProps();
+	const hierarchical = useSelect( ( select ) => {
+		const taxonomyDetails = select( 'core' ).getTaxonomy(
+			attributes.slug
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		) as any;
+		return ( taxonomyDetails && taxonomyDetails.hierarchical ) || false;
+	} );
 	const { label, slug, property, createTitle } = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -43,10 +51,13 @@ export function Edit( {
 		fetchParents: hierarchical,
 	} );
 	const searchDelayed = useDebounce(
-		useCallback( ( val ) => {
-			setSearchValue( val );
-			searchEntity( val || '' ).then( setAllEntries );
-		}, [] ),
+		useCallback(
+			( val ) => {
+				setSearchValue( val );
+				searchEntity( val || '' ).then( setAllEntries );
+			},
+			[ hierarchical ]
+		),
 		150
 	);
 
