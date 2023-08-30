@@ -133,11 +133,17 @@ class WcPayWelcomePage {
 		}
 
 		// Add badge.
+		$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 		foreach ( $menu as $index => $menu_item ) {
-			if ( 'wc-admin&path=/wc-pay-welcome-page' === $menu_item[2]
-					|| 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' === $menu_item[2] ) {
-				//phpcs:ignore
-				$menu[ $index ][0] .= ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
+			// Only add the badge markup if not already present and the menu item is the WooPayments menu item.
+			if ( false === strpos( $menu_item[0], $badge )
+				&& ( 'wc-admin&path=/wc-pay-welcome-page' === $menu_item[2]
+					|| 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' === $menu_item[2] )
+			) {
+				$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+				// One menu item with a badge is more than enough.
+				break;
 			}
 		}
 	}
