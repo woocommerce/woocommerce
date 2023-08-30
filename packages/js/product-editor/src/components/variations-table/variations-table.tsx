@@ -13,11 +13,18 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
+import {
+	ListItem,
+	Sortable,
+	Tag,
+	PaginationPageSizePicker,
+	PaginationPageArrowsWithPicker,
+} from '@woocommerce/components';
 import {
 	useContext,
 	useState,
 	createElement,
+	useRef,
 	useMemo,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -50,6 +57,7 @@ const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
 export function VariationsTable() {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
+	const lastVariations = useRef< ProductVariation[] | null >( null );
 	const [ perPage, setPerPage ] = useState(
 		DEFAULT_VARIATION_PER_PAGE_OPTION
 	);
@@ -78,7 +86,7 @@ export function VariationsTable() {
 	);
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { isLoading, variations, totalCount, isGeneratingVariations } =
+	const { isLoading, latestVariations, totalCount, isGeneratingVariations } =
 		useSelect(
 			( select ) => {
 				const {
@@ -95,7 +103,7 @@ export function VariationsTable() {
 					isGeneratingVariations: getIsGeneratingVariations( {
 						product_id: requestParams.product_id,
 					} ),
-					variations:
+					latestVariations:
 						getProductVariations< ProductVariation[] >(
 							requestParams
 						),
@@ -108,17 +116,18 @@ export function VariationsTable() {
 			[ requestParams ]
 		);
 
-	const {
-		updateProductVariation,
-		deleteProductVariation,
-		batchUpdateProductVariations,
-		invalidateResolution,
-	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	const { updateProductVariation, deleteProductVariation } = useDispatch(
+		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	);
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
-	if ( ! variations && isLoading ) {
+	if ( latestVariations && latestVariations !== lastVariations.current ) {
+		lastVariations.current = latestVariations;
+	}
+
+	if ( isLoading && lastVariations.current === null ) {
 		return (
 			<div className="woocommerce-product-variations__loading">
 				<Spinner />
@@ -130,6 +139,8 @@ export function VariationsTable() {
 			</div>
 		);
 	}
+	// this prevents a weird jump from happening while changing pages.
+	const variations = latestVariations || lastVariations.current;
 
 	const variationIds = variations.map( ( { id } ) => id );
 
@@ -440,16 +451,23 @@ export function VariationsTable() {
 				) ) }
 			</Sortable>
 
-			<Pagination
-				className="woocommerce-product-variations__footer"
-				page={ currentPage }
-				perPage={ perPage }
-				total={ totalCount }
-				showPagePicker={ false }
-				onPageChange={ setCurrentPage }
-				onPerPageChange={ setPerPage }
-				perPageOptions={ [ 5, 10, 25 ] }
-			/>
+			<div className="woocommerce-product-variations__footer woocommerce-pagination">
+				<div>
+					{ sprintf(
+						__( 'Viewing %d-%d of %d items', 'woocommerce' ),
+						paginationProps.start,
+						paginationProps.end,
+						totalCount
+					) }
+				</div>
+				<PaginationPageArrowsWithPicker { ...paginationProps } />
+				<PaginationPageSizePicker
+					{ ...paginationProps }
+					total={ totalCount }
+					perPageOptions={ [ 5, 10, 25 ] }
+					label=""
+				/>
+			</div>
 		</div>
 	);
 }

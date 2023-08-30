@@ -132,6 +132,7 @@ $table-row-height: calc($grid-unit * 9);
 	}
 
 	&__footer {
-		padding: $gap;
+		padding: $gap 0;
+		justify-content: space-between;
 	}
 }

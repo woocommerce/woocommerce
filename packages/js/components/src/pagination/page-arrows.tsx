@@ -8,10 +8,10 @@ import { sprintf, __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 
 type PageArrowsProps = {
-	page: number;
+	currentPage: number;
 	pageCount: number;
 	showPageArrowsLabel?: boolean;
-	onPageChange: (
+	setCurrentPage: (
 		page: number,
 		action?: 'previous' | 'next' | 'goto'
 	) => void;
@@ -19,24 +19,24 @@ type PageArrowsProps = {
 
 export function PageArrows( {
 	pageCount,
-	page,
+	currentPage,
 	showPageArrowsLabel = true,
-	onPageChange,
+	setCurrentPage,
 }: PageArrowsProps ) {
 	function previousPage( event: React.MouseEvent ) {
 		event.stopPropagation();
-		if ( page - 1 < 1 ) {
+		if ( currentPage - 1 < 1 ) {
 			return;
 		}
-		onPageChange( page - 1, 'previous' );
+		setCurrentPage( currentPage - 1, 'previous' );
 	}
 
 	function nextPage( event: React.MouseEvent ) {
 		event.stopPropagation();
-		if ( page + 1 > pageCount ) {
+		if ( currentPage + 1 > pageCount ) {
 			return;
 		}
-		onPageChange( page + 1, 'next' );
+		setCurrentPage( currentPage + 1, 'next' );
 	}
 
 	if ( pageCount <= 1 ) {
@@ -44,11 +44,11 @@ export function PageArrows( {
 	}
 
 	const previousLinkClass = classNames( 'woocommerce-pagination__link', {
-		'is-active': page > 1,
+		'is-active': currentPage > 1,
 	} );
 
 	const nextLinkClass = classNames( 'woocommerce-pagination__link', {
-		'is-active': page < pageCount,
+		'is-active': currentPage < pageCount,
 	} );
 
 	return (
@@ -61,7 +61,7 @@ export function PageArrows( {
 				>
 					{ sprintf(
 						__( 'Page %d of %d', 'woocommerce' ),
-						page,
+						currentPage,
 						pageCount
 					) }
 				</span>
@@ -69,7 +69,7 @@ export function PageArrows( {
 			<div className="woocommerce-pagination__page-arrows-buttons">
 				<Button
 					className={ previousLinkClass }
-					disabled={ ! ( page > 1 ) }
+					disabled={ ! ( currentPage > 1 ) }
 					onClick={ previousPage }
 					label={ __( 'Previous Page', 'woocommerce' ) }
 				>
@@ -77,7 +77,7 @@ export function PageArrows( {
 				</Button>
 				<Button
 					className={ nextLinkClass }
-					disabled={ ! ( page < pageCount ) }
+					disabled={ ! ( currentPage < pageCount ) }
 					onClick={ nextPage }
 					label={ __( 'Next Page', 'woocommerce' ) }
 				>

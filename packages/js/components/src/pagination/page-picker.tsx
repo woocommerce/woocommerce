@@ -7,9 +7,9 @@ import classNames from 'classnames';
 import { uniqueId } from 'lodash';
 
 type PagePickerProps = {
-	page: number;
+	currentPage: number;
 	pageCount: number;
-	onPageChange: (
+	setCurrentPage: (
 		page: number,
 		action?: 'previous' | 'next' | 'goto'
 	) => void;
@@ -17,10 +17,10 @@ type PagePickerProps = {
 
 export function PagePicker( {
 	pageCount,
-	page,
-	onPageChange,
+	currentPage,
+	setCurrentPage,
 }: PagePickerProps ) {
-	const [ inputValue, setInputValue ] = useState( page );
+	const [ inputValue, setInputValue ] = useState( currentPage );
 
 	function onInputChange( event: React.FormEvent< HTMLInputElement > ) {
 		setInputValue( parseInt( event.currentTarget.value, 10 ) );
@@ -30,13 +30,13 @@ export function PagePicker( {
 		const newPage = parseInt( event.target.value, 10 );
 
 		if (
-			newPage !== page &&
+			newPage !== currentPage &&
 			Number.isFinite( newPage ) &&
 			newPage > 0 &&
 			pageCount &&
 			pageCount >= newPage
 		) {
-			onPageChange( newPage, 'goto' );
+			setCurrentPage( newPage, 'goto' );
 		}
 	}
 
@@ -44,7 +44,7 @@ export function PagePicker( {
 		event.currentTarget.select();
 	}
 
-	const isError = page < 1 || page > pageCount;
+	const isError = currentPage < 1 || currentPage > pageCount;
 	const inputClass = classNames(
 		'woocommerce-pagination__page-picker-input',
 		{

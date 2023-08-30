@@ -8,30 +8,32 @@ import { __ } from '@wordpress/i18n';
 export const DEFAULT_PER_PAGE_OPTIONS = [ 25, 50, 75, 100 ];
 
 type PageSizePickerProps = {
-	page: number;
+	currentPage: number;
 	perPage: number;
 	total: number;
-	onPageChange: (
+	setCurrentPage: (
 		page: number,
 		action?: 'previous' | 'next' | 'goto'
 	) => void;
-	onPerPageChange?: ( perPage: number ) => void;
+	setPerPageChange?: ( perPage: number ) => void;
 	perPageOptions?: number[];
+	label?: string;
 };
 
 export function PageSizePicker( {
 	perPage,
-	page,
+	currentPage,
 	total,
-	onPageChange,
-	onPerPageChange = () => {},
+	setCurrentPage,
+	setPerPageChange = () => {},
 	perPageOptions = DEFAULT_PER_PAGE_OPTIONS,
+	label = __( 'Rows per page', 'woocommerce' ),
 }: PageSizePickerProps ) {
 	function perPageChange( newPerPage: string ) {
-		onPerPageChange( parseInt( newPerPage, 10 ) );
+		setPerPageChange( parseInt( newPerPage, 10 ) );
 		const newMaxPage = Math.ceil( total / parseInt( newPerPage, 10 ) );
-		if ( page > newMaxPage ) {
-			onPageChange( newMaxPage );
+		if ( currentPage > newMaxPage ) {
+			setCurrentPage( newMaxPage );
 		}
 	}
 
@@ -43,7 +45,7 @@ export function PageSizePicker( {
 	return (
 		<div className="woocommerce-pagination__per-page-picker">
 			<SelectControl
-				label={ __( 'Rows per page', 'woocommerce' ) }
+				label={ label }
 				// @ts-expect-error outdated types file.
 				labelPosition="side"
 				value={ perPage.toString() }

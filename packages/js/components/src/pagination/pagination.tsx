@@ -26,6 +26,7 @@ export type PaginationProps = {
 	showPerPagePicker?: boolean;
 	showPageArrowsLabel?: boolean;
 	perPageOptions?: number[];
+	children?: ( props: { pageCount: number } ) => JSX.Element;
 };
 
 export function Pagination( {
@@ -39,19 +40,26 @@ export function Pagination( {
 	showPageArrowsLabel = true,
 	className,
 	perPageOptions = DEFAULT_PER_PAGE_OPTIONS,
-}: React.PropsWithChildren< PaginationProps > ) {
+	children,
+}: PaginationProps ): JSX.Element | null {
 	const pageCount = Math.ceil( total / perPage );
 
 	const classes = classNames( 'woocommerce-pagination', className );
+
+	if ( children && typeof children === 'function' ) {
+		return children( {
+			pageCount,
+		} );
+	}
 
 	if ( pageCount <= 1 ) {
 		return (
 			( total > perPageOptions[ 0 ] && (
 				<div className={ classes }>
 					<PageSizePicker
-						page={ page }
+						currentPage={ page }
 						perPage={ perPage }
-						onPageChange={ onPageChange }
+						setCurrentPage={ onPageChange }
 						total={ total }
 						onPerPageChange={ onPerPageChange }
 						perPageOptions={ perPageOptions }
@@ -65,23 +73,23 @@ export function Pagination( {
 	return (
 		<div className={ classes }>
 			<PageArrows
-				page={ page }
+				currentPage={ page }
 				pageCount={ pageCount }
 				showPageArrowsLabel={ showPageArrowsLabel }
-				onPageChange={ onPageChange }
+				setCurrentPage={ onPageChange }
 			/>
 			{ showPagePicker && (
 				<PagePicker
-					page={ page }
+					currentPage={ page }
 					pageCount={ pageCount }
-					onPageChange={ onPageChange }
+					setCurrentPage={ onPageChange }
 				/>
 			) }
 			{ showPerPagePicker && (
 				<PageSizePicker
-					page={ page }
+					currentPage={ page }
 					perPage={ perPage }
-					onPageChange={ onPageChange }
+					setCurrentPage={ onPageChange }
 					total={ total }
 					onPerPageChange={ onPerPageChange }
 					perPageOptions={ perPageOptions }
