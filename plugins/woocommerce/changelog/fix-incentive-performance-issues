@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix edgecase performance issues around incentives caching.
