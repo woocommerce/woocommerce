@@ -61,7 +61,7 @@ export function Pagination( {
 						perPage={ perPage }
 						setCurrentPage={ onPageChange }
 						total={ total }
-						onPerPageChange={ onPerPageChange }
+						setPerPageChange={ onPerPageChange }
 						perPageOptions={ perPageOptions }
 					/>
 				</div>
@@ -91,7 +91,7 @@ export function Pagination( {
 					perPage={ perPage }
 					setCurrentPage={ onPageChange }
 					total={ total }
-					onPerPageChange={ onPerPageChange }
+					setPerPageChange={ onPerPageChange }
 					perPageOptions={ perPageOptions }
 				/>
 			) }
