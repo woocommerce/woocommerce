@@ -290,17 +290,6 @@ class WcPayWelcomePage {
 			return $this->incentive;
 		}
 
-		// If we have a transient cache that is not expired, use it if it is not older than an hour
-		// without checking for the store context hash.
-		// This is a safeguard to avoid making, at every WP admin page load,
-		// the store context SQL queries that might be expensive/slow in some cases
-		// (mostly sites with a huge number of orders and no HPOS).
-		if ( false !== $cache && ! empty( $cache['timestamp'] ) && intval( $cache['timestamp'] ) > time() - HOUR_IN_SECONDS ) {
-			$this->incentive = $cache['incentive'] ?? [];
-
-			return $this->incentive;
-		}
-
 		// Gather the store context data.
 		$store_context = [
 			// Store ISO-2 country code, e.g. `US`.
