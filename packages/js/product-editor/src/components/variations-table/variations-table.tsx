@@ -451,23 +451,25 @@ export function VariationsTable() {
 				) ) }
 			</Sortable>
 
-			<div className="woocommerce-product-variations__footer woocommerce-pagination">
-				<div>
-					{ sprintf(
-						__( 'Viewing %d-%d of %d items', 'woocommerce' ),
-						paginationProps.start,
-						paginationProps.end,
-						totalCount
-					) }
+			{ totalCount > 5 && (
+				<div className="woocommerce-product-variations__footer woocommerce-pagination">
+					<div>
+						{ sprintf(
+							__( 'Viewing %d-%d of %d items', 'woocommerce' ),
+							paginationProps.start,
+							paginationProps.end,
+							totalCount
+						) }
+					</div>
+					<PaginationPageArrowsWithPicker { ...paginationProps } />
+					<PaginationPageSizePicker
+						{ ...paginationProps }
+						total={ totalCount }
+						perPageOptions={ [ 5, 10, 25 ] }
+						label=""
+					/>
 				</div>
-				<PaginationPageArrowsWithPicker { ...paginationProps } />
-				<PaginationPageSizePicker
-					{ ...paginationProps }
-					total={ totalCount }
-					perPageOptions={ [ 5, 10, 25 ] }
-					label=""
-				/>
-			</div>
+			) }
 		</div>
 	);
 }
