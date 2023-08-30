@@ -34,6 +34,7 @@ As of writing, the following options are saved (and retrieved if the user has al
 This stores the name of the store, which is used in the store header and in the browser tab title, among other places.
 
 - `woocommerce_onboarding_profile`:
+    
     ```typescript
     {
         business_choice: "im_just_starting_my_business" | "im_already_selling" | "im_setting_up_a_store_for_a_client" | undefined

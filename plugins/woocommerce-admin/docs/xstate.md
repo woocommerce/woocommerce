@@ -5,7 +5,7 @@ XState is a state management framework for Javascript applications. It is based 
 In order to help you visualize and debug the state machines within WooCommerce Core, XState provides a [visualizer](https://stately.ai/viz) that you can use in your browser.
 
 
-### Enabling the visualizer
+## Enabling the visualizer
 
 To enable this, run this command in your browser's developer console:
 
@@ -15,15 +15,15 @@ localStorage.setItem('xstate_inspect', 'true');
 
 Then, a new tab with the XState visualizer should appear for pages that have state machines.
 
-### Using the visualizer
+## Using the visualizer
 
 
-###### Main View
+### Main View
 
 The main panel in the visualizer will show you the current state of the state machine. Current states are shown with a blue border, and available transitions are solid blue bubbles. If the events are simple without payload requirements, you can click on the transition bubbles to trigger the transition. Otherwise, you can use the 'Send event' button on the bottom right of the visualizer to send events to the state machine.
 
 
-###### State Tab
+### State Tab
 
 The context is the working memory that the state machine has access to. It is a plain Javascript object that can be modified by the state machine.
 
@@ -35,7 +35,7 @@ The 'Context' object is the current context of the state machine. It is a plain 
 
 The 'State' object is the current state of the state machine. It contains information about the current state, the events that led to the current state, as well as the history object which contains the previous states.
 
-###### Events Tab
+### Events Tab
 
 The 'Events' tab shows the events that have occurred since the state machine was initialized. You can click on the events to see the payload of the events.
 
@@ -43,7 +43,7 @@ Clicking on 'Show built-in events' will include built-in events in the list. The
 
 These events are useful for debugging, as they can help you understand what events have occurred and what the payload of the events are, and provides a similar functionality to Redux Dev Tools.
 
-###### Actors Tab
+### Actors Tab
 
 If there is more than one state machine active (e.g, there are multiple state machines or there are child state machines), you can select which one to inspect by clicking on the 'Actors' tab on the top right of the visualizer.
 
