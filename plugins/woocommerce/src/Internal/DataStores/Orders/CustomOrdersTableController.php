@@ -126,6 +126,7 @@ class CustomOrdersTableController {
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
 		self::add_action( self::SYNC_CHECK_EVENT_HOOK, array( $this, 'check_for_pending_syncs' ) );
+		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 	}
 
 	/**
@@ -353,11 +354,13 @@ class CustomOrdersTableController {
 		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
-			as_schedule_recurring_action(
-				time() + HOUR_IN_SECONDS,
-				6 * HOUR_IN_SECONDS,
-				self::SYNC_CHECK_EVENT_HOOK
-			);
+			if ( ! as_has_scheduled_action( self::SYNC_CHECK_EVENT_HOOK ) ) {
+				as_schedule_recurring_action(
+					time() + HOUR_IN_SECONDS,
+					6 * HOUR_IN_SECONDS,
+					self::SYNC_CHECK_EVENT_HOOK
+				);
+			}
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
 			as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
@@ -367,7 +370,7 @@ class CustomOrdersTableController {
 	/**
 	 * When sync is turned on, check to see if there are any pending syncs and if so, queue the processor.
 	 *
-	 * Runs as a callback for SYNC_CHECK_EVENT_HOOK.
+	 * Runs as a recurring callback for SYNC_CHECK_EVENT_HOOK.
 	 *
 	 * @return void
 	 */
@@ -383,6 +386,22 @@ class CustomOrdersTableController {
 		}
 
 		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+	}
+
+	/**
+	 * Callback to trigger a sync immediately by clicking a button on the Features screen.
+	 *
+	 * @return void
+	 */
+	private function sync_now() {
+		$section = filter_input( INPUT_GET, 'section' );
+		if ( 'features' !== $section ) {
+			return;
+		}
+
+		if ( filter_input( INPUT_GET, 'hpos_sync_now', FILTER_VALIDATE_BOOLEAN ) ) {
+			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		}
 	}
 
 	/**
@@ -509,6 +528,7 @@ class CustomOrdersTableController {
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		$sync_message     = '';
+
 		if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
 			$sync_message = sprintf(
 				// translators: %d: number of pending orders.
@@ -516,15 +536,31 @@ class CustomOrdersTableController {
 				$sync_status['current_pending_count']
 			);
 		} elseif ( $sync_status['current_pending_count'] > 0 ) {
-			$sync_message = sprintf(
-				// translators: %d: number of pending orders.
-				_n(
-					'%d order pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-					'%d orders pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-					$sync_status['current_pending_count'],
-					'woocommerce'
+			$sync_now_url = add_query_arg(
+				array(
+					'hpos_sync_now' => true,
 				),
-				$sync_status['current_pending_count'],
+				wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+			);
+
+			$sync_message .= esc_html__(
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+				'woocommerce'
+			);
+
+			$sync_message .= sprintf(
+				'<br /><br /><a href="%1$s" class="button button-secondary">%2$s</a>',
+				esc_url( $sync_now_url ),
+				sprintf(
+				// translators: %d: number of pending orders.
+					_n(
+						'Sync %d pending order',
+						'Sync %d pending orders',
+						$sync_status['current_pending_count'],
+						'woocommerce'
+					),
+					$sync_status['current_pending_count']
+				)
 			);
 		}
 
