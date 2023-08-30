@@ -4027,26 +4027,19 @@ table.wc-shipping-classes {
 		display: flex !important;
 
 		&::before {
-			content: "\f11c";
+			content: "\f333";
 			font-family: "Dashicons";
-			color: #999;
-			width: 7px;
-			float: left;
-			height: 100%;
-			transform: rotate(90deg);
-		}
-		&::after {
-			content: "\f11c";
-			font-family: "Dashicons";
+			text-align: center;
+			line-height: 1;
 			color: #999;
 			display: block;
-			width: 7px;
+			width: 17px;
 			float: left;
 			height: 100%;
-			transform: rotate(90deg);
+			line-height: 24px;
 		}
 
-		&:hover::before, &:hover::after {
+		&:hover::before {
 			color: #333;
 		}
 	}
