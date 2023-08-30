@@ -84,16 +84,17 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 			await page.locator('select[name="add_method_id"]')
 				.selectOption( { label: 'Local pickup' } );
-			
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
+			
+			await page.locator( '#btn-ok' ).click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
 					.filter( { hasText: 'Local pickup' } )
 			).toBeVisible();
-
-			await page.getByRole( 'button', { name: 'Save changes'} ).click();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -144,16 +145,17 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 			await page.locator('select[name="add_method_id"]')
 				.selectOption( { label: 'Free shipping' } );
-			
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
+
+			await page.locator( '#btn-ok' ).click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
 					.filter( { hasText: 'Free shipping' } )
 			).toBeVisible();
-
-			await page.getByRole( 'button', { name: 'Save changes'} ).click();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -200,9 +202,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 			await page.locator('select[name="add_method_id"]')
 				.selectOption( { label: 'Flat rate' } );
-
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
+
+			await page.locator( '#btn-ok' ).click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
@@ -211,7 +216,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 			await page.getByRole( 'link', { name: 'Flat rate' } ).click();
 			await page.getByLabel( 'Cost', { exact: true } ).fill( '10' );
-			await page.getByRole( 'button', { name: 'Save changes' } ).last().click();
+			await page.getByRole( 'button', { name: 'Save' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.goto(
@@ -324,8 +329,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page
 				.locator( 'select[name=add_method_id]' )
 				.selectOption( 'flat_rate' );
+			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
+			
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
