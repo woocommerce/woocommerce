@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
@@ -22,7 +22,6 @@ export function PageArrowsWithPicker( {
 	currentPage,
 	setCurrentPage,
 }: PageArrowsWithPickerProps ) {
-	const instanceId = uniqueId( 'woocommerce-pagination-page-picker-' );
 	const [ inputValue, setInputValue ] = useState( currentPage );
 
 	useEffect( () => {
@@ -88,6 +87,7 @@ export function PageArrowsWithPicker( {
 		}
 	);
 
+	const instanceId = uniqueId( 'woocommerce-pagination-page-picker-' );
 	return (
 		<div className="woocommerce-pagination__page-arrows">
 			<Button

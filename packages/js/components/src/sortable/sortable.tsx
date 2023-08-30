@@ -53,7 +53,7 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
-	className
+	className,
 }: SortableProps ) => {
 	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 
 /**
@@ -44,13 +43,13 @@ export function Pagination( {
 }: PaginationProps ): JSX.Element | null {
 	const pageCount = Math.ceil( total / perPage );
 
-	const classes = classNames( 'woocommerce-pagination', className );
-
 	if ( children && typeof children === 'function' ) {
 		return children( {
 			pageCount,
 		} );
 	}
+
+	const classes = classNames( 'woocommerce-pagination', className );
 
 	if ( pageCount <= 1 ) {
 		return (
