@@ -23,8 +23,8 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
-	taxonomyName: string;
-	taxonomyNameOnEntity: string;
+	slug: string;
+	property: string;
 	createTitle: string;
 	hierarchical: boolean;
 }
@@ -35,17 +35,11 @@ export function Edit( {
 	attributes: TaxonomyBlockAttributes;
 } ) {
 	const blockProps = useBlockProps();
-	const {
-		label,
-		taxonomyName,
-		taxonomyNameOnEntity,
-		createTitle,
-		hierarchical,
-	} = attributes;
+	const { label, slug, property, createTitle } = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
-	const { searchEntity, isResolving } = useTaxonomySearch( taxonomyName, {
+	const { searchEntity, isResolving } = useTaxonomySearch( slug, {
 		fetchParents: hierarchical,
 	} );
 	const searchDelayed = useDebounce(
@@ -63,7 +57,7 @@ export function Edit( {
 	const [ selectedEntries, setSelectedEntries ] = useEntityProp< Taxonomy[] >(
 		'postType',
 		'product',
-		taxonomyNameOnEntity
+		property
 	);
 
 	const mappedEntries = selectedEntries.map( ( b ) => ( {
@@ -155,7 +149,7 @@ export function Edit( {
 				></SelectTreeControl>
 				{ showCreateNewModal && (
 					<CreateTaxonomyModal
-						taxonomyName={ taxonomyName }
+						slug={ slug }
 						hierarchical={ hierarchical }
 						title={ createTitle }
 						onCancel={ () => setShowCreateNewModal( false ) }

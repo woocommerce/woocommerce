@@ -27,7 +27,7 @@ import useTaxonomySearch from './use-taxonomy-search';
 type CreateTaxonomyModalProps = {
 	initialName?: string;
 	hierarchical?: boolean;
-	taxonomyName: string;
+	slug: string;
 	title: string;
 	onCancel: () => void;
 	onCreate: ( taxonomy: Taxonomy ) => void;
@@ -37,7 +37,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	onCancel,
 	onCreate,
 	initialName,
-	taxonomyName,
+	slug,
 	hierarchical = true,
 	title,
 } ) => {
@@ -45,7 +45,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
-	const { searchEntity, isResolving } = useTaxonomySearch( taxonomyName, {
+	const { searchEntity, isResolving } = useTaxonomySearch( slug, {
 		fetchParents: false,
 	} );
 
@@ -72,7 +72,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		try {
 			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
-				taxonomyName,
+				slug,
 				{
 					name,
 					parent: parent ? parent.id : 0,

@@ -8,11 +8,11 @@
 	"keywords": [ "taxonomy"],
 	"textdomain": "default",
 	"attributes": {
-		"taxonomyName": {
+		"slug": {
 			"type": "string",
 			"__experimentalRole": "content"
 		},
-		"taxonomyNameOnEntity": {
+		"property": {
 			"type": "string",
 			"__experimentalRole": "content"
 		},
