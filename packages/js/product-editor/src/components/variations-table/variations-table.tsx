@@ -19,6 +19,7 @@ import {
 	Tag,
 	PaginationPageSizePicker,
 	PaginationPageArrowsWithPicker,
+	usePagination,
 } from '@woocommerce/components';
 import {
 	useContext,
@@ -84,37 +85,64 @@ export function VariationsTable() {
 		} ),
 		[ productId, currentPage, perPage ]
 	);
+	const totalCountRequestParams = useMemo(
+		() => ( {
+			product_id: productId,
+			order: 'asc',
+			orderby: 'menu_order',
+		} ),
+		[ productId ]
+	);
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { isLoading, latestVariations, totalCount, isGeneratingVariations } =
-		useSelect(
-			( select ) => {
-				const {
-					getProductVariations,
-					hasFinishedResolution,
-					getProductVariationsTotalCount,
-					isGeneratingVariations: getIsGeneratingVariations,
-				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-				return {
-					isLoading: ! hasFinishedResolution(
-						'getProductVariations',
-						[ requestParams ]
-					),
-					isGeneratingVariations: getIsGeneratingVariations( {
-						product_id: requestParams.product_id,
-					} ),
-					latestVariations:
-						getProductVariations< ProductVariation[] >(
-							requestParams
-						),
-					totalCount:
-						getProductVariationsTotalCount< number >(
-							requestParams
-						),
-				};
-			},
-			[ requestParams ]
-		);
+	const { totalCount } = useSelect(
+		( select ) => {
+			const { getProductVariationsTotalCount } = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
+
+			return {
+				totalCount: getProductVariationsTotalCount< number >(
+					totalCountRequestParams
+				),
+			};
+		},
+		[ productId ]
+	);
+	const { isLoading, latestVariations, isGeneratingVariations } = useSelect(
+		( select ) => {
+			const {
+				getProductVariations,
+				hasFinishedResolution,
+				isGeneratingVariations: getIsGeneratingVariations,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			const requestParams = {
+				product_id: productId,
+				page: currentPage,
+				per_page: perPage,
+				order: 'asc',
+				orderby: 'menu_order',
+			};
+			return {
+				isLoading: ! hasFinishedResolution( 'getProductVariations', [
+					requestParams,
+				] ),
+				isGeneratingVariations: getIsGeneratingVariations( {
+					product_id: requestParams.product_id,
+				} ),
+				latestVariations:
+					getProductVariations< ProductVariation[] >( requestParams ),
+			};
+		},
+		[ currentPage, perPage, productId ]
+	);
+
+	const paginationProps = usePagination( {
+		totalCount,
+		defaultPerPage: DEFAULT_VARIATION_PER_PAGE_OPTION,
+		onPageChange: setCurrentPage,
+		onPerPageChange: setPerPage,
+	} );
 
 	const { updateProductVariation, deleteProductVariation } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
