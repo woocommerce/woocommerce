@@ -1,0 +1,31 @@
+{
+	"name": "@woocommerce/product-editor-extension",
+	"version": "0.1.0",
+	"description": "A template to be used with `woo-integrate-plugin` to create a Product Editor block.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"main": "index.js",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/woocommerce/woocommerce.git"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce"
+	],
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/product-editor-extension#readme",
+	"publishConfig": {
+		"access": "public"
+	}
+}

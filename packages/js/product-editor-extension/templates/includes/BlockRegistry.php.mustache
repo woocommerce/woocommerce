@@ -1,0 +1,65 @@
+<?php
+
+namespace {{namespaceCamelCase}};
+
+use Automattic\WooCommerce\Plugins\PluginPackage;
+
+/**
+ * BlockRegistry class.
+ */
+class BlockRegistry {
+
+    /**
+	 * Plugin package.
+	 *
+	 * @var PluginPackage
+	 */
+	private $package;
+
+    /**
+     * Constructor.
+     */
+    public function __construct( $package ) {
+        $this->package = $package;
+        add_action( 'init', [ $this, 'init_blocks' ] );
+    }
+
+    /**
+     * Get the namespace.
+     */
+    protected function get_namespace() {
+        return 'TestPlugin\BlockTypes';
+    }
+
+    /**
+     * Get all the block type classes from the BlockTypes directory.
+     * Note that the file names need to match the class names in order for automatic loading to work.
+     *
+     * @return array
+     */
+    protected function get_block_type_classes(): array {
+        $classes = [];
+        $files   = glob( dirname( __FILE__ ) . '/BlockTypes/*.php' );
+
+        foreach ( $files as $file ) {
+            $class = $this->get_namespace() . '\\' . basename( $file, '.php' );
+            if ( class_exists( $class ) ) {
+                $classes[] = $class;
+            }
+        }
+
+        return $classes;
+  }
+
+    /**
+     * Initialize all blocks in the blocks directory.
+     */
+    public function init_blocks() {
+        $block_types_classes = $this->get_block_type_classes();
+        
+        foreach ( $block_types_classes as $block_type ) {
+            new $block_type( $this->package );
+        }
+    }
+
+}
