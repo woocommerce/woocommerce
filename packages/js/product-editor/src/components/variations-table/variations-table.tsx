@@ -144,9 +144,12 @@ export function VariationsTable() {
 		onPerPageChange: setPerPage,
 	} );
 
-	const { updateProductVariation, deleteProductVariation } = useDispatch(
-		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-	);
+	const {
+		updateProductVariation,
+		deleteProductVariation,
+		batchUpdateProductVariations,
+		invalidateResolution,
+	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
