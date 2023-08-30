@@ -45,6 +45,8 @@ export type CrudActions<
 	ItemType,
 	MutableProperties,
 	RequiredFields extends keyof MutableProperties | undefined = undefined,
+	// Note that {} is not being used as a type but as a default value.
+	// eslint-disable-next-line
 	ItemQueryType extends Params = {}
 > = MapActions<
 	{
