@@ -52,6 +52,11 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	public function must_be_visible(): bool {
+		// The WooPayments plugin must not be active.
+		if ( $this->is_wcpay_active() ) {
+			return false;
+		}
+
 		// Suggestions not disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return false;
@@ -68,17 +73,7 @@ class WcPayWelcomePage {
 			return false;
 		}
 
-		// Temporary solution until we improve the dismiss and cache logic.
-		if ( false !== get_option( 'wcpay_welcome_page_incentives_dismissed', false ) ) {
-			return false;
-		}
-
-		// The WooPayments plugin must not be active.
-		if ( $this->is_wcpay_active() ) {
-			return false;
-		}
-
-		// Incentive is available.
+		// An incentive must be available.
 		if ( empty( $this->get_incentive() ) ) {
 			return false;
 		}
