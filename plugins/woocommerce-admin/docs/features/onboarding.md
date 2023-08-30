@@ -1,4 +1,8 @@
-# WooCommerce Onboarding
+# WooCommerce Onboarding (DEPRECATED)
+
+**Refer to the new [Core Profiler](./core-profiler.md) documentation for the latest onboarding experience.**
+
+**Some parts of this documentation are still relevant and will be gradually moved to the new Core Profiler documentation.**
 
 The onboarding feature is a reimagined new user setup experience for WooCommerce core. It contains two sections aimed at getting merchants started with their stores. The merchant begins with the "profile wizard", which helps with initial steps like setting a store address, making extension recommendations, and connecting to Jetpack for additional features. Once the profile wizard is complete, the merchant can purchase & install optional extensions via WooCommerce.com, before continuing to the "task list". From the task list, merchants are walked through a variety of items to help them start selling, such as adding their first product and setting up payment methods.
 
