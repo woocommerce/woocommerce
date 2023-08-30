@@ -116,13 +116,6 @@ export function VariationsTable() {
 				hasFinishedResolution,
 				isGeneratingVariations: getIsGeneratingVariations,
 			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-			const requestParams = {
-				product_id: productId,
-				page: currentPage,
-				per_page: perPage,
-				order: 'asc',
-				orderby: 'menu_order',
-			};
 			return {
 				isLoading: ! hasFinishedResolution( 'getProductVariations', [
 					requestParams,
