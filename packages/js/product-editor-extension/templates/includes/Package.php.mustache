@@ -3,26 +3,26 @@
  * Plugin package class for retrieving basic plugin information.
  */
 
-namespace Automattic\WooCommerce\Plugins;
+namespace {{namespacePascalCase}};
 
 /**
- * PluginPackage class.
+ * Package class.
  */
-class PluginPackage {
+class Package {
 
     /**
 	 * Plugin ID.
 	 *
 	 * @var string
 	 */
-	private $id;
+	private $id = '{{namespace}}';
 
     /**
 	 * Current plugin version.
 	 *
 	 * @var string
 	 */
-	private $version;
+	private $version = '{{version}}';
 
 	/**
 	 * Plugin path.
@@ -48,12 +48,10 @@ class PluginPackage {
     /**
      * Constructor.
      */
-    public function __construct( $id, $version, $plugin_path, $build_path, $includes_path ) {
-        $this->id            = $id;
-        $this->version       = $version;
+    public function __construct( $plugin_path ) {
         $this->plugin_path   = $plugin_path;
-        $this->build_path    = $build_path;
-        $this->includes_path = $includes_path;
+        $this->build_path    = $this->plugin_path . 'build/';
+        $this->includes_path = $this->plugin_path . '{{{includesDir}}}';
     }
 
     /**
@@ -74,7 +72,7 @@ class PluginPackage {
 	 * @return string
 	 */
 	public function get_path( $relative_path = '' ) {
-		return trailingslashit( $this->path ) . $relative_path;
+		return trailingslashit( $this->plugin_path ) . $relative_path;
 	}
 
     /**
