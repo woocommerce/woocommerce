@@ -44,7 +44,6 @@ class TaskLists {
 	 */
 	const DEFAULT_TASKS = array(
 		'StoreDetails',
-		'Purchase',
 		'Products',
 		'WooCommercePayments',
 		'Payments',
@@ -112,7 +111,6 @@ class TaskLists {
 		$tasks = array(
 			'CustomizeStore',
 			'StoreDetails',
-			'Purchase',
 			'Products',
 			'WooCommercePayments',
 			'Payments',

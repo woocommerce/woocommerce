@@ -8,7 +8,6 @@ import './Marketing';
 import './appearance';
 import './tax';
 import './woocommerce-payments';
-import './purchase';
 import './deprecated-tasks';
 
 const possiblyImportProductTask = async () => {
