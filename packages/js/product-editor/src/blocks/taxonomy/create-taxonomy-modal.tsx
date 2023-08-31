@@ -45,9 +45,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
-	const { searchEntity, isResolving } = useTaxonomySearch( slug, {
-		fetchParents: false,
-	} );
+	const { searchEntity, isResolving } = useTaxonomySearch( slug );
 
 	const searchDelayed = useDebounce(
 		useCallback(
@@ -141,6 +139,10 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 						items={ allEntries.map( ( taxonomy ) => ( {
 							label: taxonomy.name,
 							value: String( taxonomy.id ),
+							parent:
+								taxonomy.parent > 0
+									? String( taxonomy.parent )
+									: undefined,
 						} ) ) }
 						shouldNotRecursivelySelect
 						selected={
