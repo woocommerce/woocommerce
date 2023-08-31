@@ -306,13 +306,11 @@ class CustomOrdersTableController {
 		if ( ! $tables_created ) {
 			return 'no';
 		}
-		/**
-		 * Re-enable the following code once the COT to posts table sync is implemented (it's currently commented out to ease testing).
+
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
-		if ( $sync_is_pending ) {
+		if ( $sync_is_pending && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
-		 */
 
 		return $value;
 	}
@@ -408,9 +406,22 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_feature() {
+	private function get_hpos_setting_for_feature( $sync_status ) {
 		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
+		}
+
+		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
+		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
+		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
+		$sync_complete           = 0 === $sync_status['current_pending_count'];
+		$disabled_option         = array();
+		// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
+		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
+			$disabled_option = array( 'yes' );
+		}
+		if ( ! $sync_complete && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
+			$disabled_option = array( 'yes', 'no' );
 		}
 
 		$get_value = function() {
@@ -465,9 +476,45 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_sync() {
+	private function get_hpos_setting_for_sync( $sync_status ) {
 		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
+		}
+
+		$sync_in_progress     = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
+		$sync_enabled         = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		$sync_message         = '';
+		$sync_is_pending      = $sync_status['current_pending_count'] > 0;
+		$description_is_error = false;
+		if ( $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed() ) {
+			$sync_message = sprintf(
+			// translators: %d: number of pending orders.
+				_n(
+					"There's %d order pending sync. Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!",
+					'There are %d orders pending sync. Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!',
+					$sync_status['current_pending_count'],
+					'woocommerce'
+				),
+				$sync_status['current_pending_count'],
+			);
+			$description_is_error = true;
+		} elseif ( $sync_in_progress && $sync_is_pending ) {
+			$sync_message = sprintf(
+				// translators: %d: number of pending orders.
+				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
+				$sync_status['current_pending_count']
+			);
+		} elseif ( $sync_is_pending ) {
+			$sync_message = sprintf(
+				// translators: %d: number of pending orders.
+				_n(
+					"There's %d order pending sync. You can switch data storage for orders only when posts and orders table are in sync.",
+					'There are %d orders pending sync. You can switch data storage for orders only when posts and orders table are in sync.',
+					$sync_status['current_pending_count'],
+					'woocommerce'
+				),
+				$sync_status['current_pending_count'],
+			);
 		}
 
 		$get_value = function() {
@@ -525,13 +572,34 @@ class CustomOrdersTableController {
 		};
 
 		return array(
-			'id'        => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			'title'     => '',
-			'type'      => 'checkbox',
-			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'     => $get_value,
-			'desc_tip'  => $get_sync_message,
-			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'id'                   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'title'                => '',
+			'type'                 => 'checkbox',
+			'desc'                 => __( 'Keep the posts and orders tables in sync (compatibility mode).', 'woocommerce' ),
+			'value'                => $sync_enabled,
+			'desc_tip'             => $sync_message,
+			'description_is_error' => $description_is_error,
+			'row_class'            => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
+	}
+
+	/**
+	 * Returns a value indicating if changing the authoritative data source for orders while there are orders pending synchronization is allowed.
+	 *
+	 * @return bool
+	 */
+	private function changing_data_source_with_sync_pending_is_allowed() {
+		/**
+		 * Filter to allow changing where order data is stored, even when there are orders pending synchronization.
+		 *
+		 * DANGER! This filter is intended for usage when doing manual and automated testing in development environments only,
+		 * it should NEVER be used in production environments. Order data corruption or loss can happen!
+		 *
+		 * @param bool $allow True to allow changing order storage when there are orders pending synchronization, false to disallow.
+		 * @returns bool
+		 *
+		 * @since 8.3.0
+		 */
+		return apply_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending', false );
 	}
 }
