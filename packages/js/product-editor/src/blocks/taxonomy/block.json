@@ -4,7 +4,7 @@
 	"name": "woocommerce/taxonomy-field",
 	"title": "Taxonomy",
 	"category": "widgets",
-	"description": "A block that displays a taxonomy field, allowing to search, select, and create new entries",
+	"description": "A block that displays a taxonomy field, allowing searching, selection, and creation of new items",
 	"keywords": [ "taxonomy"],
 	"textdomain": "default",
 	"attributes": {
