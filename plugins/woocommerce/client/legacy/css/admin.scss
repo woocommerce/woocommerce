@@ -4080,7 +4080,8 @@ table.wc-shipping-classes {
 		width: 13%;
 
 		a.wc-shipping-zone-delete,
-		a.wc-shipping-zone-method-delete {
+		a.wc-shipping-zone-method-delete,
+		a.wc-shipping-class-delete {
 			color: #a00;
 		}
 	}
@@ -4096,9 +4097,9 @@ table.wc-shipping-classes {
 			width: 100%;
 		}
 
-		a.wc-shipping-class-delete {
-			color: #a00;
-		}
+		// a.wc-shipping-class-delete {
+		// 	color: #a00;
+		// }
 
 		a.wc-shipping-zone-delete:hover,
 		a.wc-shipping-class-delete:hover {
