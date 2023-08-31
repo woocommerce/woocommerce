@@ -90,7 +90,7 @@
 ## Added
 
 - support for custom container name
-- Insert a 12 hour delay in using new docker image tags
+- Insert a 12-hour delay in using new docker image tags
 - Package `bin` script `wc-e2e`
 - WP Mail Log plugin as part of container initialization
 

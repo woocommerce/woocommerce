@@ -42,7 +42,7 @@ Before version 3.0.0, Action Scheduler [used custom post types](https://actionsc
 
 #### Subsequent Data Updates
 
-All Customers and Orders that get created after WooCommerce 4.0 (or the WooCommerce Admin plugin) is installed are automatically queued for processing. Only historical data requires manual intevention to process.
+All Customers and Orders that get created after WooCommerce 4.0 (or the WooCommerce Admin plugin) is installed are automatically queued for processing. Only historical data requires manual intervention to process.
 
 #### Action Scheduler at Scale
 

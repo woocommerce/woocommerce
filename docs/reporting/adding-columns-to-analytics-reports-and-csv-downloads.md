@@ -8,7 +8,7 @@ In WooCommerce, analytics CSVs are generated in two different ways: in the web b
 
 We'll look at the on-server method for adding a column first, because this is also where the data sent to the browser is generated.
 
-This example extends the Downloads analytics report. To get some data in your system for this report, create a downloadable product with a download expiry value, create an order purchasing the product, then download the product several times. In testing I created 26 downloads, which is enough that the report is spread over two pages when showing 25 items per page, and on a single page when showing 50 items per page. This let me test CSVs generated both on the server and in browser.
+This example extends the Downloads analytics report. To get some data in your system for this report, create a downloadable product with a download expiry value, create an order purchasing the product, then download the product several times. In testing, I created 26 downloads, which is enough that the report is spread over two pages when showing 25 items per page, and on a single page when showing 50 items per page. This let me test CSVs generated both on the server and in browser.
 
 In the PHP for your plugin, add three filter handlers:
 

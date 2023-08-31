@@ -46,7 +46,7 @@ The _Summary Number_ tab gives you a quick view at the total figure for that met
 ### Chart
 ![Analytics Chart](analytics-basics-chart.png)
 
-The charts on report pages offer quite a few options to customize the visualiztion of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
+The charts on report pages offer quite a few options to customize the visualization of data. The data legend ( labeled A ) allows you to toggle the visibility of the different data set periods. The _Interval Selector_ ( labeled B ) allows you to adjust the interval displayed in the chart. The options available here are dependent upon the length of the date range selected:
 
 | Length of Date Range  | Interval Options  |
 |---|---|
@@ -86,7 +86,7 @@ If your selected date range results in a data set that spans more then one page 
 ### Table Pagination
 ![Analytics Table csv Download Email](analytics-basics-table-footer.png)
 
-When the data displayed in the table is larger than the default single page size of 25, some pagination options will appear in the table footer area. Directional buttons, labeled `<` and `>` enable you to move backwards and forwards between pages, and a text field will allow you to jump to a specific page number. Furthermore you can change the number of rows to display per page.
+When the data displayed in the table is larger than the default single page size of 25, some pagination options will appear in the table footer area. Directional buttons, labeled `<` and `>` enable you to move backwards and forwards between pages, and a text field will allow you to jump to a specific page number. Furthermore, you can change the number of rows to display per page.
 
 ### Table Search Box
 On some reports, a search box is displayed in the table header area as well. For details on what the search box does on a given report, please refer to the associated documentation page for that report.
