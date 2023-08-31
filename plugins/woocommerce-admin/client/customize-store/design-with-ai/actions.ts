@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assign } from 'xstate';
+import { DoneInvokeEvent, assign } from 'xstate';
 
 /**
  * Internal dependencies
@@ -9,6 +9,7 @@ import { assign } from 'xstate';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	AIEndpointResponse,
 } from './types';
 import {
 	businessInfoDescriptionCompleteEvent,
@@ -61,13 +62,13 @@ const assignLookAndTone = assign<
 	lookAndFeel: ( context, event: unknown ) => {
 		return {
 			// @ts-expect-error -- temp
-			choice: JSON.parse( event.data.completion ).look,
+			choice: event.data.look,
 		};
 	},
 	toneOfVoice: ( context, event: unknown ) => {
 		return {
 			// @ts-expect-error -- temp
-			choice: JSON.parse( event.data.completion ).tone,
+			choice: event.data.tone,
 		};
 	},
 } );

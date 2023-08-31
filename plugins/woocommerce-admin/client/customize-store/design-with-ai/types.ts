@@ -29,3 +29,8 @@ export type designWithAiStateMachineEvents =
 	| {
 			type: 'API_CALL_TO_AI_FAILED';
 	  };
+
+export type AIEndpointResponse = {
+	look: string;
+	tone: string;
+};

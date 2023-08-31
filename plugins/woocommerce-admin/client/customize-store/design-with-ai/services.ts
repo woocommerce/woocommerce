@@ -31,12 +31,16 @@ export const getLookAndTone = async (
 	url.searchParams.append( 'prompt', prompt.join( '\n' ) );
 	url.searchParams.append( 'token', token );
 	url.searchParams.append( 'feature', 'cys' );
-	url.searchParams.append( 'fields', 'completion' );
+	url.searchParams.append( '_fields', 'completion' );
 
-	return apiFetch( {
+	const data: {
+		completion: string;
+	} = await apiFetch( {
 		url: url.toString(),
 		method: 'POST',
 	} );
+
+	return JSON.parse( data.completion );
 };
 
 export const services = {
