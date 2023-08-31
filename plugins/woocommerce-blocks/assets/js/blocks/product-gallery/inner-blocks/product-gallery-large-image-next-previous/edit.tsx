@@ -37,7 +37,6 @@ export const Edit = ( {
 	const blockProps = useBlockProps( {
 		style: {
 			width: '100%',
-			height: '100%',
 			alignItems: getAlignmentStyle(
 				attributes.layout?.verticalAlignment
 			),

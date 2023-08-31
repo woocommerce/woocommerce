@@ -36,6 +36,33 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			[
 				'woocommerce/product-gallery-large-image',
 				getInnerBlocksLockAttributes( 'lock' ),
+				[
+					[
+						'woocommerce/product-sale-badge',
+						{
+							align: 'right',
+							style: {
+								spacing: {
+									margin: {
+										top: '4px',
+										right: '4px',
+										bottom: '4px',
+										left: '4px',
+									},
+								},
+							},
+						},
+					],
+					[
+						'woocommerce/product-gallery-large-image-next-previous',
+						{
+							layout: {
+								type: 'flex',
+								verticalAlignment: 'bottom',
+							},
+						},
+					],
+				],
 			],
 		],
 	],

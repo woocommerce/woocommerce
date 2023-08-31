@@ -7,6 +7,8 @@
 	}
 
 	.wc-block-product-gallery-large-image__inner-blocks {
+		display: flex;
+		flex-direction: column;
 		position: absolute;
 		z-index: 1;
 		width: 100%;

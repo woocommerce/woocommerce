@@ -239,4 +239,14 @@ export class EditorUtils {
 
 		await this.page.getByText( option ).click();
 	}
+
+	async setAlignOption(
+		option: 'Align Left' | 'Align Center' | 'Align Right' | 'None'
+	) {
+		const button = this.page.locator( "button[aria-label='Align']" );
+
+		await button.click();
+
+		await this.page.getByText( option ).click();
+	}
 }
