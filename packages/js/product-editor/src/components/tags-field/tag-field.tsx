@@ -61,10 +61,13 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	value = [],
 	onChange,
 } ) => {
-	const { isSearching, tagsSelectList, searchTags } = useTagSearch();
+	const { tagsSelectList, searchTags } = useTagSearch();
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
+	const [ newInputValue, setNewInputValue ] = useState< boolean | string >(
+		false
+	);
 	const { createProductTag, invalidateResolutionForStoreSelector } =
 		useDispatch( EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -72,6 +75,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	const onInputChange = ( searchString?: string ) => {
 		setSearchValue( searchString || '' );
 		searchTags( searchString || '' );
+		setNewInputValue( searchString || false );
 	};
 
 	const searchDelayed = useMemo(
@@ -85,6 +89,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 		} );
 		setIsCreating( true );
 		try {
+			setNewInputValue( '' );
 			const newTag: ProductTag = await createProductTag( {
 				name: searchValue,
 			} );
@@ -109,9 +114,10 @@ export const TagField: React.FC< TagFieldProps > = ( {
 				shouldNotRecursivelySelect
 				createValue={ searchValue }
 				label={ label }
-				isLoading={ isSearching || isCreating }
+				isLoading={ isCreating }
 				onInputChange={ searchDelayed }
 				placeholder={ value.length === 0 ? placeholder : '' }
+				newInputValue={ newInputValue }
 				onCreateNew={
 					searchValue.length === 0
 						? () => setShowCreateNewModal( true )

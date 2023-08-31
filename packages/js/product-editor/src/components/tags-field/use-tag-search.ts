@@ -53,7 +53,7 @@ export const useTagSearch = () => {
 			( tagsAndNewItem.length === 0 ||
 				lastSearchValue.current.length === 0 )
 		) {
-			setTagsAndNewItem( tagsAndNewItem );
+			setTagsAndNewItem( initialTags );
 			setIsSearching( false );
 		}
 	}, [ initialTags ] );
@@ -63,6 +63,7 @@ export const useTagSearch = () => {
 			lastSearchValue.current = search || '';
 			if ( ! isAsync && initialTags.length > 0 ) {
 				setTagsAndNewItem( initialTags );
+				setIsSearching( false );
 				return initialTags;
 			}
 			setIsSearching( true );
