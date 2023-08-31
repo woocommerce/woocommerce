@@ -12,6 +12,7 @@ const log = require( '../node_modules/@wordpress/create-block/lib/log' );
 const { engines, version } = require( '../package.json' );
 const scaffold = require( './scaffold' );
 const getPluginData = require( './get-plugin-data' );
+const { getPluginConfig } = require( './config' );
 const { getDefaultValues, getPluginTemplate } = require( './templates' );
 
 const commandName = `woo-integrate-plugin`;
@@ -83,9 +84,8 @@ program
 						wpScripts,
 					} ).filter( ( [ , value ] ) => value !== undefined )
 				);
-
 				const pluginData = getPluginData();
-
+				const pluginConfig = getPluginConfig();
 				const defaultValues = getDefaultValues(
 					pluginTemplate,
 					variant
@@ -93,6 +93,7 @@ program
                 const answers = {
                     ...defaultValues,
 					...pluginData,
+					...pluginConfig,
                     ...optionsValues,
                 };
 

@@ -21,10 +21,10 @@ class ExampleBlock extends AbstractBlock {
 	protected $block_name = 'example-block';
 
     /**
-     *
+     * Initialize the block.
      */
-    public function __construct() {
-        parent::construct();
+    public function init() {
+        parent::init();
         add_action( 'woocommerce_block_template_register', 'add_block_to_simple_product_template' );
     }
 

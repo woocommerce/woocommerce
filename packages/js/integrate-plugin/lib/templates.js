@@ -125,6 +125,7 @@ const configToTemplate = async ( {
 	assetsPath,
 	defaultValues = {},
 	variants = {},
+    modules = [],
 } ) => {
 	if ( defaultValues === null || typeof defaultValues !== 'object' ) {
 		throw new CLIError( 'Template found but invalid definition provided.' );
@@ -149,6 +150,7 @@ const configToTemplate = async ( {
 		outputAssets: assetsPath ? await getOutputAssets( assetsPath ) : {},
 		defaultValues,
 		variants,
+        modules,
 	};
 };
 
@@ -240,6 +242,7 @@ const getDefaultValues = ( pluginTemplate, variant ) => {
 		variantVars: getVariantVars( pluginTemplate.variants, variant ),
         includesDir: 'includes/',
         srcDir: 'src/',
+        modules: [],
 	};
 };
 

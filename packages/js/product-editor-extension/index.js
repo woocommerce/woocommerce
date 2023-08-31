@@ -44,4 +44,5 @@ module.exports = {
 	includesTemplatesPath: join( __dirname, 'templates', 'includes' ),
 	srcTemplatesPath: join( __dirname, 'templates', 'src' ),
 	pluginTemplatesPath: join( __dirname, 'templates', 'plugin' ),
+	modules: [ 'BlockRegistry' ],
 };

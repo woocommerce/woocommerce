@@ -52,6 +52,8 @@ class Package {
         $this->plugin_path   = $plugin_path;
         $this->build_path    = $this->plugin_path . 'build/';
         $this->includes_path = $this->plugin_path . '{{{includesDir}}}';
+
+		add_action( 'plugins_loaded', array( $this, 'init' ) );
     }
 
     /**
@@ -97,6 +99,21 @@ class Package {
 	 */
 	public function get_includes_path( $relative_path = '' ) {
 		return trailingslashit( $this->includes_path ) . $relative_path;
+	}
+
+	/**
+	 * Init modules.
+	 */
+	public function init() {
+		$modules = [
+			{{#modules}}
+			{{.}}::class,
+			{{/modules}}
+		];
+
+		foreach ( $modules as $module ) {
+			new $module( $this );
+		}
 	}
 
 }

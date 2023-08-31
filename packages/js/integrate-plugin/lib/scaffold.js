@@ -14,9 +14,10 @@ const initWPScripts = require( './init-wp-scripts' );
 const initWebpackConfig = require( './init-webpack-config' );
 const initWPEnv = require( './init-wp-env' );
 const initTemplate = require( './init-template' );
+const { getUniqueItems, updateConfig } = require( './config' );
 
 module.exports = async (
-	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates },
+	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates, modules: templateModules },
 	{
 		$schema,
 		apiVersion,
@@ -35,6 +36,7 @@ module.exports = async (
 		includesDir,
 		srcDir,
 		namespace,
+		modules,
 	}
 ) => {
 	info( '' );
@@ -61,8 +63,14 @@ module.exports = async (
 		namespace,
 		namespaceSnakeCase: snakeCase( namespace ),
 		namespacePascalCase: pascalCase( namespace ),
+		modules: getUniqueItems( [
+			...modules,
+			...templateModules,
+		] ),
 	};
+
 	if ( template ) {
+		updateConfig( view );
 		initTemplate( view );
 	}
 
