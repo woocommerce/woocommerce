@@ -5,7 +5,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState, useRef, useEffect } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
@@ -75,7 +75,7 @@ function ResizableFrame( {
 	/** The default (unresized) width/height of the frame, based on the space availalbe in the viewport. */
 	defaultSize,
 	innerContentStyle,
-	isActive = false,
+	duringGuideTour = false,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -84,18 +84,13 @@ function ResizableFrame( {
 	const [ shouldShowHandle, setShouldShowHandle ] = useState( false );
 	const [ resizeRatio, setResizeRatio ] = useState( 1 );
 	const frameTransition = { type: 'tween', duration: isResizing ? 0 : 0.5 };
+	const [ hasHandlerDragged, setHasHandlerDragged ] = useState( false );
 	const frameRef = useRef( null );
 	const resizableHandleHelpId = useInstanceId(
 		ResizableFrame,
 		'edit-site-resizable-frame-handle-help'
 	);
 	const defaultAspectRatio = defaultSize.width / defaultSize.height;
-
-	useEffect( () => {
-		if ( isActive ) {
-			setShouldShowHandle( true );
-		}
-	}, [ isActive ] );
 
 	const handleResizeStart = ( _event, _direction, ref ) => {
 		// Remember the starting width so we don't have to get `ref.offsetWidth` on
@@ -134,6 +129,9 @@ function ResizableFrame( {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleResizeStop = ( _event, _direction, ref ) => {
 		setIsResizing( false );
+		if ( ! hasHandlerDragged ) {
+			setHasHandlerDragged( true );
+		}
 
 		if ( isOversized ) {
 			setIsOversized( false );
@@ -195,7 +193,7 @@ function ResizableFrame( {
 		if ( isResizing ) {
 			return 'active';
 		}
-		return shouldShowHandle ? 'visible' : 'hidden';
+		return shouldShowHandle || duringGuideTour ? 'visible' : 'hidden';
 	} )();
 
 	const resizeHandler = (
@@ -223,7 +221,8 @@ function ResizableFrame( {
 			whileFocus="active"
 			whileHover="active"
 			children={
-				isActive && (
+				duringGuideTour &&
+				! hasHandlerDragged && (
 					<Popover
 						className="components-tooltip"
 						position="middle right"
@@ -275,7 +274,7 @@ function ResizableFrame( {
 			handleComponent={ {
 				left: (
 					<>
-						{ isActive ? (
+						{ duringGuideTour ? (
 							<div>{ resizeHandler }</div>
 						) : (
 							<Tooltip
