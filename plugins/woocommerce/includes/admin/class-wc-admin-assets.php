@@ -281,6 +281,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'wc-admin-variation-meta-boxes' );
 
 				$params = array(
+					/* translators: %s: WC_DELIMITER */
+					'i18n_attributes_default_placeholder'             => sprintf( esc_attr__( 'Enter some descriptive text. Use “%s” to separate different values.', 'woocommerce' ), esc_attr( WC_DELIMITER ) ),
+					'i18n_attributes_used_for_variations_placeholder' => sprintf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), esc_attr( WC_DELIMITER ) )
+				);
+
+				wp_localize_script( 'wc-admin-product-meta-boxes', 'woocommerce_admin_product_meta_boxes', $params );
+
+				$params = array(
 					'post_id'                             => isset( $post->ID ) ? $post->ID : '',
 					'plugin_url'                          => WC()->plugin_url(),
 					'ajax_url'                            => admin_url( 'admin-ajax.php' ),

@@ -514,6 +514,23 @@ jQuery( function ( $ ) {
 		$attributeListItem.find( 'h3' ).trigger( 'click' );
 	}
 
+	function toggle_selection_of_attribute_list_item_terms( $attributeListItem ) {
+
+		var $attributeListItemSelectAllButton = $attributeListItem.find( 'button.select_all_attributes' );
+
+		if ( $attributeListItemSelectAllButton.length ) {
+			$attributeListItemSelectAllButton.trigger( 'click' );
+		}
+	}
+
+	function add_placeholder_to_attribute_values_field( $attributeListItem ) {
+		if ( $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' ).is( ':checked' ) ) {
+			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_product_meta_boxes.i18n_attributes_used_for_variations_placeholder );
+		} else {
+			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_product_meta_boxes.i18n_attributes_default_placeholder );
+		}
+	}
+
 	function init_select_controls() {
 		$( document.body ).trigger( 'wc-enhanced-select-init' );
 	}
@@ -546,6 +563,18 @@ jQuery( function ( $ ) {
 			update_attribute_row_indexes();
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
+
+			// Automatically pre-select all terms when a global Attribute is chosen.
+			toggle_selection_of_attribute_list_item_terms( $attributeListItem );
+
+			// Conditionally change the placeholder of product-level Attributes depending on the value of the "Use for variations" checkbox.
+			if ( 'undefined' === typeof globalAttributeId ) {
+				add_placeholder_to_attribute_values_field( $attributeListItem );
+
+				$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
+					add_placeholder_to_attribute_values_field( $(this).closest( '.woocommerce_attribute' ) );
+				} );
+			}
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
 
@@ -601,6 +630,17 @@ jQuery( function ( $ ) {
 			}
 		}
 	}
+
+	// Handle the Attributes onboarding dismissible notice.
+	// If users dismiss the notice, never show it again.
+	if ( localStorage.getItem('attributes-notice-dismissed' ) ) {
+		$( '#product_attributes .notice' ).hide();
+	}
+
+	$( '#product_attributes .notice.woocommerce-message button' ).on( 'click', function( e ) {
+		$( '#product_attributes .notice' ).hide();
+		localStorage.setItem( 'attributes-notice-dismissed', 'true');
+	} );
 
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
 		const attributeId = e && e.params && e.params.data && e.params.data.id;
