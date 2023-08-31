@@ -28,6 +28,19 @@ const recordShortDescriptionTracks = recordTracksFactory(
 	} )
 );
 
+export function buildShortDescriptionPrompt( longDesc: string ) {
+	return [
+		'Please write a high-converting Meta Description for the WooCommerce product description below.',
+		'It should strictly adhere to the following guidelines:',
+		'It should entice someone from a search results page to click on the product link.',
+		'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
+		'It should explain what users will see if they click on the product page link.',
+		'Do not wrap in double quotes or use any other special characters.',
+		'It should include the target keyword for the product.',
+		`Here is the full product description: \n${ longDesc }`,
+	].join( '\n' );
+}
+
 export function WriteShortDescriptionButtonContainer() {
 	const { createWarningNotice } = useDispatch( 'core/notices' );
 
@@ -85,24 +98,10 @@ export function WriteShortDescriptionButtonContainer() {
 
 	const writeItForMeEnabled =
 		! fetching && postContent.length >= MIN_DESC_LENGTH_FOR_SHORT_DESC;
-
-	const buildPrompt = (): string => {
-		return [
-			'Please write a high-converting Meta Description for the WooCommerce product description below.',
-			'It should strictly adhere to the following guidelines:',
-			'It should entice someone from a search results page to click on the product link.',
-			'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
-			'It should explain what users will see if they click on the product page link.',
-			'Do not wrap in double quotes or use any other special characters.',
-			'It should include the target keyword for the product.',
-			`Here is the full product description: \n${ tinyEditor.getContent() }`,
-		].join( '\n' );
-	};
-
 	const onWriteItForMeClick = async () => {
 		setFetching( true );
 
-		const prompt = buildPrompt();
+		const prompt = buildShortDescriptionPrompt( tinyEditor.getContent() );
 		recordShortDescriptionTracks( 'start', {
 			prompt,
 		} );

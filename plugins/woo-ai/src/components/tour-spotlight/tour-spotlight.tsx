@@ -4,6 +4,7 @@
 import Tour, { TourStepRendererProps } from '@automattic/tour-kit';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import React from 'react';
 
 type TourSpotlightProps = {
@@ -50,7 +51,9 @@ export default function TourSpotlight( {
 									.description
 							}
 						</p>
-						<Button onClick={ handleDismiss }>Got it</Button>
+						<Button onClick={ handleDismiss }>
+							{ __( 'Got it', 'woocommerce' ) }
+						</Button>
 					</div>
 				);
 			},
