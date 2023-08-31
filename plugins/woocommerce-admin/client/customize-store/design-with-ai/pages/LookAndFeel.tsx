@@ -48,7 +48,9 @@ export const LookAndFeel = ( {
 		},
 	];
 	const [ look, setLook ] = useState< string >(
-		context.lookAndFeel.choice ?? choices[ 0 ].title
+		context.lookAndFeel.choice === ''
+			? choices[ 0 ].title
+			: context.lookAndFeel.choice
 	);
 	return (
 		<div>

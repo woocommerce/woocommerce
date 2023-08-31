@@ -48,7 +48,9 @@ export const ToneOfVoice = ( {
 		},
 	];
 	const [ sound, setSound ] = useState< string >(
-		context.toneOfVoice.choice ?? choices[ 0 ].title
+		context.toneOfVoice.choice === ''
+			? choices[ 0 ].title
+			: context.toneOfVoice.choice
 	);
 	return (
 		<div>
