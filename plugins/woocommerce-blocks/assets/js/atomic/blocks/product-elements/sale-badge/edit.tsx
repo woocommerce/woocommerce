@@ -10,13 +10,8 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import Block from './block';
-import withProductSelector from '../shared/with-product-selector';
-import {
-	BLOCK_TITLE as label,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
 import type { BlockAttributes } from './types';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = ( {
 	attributes,
@@ -31,9 +26,20 @@ const Edit = ( {
 	};
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
+
 	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
+		() =>
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductTemplate,
+			} ),
+		[
+			setAttributes,
+			isDescendentOfQueryLoop,
+			isDescendentOfSingleProductTemplate,
+		]
 	);
 
 	return (
@@ -43,4 +49,4 @@ const Edit = ( {
 	);
 };
 
-export default withProductSelector( { icon, label, description } )( Edit );
+export default Edit;
