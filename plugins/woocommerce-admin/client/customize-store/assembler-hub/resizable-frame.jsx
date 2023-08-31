@@ -1,11 +1,15 @@
+// TODO: Modify Gutenberg's ResizableFrame component for use in the Assembler Hub and remove this file.
+// Reference: https://github.com/WordPress/gutenberg/tree/v16.4.0/packages/edit-site/src/components/resizable-frame/index.js
+
 /**
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
+	Popover,
 	__unstableMotion as motion,
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
@@ -71,6 +75,7 @@ function ResizableFrame( {
 	/** The default (unresized) width/height of the frame, based on the space availalbe in the viewport. */
 	defaultSize,
 	innerContentStyle,
+	isActive = false,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -85,6 +90,12 @@ function ResizableFrame( {
 		'edit-site-resizable-frame-handle-help'
 	);
 	const defaultAspectRatio = defaultSize.width / defaultSize.height;
+
+	useEffect( () => {
+		if ( isActive ) {
+			setShouldShowHandle( true );
+		}
+	}, [ isActive ] );
 
 	const handleResizeStart = ( _event, _direction, ref ) => {
 		// Remember the starting width so we don't have to get `ref.offsetWidth` on
@@ -172,11 +183,11 @@ function ResizableFrame( {
 		},
 		visible: {
 			opacity: 1,
-			left: -16,
+			left: -10,
 		},
 		active: {
 			opacity: 1,
-			left: -16,
+			left: -10,
 			scaleY: 1.3,
 		},
 	};
@@ -186,6 +197,43 @@ function ResizableFrame( {
 		}
 		return shouldShowHandle ? 'visible' : 'hidden';
 	} )();
+
+	const resizeHandler = (
+		/* Disable reason: role="separator" does in fact support aria-valuenow */
+		/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */
+		<motion.button
+			key="handle"
+			role="separator"
+			aria-orientation="vertical"
+			className={ classnames( 'edit-site-resizable-frame__handle', {
+				'is-resizing': isResizing,
+			} ) }
+			variants={ resizeHandleVariants }
+			animate={ currentResizeHandleVariant }
+			aria-label={ __( 'Drag to resize', 'woocommerce' ) }
+			aria-describedby={ resizableHandleHelpId }
+			aria-valuenow={
+				frameRef.current?.resizable?.offsetWidth || undefined
+			}
+			aria-valuemin={ FRAME_MIN_WIDTH }
+			aria-valuemax={ defaultSize.width }
+			onKeyDown={ handleResizableHandleKeyDown }
+			initial="hidden"
+			exit="hidden"
+			whileFocus="active"
+			whileHover="active"
+			children={
+				isActive && (
+					<Popover
+						className="components-tooltip"
+						position="middle right"
+					>
+						{ __( 'Drag to resize', 'woocommerce' ) }
+					</Popover>
+				)
+			}
+		/>
+	);
 
 	return (
 		<ResizableBox
@@ -227,37 +275,16 @@ function ResizableFrame( {
 			handleComponent={ {
 				left: (
 					<>
-						<Tooltip text={ __( 'Drag to resize', 'woocommerce' ) }>
-							{ /* Disable reason: role="separator" does in fact support aria-valuenow */ }
-							{ /* eslint-disable-next-line jsx-a11y/role-supports-aria-props */ }
-							<motion.button
-								key="handle"
-								role="separator"
-								aria-orientation="vertical"
-								className={ classnames(
-									'edit-site-resizable-frame__handle',
-									{ 'is-resizing': isResizing }
-								) }
-								variants={ resizeHandleVariants }
-								animate={ currentResizeHandleVariant }
-								aria-label={ __(
-									'Drag to resize',
-									'woocommerce'
-								) }
-								aria-describedby={ resizableHandleHelpId }
-								aria-valuenow={
-									frameRef.current?.resizable?.offsetWidth ||
-									undefined
-								}
-								aria-valuemin={ FRAME_MIN_WIDTH }
-								aria-valuemax={ defaultSize.width }
-								onKeyDown={ handleResizableHandleKeyDown }
-								initial="hidden"
-								exit="hidden"
-								whileFocus="active"
-								whileHover="active"
-							/>
-						</Tooltip>
+						{ isActive ? (
+							<div>{ resizeHandler }</div>
+						) : (
+							<Tooltip
+								position="middle right"
+								text={ __( 'Drag to resize', 'woocommerce' ) }
+							>
+								{ resizeHandler }
+							</Tooltip>
+						) }
 						<div hidden id={ resizableHandleHelpId }>
 							{ __(
 								'Use left and right arrow keys to resize the canvas. Hold shift to resize in larger increments.',
