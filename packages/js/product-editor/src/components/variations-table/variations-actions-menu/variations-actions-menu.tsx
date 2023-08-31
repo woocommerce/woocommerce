@@ -24,7 +24,7 @@ export function VariationsActionsMenu( {
 }: VariationsActionsMenuProps ) {
 	return (
 		<Dropdown
-			position="bottom right"
+			position="bottom left"
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button
 					disabled={ disabled }
