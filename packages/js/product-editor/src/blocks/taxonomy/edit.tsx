@@ -20,7 +20,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { CreateTaxonomyModal } from './create-taxonomy-modal';
-import { Taxonomy } from './types';
+import { Taxonomy, TaxonomyMetadata } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
@@ -36,13 +36,12 @@ export function Edit( {
 	attributes: TaxonomyBlockAttributes;
 } ) {
 	const blockProps = useBlockProps();
-	const hierarchical = useSelect( ( select ) => {
-		const taxonomyDetails = select( 'core' ).getTaxonomy(
-			attributes.slug
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		) as any;
-		return ( taxonomyDetails && taxonomyDetails.hierarchical ) || false;
-	} );
+	const { hierarchical }: TaxonomyMetadata = useSelect(
+		( select ) =>
+			select( 'core' ).getTaxonomy( attributes.slug ) || {
+				hierarchical: false,
+			}
+	);
 	const { label, slug, property, createTitle } = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );

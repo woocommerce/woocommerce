@@ -3,3 +3,7 @@ export interface Taxonomy {
 	name: string;
 	parent: number;
 }
+
+export interface TaxonomyMetadata {
+	hierarchical: boolean;
+}
