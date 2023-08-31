@@ -524,7 +524,10 @@ jQuery( function ( $ ) {
 	}
 
 	function add_placeholder_to_attribute_values_field( $attributeListItem ) {
-		if ( $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' ).is( ':checked' ) ) {
+
+		var $used_for_variations_checkbox = $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' );
+
+		if ( $used_for_variations_checkbox.length && $used_for_variations_checkbox.is( ':checked' ) ) {
 			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_product_meta_boxes.i18n_attributes_used_for_variations_placeholder );
 		} else {
 			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_product_meta_boxes.i18n_attributes_default_placeholder );
