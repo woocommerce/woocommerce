@@ -10,6 +10,8 @@ import { ProgressBar } from '@woocommerce/components';
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from '../types';
+import { CloseButton } from '../components/close-button/close-button';
+import { aiWizardClosedBeforeCompletionEvent } from '../events';
 
 export type businessInfoDescriptionCompleteEvent = {
 	type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
@@ -19,7 +21,11 @@ export const BusinessInfoDescription = ( {
 	sendEvent,
 	context,
 }: {
-	sendEvent: ( event: businessInfoDescriptionCompleteEvent ) => void;
+	sendEvent: (
+		event:
+			| businessInfoDescriptionCompleteEvent
+			| aiWizardClosedBeforeCompletionEvent
+	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
 	const [ businessInfoDescription, setBusinessInfoDescription ] = useState(
@@ -33,7 +39,13 @@ export const BusinessInfoDescription = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-
+			<CloseButton
+				onClick={ () => {
+					sendEvent( {
+						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+					} );
+				} }
+			/>
 			<div className="woocommerce-cys-design-with-ai woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>

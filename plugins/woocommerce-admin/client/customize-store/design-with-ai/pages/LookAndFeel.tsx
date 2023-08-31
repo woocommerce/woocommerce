@@ -11,6 +11,8 @@ import { useState } from '@wordpress/element';
  */
 import { designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
+import { CloseButton } from '../components/close-button/close-button';
+import { aiWizardClosedBeforeCompletionEvent } from '../events';
 
 export type lookAndFeelCompleteEvent = {
 	type: 'LOOK_AND_FEEL_COMPLETE';
@@ -21,7 +23,9 @@ export const LookAndFeel = ( {
 	sendEvent,
 	context,
 }: {
-	sendEvent: ( event: lookAndFeelCompleteEvent ) => void;
+	sendEvent: (
+		event: lookAndFeelCompleteEvent | aiWizardClosedBeforeCompletionEvent
+	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
 	const choices = [
@@ -59,7 +63,13 @@ export const LookAndFeel = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-
+			<CloseButton
+				onClick={ () => {
+					sendEvent( {
+						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+					} );
+				} }
+			/>
 			<div className="woocommerce-cys-design-with-ai-look-and-feel woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>

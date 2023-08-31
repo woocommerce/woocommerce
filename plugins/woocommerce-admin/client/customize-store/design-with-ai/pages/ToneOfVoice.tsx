@@ -11,6 +11,8 @@ import { useState } from '@wordpress/element';
  */
 import { designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
+import { CloseButton } from '../components/close-button/close-button';
+import { aiWizardClosedBeforeCompletionEvent } from '../events';
 
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
@@ -21,7 +23,9 @@ export const ToneOfVoice = ( {
 	sendEvent,
 	context,
 }: {
-	sendEvent: ( event: toneOfVoiceCompleteEvent ) => void;
+	sendEvent: (
+		event: toneOfVoiceCompleteEvent | aiWizardClosedBeforeCompletionEvent
+	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
 	const choices = [
@@ -59,7 +63,13 @@ export const ToneOfVoice = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-
+			<CloseButton
+				onClick={ () => {
+					sendEvent( {
+						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+					} );
+				} }
+			/>
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
