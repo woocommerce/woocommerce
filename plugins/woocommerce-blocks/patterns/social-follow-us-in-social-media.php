@@ -1,22 +1,22 @@
 <?php
 /**
- * Title: Social: Follow us in social media
+ * Title: Social: Follow us on social media
  * Slug: woocommerce-blocks/social-follow-us-in-social-media
  * Categories: WooCommerce
  */
 ?>
 <!-- wp:columns {"verticalAlignment":null,"align":"wide"} -->
 <div class="wp-block-columns alignwide">
-	<!-- wp:column {"verticalAlignment":"bottom","width":"66.66%","layout":{"type":"constrained"}} -->
-	<div class="wp-block-column is-vertically-aligned-bottom" style="flex-basis:66.66%">
+	<!-- wp:column {"verticalAlignment":"bottom","width":"75%","layout":{"type":"constrained"}} -->
+	<div class="wp-block-column is-vertically-aligned-bottom" style="flex-basis:75%">
 		<!-- wp:heading {"level":3,"align":"wide"} -->
-		<h3 class="wp-block-heading alignwide"><?php esc_html_e( 'Follow us in social media', 'woo-gutenberg-products-block' ); ?></h3>
+		<h3 class="wp-block-heading alignwide"><?php esc_html_e( 'Follow us on social media', 'woo-gutenberg-products-block' ); ?></h3>
 		<!-- /wp:heading --></div>
 	<!-- /wp:column -->
 
-	<!-- wp:column {"verticalAlignment":"center","width":"33.33%"} -->
-	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:33.33%">
-		<!-- wp:social-links {"iconColor":"contrast","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0"}}},"className":"is-style-logos-only","layout":{"type":"flex","justifyContent":"right","orientation":"horizontal"}} -->
+	<!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
+	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%">
+		<!-- wp:social-links {"iconColor":"contrast","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0"}}},"className":"is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
 		<ul class="wp-block-social-links has-icon-color is-style-logos-only">
 			<!-- wp:social-link {"url":"<?php echo esc_url( 'https://twitter.com/' ); ?>","service":"twitter"} /-->
 
