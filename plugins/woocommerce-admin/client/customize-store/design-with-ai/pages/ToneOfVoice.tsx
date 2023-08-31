@@ -47,7 +47,9 @@ export const ToneOfVoice = ( {
 			),
 		},
 	];
-	const [ sound, setSound ] = useState< string >( choices[ 0 ].title );
+	const [ sound, setSound ] = useState< string >(
+		context.toneOfVoice.choice ?? choices[ 0 ].title
+	);
 	return (
 		<div>
 			<ProgressBar

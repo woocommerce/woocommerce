@@ -17,12 +17,14 @@ export type businessInfoDescriptionCompleteEvent = {
 };
 export const BusinessInfoDescription = ( {
 	sendEvent,
+	context,
 }: {
 	sendEvent: ( event: businessInfoDescriptionCompleteEvent ) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
-	const [ businessInfoDescription, setBusinessInfoDescription ] =
-		useState( '' );
+	const [ businessInfoDescription, setBusinessInfoDescription ] = useState(
+		context.businessInfoDescription.descriptionText
+	);
 
 	return (
 		<div>

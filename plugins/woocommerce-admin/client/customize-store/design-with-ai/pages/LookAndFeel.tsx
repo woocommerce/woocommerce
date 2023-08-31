@@ -47,7 +47,9 @@ export const LookAndFeel = ( {
 			),
 		},
 	];
-	const [ look, setLook ] = useState< string >( choices[ 0 ].title );
+	const [ look, setLook ] = useState< string >(
+		context.lookAndFeel.choice ?? choices[ 0 ].title
+	);
 	return (
 		<div>
 			<ProgressBar
