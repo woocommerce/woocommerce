@@ -61,12 +61,12 @@ class Woo_AI_Settings {
 		add_filter( 'woocommerce_settings-woo-ai', array( $this, 'add_woo_ai_settings_group_settings' ) );
 
 		$this->tone_of_voice_select_options = array(
-			'informal'     => __( 'Relaxed and friendly.', 'woocommerce' ),
 			'humorous'     => __( 'Light-hearted and fun.', 'woocommerce' ),
-			'neutral'      => __( 'A balanced tone that uses casual expressions.', 'woocommerce' ),
 			'youthful'     => __( 'Friendly and cheeky tone.', 'woocommerce' ),
-			'formal'       => __( 'Direct yet respectful formal tone.', 'woocommerce' ),
+			'informal'     => __( 'Relaxed and friendly.', 'woocommerce' ),
+			'neutral'      => __( 'Default: Neutral tone with casual expressions.', 'woocommerce' ),
 			'motivational' => __( 'Passionate and inspiring.', 'woocommerce' ),
+			'formal'       => __( 'Direct yet respectful formal tone.', 'woocommerce' ),
 		);
 
 		$this->add_sanitization_hooks();
