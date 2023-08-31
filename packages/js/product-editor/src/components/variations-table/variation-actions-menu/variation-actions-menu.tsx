@@ -18,7 +18,7 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
 
 export function VariationActionsMenu( {
-	variation,
+	selection,
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
@@ -45,7 +45,7 @@ export function VariationActionsMenu( {
 				onClick() {
 					recordEvent( 'product_variations_menu_view', {
 						source: TRACKS_SOURCE,
-						variation_id: variation.id,
+						variation_id: selection.id,
 					} );
 				},
 			} }
@@ -56,15 +56,15 @@ export function VariationActionsMenu( {
 						label={ sprintf(
 							/** Translators: Variation ID */
 							__( 'Variation Id: %s', 'woocommerce' ),
-							variation.id
+							selection.id
 						) }
 					>
 						<MenuItem
-							href={ variation.permalink }
+							href={ selection.permalink }
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
-									variation_id: variation.id,
+									variation_id: selection.id,
 								} );
 							} }
 						>
@@ -73,18 +73,18 @@ export function VariationActionsMenu( {
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
-							variation={ variation }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
+							onChange={ onChange }
 							onClose={ onClose }
 						/>
 						<InventoryMenuItem
-							variation={ variation }
+							variation={ selection }
 							handlePrompt={ handlePrompt }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
 						<ShippingMenuItem
-							variation={ variation }
+							variation={ selection }
 							handlePrompt={ handlePrompt }
 							onClose={ onClose }
 						/>
@@ -95,7 +95,7 @@ export function VariationActionsMenu( {
 							label={ __( 'Delete variation', 'woocommerce' ) }
 							variant="link"
 							onClick={ () => {
-								onDelete( variation.id );
+								onDelete( selection.id );
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"

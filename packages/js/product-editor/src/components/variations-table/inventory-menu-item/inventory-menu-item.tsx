@@ -13,6 +13,7 @@ import { chevronRight } from '@wordpress/icons';
  */
 import { TRACKS_SOURCE } from '../../../constants';
 import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-status';
+import { UpdateStockMenuItem } from '../update-stock-menu-item';
 
 export type InventoryMenuItemProps = {
 	variation: ProductVariation;
@@ -55,39 +56,11 @@ export function InventoryMenuItem( {
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
-						<MenuItem
-							onClick={ () => {
-								recordEvent(
-									'product_variations_menu_inventory_select',
-									{
-										source: TRACKS_SOURCE,
-										action: 'stock_quantity_set',
-										variation_id: variation.id,
-									}
-								);
-								handlePrompt( undefined, ( value ) => {
-									const stockQuantity = Number( value );
-									if ( Number.isNaN( stockQuantity ) ) {
-										return {};
-									}
-									recordEvent(
-										'product_variations_menu_inventory_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'stock_quantity_set',
-											variation_id: variation.id,
-										}
-									);
-									return {
-										stock_quantity: stockQuantity,
-										manage_stock: true,
-									};
-								} );
-								onClose();
-							} }
-						>
-							{ __( 'Update stock', 'woocommerce' ) }
-						</MenuItem>
+						<UpdateStockMenuItem
+							selection={ variation }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 						<MenuItem
 							onClick={ () => {
 								recordEvent(
