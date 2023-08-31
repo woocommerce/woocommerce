@@ -384,7 +384,18 @@
 		font-style: normal;
 		font-weight: 400;
 		line-height: 16px; /* 123.077% */
-		margin-top: 6px;
+		margin-top: 8px;
+	}
+
+	.woocommerce-tour-kit-step-navigation__step {
+		color: $gray-700;
+		line-height: 16px;
+	}
+
+	&:not(.woocommerce-customize-store-welcome-tourkit) {
+		.woocommerce-tour-kit-step__body {
+			margin-top: -16px;
+		}
 	}
 }
 
@@ -394,6 +405,7 @@
 	}
 
 	.woocommerce-tour-kit-step {
+		width: 335px;
 		border-radius: 8px;
 		border: 1px solid #dcdcdc;
 
@@ -404,9 +416,14 @@
 			align-items: flex-start;
 			height: 194px;
 			background-image: url(../assets/images/welcome-tour.svg);
+			background-size: 160px;
 			background-position: center;
 			background-repeat: no-repeat;
 			margin-bottom: $gap;
 		}
+	}
+
+	.woocommerce-tour-kit-step-navigation .components-button.is-primary {
+		margin-left: 12px;
 	}
 }
