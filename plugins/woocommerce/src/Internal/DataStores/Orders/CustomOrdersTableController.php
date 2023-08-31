@@ -374,8 +374,13 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( ! as_has_scheduled_action( self::SYNC_CHECK_EVENT_HOOK ) ) {
-			as_schedule_recurring_action(
+		$has_scheduled_action = WC()->queue()->search( array(
+			'hook'   => self::SYNC_CHECK_EVENT_HOOK,
+			'status' => array( 'in-progress', 'pending' ),
+		) );
+
+		if ( ! $has_scheduled_action ) {
+			WC()->queue()->schedule_recurring(
 				time() + HOUR_IN_SECONDS,
 				6 * HOUR_IN_SECONDS,
 				self::SYNC_CHECK_EVENT_HOOK
@@ -395,7 +400,7 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		as_unschedule_all_actions( self::SYNC_CHECK_EVENT_HOOK );
+		WC()->queue()->cancel_all( self::SYNC_CHECK_EVENT_HOOK );
 	}
 
 	/**
