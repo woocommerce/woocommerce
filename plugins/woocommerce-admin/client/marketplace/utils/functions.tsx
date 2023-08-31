@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { Product } from '../components/product-list/types';
-import { MARKETPLACE_API_HOST, MARKETPLACE_CATEGORY_API_PATH } from '../components/constants';
+import { MARKETPLACE_HOST, MARKETPLACE_CATEGORY_API_PATH } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import { LOCALE } from '../../utils/admin-settings';
 
@@ -34,7 +34,7 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 }
 
 function fetchCategories(): Promise< CategoryAPIItem[] > {
-	let url = MARKETPLACE_API_HOST + MARKETPLACE_CATEGORY_API_PATH;
+	let url = MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH;
 
 	if ( LOCALE.userLocale ) {
 		url = `${ url }?locale=${ LOCALE.userLocale }`;

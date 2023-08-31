@@ -18,7 +18,7 @@ import {
 	Product,
 	SearchAPIProductType,
 } from '../product-list/types';
-import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_API_HOST } from '../constants';
+import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 
 export default function Extensions(): JSX.Element {
 	const [ productList, setProductList ] = useState<Product[]>( [] );
@@ -42,7 +42,7 @@ export default function Extensions(): JSX.Element {
 		}
 
 		const wccomSearchEndpoint =
-			MARKETPLACE_API_HOST +
+			MARKETPLACE_HOST +
 			MARKETPLACE_SEARCH_API_PATH + '?' +
 			params.toString();
 

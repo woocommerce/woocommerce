@@ -12,13 +12,13 @@ import { createInterpolateElement } from '@wordpress/element';
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
 import WooIcon from '../../assets/images/woo-icon.svg';
-import { MARKETPLACE_API_HOST } from '../constants';
+import { MARKETPLACE_HOST } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
 	__( '30 day <a>money back guarantee</a>', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_API_HOST + '/refund-policy/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/refund-policy/' } />,
 	}
 );
 
@@ -26,7 +26,7 @@ const supportTitle = createInterpolateElement(
 	__( '<a>Get help</a> when you need it', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_API_HOST + '/docs/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/docs/' } />,
 	}
 );
 
@@ -34,7 +34,7 @@ const paymentTitle = createInterpolateElement(
 	__( '<a>Products</a> you can trust', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_API_HOST + '/products/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/products/' } />,
 	}
 );
 
