@@ -5,19 +5,48 @@ import { Dropdown, MenuItem } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
+import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { ShippingMenuItemProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
+import { VariationActionsMenuItemProps } from '../types';
+import { handlePrompt } from '../../../utils/handle-prompt';
 
 export function ShippingMenuItem( {
-	variation,
-	handlePrompt,
+	selection,
+	onChange,
 	onClose,
-}: ShippingMenuItemProps ) {
+}: VariationActionsMenuItemProps ) {
+	const ids = Array.isArray( selection )
+		? selection.map( ( { id } ) => id )
+		: selection.id;
+
+	function handleDimensionsChange(
+		value: Partial< ProductVariation[ 'dimensions' ] >
+	) {
+		if ( Array.isArray( selection ) ) {
+			onChange(
+				selection.map( ( { id, dimensions } ) => ( {
+					id,
+					dimensions: {
+						...dimensions,
+						...value,
+					},
+				} ) )
+			);
+		} else {
+			onChange( {
+				dimensions: {
+					...selection.dimensions,
+					...value,
+				},
+			} );
+		}
+	}
+
 	return (
 		<Dropdown
 			position="middle right"
@@ -26,7 +55,7 @@ export function ShippingMenuItem( {
 					onClick={ () => {
 						recordEvent( 'product_variations_menu_shipping_click', {
 							source: TRACKS_SOURCE,
-							variation_id: variation.id,
+							variation_id: ids,
 						} );
 						onToggle();
 					} }
@@ -46,24 +75,23 @@ export function ShippingMenuItem( {
 								{
 									source: TRACKS_SOURCE,
 									action: 'dimensions_length_set',
-									variation_id: variation.id,
+									variation_id: ids,
 								}
 							);
-							handlePrompt( undefined, ( value ) => {
-								recordEvent(
-									'product_variations_menu_shipping_update',
-									{
-										source: TRACKS_SOURCE,
-										action: 'dimensions_length_set',
-										variation_id: variation.id,
-									}
-								);
-								return {
-									dimensions: {
-										...variation.dimensions,
+							handlePrompt( {
+								onOk( value ) {
+									recordEvent(
+										'product_variations_menu_shipping_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'dimensions_length_set',
+											variation_id: ids,
+										}
+									);
+									handleDimensionsChange( {
 										length: value,
-									},
-								};
+									} );
+								},
 							} );
 							onClose();
 						} }
@@ -77,24 +105,23 @@ export function ShippingMenuItem( {
 								{
 									source: TRACKS_SOURCE,
 									action: 'dimensions_width_set',
-									variation_id: variation.id,
+									variation_id: ids,
 								}
 							);
-							handlePrompt( undefined, ( value ) => {
-								recordEvent(
-									'product_variations_menu_shipping_update',
-									{
-										source: TRACKS_SOURCE,
-										action: 'dimensions_width_set',
-										variation_id: variation.id,
-									}
-								);
-								return {
-									dimensions: {
-										...variation.dimensions,
+							handlePrompt( {
+								onOk( value ) {
+									recordEvent(
+										'product_variations_menu_shipping_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'dimensions_width_set',
+											variation_id: ids,
+										}
+									);
+									handleDimensionsChange( {
 										width: value,
-									},
-								};
+									} );
+								},
 							} );
 							onClose();
 						} }
@@ -108,24 +135,23 @@ export function ShippingMenuItem( {
 								{
 									source: TRACKS_SOURCE,
 									action: 'dimensions_height_set',
-									variation_id: variation.id,
+									variation_id: ids,
 								}
 							);
-							handlePrompt( undefined, ( value ) => {
-								recordEvent(
-									'product_variations_menu_shipping_update',
-									{
-										source: TRACKS_SOURCE,
-										action: 'dimensions_height_set',
-										variation_id: variation.id,
-									}
-								);
-								return {
-									dimensions: {
-										...variation.dimensions,
+							handlePrompt( {
+								onOk( value ) {
+									recordEvent(
+										'product_variations_menu_shipping_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'dimensions_height_set',
+											variation_id: ids,
+										}
+									);
+									handleDimensionsChange( {
 										height: value,
-									},
-								};
+									} );
+								},
 							} );
 							onClose();
 						} }
@@ -139,19 +165,30 @@ export function ShippingMenuItem( {
 								{
 									source: TRACKS_SOURCE,
 									action: 'weight_set',
-									variation_id: variation.id,
+									variation_id: ids,
 								}
 							);
-							handlePrompt( undefined, ( value ) => {
-								recordEvent(
-									'product_variations_menu_shipping_update',
-									{
-										source: TRACKS_SOURCE,
-										action: 'weight_set',
-										variation_id: variation.id,
+							handlePrompt( {
+								onOk( value ) {
+									recordEvent(
+										'product_variations_menu_shipping_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'weight_set',
+											variation_id: ids,
+										}
+									);
+									if ( Array.isArray( selection ) ) {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
+												weight: value,
+											} ) )
+										);
+									} else {
+										onChange( { weight: value } );
 									}
-								);
-								return { weight: value };
+								},
 							} );
 							onClose();
 						} }
