@@ -143,6 +143,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		},
 		on: {
 			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
+				actions: [ 'logAiWizardClosedBeforeCompletion' ],
 				// TODO: handle this event when the 'x' is clicked at any point
 				// probably bail (to where?) and log the tracks for which step it is in plus
 				// whatever details might be helpful to know why they bailed

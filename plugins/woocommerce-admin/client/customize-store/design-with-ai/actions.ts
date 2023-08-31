@@ -50,8 +50,13 @@ const assignToneOfVoice = assign<
 	},
 } );
 
+const logAiWizardClosedBeforeCompletion = () => {
+	// track
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
+	logAiWizardClosedBeforeCompletion,
 };
