@@ -8,12 +8,16 @@ interface State {
 }
 
 interface Context {
-	productGallery: { numberOfThumbnails: number };
+	woocommerce: {
+		productGallery: { numberOfThumbnails: number };
+	};
 }
 
 interface Selectors {
-	productGallery: {
-		getNumberOfPages: ( store: unknown ) => number;
+	woocommerce: {
+		productGallery: {
+			numberOfPages: ( store: unknown ) => number;
+		};
 	};
 }
 
@@ -28,11 +32,14 @@ type SelectorsStore = Pick< Store, 'context' | 'selectors' >;
 
 interactivityApiStore( {
 	selectors: {
-		productGallery: {
-			getNumberOfPages: ( store: SelectorsStore ) => {
-				const { context } = store;
+		woocommerce: {
+			productGallery: {
+				numberOfPages: ( store: SelectorsStore ) => {
+					const { context } = store;
 
-				return context.productGallery.numberOfThumbnails;
+					return context.woocommerce.productGallery
+						.numberOfThumbnails;
+				},
 			},
 		},
 	},
