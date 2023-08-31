@@ -7,7 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 export class Connect extends Component {
 	constructor( props ) {
@@ -37,7 +37,7 @@ export class Connect extends Component {
 	}
 
 	async connectJetpack() {
-		const { jetpackConnectUrl, onConnect } = this.props;
+		const { jetpackAuthUrl, onConnect } = this.props;
 
 		this.setState(
 			{
@@ -47,7 +47,7 @@ export class Connect extends Component {
 				if ( onConnect ) {
 					onConnect();
 				}
-				window.location = jetpackConnectUrl;
+				window.location = jetpackAuthUrl;
 			}
 		);
 	}
@@ -114,15 +114,15 @@ Connect.propTypes = {
 	 */
 	isRequesting: PropTypes.bool,
 	/**
-	 * Generated Jetpack connection URL.
+	 * Generated Jetpack authentication URL.
 	 */
-	jetpackConnectUrl: PropTypes.string,
+	jetpackAuthUrl: PropTypes.string,
 	/**
 	 * Called before the redirect to Jetpack.
 	 */
 	onConnect: PropTypes.func,
 	/**
-	 * Called when the plugin has an error retrieving the jetpackConnectUrl.
+	 * Called when the plugin has an error retrieving the jetpackAuthUrl.
 	 */
 	onError: PropTypes.func,
 	/**
@@ -157,20 +157,24 @@ Connect.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
-			select( PLUGINS_STORE_NAME );
+		const {
+			getJetpackAuthUrl,
+			isOnboardingRequesting,
+			getOnboardingError,
+		} = select( ONBOARDING_STORE_NAME );
 
 		const queryArgs = {
-			redirect_url: props.redirectUrl || window.location.href,
+			redirectUrl: props.redirectUrl || window.location.href,
+			from: 'woocommerce-services',
 		};
-		const isRequesting = isPluginsRequesting( 'getJetpackConnectUrl' );
-		const error = getPluginsError( 'getJetpackConnectUrl' ) || '';
-		const jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
+		const isRequesting = isOnboardingRequesting( 'getJetpackAuthUrl' );
+		const error = getOnboardingError( 'getJetpackAuthUrl' ) || '';
+		const jetpackAuthUrl = getJetpackAuthUrl( queryArgs ).url;
 
 		return {
 			error,
 			isRequesting,
-			jetpackConnectUrl,
+			jetpackAuthUrl,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

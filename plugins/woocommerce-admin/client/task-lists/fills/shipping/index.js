@@ -207,11 +207,6 @@ export class Shipping extends Component {
 			return pluginToPromote.slug;
 		} );
 
-		// Add jetpack to the list if the list includes woocommerce-services
-		if ( pluginsToActivate.includes( 'woocommerce-services' ) ) {
-			pluginsToActivate.push( 'jetpack' );
-		}
-
 		const onShippingPluginInstalltionSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
 				install: false,
@@ -383,17 +378,10 @@ export class Shipping extends Component {
 
 		// Override the step fields for the smart shipping defaults.
 		if ( this.shippingSmartDefaultsEnabled ) {
-			const agreementText = pluginsToActivate.includes(
-				'woocommerce-services'
-			)
-				? __(
-						'By installing Jetpack and WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
-						'woocommerce'
-				  )
-				: __(
-						'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
-						'woocommerce'
-				  );
+			const agreementText = __(
+				'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
+				'woocommerce'
+			);
 			const shippingSmartDefaultsSteps = {
 				rates: {
 					label: __( 'Review your shipping options', 'woocommerce' ),

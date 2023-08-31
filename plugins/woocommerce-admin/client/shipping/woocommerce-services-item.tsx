@@ -31,7 +31,7 @@ const WooCommerceServicesItem: React.FC< {
 				actions.push( {
 					url: getAdminLink( 'plugins.php' ),
 					label: __(
-						'Finish the setup by connecting your store to Jetpack.',
+						'Finish the setup by connecting your store to WordPress.com.',
 						'woocommerce'
 					),
 				} );
