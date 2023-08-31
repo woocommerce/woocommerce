@@ -12,8 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2>
 	<?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?>
-	<?php echo wc_help_tip( __( 'Shipping classes can be used to group products of similar type and can be used by some Shipping Methods (such as "Flat rate shipping") to provide different rates to different classes of product.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 </h2>
+
+<p class="wc-shipping-zone-help-text">
+	<?php esc_html_e( 'Shipping classes can be used to group products of similar type and can be used by some Shipping Methods (such as "Flat rate shipping") to provide different rates to different classes of product.', 'woocommerce' ); ?>
+</p>
 
 <table class="wc-shipping-classes widefat">
 	<thead>
