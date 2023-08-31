@@ -364,4 +364,112 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			'Failed asserting that the template is converted to a formatted template correctly.'
 		);
 	}
+
+	/**
+	 * Test that removing a block in the template works.
+	 */
+	public function test_removing_blocks() {
+		$template = new BlockTemplate();
+
+		$template->add_block(
+			[
+				'blockName'  => 'test-block-name-c',
+				'order'      => 100,
+				'attributes' => [
+					'attr-c1' => 'value-c1',
+					'attr-c2' => 'value-c2',
+				],
+			]
+		);
+
+		$block_b = $template->add_block(
+			[
+				'id'         => 'b',
+				'blockName'  => 'test-block-name-b',
+				'order'      => 50,
+				'attributes' => [
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				],
+			]
+		);
+
+		$template->add_block(
+			[
+				'id'         => 'a',
+				'blockName'  => 'test-block-name-a',
+				'order'      => 10,
+				'attributes' => [
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				],
+			]
+		);
+
+		$block_b->add_block(
+			[
+				'blockName'  => 'test-block-name-2',
+				'order'      => 20,
+				'attributes' => [
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				],
+			]
+		);
+
+		$block_b->add_block(
+			[
+				'blockName'  => 'test-block-name-1',
+				'order'      => 10,
+				'attributes' => [
+					'attr-3' => 'value-3',
+					'attr-4' => 'value-4',
+				],
+			]
+		);
+
+		$block_b->add_block(
+			[
+				'blockName' => 'test-block-name-3',
+				'order'     => 30,
+			]
+		);
+
+		$block_to_insert_in = $template->get_block( 'a' );
+
+		$block_to_insert_in->add_block(
+			[
+				'blockName' => 'inserted-block',
+			]
+		);
+
+		$template->remove_block( 'b' );
+
+		$this->assertSame(
+			[
+				[
+					'test-block-name-a',
+					[
+						'attr-1' => 'value-1',
+						'attr-2' => 'value-2',
+					],
+					[
+						[
+							'inserted-block',
+							[],
+						],
+					],
+				],
+				[
+					'test-block-name-c',
+					[
+						'attr-c1' => 'value-c1',
+						'attr-c2' => 'value-c2',
+					],
+				],
+			],
+			$template->get_formatted_template(),
+			'Failed asserting that the template is converted to a formatted template correctly.'
+		);
+	}
 }

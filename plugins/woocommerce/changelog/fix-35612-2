@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store transactional data in order tables with HPOS.

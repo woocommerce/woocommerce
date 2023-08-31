@@ -116,16 +116,13 @@ class FeaturesController {
 			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
 			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
 				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
-				'is_experimental'    => true,
 				'enabled_by_default' => false,
 			),
 			$hpos_authoritative    => array(
 				'name'            => __( 'High performance order storage', 'woocommerce' ),
-				'is_experimental' => true,
 			),
 			$hpos_enable_sync      => array(
 				'name'            => '',
-				'is_experimental' => true,
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -133,12 +130,23 @@ class FeaturesController {
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
+			'marketplace'          => array(
+				'name'               => __( 'Marketplace', 'woocommerce' ),
+				'description'        => __(
+					'New, faster way to find extensions and themes for your WooCommerce store',
+					'woocommerce'
+				),
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+			),
 		);
 
 		$this->legacy_feature_ids = array(
 			'analytics',
 			'new_navigation',
 			'product_block_editor',
+			'marketplace',
 			// Compatibility for COT is determined by `custom_order_tables'.
 			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,

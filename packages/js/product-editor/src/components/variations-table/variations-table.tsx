@@ -1,21 +1,25 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Button, Spinner, Tooltip } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	Button,
+	CheckboxControl,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
 import {
-	Link,
-	ListItem,
-	Pagination,
-	Sortable,
-	Tag,
-} from '@woocommerce/components';
-import { getNewPath } from '@woocommerce/navigation';
-import { useContext, useState, createElement } from '@wordpress/element';
+	useContext,
+	useState,
+	createElement,
+	useMemo,
+} from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
@@ -34,7 +38,11 @@ import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
 	DEFAULT_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
+	TRACKS_SOURCE,
 } from '../../constants';
+import { VariationActionsMenu } from './variation-actions-menu';
+import { useSelection } from '../../hooks/use-selection';
+import { VariationsActionsMenu } from './variations-actions-menu';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
@@ -46,8 +54,26 @@ export function VariationsTable() {
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
+	const {
+		areAllSelected,
+		isSelected,
+		hasSelection,
+		onSelectAll,
+		onSelectItem,
+		onClearSelection,
+	} = useSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
+	const requestParams = useMemo(
+		() => ( {
+			product_id: productId,
+			page: currentPage,
+			per_page: perPage,
+			order: 'asc',
+			orderby: 'menu_order',
+		} ),
+		[ productId, currentPage, perPage ]
+	);
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
 	const { isLoading, variations, totalCount, isGeneratingVariations } =
@@ -59,20 +85,13 @@ export function VariationsTable() {
 					getProductVariationsTotalCount,
 					isGeneratingVariations: getIsGeneratingVariations,
 				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-				const requestParams = {
-					product_id: productId,
-					page: currentPage,
-					per_page: perPage,
-					order: 'asc',
-					orderby: 'menu_order',
-				};
 				return {
 					isLoading: ! hasFinishedResolution(
 						'getProductVariations',
 						[ requestParams ]
 					),
 					isGeneratingVariations: getIsGeneratingVariations( {
-						product_id: productId,
+						product_id: requestParams.product_id,
 					} ),
 					variations:
 						getProductVariations< ProductVariation[] >(
@@ -84,12 +103,18 @@ export function VariationsTable() {
 						),
 				};
 			},
-			[ currentPage, perPage, productId ]
+			[ requestParams ]
 		);
 
-	const { updateProductVariation } = useDispatch(
-		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-	);
+	const {
+		updateProductVariation,
+		deleteProductVariation,
+		batchUpdateProductVariations,
+		invalidateResolution,
+	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( 'core/notices' );
 
 	if ( ! variations && isLoading ) {
 		return (
@@ -104,9 +129,34 @@ export function VariationsTable() {
 		);
 	}
 
-	function handleCustomerVisibilityClick(
+	const variationIds = variations.map( ( { id } ) => id );
+
+	function handleDeleteVariationClick( variationId: number ) {
+		if ( isUpdating[ variationId ] ) return;
+		setIsUpdating( ( prevState ) => ( {
+			...prevState,
+			[ variationId ]: true,
+		} ) );
+		deleteProductVariation< Promise< ProductVariation > >( {
+			product_id: productId,
+			id: variationId,
+		} )
+			.then( () => {
+				recordEvent( 'product_variations_delete', {
+					source: TRACKS_SOURCE,
+				} );
+			} )
+			.finally( () =>
+				setIsUpdating( ( prevState ) => ( {
+					...prevState,
+					[ variationId ]: false,
+				} ) )
+			);
+	}
+
+	function handleVariationChange(
 		variationId: number,
-		status: 'private' | 'publish'
+		variation: Partial< ProductVariation >
 	) {
 		if ( isUpdating[ variationId ] ) return;
 		setIsUpdating( ( prevState ) => ( {
@@ -115,13 +165,79 @@ export function VariationsTable() {
 		} ) );
 		updateProductVariation< Promise< ProductVariation > >(
 			{ product_id: productId, id: variationId },
-			{ status }
-		).finally( () =>
-			setIsUpdating( ( prevState ) => ( {
-				...prevState,
-				[ variationId ]: false,
-			} ) )
-		);
+			variation
+		)
+			.then( () => {
+				createSuccessNotice(
+					/* translators: The updated variations count */
+					sprintf( __( '%s variation/s updated.', 'woocommerce' ), 1 )
+				);
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to save variation.', 'woocommerce' )
+				);
+			} )
+			.finally( () =>
+				setIsUpdating( ( prevState ) => ( {
+					...prevState,
+					[ variationId ]: false,
+				} ) )
+			);
+	}
+
+	function handleUpdateAll( update: Partial< ProductVariation >[] ) {
+		batchUpdateProductVariations< { update: [] } >(
+			{ product_id: productId },
+			{ update }
+		)
+			.then( ( response ) =>
+				invalidateResolution( 'getProductVariations', [
+					requestParams,
+				] ).then( () => response )
+			)
+			.then( ( response ) => {
+				createSuccessNotice(
+					sprintf(
+						/* translators: The updated variations count */
+						__( '%s variation/s updated.', 'woocommerce' ),
+						response.update.length
+					)
+				);
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to update variations.', 'woocommerce' )
+				);
+			} );
+	}
+
+	function handleDeleteAll( values: Partial< ProductVariation >[] ) {
+		batchUpdateProductVariations< { delete: [] } >(
+			{ product_id: productId },
+			{
+				delete: values.map( ( { id } ) => id ),
+			}
+		)
+			.then( ( response ) =>
+				invalidateResolution( 'getProductVariations', [
+					requestParams,
+				] ).then( () => response )
+			)
+			.then( ( response ) => {
+				createSuccessNotice(
+					sprintf(
+						/* translators: The updated variations count */
+						__( '%s variation/s updated.', 'woocommerce' ),
+						response.delete.length
+					)
+				);
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to delete variations.', 'woocommerce' )
+				);
+			} );
 	}
 
 	return (
@@ -140,9 +256,56 @@ export function VariationsTable() {
 						) }
 					</div>
 				) ) }
+			<div className="woocommerce-product-variations__header">
+				<div className="woocommerce-product-variations__selection">
+					<CheckboxControl
+						value="all"
+						checked={ areAllSelected( variationIds ) }
+						// @ts-expect-error Property 'indeterminate' does not exist
+						indeterminate={
+							! areAllSelected( variationIds ) &&
+							hasSelection( variationIds )
+						}
+						onChange={ onSelectAll( variationIds ) }
+					/>
+				</div>
+				<div className="woocommerce-product-variations__filters">
+					<Button
+						variant="tertiary"
+						disabled={ areAllSelected( variationIds ) }
+						onClick={ () => onSelectAll( variationIds )( true ) }
+					>
+						{ __( 'Select all', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="tertiary"
+						disabled={ ! hasSelection( variationIds ) }
+						onClick={ () => onClearSelection() }
+					>
+						{ __( 'Clear selection', 'woocommerce' ) }
+					</Button>
+				</div>
+				<div>
+					<VariationsActionsMenu
+						selection={ variations.filter( ( variation ) =>
+							isSelected( variation.id )
+						) }
+						disabled={ ! hasSelection( variationIds ) }
+						onChange={ handleUpdateAll }
+						onDelete={ handleDeleteAll }
+					/>
+				</div>
+			</div>
 			<Sortable>
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
+						<div className="woocommerce-product-variations__selection">
+							<CheckboxControl
+								value={ variation.id }
+								checked={ isSelected( variation.id ) }
+								onChange={ onSelectItem( variation.id ) }
+							/>
+						</div>
 						<div className="woocommerce-product-variations__attributes">
 							{ variation.attributes.map( ( attribute ) => {
 								const tag = (
@@ -220,9 +383,9 @@ export function VariationsTable() {
 											isUpdating[ variation.id ]
 										}
 										onClick={ () =>
-											handleCustomerVisibilityClick(
+											handleVariationChange(
 												variation.id,
-												'publish'
+												{ status: 'publish' }
 											)
 										}
 									>
@@ -251,9 +414,9 @@ export function VariationsTable() {
 											isUpdating[ variation.id ]
 										}
 										onClick={ () =>
-											handleCustomerVisibilityClick(
+											handleVariationChange(
 												variation.id,
-												'private'
+												{ status: 'private' }
 											)
 										}
 									>
@@ -265,18 +428,15 @@ export function VariationsTable() {
 									</Button>
 								</Tooltip>
 							) }
-
-							<Link
-								href={ getNewPath(
-									{},
-									`/product/${ productId }/variation/${ variation.id }`,
-									{}
-								) }
-								type="wc-admin"
-								className="components-button"
-							>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Link>
+							<VariationActionsMenu
+								selection={ variation }
+								onChange={ ( value ) =>
+									handleVariationChange( variation.id, value )
+								}
+								onDelete={ ( { id } ) =>
+									handleDeleteVariationClick( id )
+								}
+							/>
 						</div>
 					</ListItem>
 				) ) }

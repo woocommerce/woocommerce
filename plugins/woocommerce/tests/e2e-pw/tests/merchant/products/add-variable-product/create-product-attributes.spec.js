@@ -23,6 +23,8 @@ const step_goToAttributesTab = async ( page ) => {
 	} );
 };
 
+test.describe.configure( { mode: 'serial' } );
+
 test.describe( 'Add product attributes', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 

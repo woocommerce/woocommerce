@@ -6,5 +6,5 @@ import { BlockAttributes } from '@wordpress/blocks';
 
 export interface CatalogVisibilityBlockAttributes extends BlockAttributes {
 	label: string;
-	visibilty: Product[ 'catalog_visibility' ];
+	visibility: Product[ 'catalog_visibility' ];
 }
