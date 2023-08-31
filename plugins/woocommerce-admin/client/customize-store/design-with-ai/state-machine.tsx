@@ -17,7 +17,7 @@ import {
 	ApiCallLoader,
 } from './pages';
 import { actions } from './actions';
-
+import { services } from './services';
 export const designWithAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithAi',
@@ -63,8 +63,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 					},
 					postBusinessInfoDescription: {
-						always: {
-							target: '#lookAndFeel',
+						invoke: {
+							src: 'getLookAndTone',
+							onDone: {
+								actions: [ 'assignLookAndTone' ],
+								target: '#lookAndFeel',
+							},
 						},
 					},
 				},
@@ -152,5 +156,6 @@ export const designWithAiStateMachineDefinition = createMachine(
 	},
 	{
 		actions,
+		services,
 	}
 );

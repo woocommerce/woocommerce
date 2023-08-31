@@ -43,7 +43,7 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( context, event: unknown ) => {
+	toneOfVoice: ( context, event: unknown ) => {
 		return {
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
@@ -54,9 +54,28 @@ const logAiWizardClosedBeforeCompletion = () => {
 	// track
 };
 
+const assignLookAndTone = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	lookAndFeel: ( context, event: unknown ) => {
+		return {
+			// @ts-expect-error -- temp
+			choice: JSON.parse( event.data.completion ).look,
+		};
+	},
+	toneOfVoice: ( context, event: unknown ) => {
+		return {
+			// @ts-expect-error -- temp
+			choice: JSON.parse( event.data.completion ).tone,
+		};
+	},
+} );
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
 	logAiWizardClosedBeforeCompletion,
+	assignLookAndTone,
 };
