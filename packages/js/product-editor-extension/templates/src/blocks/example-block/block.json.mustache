@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "{{namespace}}/example-block",
+    "title": "Example block",
+    "category": "woocommerce",
+    "description": "Block to demonstrate extensibility of the product editor.",
+    "keywords": [
+        "product",
+        "example"
+    ],
+    "textdomain": "default",
+    "attributes": {
+        "message": {
+            "type": "string",
+            "source": "text",
+            "selector": "div"
+        }
+    },
+    "supports": {
+        "html": false,
+        "inserter": false
+    },
+    "editorStyle": "file:./editor.css",
+    "templateLock": "contentOnly"
+}
