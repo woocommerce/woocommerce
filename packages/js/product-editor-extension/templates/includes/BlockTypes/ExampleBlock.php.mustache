@@ -20,4 +20,31 @@ class ExampleBlock extends AbstractBlock {
 	 */
 	protected $block_name = 'example-block';
 
+    /**
+     *
+     */
+    public function __construct() {
+        parent::construct();
+        add_action( 'woocommerce_block_template_register', 'add_block_to_simple_product_template' );
+    }
+
+    /**
+     * Add the block to the simple product template.
+     */
+    public function add_block_to_simple_product_template( BlockTemplateInterface $template ) {
+		if ( $template instanceof ProductFormTemplateInterface && 'simple-product' === $template->get_id() ) {
+			$section = $template->get_section_by_id( 'product-catalog-section' );
+			$section->add_block(
+				[
+					'id'         => 'example-block',
+					'blockName'  => $this->get_block_type(),
+					'order'      => 15,
+					'attributes' => [
+						'message' => __( 'My custom message', '{{textdomain}}' ),
+					],
+				]
+			);
+		}
+    }
+
 }

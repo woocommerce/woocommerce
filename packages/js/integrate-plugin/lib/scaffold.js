@@ -43,7 +43,7 @@ module.exports = async (
 	const view = {
 		$schema,
 		apiVersion,
-		slug: textdomain,
+		textdomain,
 		wpScripts,
 		wpEnv,
 		npmDependencies,
