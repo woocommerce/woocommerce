@@ -48,7 +48,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		width: 404px;
 		display: block;
 		height: 48px;
-		margin-top: 32px;
+		margin-top: 46px;
 	}
 }
 
@@ -97,11 +97,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	}
 }
 
-.woocommerce-cys-design-with-ai-look-and-feel {
+.woocommerce-cys-design-with-ai-look-and-feel, .woocommerce-cys-design-with-ai-tone-of-voice {
 	.choices {
 		width: 404px;
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
+		gap: 16px;
 	}
 }
