@@ -1,6 +1,6 @@
 <?php
 
-namespace {{namespaceCamelCase}};
+namespace {{namespacePascalCase}};
 
 use Automattic\WooCommerce\Plugins\PluginPackage;
 
@@ -28,7 +28,7 @@ class BlockRegistry {
      * Get the namespace.
      */
     protected function get_namespace() {
-        return 'TestPlugin\BlockTypes';
+        return '{{namespacePascalCase}}\BlockTypes';
     }
 
     /**

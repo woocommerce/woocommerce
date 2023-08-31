@@ -4,6 +4,7 @@
 const { existsSync } = require( 'fs' );
 const { code, info, success } = require( '../node_modules/@wordpress/create-block/lib/log' );
 const path = require( 'path' );
+const { pascalCase, snakeCase } = require( 'change-case' );
 
 /**
  * Internal dependencies
@@ -33,6 +34,7 @@ module.exports = async (
 		template,
 		includesDir,
 		srcDir,
+		namespace,
 	}
 ) => {
 	info( '' );
@@ -56,6 +58,9 @@ module.exports = async (
 		includesOutputTemplates,
 		srcOutputTemplates,
 		pluginOutputTemplates,
+		namespace,
+		namespaceSnakeCase: snakeCase( namespace ),
+		namespacePascalCase: pascalCase( namespace ),
 	};
 	if ( template ) {
 		initTemplate( view );

@@ -29,6 +29,7 @@ module.exports = () => {
                 name: name[1],
                 textdomain: textdomain && textdomain[1],
                 version: version && version[1],
+                namespace: textdomain && textdomain[1],
             }
         }
     };

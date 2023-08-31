@@ -40,6 +40,7 @@ program
 	.option( '--wp-env', 'enable integration with `@wordpress/env` package' )
 	.option( '--includes-dir <dir>', 'the path to the includes directory with backend logic' )
 	.option( '--src-dir <dir>', 'the path to the src directory with client-side logic' )
+	.option( '--namespace <value>', 'internal namespace for the plugin' )
 	.action(
 		async (
 			{
@@ -49,6 +50,7 @@ program
 				variant,
 				includesDir,
 				srcDir,
+				namespace,
 			}
 		) => {
 			await checkSystemRequirements( engines );
@@ -74,6 +76,7 @@ program
 				const optionsValues = Object.fromEntries(
 					Object.entries( {
 						includesDir,
+						namespace,
 						srcDir,
 						template,
 						wpEnv,

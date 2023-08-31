@@ -9,10 +9,6 @@
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
 	},
-	"scripts": {
-		"postinstall": "composer install",
-		"changelog": "composer exec -- changelogger"
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/woocommerce/woocommerce.git"
