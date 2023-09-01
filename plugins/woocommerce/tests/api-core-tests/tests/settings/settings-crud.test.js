@@ -1941,7 +1941,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_analytics_enabled',
 						label: 'Analytics',
-						description: 'Enables WooCommerce Analytics',
+						description: 'Enable WooCommerce Analytics',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1954,7 +1954,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_navigation_enabled',
 						label: 'Navigation',
 						description: expect.stringContaining(
-							'Adds the new WooCommerce navigation experience to the dashboard'
+							'Add the new WooCommerce navigation experience to the dashboard'
 						),
 						type: 'checkbox',
 						value: expect.any( String ),
