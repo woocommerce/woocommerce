@@ -377,6 +377,7 @@ jobs:
                   E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result || needs.e2e-tests.result }}
                   k6_RESULT: ${{ needs.k6-tests.outputs.test-result || needs.k6-tests.result }}
                   PLUGINS_BLOCKS_PATH: ${{ steps.download-plugin-blocks.outputs.download-path }}
+                  PLUGIN_TESTS_RESULT: ${{ needs.test-plugins.result }}
 
             - name: Send Slack message
               id: send-slack-message

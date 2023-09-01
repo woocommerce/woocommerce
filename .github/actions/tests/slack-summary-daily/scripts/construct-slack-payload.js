@@ -4,6 +4,7 @@ module.exports = async ( { context, core, github } ) => {
 		E2E_RESULT,
 		k6_RESULT,
 		PLUGINS_BLOCKS_PATH,
+		PLUGIN_TESTS_RESULT,
 		GITHUB_REF_NAME,
 		GITHUB_RUN_ID,
 	} = process.env;
@@ -128,7 +129,8 @@ module.exports = async ( { context, core, github } ) => {
 	};
 
 	const create_blockGroups_plugins = () => {
-		const blocks_pluginTestsNotRun = [
+		const pluginTestsSkipped = PLUGIN_TESTS_RESULT === 'skipped';
+		const blocks_pluginTestsSkipped = [
 			{
 				type: 'section',
 				text: {
@@ -137,13 +139,22 @@ module.exports = async ( { context, core, github } ) => {
 				},
 			},
 			{
+				type: 'context',
+				elements: [
+					{
+						type: 'mrkdwn',
+						text: `Head over to the <${ URL_GITHUB_RUN_LOG }|GitHub workflow run log> to see what went wrong.`,
+					},
+				],
+			},
+			{
 				type: 'divider',
 			},
 		];
 
-		return PLUGINS_BLOCKS_PATH
-			? readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH )
-			: blocks_pluginTestsNotRun;
+		return pluginTestsSkipped
+			? blocks_pluginTestsSkipped
+			: readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH );
 	};
 
 	const blockGroup_header = await create_blockGroup_header();
