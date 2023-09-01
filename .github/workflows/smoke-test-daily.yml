@@ -299,7 +299,8 @@ jobs:
     plugins-results:
         name: Publish report on Smoke tests on trunk with plugins
         if: |
-            ( success() || failure() ) &&
+            ( success() || failure() ) && 
+            ( needs.test-plugins.result != 'skipped' ) &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
         needs: [e2e-tests, test-plugins, k6-tests]
