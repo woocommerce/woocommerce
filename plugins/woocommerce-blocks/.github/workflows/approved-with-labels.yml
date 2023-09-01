@@ -22,4 +22,4 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   automations: assign-milestone
-                  milestone_bump_strategy: none
+                  milestone_bump_strategy: minor
