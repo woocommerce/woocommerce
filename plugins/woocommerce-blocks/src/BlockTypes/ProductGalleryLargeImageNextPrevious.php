@@ -110,7 +110,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			$this->get_class_suffix( $context )
 		);
 
-		$alignment_class = $attributes['layout']['verticalAlignment'] ? 'is-vertically-aligned-' . $attributes['layout']['verticalAlignment'] : '';
+		$alignment_class = isset( $attributes['layout']['verticalAlignment'] ) ? 'is-vertically-aligned-' . $attributes['layout']['verticalAlignment'] : '';
 		$position_class  = 'wc-block-product-gallery-large-image-next-previous--' . $this->get_class_suffix( $context );
 
 		return strtr(
