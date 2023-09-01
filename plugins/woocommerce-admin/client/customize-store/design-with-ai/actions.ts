@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { DoneInvokeEvent, assign } from 'xstate';
+import { assign } from 'xstate';
 
 /**
  * Internal dependencies
@@ -9,7 +9,7 @@ import { DoneInvokeEvent, assign } from 'xstate';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	AIEndpointResponse,
+	completionAPIResponse,
 } from './types';
 import {
 	businessInfoDescriptionCompleteEvent,
@@ -61,14 +61,12 @@ const assignLookAndTone = assign<
 >( {
 	lookAndFeel: ( context, event: unknown ) => {
 		return {
-			// @ts-expect-error -- temp
-			choice: event.data.look,
+			choice: ( event as { data: completionAPIResponse } ).data.look,
 		};
 	},
 	toneOfVoice: ( context, event: unknown ) => {
 		return {
-			// @ts-expect-error -- temp
-			choice: event.data.tone,
+			choice: ( event as { data: completionAPIResponse } ).data.tone,
 		};
 	},
 } );

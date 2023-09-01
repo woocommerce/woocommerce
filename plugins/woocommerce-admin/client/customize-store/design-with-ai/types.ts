@@ -30,7 +30,7 @@ export type designWithAiStateMachineEvents =
 			type: 'API_CALL_TO_AI_FAILED';
 	  };
 
-export type AIEndpointResponse = {
+export type completionAPIResponse = {
 	look: string;
 	tone: string;
 };
