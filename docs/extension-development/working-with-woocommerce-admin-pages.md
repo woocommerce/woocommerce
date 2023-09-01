@@ -2,11 +2,11 @@
 
 ## Introduction
 
-There are a number of ways to manage admin-area pages for your WooCommerce extension. You can use existing PHP pages or create new React-powered pages. Regardless of the approach you choose, you’ll need to register your page with the [`PageController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/PageController.php) in order to display the WooCommerce Admin header and Activity Panel on your page.
+There are a number of ways to manage admin-area pages for your WooCommerce extension. You can use existing PHP pages or create new React-powered pages. Regardless of the approach you choose, you’ll need to register your page with the [`PageController`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html) in order to display the WooCommerce Admin header and activity panel on your page.
 
 ## Connecting a PHP-powered page to WooCommerce Admin
 
-To register an existing PHP-powered admin page with the `PageController`, use the `wc_admin_connect_page()` function. For example:
+To register an existing PHP-powered admin page with the [`PageController`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html), use the [`wc_admin_connect_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_connect_page) function. For example:
 
 ```php
 wc_admin_connect_page(
@@ -19,19 +19,19 @@ wc_admin_connect_page(
 );
 ```
 
-The `wc_admin_connect_page()` function accepts an array of arguments, two of which are optional:
+The [`wc_admin_connect_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_connect_page) function accepts an array of arguments, two of which are optional:
 
 * `id` (**required**) — This identifies the page with the controller.
 * `parent` (_optional_) — This value denotes the page as a child of a parent (using the parent’s ID) and is used for generating breadcrumbs.
-* `screen_id` (**required**) — This corresponds to `PageController::get_current_screen_id()`. It is used to determine the current page. (see note below)
-* `title` (**required**) — This corresponds to the page’s title and is used to build breadcrumbs. You can supply a String or an Array of breadcrumb pieces here.
+* `screen_id` (**required**) — This corresponds to [`PageController::get_current_screen_id()`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html#method_get_current_screen_id). It is used to determine the current page. (see note below)
+* `title` (**required**) — This corresponds to the page’s title and is used to build breadcrumbs. You can supply a string or an array of breadcrumb pieces here.
 * `path` (_optional_) — This is the page’s relative path. Used for linking breadcrumb pieces when this page is a parent.
 
-In the example above, you can see how to use an Array to construct breadcrumbs for your extension. WooCommerce will attach a link leading to the `path` value to the first piece in the title Array. All subsequent pieces are rendered as text and not linked.
+In the example above, you can see how to use an array to construct breadcrumbs for your extension. WooCommerce will attach a link leading to the `path` value to the first piece in the title array. All subsequent pieces are rendered as text and not linked.
 
 ### A note about determining the screen ID
 
-WooCommerce Admin uses its own version of `get_current_screen()` to allow for more precise identification of admin pages, which may have various tabs and subsections.
+WooCommerce Admin uses its own version of [`get_current_screen()`](https://developer.wordpress.org/reference/functions/get_current_screen/) to allow for more precise identification of admin pages, which may have various tabs and subsections.
 
 The format of this ID may vary depending on the structural elements present on the page. Some formats that the function will generate are:
 
@@ -46,7 +46,7 @@ You can also use the `wc_admin_current_screen_id` filter to make any changes nec
 
 ## Registering a Rect-powered page
 
-To register a React-powered page, use the `wc_admin_register_page()` function. It accepts an array of arguments:
+To register a React-powered page, use the [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page) function. It accepts an array of arguments:
 
 * `id` (**required**) — This identifies the page with the controller.
 * `parent` (_optional_) — This denotes the page as a child of `parent` (using the parent’s ID) and is used for generating breadcrumbs.
@@ -83,7 +83,7 @@ function add_extension_register_page() {
 add_action( 'admin_menu', 'add_extension_register_page' );
 ```
 
-In the example above, we encapsulated our call to `wc_admin_register_page()`` in a function that we have hooked to the `admin_menu`` action. Once you have registered a page with the controller, you can supply a React component on the client side.
+In the example above, we encapsulated our call to [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page) in a function that we have hooked to the [`admin_menu`](https://developer.wordpress.org/reference/hooks/admin_menu/) action. Once you have registered a page with the controller, you can supply a React component on the client side.
 
 ```js
 import { addFilter } from '@wordpress/hooks';
@@ -106,8 +106,13 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
 
 Above, we’re creating a simple [functional React component](https://reactjs.org/docs/components-and-props.html#function-and-class-components) for the sake of demonstration, but a real-world extension would likely have a more complex nesting of components.
 
-When supplying a component to the list of WooCommerce Admin Pages, it’s important to make sure that the value you specify for `navArgs.id` matches the `id` for the page you register with `PageController` in your call to `wc_admin_register_page()`.
+When supplying a component to the list of WooCommerce Admin Pages, it’s important to make sure that the value you specify for `navArgs.id` matches the `id` for the page you register with `PageController` in your call to [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page).
 
 ## Further reading
 
-You can learn more about how page registration works by checking out the [`PageController`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html) class in the WooCommerce Core Code Reference. You can see real-world examples of the two page registration methods by taking a look at [how WooCommerce Admin registers existing core pages](../../plugins/woocommerce/includes/react-admin/connect-existing-pages.php) and [how WooCommerce registers React-powered Analytics report pages](../../plugins/woocommerce/src/Internal/Admin/Analytics.php).
+You can learn more about how page registration works by checking out the [`PageController`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html) class in the WooCommerce Core Code Reference.
+
+You can see real-world examples of the two page registration methods in WooCommerce Core by taking a look at:
+
+* [How WooCommerce Admin registers existing core pages](../../plugins/woocommerce/includes/react-admin/connect-existing-pages.php) - registering PHP-powered pages
+* [How WooCommerce registers React-powered Analytics report pages](../../plugins/woocommerce/src/Internal/Admin/Analytics.php) - registering React-powered pages
