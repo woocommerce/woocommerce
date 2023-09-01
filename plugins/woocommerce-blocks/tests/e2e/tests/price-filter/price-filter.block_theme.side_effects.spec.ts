@@ -97,7 +97,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeAll( async () => {
 		await cli(
-			'npm run wp-env run tests-cli "wp option update wc_blocks_use_blockified_product_grid_block_as_template false"'
+			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 	} );
 	test.beforeEach( async ( { admin, page, editor } ) => {
@@ -172,7 +172,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 
 	test.afterAll( async () => {
 		await cli(
-			'npm run wp-env run tests-cli "wp option delete wc_blocks_use_blockified_product_grid_block_as_template"'
+			'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
 		);
 	} );
 } );
