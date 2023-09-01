@@ -5,7 +5,6 @@ import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { moreVertical } from '@wordpress/icons';
-import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,21 +21,6 @@ export function VariationActionsMenu( {
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
-	function handlePrompt(
-		label: string = __( 'Enter a value', 'woocommerce' ),
-		parser: ( value: string ) => Partial< ProductVariation > | null = () =>
-			null
-	) {
-		// eslint-disable-next-line no-alert
-		const value = window.prompt( label );
-		if ( value === null ) return;
-
-		const updates = parser( value.trim() );
-		if ( updates ) {
-			onChange( updates );
-		}
-	}
-
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
@@ -78,14 +62,13 @@ export function VariationActionsMenu( {
 							onClose={ onClose }
 						/>
 						<InventoryMenuItem
-							variation={ selection }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
 						<ShippingMenuItem
-							variation={ selection }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
+							onChange={ onChange }
 							onClose={ onClose }
 						/>
 					</MenuGroup>
