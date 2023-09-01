@@ -9,10 +9,10 @@ test.describe(
 	async () => {
 		test.afterAll( async () => {
 			await cli(
-				'npm run wp-env run tests-cli "wp option update woocommerce_cart_page_endpoint cart"'
+				'npm run wp-env run tests-cli -- wp option update woocommerce_cart_page_endpoint cart'
 			);
 			await cli(
-				'npm run wp-env run tests-cli "wp option update woocommerce_checkout_page_endpoint checkout"'
+				'npm run wp-env run tests-cli -- wp option update woocommerce_checkout_page_endpoint checkout'
 			);
 		} );
 

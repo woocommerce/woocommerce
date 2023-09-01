@@ -119,11 +119,11 @@ const prepareAttributes = async ( config: FullConfig ) => {
 	 * we need to process more than 1 batch of items.
 	 */
 	await cli(
-		`npm run wp-env run tests-cli wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
+		`npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
 	);
 
 	await cli(
-		`npm run wp-env run tests-cli wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
+		`npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
 	);
 };
 

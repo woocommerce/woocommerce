@@ -51,14 +51,14 @@ const templates = {
 
 test.beforeAll( async () => {
 	await cli(
-		'npm run wp-env run tests-cli "wp option update wc_blocks_use_blockified_product_grid_block_as_template false"'
+		'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 	);
 	await deleteAllTemplates( 'wp_template' );
 } );
 
 test.afterAll( async () => {
 	await cli(
-		'npm run wp-env run tests-cli "wp option delete wc_blocks_use_blockified_product_grid_block_as_template"'
+		'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
 	);
 	await deleteAllTemplates( 'wp_template' );
 } );
