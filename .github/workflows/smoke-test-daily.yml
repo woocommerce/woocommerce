@@ -374,8 +374,8 @@ jobs:
                       await script( { context, core, github } );
               env:
                   API_RESULT: ${{ needs.api-tests.outputs.test-result }}
-                  E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result }}
-                  k6_RESULT: ${{ needs.k6-tests.outputs.test-result }}
+                  E2E_RESULT: ${{ needs.e2e-tests.outputs.test-result || needs.e2e-tests.result }}
+                  k6_RESULT: ${{ needs.k6-tests.outputs.test-result || needs.k6-tests.result }}
                   PLUGINS_BLOCKS_PATH: ${{ steps.download-plugin-blocks.outputs.download-path }}
 
             - name: Send Slack message
