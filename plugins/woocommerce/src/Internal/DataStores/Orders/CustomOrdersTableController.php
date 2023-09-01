@@ -586,10 +586,10 @@ class CustomOrdersTableController {
 				wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 			);
 
-			$sync_message .= esc_html__(
+			$sync_message .= wp_kses_data( __(
 				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
 				'woocommerce'
-			);
+			) );
 
 			$sync_message .= sprintf(
 				'<br /><a href="%1$s" class="button button-link">%2$s</a>',
@@ -597,12 +597,12 @@ class CustomOrdersTableController {
 				sprintf(
 					// translators: %d: number of pending orders.
 					_n(
-						'Sync %d pending order',
-						'Sync %d pending orders',
+						'Sync %s pending order',
+						'Sync %s pending orders',
 						$sync_status['current_pending_count'],
 						'woocommerce'
 					),
-					$sync_status['current_pending_count']
+					number_format_i18n( $sync_status['current_pending_count'] )
 				)
 			);
 		}
