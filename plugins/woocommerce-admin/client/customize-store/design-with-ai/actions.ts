@@ -71,10 +71,16 @@ const assignLookAndTone = assign<
 	},
 } );
 
+const logAIAPIRequestError = () => {
+	// log AI API request error
+	console.log( 'API Request error' );
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
 	logAiWizardClosedBeforeCompletion,
 	assignLookAndTone,
+	logAIAPIRequestError,
 };

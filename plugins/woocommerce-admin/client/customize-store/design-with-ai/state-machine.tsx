@@ -65,6 +65,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 					postBusinessInfoDescription: {
 						invoke: {
 							src: 'getLookAndTone',
+							onError: {
+								actions: [ 'logAIAPIRequestError' ],
+								target: '#lookAndFeel',
+							},
 							onDone: {
 								actions: [ 'assignLookAndTone' ],
 								target: '#lookAndFeel',
