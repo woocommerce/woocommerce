@@ -127,10 +127,28 @@ module.exports = async ( { context, core, github } ) => {
 		return blocks;
 	};
 
+	const create_blockGroups_plugins = () => {
+		const blocks_pluginTestsNotRun = [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: ':warning: *Plugin tests were not run!*',
+				},
+			},
+			{
+				type: 'divider',
+			},
+		];
+
+		return PLUGINS_BLOCKS_PATH
+			? readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH )
+			: blocks_pluginTestsNotRun;
+	};
+
 	const blockGroup_header = await create_blockGroup_header();
 	const blockGroup_nightlySite = create_blockGroup_nightlySite();
-	const blockGroups_plugins =
-		readContextBlocksFromJsonFiles( PLUGINS_BLOCKS_PATH );
+	const blockGroups_plugins = create_blockGroups_plugins();
 	const blocks_all = [
 		...blockGroup_header,
 		...blockGroup_nightlySite,
