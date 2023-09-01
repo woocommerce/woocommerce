@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { TextareaControl, Button } from '@wordpress/components';
+import { TextareaControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 
@@ -104,9 +104,16 @@ export const BusinessInfoDescription = ( {
 								payload: businessInfoDescription,
 							} );
 						} }
-						disabled={ businessInfoDescription === '' }
+						disabled={
+							businessInfoDescription === '' ||
+							context.businessInfoDescription.isMakignRequest
+						}
 					>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ context.businessInfoDescription.isMakignRequest ? (
+							<Spinner />
+						) : (
+							__( 'Continue', 'woocommerce' )
+						) }
 					</Button>
 				</div>
 			</div>

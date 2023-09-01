@@ -1,6 +1,7 @@
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
+		isMakignRequest?: boolean;
 	};
 	lookAndFeel: {
 		choice: string;

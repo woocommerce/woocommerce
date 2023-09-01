@@ -76,6 +76,30 @@ const logAIAPIRequestError = () => {
 	console.log( 'API Request error' );
 };
 
+const assignAIAPIRequestStarted = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	businessInfoDescription: ( context ) => {
+		return {
+			...context.businessInfoDescription,
+			isMakignRequest: true,
+		};
+	},
+} );
+
+const assignAIAPIRequestFinished = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	businessInfoDescription: ( context ) => {
+		return {
+			...context.businessInfoDescription,
+			isMakignRequest: false,
+		};
+	},
+} );
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -83,4 +107,6 @@ export const actions = {
 	logAiWizardClosedBeforeCompletion,
 	assignLookAndTone,
 	logAIAPIRequestError,
+	assignAIAPIRequestStarted,
+	assignAIAPIRequestFinished,
 };

@@ -30,6 +30,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		context: {
 			businessInfoDescription: {
 				descriptionText: '',
+				isMakignRequest: false,
 			},
 
 			lookAndFeel: {
@@ -57,7 +58,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
-								actions: [ 'assignBusinessInfoDescription' ],
+								actions: [
+									'assignBusinessInfoDescription',
+									'assignAIAPIRequestStarted',
+								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
@@ -66,11 +70,17 @@ export const designWithAiStateMachineDefinition = createMachine(
 						invoke: {
 							src: 'getLookAndTone',
 							onError: {
-								actions: [ 'logAIAPIRequestError' ],
+								actions: [
+									'assignAIAPIRequestFinished',
+									'logAIAPIRequestError',
+								],
 								target: '#lookAndFeel',
 							},
 							onDone: {
-								actions: [ 'assignLookAndTone' ],
+								actions: [
+									'assignAIAPIRequestFinished',
+									'assignLookAndTone',
+								],
 								target: '#lookAndFeel',
 							},
 						},
