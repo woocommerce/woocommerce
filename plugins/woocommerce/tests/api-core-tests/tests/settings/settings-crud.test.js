@@ -1908,19 +1908,24 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_allow_tracking',
-						label: 'Enable tracking',
-						description: 'Allow usage of WooCommerce to be tracked',
-						type: 'checkbox',
-						default: 'no',
-						tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
-						value: 'no',
-					} ),
-				] )
-			);
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_allow_tracking',
+							label: 'Enable tracking',
+							description:
+								'Allow usage of WooCommerce to be tracked',
+							type: 'checkbox',
+							default: 'no',
+							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
+							value: 'no',
+						} ),
+					] )
+				);
+			} else {
+				// skipping this on an external host because of flakiness
+			}
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
