@@ -592,10 +592,10 @@ class CustomOrdersTableController {
 			);
 
 			$sync_message .= sprintf(
-				'<br /><br /><a href="%1$s" class="button button-secondary">%2$s</a>',
+				'<br /><a href="%1$s" class="button button-link">%2$s</a>',
 				esc_url( $sync_now_url ),
 				sprintf(
-				// translators: %d: number of pending orders.
+					// translators: %d: number of pending orders.
 					_n(
 						'Sync %d pending order',
 						'Sync %d pending orders',
