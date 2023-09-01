@@ -22,7 +22,7 @@ class BlockTemplate extends AbstractBlockTemplate {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_block( array $block_config ): BlockInterface {
+	public function add_block( array $block_config ): ?BlockInterface {
 		$block = new Block( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}

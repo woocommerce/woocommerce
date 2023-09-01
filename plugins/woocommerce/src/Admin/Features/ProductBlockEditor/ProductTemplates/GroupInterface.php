@@ -16,12 +16,12 @@ interface GroupInterface extends BlockContainerInterface {
 	 * @param array $block_config block config.
 	 * @return SectionInterface new block section.
 	 */
-	public function add_section( array $block_config ): SectionInterface;
+	public function add_section( array $block_config ): ?SectionInterface;
 
 	/**
 	 * Adds a new block to the section block.
 	 *
 	 * @param array $block_config block config.
 	 */
-	public function add_block( array $block_config ): BlockInterface;
+	public function add_block( array $block_config ): ?BlockInterface;
 }

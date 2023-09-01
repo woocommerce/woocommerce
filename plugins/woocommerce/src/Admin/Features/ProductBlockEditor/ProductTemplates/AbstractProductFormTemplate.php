@@ -51,7 +51,7 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_group( array $block_config ): GroupInterface {
+	public function add_group( array $block_config ): ?GroupInterface {
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}

@@ -42,7 +42,7 @@ class Group extends ProductBlock implements GroupInterface {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_section( array $block_config ): SectionInterface {
+	public function add_section( array $block_config ): ?SectionInterface {
 		$block = new Section( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}
