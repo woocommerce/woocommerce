@@ -17,7 +17,7 @@ export type ProductTag = {
 	count: number;
 };
 
-type Query = {
+export type Query = {
 	context?: string;
 	page: number;
 	per_page: number;

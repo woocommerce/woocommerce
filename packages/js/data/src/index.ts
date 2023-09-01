@@ -107,7 +107,7 @@ export {
 	ProductCategorySelectors,
 } from './product-categories/types';
 export { TaxClass } from './tax-classes/types';
-export { ProductTag } from './product-tags/types';
+export { ProductTag, Query } from './product-tags/types';
 
 /**
  * Internal dependencies

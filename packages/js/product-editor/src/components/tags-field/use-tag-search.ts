@@ -7,6 +7,7 @@ import {
 	EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME,
 	WCDataSelector,
 	ProductTag,
+	Query,
 } from '@woocommerce/data';
 
 const PAGE_SIZE = 100;
@@ -15,7 +16,7 @@ export type ProductTagNode = Pick< ProductTag, 'id' | 'name' >;
 
 const productTagQueryObject = {
 	per_page: PAGE_SIZE,
-};
+} as Query;
 
 /**
  * A hook used to handle all the search logic for the tag search component.
@@ -30,11 +31,7 @@ export const useTagSearch = () => {
 				EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 			);
 			return {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				initialTags: getProductTags( productTagQueryObject ),
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				totalCount: getProductTagsTotalCount( productTagQueryObject ),
 			};
 		}
