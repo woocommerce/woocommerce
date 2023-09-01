@@ -18,14 +18,14 @@ export const installPluginFromPHPFile = async ( phpFilePath: string ) => {
 	await createPluginFromPHPFile( phpFilePath );
 	const fileName = path.basename( phpFilePath ).replace( '.php', '' );
 	await cli(
-		`npm run wp-env run tests-cli "wp plugin install /var/www/html/custom-plugins/${ fileName }.zip --activate"`
+		`npm run wp-env run tests-cli -- wp plugin install /var/www/html/custom-plugins/${ fileName }.zip --activate`
 	);
 };
 
 export const uninstallPluginFromPHPFile = async ( phpFilePath: string ) => {
 	const fileName = path.basename( phpFilePath ).replace( '.php', '' );
 	await cli(
-		`npm run wp-env run tests-cli "wp plugin delete ${ fileName }"`
+		`npm run wp-env run tests-cli -- wp plugin delete ${ fileName }`
 	);
 	await cli( `rm ${ __dirname }/${ fileName }.zip` );
 };
