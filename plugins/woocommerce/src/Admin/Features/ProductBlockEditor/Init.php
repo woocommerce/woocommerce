@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use WP_Block_Editor_Context;
 
@@ -36,13 +37,6 @@ class Init {
 	private $redirection_controller;
 
 	/**
-	 * Simple product block template.
-	 *
-	 * @var AbstractBlockTemplate
-	 */
-	public $simple_product_template;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -50,10 +44,13 @@ class Init {
 			array_push( $this->supported_post_types, 'variable' );
 		}
 
-		$this->simple_product_template = new SimpleProductTemplate();
-		$this->redirection_controller  = new RedirectionController( $this->supported_post_types );
+		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			// Register the product block template.
+			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+			$template_registry->register( new SimpleProductTemplate() );
+
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
@@ -265,8 +262,14 @@ class Init {
 	 */
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
-			$args['template_lock'] = 'all';
-			$args['template']      = $this->simple_product_template->get_formatted_template();
+			// Get the template from the registry.
+			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+			$template          = $template_registry->get_registered( 'simple-product' );
+
+			if ( isset( $template ) ) {
+				$args['template_lock'] = 'all';
+				$args['template']      = $template->get_formatted_template();
+			}
 		}
 		return $args;
 	}

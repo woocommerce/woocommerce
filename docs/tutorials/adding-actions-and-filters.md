@@ -1,3 +1,5 @@
+# Adding actions and filters
+
 Like many WordPress plugins, WooCommerce provides a range of actions and filters through which developers can extend and modify the platform.
 
 Often, when writing new code or revising existing code, there is a desire to add new hooks—but this should always be done with thoughtfulness and care. This document aims to provide high-level guidance on the matter.

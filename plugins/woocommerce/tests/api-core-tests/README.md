@@ -62,7 +62,7 @@ The following environment variables can be configured as shown in `.env.example`
 
 ```
 # Your site's base URL, not including a trailing slash
-BASE_URL="https://mysite.com"
+API_BASE_URL="https://mysite.com"
 
 # The admin user's username or generated consumer key
 USER_KEY=""

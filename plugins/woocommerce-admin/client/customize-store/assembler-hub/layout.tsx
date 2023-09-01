@@ -5,7 +5,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState } from '@wordpress/element';
 import {
 	useReducedMotion,
 	useResizeObserver,

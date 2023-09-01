@@ -5,7 +5,6 @@ import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { moreVertical } from '@wordpress/icons';
-import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -18,25 +17,10 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
 
 export function VariationActionsMenu( {
-	variation,
+	selection,
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
-	function handlePrompt(
-		label: string = __( 'Enter a value', 'woocommerce' ),
-		parser: ( value: string ) => Partial< ProductVariation > | null = () =>
-			null
-	) {
-		// eslint-disable-next-line no-alert
-		const value = window.prompt( label );
-		if ( value === null ) return;
-
-		const updates = parser( value.trim() );
-		if ( updates ) {
-			onChange( updates );
-		}
-	}
-
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
@@ -45,7 +29,7 @@ export function VariationActionsMenu( {
 				onClick() {
 					recordEvent( 'product_variations_menu_view', {
 						source: TRACKS_SOURCE,
-						variation_id: variation.id,
+						variation_id: selection.id,
 					} );
 				},
 			} }
@@ -56,15 +40,15 @@ export function VariationActionsMenu( {
 						label={ sprintf(
 							/** Translators: Variation ID */
 							__( 'Variation Id: %s', 'woocommerce' ),
-							variation.id
+							selection.id
 						) }
 					>
 						<MenuItem
-							href={ variation.permalink }
+							href={ selection.permalink }
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
-									variation_id: variation.id,
+									variation_id: selection.id,
 								} );
 							} }
 						>
@@ -73,19 +57,18 @@ export function VariationActionsMenu( {
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
-							variation={ variation }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
+							onChange={ onChange }
 							onClose={ onClose }
 						/>
 						<InventoryMenuItem
-							variation={ variation }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
 						<ShippingMenuItem
-							variation={ variation }
-							handlePrompt={ handlePrompt }
+							selection={ selection }
+							onChange={ onChange }
 							onClose={ onClose }
 						/>
 					</MenuGroup>
@@ -95,7 +78,7 @@ export function VariationActionsMenu( {
 							label={ __( 'Delete variation', 'woocommerce' ) }
 							variant="link"
 							onClick={ () => {
-								onDelete( variation.id );
+								onDelete( selection.id );
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"
