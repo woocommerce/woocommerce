@@ -423,8 +423,8 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		$sync_status = $this->data_synchronizer->get_sync_status();
-		if ( $sync_status['current_pending_count'] <= 0 ) {
+		$pending_count = $this->data_synchronizer->get_total_pending_count();
+		if ( $pending_count <= 0 ) {
 			return;
 		}
 
