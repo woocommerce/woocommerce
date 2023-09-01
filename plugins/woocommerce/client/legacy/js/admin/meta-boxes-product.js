@@ -466,6 +466,10 @@ jQuery( function ( $ ) {
 
 		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) || false === $(el).attr( 'data-taxonomy' ) || '' === $(el).attr( 'data-taxonomy' ) ) {
 			add_placeholder_to_attribute_values_field( $(el) );
+
+			$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
+				add_placeholder_to_attribute_values_field( $(el) );
+			} );
 		}
 	} );
 	$( 'select.wc-attribute-search' ).data(
