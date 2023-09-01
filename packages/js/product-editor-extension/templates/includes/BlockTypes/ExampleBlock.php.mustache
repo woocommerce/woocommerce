@@ -3,6 +3,8 @@
 namespace {{namespacePascalCase}}\BlockTypes;
 
 use Automattic\WooCommerce\Admin\Blocks\AbstractBlock;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
 class ExampleBlock extends AbstractBlock {
 
@@ -26,7 +28,7 @@ class ExampleBlock extends AbstractBlock {
     public function init() {
         parent::init();
         add_action( 'woocommerce_block_template_register', [ $this, 'add_block_to_simple_product_template' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'add_block_scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_block_scripts_and_styles' ] );
     }
 
     /**
@@ -34,10 +36,10 @@ class ExampleBlock extends AbstractBlock {
      */
     public function add_block_to_simple_product_template( BlockTemplateInterface $template ) {
 		if ( $template instanceof ProductFormTemplateInterface && 'simple-product' === $template->get_id() ) {
-			$section = $template->get_section_by_id( 'product-catalog-section' );
+			$section = $template->get_section_by_id( 'basic-details' );
 			$section->add_block(
 				[
-					'id'         => 'example-block',
+					'id'         => '{{namespace}}-example-block',
 					'blockName'  => $this->get_block_type(),
 					'order'      => 15,
 					'attributes' => [
@@ -47,36 +49,4 @@ class ExampleBlock extends AbstractBlock {
 			);
 		}
     }
-
-    /**
-     * Add block scripts.
-     */
-	public function add_block_scripts() {
-        $script_asset_path = $this->package->get_build_path( 'blocks/example-block/index.asset.php' );
-        $script_asset      = file_exists( $script_asset_path )
-            ? require $script_asset_path
-            : array(
-                'dependencies' => array(),
-                'version'      => null,
-            );
-
-		wp_register_script(
-			'{{namespace}}-example-block',
-			$this->package->get_build_url( '/blocks/example-block/index.js' ),
-			$script_asset['dependencies'],
-            $script_asset['version'],
-			true
-		);
-
-        wp_register_style(
-			'{{namespace}}-example-block',
-			$this->package->get_build_url( '/blocks/example-block/index.css' ),
-			array(),
-			filemtime( $this->package->get_build_path( 'blocks/example-block/index.css' ) )
-		);
-
-	
-		wp_enqueue_script( '{{namespace}}-example-block' );
-		wp_enqueue_style( '{{namespace}}-example-block' );
-	}
 }
