@@ -33,7 +33,14 @@ abstract class AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_build_path = 'build/';
+	protected $block_build_path = 'blocks/';
+
+    /**
+	 * Registered block.
+	 *
+	 * @var WP_Block_Type
+	 */
+	protected $registered_block;
 
 	/**
 	 * Constructor.
@@ -52,7 +59,7 @@ abstract class AbstractBlock {
 			return false;
 		}
 		// $this->register_block_type_assets();
-		$this->register_block_type();
+		add_action( 'init', [ $this, 'register_block_type' ] );
 	}
 
     /**
@@ -75,7 +82,7 @@ abstract class AbstractBlock {
 	public function get_block_metadata_path( $block_name, $path = '' ) {
         $plugin_directory = plugin_basename(__FILE__);
 
-		$metadata_path = $this->package->get_build_path() . $block_name . '/block.json';
+		$metadata_path = $this->package->get_build_path( $this->block_build_path ) . $block_name . '/block.json';
 
 		if ( ! file_exists( $metadata_path ) ) {
 			return false;
@@ -89,14 +96,37 @@ abstract class AbstractBlock {
 	 *
 	 * @return string[] Chunks paths.
 	 */
-	protected function register_block_type() {
+	public function register_block_type() {
 		$metadata_path = $this->get_block_metadata_path( $this->block_name );
 
 		if ( empty( $metadata_path ) ) {
             return;
 		}
 
-        register_block_type_from_metadata( $metadata_path );
+        $this->registered_block = register_block_type_from_metadata( $metadata_path );
+
+        return $this->registered_block;
 	}
+
+    /**
+     * Enqueue block scripts and styles.
+     */
+    public function enqueue_block_scripts_and_styles() {
+        if ( ! $this->registered_block ) {
+            throw new \Exception( 'Block has not yet been registered.' );
+            return;
+        }
+
+        $script_handles = $this->registered_block->editor_script_handles;
+        $style_handles  = $this->registered_block->editor_style_handles;
+
+        foreach ( $script_handles as $handle ) {
+            wp_enqueue_script( $handle );
+        }
+
+        foreach ( $style_handles as $handle ) {
+            wp_enqueue_style( $handle );
+        }
+    }
 
 }
