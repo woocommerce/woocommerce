@@ -8,12 +8,17 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
+import { resolveSelect } from '@wordpress/data';
 import { trash } from '@wordpress/icons';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
-import { ProductAttributeTerm } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	ProductAttribute,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
@@ -57,6 +62,7 @@ type NewAttributeModalProps = {
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
+	termsAutoselection?: 'first' | 'all';
 };
 
 type AttributeForm = {
@@ -95,6 +101,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		'Already used in Attributes',
 		'woocommerce'
 	),
+	termsAutoselection,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -242,6 +249,62 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
+					function getAttributeOnChange( index: number ) {
+						return function handleAttributeChange(
+							value?:
+								| Omit<
+										ProductAttribute,
+										'position' | 'visible' | 'variation'
+								  >
+								| string
+						) {
+							if (
+								termsAutoselection &&
+								value &&
+								! ( typeof value === 'string' )
+							) {
+								resolveSelect(
+									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+								)
+									.getProductAttributeTerms<
+										ProductAttributeTerm[]
+									>( {
+										// Send search parameter as empty to avoid a second
+										// request when focusing the attribute-term-input-field
+										// which perform the same request to get all the terms
+										search: '',
+										attribute_id: value.id,
+									} )
+									.then( ( terms ) => {
+										const selectedAttribute =
+											getProductAttributeObject(
+												value
+											) as EnhancedProductAttribute;
+										if ( termsAutoselection === 'all' ) {
+											selectedAttribute.terms = terms;
+										} else if ( terms.length > 0 ) {
+											selectedAttribute.terms = [
+												terms[ 0 ],
+											];
+										}
+										setValue( 'attributes[' + index + ']', {
+											...selectedAttribute,
+										} );
+										focusValueField( index );
+									} )
+									.catch( () => {} );
+							} else {
+								setValue(
+									'attributes[' + index + ']',
+									value && getProductAttributeObject( value )
+								);
+								if ( value ) {
+									focusValueField( index );
+								}
+							}
+						};
+					}
+
 					return (
 						<Modal
 							title={ title }
@@ -289,24 +352,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															label={
 																attributeLabel
 															}
-															onChange={ (
-																val
-															) => {
-																setValue(
-																	'attributes[' +
-																		index +
-																		']',
-																	val &&
-																		getProductAttributeObject(
-																			val
-																		)
-																);
-																if ( val ) {
-																	focusValueField(
-																		index
-																	);
-																}
-															} }
+															onChange={ getAttributeOnChange(
+																index
+															) }
 															ignoredAttributeIds={ [
 																...selectedAttributeIds,
 																...values.attributes
@@ -336,7 +384,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														/>
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
-														{ attribute === null ||
+														{ ! attribute ||
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={
