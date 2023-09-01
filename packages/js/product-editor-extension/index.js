@@ -46,6 +46,9 @@ module.exports = {
 	srcTemplatesPath: join( __dirname, 'templates', 'src' ),
 	pluginTemplatesPath: join( __dirname, 'templates', 'plugin' ),
 	modules: [ 'BlockRegistry' ],
+	composerDependencies: [
+		'automattic/jetpack-autoloader'
+	],
 	onComplete: () => {
 		console.log( '' );
 		console.log( chalk.bold.green( 'Template installation successful! Please initialize the template module in your plugin by adding the following lines:' ) );

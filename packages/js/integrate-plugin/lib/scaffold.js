@@ -14,10 +14,19 @@ const initWPScripts = require( './init-wp-scripts' );
 const initWebpackConfig = require( './init-webpack-config' );
 const initWPEnv = require( './init-wp-env' );
 const initTemplate = require( './init-template' );
+const initComposer = require( './init-composer' );
 const { getUniqueItems, updateConfig } = require( './config' );
 
 module.exports = async (
-	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates, modules: templateModules, onComplete },
+	{
+		pluginOutputTemplates,
+		includesOutputTemplates,
+		srcOutputTemplates,
+		modules: templateModules,
+		onComplete,
+		composerDependencies,
+		composerDevDependencies
+	},
 	{
 		$schema,
 		apiVersion,
@@ -67,6 +76,8 @@ module.exports = async (
 			...modules,
 			...templateModules,
 		] ),
+		composerDependencies,
+		composerDevDependencies,
 	};
 
 	if ( template ) {
@@ -86,6 +97,8 @@ module.exports = async (
 	if ( wpEnv ) {
 		await initWPEnv( view );
 	}
+
+	await initComposer( view );
 
 	info( '' );
 	success( `Done: WordPress plugin ${ name } integrated with WooCommerce build scripts.` );

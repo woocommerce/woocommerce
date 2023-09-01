@@ -127,6 +127,8 @@ const configToTemplate = async ( {
 	variants = {},
     modules = [],
     onComplete,
+    composerDependencies = [],
+    composerDevDependencies = [],
 } ) => {
 	if ( defaultValues === null || typeof defaultValues !== 'object' ) {
 		throw new CLIError( 'Template found but invalid definition provided.' );
@@ -153,6 +155,8 @@ const configToTemplate = async ( {
 		variants,
         modules,
         onComplete,
+        composerDependencies,
+        composerDevDependencies,
 	};
 };
 

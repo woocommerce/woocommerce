@@ -12,7 +12,7 @@ module.exports = async ( {
 	description,
 	license,
 	pluginURI,
-	slug,
+	name,
 	version,
 	wpEnv,
 	wpScripts,
@@ -31,7 +31,7 @@ module.exports = async ( {
 		cwd,
 		Object.fromEntries(
 			Object.entries( {
-				name: slug,
+				name: textdomain,
 				version,
 				description,
 				author,
