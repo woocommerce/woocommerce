@@ -96,14 +96,14 @@ class FeaturesController {
 		$features           = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
-				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
+				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
 			),
 			'new_navigation'       => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
-				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+				'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 				'disable_ui'      => false,
 			),
