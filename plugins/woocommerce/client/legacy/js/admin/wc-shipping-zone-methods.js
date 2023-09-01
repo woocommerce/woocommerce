@@ -378,6 +378,8 @@
 				onAddShippingMethod: function( event ) {
 					event.preventDefault();
 
+					console.log( $( data ) );
+
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-add-shipping-method',
 						variable : {
