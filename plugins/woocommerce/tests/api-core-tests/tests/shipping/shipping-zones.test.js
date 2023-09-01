@@ -171,12 +171,8 @@ test.describe( 'Shipping zones API tests', () => {
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
 		expect( putResponseStateOnly.status() ).toEqual( 200 );
 
-		// external host starts with default shipping region
-		if ( ! shouldSkip ) {
-			expect( putResponseStateOnlyJSON).toHaveLength(0);
-		} else {
-			expect( putResponseStateOnlyJSON ).toHaveLength(1);
-		}
+		expect.soft( putResponseStateOnlyJSON ).toHaveLength(0);
+
 	} );
 
 	test( 'can delete a shipping zone', async ({request}) => {
