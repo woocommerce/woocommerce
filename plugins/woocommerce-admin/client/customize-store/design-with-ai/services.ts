@@ -30,7 +30,7 @@ export const getLookAndTone = async (
 
 	url.searchParams.append( 'prompt', prompt.join( '\n' ) );
 	url.searchParams.append( 'token', token );
-	url.searchParams.append( 'feature', 'cys' );
+	url.searchParams.append( 'feature', 'woo_cys' );
 	url.searchParams.append( '_fields', 'completion' );
 
 	const data: {
