@@ -580,6 +580,6 @@ class DataSynchronizerTests extends HposTestCase {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		$sync_setting = apply_filters( 'woocommerce_feature_setting', array(), $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], '1 order pending to be synchronized' ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
 	}
 }
