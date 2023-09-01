@@ -379,10 +379,17 @@ class CustomOrdersTableController {
 			'status' => array( 'in-progress', 'pending' ),
 		) );
 
+		/**
+		 * Modify the time interval for the recurring event to check for pending order syncs.
+		 *
+		 * @param int $sync_check_interval The time, in seconds, between sync checks. Defaults to 21600 (6 hours).
+		 */
+		$interval = apply_filters( 'woocommerce_custom_orders_table_sync_check_interval', 6 * HOUR_IN_SECONDS );
+
 		if ( ! $has_scheduled_action ) {
 			WC()->queue()->schedule_recurring(
 				time() + HOUR_IN_SECONDS,
-				6 * HOUR_IN_SECONDS,
+				$interval,
 				self::SYNC_CHECK_EVENT_HOOK
 			);
 		}
