@@ -22,13 +22,13 @@ trait BlockContainerTrait {
 	/**
 	 * Add a block to the block container.
 	 *
-	 * @param BlockInterface $block The block.
+	 * @param BlockInterface|null $block The block.
 	 *
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
 	 */
-	protected function &add_inner_block( BlockInterface $block ): BlockInterface {
+	protected function &add_inner_block( BlockInterface $block ): ?BlockInterface {
 		if ( ! $block instanceof BlockInterface ) {
 			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
 		}
@@ -37,9 +37,18 @@ trait BlockContainerTrait {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
+		$should_add_block = apply_filters( 'woocommerce_block_template_before_add_block', true, $block );
+
+		if ( ! $should_add_block ) {
+			return null;
+		}
+
 		$root_template = $block->get_root_template();
 		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
+
+		do_action( 'woocommerce_block_template_after_add_block', $block );
+
 		return $block;
 	}
 
