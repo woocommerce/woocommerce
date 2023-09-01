@@ -595,13 +595,7 @@ class FeaturesController {
 
 		$feature_ids              = array_keys( $features );
 		usort( $feature_ids, function( $feature_id_a, $feature_id_b ) use ( $features ) {
-			if ( ! isset( $features[ $feature_id_a ]['order'] ) ) {
-				$features[ $feature_id_a ]['order'] = 0;
-			}
-			if ( ! isset( $features[ $feature_id_b ]['order'] ) ) {
-				$features[ $feature_id_b ]['order'] = 0;
-			}
-			return $features[ $feature_id_b ]['order'] <=> $features[ $feature_id_a ]['order'];
+			return ( $features[ $feature_id_b ]['order'] ?? 0 ) <=> ( $features[ $feature_id_a ]['order'] ?? 0 );
 		} );
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
