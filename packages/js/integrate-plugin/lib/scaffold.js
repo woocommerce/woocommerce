@@ -17,7 +17,7 @@ const initTemplate = require( './init-template' );
 const { getUniqueItems, updateConfig } = require( './config' );
 
 module.exports = async (
-	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates, modules: templateModules },
+	{ pluginOutputTemplates, includesOutputTemplates, srcOutputTemplates, modules: templateModules, onComplete },
 	{
 		$schema,
 		apiVersion,
@@ -124,4 +124,8 @@ module.exports = async (
 	}
 	info( '' );
 	info( 'Code is Poetry' );
+
+	if ( typeof onComplete === 'function' ) {
+		onComplete();
+	}
 };

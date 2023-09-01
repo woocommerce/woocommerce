@@ -23,5 +23,8 @@
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/product-editor-extension#readme",
 	"publishConfig": {
 		"access": "public"
+	},
+	"dependencies": {
+		"chalk": "^4.0.0"
 	}
 }

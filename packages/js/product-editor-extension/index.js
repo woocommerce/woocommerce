@@ -1,6 +1,7 @@
 /**
- * External dependencies
- */
+* External dependencies
+*/
+const chalk = require( 'chalk' );
 const { join } = require( 'path' );
 
 module.exports = {
@@ -45,4 +46,12 @@ module.exports = {
 	srcTemplatesPath: join( __dirname, 'templates', 'src' ),
 	pluginTemplatesPath: join( __dirname, 'templates', 'plugin' ),
 	modules: [ 'BlockRegistry' ],
+	onComplete: () => {
+		console.log( '' );
+		console.log( chalk.bold.green( 'Template installation successful! Please initialize the template module in your plugin by adding the following lines:' ) );
+
+		console.log( '' );
+		console.log( chalk.cyan( "require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload_packages.php';") );
+		console.log( chalk.cyan( "$package = new SamplePlugin\\Package( plugin_dir_path( __FILE__ ) ); ) );") );
+	},
 };
