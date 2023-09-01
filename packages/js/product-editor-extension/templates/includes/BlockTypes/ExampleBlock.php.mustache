@@ -41,7 +41,7 @@ class ExampleBlock extends AbstractBlock {
 					'blockName'  => $this->get_block_type(),
 					'order'      => 15,
 					'attributes' => [
-						'message' => __( 'My custom message', '{{textdomain}}' ),
+						'message' => __( 'Custom product editor block', '{{textdomain}}' ),
 					],
 				]
 			);
@@ -67,7 +67,16 @@ class ExampleBlock extends AbstractBlock {
             $script_asset['version'],
 			true
 		);
+
+        wp_register_style(
+			'{{namespace}}-example-block',
+			$this->package->get_build_url( '/blocks/example-block/index.css' ),
+			array(),
+			filemtime( $this->package->get_build_path( 'blocks/example-block/index.css' ) )
+		);
+
 	
 		wp_enqueue_script( '{{namespace}}-example-block' );
+		wp_enqueue_style( '{{namespace}}-example-block' );
 	}
 }
