@@ -25,7 +25,8 @@ class ExampleBlock extends AbstractBlock {
      */
     public function init() {
         parent::init();
-        add_action( 'woocommerce_block_template_register', 'add_block_to_simple_product_template' );
+        add_action( 'woocommerce_block_template_register', [ $this, 'add_block_to_simple_product_template' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'add_block_scripts' ] );
     }
 
     /**
@@ -47,4 +48,26 @@ class ExampleBlock extends AbstractBlock {
 		}
     }
 
+    /**
+     * Add block scripts.
+     */
+	public function add_block_scripts() {
+        $script_asset_path = $this->package->get_build_path( 'blocks/example-block/index.asset.php' );
+        $script_asset      = file_exists( $script_asset_path )
+            ? require $script_asset_path
+            : array(
+                'dependencies' => array(),
+                'version'      => null,
+            );
+
+		wp_register_script(
+			'{{namespace}}-example-block',
+			$this->package->get_build_url( '/blocks/example-block/index.js' ),
+			$script_asset['dependencies'],
+            $script_asset['version'],
+			true
+		);
+	
+		wp_enqueue_script( '{{namespace}}-example-block' );
+	}
 }

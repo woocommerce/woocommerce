@@ -102,6 +102,38 @@ class Package {
 	}
 
 	/**
+	 * Returns the url to the plugin directory.
+	 *
+	 * @param string $relative_url If provided, the relative url will be
+	 *                             appended to the plugin url.
+	 *
+	 * @return string
+	 */
+	public function get_url( $relative_url = '' ) {
+		if ( ! $this->plugin_dir_url ) {
+			$this->plugin_dir_url = plugin_dir_url( $this->plugin_path . '/index.php' );
+		}
+
+		return $this->plugin_dir_url . $relative_url;
+	}
+
+	/**
+	 * Returns the url to the build directory.
+	 *
+	 * @param string $relative_url If provided, the relative url will be
+	 *                             appended to the plugin url.
+	 *
+	 * @return string
+	 */
+	public function get_build_url( $relative_url = '' ) {
+		if ( ! $this->build_dir_url ) {
+			$this->build_dir_url = plugin_dir_url( $this->build_path . '/index.php' );
+		}
+
+		return $this->build_dir_url . $relative_url;
+	}
+
+	/**
 	 * Init modules.
 	 */
 	public function init() {
