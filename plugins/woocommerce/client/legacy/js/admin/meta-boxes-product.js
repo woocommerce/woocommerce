@@ -463,6 +463,10 @@ jQuery( function ( $ ) {
 				.find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' )
 				.attr( 'disabled', 'disabled' );
 		}
+
+		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) || false === $(el).attr( 'data-taxonomy' ) || '' === $(el).attr( 'data-taxonomy' ) ) {
+			add_placeholder_to_attribute_values_field( $(el) );
+		}
 	} );
 	$( 'select.wc-attribute-search' ).data(
 		'disabled-items',

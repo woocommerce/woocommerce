@@ -41,8 +41,8 @@ test.describe( 'Add product attributes', () => {
 	test( 'can add custom product attributes', async ( { page } ) => {
 		const textbox_attributeName =
 			page.getByPlaceholder( 'f.e. size or color' );
-		const textbox_attributeValues = page.getByLabel(
-			'Value(s):'
+		const textbox_attributeValues = page.getByPlaceholder(
+			'Enter options for customers to choose from'
 		);
 		const checkbox_visible = page
 			.getByText( 'Visible on the product page' )
