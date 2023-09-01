@@ -7,13 +7,50 @@ const wcPages = [
 	{
 		name: 'WooCommerce',
 		subpages: [
-			{ name: 'Home', heading: 'Home' },
-			{ name: 'Orders', heading: 'Orders' },
-			{ name: 'Customers', heading: 'Customers' },
-			{ name: 'Coupons', heading: 'Coupons' },
-			{ name: 'Reports', heading: 'Orders' },
-			{ name: 'Settings', heading: 'General' },
-			{ name: 'Status', heading: 'System status' },
+			{
+				name: 'Home',
+				heading: 'Home',
+				element:
+					'.wooocommerce-inbox-card__header > .components-truncate',
+				text: 'Inbox',
+			},
+			{
+				name: 'Orders',
+				heading: 'Orders',
+				element: '.woocommerce-BlankState-message',
+				text: 'When you receive a new order, it will appear here.',
+			},
+			{
+				name: 'Customers',
+				heading: 'Customers',
+				element: '.woocommerce-table__empty-item',
+				text: 'No data to display',
+			},
+			{
+				name: 'Coupons',
+				heading: 'Coupons',
+				element: '.woocommerce-table__empty-item',
+				text: 'No data to display',
+			},
+			{
+				name: 'Reports',
+				heading: 'Orders',
+				element: '.nav-tab-wrapper > .nav-tab-active',
+				text: 'Orders',
+			},
+			{
+				name: 'Settings',
+				heading: 'General',
+				element:
+					'.select2-woocommerce_default_customer_address-container',
+				text: 'Shop country/region',
+			},
+			{
+				name: 'Status',
+				heading: 'System status',
+				element: 'h2',
+				text: 'WordPress environment',
+			},
 		],
 	},
 	{
@@ -104,6 +141,10 @@ for ( const currentPage of wcPages ) {
 				await expect(
 					page.locator( 'h1.components-text' )
 				).toContainText( currentPage.subpages[ i ].heading );
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+				).toContainText( currentPage.subpages[ i ].text );
 			} );
 		}
 	} );
