@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import {
@@ -18,25 +24,28 @@ import { useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { DEFAULT_PER_PAGE_OPTION } from '../../constants';
+import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../constants';
 
 export const VariableProductTour: React.FC = () => {
 	const [ isTourOpen, setIsTourOpen ] = useState( false );
 	const productId = useEntityId( 'postType', 'product' );
 	const prevTotalCount = useRef< undefined | number >();
+	const requestParams = useMemo(
+		() => ( {
+			product_id: productId,
+			page: 1,
+			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
+			order: 'asc',
+			orderby: 'menu_order',
+		} ),
+		[ productId ]
+	);
 
 	const { totalCount } = useSelect(
 		( select ) => {
 			const { getProductVariationsTotalCount } = select(
 				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 			);
-			const requestParams = {
-				product_id: productId,
-				page: 1,
-				per_page: DEFAULT_PER_PAGE_OPTION,
-				order: 'asc',
-				orderby: 'menu_order',
-			};
 			return {
 				totalCount:
 					getProductVariationsTotalCount< number >( requestParams ),

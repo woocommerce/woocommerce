@@ -2120,7 +2120,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 		return $wpdb->prepare(
 			"
-			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			SELECT COALESCE( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
 			WHERE meta_table.meta_key = '_stock'
 			AND meta_table.post_id = %d
 			",

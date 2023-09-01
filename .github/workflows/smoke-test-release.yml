@@ -162,7 +162,7 @@ jobs:
                   report-name: ${{ env.API_WP_LATEST_ARTIFACT }}
                   tests: hello
               env:
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  API_BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
 

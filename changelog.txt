@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 8.0.3 2023-08-29 =
+
+* Update - Bump WooCommerce Blocks to 10.6.6. [#39853](https://github.com/woocommerce/woocommerce/pull/39853)
+* Fix - Avoid extra queries when a WooPayments incentive has been dismissed. [#39882](https://github.com/woocommerce/woocommerce/pull/39882)
+
+
 = 8.0.2 2023-08-15 =
 
 * Fix - Fix an issue which was causing some attributes to default to a minimum length of 3. [#39686](https://github.com/woocommerce/woocommerce/pull/39686)

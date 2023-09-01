@@ -55,7 +55,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 
 	/**
 	 * Caches a block in the template. This is an internal method and should not be called directly
-	 * except for classes that implement BlockContainerInterface, in their add_block() method.
+	 * except for from the BlockContainerTrait's add_inner_block() method.
 	 *
 	 * @param BlockInterface $block The block to cache.
 	 *
@@ -76,6 +76,20 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		}
 
 		$this->block_cache[ $id ] = $block;
+	}
+
+	/**
+	 * Uncaches a block in the template. This is an internal method and should not be called directly
+	 * except for from the BlockContainerTrait's remove_block() method.
+	 *
+	 * @param string $block_id The block ID.
+	 *
+	 * @ignore
+	 */
+	public function uncache_block( string $block_id ) {
+		if ( isset( $this->block_cache[ $block_id ] ) ) {
+			unset( $this->block_cache[ $block_id ] );
+		}
 	}
 
 	/**

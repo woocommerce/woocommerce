@@ -31,6 +31,7 @@ import {
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
@@ -157,6 +158,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const openEditModal = ( attribute: ProductAttribute ) => {
+		recordEvent( 'product_options_edit', {
+			source: TRACKS_SOURCE,
+			attribute: attribute.name,
+		} );
 		setCurrentAttributeId( getAttributeId( attribute ) );
 		onEditModalOpen( attribute );
 	};
@@ -167,21 +172,35 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...value,
-			...newAttributes.filter(
-				( newAttr ) =>
-					! value.find(
-						( attr ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newAttributes.filter(
+			( newAttr ) =>
+				! value.some(
+					( current: ProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( current )
+				)
+		);
+		recordEvent( 'product_options_add', {
+			source: TRACKS_SOURCE,
+			options: addedAttributesOnly.map( ( attribute ) => ( {
+				attribute: attribute.name,
+				values: attribute.options,
+			} ) ),
+		} );
+		handleChange( [ ...value, ...addedAttributesOnly ] );
 		onAdd( newAttributes );
 		closeNewModal();
 	};
 
-	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+	const handleEdit = ( updatedAttribute: EnhancedProductAttribute ) => {
+		recordEvent( 'product_options_update', {
+			source: TRACKS_SOURCE,
+			attribute: updatedAttribute.name,
+			values: updatedAttribute.terms?.map( ( term ) => term.name ),
+			default: updatedAttribute.isDefault,
+			visible: updatedAttribute.visible,
+			filter: true, // default true until attribute filter gets implemented
+		} );
+
 		const updatedAttributes = value.map( ( attr ) => {
 			if (
 				getAttributeId( attr ) === getAttributeId( updatedAttribute )
@@ -221,7 +240,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				className="woocommerce-add-attribute-list-item__add-button"
 				onClick={ () => {
 					openNewModal();
-					recordEvent( 'product_add_attributes_click' );
+					recordEvent( 'product_options_add_button_click', {
+						source: TRACKS_SOURCE,
+					} );
 				} }
 			>
 				{ uiStrings.newAttributeListItemLabel }
