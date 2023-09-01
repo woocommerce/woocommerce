@@ -1,0 +1,5 @@
+{
+    "require": {
+        "automattic/jetpack-sync": "^1.55"
+    }
+}
