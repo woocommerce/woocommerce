@@ -11,17 +11,22 @@ import { ToggleControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { ToggleBlockAttributes } from './types';
+import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export function Edit( {
 	attributes,
 }: BlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const { label, property, disabled } = attributes;
+	const { label, property, disabled, disabledCopy } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(
 		'postType',
 		'product',
 		property
 	);
+
+	console.log( 'attributes', attributes );
+	console.log( 'blockProps', blockProps );
+	console.log( 'disabledCopy', disabledCopy );
 
 	return (
 		<div { ...blockProps }>
@@ -31,6 +36,12 @@ export function Edit( {
 				disabled={ disabled }
 				onChange={ setValue }
 			/>
+			{ disabled && (
+				<p
+					className="wp-block-woocommerce-product-toggle__disable-copy"
+					dangerouslySetInnerHTML={ sanitizeHTML( disabledCopy ) }
+				/>
+			) }
 		</div>
 	);
 }
