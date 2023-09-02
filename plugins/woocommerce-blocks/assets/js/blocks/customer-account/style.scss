@@ -35,6 +35,7 @@
 		}
 
 		.wc-block-customer-account__account-icon {
+			box-sizing: content-box !important;
 			height: em(23px);
 			width: em(23px);
 			padding: em($gap-smaller);
