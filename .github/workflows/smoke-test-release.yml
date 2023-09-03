@@ -391,7 +391,7 @@ jobs:
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
                     -f artifact="${{ env.API_WP_LATEST_X_ARTIFACT }}" \
-                    -f env_description="WP Latest-1" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
