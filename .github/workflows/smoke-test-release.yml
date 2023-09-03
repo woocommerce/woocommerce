@@ -340,6 +340,8 @@ jobs:
             - name: Launch WP Env
               working-directory: plugins/woocommerce
               run: pnpm run env:test
+              env:
+                WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
             - name: Download release zip
               env:
@@ -348,13 +350,6 @@ jobs:
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
-
-            - name: Downgrade WordPress version to ${{ steps.get-wp-latest-1.outputs.version }}
-              working-directory: plugins/woocommerce
-              run: |
-                  pnpm exec wp-env run tests-cli -- wp core update --version=${{ steps.get-wp-latest-1.outputs.version }} --force
-                  pnpm exec wp-env run tests-cli wp core update-db
-                  pnpm exec wp-env run tests-cli wp core version
 
             - name: Run API tests
               id: run-api-composite-action
