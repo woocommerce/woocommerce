@@ -355,14 +355,6 @@ jobs:
                   pnpm exec wp-env run tests-cli -- wp core update --version=${{ steps.get-wp-latest-1.outputs.version }} --force
                   pnpm exec wp-env run tests-cli wp core update-db
 
-            - name: Verify environment details
-              working-directory: plugins/woocommerce
-              run: |
-                  pnpm exec wp-env run tests-cli wp core version
-                  pnpm exec wp-env run tests-cli wp plugin list
-                  pnpm exec wp-env run tests-cli wp theme list
-                  pnpm exec wp-env run tests-cli wp user list
-
             - name: Run API tests
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
