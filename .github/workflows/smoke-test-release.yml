@@ -354,6 +354,7 @@ jobs:
               run: |
                   pnpm exec wp-env run tests-cli -- wp core update --version=${{ steps.get-wp-latest-1.outputs.version }} --force
                   pnpm exec wp-env run tests-cli wp core update-db
+                  pnpm exec wp-env run tests-cli wp core version
 
             - name: Run API tests
               id: run-api-composite-action
