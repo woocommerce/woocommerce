@@ -123,7 +123,6 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 							link: (
 								<Link
 									href="https://wordpress.com/tos/"
-									target="_blank"
 									type="external"
 								/>
 							),

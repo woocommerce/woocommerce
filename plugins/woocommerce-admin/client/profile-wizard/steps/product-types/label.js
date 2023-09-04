@@ -59,7 +59,6 @@ export default function ProductTypeLabel( {
 							moreLink: moreUrl ? (
 								<Link
 									href={ moreUrl }
-									target="_blank"
 									type="external"
 									onClick={ () =>
 										recordEvent(

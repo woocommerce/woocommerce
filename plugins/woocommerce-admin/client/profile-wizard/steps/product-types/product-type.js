@@ -57,7 +57,6 @@ export default function ProductType( {
 							moreLink: moreUrl ? (
 								<Link
 									href={ moreUrl }
-									target="_blank"
 									type="external"
 									onClick={ () =>
 										recordEvent(

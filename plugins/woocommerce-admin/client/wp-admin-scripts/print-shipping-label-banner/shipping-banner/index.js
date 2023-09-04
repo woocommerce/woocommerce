@@ -416,14 +416,12 @@ export class ShippingBanner extends Component {
 									tosLink: (
 										<ExternalLink
 											href="https://wordpress.com/tos"
-											target="_blank"
 											type="external"
 										/>
 									),
 									wcsLink: (
 										<ExternalLink
 											href="https://woocommerce.com/products/shipping/?utm_medium=product"
-											target="_blank"
 											type="external"
 											onClick={
 												this

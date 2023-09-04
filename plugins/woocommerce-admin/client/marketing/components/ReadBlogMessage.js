@@ -16,7 +16,6 @@ const ReadBlogMessage = () => {
 				<Link
 					type="external"
 					href="https://woocommerce.com/blog/marketing/coupons/?utm_medium=product"
-					target="_blank"
 				/>
 			),
 		},

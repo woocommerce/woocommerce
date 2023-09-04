@@ -18,7 +18,6 @@ export const PoweredByLink = () => (
 				link: (
 					<Link
 						href="https://automattic.com/ai-guidelines"
-						target="_blank"
 						type="external"
 						onClick={ () => {
 							recordNameTracks( 'learn_more_click' );

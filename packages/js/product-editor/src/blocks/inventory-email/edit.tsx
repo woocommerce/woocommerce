@@ -84,7 +84,6 @@ export function Edit( {
 												href={ `${ getSetting(
 													'adminUrl'
 												) }admin.php?page=wc-settings&tab=products&section=inventory` }
-												target="_blank"
 												type="external"
 											></Link>
 										),

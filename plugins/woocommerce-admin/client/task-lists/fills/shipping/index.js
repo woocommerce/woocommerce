@@ -233,7 +233,7 @@ export class Shipping extends Component {
 					name
 				),
 				components: {
-					link: <Link href={ url } target="_blank" type="external" />,
+					link: <Link href={ url } type="external" />,
 				},
 			} );
 		};
@@ -319,7 +319,6 @@ export class Shipping extends Component {
 								link: (
 									<Link
 										href="https://woocommerce.com/products/shipstation-integration?utm_medium=product"
-										target="_blank"
 										type="external"
 									/>
 								),
@@ -596,7 +595,6 @@ export class Shipping extends Component {
 														href={
 															'https://wordpress.com/tos/'
 														}
-														target="_blank"
 														type="external"
 													>
 														<></>
