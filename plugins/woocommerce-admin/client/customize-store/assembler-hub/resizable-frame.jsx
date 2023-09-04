@@ -124,13 +124,10 @@ function ResizableFrame( {
 	const handleResizeStop = ( _event, _direction, ref ) => {
 		setIsResizing( false );
 
-		if ( ! isOversized ) {
-			return;
+		if ( isOversized ) {
+			setIsOversized( false );
+			setFrameSize( INITIAL_FRAME_SIZE );
 		}
-
-		setIsOversized( false );
-
-		setFrameSize( INITIAL_FRAME_SIZE );
 	};
 
 	// Handle resize by arrow keys
