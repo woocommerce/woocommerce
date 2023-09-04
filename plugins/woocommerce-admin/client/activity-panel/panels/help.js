@@ -38,15 +38,15 @@ function getHomeItems() {
 		},
 		{
 			title: __( 'Inbox', 'woocommerce' ),
-			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-2',
-		},
-		{
-			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-4',
 		},
 		{
-			title: __( 'Store Management', 'woocommerce' ),
+			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-5',
+		},
+		{
+			title: __( 'Store Management', 'woocommerce' ),
+			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-10',
 		},
 		{
 			title: __( 'Store Setup Checklist', 'woocommerce' ),
@@ -114,11 +114,11 @@ function getPaymentGatewaySuggestions( props ) {
 			link: 'https://woocommerce.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.woocommerce_payments && {
-			title: __( 'WooCommerce Payments Start Up Guide', 'woocommerce' ),
+			title: __( 'WooPayments Start Up Guide', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/payments/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.woocommerce_payments && {
-			title: __( 'WooCommerce Payments FAQs', 'woocommerce' ),
+			title: __( 'WooPayments FAQs', 'woocommerce' ),
 			link: 'https://woocommerce.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.stripe && {

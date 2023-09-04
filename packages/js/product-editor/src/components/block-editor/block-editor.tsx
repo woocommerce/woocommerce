@@ -107,16 +107,14 @@ export function BlockEditor( {
 					onChange={ onChange }
 					settings={ settings }
 				>
-					<div className="editor-styles-wrapper">
-						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-						{ /* @ts-ignore No types for this exist yet. */ }
-						<BlockEditorKeyboardShortcuts.Register />
-						<BlockTools>
-							<ObserveTyping>
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							</ObserveTyping>
-						</BlockTools>
-					</div>
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore No types for this exist yet. */ }
+					<BlockEditorKeyboardShortcuts.Register />
+					<BlockTools>
+						<ObserveTyping>
+							<BlockList className="woocommerce-product-block-editor__block-list" />
+						</ObserveTyping>
+					</BlockTools>
 				</BlockEditorProvider>
 			</BlockContextProvider>
 		</div>

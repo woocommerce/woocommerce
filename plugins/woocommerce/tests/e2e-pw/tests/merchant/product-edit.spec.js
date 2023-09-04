@@ -40,16 +40,15 @@ test.describe( 'Products > Edit Product', () => {
 		await page.goto( `wp-admin/post.php?post=${ productId }&action=edit` );
 
 		// make some edits
-		await page.fill( '#title', 'Awesome product' );
-		await page.click( '#content-html' ); // text mode to work around iframe
-		await page.fill(
-			'.wp-editor-area >> nth=0',
-			'This product is pretty awesome'
-		);
-		await page.fill( '#_regular_price', '100.05' );
+		await page.locator( '#title' ).fill( 'Awesome product' );
+		await page.locator( '#content-html' ).click(); // text mode to work around iframe
+		await page
+			.locator( '.wp-editor-area >> nth=0' )
+			.fill( 'This product is pretty awesome' );
+		await page.locator( '#_regular_price' ).fill( '100.05' );
 
 		// publish the edits
-		await page.click( '#publish' );
+		await page.locator( '#publish' ).click();
 
 		// verify the changes saved
 		await expect( page.locator( '#title' ) ).toHaveValue(

@@ -8,7 +8,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\Users;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,8 +15,6 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Stores notices.
@@ -39,7 +36,6 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
 		'no_secure_connection'               => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
 		'redirect_download_method'           => 'redirect_download_method_notice',
 		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
@@ -57,7 +53,6 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_php74_required_notice' ) );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -120,52 +115,7 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
-		self::maybe_add_php74_required_notice();
 	}
-
-	// phpcs:disable Generic.Commenting.Todo.TaskFound
-
-	/**
-	 * Add an admin notice about the bump of the required PHP version in WooCommerce 8.2
-	 * if the current PHP version is too old.
-	 *
-	 * TODO: Remove this method in WooCommerce 8.2.
-	 */
-	private static function maybe_add_php74_required_notice() {
-		if ( version_compare( phpversion(), '7.4', '>=' ) ) {
-			return;
-		}
-
-		self::add_custom_notice(
-			'php74_required_in_woo_82',
-			sprintf(
-				'%s%s',
-				sprintf(
-					'<h4>%s</h4>',
-					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
-				),
-				sprintf(
-				// translators: Placeholder is a URL.
-					wpautop( wp_kses_data( __( 'WooCommerce 8.2, scheduled for <b>October 2023</b>, will require PHP 7.4 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
-					'https://developer.woocommerce.com/2023/06/05/new-requirement-for-woocommerce-8-2-php-7-4/'
-				)
-			)
-		);
-	}
-
-	/**
-	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 8.2
-	 * if the current PHP version is good.
-	 *
-	 * TODO: Remove this method in WooCommerce 8.2.
-	 */
-	private static function maybe_remove_php74_required_notice() {
-		if ( version_compare( phpversion(), '7.4', '>=' ) && self::has_notice( 'php74_required_in_woo_82' ) ) {
-			self::remove_notice( 'php74_required_in_woo_82' );
-		}
-	}
-
-	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.
@@ -474,46 +424,13 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about WordPress and PHP minimum requirements.
+	 * 
+	 * @deprecated 8.2.0 WordPress and PHP minimum requirements notices are no longer shown.
 	 *
 	 * @since 3.6.5
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
-			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
-			return;
-		}
-
-		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
-		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
-
-		// Both PHP and WordPress up to date version => no notice.
-		if ( ! $old_php && ! $old_wp ) {
-			return;
-		}
-
-		if ( $old_php && $old_wp ) {
-			$msg = sprintf(
-				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION,
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		} elseif ( $old_php ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum PHP version */
-				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION
-			);
-		} elseif ( $old_wp ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		}
-
-		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
 	}
 
 	/**

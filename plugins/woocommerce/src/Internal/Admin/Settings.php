@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\API\Plugins;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Marketplace_Suggestions;
 
@@ -236,6 +237,8 @@ class Settings {
 
 		$settings['features'] = $this->get_features();
 
+		$settings['isWooPayEligible'] = WCPayPromotionInit::is_woopay_eligible();
+
 		return $settings;
 	}
 
@@ -251,7 +254,7 @@ class Settings {
 		foreach ( array_keys( $features ) as $feature_id ) {
 			$new_features[ $feature_id ] = array(
 				'is_enabled'      => $features[ $feature_id ]['is_enabled'],
-				'is_experimental' => $features[ $feature_id ]['is_experimental'],
+				'is_experimental' => $features[ $feature_id ]['is_experimental'] ?? false,
 			);
 		}
 

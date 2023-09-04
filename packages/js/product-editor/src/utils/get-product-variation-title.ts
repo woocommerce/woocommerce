@@ -11,7 +11,7 @@ import { PRODUCT_VARIATION_TITLE_LIMIT } from './constants';
 /**
  * Get the product variation title for use in the header.
  *
- * @param  productVariation The product variation.
+ * @param productVariation The product variation.
  * @return string
  */
 export const getProductVariationTitle = (
@@ -31,7 +31,7 @@ export const getProductVariationTitle = (
 /**
  * Get the truncated product variation title.
  *
- * @param  productVariation The product variation.
+ * @param productVariation The product variation.
  * @return string
  */
 export const getTruncatedProductVariationTitle = (

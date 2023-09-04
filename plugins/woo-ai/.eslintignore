@@ -1,0 +1,5 @@
+*.min.js
+build
+build-module
+node_modules
+vendor

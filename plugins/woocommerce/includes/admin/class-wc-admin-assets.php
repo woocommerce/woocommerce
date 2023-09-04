@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -72,6 +73,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						if ( ! isset( $args['has_rtl'] ) ) {
 							wp_style_add_data( $handle, 'rtl', 'replace' );
 						}
+
+						wp_enqueue_style( $handle );
 					}
 				}
 			}
@@ -224,7 +227,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'export_products' => __( 'Export', 'woocommerce' ),
 					),
 					'nonces'                            => array(
-						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
+						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
 					),
 					'urls'                              => array(
 						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
@@ -546,6 +549,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
+			}
+
+			// Temporarily hide empty addons submenu item
+			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+				wp_enqueue_script( 'wc-admin-menu', WC()->plugin_url() . '/assets/js/admin/wc-admin-menu' . $suffix . '.js', null, $version );
 			}
 
 		}

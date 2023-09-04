@@ -5,8 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
-	.BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -214,6 +214,12 @@ const webpackConfig = {
 				requestToExternal( request ) {
 					if ( request === '@wordpress/components/build/ui' ) {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/edit-site' ) ) {
+						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
+						// We use the edit-site components in the customize store.
 						return null;
 					}
 				},

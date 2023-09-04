@@ -57,6 +57,9 @@ const MarketingOverviewMultichannel = lazy( () =>
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
 );
+const Marketplace = lazy( () =>
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -72,6 +75,10 @@ const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
 	)
+);
+
+const CustomizeStore = lazy( () =>
+	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -170,6 +177,25 @@ export const getPages = () => {
 				id: 'woocommerce-marketing-overview',
 			},
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( isFeatureEnabled( 'marketplace' ) ) {
+		pages.push( {
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
+			path: '/extensions',
+			breadcrumbs: [
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-marketplace',
+			},
 		} );
 	}
 
@@ -290,6 +316,18 @@ export const getPages = () => {
 		} );
 	}
 
+	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
+		pages.push( {
+			container: CustomizeStore,
+			path: '/customize-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Customize Your Store', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
 	if ( window.wcAdminFeatures.settings ) {
 		pages.push( {
 			container: SettingsGroup,
@@ -324,11 +362,8 @@ export const getPages = () => {
 			container: WCPaymentsWelcomePage,
 			path: '/wc-pay-welcome-page',
 			breadcrumbs: [
-				[
-					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce' ),
-				],
-				__( 'WooCommerce Payments', 'woocommerce' ),
+				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+				__( 'WooPayments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',
@@ -488,10 +523,21 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
-	const currentItemsSelector =
+	let currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
+
+	const parentPath = page.navArgs?.parentPath;
+	if ( parentPath ) {
+		const parentPageUrl =
+			parentPath === '/'
+				? 'admin.php?page=wc-admin'
+				: 'admin.php?page=wc-admin&path=' +
+				  encodeURIComponent( parentPath );
+		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
+	}
+
 	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {

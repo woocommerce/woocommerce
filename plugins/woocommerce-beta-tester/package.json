@@ -7,7 +7,7 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.2.0",
+	"version": "2.2.2",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
 		"@types/react": "^17.0.2",
@@ -15,13 +15,13 @@
 		"@types/wordpress__components": "^19.10.3",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^8.0.0",
+		"@wordpress/env": "^8.2.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.32.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.4.1",
-		"typescript": "^4.9.5",
+		"typescript": "^5.1.6",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
@@ -50,6 +50,9 @@
 			"js": "assets/js/*.js"
 		}
 	},
+  "config": {
+    "build_step": "pnpm run build:zip"
+  },
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
@@ -64,6 +67,8 @@
 		"format:js": "wp-scripts format-js",
 		"lint:css": "wp-scripts lint-style",
 		"lint:css:fix": "wp-scripts lint-style --fix",
+		"lint:php": "composer run-script phpcs",
+		"lint:php:fix": "composer run-script phpcbf",
 		"lint:js": "wp-scripts lint-js",
 		"lint:js:fix": "wp-scripts lint-js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
@@ -76,7 +81,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.7"
 	},
 	"lint-staged": {
 		"*.php": [

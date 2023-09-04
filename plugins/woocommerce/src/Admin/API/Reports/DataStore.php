@@ -31,6 +31,13 @@ class DataStore extends SqlQuery {
 	protected $cache_timeout = 3600;
 
 	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = '';
+
+	/**
 	 * Table used as a data store for this report.
 	 *
 	 * @var string
@@ -50,6 +57,13 @@ class DataStore extends SqlQuery {
 	 * @var array
 	 */
 	protected $column_types = array();
+
+	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
+	protected $report_columns = array();
 
 	// @todo This does not really belong here, maybe factor out the comparison as separate class?
 	/**
@@ -129,7 +143,7 @@ class DataStore extends SqlQuery {
 		self::set_db_table_name();
 		$this->assign_report_columns();
 
-		if ( property_exists( $this, 'report_columns' ) ) {
+		if ( $this->report_columns ) {
 			$this->report_columns = apply_filters(
 				'woocommerce_admin_report_columns',
 				$this->report_columns,

@@ -12,7 +12,7 @@
 	],
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.7"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/README.md",
 	"bugs": {
@@ -78,8 +78,8 @@
 		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
 		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
 		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"lint": "eslint src --ext=js,ts,tsx",
-		"lint:fix": "eslint src --ext=js,ts,tsx --fix"
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
 	},
 	"bin": {
 		"wc-e2e": "bin/wc-e2e.sh"

@@ -867,7 +867,7 @@ class ListTable extends WP_List_Table {
 	public function column_cb( $item ) {
 		ob_start();
 		?>
-		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="<?php echo esc_attr( $this->_args['singular'] ); ?>" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
 
 		<div class="locked-indicator">
 			<span class="locked-indicator-icon" aria-hidden="true"></span>
@@ -1197,7 +1197,7 @@ class ListTable extends WP_List_Table {
 
 			$action = 'delete';
 		} else {
-			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['order'] ) ) : array();
+			$ids = isset( $_REQUEST['id'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['id'] ) ) : array();
 		}
 
 		/**
@@ -1217,8 +1217,9 @@ class ListTable extends WP_List_Table {
 			exit;
 		}
 
-		$report_action = '';
-		$changed       = 0;
+		$report_action  = '';
+		$changed        = 0;
+		$action_handled = true;
 
 		if ( 'remove_personal_data' === $action ) {
 			$report_action = 'removed_personal_data';
@@ -1239,8 +1240,15 @@ class ListTable extends WP_List_Table {
 
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
 				$changed = $this->do_bulk_action_mark_orders( $ids, $new_status );
+			} else {
+				$action_handled = false;
 			}
 		} else {
+			$action_handled = false;
+		}
+
+		// Custom action.
+		if ( ! $action_handled ) {
 			$screen = get_current_screen()->id;
 
 			/**
@@ -1332,13 +1340,11 @@ class ListTable extends WP_List_Table {
 	 * @return int Number of orders that were trashed.
 	 */
 	private function do_delete( array $ids, bool $force_delete = false ): int {
-		$orders_store = wc_get_container()->get( OrdersTableDataStore::class );
-		$delete_args  = $force_delete ? array( 'force_delete' => true ) : array();
 		$changed      = 0;
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
-			$orders_store->delete( $order, $delete_args );
+			$order->delete( $force_delete );
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {

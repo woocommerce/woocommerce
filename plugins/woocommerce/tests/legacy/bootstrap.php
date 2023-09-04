@@ -102,10 +102,24 @@ class WC_Unit_Tests_Bootstrap {
 	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
 	 */
 	protected static function register_autoloader_for_testing_tools() {
-		return spl_autoload_register(
+		spl_autoload_register(
 			function ( $class ) {
+				$tests_directory   = dirname( __FILE__, 2 );
+				$helpers_directory = $tests_directory . '/php/helpers';
+
+				// Support loading top-level classes from the `php/helpers` directory.
+				if ( ! str_contains( $class, '\\' ) ) {
+					$helper_path = realpath( "$helpers_directory/$class.php" );
+
+					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
+						require $helper_path;
+						return;
+					}
+				}
+
+				// Otherwise, check if this might relate to an Automattic\WooCommerce\Testing\Tools class.
 				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
-				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$base_dir = $tests_directory . '/Tools/';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
@@ -154,7 +168,7 @@ class WC_Unit_Tests_Bootstrap {
 	private function initialize_hpos() {
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( true );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
 	}
 
 	/**
@@ -264,6 +278,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 	}
 
 	/**

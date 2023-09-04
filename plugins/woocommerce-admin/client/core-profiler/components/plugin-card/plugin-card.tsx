@@ -19,6 +19,7 @@ export const PluginCard = ( {
 	onChange,
 	checked = false,
 	description,
+	learnMoreLink,
 }: {
 	// Checkbox will be hidden if true
 	installed?: boolean;
@@ -28,17 +29,19 @@ export const PluginCard = ( {
 	description: string | ReactNode;
 	checked?: boolean;
 	onChange?: () => void;
+	learnMoreLink?: ReactNode;
 } ) => {
 	return (
 		<div className="woocommerce-profiler-plugins-plugin-card">
-			{ ! installed && (
-				<CheckboxControl
-					checked={ checked }
-					onChange={ onChange ? onChange : () => {} }
-				/>
-			) }
-			{ icon }
-			<div className="woocommerce-profiler-plugins-plugin-card-text">
+			<div className="woocommerce-profiler-plugin-card-top">
+				{ ! installed && (
+					<CheckboxControl
+						className="core-profiler__checkbox"
+						checked={ checked }
+						onChange={ onChange ? onChange : () => {} }
+					/>
+				) }
+				{ icon }
 				<div
 					className={ classnames(
 						'woocommerce-profiler-plugins-plugin-card-text-header',
@@ -52,7 +55,16 @@ export const PluginCard = ( {
 						<span>{ __( 'Installed', 'woocommerce' ) }</span>
 					) }
 				</div>
+			</div>
+
+			<div
+				className={ classnames(
+					'woocommerce-profiler-plugins-plugin-card-text',
+					{ 'smaller-margin-left': installed }
+				) }
+			>
 				<p dangerouslySetInnerHTML={ sanitizeHTML( description ) } />
+				{ learnMoreLink }
 			</div>
 		</div>
 	);

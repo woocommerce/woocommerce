@@ -11,6 +11,10 @@
 		"name": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"autoFocus": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

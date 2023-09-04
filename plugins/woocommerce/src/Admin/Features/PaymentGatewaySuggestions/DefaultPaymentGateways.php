@@ -390,10 +390,58 @@ class DefaultPaymentGateways {
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/paypal.png',
 				'plugins'             => array( 'woocommerce-paypal-payments' ),
 				'is_visible'          => array(
-					(object) array(
-						'type'      => 'base_location_country',
-						'value'     => 'IN',
-						'operation' => '!=',
+					self::get_rules_for_countries(
+						array(
+							'US',
+							'CA',
+							'MX',
+							'BR',
+							'AR',
+							'CL',
+							'CO',
+							'EC',
+							'PE',
+							'UY',
+							'VE',
+							'AT',
+							'BE',
+							'BG',
+							'HR',
+							'CH',
+							'CY',
+							'CZ',
+							'DK',
+							'EE',
+							'ES',
+							'FI',
+							'FR',
+							'DE',
+							'GB',
+							'GR',
+							'HU',
+							'IE',
+							'IT',
+							'LV',
+							'LT',
+							'LU',
+							'MT',
+							'NL',
+							'NO',
+							'PL',
+							'PT',
+							'RO',
+							'SK',
+							'SL',
+							'SE',
+							'AU',
+							'NZ',
+							'HK',
+							'JP',
+							'SG',
+							'CN',
+							'ID',
+							'IN',
+						)
 					),
 					self::get_rules_for_cbd( false ),
 				),
@@ -446,7 +494,6 @@ class DefaultPaymentGateways {
 					'SG',
 					'CN',
 					'ID',
-					'IN',
 				),
 				'category_additional' => array(
 					'US',
@@ -500,6 +547,7 @@ class DefaultPaymentGateways {
 					'SG',
 					'CN',
 					'ID',
+					'IN',
 				),
 			),
 			array(
@@ -548,7 +596,13 @@ class DefaultPaymentGateways {
 										'JP',
 									)
 								),
-								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+								(object) array(
+									'type'     => 'or',
+									'operands' => (object) array(
+										self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+										self::get_rules_selling_offline(),
+									),
+								),
 							),
 						),
 					),
@@ -677,6 +731,7 @@ class DefaultPaymentGateways {
 							'AR',
 							'CL',
 							'CO',
+							'EC',
 							'PE',
 							'UY',
 							'MX',
@@ -689,6 +744,7 @@ class DefaultPaymentGateways {
 					'AR',
 					'CL',
 					'CO',
+					'EC',
 					'PE',
 					'UY',
 					'MX',
@@ -699,15 +755,15 @@ class DefaultPaymentGateways {
 			// This is for backwards compatibility only (WC < 5.10.0-dev or WCA < 2.9.0-dev).
 			array(
 				'id'          => 'woocommerce_payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( self::get_wcpay_countries() ),
@@ -741,15 +797,15 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'woocommerce_payments:without-in-person-payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA' ) ) ),
@@ -776,15 +832,15 @@ class DefaultPaymentGateways {
 			// This is the same as the above, but with a different description for countries that support in-person payments such as US and CA.
 			array(
 				'id'          => 'woocommerce_payments:with-in-person-payments',
-				'title'       => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'       => __( 'WooPayments', 'woocommerce' ),
 				'content'     => __(
-					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array( 'US', 'CA' ) ),
@@ -848,7 +904,7 @@ class DefaultPaymentGateways {
 	 * @return array Array of countries.
 	 */
 	public static function get_wcpay_countries() {
-		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG' );
+		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG', 'BG', 'CZ', 'HR', 'HU', 'RO', 'SE', 'JP', 'AE' );
 	}
 
 	/**
@@ -904,6 +960,29 @@ class DefaultPaymentGateways {
 		return (object) array(
 			'type'     => 'or',
 			'operands' => $rules,
+		);
+	}
+
+	/**
+	 * Get rules for when selling offline for core profiler.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_selling_offline() {
+		return (object) array(
+			'type'         => 'option',
+			'transformers' => array(
+				(object) array(
+					'use'       => 'dot_notation',
+					'arguments' => (object) array(
+						'path' => 'selling_online_answer',
+					),
+				),
+			),
+			'option_name'  => 'woocommerce_onboarding_profile',
+			'operation'    => 'contains',
+			'value'        => 'no_im_selling_offline',
+			'default'      => array(),
 		);
 	}
 
@@ -1107,7 +1186,7 @@ class DefaultPaymentGateways {
 			'BO' => [],
 			'CL' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'CO' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'EC' => [ 'ppcp-gateway' ],
+			'EC' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'FK' => [],
 			'GF' => [],
 			'GY' => [],
@@ -1153,9 +1232,9 @@ class DefaultPaymentGateways {
 			'GU' => [],
 			'ID' => [ 'stripe', 'ppcp-gateway' ],
 			'IN' => [ 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ],
-			'ZA' => [ 'payfast', 'paystack', 'ppcp-gateway' ],
-			'NG' => [ 'paystack', 'ppcp-gateway' ],
-			'GH' => [ 'paystack', 'ppcp-gateway' ],
+			'ZA' => [ 'payfast', 'paystack' ],
+			'NG' => [ 'paystack' ],
+			'GH' => [ 'paystack' ],
 		);
 
 		// If the country code is not in the list, return default priority.

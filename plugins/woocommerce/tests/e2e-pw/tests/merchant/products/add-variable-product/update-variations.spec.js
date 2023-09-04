@@ -541,6 +541,10 @@ test.describe( 'Update variations', () => {
 			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
+		await test.step( 'Wait for block overlay to disappear.', async () => {
+			await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
+		} );
+
 		await test.step( 'Select variation defaults', async () => {
 			for ( const attribute of defaultVariation ) {
 				const defaultAttributeMenu = page.locator( 'select', {

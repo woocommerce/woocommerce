@@ -37,4 +37,26 @@
 		justify-content: end;
 		gap: $gap-smaller;
 	}
+
+	&__actions-tooltip.components-tooltip.components-popover
+		.components-popover__content {
+		width: 100%;
+		max-width: 150px;
+		white-space: normal;
+	}
+
+	&__actions-icon-wrapper {
+		display: flex;
+		align-items: center;
+		position: relative;
+
+		&-icon {
+			color: $gray-600;
+		}
+		&-help-icon {
+			position: absolute;
+			right: -2px;
+			bottom: 0px;
+		}
+	}
 }

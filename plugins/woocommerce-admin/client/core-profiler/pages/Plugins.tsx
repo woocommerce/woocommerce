@@ -11,7 +11,10 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext } from '../index';
+import {
+	CoreProfilerStateMachineContext,
+	PluginsLearnMoreLinkClicked,
+} from '../index';
 import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -34,15 +37,27 @@ export const Plugins = ( {
 	navigationProgress,
 	sendEvent,
 }: {
-	context: CoreProfilerStateMachineContext;
+	context: Pick<
+		CoreProfilerStateMachineContext,
+		'pluginsAvailable' | 'pluginsInstallationErrors' | 'pluginsSelected'
+	>;
 	sendEvent: (
-		payload: PluginsInstallationRequestedEvent | PluginsPageSkippedEvent
+		payload:
+			| PluginsInstallationRequestedEvent
+			| PluginsPageSkippedEvent
+			| PluginsLearnMoreLinkClicked
 	) => void;
 	navigationProgress: number;
 } ) => {
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
-	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_installed ) );
+	>(
+		context.pluginsAvailable.filter(
+			context.pluginsInstallationErrors.length
+				? ( plugin ) => context.pluginsSelected.includes( plugin.key )
+				: ( plugin ) => ! plugin.is_activated
+		)
+	);
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
 		setSelectedPlugins(
@@ -57,13 +72,33 @@ export const Plugins = ( {
 			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
 	};
+
 	const submitInstallationRequest = () => {
+		const selectedPluginSlugs = selectedPlugins.map( ( plugin ) =>
+			plugin.key.replace( ':alt', '' )
+		);
+
+		const pluginsShown: string[] = [];
+		const pluginsUnselected: string[] = [];
+
+		context.pluginsAvailable.forEach( ( plugin ) => {
+			const pluginSlug = plugin.key.replace( ':alt', '' );
+			pluginsShown.push( pluginSlug );
+
+			if (
+				! plugin.is_activated &&
+				! selectedPluginSlugs.includes( pluginSlug )
+			) {
+				pluginsUnselected.push( pluginSlug );
+			}
+		} );
+
 		return sendEvent( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				plugins: selectedPlugins.map( ( plugin ) =>
-					plugin.key.replace( ':alt', '' )
-				),
+				pluginsShown,
+				pluginsSelected: selectedPluginSlugs,
+				pluginsUnselected,
 			},
 		} );
 	};
@@ -136,10 +171,29 @@ export const Plugins = ( {
 				) }
 				<div className="woocommerce-profiler-plugins__list">
 					{ context.pluginsAvailable.map( ( plugin ) => {
+						const learnMoreLink = plugin.learn_more_link ? (
+							<Link
+								onClick={ () => {
+									sendEvent( {
+										type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
+										payload: {
+											plugin: plugin.key,
+											learnMoreLink:
+												plugin.learn_more_link ?? '',
+										},
+									} );
+								} }
+								href={ plugin.learn_more_link }
+								target="_blank"
+								type="external"
+							>
+								{ __( 'Learn More', 'woocommerce' ) }
+							</Link>
+						) : null;
 						return (
 							<PluginCard
 								key={ `checkbox-control-${ plugin.key }` }
-								installed={ plugin.is_installed }
+								installed={ plugin.is_activated }
 								onChange={ () => {
 									setSelectedPlugin( plugin );
 								} }
@@ -156,8 +210,9 @@ export const Plugins = ( {
 										/>
 									) : null
 								}
-								title={ plugin.name }
+								title={ plugin.label }
 								description={ plugin.description }
+								learnMoreLink={ learnMoreLink }
 							/>
 						);
 					} ) }

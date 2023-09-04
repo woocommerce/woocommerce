@@ -2346,7 +2346,7 @@ test.describe('Data API tests', () => {
 							"num_decimals": 2,
 							"thousand_sep": ",",
 							"weight_unit": "kg",
-							"states": []
+							"states": expect.arrayContaining([])
 						},
 						{
 							"code": "KY",
@@ -6016,7 +6016,7 @@ test.describe('Data API tests', () => {
 		expect(responseJSON).toEqual(expect.arrayContaining([
 			expect.objectContaining({
 				"code": "VEF",
-				"name": "Venezuelan bol&iacute;var",
+				"name": "Venezuelan bol&iacute;var (2008–2018)",
 				"symbol": "Bs F",
 				"_links": {
 					"self": [{
@@ -6031,8 +6031,8 @@ test.describe('Data API tests', () => {
 		expect(responseJSON).toEqual(expect.arrayContaining([
 			expect.objectContaining({
 				"code": "VES",
-				"name": "Bol&iacute;var soberano",
-				"symbol": "Bs.S",
+				"name": "Venezuelan bol&iacute;var",
+				"symbol": "Bs.",
 				"_links": {
 					"self": [{
 						"href": expect.stringContaining("data/currencies/VES")

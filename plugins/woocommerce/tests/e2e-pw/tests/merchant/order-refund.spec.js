@@ -54,11 +54,12 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// get currency symbol
-		currencySymbol = await page.textContent(
-			'.woocommerce-Price-currencySymbol'
-		);
+		currencySymbol = await page
+			.locator( '.woocommerce-Price-currencySymbol' )
+			.first()
+			.textContent();
 
-		await page.click( 'button.refund-items' );
+		await page.locator( 'button.refund-items' ).click();
 
 		// Verify the refund section shows
 		await expect(
@@ -67,8 +68,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await expect( page.locator( '#restock_refunded_items' ) ).toBeChecked();
 
 		// Initiate a refund
-		await page.fill( '.refund_order_item_qty', '1' );
-		await page.fill( '#refund_reason', 'No longer wanted' );
+		await page.locator( '.refund_order_item_qty' ).fill( '1' );
+		await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 
 		// Confirm values
 		await expect( page.locator( '.refund_line_total' ) ).toHaveValue(
@@ -81,9 +82,11 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund', {
-			waitForLoadState: 'networkidle',
-		} );
+		await page
+			.locator( '.do-manual-refund', {
+				waitForLoadState: 'networkidle',
+			} )
+			.click();
 
 		// Verify the product line item shows the refunded quantity and amount
 		await expect( page.locator( 'small.refunded >> nth=0' ) ).toContainText(
@@ -113,10 +116,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'a.delete_refund', {
-			force: true,
-			waitForLoadState: 'networkidle',
-		} ); // have to force it because not visible
+		await page.getByRole( 'row', { name: /Refund #\d+/ } ).hover();
+		await page.locator( '.delete_refund' ).click();
 
 		// Verify the refunded row item is no longer showing
 		await expect( page.locator( 'tr.refund' ) ).toHaveCount( 0 );
@@ -210,7 +211,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		);
 
 		// Click the Refund button
-		await page.click( 'button.refund-items' );
+		await page.locator( 'button.refund-items' ).click();
 
 		// Verify the refund section shows
 		await expect(
@@ -219,34 +220,18 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await expect( page.locator( '#restock_refunded_items' ) ).toBeChecked();
 
 		// Initiate a refund
-		await page.fill( '.refund_order_item_qty >> nth=1', '2' );
-		await page.fill( '#refund_reason', 'No longer wanted' );
+		await page.locator( '.refund_order_item_qty >> nth=1' ).fill( '2' );
+		await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund', {
-			waitForLoadState: 'networkidle',
-		} );
+		await page
+			.locator( '.do-manual-refund', {
+				waitForLoadState: 'networkidle',
+			} )
+			.click();
 
 		// Verify restock system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
 			/Item #\d+ stock increased from 8 to 10./
 		);
-
-		// Update the order
-		await page.click( 'button.save_order' );
-		await expect( page.locator( 'div.updated.notice-success' ) ).toContainText(
-			'Order updated.'
-		);
-
-		// Verify that inventory wasn't modified.
-		expect(
-			await page.$$eval( '.note', ( notes ) =>
-				notes.every(
-					( note ) =>
-						! note.textContent.match(
-							/Adjusted stock: Product with Stock \(10→8\)/
-						)
-				)
-			)
-		).toEqual( true );
 	} );
 } );

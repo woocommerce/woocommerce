@@ -20,7 +20,7 @@ export {
 	BlockIcon as __experimentalBlockIcon,
 	BlockIconProps,
 } from './block-icon';
-export { ProductMVPCESFooter as __experimentalProductMVPCESFooter } from './product-mvp-ces-footer';
+export { FeedbackBar as __experimentalProductMVPCESFooter } from './feedback-bar';
 export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
 export { ProductMVPFeedbackModalContainer as __experimentalProductMVPFeedbackModalContainer } from './product-mvp-feedback-modal-container';
 export {

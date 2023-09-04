@@ -611,6 +611,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+
 		$i             = absint( $_POST['i'] );
 		$metabox_class = array();
 		$attribute     = new WC_Product_Attribute();
@@ -619,7 +621,13 @@ class WC_AJAX {
 		$attribute->set_name( sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) );
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
-		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 1 ) );
+		$attribute->set_variation(
+			apply_filters(
+				'woocommerce_attribute_default_is_variation',
+				'variable' === $product_type ? 1 : 0,
+				$product_type
+			)
+		);
 		/* phpcs: enable */
 
 		if ( $attribute->is_taxonomy() ) {
@@ -2995,6 +3003,18 @@ class WC_AJAX {
 					// That's fine, it's not in the database anyways. NEXT!
 					continue;
 				}
+				/**
+				 * Notify that a non-option setting has been deleted.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action(
+					'woocommerce_update_non_option_setting',
+					array(
+						'id'     => 'shipping_zone',
+						'action' => 'delete',
+					)
+				);
 				WC_Shipping_Zones::delete_zone( $zone_id );
 				continue;
 			}
@@ -3024,19 +3044,18 @@ class WC_AJAX {
 					);
 					$zone->set_zone_order( $zone_data['zone_order'] );
 				}
-
-				global $current_tab;
-				$current_tab = 'shipping';
-				/**
-				 * Completes the saving process for options.
-				 *
-				 * @since 7.8.0
-				 */
-				do_action( 'woocommerce_update_options' );
 				$zone->save();
 			}
 		}
 
+		global $current_tab;
+		$current_tab = 'shipping';
+		/**
+		 * Completes the saving process for options.
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_update_options' );
 		wp_send_json_success(
 			array(
 				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
@@ -3066,15 +3085,31 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
+		// A shipping zone can be created here if the user is adding a method without first saving the shipping zone.
+		if ( '' === $zone_id ) {
+			/**
+			 * Notified that a non-option setting has been added.
+			 *
+			 * @since 7.8.0
+			 */
+			do_action(
+				'woocommerce_update_non_option_setting',
+				array(
+					'id'     => 'shipping_zone',
+					'action' => 'add',
+				)
+			);
+		}
 		/**
-		 * Notify that a non-option setting has been updated.
+		 * Notify that a non-option setting has been added.
 		 *
 		 * @since 7.8.0
 		 */
 		do_action(
 			'woocommerce_update_non_option_setting',
 			array(
-				'id' => 'zone_method',
+				'id'     => 'zone_method',
+				'action' => 'add',
 			)
 		);
 		$instance_id = $zone->add_shipping_method( wc_clean( wp_unslash( $_POST['method_id'] ) ) );
@@ -3178,11 +3213,26 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
+		// A shipping zone can be created here if the user is adding a method without first saving the shipping zone.
+		if ( '' === $zone_id ) {
+			/**
+			 * Notifies that a non-option setting has been added.
+			 *
+			 * @since 7.8.0
+			 */
+			do_action(
+				'woocommerce_update_non_option_setting',
+				array(
+					'id'     => 'shipping_zone',
+					'action' => 'add',
+				)
+			);
+		}
 		$changes = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( isset( $changes['zone_name'] ) ) {
 			/**
-			 * Completes the saving process for options.
+			 * Notifies that a non-option setting has been updated.
 			 *
 			 * @since 7.8.0
 			 */
@@ -3192,7 +3242,7 @@ class WC_AJAX {
 
 		if ( isset( $changes['zone_locations'] ) ) {
 			/**
-			 * Completes the saving process for options.
+			 * Notifies that a non-option setting has been updated.
 			 *
 			 * @since 7.8.0
 			 */
@@ -3218,7 +3268,7 @@ class WC_AJAX {
 
 		if ( isset( $changes['zone_postcodes'] ) ) {
 			/**
-			 * Completes the saving process for options.
+			 * Notifies that a non-option setting has been updated.
 			 *
 			 * @since 7.8.0
 			 */
@@ -3231,12 +3281,6 @@ class WC_AJAX {
 		}
 
 		if ( isset( $changes['methods'] ) ) {
-			/**
-			 * Completes the saving process for options.
-			 *
-			 * @since 7.8.0
-			 */
-			do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_methods' ) );
 			foreach ( $changes['methods'] as $instance_id => $data ) {
 				$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
 
@@ -3245,6 +3289,18 @@ class WC_AJAX {
 					$option_key      = $shipping_method->get_instance_option_key();
 					if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
 						delete_option( $option_key );
+						/**
+						 * Notifies that a non-option setting has been deleted.
+						 *
+						 * @since 7.8.0
+						 */
+						do_action(
+							'woocommerce_update_non_option_setting',
+							array(
+								'id'     => 'zone_method',
+								'action' => 'delete',
+							)
+						);
 						do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
 					}
 					continue;
@@ -3260,7 +3316,7 @@ class WC_AJAX {
 
 				if ( isset( $method_data['method_order'] ) ) {
 					/**
-					 * Completes the saving process for options.
+					 * Notifies that a non-option setting has been updated.
 					 *
 					 * @since 7.8.0
 					 */
@@ -3270,7 +3326,7 @@ class WC_AJAX {
 
 				if ( isset( $method_data['enabled'] ) ) {
 					/**
-					 * Completes the saving process for options.
+					 * Notifies that a non-option setting has been updated.
 					 *
 					 * @since 7.8.0
 					 */
@@ -3385,6 +3441,18 @@ class WC_AJAX {
 					// That's fine, it's not in the database anyways. NEXT!
 					continue;
 				}
+				/**
+				 * Notifies that a non-option setting has been deleted.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action(
+					'woocommerce_update_non_option_setting',
+					array(
+						'id'     => 'shipping_class',
+						'action' => 'delete',
+					)
+				);
 				wp_delete_term( $term_id, 'product_shipping_class' );
 				continue;
 			}
@@ -3426,9 +3494,27 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
+				/**
+				 * Notifies that a non-option setting has been added.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action(
+					'woocommerce_update_non_option_setting',
+					array(
+						'id'     => 'shipping_class',
+						'action' => 'add',
+					)
+				);
 				$inserted_term = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
 			} else {
+				/**
+				 * Notifies that a non-option setting has been updated.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'shipping_class' ) );
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}
 
@@ -3529,7 +3615,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function order_refresh_lock( $response, $data ) : array {
+	private static function order_refresh_lock( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->refresh_lock_ajax( $response, $data );
 	}
 
@@ -3542,7 +3628,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function check_locked_orders( $response, $data ) : array {
+	private static function check_locked_orders( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
 	}
 

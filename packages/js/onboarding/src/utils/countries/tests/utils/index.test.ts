@@ -21,6 +21,18 @@ describe( 'findCountryOption', () => {
 		expect( findCountryOption( countryStateOptions, location ) ).toBeNull();
 	} );
 
+	it( 'should ignore accents for comparsion', () => {
+		const location = {
+			city: 'Malaga',
+			region: 'Andalucia',
+			country_short: 'ES',
+		};
+		expect( findCountryOption( countryStateOptions, location ) ).toEqual( {
+			key: 'ES:MA',
+			label: 'Spain — Málaga',
+		} );
+	} );
+
 	it.each( [
 		{
 			location: { country_short: 'TW' },

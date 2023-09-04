@@ -1,3 +1,4 @@
+export { init as initCatalogVisibility } from './catalog-visibility';
 export { init as initCategory } from './category';
 export { init as initCheckbox } from './checkbox';
 export { init as initCollapsible } from './collapsible';
@@ -20,3 +21,8 @@ export { init as initTab } from './tab';
 export { init as initInventoryQuantity } from './inventory-quantity';
 export { init as initToggle } from './toggle';
 export { init as attributesInit } from './attributes';
+export { init as initVariations } from './variations';
+export { init as initRequirePassword } from './password';
+export { init as initVariationItems } from './variation-items';
+export { init as initVariationOptions } from './variation-options';
+export { init as initNotice } from './notice';

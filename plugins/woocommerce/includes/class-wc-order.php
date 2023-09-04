@@ -2286,4 +2286,13 @@ class WC_Order extends WC_Abstract_Order {
 	public function is_created_via( $modus ) {
 		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
 	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash(): bool {
+		return (bool) $this->data_store->untrash_order( $this );
+	}
 }

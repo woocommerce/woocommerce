@@ -125,7 +125,7 @@ export const UserProfile = ( {
 }: {
 	sendEvent: ( event: UserProfileEvent ) => void;
 	navigationProgress: number;
-	context: CoreProfilerStateMachineContext;
+	context: Pick< CoreProfilerStateMachineContext, 'userProfile' >;
 } ) => {
 	const [ businessChoice, setBusinessChoice ] = useState< BusinessChoice >(
 		context.userProfile.businessChoice || 'im_just_starting_my_business'
@@ -227,7 +227,7 @@ export const UserProfile = ( {
 		>
 			<Navigation
 				percentage={ navigationProgress }
-				skipText={ __( 'Skip this setup', 'woocommerce' ) }
+				skipText={ __( 'Skip this step', 'woocommerce' ) }
 				onSkip={ () =>
 					sendEvent( {
 						type: 'USER_PROFILE_SKIPPED',

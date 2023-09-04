@@ -28,14 +28,22 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
-	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
+	public const DELETED_RECORD_META_KEY        = '_deleted_from';
+	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
+	public const DELETED_FROM_ORDERS_META_VALUE = 'orders_table';
+
+	public const ORDERS_TABLE_CREATED = 'woocommerce_custom_orders_table_created';
+
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
+
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
-	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
-	public const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
-	public const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
+	public const ID_TYPE_MISSING_IN_ORDERS_TABLE   = 0;
+	public const ID_TYPE_MISSING_IN_POSTS_TABLE    = 1;
+	public const ID_TYPE_DIFFERENT_UPDATE_DATE     = 2;
+	public const ID_TYPE_DELETED_FROM_ORDERS_TABLE = 3;
+	public const ID_TYPE_DELETED_FROM_POSTS_TABLE  = 4;
 
 	/**
 	 * The data store object to use.
@@ -78,6 +86,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function __construct() {
 		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
 		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
+		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
 
@@ -116,7 +125,29 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function check_orders_table_exists(): bool {
 		$missing_tables = $this->database_util->get_missing_tables( $this->data_store->get_database_schema() );
 
-		return count( $missing_tables ) === 0;
+		if ( count( $missing_tables ) === 0 ) {
+			update_option( self::ORDERS_TABLE_CREATED, 'yes' );
+			return true;
+		} else {
+			update_option( self::ORDERS_TABLE_CREATED, 'no' );
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the value of the orders table created option. If it's not set, then it checks the orders table and set it accordingly.
+	 *
+	 * @return bool Whether orders table exists.
+	 */
+	public function get_table_exists(): bool {
+		$table_exists = get_option( self::ORDERS_TABLE_CREATED );
+		switch ( $table_exists ) {
+			case 'no':
+			case 'yes':
+				return 'yes' === $table_exists;
+			default:
+				return $this->check_orders_table_exists();
+		}
 	}
 
 	/**
@@ -124,6 +155,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
+		$this->check_orders_table_exists();
 	}
 
 	/**
@@ -135,6 +167,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		foreach ( $table_names as $table_name ) {
 			$this->database_util->drop_database_table( $table_name );
 		}
+		delete_option( self::ORDERS_TABLE_CREATED );
 	}
 
 	/**
@@ -186,8 +219,12 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table     = $this->data_store::get_orders_table_name();
+
 		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+
+		$orders_table = $this->data_store::get_orders_table_name();
 
 		if ( empty( $order_post_types ) ) {
 			$this->error_logger->debug(
@@ -201,7 +238,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+		if ( ! $this->get_table_exists() ) {
+			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
+					$order_post_types
+				)
+				// phpcs:enable
+			);
+			return $count;
+		}
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "
@@ -247,8 +294,30 @@ SELECT(
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$pending_count = (int) $wpdb->get_var( $sql );
+
+		$deleted_from_table = $this->get_current_deletion_record_meta_value();
+
+		$deleted_count  = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT count(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
+				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
+			)
+		);
+		$pending_count += $deleted_count;
+
 		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
 		return $pending_count;
+	}
+
+	/**
+	 * Get the meta value for order deletion records based on which table is currently authoritative.
+	 *
+	 * @return string self::DELETED_FROM_ORDERS_META_VALUE if the orders table is authoritative, self::DELETED_FROM_POSTS_META_VALUE otherwise.
+	 */
+	private function get_current_deletion_record_meta_value() {
+		return $this->custom_orders_table_is_authoritative() ?
+				self::DELETED_FROM_ORDERS_META_VALUE :
+				self::DELETED_FROM_POSTS_META_VALUE;
 	}
 
 	/**
@@ -268,6 +337,8 @@ SELECT(
 	 * ID_TYPE_MISSING_IN_ORDERS_TABLE: orders that exist in posts table but not in orders table.
 	 * ID_TYPE_MISSING_IN_POSTS_TABLE: orders that exist in orders table but not in posts table (the corresponding post entries are placeholders).
 	 * ID_TYPE_DIFFERENT_UPDATE_DATE: orders that exist in both tables but have different last update dates.
+	 * ID_TYPE_DELETED_FROM_ORDERS_TABLE: orders deleted from the orders table but not yet from the posts table.
+	 * ID_TYPE_DELETED_FROM_POSTS_TABLE: orders deleted from the posts table but not yet from the orders table.
 	 *
 	 * @param int $type One of ID_TYPE_MISSING_IN_ORDERS_TABLE, ID_TYPE_MISSING_IN_POSTS_TABLE, ID_TYPE_DIFFERENT_UPDATE_DATE.
 	 * @param int $limit Maximum number of ids to return.
@@ -327,6 +398,10 @@ ORDER BY orders.id ASC
 				);
 				// phpcs:enable
 				break;
+			case self::ID_TYPE_DELETED_FROM_ORDERS_TABLE:
+				return $this->get_deleted_order_ids( true, $limit );
+			case self::ID_TYPE_DELETED_FROM_POSTS_TABLE:
+				return $this->get_deleted_order_ids( false, $limit );
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
 		}
@@ -334,6 +409,31 @@ ORDER BY orders.id ASC
 
 		// phpcs:ignore WordPress.DB
 		return array_map( 'intval', $wpdb->get_col( $sql . " LIMIT $limit" ) );
+	}
+
+	/**
+	 * Get the ids of the orders that are marked as deleted in the orders meta table.
+	 *
+	 * @param bool $deleted_from_orders_table True to get the ids of the orders deleted from the orders table, false o get the ids of the orders deleted from the posts table.
+	 * @param int  $limit The maximum count of orders to return.
+	 * @return array An array of order ids.
+	 */
+	private function get_deleted_order_ids( bool $deleted_from_orders_table, int $limit ) {
+		global $wpdb;
+
+		$deleted_from_table = $this->get_current_deletion_record_meta_value();
+
+		$order_ids = $wpdb->get_col(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				"SELECT DISTINCT(order_id) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s LIMIT {$limit}",
+				self::DELETED_RECORD_META_KEY,
+				$deleted_from_table
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
@@ -351,25 +451,122 @@ ORDER BY orders.id ASC
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
+		if ( empty( $batch ) ) {
+			return;
+		}
+
+		$batch = array_map( 'absint', $batch );
+
 		$this->order_cache_controller->temporarily_disable_orders_cache_usage();
 
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			foreach ( $batch as $id ) {
-				$order = wc_get_order( $id );
-				if ( ! $order ) {
-					$this->error_logger->error( "Order $id not found during batch process, skipping." );
-					continue;
+		$custom_orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
+		$deleted_order_ids                    = $this->process_deleted_orders( $batch, $custom_orders_table_is_authoritative );
+		$batch                                = array_diff( $batch, $deleted_order_ids );
+
+		if ( ! empty( $batch ) ) {
+			if ( $custom_orders_table_is_authoritative ) {
+				foreach ( $batch as $id ) {
+					$order = wc_get_order( $id );
+					if ( ! $order ) {
+						$this->error_logger->error( "Order $id not found during batch process, skipping." );
+						continue;
+					}
+					$data_store = $order->get_data_store();
+					$data_store->backfill_post_record( $order );
 				}
-				$data_store = $order->get_data_store();
-				$data_store->backfill_post_record( $order );
+			} else {
+				$this->posts_to_cot_migrator->migrate_orders( $batch );
 			}
-		} else {
-			$this->posts_to_cot_migrator->migrate_orders( $batch );
 		}
+
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
 			$this->order_cache_controller->maybe_restore_orders_cache_usage();
 		}
+	}
+
+	/**
+	 * Take a batch of order ids pending synchronization and process those that were deleted, ignoring the others
+	 * (which will be orders that were created or modified) and returning the ids of the orders actually processed.
+	 *
+	 * @param array $batch Array of ids of order pending synchronization.
+	 * @param bool  $custom_orders_table_is_authoritative True if the custom orders table is currently authoritative.
+	 * @return array Order ids that have been actually processed.
+	 */
+	private function process_deleted_orders( array $batch, bool $custom_orders_table_is_authoritative ): array {
+		global $wpdb;
+
+		$deleted_from_table_name = $this->get_current_deletion_record_meta_value();
+
+		$data_store_for_deletion =
+			$custom_orders_table_is_authoritative ?
+			new \WC_Order_Data_Store_CPT() :
+			wc_get_container()->get( OrdersTableDataStore::class );
+
+		$order_ids_as_sql_list = '(' . implode( ',', $batch ) . ')';
+
+		$deleted_order_ids  = array();
+		$meta_ids_to_delete = array();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$deletion_data = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, order_id FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s AND order_id IN $order_ids_as_sql_list ORDER BY order_id DESC",
+				self::DELETED_RECORD_META_KEY,
+				$deleted_from_table_name
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( empty( $deletion_data ) ) {
+			return array();
+		}
+
+		foreach ( $deletion_data as $item ) {
+			$meta_id  = $item['id'];
+			$order_id = $item['order_id'];
+
+			if ( isset( $deleted_order_ids[ $order_id ] ) ) {
+				$meta_ids_to_delete[] = $meta_id;
+				continue;
+			}
+
+			if ( ! $data_store_for_deletion->order_exists( $order_id ) ) {
+				$this->error_logger->warning( "Order {$order_id} doesn't exist in the backup table, thus it can't be deleted" );
+				$deleted_order_ids[]  = $order_id;
+				$meta_ids_to_delete[] = $meta_id;
+				continue;
+			}
+
+			try {
+				$order = new \WC_Order();
+				$order->set_id( $order_id );
+				$data_store_for_deletion->read( $order );
+
+				$data_store_for_deletion->delete(
+					$order,
+					array(
+						'force_delete'     => true,
+						'suppress_filters' => true,
+					)
+				);
+			} catch ( \Exception $ex ) {
+				$this->error_logger->error( "Couldn't delete order {$order_id} from the backup table: {$ex->getMessage()}" );
+				continue;
+			}
+
+			$deleted_order_ids[]  = $order_id;
+			$meta_ids_to_delete[] = $meta_id;
+		}
+
+		if ( ! empty( $meta_ids_to_delete ) ) {
+			$order_id_rows_as_sql_list = '(' . implode( ',', $meta_ids_to_delete ) . ')';
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders_meta WHERE id IN {$order_id_rows_as_sql_list}" );
+		}
+
+		return $deleted_order_ids;
 	}
 
 	/**
@@ -389,17 +586,29 @@ ORDER BY orders.id ASC
 	 * @return array Batch of records.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $size );
-		} else {
-			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_ORDERS_TABLE, $size );
-		}
+		$orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
+
+		$order_ids = $this->get_ids_of_orders_pending_sync(
+			$orders_table_is_authoritative ? self::ID_TYPE_MISSING_IN_POSTS_TABLE : self::ID_TYPE_MISSING_IN_ORDERS_TABLE,
+			$size
+		);
 		if ( count( $order_ids ) >= $size ) {
 			return $order_ids;
 		}
 
-		$order_ids = $order_ids + $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $size - count( $order_ids ) );
-		return $order_ids;
+		$updated_order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $size - count( $order_ids ) );
+		$order_ids         = array_merge( $order_ids, $updated_order_ids );
+		if ( count( $order_ids ) >= $size ) {
+			return $order_ids;
+		}
+
+		$deleted_order_ids = $this->get_ids_of_orders_pending_sync(
+			$orders_table_is_authoritative ? self::ID_TYPE_DELETED_FROM_ORDERS_TABLE : self::ID_TYPE_DELETED_FROM_POSTS_TABLE,
+			$size - count( $order_ids )
+		);
+		$order_ids         = array_merge( $order_ids, $deleted_order_ids );
+
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
@@ -451,9 +660,45 @@ ORDER BY orders.id ASC
 	 * @param WP_Post $post The deleted post.
 	 */
 	private function handle_deleted_post( $postid, $post ): void {
-		if ( 'shop_order' === $post->post_type && $this->data_sync_is_enabled() ) {
-			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
+		global $wpdb;
+
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+		if ( ! in_array( $post->post_type, $order_post_types, true ) ) {
+			return;
 		}
+
+		if ( ! $this->get_table_exists() ) {
+			return;
+		}
+
+		if ( $this->data_sync_is_enabled() ) {
+			$this->data_store->delete_order_data_from_custom_order_tables( $postid );
+		} elseif ( $this->custom_orders_table_is_authoritative() ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.SlowDBQuery
+		if ( $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE ID=%d)
+						AND NOT EXISTS (SELECT order_id FROM {$this->data_store::get_meta_table_name()} WHERE order_id=%d AND meta_key=%s AND meta_value=%s)",
+				$postid,
+				$postid,
+				self::DELETED_RECORD_META_KEY,
+				self::DELETED_FROM_POSTS_META_VALUE
+			)
+		)
+		) {
+			$wpdb->insert(
+				$this->data_store::get_meta_table_name(),
+				array(
+					'order_id'   => $postid,
+					'meta_key'   => self::DELETED_RECORD_META_KEY,
+					'meta_value' => self::DELETED_FROM_POSTS_META_VALUE,
+				)
+			);
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.SlowDBQuery
 	}
 
 	/**
