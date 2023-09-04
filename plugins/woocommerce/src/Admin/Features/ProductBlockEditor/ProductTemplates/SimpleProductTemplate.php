@@ -555,7 +555,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'disabledCopy' => sprintf(
 						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
 							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
-							'<a href="http://blue.local/wp-admin/admin.php?page=wc-settings&tab=products&section=inventory" target="_blank" rel="noreferrer">',
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 							'</a>'
 						),
 				],
