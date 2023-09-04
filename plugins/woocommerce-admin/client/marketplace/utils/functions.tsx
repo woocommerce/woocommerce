@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Product } from '../components/product-list/types';
 import {
 	MARKETPLACE_HOST,
-	MARKETPLACE_CATEGORY_API_PATH
+	MARKETPLACE_CATEGORY_API_PATH,
 } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import { LOCALE } from '../../utils/admin-settings';

@@ -109,7 +109,7 @@ export default function FeedbackModal(): JSX.Element {
 
 		return () => {
 			clearTimeout( timer );
-		}
+		};
 	}
 
 	function showSnackbar() {

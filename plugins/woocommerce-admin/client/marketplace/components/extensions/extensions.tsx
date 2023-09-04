@@ -41,7 +41,7 @@ export default function Extensions(): JSX.Element {
 		const wccomSearchEndpoint =
 			MARKETPLACE_HOST +
 			MARKETPLACE_SEARCH_API_PATH +
-			'?'	+
+			'?' +
 			params.toString();
 
 		// Fetch data from WCCOM API
