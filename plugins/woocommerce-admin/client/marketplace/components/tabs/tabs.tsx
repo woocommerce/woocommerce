@@ -108,12 +108,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { setSelectedTab } = marketplaceContextValue;
 
-	interface Query {
-		path?: string;
-		tab?: string;
-	}
-
-	const query: Record<string, string> = useQuery();
+	const query: Record< string, string > = useQuery();
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {

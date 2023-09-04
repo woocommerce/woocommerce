@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { WooFooterItem } from '@woocommerce/admin-layout';
 import { __ } from '@wordpress/i18n';
 import { check, commentContent, shield } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';

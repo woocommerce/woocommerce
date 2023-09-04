@@ -83,8 +83,6 @@ export default function FeedbackModal(): JSX.Element {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	function maybeShowSnackbar() {
-		let timer: ReturnType<typeof setTimeout> | undefined;
-
 		// Don't show if we're still loading content
 		if ( isLoading ) {
 			return;
@@ -104,12 +102,14 @@ export default function FeedbackModal(): JSX.Element {
 			return;
 		}
 
-		timer = setTimeout( showSnackbar, SNACKBAR_TIMEOUT );
+		const timer = setTimeout( showSnackbar, SNACKBAR_TIMEOUT );
 
 		// Without this, navigating between screens will create a series of snackbars
 		dismissToday();
 
-		return () => { clearTimeout( timer ); }
+		return () => {
+			clearTimeout( timer );
+		}
 	}
 
 	function showSnackbar() {

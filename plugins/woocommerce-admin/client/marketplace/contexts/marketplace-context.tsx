@@ -26,7 +26,7 @@ export function MarketplaceContextProvider( props: {
 		isLoading,
 		setIsLoading,
 		selectedTab,
-		setSelectedTab
+		setSelectedTab,
 	};
 
 	return (

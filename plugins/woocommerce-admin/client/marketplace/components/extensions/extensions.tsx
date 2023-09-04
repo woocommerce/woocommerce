@@ -14,14 +14,11 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
-import {
-	Product,
-	SearchAPIProductType,
-} from '../product-list/types';
+import { Product, SearchAPIProductType } from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 
 export default function Extensions(): JSX.Element {
-	const [ productList, setProductList ] = useState<Product[]>( [] );
+	const [ productList, setProductList ] = useState< Product[] >( [] );
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, setIsLoading } = marketplaceContextValue;
 
@@ -43,7 +40,8 @@ export default function Extensions(): JSX.Element {
 
 		const wccomSearchEndpoint =
 			MARKETPLACE_HOST +
-			MARKETPLACE_SEARCH_API_PATH + '?' +
+			MARKETPLACE_SEARCH_API_PATH +
+			'?'	+
 			params.toString();
 
 		// Fetch data from WCCOM API
