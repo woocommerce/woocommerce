@@ -33,6 +33,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const {
 		id: taskId,
 		title,
+		badge,
 		content,
 		time,
 		actionLabel,
@@ -82,6 +83,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					key={ taskId }
 					className={ className }
 					title={ title }
+					badge={ badge }
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }
@@ -99,7 +101,16 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				/>
 			);
 		},
-		[ taskId, title, content, time, actionLabel, isComplete, activeTaskId ]
+		[
+			taskId,
+			title,
+			badge,
+			content,
+			time,
+			actionLabel,
+			isComplete,
+			activeTaskId,
+		]
 	);
 
 	return hasFills ? (

@@ -117,6 +117,10 @@ a.woocommerce-experimental-list__item {
 			color: $foreground-color-hover;
 		}
 
+		.woocommerce-task-list__item-badge {
+			background-color: $white;
+		}
+
 		.woocommerce-list__item-before > svg {
 			fill: $foreground-color-hover;
 		}
