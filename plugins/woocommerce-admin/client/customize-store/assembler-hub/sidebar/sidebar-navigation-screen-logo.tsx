@@ -112,7 +112,7 @@ const useLogoEdit = ( {
 	};
 
 	const onInitialSelectLogo = ( media: { id: string; url: string } ) => {
-		// Initialize the syncSiteIcon toggle. If we currently have no Site logo and no
+		// Initialize the syncSiteIcon toggle. If we currently have no site logo and no
 		// site icon, automatically sync the logo to the icon.
 		if ( shouldSyncIcon === undefined ) {
 			const shouldForceSync = ! siteIconId;
