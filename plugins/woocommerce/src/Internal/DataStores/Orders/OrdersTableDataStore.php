@@ -570,7 +570,17 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		self::$backfilling_order_ids[] = $order->get_id();
-		$cpt_data_store->update_order_from_object( $order );
+		$this->update_order_meta_from_object( $order );
+		$order_class = get_class( $order );
+		$post_order  = new $order_class();
+		$post_order->set_id( $order->get_id() );
+		$cpt_data_store->read( $post_order );
+
+		// This compares the order data to the post data and set changes array for props that are changed.
+		$post_order->set_props( $order->get_data() );
+
+		$cpt_data_store->update_order_from_object( $post_order );
+
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
 				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
@@ -769,6 +779,47 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function set_order_stock_reduced( $order, $set ) {
 		$this->set_stock_reduced( $order, $set );
+	}
+
+	/**
+	 * Get token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	public function get_payment_token_ids( $order ) {
+		/**
+		 * We don't store _payment_tokens in props to preserve backward compatibility. In CPT data store, `_payment_tokens` is always fetched directly from DB instead of from prop.
+		 */
+		$payment_tokens = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $payment_tokens ) {
+			$payment_tokens = $payment_tokens[0]->meta_value;
+		}
+		if ( ! $payment_tokens && version_compare( $order->get_version(), '8.0.0', '<' ) ) {
+			// Before 8.0 we were incorrectly storing payment_tokens in the order meta. So we need to check there too.
+			$payment_tokens = get_post_meta( $order->get_id(), '_payment_tokens', true );
+		}
+		return array_filter( (array) $payment_tokens );
+	}
+
+	/**
+	 * Update token ids for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $token_ids Payment token ids.
+	 */
+	public function update_payment_token_ids( $order, $token_ids ) {
+		$meta          = new \WC_Meta_Data();
+		$meta->key     = '_payment_tokens';
+		$meta->value   = $token_ids;
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_payment_tokens' );
+		if ( $existing_meta ) {
+			$existing_meta = $existing_meta[0];
+			$meta->id      = $existing_meta->id;
+			$this->data_store_meta->update_meta( $order, $meta );
+		} else {
+			$this->data_store_meta->add_meta( $order, $meta );
+		}
 	}
 
 	/**
@@ -1807,8 +1858,8 @@ FROM $order_meta_table
 		if ( $row ) {
 			$result[] = array(
 				'table'  => self::get_orders_table_name(),
-				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
-				'format' => array_merge( $row['format'], array( 'id' => '%d' ) ),
+				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id(), 'type' => $order->get_type() ) ),
+				'format' => array_merge( $row['format'], array( 'id' => '%d', 'type' => '%s' ) ),
 			);
 		}
 
@@ -1876,8 +1927,6 @@ FROM $order_meta_table
 	 */
 	protected function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
 		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
-
-		$changes['type'] = $order->get_type();
 
 		// Make sure 'status' is correctly prefixed.
 		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
@@ -2112,16 +2161,6 @@ FROM $order_meta_table
 			'_wp_trash_meta_time'   => time(),
 		);
 
-		foreach ( $trash_metadata as $meta_key => $meta_value ) {
-			$this->add_meta(
-				$order,
-				(object) array(
-					'key'   => $meta_key,
-					'value' => $meta_value,
-				)
-			);
-		}
-
 		$wpdb->update(
 			self::get_orders_table_name(),
 			array(
@@ -2134,6 +2173,16 @@ FROM $order_meta_table
 		);
 
 		$order->set_status( 'trash' );
+
+		foreach ( $trash_metadata as $meta_key => $meta_value ) {
+			$this->add_meta(
+				$order,
+				(object) array(
+					'key'   => $meta_key,
+					'value' => $meta_value,
+				)
+			);
+		}
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( $data_synchronizer->data_sync_is_enabled() ) {
@@ -2266,6 +2315,11 @@ FROM $order_meta_table
 
 		$this->persist_save( $order );
 
+		// Do not fire 'woocommerce_new_order' for draft statuses for backwards compatibility.
+		if ( 'auto-draft' === $order->get_status( 'edit') ) {
+			return;
+		}
+
 		/**
 		 * Fires when a new order is created.
 		 *
@@ -2302,9 +2356,9 @@ FROM $order_meta_table
 			$order->set_date_modified( current_time( 'mysql' ) );
 		}
 
-		$this->update_order_meta( $order );
-
 		$this->persist_order_to_db( $order, $force_all_fields );
+
+		$this->update_order_meta( $order );
 
 		$order->save_meta_data();
 		$order->apply_changes();
@@ -2324,6 +2378,9 @@ FROM $order_meta_table
 	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
+		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
+		$changes         = $order->get_changes();
+
 		// Before updating, ensure date paid is set if missing.
 		if (
 			! $order->get_date_paid( 'edit' )
@@ -2356,6 +2413,18 @@ FROM $order_meta_table
 
 		$order->apply_changes();
 		$this->clear_caches( $order );
+
+		// For backwards compatibility, moving an auto-draft order to a valid status triggers the 'woocommerce_new_order' hook.
+		if ( ! empty( $changes['status'] ) && 'auto-draft' === $previous_status ) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			return;
+		}
+
+		// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
+		if ( ( ! empty( $changes['status'] ) && in_array( 'trash', array( $changes['status'], $previous_status ), true ) )
+			|| ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) {
+			return;
+		}
 
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
@@ -2395,6 +2464,7 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
+			$this->clear_caches( $order );
 			self::$backfilling_order_ids[] = $order->get_id();
 			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
@@ -2642,7 +2712,7 @@ CREATE TABLE $orders_table_name (
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY billing_email (billing_email($max_index_length)),
-	KEY type_status (type, status),
+	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
 ) $collate;
@@ -2680,10 +2750,10 @@ CREATE TABLE $operational_data_table_name (
 	order_stock_reduced tinyint(1) NULL,
 	date_paid_gmt datetime NULL,
 	date_completed_gmt datetime NULL,
-	shipping_tax_amount decimal(26, 8) NULL,
-	shipping_total_amount decimal(26, 8) NULL,
-	discount_tax_amount decimal(26, 8) NULL,
-	discount_total_amount decimal(26, 8) NULL,
+	shipping_tax_amount decimal(26,8) NULL,
+	shipping_total_amount decimal(26,8) NULL,
+	discount_tax_amount decimal(26,8) NULL,
+	discount_total_amount decimal(26,8) NULL,
 	recorded_sales tinyint(1) NULL,
 	UNIQUE KEY order_id (order_id),
 	KEY order_key (order_key)
@@ -2715,13 +2785,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing at least ->id).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2735,13 +2806,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing ->key and ->value).
 	 *
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2755,13 +2827,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Update meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 * @param WC_Data   $object WC_Data object.
+	 * @param \stdClass $meta (containing ->id, ->key and ->value).
 	 *
-	 * @return bool
+	 * @return
 	 */
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2770,5 +2843,23 @@ CREATE TABLE $meta_table (
 		}
 
 		return $update_meta;
+	}
+
+	/**
+	 * Perform after meta change operations, including updating the date_modified field, clearing caches and applying changes.
+	 *
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param \WC_Meta_Data     $meta  Metadata object.
+	 */
+	protected function after_meta_change( &$order, $meta ) {
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
+		$this->clear_caches( $order );
+
+		// Prevent this happening multiple time in same request.
+		if ( $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+			$order->save();
+		}
 	}
 }

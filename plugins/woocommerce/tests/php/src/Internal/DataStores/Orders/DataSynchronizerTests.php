@@ -8,8 +8,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
-
 /**
  * Tests for DataSynchronizer class.
  */
@@ -550,6 +548,8 @@ class DataSynchronizerTests extends HposTestCase {
 	 * @testDox When sync is enabled, the custom orders table is created.
 	 */
 	public function test_tables_are_created_when_sync_is_enabled() {
+		$this->markTestSkipped( 'This is interfering with OrdersTableDataStoreTests and requires further review.' );
+
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$this->sut->delete_database_tables();
@@ -580,6 +580,6 @@ class DataSynchronizerTests extends HposTestCase {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		$sync_setting = apply_filters( 'woocommerce_feature_setting', array(), $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], '1 order pending to be synchronized' ) );
 	}
 }

@@ -5,6 +5,8 @@
  * @package WC_Beta_Tester
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Tracks_Debug_Log.
  */
@@ -68,6 +70,9 @@ class Tracks_Debug_Log {
 		}
 
 		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				$property = print_r( $property, true );
+			}
 			if ( $logger ) {
 				$logger->debug(
 					"  - {$key}: {$property}",

@@ -1,21 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-
 const { allUSTaxesExample } = require( '../../data' );
-const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
 
 /**
  * Tests for the WooCommerce API.
@@ -24,9 +8,8 @@ const skipTestIfCI = () => {
  * @group taxes
  *
  */
-skipTestIfCI();
 
-test.describe( 'Tax Rates API tests: CRUD', () => {
+test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 	let taxRateId;
 
 	test.describe( 'Create a tax rate', () => {

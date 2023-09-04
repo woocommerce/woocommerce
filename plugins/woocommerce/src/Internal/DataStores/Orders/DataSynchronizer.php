@@ -128,8 +128,26 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( count( $missing_tables ) === 0 ) {
 			update_option( self::ORDERS_TABLE_CREATED, 'yes' );
 			return true;
+		} else {
+			update_option( self::ORDERS_TABLE_CREATED, 'no' );
+			return false;
 		}
-		return false;
+	}
+
+	/**
+	 * Returns the value of the orders table created option. If it's not set, then it checks the orders table and set it accordingly.
+	 *
+	 * @return bool Whether orders table exists.
+	 */
+	public function get_table_exists(): bool {
+		$table_exists = get_option( self::ORDERS_TABLE_CREATED );
+		switch ( $table_exists ) {
+			case 'no':
+			case 'yes':
+				return 'yes' === $table_exists;
+			default:
+				return $this->check_orders_table_exists();
+		}
 	}
 
 	/**
@@ -137,10 +155,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
-		if ( ! $this->check_orders_table_exists() ) {
-			return;
-		}
-		update_option( self::ORDERS_TABLE_CREATED, 'yes' );
+		$this->check_orders_table_exists();
 	}
 
 	/**
@@ -223,7 +238,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
+		if ( ! $this->get_table_exists() ) {
 			$count = $wpdb->get_var(
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
 				$wpdb->prepare(
@@ -652,7 +667,7 @@ ORDER BY orders.id ASC
 			return;
 		}
 
-		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
+		if ( ! $this->get_table_exists() ) {
 			return;
 		}
 

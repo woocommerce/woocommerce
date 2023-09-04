@@ -38,7 +38,7 @@ export const useCreateProductByType = () => {
 			}
 
 			const assignment = await loadExperimentAssignment(
-				'woocommerce_product_creation_experience_202306_v2'
+				'woocommerce_product_creation_experience_202308_v3'
 			);
 
 			if ( assignment.variationName === 'treatment' ) {

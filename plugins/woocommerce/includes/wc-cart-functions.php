@@ -176,7 +176,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order && hash_equals( $order->get_order_key(), $order_key ) ) {
+			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
 				WC()->cart->empty_cart();
 			}
 		}
@@ -185,7 +185,7 @@ function wc_clear_cart_after_payment() {
 	if ( WC()->session->order_awaiting_payment > 0 ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
-		if ( $order && $order->get_id() > 0 ) {
+		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through.
 			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
 				WC()->cart->empty_cart();
