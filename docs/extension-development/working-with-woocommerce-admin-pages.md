@@ -13,7 +13,7 @@ wc_admin_connect_page(
     array(
         'id'        => 'woocommerce-settings',
         'screen_id' => 'woocommerce_page_wc-settings-general',
-        'title'     => array('Settings', 'General'),
+        'title'     => array( 'Settings', 'General' ),
         'path'      => add_query_arg( 'page', 'wc-settings', 'admin.php' ),
     )
 );
