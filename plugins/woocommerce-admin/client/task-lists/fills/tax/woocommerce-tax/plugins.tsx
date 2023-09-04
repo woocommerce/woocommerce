@@ -57,16 +57,6 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 		nextStep();
 	}, [ isResolving ] );
 
-	const agreementText = pluginsToActivate.includes( 'woocommerce-services' )
-		? __(
-				'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-		  )
-		: __(
-				'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-		  );
-
 	if ( isResolving ) {
 		return null;
 	}
@@ -108,7 +98,10 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					lineHeight="16px"
 				>
 					{ interpolateComponents( {
-						mixedString: agreementText,
+						mixedString: __(
+							'By installing WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
+							'woocommerce'
+						),
 						components: {
 							link: (
 								<Link

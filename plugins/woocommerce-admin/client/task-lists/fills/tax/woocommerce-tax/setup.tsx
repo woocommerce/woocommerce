@@ -103,11 +103,9 @@ export const Setup: React.FC< SetupProps > = ( {
 		},
 		{
 			key: 'plugins',
-			label: pluginsToActivate.includes( 'woocommerce-services' )
-				? __( 'Install Jetpack and WooCommerce Tax', 'woocommerce' )
-				: __( 'Install Jetpack', 'woocommerce' ),
+			label: __( 'Install WooCommerce Tax', 'woocommerce' ),
 			description: __(
-				'Jetpack and WooCommerce Tax allow you to automate sales tax calculations',
+				'WooCommerce Tax allows you to automate sales tax calculations',
 				'woocommerce'
 			),
 			content: <Plugins { ...stepProps } />,

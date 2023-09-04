@@ -7,7 +7,7 @@ import { TaskType } from '@woocommerce/data';
 /**
  * Plugins required to automate taxes.
  */
-export const AUTOMATION_PLUGINS = [ 'jetpack', 'woocommerce-services' ];
+export const AUTOMATION_PLUGINS = [ 'woocommerce-services' ];
 
 /**
  * Check if a store has a complete address given general settings.
