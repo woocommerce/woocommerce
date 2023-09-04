@@ -41,34 +41,68 @@ const wcPages = [
 			{
 				name: 'Settings',
 				heading: 'General',
-				element:
-					'.select2-woocommerce_default_customer_address-container',
-				text: 'Shop country/region',
+				element: '#store_address-description',
+				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
 			},
 			{
 				name: 'Status',
 				heading: 'System status',
-				element: 'h2',
-				text: 'WordPress environment',
+				element: '.nav-tab-active',
+				text: 'System status',
 			},
 		],
 	},
 	{
 		name: 'Products',
 		subpages: [
-			{ name: 'All Products', heading: 'Products' },
-			{ name: 'Add New', heading: 'Add New' },
-			{ name: 'Categories', heading: 'Product categories' },
-			{ name: 'Tags', heading: 'Product tags' },
-			{ name: 'Attributes', heading: 'Attributes' },
+			{
+				name: 'All Products',
+				heading: 'Products',
+				element: '.woocommerce-BlankState-cta.button-primary',
+				text: 'Create Product',
+			},
+			{
+				name: 'Add New',
+				heading: 'Add New',
+				element: '.general_options > a > span',
+				text: 'General',
+			},
+			{
+				name: 'Categories',
+				heading: 'Product categories',
+				element: '.row-title',
+				text: 'Uncategorized',
+			},
+			{
+				name: 'Tags',
+				heading: 'Product tags',
+				element: '.no-items > td',
+				text: 'No tags found',
+			},
+			{
+				name: 'Attributes',
+				heading: 'Attributes',
+				element: '.alternate > td',
+				text: 'No attributes currently exist.',
+			},
 		],
 	},
 	// analytics is handled through a separate test
 	{
 		name: 'Marketing',
 		subpages: [
-			{ name: 'Overview', heading: 'Overview' },
-			{ name: 'Coupons', heading: 'Coupons' },
+			{
+				name: 'Overview',
+				heading: 'Overview',
+				element: '.woocommerce-marketing-card-header-description',
+				text: 'Start by adding a channel to your store',
+			},
+			{
+				name: 'Coupons',
+				heading: 'Coupons',
+				element: '.woocommerce-BlankState-cta.button-primary',
+				text: 'Create your first coupon',
+			},
 		],
 	},
 ];
