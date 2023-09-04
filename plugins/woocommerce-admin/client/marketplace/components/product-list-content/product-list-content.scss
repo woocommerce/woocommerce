@@ -20,6 +20,12 @@
 			gap: $large-gap;
 			grid-template-columns: repeat(2, 1fr);
 		}
+		// Hide third and fourth product cards on Discover page due to API result count
+		// These are progressively displayed at larger screen sizes.
+		&__discover .woocommerce-marketplace__product-card:nth-child(3),
+		&__discover .woocommerce-marketplace__product-card:nth-child(4) {
+			display: none;
+		}
 	}
 }
 
@@ -29,6 +35,9 @@
 			gap: $large-gap;
 			grid-template-columns: repeat(3, 1fr);
 		}
+		&__discover .woocommerce-marketplace__product-card:nth-child(3) {
+			display: block;
+		}
 	}
 }
 
@@ -36,6 +45,9 @@
 	.woocommerce-marketplace {
 		&__product-list-content {
 			grid-template-columns: repeat(4, 1fr);
+		}
+		&__discover .woocommerce-marketplace__product-card:nth-child(4) {
+			display: block;
 		}
 	}
 }
