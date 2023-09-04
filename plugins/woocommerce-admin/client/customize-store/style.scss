@@ -1,0 +1,18 @@
+.woocommerce-layout .woocommerce-layout__main {
+	@include breakpoint( '<782px' ) {
+		padding-top: 0 !important;
+	}
+}
+
+.woocommerce-customize-store {
+	background-color: #fff;
+
+	#woocommerce-layout__primary {
+		margin: 0;
+		width: 100%;
+	}
+
+	.woocommerce-layout__main {
+		padding-right: 0;
+	}
+}

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure refund meta data is saved correctly when HPOS is enabled.

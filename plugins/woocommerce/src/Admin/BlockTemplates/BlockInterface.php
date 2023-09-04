@@ -62,13 +62,22 @@ interface BlockInterface {
 
 	/**
 	 * Get the parent container that the block belongs to.
+	 *
+	 * @throws \RuntimeException If the block does not have a parent.
 	 */
 	public function &get_parent(): ?ContainerInterface;
 
 	/**
 	 * Get the root template that the block belongs to.
+	 *
+	 * @throws \RuntimeException If the block does not have a root template.
 	 */
 	public function &get_root_template(): BlockTemplateInterface;
+
+	/**
+	 * Detach the block from its parent and root template.
+	 */
+	public function detach();
 
 	/**
 	 * Get the block configuration as a formatted template.

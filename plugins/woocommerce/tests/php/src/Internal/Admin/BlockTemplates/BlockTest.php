@@ -106,6 +106,110 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that removing a block from a block sets the parent and root template to null
+	 * and that the block is removed from the root template.
+	 */
+	public function test_remove_block() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$block->remove_block( 'test-block-id-2' );
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block was removed from the root template.'
+		);
+
+		$this->expectException( \RuntimeException::class );
+
+		$child_block->get_parent();
+	}
+
+	/**
+	 * Test that removing a block from a block sets the parent and root template to null
+	 * and that the block is removed from the root template, as well as any descendants.
+	 */
+	public function test_remove_nested_block() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$template->remove_block( 'test-block-id-2' );
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested descendent block was removed from the root template.'
+		);
+
+		$this->expectException( \RuntimeException::class );
+
+		$child_block->get_parent();
+	}
+
+	/**
+	 * Test that removing a block from a block sets the parent and root template to null
+	 * and that the block is removed from the root template, as well as any descendants.
+	 */
+	public function test_remove_block_and_descendants() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$template->remove_block( 'test-block-id' );
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id' ),
+			'Failed asserting that the child block was removed from the root template.'
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested descendent block was removed from the root template.'
+		);
+
+		$this->expectException( \RuntimeException::class );
+
+		$child_block->get_parent();
+	}
+
+	/**
 	 * Test that adding nested blocks sets the parent and root template correctly.
 	 */
 	public function test_nested_add_block() {

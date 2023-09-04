@@ -1,4 +1,4 @@
-name: Lint JS packages
+name: Lint packages
 
 on:
     pull_request:
@@ -39,16 +39,16 @@ jobs:
                   # ignore scripts is faster, and postinstall should not be needed for lint.
                   pnpm install --ignore-scripts
 
-            - name: Lint
+            - name: Lint JS and CSS
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
-              continue-on-error: true
 
             - name: Collect and Combine Eslint Reports
+              if: ${{ github.event.pull_request.head.repo.fork != true && always() }}
               run: node ./.github/workflows/scripts/collect-eslint-reports.js
 
             - name: Annotate Code Linting Results
               uses: ataylorme/eslint-annotate-action@a1bf7cb320a18aa53cb848a267ce9b7417221526
-              if: github.event.pull_request.head.repo.fork != true
+              if: ${{ github.event.pull_request.head.repo.fork != true && always() }}
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   report-json: 'combined_eslint_report.json'
