@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Make `Link type="external"` use `@wordpress/components.ExternalLink` to use the "external" icon, and make UI consistent.
