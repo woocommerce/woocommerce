@@ -4,7 +4,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useContext } from '@wordpress/element';
+import { useState, useContext, cloneElement } from '@wordpress/element';
 import {
 	RangeControl,
 	ToggleControl,
@@ -341,7 +341,15 @@ const LogoEdit = ( {
 
 	return (
 		<>
-			{ logoImg }
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onInitialSelectLogo }
+					allowedTypes={ ALLOWED_MEDIA_TYPES }
+					render={ ( { open }: { open: () => void } ) =>
+						cloneElement( logoImg, { onClick: open } )
+					}
+				/>
+			</MediaUploadCheck>
 			{ !! logoUrl && (
 				<LogoSettings
 					attributes={ attributes }
