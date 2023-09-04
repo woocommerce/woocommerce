@@ -63,7 +63,7 @@ Starting with these three broad lifecycle areas, you can begin to break your ext
 
 ## Handling activation and deactivation
 
-A common pattern in WooCommerce extensions is to create dedicated functions in your main PHP file to serve as activation and deactivation hooks. You then register these hooks with WordPress using the applicable registration function. This tells WordPess to call the function when the plugin is activated or deactivated. Consider the following examples:
+A common pattern in WooCommerce extensions is to create dedicated functions in your main PHP file to serve as activation and deactivation hooks. You then register these hooks with WordPress using the applicable registration function. This tells WordPress to call the function when the plugin is activated or deactivated. Consider the following examples:
 
 ```php
 function my_extension_activate() {
