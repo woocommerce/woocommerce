@@ -24,10 +24,6 @@ export function Edit( {
 		property
 	);
 
-	console.log( 'attributes', attributes );
-	console.log( 'blockProps', blockProps );
-	console.log( 'disabledCopy', disabledCopy );
-
 	return (
 		<div { ...blockProps }>
 			<ToggleControl
