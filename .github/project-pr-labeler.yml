@@ -67,11 +67,6 @@
 'plugin: woo-ai':
 - plugins/woo-ai/**/*
 
-'focus: react admin [team:Ghidorah]':
-- plugins/woocommerce/src/Admin/**/*
-- plugins/woocommerce/src/Internal/Admin/**/*
-- plugins/woocommerce-admin/**/*
-
 'focus: performance tests [team:Solaris]':
 - plugins/woocommerce/tests/performance/**/*
 
