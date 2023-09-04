@@ -20,7 +20,7 @@ import { BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { useCallback } from 'react';
+import { useCallback } from '@wordpress/element';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
