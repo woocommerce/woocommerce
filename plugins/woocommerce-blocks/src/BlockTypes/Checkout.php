@@ -33,6 +33,19 @@ class Checkout extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+
+	}
+
+	/**
+	 * Dequeues the scripts added by WC Core to the Checkout page.
+	 *
+	 * @return void
+	 */
+	public function dequeue_woocommerce_core_scripts() {
+		wp_dequeue_script( 'wc-checkout' );
+		wp_dequeue_script( 'wc-password-strength-meter' );
+		wp_dequeue_script( 'selectWoo' );
+		wp_dequeue_style( 'select2' );
 	}
 
 	/**
@@ -119,17 +132,15 @@ class Checkout extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+
 		if ( $this->is_checkout_endpoint() ) {
 			// Note: Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
 			// legacy shortcode instead and do not render block.
 			return wc_current_theme_is_fse_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
 		}
 
-		// Deregister core checkout scripts and styles.
-		wp_dequeue_script( 'wc-checkout' );
-		wp_dequeue_script( 'wc-password-strength-meter' );
-		wp_dequeue_script( 'selectWoo' );
-		wp_dequeue_style( 'select2' );
+		// Dequeue the core scripts when rendering this block.
+		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
 		/**
 		 * We need to check if $content has any templates from prior iterations of the block, in order to update to the latest iteration.
