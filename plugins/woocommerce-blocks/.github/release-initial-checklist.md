@@ -88,7 +88,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 ## Pull request in WooCommerce Core for Package update
 
-This only needs to be done if this release is the last release of the feature plugin before code freeze in the WooCommerce core cycle. If this condition doesn't exist you can skip this section.
+**🆕 These steps need to be done for every WooCommerce Blocks release that _isn't_ a patch release**. More information can be found here on why: pdToLP-Of-p2.
 
 -   [ ] Remind whoever is porter this week to audit our codebase to ensure this [experimental interface document](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md) is up to date. See Pca54o-rM-p2 for more details.
 -   [ ] Create a pull request for updating the package in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/747cb6b7184ba9fdc875ab104da5839cfda8b4be/plugins/woocommerce/composer.json) for the Woo Blocks package to the version you are releasing. Reviewing and merging the PR is your team's responsibility.
