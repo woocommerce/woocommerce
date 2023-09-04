@@ -37,6 +37,16 @@ trait BlockContainerTrait {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
+		/**
+		 * Filter called before a block is added to the block container.
+		 *
+		 * This filter can be used to prevent a block from being added to the block container by returning false.
+		 *
+		 * @param bool           $should_add_block Whether the block should be added to the block container.
+		 * @param BlockInterface $block            The block.
+		 *
+		 * @since 8.2.0
+		 */
 		$should_add_block = apply_filters( 'woocommerce_block_template_before_add_block', true, $block );
 
 		if ( ! $should_add_block ) {
@@ -47,6 +57,14 @@ trait BlockContainerTrait {
 		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
 
+		/**
+		 * Action called after a block is added to the block container.
+		 *
+		 * This action can be used to perform actions after a block is added to the block container,
+		 * such as adding a dependent block.
+		 *
+		 * @param BlockInterface $block The block.
+		 */
 		do_action( 'woocommerce_block_template_after_add_block', $block );
 
 		return $block;
