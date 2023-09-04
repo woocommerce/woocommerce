@@ -78,7 +78,7 @@ function ResizableFrame( {
 	const [ isResizing, setIsResizing ] = useState( false );
 	const [ shouldShowHandle, setShouldShowHandle ] = useState( false );
 	const [ resizeRatio, setResizeRatio ] = useState( 1 );
-	const FRAME_TRANSITION = { type: 'tween', duration: isResizing ? 0 : 0.5 };
+	const frameTransition = { type: 'tween', duration: isResizing ? 0 : 0.5 };
 	const frameRef = useRef( null );
 	const resizableHandleHelpId = useInstanceId(
 		ResizableFrame,
@@ -198,7 +198,7 @@ function ResizableFrame( {
 				if ( definition === 'fullWidth' )
 					setFrameSize( { width: '100%', height: '100%' } );
 			} }
-			transition={ FRAME_TRANSITION }
+			transition={ frameTransition }
 			size={ frameSize }
 			enable={ {
 				top: false,
@@ -279,7 +279,7 @@ function ResizableFrame( {
 				animate={ {
 					borderRadius: isFullWidth ? 0 : 8,
 				} }
-				transition={ FRAME_TRANSITION }
+				transition={ frameTransition }
 				style={ innerContentStyle }
 			>
 				{ children }
