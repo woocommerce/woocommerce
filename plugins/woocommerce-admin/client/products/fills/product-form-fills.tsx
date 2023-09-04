@@ -20,7 +20,6 @@ import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 import { AttributesSectionFills } from './attributes-section';
 import { ImagesSectionFills } from './images-section';
-import { OptionsSection } from '../sections/options-section';
 import { ProductVariationsSection } from '../sections/product-variations-section';
 import {
 	TAB_GENERAL_ID,
@@ -113,7 +112,6 @@ const Tabs = () => {
 					tabProps={ tabPropData.options }
 				>
 					<>
-						<OptionsSection />
 						<ProductVariationsSection />
 					</>
 				</WooProductTabItem>

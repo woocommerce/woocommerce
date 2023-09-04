@@ -1,0 +1,40 @@
+name: Run tests for JS packages and woocommerce-admin/client
+
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+    test-js:
+        name: Run JS Tests
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.6.7'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  # ignore scripts is faster, and postinstall should not be needed for tests.
+                  pnpm install --ignore-scripts
+
+            - name: Test
+              run: pnpm run test --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' --color

@@ -22,8 +22,9 @@ none
 # Logs
 logs/
 
-# Eslint Cache
+# Eslint
 .eslintcache
+eslint_report.json
 
 # Environment files
 wp-cli.local.yml

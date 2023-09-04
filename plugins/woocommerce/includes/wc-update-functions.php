@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2590,4 +2591,51 @@ function wc_update_750_disable_new_product_management_experience() {
 function wc_update_770_remove_multichannel_marketing_feature_options() {
 	delete_option( 'woocommerce_multichannel_marketing_enabled' );
 	delete_option( 'woocommerce_marketing_overview_welcome_hidden' );
+}
+
+/**
+ * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
+ *
+ * @return bool Whether there are pending migration recrods.
+ */
+function wc_update_810_migrate_transactional_metadata_for_hpos() {
+	global $wpdb;
+
+	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+	if ( ! $data_synchronizer->get_table_exists() ) {
+		return false;
+	}
+
+	$orders_table      = OrdersTableDataStore::get_orders_table_name();
+	$orders_meta_table = OrdersTableDataStore::get_meta_table_name();
+
+	/**
+	 * We are migrating payment_tokens meta that is stored in wp_postmeta table to the HPOS table. To do this with minimum db ops:
+	 * 1. We join postmeta table with wc_orders table directly, this filters out orders that are yet to be migrated and any post with non-order post type.
+	 * 2. A combination of filter on wc_orders_meta.meta_key = _payment_tokens in the join condition itself, along with a null check in a WHERE condition, allows us to only get the orders where the meta is not yet migrated.
+	 */
+	$select_query = "
+SELECT post_id, '_payment_tokens', {$wpdb->postmeta}.meta_value
+FROM {$wpdb->postmeta}
+JOIN $orders_table ON {$wpdb->postmeta}.post_id = $orders_table.id
+LEFT JOIN $orders_meta_table ON $orders_meta_table.order_id = $orders_table.id AND $orders_meta_table.meta_key = '_payment_tokens'
+WHERE
+	{$wpdb->postmeta}.meta_key = '_payment_tokens'
+	AND $orders_meta_table.order_id IS NULL
+	";
+
+	// No need to get the data in application, we can insert directly. Sync setting does not matter as this data already exist in the post table. Limit the batch size to 250.
+	$query =
+		"
+INSERT INTO $orders_meta_table (order_id, meta_key, meta_value)
+$select_query
+LIMIT 250
+";
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything hardcoded.
+	$wpdb->query( $query );
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- No user input in the query, everything hardcoded.
+	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
+
+	return ! empty( $has_pending );
 }

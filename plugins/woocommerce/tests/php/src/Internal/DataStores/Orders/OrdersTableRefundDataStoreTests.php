@@ -102,10 +102,15 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that refund props are set as expected.
+	 * @testDox Test that refund props are set as expected with HPOS enabled.
 	 */
 	public function test_refund_data_is_set() {
-		$order  = OrderHelper::create_order();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = OrderHelper::create_order();
+		$user  = $this->factory()->user->create_and_get( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user->ID );
+
 		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
@@ -119,6 +124,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
 		$this->assertEquals( 10, $refreshed_refund->get_data()['amount'] );
 		$this->assertEquals( 'Test', $refreshed_refund->get_data()['reason'] );
+		$this->assertEquals( $user->ID, $refreshed_refund->get_data()['refunded_by'] );
 	}
 
 }

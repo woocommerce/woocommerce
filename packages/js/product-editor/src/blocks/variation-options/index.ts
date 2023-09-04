@@ -7,7 +7,7 @@ import { BlockConfiguration } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-blocks';
+import { initBlock } from '../../utils/init-block';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
 import { VariationOptionsBlockAttributes } from './types';

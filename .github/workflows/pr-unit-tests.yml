@@ -15,7 +15,7 @@ permissions: {}
 jobs:
     test:
         if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
-        name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
+        name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} - ${{ matrix.unittests }} ${{ matrix.hpos && 'HPOS' || '' }}
         timeout-minutes: 30
         runs-on: ubuntu-20.04
         permissions:

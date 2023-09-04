@@ -497,4 +497,177 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'parent', $variation['manage_stock'] );
 	}
+
+	/**
+	 * Test updating a variation stock.
+	 *
+	 * @since 8.1.0
+	 */
+	public function test_generate_new_variations() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
+		$color_attribute      = new WC_Product_Attribute();
+		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
+		$color_attribute->set_name( $color_attribute_data['attribute_taxonomy'] );
+		$color_attribute->set_options( $color_attribute_data['term_ids'] );
+		$color_attribute->set_position( 1 );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$attributes   = $product->get_attributes();
+		$attributes[] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+		$product   = wc_get_product( $product->get_id() );
+		$children  = $product->get_children();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 6, $variation['count'] );
+		// Generated 2 new ones.
+		$this->assertEquals( 8, count( $children ) );
+	}
+
+	/**
+	 * Test updating a variation stock.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_generate_new_variations_with_delete_set_to_true() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
+		$color_attribute      = new WC_Product_Attribute();
+		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
+		$color_attribute->set_name( $color_attribute_data['attribute_taxonomy'] );
+		$color_attribute->set_options( $color_attribute_data['term_ids'] );
+		$color_attribute->set_position( 1 );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$attributes   = $product->get_attributes();
+		$attributes[] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+		$product   = wc_get_product( $product->get_id() );
+		$children  = $product->get_children();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 6, $variation['count'] );
+		$this->assertEquals( 2, $variation['deleted_count'] );
+		// Generated 2 new ones.
+		$this->assertEquals( 6, count( $children ) );
+	}
+
+	/**
+	 * Test updating a variation stock.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_delete_unmatched_variations_when_removing_term() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$color_attribute = new WC_Product_Attribute();
+		$color_attribute->set_name( 'color' );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$color_attribute->set_options( array( 'red', 'green', 'blue' ) );
+		$color_attribute->set_position( 1 );
+		$attributes   = $product->get_attributes();
+		$attributes[] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+		$response  = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_attributes = get_post_meta( $product->get_id() , '_product_attributes' );
+
+		// Removing blue term from product.
+		$product    = wc_get_product( $product->get_id() );
+		$attributes = $product->get_attributes();
+		$color_attribute->set_options( array( 'red', 'green' ) );
+		$attributes['color'] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+		$response  = $this->server->dispatch( $request );
+
+		$variation = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $variation['count'] );
+		$this->assertEquals( 2, $variation['deleted_count'] );
+
+		$product   = wc_get_product( $product->get_id() );
+		// Removed two.
+		$this->assertEquals( 4, count( $product->get_children() ) );
+	}
+
+	/**
+	 * Test updating a variation stock.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_delete_unmatched_variations_when_removing_attribute() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$color_attribute = new WC_Product_Attribute();
+		$color_attribute->set_name( 'color' );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$color_attribute->set_options( array( 'red', 'yellow', 'green' ) );
+		$color_attribute->set_position( 1 );
+		$attributes   = $product->get_attributes();
+		$attributes[] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+		$response  = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_attributes = get_post_meta( $product->get_id() , '_product_attributes' );
+
+		// Removing color attribute from product.
+		$product    = wc_get_product( $product->get_id() );
+		$attributes = $product->get_attributes();
+		unset( $attributes['color'] );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+		$response  = $this->server->dispatch( $request );
+
+		$variation = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $variation['count'] );
+		$this->assertEquals( 4, $variation['deleted_count'] );
+
+		$product   = wc_get_product( $product->get_id() );
+		// Removed four.
+		$this->assertEquals( 2, count( $product->get_children() ) );
+	}
 }

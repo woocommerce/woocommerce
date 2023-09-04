@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use admin theme color for select2, instead of hardcoded theme values.

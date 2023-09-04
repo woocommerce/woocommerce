@@ -29,6 +29,8 @@ type EditAttributeModalProps = {
 	termsPlaceholder?: string;
 	isDefaultLabel?: string;
 	isDefaultTooltip?: string;
+	useAsFilterLabel?: string;
+	useAsFilterTooltip?: string;
 	visibleLabel?: string;
 	visibleTooltip?: string;
 	cancelAccessibleLabel?: string;
@@ -53,6 +55,11 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	isDefaultLabel = __( 'Set default value', 'woocommerce' ),
 	isDefaultTooltip = __(
 		'Check to preselect the first choice when customers enter the product page.',
+		'woocommerce'
+	),
+	useAsFilterLabel = __( 'Use as filter', 'woocommerce' ),
+	useAsFilterTooltip = __(
+		'Check to allow customers to search and filter by this option in your store.',
 		'woocommerce'
 	),
 	visibleLabel = __( 'Visible to customers', 'woocommerce' ),
@@ -157,6 +164,20 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						/>
 						<Tooltip text={ visibleTooltip } />
 					</div>
+					{ attribute.id !== 0 && (
+						/* Only supported for global attributes, and disabled for now as the 'Filter by Attributes' block does not support this yet. */
+						<div className="woocommerce-edit-attribute-modal__option-container">
+							<CheckboxControl
+								disabled={ true }
+								onChange={ () => {
+									// Disabled.
+								} }
+								checked={ true }
+								label={ useAsFilterLabel }
+							/>
+							<Tooltip text={ useAsFilterTooltip } />
+						</div>
+					) }
 				</div>
 			</div>
 			<div className="woocommerce-edit-attribute-modal__buttons">

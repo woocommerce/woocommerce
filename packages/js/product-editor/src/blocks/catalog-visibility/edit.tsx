@@ -17,7 +17,7 @@ export function Edit( {
 }: {
 	attributes: CatalogVisibilityBlockAttributes;
 } ) {
-	const { label, visibilty } = attributes;
+	const { label, visibility } = attributes;
 
 	const blockProps = useBlockProps();
 
@@ -26,22 +26,22 @@ export function Edit( {
 	>( 'postType', 'product', 'catalog_visibility' );
 
 	const checked =
-		catalogVisibility === visibilty || catalogVisibility === 'hidden';
+		catalogVisibility === visibility || catalogVisibility === 'hidden';
 
 	function handleChange( selected: boolean ) {
 		if ( selected ) {
 			if ( catalogVisibility === 'visible' ) {
-				setCatalogVisibility( visibilty );
+				setCatalogVisibility( visibility );
 				return;
 			}
 			setCatalogVisibility( 'hidden' );
 		} else {
 			if ( catalogVisibility === 'hidden' ) {
-				if ( visibilty === 'catalog' ) {
+				if ( visibility === 'catalog' ) {
 					setCatalogVisibility( 'search' );
 					return;
 				}
-				if ( visibilty === 'search' ) {
+				if ( visibility === 'search' ) {
 					setCatalogVisibility( 'catalog' );
 					return;
 				}

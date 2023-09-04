@@ -20,8 +20,10 @@ const productData = {
 	salePrice: '90',
 };
 
+test.describe.configure( { mode: 'serial' } );
+
 test.describe( 'General tab', () => {
-	test.describe.serial( 'Create product', () => {
+	test.describe( 'Create product', () => {
 		let productId;
 		test.use( { storageState: process.env.ADMINSTATE } );
 

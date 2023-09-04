@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Refactor Pagination component and split out into multiple re-usable components. Also added a `usePagination` hook.

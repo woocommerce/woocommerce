@@ -39,7 +39,7 @@
 		"compile": "tsc --project tsconfig.json",
 		"prepack": "pnpm run build",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {

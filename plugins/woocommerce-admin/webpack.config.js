@@ -216,6 +216,18 @@ const webpackConfig = {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
 						return null;
 					}
+
+					if ( request === '@wordpress/router' ) {
+						// The external wp.router does not exist in WP 6.2 and below, so we need to skip requesting to external here.
+						// We use the router in the customize store. We can remove this once our minimum support is WP 6.3.
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/edit-site' ) ) {
+						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
+						// We use the edit-site components in the customize store.
+						return null;
+					}
 				},
 			} ),
 		// Reduces data for moment-timezone.
