@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { partial } from 'lodash';
+import { ExternalLink } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { getHistory } from '@woocommerce/navigation';
 import React from 'react';
@@ -80,10 +81,12 @@ export const Link = ( {
 		passProps.onClick = partial( wcAdminLinkHandler, passProps.onClick );
 	}
 
+	const LinkElement = type === 'external' ? ExternalLink : 'a';
+
 	return (
-		<a href={ href } { ...passProps }>
+		<LinkElement href={ href } { ...passProps }>
 			{ children }
-		</a>
+		</LinkElement>
 	);
 };
 

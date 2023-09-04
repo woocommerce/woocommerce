@@ -19,10 +19,34 @@ describe( 'Link', () => {
 
 		expect( container.firstChild ).toMatchInlineSnapshot( `
 			<a
+			  class="components-external-link"
 			  data-link-type="external"
 			  href="https://woocommerce.com"
+			  rel="external noreferrer noopener"
+			  target="_blank"
 			>
 			  WooCommerce.com
+			  <span
+			    class="components-visually-hidden css-1mm2cvy-View em57xhy0"
+			    data-wp-c16t="true"
+			    data-wp-component="VisuallyHidden"
+			    style="border: 0px; clip: rect(1px, 1px, 1px, 1px); clip-path: inset( 50% ); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; word-wrap: normal;"
+			  >
+			    (opens in a new tab)
+			  </span>
+			  <svg
+			    aria-hidden="true"
+			    class="components-external-link__icon css-16iaek2-StyledIcon etxm6pv0"
+			    focusable="false"
+			    height="24"
+			    viewBox="0 0 24 24"
+			    width="24"
+			    xmlns="http://www.w3.org/2000/svg"
+			  >
+			    <path
+			      d="M18.2 17c0 .7-.6 1.2-1.2 1.2H7c-.7 0-1.2-.6-1.2-1.2V7c0-.7.6-1.2 1.2-1.2h3.2V4.2H7C5.5 4.2 4.2 5.5 4.2 7v10c0 1.5 1.2 2.8 2.8 2.8h10c1.5 0 2.8-1.2 2.8-2.8v-3.6h-1.5V17zM14.9 3v1.5h3.7l-6.4 6.4 1.1 1.1 6.4-6.4v3.7h1.5V3h-6.3z"
+			    />
+			  </svg>
 			</a>
 		` );
 	} );
@@ -87,7 +111,7 @@ describe( 'Link', () => {
 				href="https://woocommerce.com"
 				type="external"
 				className="foo"
-				target="bar"
+				title="bar"
 			>
 				WooCommerce.com
 			</Link>
@@ -95,12 +119,35 @@ describe( 'Link', () => {
 
 		expect( container.firstChild ).toMatchInlineSnapshot( `
 			<a
-			  class="foo"
+			  class="components-external-link foo"
 			  data-link-type="external"
 			  href="https://woocommerce.com"
-			  target="bar"
+			  rel="external noreferrer noopener"
+			  target="_blank"
+			  title="bar"
 			>
 			  WooCommerce.com
+			  <span
+			    class="components-visually-hidden css-1mm2cvy-View em57xhy0"
+			    data-wp-c16t="true"
+			    data-wp-component="VisuallyHidden"
+			    style="border: 0px; clip: rect(1px, 1px, 1px, 1px); clip-path: inset( 50% ); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; word-wrap: normal;"
+			  >
+			    (opens in a new tab)
+			  </span>
+			  <svg
+			    aria-hidden="true"
+			    class="components-external-link__icon css-16iaek2-StyledIcon etxm6pv0"
+			    focusable="false"
+			    height="24"
+			    viewBox="0 0 24 24"
+			    width="24"
+			    xmlns="http://www.w3.org/2000/svg"
+			  >
+			    <path
+			      d="M18.2 17c0 .7-.6 1.2-1.2 1.2H7c-.7 0-1.2-.6-1.2-1.2V7c0-.7.6-1.2 1.2-1.2h3.2V4.2H7C5.5 4.2 4.2 5.5 4.2 7v10c0 1.5 1.2 2.8 2.8 2.8h10c1.5 0 2.8-1.2 2.8-2.8v-3.6h-1.5V17zM14.9 3v1.5h3.7l-6.4 6.4 1.1 1.1 6.4-6.4v3.7h1.5V3h-6.3z"
+			    />
+			  </svg>
 			</a>
 		` );
 	} );
