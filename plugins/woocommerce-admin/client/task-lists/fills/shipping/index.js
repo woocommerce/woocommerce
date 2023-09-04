@@ -378,10 +378,6 @@ export class Shipping extends Component {
 
 		// Override the step fields for the smart shipping defaults.
 		if ( this.shippingSmartDefaultsEnabled ) {
-			const agreementText = __(
-				'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-			);
 			const shippingSmartDefaultsSteps = {
 				rates: {
 					label: __( 'Review your shipping options', 'woocommerce' ),
@@ -577,7 +573,10 @@ export class Shipping extends Component {
 										style={ { display: 'block' } }
 									>
 										{ interpolateComponents( {
-											mixedString: agreementText,
+											mixedString: __(
+												'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
+												'woocommerce'
+											),
 											components: {
 												link: (
 													<Link
