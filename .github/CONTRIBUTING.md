@@ -37,7 +37,7 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=woocommerce run lint:php:changes:branch`.
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
-- Please consider adding appropriate tests related to your change if applicabble such as unit, API and E2E. You can check the following guides for this purpose:
+- Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E. You can check the following guides for this purpose:
   - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#writing-tests).
   - [Writing API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-tests).
   - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests).
