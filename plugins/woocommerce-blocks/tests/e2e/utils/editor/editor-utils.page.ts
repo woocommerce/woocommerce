@@ -249,4 +249,13 @@ export class EditorUtils {
 
 		await this.page.getByText( option ).click();
 	}
+
+	async saveTemplate() {
+		await Promise.all( [
+			this.editor.saveSiteEditorEntities(),
+			this.page.waitForResponse( ( response ) =>
+				response.url().includes( 'wp-json/wp/v2/templates/' )
+			),
+		] );
+	}
 }
