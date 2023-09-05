@@ -378,8 +378,6 @@
 				onAddShippingMethod: function( event ) {
 					event.preventDefault();
 
-					console.log( $( data ) );
-
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-add-shipping-method',
 						variable : {
@@ -421,7 +419,24 @@
 									shippingMethodView.model.trigger( 'saved:methods' );
 								}
 							}
+							var instance_id = response.data.instance_id, 
+							    method      = response.data.methods[ instance_id ];
+
 							shippingMethodView.unblock();
+
+							$( this ).WCBackboneModal({
+								template : 'wc-modal-shipping-method-settings',
+								variable : {
+									instance_id : instance_id,
+									method      : method
+								},
+								data : {
+									instance_id : instance_id,
+									method      : method
+								}
+							});
+		
+							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' );
 					}
 				},
