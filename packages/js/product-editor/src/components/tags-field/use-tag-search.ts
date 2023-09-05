@@ -12,6 +12,14 @@ import {
 export type ProductTagNode = Pick< ProductTag, 'id' | 'name' >;
 
 /**
+ * Filters the provided list of tags based on a given search term by checking
+ * if the term is included in the tag's slug.
+ */
+function getFilteredTags( items: ProductTag[] = [], search: string ) {
+	return items.filter( ( tag ) => tag.slug?.includes( search ) );
+}
+
+/**
  * A hook used to handle all the search logic for the tag search component.
  */
 export const useTagSearch = () => {
@@ -49,9 +57,13 @@ export const useTagSearch = () => {
 		async ( search?: string ): Promise< ProductTag[] > => {
 			lastSearchValue.current = search || '';
 			if ( initialTags.length > 0 ) {
-				setTagsAndNewItem( initialTags );
+				const tags = getFilteredTags(
+					initialTags,
+					lastSearchValue.current.toLowerCase()
+				);
+				setTagsAndNewItem( tags );
 				setIsSearching( false );
-				return initialTags;
+				return tags;
 			}
 			setIsSearching( true );
 			try {
