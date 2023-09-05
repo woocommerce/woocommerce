@@ -48,6 +48,18 @@ $table-row-height: calc($grid-unit * 9);
 		}
 	}
 
+	&__price {
+		text-align: right;
+		padding-right: $grid-unit-40;
+	}
+
+	&__regular-price--on-sale {
+		text-decoration: line-through;
+		color: $gray-600;
+		margin-left: 6px;
+		word-wrap: normal;
+	}
+
 	&__status-dot {
 		margin-right: $gap-smaller;
 		&.green {
