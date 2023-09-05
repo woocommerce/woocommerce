@@ -10,7 +10,7 @@ import {
  * Internal dependencies
  */
 import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
-import { generateProductDataInstructions } from '../utils';
+import { generateProductDataInstructions, ProductProps } from '../utils';
 
 type UseNewCategorySuggestionsHook = {
 	fetchSuggestions: () => Promise< void >;
@@ -42,7 +42,9 @@ export const useNewCategorySuggestions = (
 	} );
 
 	const buildPrompt = async () => {
-		const productPropsInstructions = generateProductDataInstructions();
+		const productPropsInstructions = generateProductDataInstructions( {
+			excludeProps: [ ProductProps.Categories ],
+		} );
 		const instructions = [
 			'You are a WooCommerce SEO and marketing expert.',
 			`Using the product's ${ productPropsInstructions.includedProps.join(
