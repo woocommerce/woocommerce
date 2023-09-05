@@ -97,7 +97,7 @@ class ProductTemplate extends AbstractBlock {
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
 			$post_classes = implode( ' ', get_post_class( 'wc-block-product' ) );
-			$content     .= '<li class="' . esc_attr( $post_classes ) . '">' . $block_content . '</li>';
+			$content     .= '<li data-wc-key="product-item-' . get_the_ID() . '" class="' . esc_attr( $post_classes ) . '">' . $block_content . '</li>';
 		}
 
 		/*
