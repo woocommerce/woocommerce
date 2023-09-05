@@ -2732,6 +2732,9 @@ importers:
       '@wordpress/base-styles':
         specifier: wp-6.0
         version: 4.3.1
+      '@wordpress/blob':
+        specifier: wp-6.0
+        version: 3.6.1
       '@wordpress/blocks':
         specifier: ^11.17.0
         version: 11.18.0(react@17.0.2)
@@ -18958,14 +18961,14 @@ packages:
       '@babel/runtime': 7.21.0
     dev: false
 
-  /@wordpress/blob@3.28.0:
-    resolution: {integrity: sha512-Nf9nd8+uzmYu2/yObQLKukCxRORS/KgSBpGiDMRoEOZv8kGOLmwqyCXdx5oEc46yjytOW0v3D8Vt3M79R/0LNw==}
+  /@wordpress/blob@3.40.0:
+    resolution: {integrity: sha512-eXI9j/XiS0dAjdr04qkYnwKhEH7WevIpEOlCzj9m0FlJmq7HKgNOg3FJX3JhG7xAOJvGBBxtcHshnx29XexBIw==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.21.0
 
-  /@wordpress/blob@3.40.0:
-    resolution: {integrity: sha512-eXI9j/XiS0dAjdr04qkYnwKhEH7WevIpEOlCzj9m0FlJmq7HKgNOg3FJX3JhG7xAOJvGBBxtcHshnx29XexBIw==}
+  /@wordpress/blob@3.6.1:
+    resolution: {integrity: sha512-p0n49LESfOv1Jx9BOzpWa1iUHekBrYoKcUHz6P7Xe2L8NgnZiZay3B+Ak5OFOwd1VimQ49yeClNjG/qjaFH6gA==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.21.0
@@ -18982,7 +18985,7 @@ packages:
       '@react-spring/web': 9.5.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/blocks': 11.18.0(react@17.0.2)
       '@wordpress/components': 21.2.0(@babel/core@7.17.8)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/compose': 5.17.0(react@17.0.2)
@@ -19040,7 +19043,7 @@ packages:
       '@react-spring/web': 9.5.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/blocks': 11.18.0(react@17.0.2)
       '@wordpress/components': 21.2.0(@babel/core@7.21.3)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/compose': 5.17.0(react@17.0.2)
@@ -19164,7 +19167,7 @@ packages:
       '@react-spring/web': 9.5.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/blocks': 11.18.0(react@17.0.2)
       '@wordpress/components': 19.12.0(@babel/core@7.21.3)(@types/react@17.0.50)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)
       '@wordpress/compose': 5.17.0(react@17.0.2)
@@ -19217,7 +19220,7 @@ packages:
       '@react-spring/web': 9.5.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/blocks': 11.18.0(react@17.0.2)
       '@wordpress/components': 20.0.0(@babel/core@7.17.8)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/compose': 5.17.0(react@17.0.2)
@@ -19270,7 +19273,7 @@ packages:
       '@react-spring/web': 9.5.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/blocks': 11.18.0(react@17.0.2)
       '@wordpress/components': 20.0.0(@babel/core@7.21.3)(@types/react@17.0.50)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/compose': 5.17.0(react@17.0.2)
@@ -19453,7 +19456,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/autop': 3.28.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/block-serialization-default-parser': 4.28.0
       '@wordpress/compose': 5.17.0(react@17.0.2)
       '@wordpress/data': 7.3.0(react@17.0.2)
@@ -19522,7 +19525,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/autop': 3.28.0
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.40.0
       '@wordpress/block-serialization-default-parser': 4.28.0
       '@wordpress/compose': 6.5.0(react@17.0.2)
       '@wordpress/data': 8.5.0(react@17.0.2)
@@ -21872,7 +21875,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/api-fetch': 6.3.1
-      '@wordpress/blob': 3.28.0
+      '@wordpress/blob': 3.6.1
       '@wordpress/element': 4.4.1
       '@wordpress/i18n': 4.6.1
       lodash: 4.17.21

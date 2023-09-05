@@ -81,6 +81,11 @@
 		background-color: #fcfcfc;
 	}
 
+	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
+		align-items: center;
+		display: flex;
+	}
+
 	.edit-site-site-hub__site-title {
 		color: $gray-900;
 		font-size: 0.8125rem;
@@ -190,6 +195,121 @@
 		.edit-site-save-hub {
 			border-top: 0;
 			padding: 32px 29px 32px 35px;
+		}
+	}
+
+	.woocommerce-customize-store__sidebar-group-header {
+		color: $gray-900;
+		font-size: 0.6875rem;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 145.455% */
+		text-transform: uppercase;
+	}
+
+	.woocommerce-customize-store__sidebar-group {
+		padding: 0 8px;
+
+		.woocommerce-customize-store__sidebar-group-header {
+			padding: 16px 0;
+		}
+	}
+
+	button.block-library-site-logo__inspector-upload-container {
+		margin: 12px 0 32px;
+		display: flex;
+		padding: 32px;
+		justify-content: center;
+		align-items: center;
+		gap: $gap;
+		align-self: stretch;
+		border-radius: 4px;
+		background: #f0f0f0;
+		width: 324px;
+		height: 88px;
+
+		svg {
+			color: $gray-600;
+		}
+	}
+
+	.woocommerce-customize-store__sidebar-logo-container {
+		margin: 12px 0 32px;
+		width: 324px;
+		padding: 32px;
+		cursor: pointer;
+	}
+
+	.woocommerce-customize-store__sidebar-logo-content {
+		.components-toggle-control {
+			margin-bottom: 24px;
+
+			label {
+				color: $gray-900;
+				font-size: 0.8125rem;
+				font-style: normal;
+				font-weight: 400;
+				line-height: 16px; /* 123.077% */
+				margin-bottom: 0;
+			}
+
+			.components-form-toggle:not(.is-checked) {
+				.components-form-toggle__track {
+					background-color: $gray-600;
+				}
+			}
+
+			.components-form-toggle__thumb {
+				background-color: #fff;
+				border-color: #fff;
+			}
+		}
+
+		.components-range-control {
+			margin-bottom: 24px;
+			padding-top: 8px;
+
+			input::-webkit-outer-spin-button,
+			input::-webkit-inner-spin-button {
+				-webkit-appearance: none;
+				margin: 0;
+			}
+
+			input[type='number'] {
+				-moz-appearance: textfield;
+			}
+
+			.components-base-control__label {
+				text-transform: none;
+				color: $gray-900;
+				font-size: 0.8125rem;
+				font-style: normal;
+				font-weight: 400;
+				line-height: 16px; /* 123.077% */
+				margin-bottom: 8px;
+			}
+
+			.components-input-control__container {
+				width: 84px;
+			}
+
+			.components-input-control__input {
+				display: flex;
+				height: 36px;
+				align-items: center;
+				border-radius: 2px;
+				border: 1px solid $gray-600;
+				background: #fff;
+				color: $gray-900;
+			}
+		}
+
+		.components-base-control__help {
+			color: $gray-700;
+			font-size: 0.75rem;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 16px; /* 133.333% */
 		}
 	}
 
