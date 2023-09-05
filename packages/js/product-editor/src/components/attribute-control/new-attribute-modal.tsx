@@ -62,7 +62,7 @@ type NewAttributeModalProps = {
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
-	termsAutoselection?: 'first' | 'all';
+	termsAutoSelection?: 'first' | 'all';
 };
 
 type AttributeForm = {
@@ -101,7 +101,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		'Already used in Attributes',
 		'woocommerce'
 	),
-	termsAutoselection,
+	termsAutoSelection,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -259,7 +259,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								| string
 						) {
 							if (
-								termsAutoselection &&
+								termsAutoSelection &&
 								value &&
 								! ( typeof value === 'string' )
 							) {
@@ -280,7 +280,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 											getProductAttributeObject(
 												value
 											) as EnhancedProductAttribute;
-										if ( termsAutoselection === 'all' ) {
+										if ( termsAutoSelection === 'all' ) {
 											selectedAttribute.terms = terms;
 										} else if ( terms.length > 0 ) {
 											selectedAttribute.terms = [
