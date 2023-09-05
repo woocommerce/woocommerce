@@ -37,7 +37,9 @@ const connect = ( createNotice, setIsBusy ) => {
 };
 
 const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
-	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
+	const incentive =
+		getAdminSetting( 'wcpayWelcomePageIncentive' ) ||
+		window.wcpaySettings?.connectIncentive;
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isBusy, setIsBusy ] = useState( false );
 	const onClick = () => {
