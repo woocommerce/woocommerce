@@ -11,7 +11,6 @@ import { Edit } from './edit';
 import { Save } from './save';
 import metadata from './block.json';
 import icon from './icon';
-import './inner-blocks/product-gallery-large-image';
 import './inner-blocks/product-gallery-large-image-next-previous';
 import './inner-blocks/product-gallery-pager';
 import './inner-blocks/product-gallery-thumbnails';

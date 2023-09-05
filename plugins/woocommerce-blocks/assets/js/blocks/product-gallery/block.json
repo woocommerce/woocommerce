@@ -18,7 +18,8 @@
 		"thumbnailsNumberOfThumbnails": "thumbnailsNumberOfThumbnails",
 		"productGalleryClientId": "productGalleryClientId",
 		"nextPreviousButtonsPosition": "nextPreviousButtonsPosition",
-		"pagerDisplayMode": "pagerDisplayMode"
+		"pagerDisplayMode": "pagerDisplayMode",
+		"hoverZoom": "hoverZoom"
 	},
 	"attributes": {
 		"thumbnailsPosition": {
@@ -43,7 +44,7 @@
 		},
 		"hoverZoom": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"fullScreenOnClick": {
 			"type": "boolean",

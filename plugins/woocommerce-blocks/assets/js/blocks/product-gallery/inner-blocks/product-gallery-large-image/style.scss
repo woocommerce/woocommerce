@@ -2,11 +2,19 @@
 	width: fit-content;
 	height: fit-content;
 	position: relative;
+	overflow: hidden;
+
 	img {
 		display: block;
+		transition: all 0.1s linear;
+
+		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
+			cursor: zoom-in;
+		}
 	}
 
 	.wc-block-product-gallery-large-image__inner-blocks {
+		pointer-events: none;
 		display: flex;
 		flex-direction: column;
 		position: absolute;

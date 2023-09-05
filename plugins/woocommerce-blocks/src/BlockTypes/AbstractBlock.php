@@ -83,7 +83,7 @@ abstract class AbstractBlock {
 
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
-			$this->enqueue_assets( $render_callback_attributes );
+			$this->enqueue_assets( $render_callback_attributes, $content, $block );
 		}
 		return $this->render( $render_callback_attributes, $content, $block );
 	}
@@ -367,9 +367,11 @@ abstract class AbstractBlock {
 	 * @internal This prevents the block script being enqueued on all pages. It is only enqueued as needed. Note that
 	 * we intentionally do not pass 'script' to register_block_type.
 	 *
-	 * @param array $attributes  Any attributes that currently are available from the block.
+	 * @param array    $attributes  Any attributes that currently are available from the block.
+	 * @param string   $content    The block content.
+	 * @param WP_Block $block    The block object.
 	 */
-	protected function enqueue_assets( array $attributes ) {
+	protected function enqueue_assets( array $attributes, $content, $block ) {
 		if ( $this->enqueued_assets ) {
 			return;
 		}

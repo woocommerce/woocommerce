@@ -54,15 +54,6 @@ class ProductGallery extends AbstractBlock {
 	}
 
 	/**
-	 * It isn't necessary register block assets because it is a server side block.
-	 */
-	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-
-		return null;
-	}
-
-	/**
 	 * Get the Interactivity API's view script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
