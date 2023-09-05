@@ -32,7 +32,6 @@ export const useTagSearch = () => {
 	const [ tagsAndNewItem, setTagsAndNewItem ] = useState< ProductTag[] >(
 		[]
 	);
-	const isAsync = ! initialTags || initialTags.length > 0;
 
 	useEffect( () => {
 		if (
@@ -49,7 +48,7 @@ export const useTagSearch = () => {
 	const searchTags = useCallback(
 		async ( search?: string ): Promise< ProductTag[] > => {
 			lastSearchValue.current = search || '';
-			if ( ! isAsync && initialTags.length > 0 ) {
+			if ( initialTags.length > 0 ) {
 				setTagsAndNewItem( initialTags );
 				setIsSearching( false );
 				return initialTags;
