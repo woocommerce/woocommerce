@@ -138,10 +138,12 @@ test.describe( `${ blockData.name }`, () => {
 			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
-			const groupBlock = await editorUtils.getBlockByTypeWithParent(
-				'core/group',
-				'woocommerce/product-gallery'
-			);
+			const groupBlock = (
+				await editorUtils.getBlockByTypeWithParent(
+					'core/group',
+					'woocommerce/product-gallery'
+				)
+			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
@@ -153,7 +155,7 @@ test.describe( `${ blockData.name }`, () => {
 				await editorUtils.isBlockEarlierThan(
 					groupBlock,
 					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'core/group'
 				);
 
 			expect( isThumbnailsBlockEarlier ).toBe( true );
@@ -169,11 +171,12 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const groupBlockFrontend =
+			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
 					'wp-block-group',
 					'woocommerce/product-gallery'
-				);
+				)
+			 ).first();
 
 			const groupBlockFrontendClassAttribute =
 				await groupBlockFrontend.getAttribute( 'class' );
@@ -183,10 +186,9 @@ test.describe( `${ blockData.name }`, () => {
 			expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
 
 			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThan(
+				await frontendUtils.isBlockEarlierThanGroupBlock(
 					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'woocommerce/product-gallery-thumbnails'
 				);
 
 			expect( isThumbnailsFrontendBlockEarlier ).toBe( true );
@@ -233,10 +235,12 @@ test.describe( `${ blockData.name }`, () => {
 			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
-			const groupBlock = await editorUtils.getBlockByTypeWithParent(
-				'core/group',
-				'woocommerce/product-gallery'
-			);
+			const groupBlock = (
+				await editorUtils.getBlockByTypeWithParent(
+					'core/group',
+					'woocommerce/product-gallery'
+				)
+			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
@@ -248,7 +252,7 @@ test.describe( `${ blockData.name }`, () => {
 				await editorUtils.isBlockEarlierThan(
 					groupBlock,
 					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'core/group'
 				);
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
@@ -264,11 +268,12 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const groupBlockFrontend =
+			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
 					'wp-block-group',
 					'woocommerce/product-gallery'
-				);
+				)
+			 ).first();
 
 			const groupBlockFrontendClassAttribute =
 				await groupBlockFrontend.getAttribute( 'class' );
@@ -280,10 +285,9 @@ test.describe( `${ blockData.name }`, () => {
 			);
 
 			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThan(
+				await frontendUtils.isBlockEarlierThanGroupBlock(
 					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'woocommerce/product-gallery-thumbnails'
 				);
 
 			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );
@@ -330,10 +334,12 @@ test.describe( `${ blockData.name }`, () => {
 			// eslint-disable-next-line playwright/no-wait-for-timeout
 			await page.waitForTimeout( 500 );
 
-			const groupBlock = await editorUtils.getBlockByTypeWithParent(
-				'core/group',
-				'woocommerce/product-gallery'
-			);
+			const groupBlock = (
+				await editorUtils.getBlockByTypeWithParent(
+					'core/group',
+					'woocommerce/product-gallery'
+				)
+			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
@@ -345,7 +351,7 @@ test.describe( `${ blockData.name }`, () => {
 				await editorUtils.isBlockEarlierThan(
 					groupBlock,
 					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'core/group'
 				);
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
@@ -361,11 +367,12 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const groupBlockFrontend =
+			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
 					'wp-block-group',
 					'woocommerce/product-gallery'
-				);
+				)
+			 ).first();
 
 			const groupBlockFrontendClassAttribute =
 				await groupBlockFrontend.getAttribute( 'class' );
@@ -375,10 +382,9 @@ test.describe( `${ blockData.name }`, () => {
 			expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
 
 			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThan(
+				await frontendUtils.isBlockEarlierThanGroupBlock(
 					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails',
-					'woocommerce/product-gallery-large-image'
+					'woocommerce/product-gallery-thumbnails'
 				);
 
 			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );

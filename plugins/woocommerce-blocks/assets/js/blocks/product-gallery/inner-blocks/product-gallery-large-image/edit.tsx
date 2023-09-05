@@ -5,9 +5,17 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { memo } from '@wordpress/element';
 
-const getInnerBlocksTemplate = () => {
-	return [ [ 'woocommerce/product-gallery-large-image-next-previous' ] ];
-};
+/**
+ * Internal dependencies
+ */
+import largeImageNextPreviousButtonMetadata from '../product-gallery-large-image-next-previous/block.json';
+import pagerMetadata from '../product-gallery-pager/block.json';
+import './editor.scss';
+
+const getInnerBlocksTemplate = () => [
+	[ largeImageNextPreviousButtonMetadata.name ],
+	[ pagerMetadata.name ],
+];
 
 const Placeholder = memo( () => {
 	return (
@@ -19,11 +27,6 @@ const Placeholder = memo( () => {
 		</div>
 	);
 } );
-
-/**
- * Internal dependencies
- */
-import './editor.scss';
 
 export const Edit = (): JSX.Element => {
 	const innerBlocksProps = useInnerBlocksProps(
