@@ -193,15 +193,17 @@ class WcPayWelcomePage {
 	/**
 	 * Adds the WooPayments incentive badge to the onboarding task.
 	 *
+	 * @param string $badge Current badge.
+	 *
 	 * @return string
 	 */
-	public function onboarding_task_badge(): string {
+	public function onboarding_task_badge( string $badge ): string {
 		// Return early if the incentive must not be visible.
 		if ( ! $this->must_be_visible() ) {
-			return '';
+			return $badge;
 		}
 
-		return $this->get_incentive()['task_badge'] ?? '';
+		return $this->get_incentive()['task_badge'] ?? $badge;
 	}
 
 	/**
