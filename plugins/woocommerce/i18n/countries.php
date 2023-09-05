@@ -263,4 +263,5 @@ return array(
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
 	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
+	'XK' => __( 'Kosovo', 'woocommerce' ),
 );

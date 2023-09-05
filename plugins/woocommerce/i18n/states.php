@@ -2127,4 +2127,5 @@ return array(
 		'ZM-09' => __( 'Lusaka', 'woocommerce' ),
 		'ZM-10' => __( 'Muchinga', 'woocommerce' ),
 	),
+	'XK' => array(),
 );

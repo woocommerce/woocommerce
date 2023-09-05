@@ -2219,6 +2219,7 @@ const stateOptions = {
 	"VI": "Virgin Islands (US)",
 	"WF": "Wallis and Futuna",
 	"EH": "Western Sahara",
+	"XK": "Kosovo",
 	"YE": "Yemen",
 	"ZM:ZM-01": "Zambia - Western",
 	"ZM:ZM-02": "Zambia - Central",
@@ -2479,6 +2480,7 @@ const countries = {
 	"VI": "Virgin Islands (US)",
 	"WF": "Wallis and Futuna",
 	"EH": "Western Sahara",
+	"XK": "Kosovo",
 	"YE": "Yemen",
 	"ZM": "Zambia",
 	"ZW": "Zimbabwe"
