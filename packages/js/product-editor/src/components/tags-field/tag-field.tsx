@@ -65,9 +65,9 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isCreating, setIsCreating ] = useState( false );
 	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
-	const [ newInputValue, setNewInputValue ] = useState< boolean | string >(
-		false
-	);
+	const [ newInputValue, setNewInputValue ] = useState<
+		undefined | string
+	>();
 	const { createProductTag, invalidateResolutionForStoreSelector } =
 		useDispatch( EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -75,7 +75,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	const onInputChange = ( searchString?: string ) => {
 		setSearchValue( searchString || '' );
 		searchTags( searchString || '' );
-		setNewInputValue( searchString || false );
+		setNewInputValue( searchString );
 	};
 
 	const searchDelayed = useMemo(
@@ -117,7 +117,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 				isLoading={ isCreating }
 				onInputChange={ searchDelayed }
 				placeholder={ value.length === 0 ? placeholder : '' }
-				newInputValue={ newInputValue }
+				initialInputValue={ newInputValue }
 				onCreateNew={
 					searchValue.length === 0
 						? () => setShowCreateNewModal( true )

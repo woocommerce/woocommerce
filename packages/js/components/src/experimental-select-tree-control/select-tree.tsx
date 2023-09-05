@@ -25,7 +25,7 @@ interface SelectTreeProps extends TreeControlProps {
 	isLoading?: boolean;
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
-	newInputValue?: string | boolean;
+	initialInputValue?: string | undefined;
 }
 
 export const SelectTree = function SelectTree( {
@@ -34,7 +34,7 @@ export const SelectTree = function SelectTree( {
 	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
-	newInputValue = false,
+	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
 	...props
@@ -76,8 +76,8 @@ export const SelectTree = function SelectTree( {
 	const isReadOnly = ! isOpen && ! isFocused;
 
 	useEffect( () => {
-		if ( newInputValue !== false && isFocused ) {
-			setInputValue( newInputValue as string );
+		if ( initialInputValue !== undefined && isFocused ) {
+			setInputValue( initialInputValue as string );
 		}
 	}, [ isFocused ] );
 
