@@ -100,7 +100,7 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
-					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 				},
@@ -387,7 +387,7 @@
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
 				},
-				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
+				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
 
@@ -437,6 +437,8 @@
 							});
 		
 							$( document.body ).trigger( 'init_tooltips' );
+
+							closeModal();
 						}, 'json' );
 					}
 				},

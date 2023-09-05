@@ -54,6 +54,7 @@
 		events: {
 			'click .modal-close': 'closeButton',
 			'click #btn-ok'     : 'addButton',
+			'click #btn-next'   : 'nextButton',
 			'touchstart #btn-ok': 'addButton',
 			'keydown'           : 'keyboardActions'
 		},
@@ -108,6 +109,13 @@
 		addButton: function( e ) {
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e );
+		},
+		nextButton: function( e ) {
+			var context = this;
+			function closeModal() {
+				context.closeButton( e );
+			}
+			$( document.body ).trigger( 'wc_backbone_modal_next_response', [ this._target, this.getFormData(), closeModal ] );
 		},
 		getFormData: function() {
 			var data = {};

@@ -207,7 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+						<button id="btn-next" class="button button-primary button-large"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
