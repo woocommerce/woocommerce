@@ -32,6 +32,11 @@ import OrderSummarySubtotalBlock from '../inner-blocks/cart-order-summary-subtot
 import OrderSummaryShippingBlock from '../inner-blocks/cart-order-summary-shipping/frontend';
 import OrderSummaryTaxesBlock from '../inner-blocks/cart-order-summary-taxes/frontend';
 
+jest.mock( '@wordpress/compose', () => ( {
+	...jest.requireActual( '@wordpress/compose' ),
+	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
+} ) );
+
 const CartBlock = ( {
 	attributes = {
 		showRateAfterTaxName: false,
