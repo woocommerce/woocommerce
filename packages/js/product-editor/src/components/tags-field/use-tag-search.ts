@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { useSelect, resolveSelect } from '@wordpress/data';
+import { resolveSelect } from '@wordpress/data';
 import {
 	EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME,
-	WCDataSelector,
 	ProductTag,
 } from '@woocommerce/data';
 
@@ -19,46 +18,57 @@ function getFilteredTags( items: ProductTag[] = [], search: string ) {
 	return items.filter( ( tag ) => tag.slug?.includes( search ) );
 }
 
+async function fetchProductTags( search?: string ): Promise< ProductTag[] > {
+	const query = search !== undefined ? { search } : '';
+	return resolveSelect( EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME ).getProductTags(
+		query
+	);
+}
+
 /**
  * A hook used to handle all the search logic for the tag search component.
  */
 export const useTagSearch = () => {
 	const lastSearchValue = useRef( '' );
-	const { initialTags } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const { getProductTags } = select(
-				EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
-			);
-			return {
-				initialTags: getProductTags(),
-			};
-		}
-	);
+	const [ fetchedTags, setFetchedTags ] = useState< ProductTag[] >( [] );
 	const [ isSearching, setIsSearching ] = useState( true );
 	const [ tagsAndNewItem, setTagsAndNewItem ] = useState< ProductTag[] >(
 		[]
 	);
 
 	useEffect( () => {
+		const fetchAndSetTags = async () => {
+			try {
+				const tags = await fetchProductTags();
+				setFetchedTags( tags );
+				setIsSearching( false );
+			} catch ( error ) {
+				setIsSearching( false );
+			}
+		};
+
+		fetchAndSetTags();
+	}, [ tagsAndNewItem ] );
+
+	useEffect( () => {
 		if (
-			initialTags &&
-			initialTags.length > 0 &&
+			fetchedTags &&
+			fetchedTags.length > 0 &&
 			( tagsAndNewItem.length === 0 ||
 				lastSearchValue.current.length === 0 )
 		) {
-			setTagsAndNewItem( initialTags );
+			setTagsAndNewItem( fetchedTags );
 			setIsSearching( false );
 		}
-	}, [ initialTags ] );
+	}, [ fetchedTags ] );
 
 	const searchTags = useCallback(
 		async ( search?: string ): Promise< ProductTag[] > => {
 			lastSearchValue.current = search || '';
-			if ( initialTags.length > 0 ) {
+			if ( fetchedTags.length > 0 ) {
 				const tags = getFilteredTags(
-					initialTags,
+					// initialTags,
+					fetchedTags,
 					lastSearchValue.current.toLowerCase()
 				);
 				setTagsAndNewItem( tags );
@@ -67,11 +77,7 @@ export const useTagSearch = () => {
 			}
 			setIsSearching( true );
 			try {
-				const newTags: ProductTag[] = await resolveSelect(
-					EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
-				).getProductTags( {
-					search,
-				} );
+				const newTags = await fetchProductTags( search );
 
 				setIsSearching( false );
 				setTagsAndNewItem( newTags );
@@ -81,7 +87,7 @@ export const useTagSearch = () => {
 				return [];
 			}
 		},
-		[ initialTags ]
+		[ fetchedTags ]
 	);
 
 	return {
