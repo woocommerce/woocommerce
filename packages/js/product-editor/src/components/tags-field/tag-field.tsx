@@ -23,6 +23,7 @@ import { TRACKS_SOURCE } from '../../constants';
 import { CreateTagModal } from './create-tag-modal';
 
 type TagFieldProps = {
+	id: string;
 	label: string;
 	placeholder: string;
 	value?: ProductTagNode[];
@@ -56,6 +57,7 @@ export function mapFromTreeItemsToTags(
 }
 
 export const TagField: React.FC< TagFieldProps > = ( {
+	id,
 	label,
 	placeholder,
 	value = [],
@@ -106,7 +108,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 	return (
 		<>
 			<SelectTree
-				id="tag-field"
+				id={ id }
 				multiple
 				shouldNotRecursivelySelect
 				createValue={ searchValue }

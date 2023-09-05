@@ -5,7 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
 import { BlockAttributes } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
+import { BaseControl } from '@wordpress/components';
 import { ProductTag } from '@woocommerce/data';
+import { useInstanceId } from '@wordpress/compose';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -29,10 +31,13 @@ export function Edit( {
 		Pick< ProductTag, 'id' | 'name' >[]
 	>( 'postType', context?.postType || 'product', name || 'tags' );
 
+	const tagFieldId = useInstanceId( BaseControl, 'tag-field' ) as string;
+
 	return (
 		<div { ...blockProps }>
 			{
 				<TagField
+					id={ tagFieldId }
 					label={ label || __( 'Tags', 'woocommerce' ) }
 					placeholder={
 						placeholder ||
