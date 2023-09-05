@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ProgressBar } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
 export const Basic = () => (
 	<div style={ { background: '#fff', height: '200px', padding: '20px' } }>
