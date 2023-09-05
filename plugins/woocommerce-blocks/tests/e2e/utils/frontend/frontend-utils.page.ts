@@ -113,6 +113,49 @@ export class FrontendUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
+	async isBlockEarlierThanGroupBlock(
+		containerBlock: Locator,
+		firstBlock: string
+	) {
+		if ( ! containerBlock ) {
+			throw new Error( 'Container block not found.' );
+		}
+
+		const childBlocks: Locator = containerBlock.locator( '> div' );
+
+		let firstBlockIndex = -1;
+		let secondBlockIndex = -1;
+
+		for ( let i = 0; i < ( await childBlocks.count() ); i++ ) {
+			const blockName = await childBlocks
+				.nth( i )
+				.getAttribute( 'data-block-name' );
+			const isGroupBlock = await childBlocks
+				.nth( i )
+				.evaluate( ( node ) =>
+					node.classList.contains( 'wp-block-group' )
+				);
+
+			if ( blockName === firstBlock ) {
+				firstBlockIndex = i;
+			}
+
+			if ( isGroupBlock ) {
+				secondBlockIndex = i;
+			}
+
+			if ( firstBlockIndex !== -1 && secondBlockIndex !== -1 ) {
+				break;
+			}
+		}
+
+		if ( firstBlockIndex === -1 || secondBlockIndex === -1 ) {
+			throw new Error( 'Both blocks must exist within the editor' );
+		}
+
+		return firstBlockIndex < secondBlockIndex;
+	}
+
 	/**
 	 * Playwright selectText causes flaky tests when running on local
 	 * development machine. This method is more reliable on both environments.
