@@ -4,7 +4,11 @@
 	background: #fff;
 
 	.woocommerce-layout__primary {
-		margin: 0;
+		margin: $header-height-mobile 0 0;
+
+		@media (min-width: $breakpoint-medium) {
+			margin-top: $header-height-desktop;
+		}
 	}
 
 	.woocommerce-layout__main {
