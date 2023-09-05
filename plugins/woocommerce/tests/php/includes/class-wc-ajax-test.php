@@ -192,4 +192,63 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 108, $order->get_total() );
 	}
+
+	/**
+	 * Tests if an error is generated when trying to refund too many of a product
+	 *
+	 * @return void
+	 */
+	public function test_refund_too_many() {
+		// Create order with products.
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_regular_price( 10 );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_regular_price( 10 );
+		$product2->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product1, 1 );
+		$order->add_product( $product2, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$item    = current( $order->get_items() );
+		$item_id = $item->get_id();
+
+		$this->_setRole( 'administrator' );
+
+		// Try to refund too many items.
+		$_REQUEST = array(
+			'order_id'               => $order->get_id(),
+			'refund_amount'          => 20.00,
+			'refunded_amount'        => 0,
+			'refund_reason'          => '',
+			'line_item_qtys'         => wp_json_encode( array( $item_id => '2' ) ),
+			'line_item_totals'       => wp_json_encode(
+				array(
+					$item_id => 20,
+				)
+			),
+			'api_refund'             => false,
+			'restock_refunded_items' => true,
+			'security'               => wp_create_nonce( 'order-item' ),
+		);
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$_POST = $_REQUEST;
+
+		try {
+			$this->_handleAjax( 'woocommerce_refund_line_items' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			// wp_die() doesn't actually occur, so we need to clean up the output buffer.
+			ob_end_clean();
+		}
+
+		$response = json_decode( $this->_last_response, true );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertContains( 'Invalid refund quantity for item', $response['data']['error'] );
+	}
 }
