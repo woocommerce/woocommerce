@@ -229,6 +229,23 @@ interactivityStore(
 				},
 			},
 		},
+		init: {
+			woocommerce: {
+				syncTemporaryNumberOfItemsOnLoad: ( store: Store ) => {
+					const { selectors, context } = store;
+					// If the cart has loaded when we instantiate this element, we sync
+					// the temporary number of items with the number of items in the cart
+					// to avoid triggering the animation. We do this only once, but we
+					// use useLayoutEffect to avoid the useEffect flickering.
+					if ( selectors.woocommerce.hasCartLoaded( store ) ) {
+						context.woocommerce.temporaryNumberOfItems =
+							selectors.woocommerce.numberOfItemsInTheCart(
+								store
+							);
+					}
+				},
+			},
+		},
 		effects: {
 			woocommerce: {
 				startAnimation: ( store: Store ) => {

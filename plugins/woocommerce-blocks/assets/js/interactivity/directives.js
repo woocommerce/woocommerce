@@ -1,4 +1,4 @@
-import { useContext, useMemo, useEffect } from 'preact/hooks';
+import { useContext, useMemo, useEffect, useLayoutEffect } from 'preact/hooks';
 import { deepSignal, peek } from 'deepsignal';
 import { useSignalEffect } from './utils';
 import { directive } from './hooks';
@@ -56,6 +56,23 @@ export default () => {
 			} );
 		} );
 	} );
+
+	// data-wc-layout-init--[name]
+	directive(
+		'layout-init',
+		( {
+			directives: { 'layout-init': layoutInit },
+			context,
+			evaluate,
+		} ) => {
+			const contextValue = useContext( context );
+			Object.values( layoutInit ).forEach( ( path ) => {
+				useLayoutEffect( () => {
+					return evaluate( path, { context: contextValue } );
+				}, [] );
+			} );
+		}
+	);
 
 	// data-wc-on--[event]
 	directive( 'on', ( { directives: { on }, element, evaluate, context } ) => {
