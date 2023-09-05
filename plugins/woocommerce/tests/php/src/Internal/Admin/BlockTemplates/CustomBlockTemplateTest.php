@@ -15,6 +15,30 @@ use WC_Unit_Test_Case;
  */
 class CustomBlockTemplateTest extends WC_Unit_Test_Case {
 	/**
+	 * Test getting the template ID.
+	 */
+	public function test_get_id() {
+		$template = new CustomBlockTemplate();
+		$this->assertEquals( $template->get_id(), 'custom-block-template' );
+	}
+
+	/**
+	 * Test getting the template ID.
+	 */
+	public function test_get_title() {
+		$template = new CustomBlockTemplate();
+		$this->assertEquals( $template->get_title(), 'Custom Block Template' );
+	}
+
+	/**
+	 * Test getting the template ID.
+	 */
+	public function test_get_description() {
+		$template = new CustomBlockTemplate();
+		$this->assertEquals( $template->get_description(), 'A custom block template for testing.' );
+	}
+
+	/**
 	 * Test that the add_block method does not exist by default on templates.
 	 */
 	public function test_add_block_does_not_exist() {
@@ -37,5 +61,30 @@ class CustomBlockTemplateTest extends WC_Unit_Test_Case {
 
 		$block = $template->get_block( 'test-block-name' );
 		$this->assertInstanceOf( CustomBlock::class, $block );
+	}
+
+	/**
+	 * Test that a custom block can be removed as expected.
+	 */
+	public function test_remove_custom_block() {
+		$template = new CustomBlockTemplate();
+
+		$template->add_custom_block(
+			[
+				'id'        => 'test-block-name-1',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->add_custom_block(
+			[
+				'id'        => 'test-block-name-2',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->remove_block( 'test-block-name-1' );
+
+		$this->assertNull( $template->get_block( 'test-block-name-1' ) );
 	}
 }

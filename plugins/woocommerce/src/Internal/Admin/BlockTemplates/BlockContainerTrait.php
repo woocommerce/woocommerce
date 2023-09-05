@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 
 /**
  * Trait for block containers.
@@ -45,6 +46,91 @@ trait BlockContainerTrait {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
+	 * Checks if a block is a descendant of the block container.
+	 *
+	 * @param BlockInterface $block The block.
+	 */
+	private function is_block_descendant( BlockInterface $block ): bool {
+		$parent = $block->get_parent();
+
+		if ( $parent === $this ) {
+			return true;
+		}
+
+		if ( ! $parent instanceof BlockInterface ) {
+			return false;
+		}
+
+		return $this->is_block_descendant( $parent );
+	}
+
+	/**
+	 * Remove a block from the block container.
+	 *
+	 * @param string $block_id The block ID.
+	 *
+	 * @throws \UnexpectedValueException If the block container is not an ancestor of the block.
+	 */
+	public function remove_block( string $block_id ) {
+		$root_template = $this->get_root_template();
+
+		$block = $root_template->get_block( $block_id );
+
+		if ( ! $block ) {
+			return;
+		}
+
+		if ( ! $this->is_block_descendant( $block ) ) {
+			throw new \UnexpectedValueException( 'The block container is not an ancestor of the block.' );
+		}
+
+		// If the block is a container, remove all of its blocks.
+		if ( $block instanceof ContainerInterface ) {
+			$block->remove_blocks();
+		}
+
+		// Remove block from root template's cache.
+		$root_template = $this->get_root_template();
+		$root_template->uncache_block( $block->get_id() );
+
+		$parent = $block->get_parent();
+		$parent->remove_inner_block( $block );
+
+		// Detach block from parent and root template.
+		$block->detach();
+
+	}
+
+	/**
+	 * Remove all blocks from the block container.
+	 */
+	public function remove_blocks() {
+		array_map(
+			function ( BlockInterface $block ) {
+				$this->remove_block( $block->get_id() );
+			},
+			$this->inner_blocks
+		);
+	}
+
+	/**
+	 * Remove a block from the block container's inner blocks. This is an internal method and should not be called directly
+	 * except for from the BlockContainerTrait's remove_block() method.
+	 *
+	 * @param BlockInterface $block The block.
+	 */
+	public function remove_inner_block( BlockInterface $block ) {
+		$this->inner_blocks = array_filter(
+			$this->inner_blocks,
+			function ( BlockInterface $inner_block ) use ( $block ) {
+				return $inner_block !== $block;
+			}
+		);
+	}
+
+
+
+	/**
 	 * Get the inner blocks sorted by order.
 	 */
 	private function get_inner_blocks_sorted_by_order(): array {
@@ -52,7 +138,7 @@ trait BlockContainerTrait {
 
 		usort(
 			$sorted_inner_blocks,
-			function( Block $a, Block $b ) {
+			function( BlockInterface $a, BlockInterface $b ) {
 				return $a->get_order() <=> $b->get_order();
 			}
 		);

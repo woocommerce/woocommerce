@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed missed lint error in Assembler Hub

@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * This is the main class that controls the custom orders tables feature. Its responsibilities are:
  *
- * - Allowing to enable and disable the feature while it's in development (show_feature method)
  * - Displaying UI components (entries in the tools page and in settings)
  * - Providing the proper data store for orders via 'woocommerce_order_data_store' hook
  *
@@ -157,40 +156,13 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Checks if the feature is visible (so that dedicated entries will be added to the debug tools page).
-	 *
-	 * @return bool True if the feature is visible.
-	 */
-	public function is_feature_visible(): bool {
-		return true;
-	}
-
-	/**
-	 * Makes the feature visible, so that dedicated entries will be added to the debug tools page.
-	 *
-	 * This method shouldn't be used anymore, see the FeaturesController class.
-	 */
-	public function show_feature() {
-		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
-		wc_doing_it_wrong(
-			$class_and_method,
-			sprintf(
-				// translators: %1$s the name of the class and method used.
-				__( '%1$s: The visibility of the custom orders table feature is now handled by the WooCommerce features engine. See the FeaturesController class, or go to WooCommerce - Settings - Advanced - Features.', 'woocommerce' ),
-				$class_and_method
-			),
-			'7.0'
-		);
-	}
-
-	/**
 	 * Is the custom orders table usage enabled via settings?
 	 * This can be true only if the feature is enabled and a table regeneration has been completed.
 	 *
 	 * @return bool True if the custom orders table usage is enabled
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
-		return $this->is_feature_visible() && get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
+		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -469,6 +441,7 @@ class CustomOrdersTableController {
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
 		$sync_complete           = 0 === $sync_status['current_pending_count'];
 		$disabled_option         = array();
+		// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
 			$disabled_option = array( 'yes' );
 		}
@@ -478,16 +451,17 @@ class CustomOrdersTableController {
 
 		return array(
 			'id'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'title'       => __( 'Data storage for orders', 'woocommerce' ),
+			'title'       => __( 'Order data storage', 'woocommerce' ),
 			'type'        => 'radio',
 			'options'     => array(
-				'no'  => __( 'WordPress post tables', 'woocommerce' ),
-				'yes' => __( 'High performance order storage (new)', 'woocommerce' ),
+				'no'  => __( 'WordPress posts storage (legacy)', 'woocommerce' ),
+				'yes' => __( 'High-performance order storage (recommended)', 'woocommerce' ),
 			),
 			'value'       => $hpos_enabled ? 'yes' : 'no',
 			'disabled'    => $disabled_option,
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
+			'row_class' => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 		);
 	}
 
@@ -512,8 +486,8 @@ class CustomOrdersTableController {
 			$sync_message = sprintf(
 				// translators: %d: number of pending orders.
 				_n(
-					'Sync %d pending order. You can switch data storage for orders only when posts and orders table are in sync.',
-					'Sync %d pending orders. You can switch data storage for orders only when posts and orders table are in sync.',
+					'%d order pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+					'%d orders pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
 					$sync_status['current_pending_count'],
 					'woocommerce'
 				),
@@ -522,12 +496,13 @@ class CustomOrdersTableController {
 		}
 
 		return array(
-			'id'       => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			'title'    => '',
-			'type'     => 'checkbox',
-			'desc'     => __( 'Keep the posts and orders tables in sync (compatibility mode).', 'woocommerce' ),
-			'value'    => $sync_enabled,
-			'desc_tip' => $sync_message,
+			'id'        => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'title'     => '',
+			'type'      => 'checkbox',
+			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
+			'value'     => $sync_enabled,
+			'desc_tip'  => $sync_message,
+			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}
 }

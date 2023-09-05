@@ -57,6 +57,9 @@ const MarketingOverviewMultichannel = lazy( () =>
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
 );
+const Marketplace = lazy( () =>
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -174,6 +177,25 @@ export const getPages = () => {
 				id: 'woocommerce-marketing-overview',
 			},
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( isFeatureEnabled( 'marketplace' ) ) {
+		pages.push( {
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
+			path: '/extensions',
+			breadcrumbs: [
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-marketplace',
+			},
 		} );
 	}
 
@@ -297,7 +319,7 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
 		pages.push( {
 			container: CustomizeStore,
-			path: '/customize-store',
+			path: '/customize-store/*',
 			breadcrumbs: [
 				...initialBreadcrumbs,
 				__( 'Customize Your Store', 'woocommerce' ),

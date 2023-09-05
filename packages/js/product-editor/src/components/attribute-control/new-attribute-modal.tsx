@@ -55,6 +55,8 @@ type NewAttributeModalProps = {
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
+	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
 };
 
 type AttributeForm = {
@@ -88,6 +90,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onAdd,
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
+	disabledAttributeIds = [],
+	disabledAttributeMessage = __(
+		'Already used in Attributes',
+		'woocommerce'
+	),
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -213,8 +220,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			document.querySelector< HTMLLabelElement >(
 				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
 			);
+		const timeoutId = setTimeout( () => {
+			firstAttributeFieldLabel?.focus();
+		}, 100 );
 
-		firstAttributeFieldLabel?.focus();
+		return () => clearTimeout( timeoutId );
 	}, [] );
 
 	return (
@@ -316,6 +326,12 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															] }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
+															}
+															disabledAttributeIds={
+																disabledAttributeIds
+															}
+															disabledAttributeMessage={
+																disabledAttributeMessage
 															}
 														/>
 													</td>

@@ -1,26 +1,16 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
+const shouldSkip = API_BASE_URL != undefined;
+
 const exp = require( 'constants' );
 const { keys } = require( 'lodash' );
 const {
 	countries,
 	currencies,
+	externalCountries,
 	stateOptions,
 } = require( '../../data/settings' );
 
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
 /**
  * Tests for the WooCommerce API.
  *
@@ -28,9 +18,8 @@ const skipTestIfCI = () => {
  * @group settings
  *
  */
-skipTestIfCI();
 
-test.describe( 'Settings API tests: CRUD', () => {
+test.describe.serial( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
 		test( 'can retrieve all settings groups', async ( { request } ) => {
 			// call API to retrieve all settings groups
@@ -336,6 +325,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -387,33 +377,71 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_all_except_countries',
-						label: 'Sell to all countries, except for&hellip;',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_specific_allowed_countries',
-						label: 'Sell to specific countries',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_all_except_countries',
+							label: 'Sell to all countries, except for&hellip;',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_all_except_countries',
+							label: 'Sell to all countries, except for&hellip;',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: [],
+							options:
+								expect.objectContaining( externalCountries ),
+						} ),
+					] )
+				);
+			}
+
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_allowed_countries',
+							label: 'Sell to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_allowed_countries',
+							label: 'Sell to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: [],
+							options:
+								expect.objectContaining( externalCountries ),
+						} ),
+					] )
+				);
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -436,19 +464,38 @@ test.describe( 'Settings API tests: CRUD', () => {
 				] )
 			);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_specific_ship_to_countries',
-						label: 'Ship to specific countries',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_ship_to_countries',
+							label: 'Ship to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_ship_to_countries',
+							label: 'Ship to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: [],
+							options:
+								expect.objectContaining( externalCountries ),
+						} ),
+					] )
+				);
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -1629,34 +1676,44 @@ test.describe( 'Settings API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_cart_page_id',
-						label: 'Cart page',
-						description: 'Page contents: [woocommerce_cart]',
-						type: 'select',
-						default: '',
-						tip: 'Page contents: [woocommerce_cart]',
-						value: expect.any( String ),
-						options: expect.any( Object ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_checkout_page_id',
-						label: 'Checkout page',
-						description: 'Page contents: [woocommerce_checkout]',
-						type: 'select',
-						default: expect.any( Number ),
-						tip: 'Page contents: [woocommerce_checkout]',
-						value: expect.any( String ),
-						options: expect.any( Object ),
-					} ),
-				] )
-			);
+
+			// not present in external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_cart_page_id',
+							label: 'Cart page',
+							description: 'Page contents: [woocommerce_cart]',
+							type: 'select',
+							default: '',
+							tip: 'Page contents: [woocommerce_cart]',
+							value: expect.any( String ),
+							options: expect.any( Object ),
+						} ),
+					] )
+				);
+			}
+
+			// not present in external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_checkout_page_id',
+							label: 'Checkout page',
+							description:
+								'Page contents: [woocommerce_checkout]',
+							type: 'select',
+							default: expect.any( Number ),
+							tip: 'Page contents: [woocommerce_checkout]',
+							value: expect.any( String ),
+							options: expect.any( Object ),
+						} ),
+					] )
+				);
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -1884,7 +1941,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_analytics_enabled',
 						label: 'Analytics',
-						description: 'Enables WooCommerce Analytics',
+						description: 'Enable WooCommerce Analytics',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1897,7 +1954,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_navigation_enabled',
 						label: 'Navigation',
 						description: expect.stringContaining(
-							'Adds the new WooCommerce navigation experience to the dashboard'
+							'Add the new WooCommerce navigation experience to the dashboard'
 						),
 						type: 'checkbox',
 						value: expect.any( String ),

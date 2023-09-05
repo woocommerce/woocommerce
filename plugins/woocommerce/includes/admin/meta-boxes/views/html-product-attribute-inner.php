@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select multiple="multiple"
 							data-minimum_input_length="0"
 							data-limit="50" data-return_id="id"
-							data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>"
+							data-placeholder="<?php esc_attr_e( 'Select values', 'woocommerce' ); ?>"
 							data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 							class="multiselect attribute_values wc-taxonomy-term-search"
 							name="attribute_values[<?php echo esc_attr( $i ); ?>][]"
@@ -79,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
 			} else {
 				?>
-				<textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php /* translators: %s: WC_DELIMITER */ printf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), esc_attr( WC_DELIMITER ) ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
+				<textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
 				<?php
 			}
 			?>

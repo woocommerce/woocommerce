@@ -62,3 +62,5 @@ export const TRACKS_SOURCE = 'product-block-editor-v1';
  * @see https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/pagination/index.js#L12
  */
 export const DEFAULT_PER_PAGE_OPTION = 25;
+
+export const DEFAULT_VARIATION_PER_PAGE_OPTION = 5;
