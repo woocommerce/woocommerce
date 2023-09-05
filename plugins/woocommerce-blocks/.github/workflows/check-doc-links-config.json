@@ -19,5 +19,6 @@
 		{
 		"pattern": "https://www.php.net/manual/en/install.php"
 		}
-	]
+	],
+	"retryOn429": true
 }
