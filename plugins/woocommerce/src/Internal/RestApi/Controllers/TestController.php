@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\AllowedRol
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\AllowUnauthenticatedAttribute as AllowUnauthenticated;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\ControllerBase;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiControllerAttribute as RestApiController;
-use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\DescriptionAttribute as Description;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionAttribute as Description;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiEndpointAttribute as RestApiEndpoint;
 
 // phpcs:disable Squiz.Commenting.ClassComment.Missing, Squiz.Commenting.FunctionComment.Missing

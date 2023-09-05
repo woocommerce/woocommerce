@@ -3,7 +3,7 @@
  * DescriptionAttribute class file.
  */
 
-namespace Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes;
+namespace Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation;
 
 /**
  * Represents the description of a REST API controller class or endpoint.

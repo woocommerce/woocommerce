@@ -7,11 +7,22 @@ namespace Automattic\WooCommerce\Internal\RestApi\Controller;
 
 use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\CategoryAboutTitleAttribute as CategoryAboutTitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\CategoryAboutTextAttribute as CategoryAboutText;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\CategoryPathAttribute as CategoryPath;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\CategoryTitleAttribute as CategoryTitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\CategorySubtitleAttribute as CategorySubtitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionTitleAttribute as DescriptionTitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionTextAttribute as DescriptionText;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\Enums\InputParameterLocation;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\InputParameterAttribute as InputParameter;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\InputTypeAttribute as InputType;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\OutputTypeAttribute as OutputType;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\ControllerBase;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiControllerAttribute as RestApiController;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiEndpointAttribute as RestApiEndpoint;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\AllowedRolesAttribute as AllowedRoles;
-use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\DescriptionAttribute as Description;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionAttribute as Description;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\ResponseException;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Responses;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -19,7 +30,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 // phpcs:disable Squiz.Commenting.ClassComment.Missing
 
 #[RestApiController( 'orders' )]
-#[Description( 'Handles WooCommerce orders.' )]
+#[CategoryPath('Orders/Orders')]
+#[CategoryTitle('Orders')]
+#[CategorySubtitle( 'invoke::OrdersTexts::controller_subtitle' )]
+#[CategoryAboutTitle('About WooCommerce Orders')]
+#[CategoryAboutText( 'invoke::OrdersTexts::controller_about_text' )]
 class OrdersController extends ControllerBase {
 
 	/**
@@ -55,7 +70,9 @@ class OrdersController extends ControllerBase {
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 	#[RestApiEndpoint( 'GET', '(?<id>:int:)' )]
-	#[Description( 'Get the details of an order.' )]
+	#[DescriptionTitle( 'Get order' )]
+	#[DescriptionText( 'Get the details of an order.' )]
+	#[InputParameter('id', 'Order id', InputParameterLocation::Url, 'int', true)]
 	public static function get_order( \WP_Rest_Request $request, ?\WP_User $user ) {
 		$order_id = $request->get_param( 'id' );
 		$order    = self::get_existing_order( $order_id, $user );
@@ -90,6 +107,8 @@ class OrdersController extends ControllerBase {
 
 	#[RestApiEndpoint( 'POST', '(?<id>:int:)/notes' )]
 	#[Description( 'Add a note to an order.' )]
+	#[InputType('foorcios')]
+	#[OutputType('barcios')]
 	public static function add_order_note( \WP_Rest_Request $request, ?\WP_User $user ) {
 		$order_id = $request->get_param( 'id' );
 		$order    = self::get_existing_order( $order_id, $user );
