@@ -50,6 +50,7 @@ type AttributeControlProps = {
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
 	disabledAttributeIds?: number[];
+	termsAutoSelection?: 'first' | 'all';
 	uiStrings?: {
 		notice?: string | React.ReactElement;
 		emptyStateSubtitle?: string;
@@ -84,6 +85,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
 	disabledAttributeIds = [],
+	termsAutoSelection,
 } ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
@@ -307,6 +309,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					disabledAttributeMessage={
 						uiStrings.disabledAttributeMessage
 					}
+					termsAutoSelection={ termsAutoSelection }
 				/>
 			) }
 			<SelectControlMenuSlot />
