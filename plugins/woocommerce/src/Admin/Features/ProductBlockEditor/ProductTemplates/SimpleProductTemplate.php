@@ -268,7 +268,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_catalog_section->add_block(
 			[
 				'id'         => 'product-categories',
-				'blockName'  => 'woocommerce/taxonomy-field',
+				'blockName'  => 'woocommerce/product-taxonomy-field',
 				'order'      => 10,
 				'attributes' => [
 					'slug'        => 'product_cat',

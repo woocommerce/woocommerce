@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Migrate category field to woocommerce/taxonomy-field block
+Migrate category field to woocommerce/product-taxonomy-field block
