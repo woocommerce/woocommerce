@@ -89,6 +89,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 				skipText={ __( 'Set up manually', 'woocommerce' ) }
 				onAbort={ () => onDisable() }
 				abortText={ __( "I don't charge sales tax", 'woocommerce' ) }
+				pluginSlugs={ pluginsToActivate }
 			/>
 			{ ! tosAccepted && (
 				<Text
