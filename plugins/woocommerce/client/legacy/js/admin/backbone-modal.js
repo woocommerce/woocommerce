@@ -95,9 +95,9 @@
 
 			$( document.body ).trigger( 'wc_backbone_modal_loaded', this._target );
 		},
-		closeButton: function( e ) {
+		closeButton: function( e, addButtonCalled ) {
 			e.preventDefault();
-			$( document.body ).trigger( 'wc_backbone_modal_before_remove', this._target );
+			$( document.body ).trigger( 'wc_backbone_modal_before_remove', [ this._target, this.getFormData(), !!addButtonCalled ] );
 			this.undelegateEvents();
 			$( document ).off( 'focusin' );
 			$( document.body ).css({
@@ -108,7 +108,7 @@
 		},
 		addButton: function( e ) {
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
-			this.closeButton( e );
+			this.closeButton( e, true );
 		},
 		nextButton: function( e ) {
 			var context = this;

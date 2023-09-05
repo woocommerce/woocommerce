@@ -101,6 +101,7 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 				},
@@ -308,7 +309,7 @@
 						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						method      = methods[ instance_id ];
 
-					// Only load modal if supported
+					// Only load modal if supported.
 					if ( ! method.settings_html ) {
 						return true;
 					}
@@ -319,11 +320,13 @@
 						template : 'wc-modal-shipping-method-settings',
 						variable : {
 							instance_id : instance_id,
-							method      : method
+							method      : method,
+							status	    : 'existing'
 						},
 						data : {
 							instance_id : instance_id,
-							method      : method
+							method      : method,
+							status	    : 'existing'
 						}
 					});
 
@@ -431,11 +434,13 @@
 								template : 'wc-modal-shipping-method-settings',
 								variable : {
 									instance_id : instance_id,
-									method      : method
+									method      : method,
+									status	    : 'new'
 								},
 								data : {
 									instance_id : instance_id,
-									method      : method
+									method      : method,
+									status	    : 'new'
 								}
 							});
 		
@@ -444,6 +449,46 @@
 							// Close original modal
 							closeModal();
 						}, 'json' );
+					}
+				},
+				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
+					if ( target === 'wc-modal-shipping-method-settings' ) {
+						var btnData = $( '#btn-ok' ).data();
+
+						if ( ! addButtonCalled && btnData && btnData.status === 'new' ) {
+							console.log( 'delete instance_id: ' + post_data.instance_id );
+							shippingMethodView.block();
+
+							var view    = shippingMethodView,
+								model   = view.model,
+								methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+								changes = {},
+								instance_id = post_data.instance_id;
+
+							// Remove method to zone via ajax call
+							$.post( {
+								url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
+								data: {
+									wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
+									instance_id: instance_id,
+									zone_id: data.zone_id,
+								},
+								success: function( { data } ) {
+									delete methods[instance_id];
+									changes.methods = changes.methods || data.methods;
+									model.set('methods', methods);
+									model.logChanges( changes );
+									view.clearUnloadConfirmation();
+									view.render();
+									shippingMethodView.unblock();
+								},
+								error: function( jqXHR, textStatus, errorThrown ) {
+									window.alert( data.strings.remove_method_failed );
+									shippingMethodView.unblock();
+								},
+								dataType: 'json'
+							});
+						}
 					}
 				},
 				onChangeShippingMethodSelector: function() {
