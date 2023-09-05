@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update TaskItem type to include `badge` prop.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Display a custom WooPayments onboarding task header content, when an incentive with server based header is available.
