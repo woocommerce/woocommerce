@@ -291,8 +291,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 											...selectedAttribute,
 										} );
 										focusValueField( index );
-									} )
-									.catch( () => {} );
+									} );
 							} else {
 								setValue(
 									'attributes[' + index + ']',
