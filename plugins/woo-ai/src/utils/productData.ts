@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { Attribute } from './types';
@@ -63,9 +68,16 @@ export const getCategories = (): string[] => {
 			'#taxonomy-product_cat input[type="checkbox"][name="tax_input[product_cat][]"]'
 		);
 	const categoryElements = Array.from( checkboxes );
-	const selectedCategories = categoryElements.filter(
-		( category ) => category.checked
-	);
+
+	// Filter out the Uncategorized category and return the remaining selected categories
+	const selectedCategories = categoryElements.filter( ( element ) => {
+		const categoryLabel = element.parentElement?.innerText.trim();
+
+		return (
+			element.checked &&
+			categoryLabel !== __( 'Uncategorized', 'woocommerce' )
+		);
+	} );
 
 	// Get the hierarchy string for each selected category and filter out any empty strings
 	return selectedCategories.map( getCategoryHierarchy ).filter( Boolean );
