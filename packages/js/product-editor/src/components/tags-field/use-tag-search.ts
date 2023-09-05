@@ -7,32 +7,24 @@ import {
 	EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME,
 	WCDataSelector,
 	ProductTag,
-	Query,
 } from '@woocommerce/data';
 
-const PAGE_SIZE = 100;
-
 export type ProductTagNode = Pick< ProductTag, 'id' | 'name' >;
-
-const productTagQueryObject = {
-	per_page: PAGE_SIZE,
-} as Query;
 
 /**
  * A hook used to handle all the search logic for the tag search component.
  */
 export const useTagSearch = () => {
 	const lastSearchValue = useRef( '' );
-	const { initialTags, totalCount } = useSelect(
+	const { initialTags } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		( select: WCDataSelector ) => {
-			const { getProductTags, getProductTagsTotalCount } = select(
+			const { getProductTags } = select(
 				EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 			);
 			return {
-				initialTags: getProductTags( productTagQueryObject ),
-				totalCount: getProductTagsTotalCount( productTagQueryObject ),
+				initialTags: getProductTags(),
 			};
 		}
 	);
@@ -40,8 +32,7 @@ export const useTagSearch = () => {
 	const [ tagsAndNewItem, setTagsAndNewItem ] = useState< ProductTag[] >(
 		[]
 	);
-	const isAsync =
-		! initialTags || ( initialTags.length > 0 && totalCount > PAGE_SIZE );
+	const isAsync = ! initialTags || initialTags.length > 0;
 
 	useEffect( () => {
 		if (
@@ -69,7 +60,6 @@ export const useTagSearch = () => {
 					EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 				).getProductTags( {
 					search,
-					per_page: PAGE_SIZE,
 				} );
 
 				setIsSearching( false );
