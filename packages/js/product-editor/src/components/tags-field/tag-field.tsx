@@ -2,18 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
+import { useState, createElement, Fragment } from '@wordpress/element';
 import {
 	TreeItemType,
 	__experimentalSelectTreeControl as SelectTree,
 } from '@woocommerce/components';
-import { debounce } from 'lodash';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME,
 	ProductTag,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
+import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -78,10 +78,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 		setNewInputValue( searchString );
 	};
 
-	const searchDelayed = useMemo(
-		() => debounce( onInputChange, 150 ),
-		[ onInputChange ]
-	);
+	const searchDelayed = useDebounce( onInputChange, 150 );
 
 	const onSave = async () => {
 		recordEvent( 'product_tag_add', {
