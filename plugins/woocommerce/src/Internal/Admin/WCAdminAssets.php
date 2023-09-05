@@ -297,6 +297,13 @@ class WCAdminAssets {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
+				global $wp_version;
+				if ( 'app' === $script_path_name && version_compare( $wp_version, '6.3', '<' ) ) {
+					// Remove wp-router dependency for WordPress versions < 6.3 because wp-router is not included in those versions. We only use wp-router in customize store pages and the feature is only available in WordPress 6.3+.
+					// We can remove this once our minimum support is WP 6.3.
+					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-router' ) );
+				}
+
 				wp_register_script(
 					$script,
 					self::get_url( $script_path_name . '/index', 'js' ),
