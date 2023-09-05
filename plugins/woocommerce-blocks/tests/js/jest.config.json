@@ -30,7 +30,9 @@
 		"@woocommerce/blocks-test-utils": "tests/utils",
 		"@woocommerce/types": "assets/js/types",
 		"@woocommerce/utils": "assets/js/utils",
-		"@woocommerce/interactivity": "assets/js/interactivity"
+		"@woocommerce/interactivity": "assets/js/interactivity",
+		"^react$": "<rootDir>/node_modules/react",
+		"^react-dom$": "<rootDir>/node_modules/react-dom"
 	},
 	"setupFiles": [
 		"@wordpress/jest-preset-default/scripts/setup-globals.js",
@@ -45,7 +47,7 @@
 		"<rootDir>/node_modules/",
 		"<rootDir>/vendor/"
 	],
-	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
+	"transformIgnorePatterns": [ "node_modules/?!(simple-html-tokenizer|is-plain-obj|is-plain-object|memize)" ],
 	"testEnvironment": "jsdom",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
