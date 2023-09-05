@@ -51,10 +51,6 @@ const assignToneOfVoice = assign<
 	},
 } );
 
-const logAiWizardClosedBeforeCompletion = () => {
-	// track
-};
-
 const assignLookAndTone = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
@@ -73,40 +69,14 @@ const assignLookAndTone = assign<
 
 const logAIAPIRequestError = () => {
 	// log AI API request error
+	// eslint-disable-next-line no-console
 	console.log( 'API Request error' );
 };
-
-const assignAIAPIRequestStarted = assign<
-	designWithAiStateMachineContext,
-	designWithAiStateMachineEvents
->( {
-	businessInfoDescription: ( context ) => {
-		return {
-			...context.businessInfoDescription,
-			isMakignRequest: true,
-		};
-	},
-} );
-
-const assignAIAPIRequestFinished = assign<
-	designWithAiStateMachineContext,
-	designWithAiStateMachineEvents
->( {
-	businessInfoDescription: ( context ) => {
-		return {
-			...context.businessInfoDescription,
-			isMakignRequest: false,
-		};
-	},
-} );
 
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
-	logAiWizardClosedBeforeCompletion,
 	assignLookAndTone,
 	logAIAPIRequestError,
-	assignAIAPIRequestStarted,
-	assignAIAPIRequestFinished,
 };

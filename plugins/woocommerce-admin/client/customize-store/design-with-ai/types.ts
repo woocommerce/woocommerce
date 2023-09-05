@@ -13,7 +13,7 @@ export type designWithAiStateMachineContext = {
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
 };
 export type designWithAiStateMachineEvents =
-	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION' }
+	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| {
 			type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
 			payload: string;

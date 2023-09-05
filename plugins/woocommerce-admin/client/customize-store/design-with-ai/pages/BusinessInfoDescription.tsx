@@ -31,6 +31,7 @@ export const BusinessInfoDescription = ( {
 	const [ businessInfoDescription, setBusinessInfoDescription ] = useState(
 		context.businessInfoDescription.descriptionText
 	);
+	const [ isRequesting, setIsRequesting ] = useState( false );
 
 	return (
 		<div>
@@ -43,6 +44,7 @@ export const BusinessInfoDescription = ( {
 				onClick={ () => {
 					sendEvent( {
 						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+						payload: { step: 'business-info-description' },
 					} );
 				} }
 			/>
@@ -99,17 +101,17 @@ export const BusinessInfoDescription = ( {
 					<Button
 						variant="primary"
 						onClick={ () => {
+							setIsRequesting( true );
 							sendEvent( {
 								type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE',
 								payload: businessInfoDescription,
 							} );
 						} }
 						disabled={
-							businessInfoDescription === '' ||
-							context.businessInfoDescription.isMakignRequest
+							businessInfoDescription.length === 0 || isRequesting
 						}
 					>
-						{ context.businessInfoDescription.isMakignRequest ? (
+						{ isRequesting ? (
 							<Spinner />
 						) : (
 							__( 'Continue', 'woocommerce' )

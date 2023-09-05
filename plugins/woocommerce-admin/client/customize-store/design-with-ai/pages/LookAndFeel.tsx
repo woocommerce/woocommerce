@@ -67,6 +67,7 @@ export const LookAndFeel = ( {
 				onClick={ () => {
 					sendEvent( {
 						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+						payload: { step: 'look-and-feel' },
 					} );
 				} }
 			/>
