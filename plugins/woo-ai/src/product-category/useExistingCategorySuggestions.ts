@@ -10,8 +10,8 @@ import {
  * Internal dependencies
  */
 import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
-import { generateProductDataInstructions } from '../utils';
-import { getAvailableCategories } from './utils';
+import { generateProductDataInstructions, ProductProps } from '../utils';
+import { getAvailableCategoryPaths } from './utils';
 
 type UseExistingCategorySuggestionsHook = {
 	fetchSuggestions: () => Promise< void >;
@@ -30,10 +30,20 @@ export const useExistingCategorySuggestions = (
 			onError( error );
 		},
 		onCompletionFinished: async ( reason, content ) => {
+			if ( reason === 'error' ) {
+				throw Error( 'Unable to parse suggestions' );
+			}
+			if ( ! content ) {
+				throw Error( 'No suggestions were generated' );
+			}
+
 			try {
-				const parsed = content.split( ',' ).map( ( suggestion ) => {
-					return suggestion.trim();
-				} );
+				const parsed = content
+					.split( ',' )
+					.map( ( suggestion ) => {
+						return suggestion.trim();
+					} )
+					.filter( Boolean );
 
 				onSuggestionsGenerated( parsed );
 			} catch ( e ) {
@@ -45,13 +55,15 @@ export const useExistingCategorySuggestions = (
 	const buildPrompt = async () => {
 		let availableCategories: string[] = [];
 		try {
-			availableCategories = await getAvailableCategories();
+			availableCategories = await getAvailableCategoryPaths();
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Unable to fetch available categories', e );
 		}
 
-		const productPropsInstructions = generateProductDataInstructions();
+		const productPropsInstructions = generateProductDataInstructions( {
+			excludeProps: [ ProductProps.Categories ],
+		} );
 		const instructions = [
 			'You are a WooCommerce SEO and marketing expert.',
 			`Using the product's ${ productPropsInstructions.includedProps.join(

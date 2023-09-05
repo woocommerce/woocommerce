@@ -29,10 +29,20 @@ export const useNewCategorySuggestions = (
 			onError( error );
 		},
 		onCompletionFinished: async ( reason, content ) => {
+			if ( reason === 'error' ) {
+				throw Error( 'Unable to parse suggestions' );
+			}
+			if ( ! content ) {
+				throw Error( 'No suggestions were generated' );
+			}
+
 			try {
-				const parsed = content.split( ',' ).map( ( suggestion ) => {
-					return suggestion.trim();
-				} );
+				const parsed = content
+					.split( ',' )
+					.map( ( suggestion ) => {
+						return suggestion.trim();
+					} )
+					.filter( Boolean );
 
 				onSuggestionsGenerated( parsed );
 			} catch ( e ) {

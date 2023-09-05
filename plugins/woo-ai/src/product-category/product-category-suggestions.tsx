@@ -15,9 +15,10 @@ import {
 } from '../components';
 import { getCategories, selectCategory } from '../utils';
 import AlertIcon from '../../assets/images/icons/alert.svg';
-import { getAvailableCategories, recordCategoryTracks } from './utils';
+import { getAvailableCategoryPaths, recordCategoryTracks } from './utils';
 import { useNewCategorySuggestions } from './useNewCategorySuggestions';
 import { useExistingCategorySuggestions } from './useExistingCategorySuggestions';
+import { createCategoriesFromPath } from '../utils/categoryCreator';
 
 enum SuggestionsState {
 	Initial,
@@ -58,41 +59,6 @@ export const ProductCategorySuggestions = () => {
 	};
 
 	/**
-	 * Filter the category suggestions.
-	 *
-	 * @param  categorySuggestions The category suggestions to filter.
-	 * @param  onlyAvailable       Whether to return only the categories that are available (already exist) on the store.
-	 *
-	 * @return {Promise<string[]>} The filtered category suggestions.
-	 */
-	const filterCategorySuggestions = async (
-		categorySuggestions: string[],
-		onlyAvailable = false
-	): Promise< string[] > => {
-		const selectedCategories = getCategories();
-
-		if ( onlyAvailable ) {
-			try {
-				const availableCategories = await getAvailableCategories();
-
-				return categorySuggestions.filter(
-					( suggestion ) =>
-						isSuggestionValid( suggestion, selectedCategories ) &&
-						availableCategories.includes( suggestion )
-				);
-			} catch ( e ) {
-				// eslint-disable-next-line no-console
-				console.error( 'Unable to fetch available categories.', e );
-				return [];
-			}
-		}
-
-		return categorySuggestions.filter( ( suggestion ) =>
-			isSuggestionValid( suggestion, selectedCategories )
-		);
-	};
-
-	/**
 	 * Callback for when the existing category suggestions have been generated.
 	 *
 	 * @param {string[]} existingCategorySuggestions The existing category suggestions.
@@ -100,10 +66,21 @@ export const ProductCategorySuggestions = () => {
 	const onExistingCategorySuggestionsGenerated = async (
 		existingCategorySuggestions: string[]
 	) => {
-		const filtered = await filterCategorySuggestions(
-			existingCategorySuggestions,
-			true
-		);
+		let filtered: string[] = [];
+		try {
+			const availableCategories = await getAvailableCategoryPaths();
+
+			// Only show suggestions that are valid, available, and not already in the list of new suggestions.
+			filtered = existingCategorySuggestions.filter(
+				( suggestion ) =>
+					isSuggestionValid( suggestion, getCategories() ) &&
+					availableCategories.includes( suggestion ) &&
+					! newSuggestions.includes( suggestion )
+			);
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Unable to fetch available categories.', e );
+		}
 
 		if ( filtered.length === 0 ) {
 			setExistingSuggestionsState( SuggestionsState.None );
@@ -128,8 +105,10 @@ export const ProductCategorySuggestions = () => {
 	const onNewCategorySuggestionsGenerated = async (
 		newCategorySuggestions: string[]
 	) => {
-		const filtered = await filterCategorySuggestions(
-			newCategorySuggestions
+		const filtered = newCategorySuggestions.filter(
+			( suggestion ) =>
+				isSuggestionValid( suggestion, getCategories() ) &&
+				! existingSuggestions.includes( suggestion )
 		);
 
 		if ( filtered.length === 0 ) {
@@ -218,16 +197,23 @@ export const ProductCategorySuggestions = () => {
 	 * @param {string} suggestion The suggestion that was clicked.
 	 */
 	const handleNewSuggestionClick = useCallback(
-		( suggestion: string ) => {
+		async ( suggestion: string ) => {
 			// remove the selected item from the list of suggestions
 			setNewSuggestions(
 				newSuggestions.filter( ( s ) => s !== suggestion )
 			);
 
-			recordCategoryTracks( 'select', {
-				selected_category: suggestion,
-				suggestions_type: 'new',
-			} );
+			try {
+				await createCategoriesFromPath( suggestion );
+
+				recordCategoryTracks( 'select', {
+					selected_category: suggestion,
+					suggestions_type: 'new',
+				} );
+			} catch ( e ) {
+				// eslint-disable-next-line no-console
+				console.error( 'Unable to create category', e );
+			}
 		},
 		[ newSuggestions ]
 	);
