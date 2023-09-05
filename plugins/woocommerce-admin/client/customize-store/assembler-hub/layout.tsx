@@ -39,6 +39,7 @@ import Sidebar from './sidebar';
 import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
+import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -54,6 +55,7 @@ export const Layout = () => {
 	} );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
+	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -140,6 +142,10 @@ export const Layout = () => {
 									<ErrorBoundary>
 										<ResizableFrame
 											isReady={ ! isEditorLoading }
+											duringGuideTour={
+												shouldTourBeShown &&
+												! onboardingTourProps.showWelcomeTour
+											}
 											isFullWidth={ false }
 											defaultSize={ {
 												width:
@@ -170,6 +176,9 @@ export const Layout = () => {
 					) }
 				</div>
 			</div>
+			{ shouldTourBeShown && (
+				<OnboardingTour { ...onboardingTourProps } />
+			) }
 		</LogoBlockContext.Provider>
 	);
 };
