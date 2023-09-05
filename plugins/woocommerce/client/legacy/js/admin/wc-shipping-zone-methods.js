@@ -391,6 +391,8 @@
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
 
+						$('#btn-next').html('<img alt="processing" src="images/wpspin_light.gif" class="waiting" />');
+
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
@@ -424,6 +426,7 @@
 
 							shippingMethodView.unblock();
 
+							// Pop up next modal
 							$( this ).WCBackboneModal({
 								template : 'wc-modal-shipping-method-settings',
 								variable : {
@@ -438,6 +441,7 @@
 		
 							$( document.body ).trigger( 'init_tooltips' );
 
+							// Close original modal
 							closeModal();
 						}, 'json' );
 					}

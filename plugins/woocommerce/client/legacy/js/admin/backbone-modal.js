@@ -142,7 +142,11 @@
 				13 === button &&
 				! ( e.target.tagName && ( e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea' ) )
 			) {
-				this.addButton( e );
+				if ( $( '#btn-ok' ).length ) {
+					this.addButton( e );
+				}	else if ( $( '#btn-next' ).length ) {
+					this.nextButton( e );
+				}
 			}
 
 			// ESC key
