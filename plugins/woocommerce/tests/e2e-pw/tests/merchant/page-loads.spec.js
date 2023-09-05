@@ -17,8 +17,8 @@ const wcPages = [
 			{
 				name: 'Orders',
 				heading: 'Orders',
-				element: '.woocommerce-BlankState-message',
-				text: 'When you receive a new order, it will appear here.',
+				element: '.select2-selection__placeholder',
+				text: 'Filter by registered customer',
 			},
 			{
 				name: 'Customers',
@@ -58,14 +58,14 @@ const wcPages = [
 			{
 				name: 'All Products',
 				heading: 'Products',
-				element: '.woocommerce-BlankState-cta.button-primary',
-				text: 'Create Product',
+				element: '.product_cat.column-product_cat',
+				text: 'Uncategorized',
 			},
 			{
 				name: 'Add New',
 				heading: 'Add New',
-				element: '.general_options > a > span',
-				text: 'General',
+				element: '.duplication',
+				text: 'Copy to a new draft',
 			},
 			{
 				name: 'Categories',
