@@ -20,10 +20,12 @@ import {
 export const BlockPreview = ( {
 	blocks,
 	settings,
+	useSubRegistry = true,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
+	useSubRegistry?: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
 	const renderedBlocks = useMemo(
 		() => ( Array.isArray( blocks ) ? blocks : [ blocks ] ),
@@ -31,7 +33,11 @@ export const BlockPreview = ( {
 	);
 
 	return (
-		<BlockEditorProvider value={ renderedBlocks } settings={ settings }>
+		<BlockEditorProvider
+			value={ renderedBlocks }
+			settings={ settings }
+			useSubRegistry={ useSubRegistry }
+		>
 			<AutoHeightBlockPreview settings={ settings } { ...props } />
 		</BlockEditorProvider>
 	);

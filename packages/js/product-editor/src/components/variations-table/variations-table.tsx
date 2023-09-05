@@ -13,11 +13,19 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { ListItem, Pagination, Sortable, Tag } from '@woocommerce/components';
+import {
+	ListItem,
+	Sortable,
+	Tag,
+	PaginationPageSizePicker,
+	PaginationPageArrowsWithPicker,
+	usePagination,
+} from '@woocommerce/components';
 import {
 	useContext,
 	useState,
 	createElement,
+	useRef,
 	useMemo,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -36,7 +44,7 @@ import HiddenIcon from './hidden-icon';
 import VisibleIcon from './visible-icon';
 import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
-	DEFAULT_PER_PAGE_OPTION,
+	DEFAULT_VARIATION_PER_PAGE_OPTION,
 	PRODUCT_VARIATION_TITLE_LIMIT,
 	TRACKS_SOURCE,
 } from '../../constants';
@@ -50,7 +58,10 @@ const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
 export function VariationsTable() {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
-	const [ perPage, setPerPage ] = useState( DEFAULT_PER_PAGE_OPTION );
+	const lastVariations = useRef< ProductVariation[] | null >( null );
+	const [ perPage, setPerPage ] = useState(
+		DEFAULT_VARIATION_PER_PAGE_OPTION
+	);
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
@@ -74,37 +85,57 @@ export function VariationsTable() {
 		} ),
 		[ productId, currentPage, perPage ]
 	);
+	const totalCountRequestParams = useMemo(
+		() => ( {
+			product_id: productId,
+			order: 'asc',
+			orderby: 'menu_order',
+		} ),
+		[ productId ]
+	);
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { isLoading, variations, totalCount, isGeneratingVariations } =
-		useSelect(
-			( select ) => {
-				const {
-					getProductVariations,
-					hasFinishedResolution,
-					getProductVariationsTotalCount,
-					isGeneratingVariations: getIsGeneratingVariations,
-				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-				return {
-					isLoading: ! hasFinishedResolution(
-						'getProductVariations',
-						[ requestParams ]
-					),
-					isGeneratingVariations: getIsGeneratingVariations( {
-						product_id: requestParams.product_id,
-					} ),
-					variations:
-						getProductVariations< ProductVariation[] >(
-							requestParams
-						),
-					totalCount:
-						getProductVariationsTotalCount< number >(
-							requestParams
-						),
-				};
-			},
-			[ requestParams ]
-		);
+	const { totalCount } = useSelect(
+		( select ) => {
+			const { getProductVariationsTotalCount } = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
+
+			return {
+				totalCount: getProductVariationsTotalCount< number >(
+					totalCountRequestParams
+				),
+			};
+		},
+		[ productId ]
+	);
+	const { isLoading, latestVariations, isGeneratingVariations } = useSelect(
+		( select ) => {
+			const {
+				getProductVariations,
+				hasFinishedResolution,
+				isGeneratingVariations: getIsGeneratingVariations,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			return {
+				isLoading: ! hasFinishedResolution( 'getProductVariations', [
+					requestParams,
+				] ),
+				isGeneratingVariations: getIsGeneratingVariations( {
+					product_id: requestParams.product_id,
+				} ),
+				latestVariations:
+					getProductVariations< ProductVariation[] >( requestParams ),
+			};
+		},
+		[ currentPage, perPage, productId ]
+	);
+
+	const paginationProps = usePagination( {
+		totalCount,
+		defaultPerPage: DEFAULT_VARIATION_PER_PAGE_OPTION,
+		onPageChange: setCurrentPage,
+		onPerPageChange: setPerPage,
+	} );
 
 	const {
 		updateProductVariation,
@@ -116,7 +147,11 @@ export function VariationsTable() {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
-	if ( ! variations && isLoading ) {
+	if ( latestVariations && latestVariations !== lastVariations.current ) {
+		lastVariations.current = latestVariations;
+	}
+
+	if ( isLoading && lastVariations.current === null ) {
 		return (
 			<div className="woocommerce-product-variations__loading">
 				<Spinner />
@@ -128,6 +163,8 @@ export function VariationsTable() {
 			</div>
 		);
 	}
+	// this prevents a weird jump from happening while changing pages.
+	const variations = latestVariations || lastVariations.current;
 
 	const variationIds = variations.map( ( { id } ) => id );
 
@@ -242,20 +279,16 @@ export function VariationsTable() {
 
 	return (
 		<div className="woocommerce-product-variations">
-			{ isLoading ||
-				( isGeneratingVariations && (
-					<div className="woocommerce-product-variations__loading">
-						<Spinner />
-						{ isGeneratingVariations && (
-							<span>
-								{ __(
-									'Generating variations…',
-									'woocommerce'
-								) }
-							</span>
-						) }
-					</div>
-				) ) }
+			{ ( isLoading || isGeneratingVariations ) && (
+				<div className="woocommerce-product-variations__loading">
+					<Spinner />
+					{ isGeneratingVariations && (
+						<span>
+							{ __( 'Generating variations…', 'woocommerce' ) }
+						</span>
+					) }
+				</div>
+			) }
 			<div className="woocommerce-product-variations__header">
 				<div className="woocommerce-product-variations__selection">
 					<CheckboxControl
@@ -296,7 +329,7 @@ export function VariationsTable() {
 					/>
 				</div>
 			</div>
-			<Sortable>
+			<Sortable className="woocommerce-product-variations__table">
 				{ variations.map( ( variation ) => (
 					<ListItem key={ `${ variation.id }` }>
 						<div className="woocommerce-product-variations__selection">
@@ -442,15 +475,25 @@ export function VariationsTable() {
 				) ) }
 			</Sortable>
 
-			<Pagination
-				className="woocommerce-product-variations__footer"
-				page={ currentPage }
-				perPage={ perPage }
-				total={ totalCount }
-				showPagePicker={ false }
-				onPageChange={ setCurrentPage }
-				onPerPageChange={ setPerPage }
-			/>
+			{ totalCount > 5 && (
+				<div className="woocommerce-product-variations__footer woocommerce-pagination">
+					<div>
+						{ sprintf(
+							__( 'Viewing %d-%d of %d items', 'woocommerce' ),
+							paginationProps.start,
+							paginationProps.end,
+							totalCount
+						) }
+					</div>
+					<PaginationPageArrowsWithPicker { ...paginationProps } />
+					<PaginationPageSizePicker
+						{ ...paginationProps }
+						total={ totalCount }
+						perPageOptions={ [ 5, 10, 25 ] }
+						label=""
+					/>
+				</div>
+			) }
 		</div>
 	);
 }

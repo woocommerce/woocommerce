@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid string<>int comparison in products bought query to avoid results with customer_id = 0.
