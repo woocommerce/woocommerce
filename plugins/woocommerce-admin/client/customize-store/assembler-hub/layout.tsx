@@ -11,6 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
