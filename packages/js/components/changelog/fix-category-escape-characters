@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Decode HTML escaped string for tree-item and selected-items components
+
+
