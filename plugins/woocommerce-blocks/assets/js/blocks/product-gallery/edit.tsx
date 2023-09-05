@@ -34,41 +34,54 @@ const TEMPLATE: InnerBlockTemplate[] = [
 				getInnerBlocksLockAttributes( 'lock' ),
 			],
 			[
-				'woocommerce/product-gallery-large-image',
-				getInnerBlocksLockAttributes( 'lock' ),
+				'core/group',
+				{
+					layout: {
+						type: 'flex',
+						orientation: 'vertical',
+						justifyContent: 'center',
+					},
+					...getInnerBlocksLockAttributes( 'lock' ),
+				},
 				[
 					[
-						'woocommerce/product-sale-badge',
-						{
-							align: 'right',
-							style: {
-								spacing: {
-									margin: {
-										top: '4px',
-										right: '4px',
-										bottom: '4px',
-										left: '4px',
+						'woocommerce/product-gallery-large-image',
+						getInnerBlocksLockAttributes( 'lock' ),
+						[
+							[
+								'woocommerce/product-sale-badge',
+								{
+									align: 'right',
+									style: {
+										spacing: {
+											margin: {
+												top: '4px',
+												right: '4px',
+												bottom: '4px',
+												left: '4px',
+											},
+										},
 									},
 								},
-							},
-						},
+							],
+							[
+								'woocommerce/product-gallery-large-image-next-previous',
+								{
+									layout: {
+										type: 'flex',
+										verticalAlignment: 'bottom',
+									},
+								},
+							],
+						],
 					],
 					[
-						'woocommerce/product-gallery-large-image-next-previous',
-						{
-							layout: {
-								type: 'flex',
-								verticalAlignment: 'bottom',
-							},
-						},
+						'woocommerce/product-gallery-pager',
+						{ lock: { move: true, remove: true } },
 					],
 				],
 			],
 		],
-	],
-	[
-		'woocommerce/product-gallery-pager',
-		getInnerBlocksLockAttributes( 'lock' ),
 	],
 ];
 
@@ -128,7 +141,6 @@ export const Edit = ( {
 			<InnerBlocks
 				allowedBlocks={ [
 					'woocommerce/product-gallery-large-image',
-					'woocommerce/product-gallery-pager',
 					'woocommerce/product-gallery-thumbnails',
 				] }
 				templateLock={ false }
