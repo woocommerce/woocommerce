@@ -132,16 +132,18 @@ class Cart extends AbstractBlock {
 	/**
 	 * Enqueue frontend assets for this block, just in time for rendering.
 	 *
-	 * @param array $attributes  Any attributes that currently are available from the block.
+	 * @param array    $attributes  Any attributes that currently are available from the block.
+	 * @param string   $content    The block content.
+	 * @param WP_Block $block    The block object.
 	 */
-	protected function enqueue_assets( array $attributes ) {
+	protected function enqueue_assets( array $attributes, $content, $block ) {
 		/**
 		 * Fires before cart block scripts are enqueued.
 		 *
 		 * @since 2.6.0
 		 */
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		parent::enqueue_assets( $attributes );
+		parent::enqueue_assets( $attributes, $content, $block );
 		/**
 		 * Fires after cart block scripts are enqueued.
 		 *
