@@ -177,6 +177,7 @@ class ProductButton extends AbstractBlock {
 				data-wc-text="selectors.woocommerce.addToCartText"
 				data-wc-class--wc-block-slide-in="selectors.woocommerce.slideInAnimation"
 				data-wc-class--wc-block-slide-out="selectors.woocommerce.slideOutAnimation"
+				data-wc-layout-init="init.woocommerce.syncTemporaryNumberOfItemsOnLoad"
 				data-wc-effect="effects.woocommerce.startAnimation"
 				data-wc-on--animationend="actions.woocommerce.handleAnimationEnd"
 			';
