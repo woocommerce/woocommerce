@@ -5303,6 +5303,14 @@ img.help_tip {
 			visibility: visible;
 		}
 	}
+
+	&.wc-metabox {
+		&.postbox {
+			border-top: 0px;
+			border-left: 0px;
+			border-right: 0px;
+		}
+	}
 }
 
 .woocommerce_options_panel {
@@ -5517,7 +5525,8 @@ img.help_tip {
   * WooCommerce meta boxes
   */
 .wc-metaboxes-wrapper {
-	:not(#variable_product_options_inner) {
+	:not(#variable_product_options_inner),
+	&#product_attributes {
 		.toolbar:not(.expand-close-hidden) {
 		  border-bottom: 1px solid #eee;
 		}
