@@ -76,7 +76,11 @@ describe( 'ReviewsPanel', () => {
 			/>
 		);
 
-		expect( getByTextWithMarkup( 'Reviewer reviewed Cap' ) ).not.toBeNull();
+		expect(
+			getByTextWithMarkup(
+				'Reviewer(opens in a new tab) reviewed Cap(opens in a new tab)'
+			)
+		).not.toBeNull();
 	} );
 
 	it( 'should render checkmark circle icon in the review title, if review is verfied owner', () => {

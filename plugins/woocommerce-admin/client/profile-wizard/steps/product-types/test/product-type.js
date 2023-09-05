@@ -51,7 +51,7 @@ describe( 'ProductType', () => {
 		const learnMoreLink = popover.querySelector( 'a' );
 		expect( popover ).not.toBeNull();
 		expect( popover.textContent ).toBe(
-			defaultProps.description + ' Learn more'
+			defaultProps.description + ' Learn more(opens in a new tab)'
 		);
 		expect( learnMoreLink.href ).toBe( defaultProps.moreUrl );
 	} );
