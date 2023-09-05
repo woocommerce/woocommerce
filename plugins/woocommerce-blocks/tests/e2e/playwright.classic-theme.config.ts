@@ -13,7 +13,7 @@ export default defineConfig( {
 	...config,
 	outputDir: path.join(
 		process.cwd(),
-		'artifacts/test-results-side-effects'
+		'artifacts/test-results-classic-theme'
 	),
 	fullyParallel: false,
 	workers: 1,
