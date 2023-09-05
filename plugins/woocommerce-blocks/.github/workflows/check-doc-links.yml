@@ -25,7 +25,7 @@ jobs:
           cache: 'npm'
 
       - name: Install markdown-link-check
-        run: npm install -g markdown-link-check
+        run: npm install -g markdown-link-check@3.11.2
 
       - name: Run markdown-link-check
         run: |
