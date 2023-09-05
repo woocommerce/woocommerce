@@ -13,6 +13,7 @@ import {
 import { DESCRIPTION_MAX_LENGTH, MAX_TITLE_LENGTH } from '../constants';
 
 type PropsFilter = {
+	excludeProps?: ProductProps[];
 	allowedProps?: ProductProps[];
 };
 
@@ -24,13 +25,27 @@ type InstructionSet = {
 /**
  * Function to generate prompt instructions for product data.
  *
+ * @param {PropsFilter}    propsFilter              Object containing the props to be included or excluded from the instructions.
+ * @param {ProductProps[]} propsFilter.excludeProps Array of props to be excluded from the instructions.
+ * @param {ProductProps[]} propsFilter.allowedProps Array of props to be included in the instructions.
+ *
  * @return {string[]} Array of prompt instructions.
  */
 export const generateProductDataInstructions = ( {
+	excludeProps,
 	allowedProps,
 }: PropsFilter = {} ): InstructionSet => {
-	const isPropertyAllowed = ( prop: ProductProps ): boolean =>
-		! allowedProps || allowedProps.includes( prop );
+	const isPropertyAllowed = ( prop: ProductProps ): boolean => {
+		if ( allowedProps ) {
+			return allowedProps.includes( prop );
+		}
+
+		if ( excludeProps ) {
+			return ! excludeProps.includes( prop );
+		}
+
+		return true;
+	};
 
 	const productName: string = isPropertyAllowed( ProductProps.Name )
 		? getProductName()
