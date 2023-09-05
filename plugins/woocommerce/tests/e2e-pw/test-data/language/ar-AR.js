@@ -15,6 +15,7 @@ const ar_AR = {
 	'Add new': 'إضافة المزيد',
 	'Add New': 'إضافة منتج جديد',
 	'Add new order': 'إضافة طلب جديد',
+	'Add new product': 'إضافة منتج جديد',
 	'Add Performance section': 'إضافة الأداء من الأقسام',
 	'"Add Performance section"': '"إضافة الأداء من الأقسام"',
 	Addresses: 'العنوان',

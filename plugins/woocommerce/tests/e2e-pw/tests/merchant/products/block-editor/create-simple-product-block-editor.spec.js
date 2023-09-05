@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../../../test-data/data');
 
 const {
 	clickOnTab,
@@ -79,7 +80,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: getTranslationFor( 'Add' ),
 				} )
 				.click();
 

@@ -15,6 +15,7 @@ const en_US = {
     'Add new': 'Add new',
     'Add New': 'Add New',
     'Add new order': 'Add new order',
+    'Add new product': 'Add new product',
     'Add Performance section': 'Add Performance section',
     '"Add Performance section"': '"Add Performance section"',
     'Addresses': 'Addresses',

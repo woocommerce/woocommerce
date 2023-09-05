@@ -15,6 +15,7 @@ const es_ES = {
     'Add new': 'Añadir nuevo',
     'Add New': 'Añadir Nuevo',
     'Add new order': 'Añadir nuevo pedido',
+    'Add new product': 'Añadir nuevo producto',
     'Add Performance section': 'Añadir sección Rendimiento',
     '"Add Performance section"': '"Añadir sección Rendimiento"',
     'Addresses': 'Direcciones',

@@ -15,6 +15,7 @@ const fr_FR = {
 	'Add new': 'Ajouter',
 	'Add New': 'Ajouter',
 	'Add new order': 'Nouvelle commande',
+	'Add new product': 'Ajouter un nouveau produit',
 	'Add Performance section': 'Ajouter la section Performances',
 	'"Add Performance section"': '"Ajouter la section Performances"',
 	'Addresses': 'Adresses',
