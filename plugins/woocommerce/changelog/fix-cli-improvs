@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove COT enable requirement from sync and verify command.

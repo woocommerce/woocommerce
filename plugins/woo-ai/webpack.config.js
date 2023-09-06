@@ -5,7 +5,6 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
-		settings: './src/settings/settings.ts',
 	},
 	module: {
 		...defaultConfig.module,
@@ -24,6 +23,11 @@ module.exports = {
 	},
 	resolve: {
 		extensions: [ '.js', '.jsx', '.tsx', '.ts' ],
+		fallback: {
+			stream: false,
+			path: false,
+			fs: false,
+		},
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(
