@@ -15,6 +15,7 @@ import { getAvailableCategoryPaths, recordCategoryTracks } from './utils';
 import { useNewCategorySuggestions } from './useNewCategorySuggestions';
 import { useExistingCategorySuggestions } from './useExistingCategorySuggestions';
 import { createCategoriesFromPath } from '../utils/categoryCreator';
+import { CategorySuggestionFeedback } from './category-suggestion-feedback';
 
 enum SuggestionsState {
 	Initial,
@@ -33,6 +34,7 @@ export const ProductCategorySuggestions = () => {
 		string[]
 	>( [] );
 	const [ newSuggestions, setNewSuggestions ] = useState< string[] >( [] );
+	const [ showFeedback, setShowFeedback ] = useState( false );
 
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
@@ -183,6 +185,8 @@ export const ProductCategorySuggestions = () => {
 				selected_category: suggestion,
 				suggestions_type: 'existing',
 			} );
+
+			setShowFeedback( true );
 		},
 		[ existingSuggestions ]
 	);
@@ -206,6 +210,8 @@ export const ProductCategorySuggestions = () => {
 					selected_category: suggestion,
 					suggestions_type: 'new',
 				} );
+
+				setShowFeedback( true );
 			} catch ( e ) {
 				// eslint-disable-next-line no-console
 				console.error( 'Unable to create category', e );
@@ -215,6 +221,7 @@ export const ProductCategorySuggestions = () => {
 	);
 
 	const fetchProductSuggestions = async () => {
+		setShowFeedback( false );
 		setExistingSuggestions( [] );
 		setNewSuggestions( [] );
 		setExistingSuggestionsState( SuggestionsState.Fetching );
@@ -282,50 +289,57 @@ export const ProductCategorySuggestions = () => {
 				) }
 			{ ( existingSuggestionsState === SuggestionsState.Complete ||
 				newSuggestionsState === SuggestionsState.Complete ) && (
-				<div className="wc-product-category-suggestions__suggestions">
-					{ existingSuggestions && (
-						<ul className="wc-product-category-suggestions__existing-categories">
-							{ existingSuggestions.map( ( suggestion ) => (
-								<li key={ suggestion }>
-									<button
-										title={ __(
-											'Select category',
-											'woocommerce'
-										) }
-										className="button-link"
-										onClick={ () =>
-											handleExistingSuggestionClick(
-												suggestion
-											)
-										}
-									>
-										+ { suggestion }
-									</button>
-								</li>
-							) ) }
-						</ul>
-					) }
-					{ newSuggestions && (
-						<ul className="wc-product-category-suggestions__new-categories">
-							{ newSuggestions.map( ( suggestion ) => (
-								<li key={ suggestion }>
-									<button
-										title={ __(
-											'Add and select category',
-											'woocommerce'
-										) }
-										className="button-link"
-										onClick={ () =>
-											handleNewSuggestionClick(
-												suggestion
-											)
-										}
-									>
-										+ { suggestion }
-									</button>
-								</li>
-							) ) }
-						</ul>
+				<div>
+					<div className="wc-product-category-suggestions__suggestions">
+						{ existingSuggestions && (
+							<ul className="wc-product-category-suggestions__existing-categories">
+								{ existingSuggestions.map( ( suggestion ) => (
+									<li key={ suggestion }>
+										<button
+											title={ __(
+												'Select category',
+												'woocommerce'
+											) }
+											className="button-link"
+											onClick={ () =>
+												handleExistingSuggestionClick(
+													suggestion
+												)
+											}
+										>
+											+ { suggestion }
+										</button>
+									</li>
+								) ) }
+							</ul>
+						) }
+						{ newSuggestions && (
+							<ul className="wc-product-category-suggestions__new-categories">
+								{ newSuggestions.map( ( suggestion ) => (
+									<li key={ suggestion }>
+										<button
+											title={ __(
+												'Add and select category',
+												'woocommerce'
+											) }
+											className="button-link"
+											onClick={ () =>
+												handleNewSuggestionClick(
+													suggestion
+												)
+											}
+										>
+											+ { suggestion }
+										</button>
+									</li>
+								) ) }
+							</ul>
+						) }
+					</div>
+					{ showFeedback && (
+						<div className="wc-product-category-suggestions__feedback">
+							<CategorySuggestionFeedback />
+						</div>
 					) }
 				</div>
 			) }
