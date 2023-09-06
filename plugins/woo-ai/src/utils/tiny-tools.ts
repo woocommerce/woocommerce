@@ -1,7 +1,9 @@
-type TinyContent = {
+export type TinyContent = {
 	getContent: ( args?: object ) => string;
 	setContent: ( str: string ) => void;
 	id: string;
+	on: ( event: string, callback: ( event: Event ) => void ) => void;
+	off: ( event: string, callback: ( event: Event ) => void ) => void;
 };
 
 declare const tinymce: {
@@ -9,7 +11,7 @@ declare const tinymce: {
 	editors: TinyContent[];
 };
 
-const getTinyContentObject = ( editorId = 'content' ) =>
+export const getTinyContentObject = ( editorId = 'content' ) =>
 	typeof tinymce === 'object'
 		? tinymce.editors.find(
 				( editor: { id: string } ) => editor.id === editorId
@@ -38,5 +40,5 @@ export const setTinyContent = ( str: string, editorId?: string ) => {
 };
 
 export const getTinyContent = ( editorId?: string, args?: object ) => {
-	return getTinyContentObject( editorId )?.getContent( args );
+	return getTinyContentObject( editorId )?.getContent( args ) ?? '';
 };

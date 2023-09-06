@@ -3,7 +3,7 @@
  */
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
-import { Sender } from 'xstate';
+import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -29,13 +29,17 @@ export type DesignWithAiComponentMeta = {
 	component: DesignWithAiComponent;
 };
 
-export const DesignWithAiController = ( {}: {
-	sendEventToParent: Sender< customizeStoreStateMachineEvents >;
+export const DesignWithAiController = ( {
+	parentMachine,
+}: {
+	parentMachine?: AnyInterpreter;
+	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
 			devTools: process.env.NODE_ENV === 'development',
+			parent: parentMachine,
 		}
 	);
 
@@ -78,10 +82,10 @@ export const DesignWithAiController = ( {}: {
 };
 
 //loader should send event 'THEME_SUGGESTED' when it's done
-export const DesignWithAi: CustomizeStoreComponent = ( { sendEvent } ) => {
+export const DesignWithAi: CustomizeStoreComponent = ( { parentMachine } ) => {
 	return (
 		<>
-			<DesignWithAiController sendEventToParent={ sendEvent } />
+			<DesignWithAiController parentMachine={ parentMachine } />
 		</>
 	);
 };

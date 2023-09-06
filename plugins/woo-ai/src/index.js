@@ -10,8 +10,13 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
 import { ProductCategorySuggestions } from './product-category';
+import { WriteShortDescriptionButtonContainer } from './product-short-description';
+import setPreferencesPersistence from './utils/preferencesPersistence';
 
 import './index.scss';
+
+// This sets up loading and saving the plugin's preferences.
+setPreferencesPersistence();
 
 const queryClient = new QueryClient();
 
@@ -50,8 +55,16 @@ const nameSuggestionsRoot = document.getElementById(
 	'woocommerce-ai-app-product-name-suggestions'
 );
 
+const shortDescriptionButtonRoot = document.getElementById(
+	'woocommerce-ai-app-product-short-description-gpt-button'
+);
+
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
 	renderProductCategorySuggestions();
+	renderComponent(
+		WriteShortDescriptionButtonContainer,
+		shortDescriptionButtonRoot
+	);
 }

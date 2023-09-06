@@ -2,35 +2,55 @@
  * External dependencies
  */
 import React from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
-import { MagicButton, MagicButtonProps } from '../components';
+import MagicIcon from '../../assets/images/icons/magic.svg';
+
+type MagicButtonProps = {
+	title?: string;
+	disabled?: boolean;
+	onClick: () => void;
+	label: string;
+};
+
+type WriteItForMeBtnProps = MagicButtonProps & {
+	disabledMessage?: string;
+};
+
+const MagicButton = ( {
+	title,
+	label,
+	onClick,
+	disabled = false,
+}: MagicButtonProps ) => {
+	return (
+		<button
+			className="button wp-media-button woo-ai-write-it-for-me-btn"
+			type="button"
+			disabled={ disabled }
+			title={ title }
+			onClick={ onClick }
+		>
+			<img src={ MagicIcon } alt="" />
+			{ label }
+		</button>
+	);
+};
 
 export const WriteItForMeBtn = ( {
 	disabled,
 	onClick,
-}: Omit< MagicButtonProps, 'title' | 'label' > ) => {
+	disabledMessage,
+}: Omit< WriteItForMeBtnProps, 'title' | 'label' > ) => {
 	return (
 		<MagicButton
 			disabled={ disabled }
 			onClick={ onClick }
 			label={ __( 'Write with AI', 'woocommerce' ) }
-			title={
-				disabled
-					? sprintf(
-							/* translators: %d: Minimum characters for product title */
-							__(
-								'Please create a product title before generating a description. It must be %d characters or longer.',
-								'woocommerce'
-							),
-							MIN_TITLE_LENGTH_FOR_DESCRIPTION
-					  )
-					: undefined
-			}
+			title={ disabled ? disabledMessage : undefined }
 		/>
 	);
 };
@@ -44,7 +64,7 @@ export const StopCompletionBtn = ( {
 			disabled={ disabled }
 			onClick={ onClick }
 			label={ __( 'Stop writing…', 'woocommerce' ) }
-			title={ __( 'Stop generating the description.', 'woocommerce' ) }
+			title={ __( 'Stop generating content.', 'woocommerce' ) }
 		/>
 	);
 };
