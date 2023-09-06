@@ -1657,3 +1657,35 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 	}
 }
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
+
+/**
+ * @param int $attachment_id Media attachment ID
+ * @return void
+ */
+function wc_product_add_featured_image_by_sku( $attachment_id ) {
+	if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_image_sku' ) ) {
+		return;
+	}
+
+	$attachment_post = get_post( $attachment_id );
+	if ( ! $attachment_post ) {
+		return;
+	}
+	// On upload the attachment post title is the uploaded file's filename.
+	$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
+	if ( ! $file_name ) {
+		return;
+	}
+
+	$product_id = wc_get_product_id_by_sku( $file_name );
+	if ( $product_id ) {
+		return;
+	}
+
+	set_post_thumbnail( $product_id, $attachment_id );
+
+	if ( $attachment_post->post_parent === 0 ) {
+		wp_update_post( array( 'ID' => $attachment_id, 'post_parent' => $product_id ) );
+	}
+}
+add_action( 'add_attachment', 'wc_product_add_featured_image_by_sku' );
