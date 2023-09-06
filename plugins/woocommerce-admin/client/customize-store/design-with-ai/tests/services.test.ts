@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { recordEvent } from '@woocommerce/tracks'; // Replace 'eventModule' with the actual module where recordEvent is defined
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies

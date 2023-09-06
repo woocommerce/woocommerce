@@ -83,11 +83,11 @@ export const ToneOfVoice = ( {
 						{ choices.map( ( { title, subtitle, key } ) => {
 							return (
 								<Choice
-									key={ title }
+									key={ key }
 									name="user-profile-choice"
 									title={ title }
 									subtitle={ subtitle }
-									selected={ sound === title }
+									selected={ sound === key }
 									value={ key }
 									onChange={ ( _key ) => {
 										setSound( _key as Tone );
