@@ -24,14 +24,23 @@
     align-items: center;
   }
 
-  &__new-list {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: wrap;
-
-    li {
-      margin-bottom: 0;
-    }
+  &__suggestions {
+    margin-top: 10px;
   }
+
+  &__existing-categories, &__new-categories  {
+    margin: 0;
+  }
+
+  .woo-ai-write-it-for-me-btn {
+    margin: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.woocommerce-embed-page #wpbody-content .wc-product-category-suggestions .notice {
+  margin-top: 10px;
+  margin-bottom: 0;
 }

@@ -8,11 +8,7 @@ import { UseCompletionError } from '@woocommerce/ai';
 /**
  * Internal dependencies
  */
-import {
-	MagicButton,
-	RandomLoadingMessage,
-	SuggestionPills,
-} from '../components';
+import { MagicButton, RandomLoadingMessage } from '../components';
 import { getCategories, selectCategory } from '../utils';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { getAvailableCategoryPaths, recordCategoryTracks } from './utils';
@@ -236,20 +232,14 @@ export const ProductCategorySuggestions = () => {
 
 	return (
 		<div className="wc-product-category-suggestions">
-			{ existingSuggestions.length > 0 &&
-				existingSuggestionsState !== SuggestionsState.Fetching && (
-					<SuggestionPills
-						suggestions={ existingSuggestions }
-						onSuggestionClick={ handleExistingSuggestionClick }
-					/>
-				) }
-			{ newSuggestions.length > 0 &&
-				newSuggestionsState !== SuggestionsState.Fetching && (
-					<SuggestionPills
-						suggestions={ newSuggestions }
-						onSuggestionClick={ handleNewSuggestionClick }
-					/>
-				) }
+			<MagicButton
+				onClick={ fetchProductSuggestions }
+				disabled={
+					existingSuggestionsState === SuggestionsState.Fetching ||
+					newSuggestionsState === SuggestionsState.Fetching
+				}
+				label={ __( 'Suggest categories using AI', 'woocommerce' ) }
+			/>
 			{ ( existingSuggestionsState === SuggestionsState.Fetching ||
 				newSuggestionsState === SuggestionsState.Fetching ) && (
 				<div className="wc-product-category-suggestions__loading notice notice-info">
@@ -290,16 +280,55 @@ export const ProductCategorySuggestions = () => {
 						</p>
 					</div>
 				) }
-			{ existingSuggestionsState !== SuggestionsState.Fetching &&
-				newSuggestionsState !== SuggestionsState.Fetching && (
-					<MagicButton
-						onClick={ fetchProductSuggestions }
-						label={ __(
-							'Suggest categories using AI',
-							'woocommerce'
-						) }
-					/>
-				) }
+			{ ( existingSuggestionsState === SuggestionsState.Complete ||
+				newSuggestionsState === SuggestionsState.Complete ) && (
+				<div className="wc-product-category-suggestions__suggestions">
+					{ existingSuggestions && (
+						<ul className="wc-product-category-suggestions__existing-categories">
+							{ existingSuggestions.map( ( suggestion ) => (
+								<li key={ suggestion }>
+									<button
+										title={ __(
+											'Select category',
+											'woocommerce'
+										) }
+										className="button-link"
+										onClick={ () =>
+											handleExistingSuggestionClick(
+												suggestion
+											)
+										}
+									>
+										+ { suggestion }
+									</button>
+								</li>
+							) ) }
+						</ul>
+					) }
+					{ newSuggestions && (
+						<ul className="wc-product-category-suggestions__new-categories">
+							{ newSuggestions.map( ( suggestion ) => (
+								<li key={ suggestion }>
+									<button
+										title={ __(
+											'Add and select category',
+											'woocommerce'
+										) }
+										className="button-link"
+										onClick={ () =>
+											handleNewSuggestionClick(
+												suggestion
+											)
+										}
+									>
+										+ { suggestion }
+									</button>
+								</li>
+							) ) }
+						</ul>
+					) }
+				</div>
+			) }
 		</div>
 	);
 };
