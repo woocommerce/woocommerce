@@ -5,23 +5,16 @@
 import classnames from 'classnames';
 import { useMemo, useContext } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
-import { __experimentalGrid as Grid } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
-/**
- * Internal dependencies
- */
-import { ColorPaletteVariationPreview } from './color-palette-variations-preview';
-import { COLOR_PALETTES } from './constants';
-
 const { GlobalStylesContext, areGlobalStyleConfigsEqual } = unlock(
 	blockEditorPrivateApis
 );
 
-const Variation = ( { variation } ) => {
+export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
 	const context = useMemo( () => {
 		return {
@@ -82,23 +75,9 @@ const Variation = ( { variation } ) => {
 				aria-current={ isActive }
 			>
 				<div className="woocommerce-customize-store_global-styles-variations_item-preview">
-					<ColorPaletteVariationPreview title={ variation?.title } />
+					{ children }
 				</div>
 			</div>
 		</GlobalStylesContext.Provider>
-	);
-};
-
-export const ColorPalette = () => {
-	return (
-		<Grid
-			columns={ 3 }
-			gap={ 4 }
-			className="woocommerce-customize-store_global-styles-style-variations-container"
-		>
-			{ COLOR_PALETTES.map( ( variation, index ) => (
-				<Variation key={ index } variation={ variation } />
-			) ) }
-		</Grid>
 	);
 };

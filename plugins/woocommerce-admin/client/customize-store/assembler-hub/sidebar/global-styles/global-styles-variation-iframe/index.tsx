@@ -31,7 +31,7 @@ interface Props {
 	onFocusOut?: () => void;
 }
 
-export const GlobalStylesVariationContainer = ( {
+export const GlobalStylesVariationIframe = ( {
 	width,
 	height,
 	inlineCss,

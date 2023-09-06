@@ -22,7 +22,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { GlobalStylesVariationContainer } from './global-styles-variation-container';
+import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
 
 export interface Color {
 	color: string;
@@ -71,7 +71,7 @@ export const ColorPaletteVariationPreview = ( { title }: Props ) => {
 		.slice( 0, 2 );
 
 	return (
-		<GlobalStylesVariationContainer
+		<GlobalStylesVariationIframe
 			width={ width }
 			height={ normalizedHeight }
 			containerResizeListener={ containerResizeListener }
@@ -139,6 +139,6 @@ export const ColorPaletteVariationPreview = ( { title }: Props ) => {
 					) }
 				</div>
 			</div>
-		</GlobalStylesVariationContainer>
+		</GlobalStylesVariationIframe>
 	);
 };
