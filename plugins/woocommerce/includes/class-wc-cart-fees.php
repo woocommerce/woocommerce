@@ -43,7 +43,7 @@ final class WC_Cart_Fees {
 	/**
 	 * Constructor. Reference to the cart.
 	 *
-	 * @param null $deprecated Deprecated since WooCommerce 7.9.1.
+	 * @param null $deprecated Deprecated since WooCommerce 8.0.4.
 	 *
 	 * @since 3.2.0
 	 */
@@ -52,7 +52,7 @@ final class WC_Cart_Fees {
 			wc_doing_it_wrong(
 				'new WC_Cart_Fees',
 				'You don\'t need to pass a cart parameter to the WC_Cart_Fees constructor anymore',
-				'7.9.1'
+				'8.0.4'
 			);
 		}
 	}
