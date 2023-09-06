@@ -36,6 +36,7 @@ describe( 'TagField', () => {
 			<Form initialValues={ { tags: [] } }>
 				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
+						id="tag-field"
 						label="Tags"
 						placeholder="Search or create tag…"
 						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
@@ -59,6 +60,7 @@ describe( 'TagField', () => {
 			>
 				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
+						id="another-tag-field"
 						label="Tags"
 						placeholder="Search or create tag…"
 						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
