@@ -1,4 +1,46 @@
 const { chromium, expect } = require( '@playwright/test' );
+const { GITHUB_TOKEN, UPDATE_WC } = process.env;
+const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
+const axios = require( 'axios' ).default;
+
+const getWCDownloadURL = async () => {
+	const requestConfig = {
+		method: 'get',
+		url: 'https://api.github.com/repos/woocommerce/woocommerce/releases',
+		headers: {
+			Accept: 'application/vnd.github+json',
+		},
+		params: {
+			per_page: 100,
+		},
+	};
+	if ( GITHUB_TOKEN ) {
+		requestConfig.headers.Authorization = `Bearer ${ GITHUB_TOKEN }`;
+	}
+	const response = await axios( requestConfig ).catch( ( error ) => {
+		if ( error.response ) {
+			console.log( error.response.data );
+		}
+		throw new Error( error.message );
+	} );
+	const releaseWithTagName = response.data.find(
+		( { tag_name } ) => tag_name === UPDATE_WC
+	);
+	if ( ! releaseWithTagName ) {
+		throw new Error(
+			`No release with tag_name="${ UPDATE_WC }" found. If "${ UPDATE_WC }" is a draft release, make sure to specify a GITHUB_TOKEN environment variable.`
+		);
+	}
+	const wcZipAsset = releaseWithTagName.assets.find( ( { name } ) =>
+		name.match( /^woocommerce(-trunk-nightly)?\.zip$/ )
+	);
+	if ( wcZipAsset ) {
+		return GITHUB_TOKEN ? wcZipAsset.url : wcZipAsset.browser_download_url;
+	}
+	throw new Error(
+		`WooCommerce release with tag "${ UPDATE_WC }" found, but does not have a WooCommerce ZIP asset.`
+	);
+};
 
 module.exports = async ( config ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
@@ -8,7 +50,16 @@ module.exports = async ( config ) => {
 	const setupContext = await browser.newContext( contextOptions );
 	const setupPage = await setupContext.newPage();
 
-	// If API_BASE_URL is configured and doesn't include localhost, running on daily
+	const url = await getWCDownloadURL();
+	const params = { url };
+
+	if ( GITHUB_TOKEN ) {
+		params.authorizationToken = GITHUB_TOKEN;
+	}
+
+	const woocommerceZipPath = await downloadZip( params );
+
+	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
 		! process.env.API_BASE_URL.includes( 'localhost' )
@@ -73,18 +124,30 @@ module.exports = async ( config ) => {
 
 		console.log( 'Reinstalling WooCommerce Plugin...' );
 		await setupPage.goto( 'wp-admin/plugin-install.php' );
-		await setupPage.locator( '#search-plugins' ).type( 'woocommerce' );
+		await setupPage.locator( 'a.upload-view-toggle' ).click();
+		await expect( setupPage.locator( 'p.install-help' ) ).toBeVisible();
+		await expect( setupPage.locator( 'p.install-help' ) ).toContainText(
+			'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+		);
+		const [ fileChooser ] = await Promise.all( [
+			setupPage.waitForEvent( 'filechooser' ),
+			setupPage.locator( '#pluginzip' ).click(),
+		] );
+		await fileChooser.setFiles( woocommerceZipPath );
 		await setupPage
-			.getByRole( 'link', {
-				name: /Install WooCommerce \d+\.\d+\.\d+ now/g,
-			} )
+			.locator( '#install-plugin-submit' )
+			.click( { timeout: 60000 } );
+		await setupPage.waitForLoadState( 'networkidle' );
+		await setupPage
+			.getByRole( 'link', { name: 'Activate Plugin' } )
 			.click();
-		await setupPage.getByRole( 'link', { name: 'Activate' } ).click();
 
 		console.log( 'WooCommerce Re-installed.' );
 		await expect(
 			setupPage.getByRole( 'heading', { name: 'Welcome to Woo!' } )
 		).toBeVisible();
+
+		await deleteZip( woocommerceZipPath );
 
 		// await site.reset( process.env.USER_KEY, process.env.USER_SECRET );
 	}
