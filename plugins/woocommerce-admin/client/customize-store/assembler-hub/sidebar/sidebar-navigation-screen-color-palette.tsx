@@ -21,7 +21,7 @@ import { PanelBody } from '@wordpress/components';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { ColorPalettes, ColorPanel } from './global-styles';
+import { ColorPalette, ColorPanel } from './global-styles';
 
 const SidebarNavigationScreenColorPaletteContent = () => {
 	const { storedSettings } = useSelect( ( select ) => {
@@ -44,7 +44,7 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 				onChange={ noop }
 				onInput={ noop }
 			>
-				<ColorPalettes />
+				<ColorPalette />
 
 				<PanelBody
 					className="woocommerce-customize-store__color-panel-container"

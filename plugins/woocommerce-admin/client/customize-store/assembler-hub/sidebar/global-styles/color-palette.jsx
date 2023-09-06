@@ -89,7 +89,7 @@ const Variation = ( { variation } ) => {
 	);
 };
 
-export const ColorPalettes = () => {
+export const ColorPalette = () => {
 	return (
 		<Grid
 			columns={ 3 }
