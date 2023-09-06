@@ -114,7 +114,7 @@ trait SourceAttributionMeta {
 		}
 
 		// Determine the device type from the user agent.
-		if ( array_key_exists( 'user_agent', $return ) ) {
+		if ( ! array_key_exists( 'device_type', $return ) && array_key_exists( 'user_agent', $return ) ) {
 			$detector = new MobileDetect( array(), $return['user_agent'] );
 			if ( $detector->isMobile() ) {
 				$return['device_type'] = __( 'Mobile', 'woocommerce' );
@@ -216,15 +216,15 @@ trait SourceAttributionMeta {
 		switch ( $source_type ) {
 			case 'utm':
 				/* translators: %s is the source value */
-				$label = esc_html__( 'Source: %s', 'woocommerce' );
+				$label = __( 'Source: %s', 'woocommerce' );
 				break;
 			case 'organic':
 				/* translators: %s is the source value */
-				$label = esc_html__( 'Organic: %s', 'woocommerce' );
+				$label = __( 'Organic: %s', 'woocommerce' );
 				break;
 			case 'referral':
 				/* translators: %s is the source value */
-				$label = esc_html__( 'Referral: %s', 'woocommerce' );
+				$label = __( 'Referral: %s', 'woocommerce' );
 				break;
 		}
 
@@ -256,5 +256,64 @@ trait SourceAttributionMeta {
 		}
 
 		return $theorder;
+	}
+
+	/**
+	 * Map posted values to meta values.
+	 *
+	 * @return array
+	 */
+	private function get_source_values(): array {
+		$values = array();
+
+		// Look through each field in POST data.
+		foreach ( $this->fields as $field ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$value = sanitize_text_field( wp_unslash( $_POST[ $this->get_prefixed_field( $field ) ] ?? '(none)' ) );
+			if ( '(none)' === $value ) {
+				continue;
+			}
+
+			$values[ $field ] = $value;
+		}
+
+		// Set the device type if possible using the user agent.
+		if ( array_key_exists( 'user_agent', $values ) && ! empty( $values['user_agent'] ) ) {
+			$detector = new MobileDetect( array(), $values['user_agent'] );
+
+			if ( $detector->isMobile() ) {
+				$values[ 'device_type' ] = __( 'Mobile', 'woocommerce' );
+			} elseif ( $detector->isTablet() ) {
+				$values[ 'device_type' ] = __( 'Tablet', 'woocommerce' );
+			} else {
+				$values[ 'device_type' ] = __( 'Desktop', 'woocommerce' );
+			}
+		}
+
+		// Set the origin label
+		if ( array_key_exists( 'type', $values ) && array_key_exists( 'utm_source', $values ) ) {
+			$values['origin'] = $this->get_origin_label( $values['type'], $values['utm_source'] );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Get the label for the order origin
+	 *
+	 * @param string $source_type The source type.
+	 * @param string $source      The source.
+	 *
+	 * @return string
+	 */
+	private function get_origin_label( string $source_type, string $source ): string {
+		$formatted_source = ucfirst( trim( $source, '()' ) );
+		$label            = $this->get_source_label( $source_type );
+
+		if ( empty( $label ) ) {
+			return $formatted_source;
+		}
+
+		return sprintf( $label, $formatted_source );
 	}
 }
