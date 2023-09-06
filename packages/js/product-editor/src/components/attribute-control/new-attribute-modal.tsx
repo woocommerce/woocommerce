@@ -63,6 +63,7 @@ type NewAttributeModalProps = {
 	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
 	termsAutoSelection?: 'first' | 'all';
+	defaultVisibility?: boolean;
 };
 
 type AttributeForm = {
@@ -102,6 +103,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		'woocommerce'
 	),
 	termsAutoSelection,
+	defaultVisibility = false,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -159,7 +161,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	};
 
 	const getVisibleOrTrue = ( attribute: EnhancedProductAttribute ) =>
-		attribute.visible !== undefined ? attribute.visible : true;
+		attribute.visible !== undefined ? attribute.visible : defaultVisibility;
 
 	const onAddingAttributes = ( values: AttributeForm ) => {
 		const newAttributesToAdd: EnhancedProductAttribute[] = [];
