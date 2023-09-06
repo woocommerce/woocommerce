@@ -32,6 +32,7 @@ jobs:
             CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
             CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
+            UPDATE_WC: 'nightly'
         steps:
             - uses: actions/checkout@v3
 
