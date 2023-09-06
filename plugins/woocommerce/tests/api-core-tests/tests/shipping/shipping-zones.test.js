@@ -171,7 +171,7 @@ test.describe( 'Shipping zones API tests', () => {
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
 		expect( putResponseStateOnly.status() ).toEqual( 200 );
 
-		expect.soft( putResponseStateOnlyJSON ).toHaveLength(0);
+		expect( putResponseStateOnlyJSON ).toHaveLength(0);
 
 	} );
 
