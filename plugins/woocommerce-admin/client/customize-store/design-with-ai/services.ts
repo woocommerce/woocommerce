@@ -69,8 +69,10 @@ export const getLookAndTone = async (
 	const prompt = [
 		'You are a WordPress theme expert.',
 		'Analyze the following store description and determine the look and tone of the theme.',
-		'For look, you can choose between Contemporary, Classic, and Bold.',
-		'For tone of the description, you can choose between Informal, Neutral, and Formal.',
+		`For look, you can choose between ${ VALID_LOOKS.join( ',' ) }.`,
+		`For tone of the description, you can choose between ${ VALID_TONES.join(
+			','
+		) }.`,
 		'Your response should be in json with look and tone values.',
 		'\n',
 		context.businessInfoDescription.descriptionText,
