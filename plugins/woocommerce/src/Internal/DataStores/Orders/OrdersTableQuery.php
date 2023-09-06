@@ -198,13 +198,17 @@ class OrdersTableQuery {
 		// TODO: args to be implemented.
 		unset( $this->args['customer_note'], $this->args['name'] );
 
+		$require_limit_data = ( $this->arg_isset( 'limit' ) || $this->arg_isset( 'page' ) || $this->arg_isset( 'offset' ) );
+
+		$this->build_query();
+
 		/**
 		 * Filters the orders array before the query takes place.
 		 *
 		 * Return a non-null value to bypass the HPOS default order queries.
 		 *
 		 * If the query includes limits via the `limit`, `page`, or `offset` arguments, we
-		 * require the `found_orders` and `max_num_pages` properties to also be set. 
+		 * require the `found_orders` and `max_num_pages` properties to also be set.
 		 *
 		 * @since 8.2.0
 		 *
@@ -217,22 +221,21 @@ class OrdersTableQuery {
 		 * }
 		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
 		 */
-		[ $this->orders, $this->found_orders, $this->max_num_pages ] = apply_filters( 'woocommerce_hpos_pre_query', null, array( $this ) );
-		// Return early if we orders were set by the filter.
-		if ( null !== $this->orders ) {
-			// Require data for pagination iff args for $this->limits are set. 
-			if ( $this->arg_isset( 'limit' ) || $this->arg_isset( 'page' ) || $this->arg_isset( 'offset' ) ) {
-				if ( null !== $this->found_orders && null !== $this->max_num_pages ) {
-					return;
-				}
-			} else {
-				return;
+		list( $this->orders, $this->found_orders, $this->max_num_pages ) = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
+		// If the filter set the orders, make sure the others values are set as well and skip running the query.
+		if ( is_array( $this->orders ) ) {
+			if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
+				$this->found_orders = count( $this->orders );
 			}
-			// Something was set by the filter, but not all required data was set -- reset the orders and continue as normal.
-			$this->orders = null;
+			if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
+				if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
+					$this->args['limit'] = 10;
+				}
+				$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+			}
+		} else {
+			$this->run_query();
 		}
-		$this->build_query();
-		$this->run_query();
 	}
 
 	/**

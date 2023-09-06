@@ -237,9 +237,9 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The pre-query escape hook allows replacing the order query.
+	 * @testdox The pre-query escape hook allows replacing the order query. The callback does not return pagination information.
 	 */
-	public function test_pre_query_escape_hook() {
+	public function test_pre_query_escape_hook_simple() {
 		$order1 = new \WC_Order();
 		$order1->set_date_created( time() - HOUR_IN_SECONDS );
 		$order1->save();
@@ -252,13 +252,58 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $query->found_orders );
 		$this->assertEquals( 0, $query->max_num_pages );
 
-		$callback = function( $query ) use ( $order1 ) {
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			$this->assertNull( $result );
+			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
+			$this->assertStringContainsString( 'SELECT ', $sql );
+
+			// Only return one of the orders to show that we are replacing the query result.
+			// Do not return found_orders or max_num_pages to show we're setting defaults.
+			$order_ids = array( $order1->get_id() );
+			return array( $order_ids, null, null );
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( 1, $query->max_num_pages );
+		$this->assertEquals( $order1->get_id(), $query->orders[0] );
+
+		$orders = wc_get_orders( array() );
+		$this->assertCount( 1, $orders );
+		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox The pre-query escape hook allows replacing the order query. The callback returns pagination information.
+	 */
+	public function test_pre_query_escape_hook_with_pagination() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->save();
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 2, $query->orders );
+		$this->assertEquals( 2, $query->found_orders );
+		$this->assertEquals( 0, $query->max_num_pages );
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			$this->assertNull( $result );
+			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
+			$this->assertStringContainsString( 'SELECT ', $sql );
+
 			// Only return one of the orders to show that we are replacing the query result.
 			$order_ids = array( $order1->get_id() );
-			// These are made up to show that we are actually replacing the values. 
-			$found_orders = 17;
+			// These are made up to show that we are actually replacing the values.
+			$found_orders  = 17;
 			$max_num_pages = 23;
-			return [ $order_ids, $found_orders, $max_num_pages ];
+			return array( $order_ids, $found_orders, $max_num_pages );
 		};
 		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
 
@@ -275,4 +320,31 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
+	/**
+	 * @testdox The pre-query escape hook uses the limit arg if it is set.
+	 */
+	public function test_pre_query_escape_hook_pass_limit() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			// Do not return found_orders or max_num_pages so as to provoke a warning.
+			$order_ids = array( $order1->get_id() );
+			return array( $order_ids, 10, null );
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		echo 'setting limit arg to 5. ';
+		$query = new OrdersTableQuery(
+			array(
+				'limit' => 5,
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 10, $query->found_orders );
+		$this->assertEquals( 2, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
 }
