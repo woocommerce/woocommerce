@@ -24,13 +24,13 @@ import {
 	customizeStoreStateMachineContext,
 } from './types';
 import { ThemeCard } from './intro/theme-cards';
-
 import './style.scss';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
 	| designWithAiEvents
-	| assemblerHubEvents;
+	| assemblerHubEvents
+	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } };
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
@@ -131,6 +131,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		backToHomescreen: {},
 		appearanceTask: {},
 	},
+	on: {
+		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
+			actions: () => {
+				// TODO: when navigation has been implemented, this should navigate back to the Intro screen
+			},
+		},
+	},
 } );
 
 export const CustomizeStoreController = ( {
@@ -187,6 +194,7 @@ export const CustomizeStoreController = ( {
 			>
 				{ CurrentComponent ? (
 					<CurrentComponent
+						parentMachine={ service }
 						sendEvent={ send }
 						context={ state.context }
 					/>

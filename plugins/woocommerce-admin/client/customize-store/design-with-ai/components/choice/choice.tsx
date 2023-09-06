@@ -11,21 +11,21 @@ import './choice.scss';
 type Props = {
 	className?: string;
 	selected: boolean;
-	title: string | React.ReactNode;
+	title: string;
+	subtitle?: string;
 	name: string;
 	value: string;
 	onChange: ( value: string ) => void;
-	subOptionsComponent?: React.ReactNode;
 };
 
 export const Choice = ( {
 	className,
 	selected,
 	title,
+	subtitle,
 	name,
 	value,
 	onChange,
-	subOptionsComponent = null,
 }: Props ) => {
 	const changeHandler = () => {
 		onChange( value );
@@ -36,7 +36,7 @@ export const Choice = ( {
 		<div
 			role="radio"
 			className={ classNames(
-				'woocommerce-profiler-choice-container',
+				'woocommerce-cys-choice-container',
 				className
 			) }
 			onClick={ changeHandler }
@@ -48,9 +48,9 @@ export const Choice = ( {
 			data-selected={ selected ? selected : null }
 			tabIndex={ 0 }
 		>
-			<div className="woocommerce-profiler-choice">
+			<div className="woocommerce-cys-choice">
 				<input
-					className="woocommerce-profiler-choice-input"
+					className="woocommerce-cys-choice-input"
 					id={ inputId }
 					name={ name }
 					type="radio"
@@ -64,12 +64,8 @@ export const Choice = ( {
 				<label htmlFor={ inputId } className="choice__title">
 					{ title }
 				</label>
+				{ subtitle && <p className="choice__subtitle">{ subtitle }</p> }
 			</div>
-			{ selected && subOptionsComponent && (
-				<div className="woocommerce-profiler-choice-sub-options">
-					{ subOptionsComponent }
-				</div>
-			) }
 		</div>
 	);
 };
