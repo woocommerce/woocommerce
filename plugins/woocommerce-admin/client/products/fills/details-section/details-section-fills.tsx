@@ -8,7 +8,6 @@ import {
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalDetailsNameField as DetailsNameField,
 	__experimentalDetailsFeatureField as DetailsFeatureField,
-	__experimentalDetailsCategoriesField as DetailsCategoriesField,
 	__experimentalDetailsSummaryField as DetailsSummaryField,
 	__experimentalDetailsDescriptionField as DetailsDescriptionField,
 	DETAILS_SECTION_ID,
@@ -43,13 +42,6 @@ export const DetailsSectionFills = () => (
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsNameField />
-		</WooProductFieldItem>
-		<WooProductFieldItem
-			id="categories"
-			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
-			pluginId={ PLUGIN_ID }
-		>
-			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="feature"

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename woocommerce/taxonomy-field to woocommerce/product-taxonomy-field

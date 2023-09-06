@@ -67,6 +67,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 
 	const onSave = async () => {
 		setErrorMessage( null );
+		setIsCreating( true );
 		try {
 			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
@@ -79,6 +80,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					throwOnError: true,
 				}
 			);
+			setIsCreating( false );
 			onCreate( newTaxonomy );
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch ( e: any ) {

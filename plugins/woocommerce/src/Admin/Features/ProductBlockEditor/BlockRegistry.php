@@ -22,7 +22,6 @@ class BlockRegistry {
 	const PRODUCT_BLOCKS = [
 		'woocommerce/conditional',
 		'woocommerce/product-catalog-visibility-field',
-		'woocommerce/product-category-field',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
 		'woocommerce/product-description-field',
@@ -46,6 +45,7 @@ class BlockRegistry {
 		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
+		'woocommerce/product-taxonomy-field',
 	];
 
 	/**

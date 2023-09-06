@@ -1,4 +1,4 @@
-# woocommerce/taxonomy-field block
+# woocommerce/product-taxonomy-field block
 
 This is a block that displays a taxonomy field, allowing searching, selection, and creation of new items, to be used in a product context.
 
