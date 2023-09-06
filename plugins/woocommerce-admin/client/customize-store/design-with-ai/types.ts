@@ -1,7 +1,6 @@
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
-		isMakignRequest?: boolean;
 	};
 	lookAndFeel: {
 		choice: Look | '';
@@ -30,11 +29,6 @@ export type designWithAiStateMachineEvents =
 	| {
 			type: 'API_CALL_TO_AI_FAILED';
 	  };
-
-export type completionAPIResponse = {
-	look: string;
-	tone: string;
-};
 
 export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
 export const VALID_TONES = [ 'Informal', 'Neutral', 'Formal' ] as const;
