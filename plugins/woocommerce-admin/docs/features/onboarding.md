@@ -81,7 +81,7 @@ We have a special WordPress.com connection flow designed specifically for WooCom
 We use the Jetpack Connection package's `Manager::get_authorization_url()` function directly, but add the following two query parameters:
 
 * `calypso_env`, which allows us to load different versions of Calypso when testing. See the Calypso section below.
-* `from=woocommerce-services`, which is used to conditionally show the WooCommerce-themed authorization process (https://github.com/Automattic/wp-calypso/pull/35193). Without this parameter, you would end up in the normal Jetpack authorization flow.
+* `from=woocommerce-services`, which is used to conditionally show the WooCommerce-themed authorization process [https://github.com/Automattic/wp-calypso/pull/35193](https://github.com/Automattic/wp-calypso/pull/35193). Without this parameter, you would end up in the normal Jetpack authorization flow.
 
 The user is prompted to install and connect to Jetpack as the first step of the profile wizard. If the user hasn't connected when they arrive at the task list, we also prompt them on certain tasks to make the setup process easier, such as the shipping and tax steps.
 
