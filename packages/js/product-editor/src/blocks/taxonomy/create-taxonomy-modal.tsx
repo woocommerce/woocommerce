@@ -26,6 +26,7 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 type CreateTaxonomyModalProps = {
 	initialName?: string;
+	dialogNameHelpText?: string;
 	hierarchical: boolean;
 	slug: string;
 	title: string;
@@ -39,6 +40,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	initialName,
 	slug,
 	hierarchical,
+	dialogNameHelpText,
 	title,
 } ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
@@ -113,7 +115,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 				<BaseControl
 					id={ id }
 					label={ __( 'Name', 'woocommerce' ) }
-					help={ errorMessage }
+					help={ errorMessage || dialogNameHelpText }
 					className={ classNames( {
 						'has-error': errorMessage,
 					} ) }

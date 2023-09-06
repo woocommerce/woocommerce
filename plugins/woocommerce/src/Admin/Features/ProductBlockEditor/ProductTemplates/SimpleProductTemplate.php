@@ -271,10 +271,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-taxonomy-field',
 				'order'      => 10,
 				'attributes' => [
-					'slug'        => 'product_cat',
-					'property'    => 'categories',
-					'label'       => __( 'Categories', 'woocommerce' ),
-					'createTitle' => __( 'Create new category', 'woocommerce' ),
+					'slug'               => 'product_cat',
+					'property'           => 'categories',
+					'label'              => __( 'Categories', 'woocommerce' ),
+					'createTitle'        => __( 'Create new category', 'woocommerce' ),
+					'dialogNameHelpText' => __( 'Shown to customers on the product page.', 'woocommerce' ),
 				],
 			]
 		);
