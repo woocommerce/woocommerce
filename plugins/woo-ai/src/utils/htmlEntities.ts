@@ -1,4 +1,4 @@
-export const htmlEntities = ( str: string ) =>
+export const encodeHtmlEntities = ( str: string ) =>
 	str.replace(
 		/[&<>'"]/g,
 		( tag ) =>
@@ -10,3 +10,11 @@ export const htmlEntities = ( str: string ) =>
 				'"': '&quot;',
 			}[ tag ] || tag )
 	);
+
+export const decodeHtmlEntities = ( () => {
+	const textArea = document.createElement( 'textarea' );
+	return ( str: string ): string => {
+		textArea.innerHTML = str;
+		return textArea.value;
+	};
+} )();

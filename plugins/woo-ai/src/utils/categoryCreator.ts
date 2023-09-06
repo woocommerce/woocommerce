@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { htmlEntities } from './htmlEntities';
+import { encodeHtmlEntities } from './htmlEntities';
 import { getAvailableCategories } from '../product-category/utils';
 
 interface HTMLWPListElement extends HTMLElement {
@@ -138,7 +138,7 @@ const getCategoriesToCreate = async (
 	orderedList.every( ( categoryName, index ) => {
 		const matchingCategory = availableCategories.find( ( category ) => {
 			return (
-				category.name === htmlEntities( categoryName ) &&
+				category.name === encodeHtmlEntities( categoryName ) &&
 				category.parent === parentCategoryId
 			);
 		} );

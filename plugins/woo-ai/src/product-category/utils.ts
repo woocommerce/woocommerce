@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { getPostId, recordTracksFactory } from '../utils';
+import { getPostId, recordTracksFactory, decodeHtmlEntities } from '../utils';
 
 type TracksData = Record< string, string | number | null | Array< string > >;
 
@@ -32,9 +32,15 @@ export const recordCategoryTracks = recordTracksFactory< TracksData >(
  */
 export const getAvailableCategories =
 	async (): Promise< CategoriesApiResponse > => {
-		return await apiFetch< CategoriesApiResponse >( {
+		const results = await apiFetch< CategoriesApiResponse >( {
 			path: '/wc/v3/products/categories?per_page=100&fields=id,name,parent',
 		} );
+
+		results.forEach( ( category ) => {
+			category.name = decodeHtmlEntities( category.name );
+		} );
+
+		return results;
 	};
 
 /**
