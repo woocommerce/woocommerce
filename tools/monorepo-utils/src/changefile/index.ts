@@ -69,6 +69,9 @@ const program = new Command( 'changefile' )
 
 			const details = getChangelogDetails( prBody );
 			const { significance, type, message, comment } = details;
+
+			console.log( message );
+			process.exit( 0 );
 			const changelogDetailsError = getChangelogDetailsError( details );
 
 			if ( changelogDetailsError ) {
