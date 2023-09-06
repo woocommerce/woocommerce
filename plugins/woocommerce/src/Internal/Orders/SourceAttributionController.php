@@ -102,9 +102,11 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
-				$this->set_order_source_data( $order );
+				$source_data = $this->get_source_values();
+				$this->set_order_source_data( $source_data, $order );
 			}
 		);
+
 		add_action(
 			'user_register',
 			function( $customer_id ) {
@@ -239,8 +241,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function display_origin_column( $order_id ): void {
-		// Ensure we've got a valid order.
 		try {
+			// Ensure we've got a valid order.
 			$order = $this->get_hpos_order_object( $order_id );
 			$this->output_origin_column( $order );
 		} catch ( Exception $e ) {
@@ -256,17 +258,9 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$source_type      = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
-		$source           = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) ) ?: esc_html__( '(none)', 'woocommerce' );
-		$formatted_source = ucfirst( trim( $source, '()' ) );
-		$label            = $this->get_source_label( $source_type );
-
-		if ( empty( $label ) ) {
-			echo esc_html( $formatted_source );
-			return;
-		}
-
-		printf( $label, esc_html( $formatted_source ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
+		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) ) ?: __( '(none)', 'woocommerce' );
+		echo esc_html( $this->get_origin_label( $source_type, $source ) );
 	}
 
 	/**
@@ -287,7 +281,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 */
 	private function set_customer_source_data( WC_Customer $customer ) {
 		foreach ( $this->get_source_values() as $key => $value ) {
-			$customer->add_meta_data( $key, $value );
+			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
 
 		$customer->save_meta_data();
@@ -300,34 +294,12 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 *
 	 * @return void
 	 */
-	private function set_order_source_data( WC_Order $order ) {
-		foreach ( $this->get_source_values() as $key => $value ) {
-			$order->add_meta_data( $key, $value );
+	private function set_order_source_data( array $source_data, WC_Order $order ) {
+		foreach ( $source_data as $key => $value ) {
+			$order->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
 
 		$order->save_meta_data();
-	}
-
-	/**
-	 * Map posted values to meta values.
-	 *
-	 * @return array
-	 */
-	private function get_source_values(): array {
-		$values = array();
-
-		// Look through each field in POST data.
-		foreach ( $this->fields as $field ) {
-			// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$value = sanitize_text_field( wp_unslash( $_POST[ $this->get_prefixed_field( $field ) ] ?? '' ) );
-			if ( '(none)' === $value ) {
-				continue;
-			}
-
-			$values[ $this->get_meta_prefixed_field( $field ) ] = $value;
-		}
-
-		return $values;
 	}
 
 	/**
