@@ -14,6 +14,7 @@ use WC_Customer;
 use WC_Log_Levels;
 use WC_Logger_Interface;
 use WC_Order;
+use WC_Tracks;
 use WP_User;
 
 /**
@@ -103,6 +104,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'woocommerce_checkout_order_created',
 			function( $order ) {
 				$source_data = $this->get_source_values();
+				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
 			}
 		);
@@ -343,5 +345,24 @@ class SourceAttributionController implements RegisterHooksInterface {
 			$this->log( $e->getMessage(), __METHOD__, WC_Log_Levels::ERROR );
 			return false;
 		}
+	}
+
+	/**
+	 * Send order source data to Tracks.
+	 *
+	 * @param array    $source_data The source data.
+	 * @param WC_Order $order       The order object.
+	 *
+	 * @return void
+	 */
+	private function send_order_tracks( array $source_data, WC_Order $order ) {
+		$tracks_data = array(
+			'origin'        => $source_data['origin'] ?? '',
+			'device_type'   => $source_data['device_type'] ?? '(unknown)',
+			'session_pages' => $source_data['session_pages'] ?? 0,
+			'order_total'   => $order->get_total(),
+		);
+
+		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_source_attribution', $tracks_data );
 	}
 }
