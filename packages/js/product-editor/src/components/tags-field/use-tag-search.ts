@@ -20,14 +20,15 @@ export const useTagSearch = () => {
 	const fetchProductTags = ( search?: string ) => {
 		setIsSearching( true );
 		const query = search !== undefined ? { search } : '';
-		resolveSelect( EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME ).getProductTags(
-			query
-		).then( ( tags ) => {
-		   setFetchedTags( tags as ProductTag[] );
-		}).finally( () => {
-		   setIsSearching( false );
-		});
-	}
+		resolveSelect( EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME )
+			.getProductTags( query )
+			.then( ( tags ) => {
+				setFetchedTags( tags as ProductTag[] );
+			} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
+	};
 
 	useEffect( fetchProductTags, [] );
 
