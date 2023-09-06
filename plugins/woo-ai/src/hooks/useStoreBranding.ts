@@ -7,13 +7,8 @@ import { useQuery, UseQueryResult } from 'react-query';
 /**
  * Internal dependencies
  */
-import { getToneOfVoice, getBusinessDescription } from '../utils/branding';
-
-// Define your data type
-interface BrandingData {
-	toneOfVoice: string;
-	businessDescription: string;
-}
+import { getAllBrandingSettings } from '../utils/branding';
+import type { BrandingSettings } from '../utils/branding';
 
 // Define your error type
 interface BrandingError {
@@ -25,22 +20,17 @@ type UseStoreBrandingOptions = {
 };
 
 // Async function to fetch branding data
-async function fetchBrandingData(): Promise< BrandingData > {
-	const [ toneOfVoice, businessDescription ] = await Promise.all( [
-		getToneOfVoice(),
-		getBusinessDescription(),
-	] );
-
-	return { toneOfVoice, businessDescription };
+async function fetchBrandingData(): Promise< BrandingSettings > {
+	return await getAllBrandingSettings();
 }
 
 export function useStoreBranding( {
 	onError,
 }: UseStoreBrandingOptions = {} ): UseQueryResult<
-	BrandingData,
+	BrandingSettings,
 	BrandingError
 > {
-	const result = useQuery< BrandingData, BrandingError >(
+	const result = useQuery< BrandingSettings, BrandingError >(
 		'storeBranding',
 		fetchBrandingData,
 		{
