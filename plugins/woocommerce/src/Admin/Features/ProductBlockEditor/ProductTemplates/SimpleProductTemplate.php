@@ -552,6 +552,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property' => 'manage_stock',
 					'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+					'disabledCopy' => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 				],
 			]
 		);

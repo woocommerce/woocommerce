@@ -219,7 +219,10 @@ export function WriteItForMeButtonContainer() {
 			);
 		}
 
-		if ( brandingData?.toneOfVoice ) {
+		if (
+			brandingData?.toneOfVoice &&
+			brandingData?.toneOfVoice !== 'neutral'
+		) {
 			instructions.push(
 				`Generate the description using a ${ brandingData.toneOfVoice } tone.`
 			);
@@ -227,7 +230,7 @@ export function WriteItForMeButtonContainer() {
 
 		if ( brandingData?.businessDescription ) {
 			instructions.push(
-				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
+				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }"`
 			);
 		}
 

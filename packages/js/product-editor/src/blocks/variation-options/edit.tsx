@@ -120,6 +120,7 @@ export function Edit() {
 				disabledAttributeIds={ entityAttributes
 					.filter( ( attr ) => ! attr.variation )
 					.map( ( attr ) => attr.id ) }
+				termsAutoSelection="all"
 				uiStrings={ {
 					notice,
 					globalAttributeHelperMessage: '',

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Sender } from 'xstate';
+import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -10,6 +10,7 @@ import { customizeStoreStateMachineEvents } from '.';
 import { ThemeCard } from './intro/theme-cards';
 
 export type CustomizeStoreComponent = ( props: {
+	parentMachine: AnyInterpreter;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 	context: customizeStoreStateMachineContext;
 } ) => React.ReactElement | null;

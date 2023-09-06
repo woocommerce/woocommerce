@@ -6,12 +6,11 @@ const {
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
+const { toggleBlockProductTour } = require( '../../../../utils/tours' );
 
 const ALL_PRODUCTS_URL = 'wp-admin/edit.php?post_type=product';
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
-const SETTINGS_URL =
-	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
 
 let isNewProductEditorEnabled = false;
 
@@ -27,6 +26,10 @@ test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { request } ) => {
+		await toggleBlockProductTour( request, false );
+	} );
 
 	test.beforeEach( async ( { page } ) => {
 		isNewProductEditorEnabled = await isBlockProductEditorEnabled( page );
@@ -71,6 +74,7 @@ test.describe( 'Disable block product editor', () => {
 		await dismissFeedbackModalIfShown( page );
 		await expectOldProductEditor( page );
 	} );
+
 	test( 'can be disabled from settings', async ( { page } ) => {
 		await toggleBlockProductEditor( 'disable', page );
 		await page.goto( ALL_PRODUCTS_URL );

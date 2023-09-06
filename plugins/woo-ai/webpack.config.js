@@ -5,7 +5,6 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
-		settings: './src/settings/settings.ts',
 	},
 	module: {
 		...defaultConfig.module,
