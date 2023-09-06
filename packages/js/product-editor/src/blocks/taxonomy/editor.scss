@@ -11,6 +11,16 @@
 			justify-content: flex-end;
 		}
 	}
+
+	.components-base-control {
+		margin-bottom: $gap;
+		&__field {
+			.components-base-control {
+				margin-bottom: 0;
+			}
+		}
+	}
+
 	.has-error {
 		.components-text-control__input {
 			border-color: $studio-red-50;
