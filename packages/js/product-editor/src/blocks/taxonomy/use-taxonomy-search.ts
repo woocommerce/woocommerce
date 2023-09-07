@@ -69,6 +69,7 @@ const useTaxonomySearch = (
 					taxonomyName
 				);
 			}
+			setIsSearching( false );
 		} catch ( e ) {
 			setIsSearching( false );
 		}
