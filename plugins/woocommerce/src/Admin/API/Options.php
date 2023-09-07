@@ -224,9 +224,18 @@ class Options extends \WC_REST_Data_Controller {
 			'stylesheet'                     => current_user_can( 'edit_theme_options' ),
 		);
 
-		return array_merge(
-			array_fill_keys( $theme_permissions, current_user_can( 'edit_theme_options' ) ),
-			array_fill_keys( $woocommerce_permissions, $is_woocommerce_admin )
+		/**
+		 * Filter the default option permissions allowing exensible control over which options are available to the user.
+		 *
+		 * @param  array $options Array of allowed options.
+		 * @return array
+		 */
+		return apply_filters(
+			'woocommerce_rest_api_default_option_permissions',
+			array_merge(
+				array_fill_keys( $theme_permissions, current_user_can( 'edit_theme_options' ) ),
+				array_fill_keys( $woocommerce_permissions, $is_woocommerce_admin )
+			)
 		);
 	}
 
