@@ -147,9 +147,9 @@ describe( 'useStoreCart', () => {
 			useStoreCart( options );
 		return (
 			<div
-				results={ results }
-				receiveCart={ receiveCart }
-				receiveCartContents={ receiveCartContents }
+				data-results={ results }
+				data-receiveCart={ receiveCart }
+				data-receiveCartContents={ receiveCartContents }
 			/>
 		);
 	};
@@ -200,8 +200,11 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results, receiveCart, receiveCartContents } =
-				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const results = props[ 'data-results' ];
+			const receiveCart = props[ 'data-receiveCart' ];
+			const receiveCartContents = props[ 'data-receiveCartContents' ];
+
 			const {
 				receiveCart: defaultReceiveCart,
 				receiveCartContents: defaultReceiveCartContents,
@@ -223,8 +226,10 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results, receiveCart, receiveCartContents } =
-				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const results = props[ 'data-results' ];
+			const receiveCart = props[ 'data-receiveCart' ];
+			const receiveCartContents = props[ 'data-receiveCartContents' ];
 
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();
@@ -255,8 +260,10 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results, receiveCart, receiveCartContents } =
-				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const results = props[ 'data-results' ];
+			const receiveCart = props[ 'data-receiveCart' ];
+			const receiveCartContents = props[ 'data-receiveCartContents' ];
 
 			expect( results ).toEqual( previewCartData );
 			expect( receiveCart ).toEqual( receiveCartMock );

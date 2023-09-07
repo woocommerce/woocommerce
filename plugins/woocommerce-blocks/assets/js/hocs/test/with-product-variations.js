@@ -32,11 +32,11 @@ const mockVariations = [
 const TestComponent = withProductVariations( ( props ) => {
 	return (
 		<div
-			error={ props.error }
-			expandedProduct={ props.expandedProduct }
-			isLoading={ props.isLoading }
-			variations={ props.variations }
-			variationsLoading={ props.variationsLoading }
+			data-error={ props.error }
+			data-expandedProduct={ props.expandedProduct }
+			data-isLoading={ props.isLoading }
+			data-variations={ props.variations }
+			data-variationsLoading={ props.variationsLoading }
 		/>
 	);
 } );
@@ -148,9 +148,9 @@ describe( 'withProductVariations Component', () => {
 				],
 			};
 
-			expect( props.error ).toBeNull();
-			expect( props.isLoading ).toBe( false );
-			expect( props.variations ).toEqual( expectedVariations );
+			expect( props[ 'data-error' ] ).toBeNull();
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-variations' ] ).toEqual( expectedVariations );
 		} );
 	} );
 
@@ -177,9 +177,9 @@ describe( 'withProductVariations Component', () => {
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props.error ).toEqual( formattedError );
-			expect( props.isLoading ).toBe( false );
-			expect( props.variations ).toEqual( { 1: null } );
+			expect( props[ 'data-error' ] ).toEqual( formattedError );
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-variations' ] ).toEqual( { 1: null } );
 		} );
 	} );
 } );
