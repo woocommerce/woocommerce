@@ -54,8 +54,8 @@ const updateReleaseChangelogs = async (
 
 	// Convert PR number to markdown link.
 	nextLog = nextLog.replace(
-		/\[#(\d+)\]/g,
-		'[$&](https://github.com/woocommerce/woocommerce/pull/$1)'
+		/\[#(\d+)\](?!\()/g,
+		'[#$1](https://github.com/woocommerce/woocommerce/pull/$1)'
 	);
 
 	readme = readme.replace(
