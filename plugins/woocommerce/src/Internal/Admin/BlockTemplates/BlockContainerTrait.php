@@ -40,6 +40,19 @@ trait BlockContainerTrait {
 		$root_template = $block->get_root_template();
 		$root_template->cache_block( $block );
 		$this->inner_blocks[] = &$block;
+
+		/**
+		 * Action called after a block is added to a block container.
+		 *
+		 * This action can be used to perform actions after a block is added to the block container,
+		 * such as adding a dependent block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.2.0
+		 */
+		do_action( 'woocommerce_block_template_after_add_block', $block );
+
 		return $block;
 	}
 
