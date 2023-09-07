@@ -2803,10 +2803,19 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
+		if ( $this->should_backfill_post_record() && isset( $meta->id ) && ! isset( $meta->key ) ) {
+			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
+			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
+			if ( $db_meta ) {
+				$meta->key   = $db_meta->meta_key;
+				$meta->value = $db_meta->meta_value;
+			}
+		}
+
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
 		$this->after_meta_change( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
