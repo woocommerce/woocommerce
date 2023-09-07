@@ -2804,4 +2804,26 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$reset_state->call( $sut );
 		wp_cache_flush();
 	}
+
+	/**
+	 * @testDox Test that we can delete metadata just by sending the meta ID.
+	 */
+	public function test_allow_deleting_meta_with_id_only() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$meta_data = $this->sut->read_meta( $order );
+
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $r_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), 'test_key', true ) );
+	}
 }
