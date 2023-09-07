@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ntegration;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\WCCom\TrackingController as WCCOMTracking;
 use WP_UnitTestCase;
 
@@ -20,6 +21,11 @@ class WCCOMTrackingTest extends WP_UnitTestCase {
 		$this->WCCOMTrackingIntegration = $this->getMockBuilder( WCCOMTracking::class )
 			->onlyMethods( [ 'is_WCCom_Cookie_Terms_available', 'is_wccom_tracking_allowed' ] )
 			->getMock();
+
+		$mockFeaturesController = $this->getMockBuilder( FeaturesController::class )->getMock();
+		$mockFeaturesController->method( 'feature_is_enabled' )->with( 'order_source_attribution' )->willReturn( true );
+
+		$this->WCCOMTrackingIntegration->init( $mockFeaturesController );
 	}
 
 	public function test_wccom_tracking_not_allowed(): void {
