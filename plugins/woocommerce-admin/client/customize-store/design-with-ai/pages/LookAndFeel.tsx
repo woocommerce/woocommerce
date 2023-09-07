@@ -9,14 +9,14 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { designWithAiStateMachineContext } from '../types';
+import { Look, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
 
 export type lookAndFeelCompleteEvent = {
 	type: 'LOOK_AND_FEEL_COMPLETE';
-	payload: string;
+	payload: Look;
 };
 
 export const LookAndFeel = ( {
@@ -31,6 +31,7 @@ export const LookAndFeel = ( {
 	const choices = [
 		{
 			title: __( 'Contemporary', 'woocommerce' ),
+			key: 'Contemporary' as const,
 			subtitle: __(
 				'Clean lines, neutral colors, sleek and modern look',
 				'woocommerce'
@@ -38,6 +39,7 @@ export const LookAndFeel = ( {
 		},
 		{
 			title: __( 'Classic', 'woocommerce' ),
+			key: 'Classic' as const,
 			subtitle: __(
 				'Elegant and timeless look with nostalgic touch.',
 				'woocommerce'
@@ -45,15 +47,16 @@ export const LookAndFeel = ( {
 		},
 		{
 			title: __( 'Bold', 'woocommerce' ),
+			key: 'Bold' as const,
 			subtitle: __(
 				'Vibrant look with eye-catching colors and visuals.',
 				'woocommerce'
 			),
 		},
 	];
-	const [ look, setLook ] = useState< string >(
+	const [ look, setLook ] = useState< Look >(
 		context.lookAndFeel.choice === ''
-			? choices[ 0 ].title
+			? choices[ 0 ].key
 			: context.lookAndFeel.choice
 	);
 	return (
@@ -80,17 +83,17 @@ export const LookAndFeel = ( {
 						) }
 					</h1>
 					<div className="choices">
-						{ choices.map( ( { title, subtitle } ) => {
+						{ choices.map( ( { title, subtitle, key } ) => {
 							return (
 								<Choice
-									key={ title }
+									key={ key }
 									name="user-profile-choice"
 									title={ title }
 									subtitle={ subtitle }
-									selected={ look === title }
-									value={ title }
-									onChange={ ( _title ) => {
-										setLook( _title );
+									selected={ look === key }
+									value={ key }
+									onChange={ ( _key ) => {
+										setLook( _key as Look );
 									} }
 								/>
 							);

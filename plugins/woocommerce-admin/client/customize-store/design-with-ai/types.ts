@@ -1,13 +1,12 @@
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
-		isMakignRequest?: boolean;
 	};
 	lookAndFeel: {
-		choice: string;
+		choice: Look | '';
 	};
 	toneOfVoice: {
-		choice: string;
+		choice: Tone | '';
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
@@ -31,7 +30,7 @@ export type designWithAiStateMachineEvents =
 			type: 'API_CALL_TO_AI_FAILED';
 	  };
 
-export type completionAPIResponse = {
-	look: string;
-	tone: string;
-};
+export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
+export const VALID_TONES = [ 'Informal', 'Neutral', 'Formal' ] as const;
+export type Look = ( typeof VALID_LOOKS )[ number ];
+export type Tone = ( typeof VALID_TONES )[ number ];

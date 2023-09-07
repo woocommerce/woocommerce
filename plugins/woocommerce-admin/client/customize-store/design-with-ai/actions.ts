@@ -9,19 +9,19 @@ import { assign } from 'xstate';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	completionAPIResponse,
 } from './types';
 import {
 	businessInfoDescriptionCompleteEvent,
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
+import { LookAndToneCompletionResponse } from './services';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	businessInfoDescription: ( context, event: unknown ) => {
+	businessInfoDescription: ( _context, event: unknown ) => {
 		return {
 			descriptionText: ( event as businessInfoDescriptionCompleteEvent )
 				.payload,
@@ -33,7 +33,7 @@ const assignLookAndFeel = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( context, event: unknown ) => {
+	lookAndFeel: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as lookAndFeelCompleteEvent ).payload,
 		};
@@ -44,7 +44,7 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	toneOfVoice: ( context, event: unknown ) => {
+	toneOfVoice: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
@@ -55,14 +55,16 @@ const assignLookAndTone = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( context, event: unknown ) => {
+	lookAndFeel: ( _context, event: unknown ) => {
 		return {
-			choice: ( event as { data: completionAPIResponse } ).data.look,
+			choice: ( event as { data: LookAndToneCompletionResponse } ).data
+				.look,
 		};
 	},
-	toneOfVoice: ( context, event: unknown ) => {
+	toneOfVoice: ( _context, event: unknown ) => {
 		return {
-			choice: ( event as { data: completionAPIResponse } ).data.tone,
+			choice: ( event as { data: LookAndToneCompletionResponse } ).data
+				.tone,
 		};
 	},
 } );
