@@ -6,6 +6,8 @@
  * @since   3.5.0
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Tests for the Customers REST API.
  *
@@ -13,6 +15,7 @@
  * @extends WC_REST_Unit_Test_Case
  */
 class Customers extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -59,7 +62,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $customers ) );
 
-		$this->assertContains(
+		$matching_customer_data = current(
+			array_filter(
+				$customers,
+				function( $customer ) use ( $customer_1 ) {
+					return $customer['id'] === $customer_1->get_id();
+				}
+			)
+		);
+		$this->assertIsArray( $matching_customer_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'                 => $customer_1->get_id(),
 				'date_created'       => wc_rest_prepare_date_response( $date_created, false ),
@@ -112,7 +125,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$customers
+			$matching_customer_data
 		);
 
 		update_option( 'timezone_tring', 'America/New York' );
@@ -130,7 +143,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->assertContains(
+		$matching_customer_data = current(
+			array_filter(
+				$customers,
+				function( $customer ) use ( $customer_3 ) {
+					return $customer['id'] === $customer_3->get_id();
+				}
+			)
+		);
+		$this->assertIsArray( $matching_customer_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'                 => $customer_3->get_id(),
 				'date_created'       => wc_rest_prepare_date_response( $date_created, false ),
@@ -183,9 +206,8 @@ class Customers extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$customers
+			$matching_customer_data
 		);
-
 	}
 
 	/**

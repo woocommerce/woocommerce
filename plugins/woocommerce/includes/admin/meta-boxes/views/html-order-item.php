@@ -3,7 +3,7 @@
  * Shows an order item
  *
  * @package WooCommerce\Admin
- * @var object $item The item being displayed
+ * @var WC_Order_Item $item The item being displayed
  * @var int $item_id The id of the item being displayed
  */
 

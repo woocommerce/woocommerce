@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix unit test snapshots due to a dependency version change

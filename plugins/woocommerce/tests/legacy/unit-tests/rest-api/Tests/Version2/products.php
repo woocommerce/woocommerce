@@ -6,10 +6,14 @@
  * @since 3.0.0
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Products_API_V2 class.
  */
 class Products_API_V2 extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -77,19 +81,20 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_product() {
 		wp_set_current_user( $this->user );
-		$simple   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
+		$simple   = ProductHelper::create_external_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $simple->get_id() ) );
 		$product  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains(
+
+		$this->assertArraySubset(
 			array(
 				'id'            => $simple->get_id(),
 				'name'          => 'Dummy External Product',
-				'type'          => 'simple',
+				'type'          => 'external',
 				'status'        => 'publish',
 				'sku'           => 'DUMMY EXTERNAL SKU',
-				'regular_price' => 10,
+				'regular_price' => '10',
 			),
 			$product
 		);

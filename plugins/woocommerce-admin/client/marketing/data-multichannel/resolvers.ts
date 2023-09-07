@@ -12,12 +12,14 @@ import {
 	receiveRecommendedChannelsSuccess,
 	receiveRecommendedChannelsError,
 	receiveCampaigns,
+	receiveCampaignTypes,
 } from './actions';
 import { awaitResponseJson } from './controls';
 import {
 	RegisteredChannel,
 	RecommendedChannel,
 	Campaign,
+	CampaignType,
 	ApiFetchError,
 } from './types';
 import { API_NAMESPACE } from './constants';
@@ -73,8 +75,8 @@ const getTotalFromResponse = ( response: Response ) => {
 /**
  * Get campaigns from API backend.
  *
- * @param  page    Page number. First page is `1`.
- * @param  perPage Page size, i.e. number of records in one page.
+ * @param page    Page number. First page is `1`.
+ * @param perPage Page size, i.e. number of records in one page.
  */
 export function* getCampaigns( page: number, perPage: number ) {
 	try {
@@ -112,5 +114,19 @@ export function* getCampaigns( page: number, perPage: number ) {
 		}
 
 		throw error;
+	}
+}
+
+export function* getCampaignTypes() {
+	try {
+		const data: CampaignType[] = yield apiFetch( {
+			path: `${ API_NAMESPACE }/campaign-types`,
+		} );
+
+		yield receiveCampaignTypes( data );
+	} catch ( error ) {
+		if ( isApiFetchError( error ) ) {
+			yield receiveCampaignTypes( error );
+		}
 	}
 }

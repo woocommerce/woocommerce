@@ -10,13 +10,15 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 	return [
 		{
 			referenceElements: {
-				desktop: '#adminmenu a[href="admin.php?page=wc-addons"]',
+				desktop:
+					'#adminmenu a[href="admin.php?page=wc-admin&path=%2Fextensions"]',
 			},
 			focusElement: {
-				desktop: '#adminmenu a[href="admin.php?page=wc-addons"]',
+				desktop:
+					'#adminmenu a[href="admin.php?page=wc-admin&path=%2Fextensions"]',
 			},
 			meta: {
-				name: 'wc-addons-menu-item',
+				name: 'wc-extensions-menu-item',
 				heading: __(
 					'Welcome to the WooCommerce Marketplace',
 					'woocommerce'
@@ -24,7 +26,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'Power up your store by adding extra functionality using extensions, find a fresh new look with themes, or integrate your store with other software and services.<br/><br/>The WooCommerce Marketplace is your go-to for all of the above, and the only place you’ll find products that have been reviewed and approved by the WooCommerce team.<br/><br/>Whether you’re looking to improve your store or grow your business, you can find a solution here. There are hundreds of options available, and new products are added regularly.<br/><br/>The WooCommerce Marketplace is also available at WooCommerce.com.',
+							"Power up your store by adding extra functionality with extensions or integrate your store with other software and services.<br/><br/>Here you'll find hundreds of trusted solutions for your store — all reviewed and approved by the Woo team.<br/><br/>You can also browse the Woo Marketplace at WooCommerce.com.",
 							'woocommerce'
 						),
 						{
@@ -36,17 +38,17 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 		},
 		{
 			referenceElements: {
-				desktop: '.marketplace-header__search-form',
+				desktop: '.woocommerce-marketplace__search',
 			},
 			focusElement: {
-				desktop: '.marketplace-header__search-form',
+				desktop: '.woocommerce-marketplace__search',
 			},
 			meta: {
-				name: 'wc-addons-search',
+				name: 'wc-extensions-search',
 				heading: __( 'Find exactly what you need', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'Use the search box to find specific products or solutions.',
+						'Use the search box to find specific extensions or solutions.',
 						'woocommerce'
 					),
 				},
@@ -54,10 +56,10 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 		},
 		{
 			referenceElements: {
-				desktop: '#marketplace-current-section-dropdown',
+				desktop: '.woocommerce-marketplace__tab-browse',
 			},
 			focusElement: {
-				desktop: '#marketplace-current-section-dropdown',
+				desktop: '.woocommerce-marketplace__tab-browse',
 			},
 			meta: {
 				name: 'wc-addons-categories',
@@ -65,7 +67,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'Or browse all available products by category.',
+							"Or if you're not sure exactly what you need, you can browse all available extensions by category.",
 							'woocommerce'
 						),
 						{
@@ -77,18 +79,18 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 		},
 		{
 			referenceElements: {
-				desktop: '.addon-product-group:first-child',
+				desktop: '.woocommerce-marketplace__discover:first-child',
 			},
 			focusElement: {
-				desktop: '.addon-product-group:first-child',
+				desktop: '.woocommerce-marketplace__discover:first-child',
 			},
 			meta: {
 				name: 'wc-addons-featured',
-				heading: __( 'Learn more about products', 'woocommerce' ),
+				heading: __( 'Learn more about each product', 'woocommerce' ),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							'Scroll down to see all available products for a search or selected category.<br/><br/>Click on any product to see more information about it, including features, requirements, and available documentation.',
+							'Scroll down to see all of the relevant extensions and solutions.<br/><br/>Click on any solution to learn more about its features, any installation requirements, and available documentation.',
 							'woocommerce'
 						),
 						{
@@ -100,10 +102,10 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 		},
 		{
 			referenceElements: {
-				desktop: '.marketplace-header__tab-link_helper',
+				desktop: '.woocommerce-marketplace__header-meta',
 			},
 			focusElement: {
-				desktop: '.marketplace-header__tab-link_helper',
+				desktop: '.woocommerce-marketplace__header-meta',
 			},
 			meta: {
 				name: 'wc-addons-my-subscriptions',
@@ -111,7 +113,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"Products purchased from the WooCommerce Marketplace can be managed in My Subscriptions, either here or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! We hope the WooCommerce Marketplace helps you build the business of your dreams.",
+							"All of your Woo Marketplace purchases can be found here, or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! You're now ready to power up your store.",
 							'woocommerce'
 						),
 						{

@@ -44,7 +44,6 @@ class Marketing {
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 5 );
 		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
-		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 	}
 
@@ -139,18 +138,6 @@ class Marketing {
 				$item[2] = 'admin.php?page=' . $item[2];
 			}
 		}
-	}
-
-	/**
-	 * Preload options to prime state of the application.
-	 *
-	 * @param array $options Array of options to preload.
-	 * @return array
-	 */
-	public function preload_options( $options ) {
-		$options[] = 'woocommerce_marketing_overview_welcome_hidden';
-
-		return $options;
 	}
 
 	/**

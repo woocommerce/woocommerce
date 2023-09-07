@@ -72,8 +72,26 @@ export type CampaignsState = {
 	total?: number;
 };
 
+export type CampaignType = {
+	id: string;
+	name: string;
+	description: string;
+	channel: {
+		slug: string;
+		name: string;
+	};
+	create_url: string;
+	icon_url: string;
+};
+
+export type CampaignTypesState = {
+	data?: Array< CampaignType >;
+	error?: ApiFetchError;
+};
+
 export type State = {
 	registeredChannels: RegisteredChannelsState;
 	recommendedChannels: RecommendedChannelsState;
 	campaigns: CampaignsState;
+	campaignTypes: CampaignTypesState;
 };

@@ -97,11 +97,10 @@ test.describe(
 		test( 'should let user search the store', async ( { page } ) => {
 			await page.goto( 'shop/' );
 
-			await page.fill(
-				'#wp-block-search__input-1',
-				simpleProductName + ' 1'
-			);
-			await page.click( 'button.wp-block-search__button' );
+			await page
+				.locator( '#wp-block-search__input-1' )
+				.fill( simpleProductName + ' 1' );
+			await page.locator( 'button.wp-block-search__button' ).click();
 
 			await expect( page.locator( 'h1.page-title' ) ).toContainText(
 				`${ simpleProductName } 1`
@@ -116,8 +115,10 @@ test.describe(
 		} ) => {
 			// browse the Audio category
 			await page.goto( 'shop/' );
-			await page.click( `text=${ simpleProductName } 2` );
-			await page.click( 'span.posted_in > a', { hasText: categoryB } );
+			await page.locator( `text=${ simpleProductName } 2` ).click();
+			await page
+				.locator( 'span.posted_in > a', { hasText: categoryB } )
+				.click();
 
 			// verify the Audio category page
 			await expect( page.locator( 'h1.page-title' ) ).toContainText(
@@ -126,7 +127,7 @@ test.describe(
 			await expect(
 				page.locator( 'h2.woocommerce-loop-product__title' )
 			).toContainText( simpleProductName + ' 2' );
-			await page.click( `text=${ simpleProductName } 2` );
+			await page.locator( `text=${ simpleProductName } 2` ).click();
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 				simpleProductName + ' 2'
 			);
@@ -138,24 +139,40 @@ test.describe(
 			await page.goto( 'shop/' );
 
 			// sort by price high to low
-			await page.selectOption( '.orderby', 'price-desc' );
-			// last product is most expensive
-			await expect(
-				page.locator( 'ul.products > li:nth-child(1)' )
-			).toContainText( `${ simpleProductName } 3` );
-			await expect(
-				page.locator( 'ul.products > li:nth-child(3)' )
-			).toContainText( `${ simpleProductName } 1` );
+			await page.locator( '.orderby' ).selectOption( 'price-desc' );
+
+			// Check that the priciest appears before the cheapest in the list
+			const highToLowList = await page
+				.getByRole( 'listitem' )
+				.getByRole( 'heading' )
+				.allInnerTexts();
+			const highToLow_index_priciest = highToLowList.indexOf(
+				`${ simpleProductName } 3`
+			);
+			const highToLow_index_cheapest = highToLowList.indexOf(
+				`${ simpleProductName } 1`
+			);
+			expect( highToLow_index_priciest ).toBeLessThan(
+				highToLow_index_cheapest
+			);
 
 			// sort by price low to high
-			await page.selectOption( '.orderby', 'price' );
-			// last product is most expensive
-			await expect(
-				page.locator( 'ul.products > li:nth-last-child(3)' )
-			).toContainText( `${ simpleProductName } 1` );
-			await expect(
-				page.locator( 'ul.products > li:nth-last-child(1)' )
-			).toContainText( `${ simpleProductName } 3` );
+			await page.locator( '.orderby' ).selectOption( 'price' );
+
+			// Check that the cheapest appears before the priciest in the list
+			const lowToHighList = await page
+				.getByRole( 'listitem' )
+				.getByRole( 'heading' )
+				.allInnerTexts();
+			const lowToHigh_index_priciest = lowToHighList.indexOf(
+				`${ simpleProductName } 3`
+			);
+			const lowToHigh_index_cheapest = lowToHighList.indexOf(
+				`${ simpleProductName } 1`
+			);
+			expect( lowToHigh_index_cheapest ).toBeLessThan(
+				lowToHigh_index_priciest
+			);
 		} );
 	}
 );

@@ -88,8 +88,5 @@ export const StatsList = ( {
 };
 
 export default withSelect( ( select, { stats, query } ) => {
-	if ( stats.length === 0 ) {
-		return;
-	}
 	return getIndicatorData( select, stats, query );
 } )( StatsList );

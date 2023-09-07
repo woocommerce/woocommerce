@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixing the onsubmit_label prop from SHOW_CES_MODAL action incorreclty named as onSubmitLabel

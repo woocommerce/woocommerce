@@ -28,7 +28,7 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Fitler to enable unminified-js feature.
+	 * Filter to enable unminified-js feature.
 	 *
 	 * @param  array $features Array of active features.
 	 */

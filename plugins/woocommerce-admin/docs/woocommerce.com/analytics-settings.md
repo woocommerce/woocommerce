@@ -12,7 +12,7 @@ WooCommerce Admin is pre-configured with default settings for WooCommerce Analyt
 
 ![Excluded statuses settings](images/settings-excluded-statuses.png)
 
-In this section, statuses that are **unchecked** are **included** in anayltics reports. **Checked** statuses are **excluded**. If your store uses custom order statuses, those statuses are included in the reports by default. They will be listed in this section under `Custom Statuses` and can be excluded via the status checkbox.
+In this section, statuses that are **unchecked** are **included** in analytics reports. **Checked** statuses are **excluded**. If your store uses custom order statuses, those statuses are included in the reports by default. They will be listed in this section under `Custom Statuses` and can be excluded via the status checkbox.
 
 ### Default Date Range
 

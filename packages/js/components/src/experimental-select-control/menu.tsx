@@ -7,9 +7,9 @@ import {
 	createElement,
 	useEffect,
 	useRef,
-	useState,
 	createPortal,
 	Children,
+	useLayoutEffect,
 } from '@wordpress/element';
 
 /**
@@ -22,6 +22,8 @@ type MenuProps = {
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
+	position?: Popover.Position;
+	scrollIntoViewOnOpen?: boolean;
 };
 
 export const Menu = ( {
@@ -29,17 +31,39 @@ export const Menu = ( {
 	getMenuProps,
 	isOpen,
 	className,
+	position = 'bottom right',
+	scrollIntoViewOnOpen = false,
 }: MenuProps ) => {
-	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
+	const popoverRef = useRef< HTMLDivElement >( null );
 
-	useEffect( () => {
-		if ( selectControlMenuRef.current?.parentElement ) {
-			setBoundingRect(
-				selectControlMenuRef.current.parentElement.getBoundingClientRect()
+	useLayoutEffect( () => {
+		const comboboxWrapper = selectControlMenuRef.current?.closest(
+			'.woocommerce-experimental-select-control__combo-box-wrapper'
+		);
+		const popoverContent =
+			popoverRef.current?.querySelector< HTMLDivElement >(
+				'.components-popover__content'
 			);
+		if ( comboboxWrapper && comboboxWrapper?.clientWidth > 0 ) {
+			if ( popoverContent ) {
+				popoverContent.style.width = `${
+					comboboxWrapper.getBoundingClientRect().width
+				}px`;
+			}
 		}
-	}, [ selectControlMenuRef.current ] );
+	}, [
+		selectControlMenuRef.current,
+		selectControlMenuRef.current?.clientWidth,
+		popoverRef.current,
+	] );
+
+	// Scroll the selected item into view when the menu opens.
+	useEffect( () => {
+		if ( isOpen && scrollIntoViewOnOpen ) {
+			selectControlMenuRef.current?.scrollIntoView();
+		}
+	}, [ isOpen, scrollIntoViewOnOpen ] );
 
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	/* Disabled because of the onmouseup on the ul element below. */
@@ -60,8 +84,10 @@ export const Menu = ( {
 							'has-results': Children.count( children ) > 0,
 						}
 					) }
-					position="bottom right"
+					position={ position }
 					animate={ false }
+					resize={ false }
+					ref={ popoverRef }
 				>
 					<ul
 						{ ...getMenuProps() }
@@ -69,9 +95,6 @@ export const Menu = ( {
 							'woocommerce-experimental-select-control__popover-menu-container',
 							className
 						) }
-						style={ {
-							width: boundingRect?.width,
-						} }
 						onMouseUp={ ( e ) =>
 							// Fix to prevent select control dropdown from closing when selecting within the Popover.
 							e.stopPropagation()

@@ -11,6 +11,7 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductSectionLayout as ProductSectionLayout,
+	__experimentalUseProductHelper as useProductHelper,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { Product } from '@woocommerce/data';
@@ -27,7 +28,6 @@ import {
 	PricingTaxesClassField,
 	PricingTaxesChargeField,
 } from './index';
-import { useProductHelper } from '../../use-product-helper';
 import { PLUGIN_ID } from '../constants';
 
 import './pricing-section.scss';

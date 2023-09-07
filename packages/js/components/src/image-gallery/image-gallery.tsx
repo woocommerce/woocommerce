@@ -14,10 +14,11 @@ import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 /**
  * Internal dependencies
  */
-import { Sortable, moveIndex } from '../sortable';
+import { moveIndex } from '../sortable';
 import { ImageGalleryToolbar } from './index';
 import { ImageGalleryChild, MediaUploadComponentType } from './types';
 import { removeItem, replaceItem } from './utils';
+import { ImageGalleryWrapper } from './image-gallery-wrapper';
 
 export type ImageGalleryProps = {
 	children: ImageGalleryChild | ImageGalleryChild[];
@@ -30,6 +31,7 @@ export type ImageGalleryProps = {
 		replaceIndex: number;
 		media: { id: number } & MediaItem;
 	} ) => void;
+	allowDragging?: boolean;
 	onSelectAsCover?: ( itemId: string | null ) => void;
 	onOrderChange?: ( items: ImageGalleryChild[] ) => void;
 	MediaUploadComponent?: MediaUploadComponentType;
@@ -41,6 +43,7 @@ export type ImageGalleryProps = {
 export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 	children,
 	columns = 4,
+	allowDragging = true,
 	onSelectAsCover = () => null,
 	onOrderChange = () => null,
 	onRemove = () => null,
@@ -82,11 +85,9 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				gridTemplateColumns: 'min-content '.repeat( columns ),
 			} }
 		>
-			<Sortable
-				isHorizontal
-				onOrderChange={ ( items ) => {
-					updateOrderedChildren( items );
-				} }
+			<ImageGalleryWrapper
+				allowDragging={ allowDragging }
+				updateOrderedChildren={ updateOrderedChildren }
 				onDragStart={ ( event ) => {
 					setIsDragging( true );
 					onDragStart( event );
@@ -128,6 +129,20 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 											event.relatedTarget as Element
 										 ).closest(
 											'.media-modal, .components-modal__frame'
+										) ) ||
+									( event.relatedTarget &&
+										// Check if not a button within the toolbar is clicked, to prevent hiding the toolbar.
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar'
+										) ) ||
+									( event.relatedTarget &&
+										// Prevent toolbar from hiding if the dropdown is clicked within the toolbar.
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar-dropdown-popover'
 										) )
 								) {
 									return;
@@ -137,6 +152,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						},
 						isToolbarVisible ? (
 							<ImageGalleryToolbar
+								allowDragging={ allowDragging }
 								childIndex={ childIndex }
 								lastChild={
 									childIndex === orderedChildren.length - 1
@@ -190,7 +206,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						) : null
 					);
 				} ) }
-			</Sortable>
+			</ImageGalleryWrapper>
 		</div>
 	);
 };

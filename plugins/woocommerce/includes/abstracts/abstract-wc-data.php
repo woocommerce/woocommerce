@@ -195,6 +195,19 @@ abstract class WC_Data {
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
+		/**
+		 * Filters whether an object deletion should take place. Equivalent to `pre_delete_post`.
+		 *
+		 * @param mixed   $check Whether to go ahead with deletion.
+		 * @param WC_Data $this The data object being deleted.
+		 * @param bool    $force_delete Whether to bypass the trash.
+		 *
+		 * @since 8.1.0.
+		 */
+		$check = apply_filters( "woocommerce_pre_delete_$this->object_type", null, $this, $force_delete );
+		if ( null !== $check ) {
+			return $check;
+		}
 		if ( $this->data_store ) {
 			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );
@@ -507,6 +520,26 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Delete meta data with a matching value.
+	 *
+	 * @since 7.7.0
+	 * @param string $key   Meta key.
+	 * @param mixed  $value Meta value. Entries will only be removed that match the value.
+	 */
+	public function delete_meta_data_value( $key, $value ) {
+		$this->maybe_read_meta_data();
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
+
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				if ( $value === $this->meta_data[ $array_key ]->value ) {
+					$this->meta_data[ $array_key ]->value = null;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Delete meta data.
 	 *
 	 * @since 2.6.0
@@ -741,7 +774,7 @@ abstract class WC_Data {
 				if ( ! $errors ) {
 					$errors = new WP_Error();
 				}
-				$errors->add( $e->getErrorCode(), $e->getMessage() );
+				$errors->add( $e->getErrorCode(), $e->getMessage(), array( 'property_name' => $prop ) );
 			}
 		}
 

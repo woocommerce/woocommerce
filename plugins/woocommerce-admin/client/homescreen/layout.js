@@ -7,7 +7,6 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
-	useState,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -31,7 +30,11 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
+import {
+	TasksPlaceholder,
+	useActiveSetupTasklist,
+	ProgressTitle,
+} from '../task-lists';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
@@ -42,18 +45,19 @@ import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { ProgressTitle } from '../task-lists';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
+import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
 
-const Tasks = lazy( () =>
-	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
-		default: module.Tasks,
-	} ) )
+const TaskLists = lazy( () =>
+	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
+		( module ) => ( {
+			default: module.TaskLists,
+		} )
+	)
 );
 
 export const Layout = ( {
 	defaultHomescreenLayout,
-	isBatchUpdating,
 	query,
 	taskListComplete,
 	hasTaskList,
@@ -66,19 +70,15 @@ export const Layout = ( {
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
+	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
 		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
-
-	if ( isBatchUpdating && ! showInbox ) {
-		setShowInbox( true );
-	}
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
@@ -111,6 +111,7 @@ export const Layout = ( {
 							) }
 						/>
 					) }
+					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
@@ -131,7 +132,7 @@ export const Layout = ( {
 						<ProgressTitle taskListId={ activeSetupTaskList } />
 					</>
 				) }
-				<Tasks query={ query } />
+				<TaskLists query={ query } />
 			</Suspense>
 		);
 	};

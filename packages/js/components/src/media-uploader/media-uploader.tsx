@@ -24,7 +24,7 @@ type MediaUploaderProps = {
 	MediaUploadComponent?: < T extends boolean = false >(
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
-	multipleSelect?: boolean;
+	multipleSelect?: boolean | string;
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
@@ -34,6 +34,7 @@ type MediaUploaderProps = {
 		message: string;
 		file: File;
 	} ) => void;
+	onMediaGalleryOpen?: () => void;
 	onUpload?: ( files: MediaItem[] ) => void;
 	onFileUploadChange?: ( files: MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
@@ -49,6 +50,7 @@ export const MediaUploader = ( {
 	multipleSelect = false,
 	onError = () => null,
 	onFileUploadChange = () => null,
+	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
@@ -94,9 +96,16 @@ export const MediaUploader = ( {
 						<MediaUploadComponent
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
+							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
 							render={ ( { open } ) => (
-								<Button variant="secondary" onClick={ open }>
+								<Button
+									variant="secondary"
+									onClick={ () => {
+										onMediaGalleryOpen();
+										open();
+									} }
+								>
 									{ buttonText }
 								</Button>
 							) }

@@ -40,7 +40,7 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 			} );
 
 		return {
-			loading: ! hasFinishedResolution( 'getRecommendedChannels' ),
+			loading: ! hasFinishedResolution( 'getRecommendedChannels', [] ),
 			data: nonActiveRecommendedChannels,
 			error,
 		};

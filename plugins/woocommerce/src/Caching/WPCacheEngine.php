@@ -34,7 +34,7 @@ class WPCacheEngine implements CacheEngine {
 	 */
 	public function cache_object( string $key, $object, int $expiration, string $group = '' ): bool {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
-		return wp_cache_set( $prefixed_key, $object, $group, $expiration );
+		return false !== wp_cache_set( $prefixed_key, $object, $group, $expiration );
 	}
 
 	/**
@@ -47,7 +47,7 @@ class WPCacheEngine implements CacheEngine {
 	 */
 	public function delete_cached_object( string $key, string $group = '' ): bool {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
-		return wp_cache_delete( $prefixed_key, $group );
+		return false !== wp_cache_delete( $prefixed_key, $group );
 	}
 
 	/**
@@ -71,6 +71,6 @@ class WPCacheEngine implements CacheEngine {
 	 * @return bool True if the group is deleted successfully, false otherwise.
 	 */
 	public function delete_cache_group( string $group = '' ): bool {
-		return self::invalidate_cache_group( $group );
+		return false !== self::invalidate_cache_group( $group );
 	}
 }

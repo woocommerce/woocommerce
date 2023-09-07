@@ -64,7 +64,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 			{ ! collapsed && (
 				<>
 					{ children }
-					{ footer && <CardFooter>{ footer }</CardFooter> }
+					{ !! footer && <CardFooter>{ footer }</CardFooter> }
 				</>
 			) }
 		</Card>

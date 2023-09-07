@@ -23,6 +23,14 @@ class WCAdminAssets {
 	protected static $instance = null;
 
 	/**
+	 * An array of dependencies that have been preloaded (to avoid duplicates).
+	 *
+	 * @var array
+	 */
+	protected $preloaded_dependencies;
+
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -238,7 +246,7 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Registers all the neccessary scripts and styles to show the admin experience.
+	 * Registers all the necessary scripts and styles to show the admin experience.
 	 */
 	public function register_scripts() {
 		if ( ! function_exists( 'wp_set_script_translations' ) ) {
@@ -249,6 +257,7 @@ class WCAdminAssets {
 		$css_file_version = self::get_file_version( 'css' );
 
 		$scripts = array(
+			'wc-admin-layout',
 			'wc-explat',
 			'wc-experimental',
 			'wc-customer-effort-score',
@@ -277,6 +286,7 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
+			'wc-experimental',
 			WC_ADMIN_APP,
 		);
 
@@ -303,6 +313,14 @@ class WCAdminAssets {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, $script_path_name );
 			}
 		}
+
+		wp_register_style(
+			'wc-admin-layout',
+			self::get_url( 'admin-layout/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-admin-layout', 'rtl', 'replace' );
 
 		wp_register_style(
 			'wc-components',
@@ -348,7 +366,7 @@ class WCAdminAssets {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
+			array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			$css_file_version
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
@@ -368,6 +386,7 @@ class WCAdminAssets {
 	public function inject_wc_settings_dependencies() {
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
 			$handles_for_injection = [
+				'wc-admin-layout',
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',

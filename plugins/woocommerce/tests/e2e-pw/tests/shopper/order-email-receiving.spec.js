@@ -7,7 +7,7 @@ let productId, orderId;
 const product = {
 	name: 'Order email product',
 	type: 'simple',
-	price: '42.77',
+	regular_price: '42.77',
 };
 
 const storeName = 'WooCommerce Core E2E Test Suite';
@@ -27,10 +27,18 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			) }`
 		);
 		// clear out the email logs before each test
-		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
-			await page.click( '#cb-select-all-1' );
-			await page.selectOption( '#bulk-action-selector-top', 'delete' );
-			await page.click( '#doaction' );
+		while (
+			await page.locator( '#bulk-action-selector-top' ).isVisible()
+		) {
+			// In WP 6.3, label intercepts check action. Need to force.
+			await page
+				.getByLabel( 'Select All' )
+				.first()
+				.check( { force: true } );
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'delete' );
+			await page.locator( '#doaction' ).click();
 		}
 	} );
 
@@ -53,32 +61,40 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.goto( '/checkout/' );
 
-		await page.fill(
-			'#billing_first_name',
-			customer.billing.us.first_name
-		);
-		await page.fill( '#billing_last_name', customer.billing.us.last_name );
-		await page.fill( '#billing_address_1', customer.billing.us.address );
-		await page.fill( '#billing_city', customer.billing.us.city );
-		await page.selectOption(
-			'#billing_country',
-			customer.billing.us.country
-		);
+		await page
+			.locator( '#billing_first_name' )
+			.fill( customer.billing.us.first_name );
+		await page
+			.locator( '#billing_last_name' )
+			.fill( customer.billing.us.last_name );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( customer.billing.us.address );
+		await page.locator( '#billing_city' ).fill( customer.billing.us.city );
+		await page
+			.locator( '#billing_country' )
+			.selectOption( customer.billing.us.country );
 
-		await page.selectOption( '#billing_state', customer.billing.us.state );
+		await page
+			.locator( '#billing_state' )
+			.selectOption( customer.billing.us.state );
 
-		await page.fill( '#billing_postcode', customer.billing.us.zip );
-		await page.fill( '#billing_phone', customer.billing.us.phone );
-		await page.fill( '#billing_email', customer.email );
+		await page
+			.locator( '#billing_postcode' )
+			.fill( customer.billing.us.zip );
+		await page
+			.locator( '#billing_phone' )
+			.fill( customer.billing.us.phone );
+		await page.locator( '#billing_email' ).fill( customer.email );
 
-		await page.click( 'text=Place order' );
+		await page.locator( 'text=Place order' ).click();
 
-		await page.waitForSelector(
-			'li.woocommerce-order-overview__order > strong'
-		);
-		orderId = await page.textContent(
-			'li.woocommerce-order-overview__order > strong'
-		);
+		await expect(
+			page.locator( 'li.woocommerce-order-overview__order > strong' )
+		).toBeVisible();
+		orderId = await page
+			.locator( 'li.woocommerce-order-overview__order > strong' )
+			.textContent();
 
 		// search to narrow it down to just the messages we want
 		await page.goto(

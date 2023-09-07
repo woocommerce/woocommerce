@@ -18,6 +18,8 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -32,7 +34,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.6.0';
+	public $version = '8.2.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -204,6 +206,22 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Initiali Jetpack Connection Config.
+	 *
+	 * @return void
+	 */
+	public function init_jetpack_connection_config() {
+		$config = new Automattic\Jetpack\Config();
+		$config->ensure(
+			'connection',
+			array(
+				'slug' => 'woocommerce',
+				'name' => __( 'WooCommerce', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
@@ -213,6 +231,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
@@ -221,6 +240,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
+		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -239,6 +259,8 @@ final class WooCommerce {
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
+		$container->get( WebhookUtil::class );
+		$container->get( Marketplace::class );
 	}
 
 	/**
@@ -295,9 +317,12 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+		
+		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
 		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
+
 		/** Define if we're checking against major, minor or no versions in the following places:
 		 *   - plugin screen in WP Admin (displaying extra warning when updating to new major versions)
 		 *   - System Status Report ('Installed version not tested with active version of WooCommerce' warning)
@@ -531,6 +556,15 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+
+		/**
+		 * Tracks.
+		 */
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		/**
 		 * WCCOM Site.

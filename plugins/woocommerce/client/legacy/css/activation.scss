@@ -11,28 +11,12 @@ div.woocommerce-message {
 	position: relative;
 
 	&.updated {
-		border-left-color: #cc99c2 !important;
+		border-left-color: var(--wp-admin-theme-color) !important;
 	}
 }
 
 p.woocommerce-actions,
 .woocommerce-message {
-
-	.button-primary {
-		background: #bb77ae;
-		border-color: #a36597;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		color: #fff;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background: #a36597;
-			border-color: #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		}
-	}
 
 	a.woocommerce-message-close {
 		position: static;

@@ -82,7 +82,6 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 * Test is_complete function of Purchase task.
 	 */
 	public function test_is_not_complete_if_remaining_paid_products() {
-		$this->markTestSkipped( 'Skipped temporarily due to change in endpoint behavior.' );
 		update_option( OnboardingProfile::DATA_OPTION, array( 'product_types' => array( 'memberships' ) ) );
 		$this->assertEquals( false, $this->task->is_complete() );
 	}
@@ -161,7 +160,6 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 * Test the task title if 2 paid items exist.
 	 */
 	public function test_get_title_if_multiple_paid_themes() {
-		$this->markTestSkipped( 'Skipped temporarily due to change in endpoint behavior.' );
 		update_option(
 			OnboardingProfile::DATA_OPTION,
 			array(
@@ -176,7 +174,6 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 * Test the task title if multiple additional paid items exist.
 	 */
 	public function test_get_title_if_multiple_paid_products() {
-		$this->markTestSkipped( 'Skipped temporarily due to change in endpoint behavior.' );
 		update_option(
 			OnboardingProfile::DATA_OPTION,
 			array(

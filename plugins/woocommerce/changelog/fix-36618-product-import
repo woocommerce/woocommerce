@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure product importer imports all lines in a CSV file.

@@ -40,7 +40,7 @@ type MutableProperties = Partial<
 
 type ProductAttributeTermActions = CrudActions<
 	'ProductAttributeTerm',
-	ProductAttributeTerm,
+	ProductAttributeTerm & { attribute_id: string },
 	MutableProperties,
 	'name'
 >;

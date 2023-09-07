@@ -39,11 +39,12 @@ export type SortableProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
+	className?: string;
 };
 
 const THROTTLE_TIME = 16;
 
-export const SortableContext = createContext( {} );
+export const SortableContext: React.Context< object > = createContext( {} );
 
 export const Sortable = ( {
 	children,
@@ -52,6 +53,7 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
+	className,
 }: SortableProps ) => {
 	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
@@ -110,7 +112,7 @@ export const Sortable = ( {
 
 		// Items before the current item cause a one off error when
 		// removed from the old array and spliced into the new array.
-		// TODO: Issue with dragging into same position having to do with isBefore returning true intially.
+		// TODO: Issue with dragging into same position having to do with isBefore returning true initially.
 		let targetIndex = dragIndex < index ? index : index + 1;
 		if ( isBefore( event, isHorizontal ) ) {
 			targetIndex--;
@@ -227,7 +229,7 @@ export const Sortable = ( {
 	return (
 		<SortableContext.Provider value={ {} }>
 			<ol
-				className={ classnames( 'woocommerce-sortable', {
+				className={ classnames( 'woocommerce-sortable', className, {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }

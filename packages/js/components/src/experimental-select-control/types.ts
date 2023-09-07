@@ -16,7 +16,8 @@ export type DefaultItemType = {
 export type SelectedType< ItemType > = ItemType | null;
 
 export type Props = {
-	[ key: string ]: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[ key: string ]: any;
 };
 
 export type getItemPropsType< ItemType > = (

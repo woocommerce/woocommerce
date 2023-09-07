@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { createElement, ReactElement } from 'react';
+import { Tooltip } from '@wordpress/components';
+import { createElement, CSSProperties, ReactElement } from 'react';
 
 /**
  * Internal dependencies
@@ -14,6 +15,8 @@ export type MenuItemProps< ItemType > = {
 	item: ItemType;
 	children: ReactElement | string;
 	getItemProps: getItemPropsType< ItemType >;
+	activeStyle?: CSSProperties;
+	tooltipText?: string;
 };
 
 export const MenuItem = < ItemType, >( {
@@ -21,15 +24,29 @@ export const MenuItem = < ItemType, >( {
 	getItemProps,
 	index,
 	isActive,
+	activeStyle = { backgroundColor: '#bde4ff' },
 	item,
+	tooltipText,
 }: MenuItemProps< ItemType > ) => {
-	return (
-		<li
-			style={ isActive ? { backgroundColor: '#bde4ff' } : {} }
-			{ ...getItemProps( { item, index } ) }
-			className="woocommerce-experimental-select-control__menu-item"
-		>
-			{ children }
-		</li>
-	);
+	function renderListItem() {
+		return (
+			<li
+				style={ isActive ? activeStyle : {} }
+				{ ...getItemProps( { item, index } ) }
+				className="woocommerce-experimental-select-control__menu-item"
+			>
+				{ children }
+			</li>
+		);
+	}
+
+	if ( tooltipText ) {
+		return (
+			<Tooltip text={ tooltipText } position="top center">
+				{ renderListItem() }
+			</Tooltip>
+		);
+	}
+
+	return renderListItem();
 };

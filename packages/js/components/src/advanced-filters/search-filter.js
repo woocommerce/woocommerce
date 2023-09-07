@@ -6,14 +6,16 @@ import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import Search from '../search';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 class SearchFilter extends Component {
 	constructor( { filter, config, query } ) {
@@ -86,13 +88,10 @@ class SearchFilter extends Component {
 		const filterStr = selected.map( ( item ) => item.label ).join( ', ' );
 
 		return textContent(
-			interpolateComponents( {
-				mixedString: config.labels.title,
-				components: {
-					filter: <Fragment>{ filterStr }</Fragment>,
-					rule: <Fragment>{ rule.label }</Fragment>,
-					title: <Fragment />,
-				},
+			createInterpolateElement( config.labels.title, {
+				filter: <Fragment>{ filterStr }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
+				title: <Fragment />,
 			} )
 		);
 	}
@@ -103,40 +102,37 @@ class SearchFilter extends Component {
 		const { selected } = this.state;
 		const { rule } = filter;
 		const { input, labels, rules } = config;
-		const children = interpolateComponents( {
-			mixedString: labels.title,
-			components: {
-				title: <span className={ className } />,
-				rule: (
-					<SelectControl
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__rule'
-						) }
-						options={ rules }
-						value={ rule }
-						onChange={ ( value ) =>
-							onFilterChange( { property: 'rule', value } )
-						}
-						aria-label={ labels.rule }
-					/>
-				),
-				filter: (
-					<Search
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__input'
-						) }
-						onChange={ this.onSearchChange }
-						type={ input.type }
-						autocompleter={ input.autocompleter }
-						placeholder={ labels.placeholder }
-						selected={ selected }
-						inlineTags
-						aria-label={ labels.filter }
-					/>
-				),
-			},
+		const children = createInterpolateElement( labels.title, {
+			title: <span className={ className } />,
+			rule: (
+				<SelectControl
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__rule'
+					) }
+					options={ rules }
+					value={ rule }
+					onChange={ ( value ) =>
+						onFilterChange( { property: 'rule', value } )
+					}
+					aria-label={ labels.rule }
+				/>
+			),
+			filter: (
+				<Search
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__input'
+					) }
+					onChange={ this.onSearchChange }
+					type={ input.type }
+					autocompleter={ input.autocompleter }
+					placeholder={ labels.placeholder }
+					selected={ selected }
+					inlineTags
+					aria-label={ labels.filter }
+				/>
+			),
 		} );
 
 		const screenReaderText = this.getScreenReaderText( filter, config );

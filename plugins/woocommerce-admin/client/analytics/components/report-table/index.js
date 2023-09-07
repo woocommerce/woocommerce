@@ -10,6 +10,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
 import {
 	getIdsFromQuery,
@@ -39,7 +40,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
 import { extendTableData } from './utils';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -138,7 +138,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const filterShownHeaders = ( headers, hiddenKeys ) => {
-		// If no user preferences, set visibilty based on column default.
+		// If no user preferences, set visibility based on column default.
 		if ( ! hiddenKeys ) {
 			return headers.map( ( header ) => ( {
 				...header,
@@ -146,7 +146,7 @@ const ReportTable = ( props ) => {
 			} ) );
 		}
 
-		// Set visibilty based on user preferences.
+		// Set visibility based on user preferences.
 		return headers.map( ( header ) => ( {
 			...header,
 			visible: header.required || ! hiddenKeys.includes( header.key ),

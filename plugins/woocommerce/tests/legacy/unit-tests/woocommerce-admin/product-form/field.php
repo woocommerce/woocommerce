@@ -21,7 +21,7 @@ class WC_Admin_Tests_ProductForm_Field extends WC_Unit_Test_Case {
 		new Field(
 			'id',
 			'woocommerce',
-			array(),
+			array()
 		);
 	}
 }

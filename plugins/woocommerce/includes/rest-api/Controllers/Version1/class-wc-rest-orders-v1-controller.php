@@ -1008,7 +1008,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'version' => array(
 					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
-					'type'        => 'integer',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

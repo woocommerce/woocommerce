@@ -817,7 +817,7 @@ function wc_privacy_policy_page_id() {
 }
 
 /**
- * See if the checkbox is enabled or not based on the existance of the terms page and checkbox text.
+ * See if the checkbox is enabled or not based on the existence of the terms page and checkbox text.
  *
  * @since 3.4.0
  * @return bool
@@ -1223,7 +1223,10 @@ if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
 	 * @param int|object|string $category Category ID, Object or String.
 	 */
 	function woocommerce_template_loop_category_link_open( $category ) {
-		echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+		$category_term = get_term( $category, 'product_cat' );
+		$category_name = ( ! $category_term || is_wp_error( $category_term ) ) ? '' : $category_term->name;
+		/* translators: %s: Category name */
+		echo '<a aria-label="' . sprintf( esc_attr__( 'Visit product category %1$s', 'woocommerce' ), esc_attr( $category_name ) ) . '" href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
 	}
 }
 
@@ -1362,11 +1365,16 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					'data-product_id'  => $product->get_id(),
 					'data-product_sku' => $product->get_sku(),
 					'aria-label'       => $product->add_to_cart_description(),
+					'aria-describedby' => $product->add_to_cart_aria_describedby(),
 					'rel'              => 'nofollow',
 				),
 			);
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
+
+			if ( ! empty( $args['attributes']['aria-describedby'] ) ) {
+				$args['attributes']['aria-describedby'] = wp_strip_all_tags( $args['attributes']['aria-describedby'] );
+			}
 
 			if ( isset( $args['attributes']['aria-label'] ) ) {
 				$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
@@ -2105,7 +2113,13 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
 		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
-		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
+		/**
+		 * Filter the number of upsell products should on the product page.
+		 *
+		 * @param int $limit number of upsell products.
+		 * @since 3.0.0
+		 */
+		$limit = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
 
 		// Get visible upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
@@ -2185,7 +2199,13 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		$orderby     = apply_filters( 'woocommerce_cross_sells_orderby', $orderby );
 		$order       = apply_filters( 'woocommerce_cross_sells_order', $order );
 		$cross_sells = wc_products_array_orderby( $cross_sells, $orderby, $order );
-		$limit       = apply_filters( 'woocommerce_cross_sells_total', $limit );
+		/**
+		 * Filter the number of cross sell products should on the product page.
+		 *
+		 * @param int $limit number of cross sell products.
+		 * @since 3.0.0
+		 */
+		$limit       = intval( apply_filters( 'woocommerce_cross_sells_total', $limit ) );
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
 
 		wc_get_template(
@@ -2744,6 +2764,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 			'order/order-again.php',
 			array(
 				'order'           => $order,
+				'wp_button_class' => wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '',
 				'order_again_url' => wp_nonce_url( add_query_arg( 'order_again', $order->get_id(), wc_get_cart_url() ), 'woocommerce-order_again' ),
 			)
 		);
@@ -2769,6 +2790,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'description'       => '',
 			'placeholder'       => '',
 			'maxlength'         => false,
+			'minlength'         => false,
 			'required'          => false,
 			'autocomplete'      => false,
 			'id'                => $key,
@@ -2812,6 +2834,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( $args['maxlength'] ) {
 			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+		}
+
+		if ( $args['minlength'] ) {
+			$args['custom_attributes']['minlength'] = absint( $args['minlength'] );
 		}
 
 		if ( ! empty( $args['autocomplete'] ) ) {
@@ -3540,7 +3566,7 @@ function wc_display_product_attributes( $product ) {
 	 * Hook: woocommerce_display_product_attributes.
 	 *
 	 * @since 3.6.0.
-	 * @param array $product_attributes Array of atributes to display; label, value.
+	 * @param array $product_attributes Array of attributes to display; label, value.
 	 * @param WC_Product $product Showing attributes for this product.
 	 */
 	$product_attributes = apply_filters( 'woocommerce_display_product_attributes', $product_attributes, $product );
@@ -3670,7 +3696,28 @@ function wc_logout_url( $redirect = '' ) {
  * @since 3.1.0
  */
 function wc_empty_cart_message() {
-	echo '<p class="cart-empty woocommerce-info">' . wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ) . '</p>';
+	$notice = wc_print_notice(
+		wp_kses_post(
+			/**
+			 * Filter empty cart message text.
+			 *
+			 * @since 3.1.0
+			 * @param string $message Default empty cart message.
+			 * @return string
+			 */
+			apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) )
+		),
+		'notice',
+		array(),
+		true
+	);
+
+	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
+	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
+
+	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
 }
 
 /**

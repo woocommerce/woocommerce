@@ -44,6 +44,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
+					'delete' => array(
+						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
+						'type'        => 'boolean',
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -64,7 +68,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = array(
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = array(
 			'id'                    => $object->get_id(),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
@@ -105,13 +110,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_image( $object ),
+			'image'                 => $this->get_image( $object, $context ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
 		);
 
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
@@ -352,10 +356,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * Get the image for a product variation.
 	 *
 	 * @param WC_Product_Variation $variation Variation data.
+	 * @param string               $context   Context of the request: 'view' or 'edit'.
 	 * @return array
 	 */
-	protected function get_image( $variation ) {
-		if ( ! $variation->get_image_id() ) {
+	protected function get_image( $variation, $context = 'view' ) {
+		if ( ! $variation->get_image_id( $context ) ) {
 			return;
 		}
 
@@ -926,6 +931,40 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
+	 * Deletes all unmatched variations (aka duplicates).
+	 *
+	 * @param  WC_Product $product Variable product.
+	 * @return int        Number of deleted variations.
+	 */
+	private function delete_unmatched_product_variations( $product ) {
+		$deleted_count = 0;
+
+		if ( ! $product ) {
+			return $deleted_count;
+		}
+
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+
+		// Get existing variations so we don't create duplicates.
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+
+		$possible_attribute_combinations = array_reverse( wc_array_cartesian( $attributes ) );
+
+		foreach ( $existing_variations as $existing_variation ) {
+			$matching_attribute_key = array_search( $existing_variation->get_attributes(), $possible_attribute_combinations ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+			if ( $matching_attribute_key !== false ) {
+				// We only want one possible variation for each possible attribute combination.
+				unset( $possible_attribute_combinations[ $matching_attribute_key ] );
+				continue;
+			}
+			$existing_variation->delete( true );
+			$deleted_count ++;
+		}
+
+		return $deleted_count;
+	}
+
+	/**
 	 * Generate all variations for a given product.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -945,6 +984,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$product           = wc_get_product( $product_id );
 		$data_store        = $product->get_data_store();
 		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+
+		if ( isset( $request['delete'] ) && $request['delete'] ) {
+			$deleted_count = $this->delete_unmatched_product_variations( $product );
+			$response['deleted_count'] = $deleted_count;
+		}
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 

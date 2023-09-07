@@ -124,7 +124,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'payment-gateway-suggestions',
-			'type'       => 'array',
+			'type'       => 'object',
 			'properties' => array(
 				'content'                 => array(
 					'description' => __( 'Suggestion description.', 'woocommerce' ),
@@ -167,6 +167,16 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'transaction_processors'  => array(
+					'description'         => __( 'Array of transaction processors and their images.', 'woocommerce' ),
+					'type'                => 'object',
+					'addtionalProperties' => array(
+						'type'   => 'string',
+						'format' => 'uri',
+					),
+					'context'             => array( 'view', 'edit' ),
+					'readonly'            => true,
 				),
 			),
 		);

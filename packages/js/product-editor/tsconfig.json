@@ -5,6 +5,16 @@
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
-		"declarationDir": "./build-types"
-	}
+		"declarationDir": "./build-types",
+		"resolveJsonModule": true,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
+	},
+	"include": [
+		"**/*.d.ts",
+		"src/**/*",
+		"src/**/*.json"
+	]
 }

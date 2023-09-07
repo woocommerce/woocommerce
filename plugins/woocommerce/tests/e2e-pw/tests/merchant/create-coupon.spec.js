@@ -25,18 +25,24 @@ test.describe( 'Add New Coupon Page', () => {
 	} );
 
 	test( 'can create new coupon', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon', {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
 
-		await page.fill( '#title', couponCode );
+		await page.locator( '#title' ).fill( couponCode );
 
-		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
+		// Blur then wait for the auto-save to finish
+		await page.locator( '#title' ).blur();
+		await expect(
+			page.getByRole( 'link', { name: 'Move to Trash' } )
+		).toBeVisible();
 
-		await page.fill( '#coupon_amount', '100' );
+		await page
+			.locator( '#woocommerce-coupon-description' )
+			.fill( 'test coupon' );
 
-		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-		await page.click( '#publish' );
+		await page.locator( '#coupon_amount' ).fill( '100' );
+
+		await page.locator( '#publish:not(.disabled)' ).click();
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page

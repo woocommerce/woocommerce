@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Woo AI settings page fields persistence bug when disabling the feature.

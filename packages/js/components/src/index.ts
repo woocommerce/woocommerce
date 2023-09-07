@@ -16,7 +16,7 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { Form, useFormContext } from './form';
 export { FormSection } from './form-section';
-export type { FormContext, FormRef, FormErrors } from './form';
+export type { FormContext, FormContextType, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
@@ -27,7 +27,7 @@ export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
-export { default as Pagination } from './pagination';
+export * from './pagination';
 export { default as Pill } from './pill';
 export { default as Plugins } from './plugins';
 export { default as ProductImage } from './product-image';
@@ -95,7 +95,14 @@ export {
 	SlotContextType,
 	SlotContextHelpersType,
 } from './slot-context';
-export { TreeControl as __experimentalTreeControl } from './experimental-tree-control';
+export {
+	TreeControl as __experimentalTreeControl,
+	Item as TreeItemType,
+} from './experimental-tree-control';
+export {
+	SelectTree as __experimentalSelectTreeControl,
+	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
+} from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 
 // Exports below can be removed once the @woocommerce/product-editor package is released.
@@ -103,3 +110,5 @@ export {
 	ProductSectionLayout as __experimentalProductSectionLayout,
 	ProductFieldSection as __experimentalProductFieldSection,
 } from './product-section-layout';
+export { DisplayState } from './display-state';
+export { ProgressBar } from './progress-bar';

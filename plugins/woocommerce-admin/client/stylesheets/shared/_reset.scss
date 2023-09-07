@@ -71,7 +71,7 @@
 	}
 }
 
-// Temporary fix for compability with the Jetpack masterbar
+// Temporary fix for compatibility with the Jetpack masterbar
 // See https://github.com/Automattic/jetpack/issues/9608
 @include breakpoint( '<782px' ) {
 	.jetpack-masterbar {

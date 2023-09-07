@@ -11,6 +11,14 @@ defined( 'ABSPATH' ) || exit;
  * Rule processor for publishing based on the number of orders.
  */
 class OrderCountRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * The orders provider.
+	 *
+	 * @var OrdersProvider
+	 */
+	protected $orders_provider;
+
 	/**
 	 * Constructor.
 	 *

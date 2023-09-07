@@ -190,7 +190,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_apply_coupon_across_status() {
 		$coupon_code = 'coupon_test_count_across_status';
-		$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
 		$this->assertEquals( 0, $coupon->get_usage_count() );
 
 		$order = WC_Helper_Order::create_order();
@@ -253,8 +253,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_apply_coupon_stores_meta_data() {
 		$coupon_code = 'coupon_test_meta_data';
-		$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
-		$order  = WC_Helper_Order::create_order();
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order       = WC_Helper_Order::create_order();
 		$order->set_status( 'processing' );
 		$order->save();
 		$order->apply_coupon( $coupon_code );
@@ -268,5 +268,85 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'code', $coupon_data );
 		$this->assertEquals( $coupon->get_id(), $coupon_data['id'] );
 		$this->assertEquals( $coupon_code, $coupon_data['code'] );
+	}
+
+	/**
+	 * Test for get_discount_to_display which must return a value
+	 * with and without tax whatever the setting of the options.
+	 *
+	 * Issue :https://github.com/woocommerce/woocommerce/issues/36794
+	 */
+	public function test_get_discount_to_display() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_currency', 'USD' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
+		// Set dummy data.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'tax',
+			'tax_rate_priority' => '1',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$coupon  = WC_Helper_Coupon::create_coupon();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
+
+		$order = new WC_Order();
+		$order->add_product( $product );
+		$order->apply_coupon( $coupon );
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( wc_price( 1, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'excl' ) );
+		$this->assertEquals( wc_price( 1.20, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'incl' ) );
+	}
+
+	/**
+	 * @testDox Cache does not interfere if wc_get_order returns a different class than WC_Order.
+	 */
+	public function test_cache_does_not_interferes_with_order_object() {
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id ) {
+				// this makes the cache store a specific order class instance, but it's quickly replaced by a generic one
+				// as we're in the middle of a save and this gets executed before the logic in WC_Abstract_Order.
+				$order = wc_get_order( $order_id );
+			}
+		);
+		$order = new WC_Order();
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( Automattic\WooCommerce\Admin\Overrides\Order::class, $order );
+	}
+
+	/**
+	 * @testDox When a taxonomy with a default term is set on the order, it's inserted when a new order is created.
+	 */
+	public function test_default_term_for_custom_taxonomy() {
+		$custom_taxonomy = register_taxonomy(
+			'custom_taxonomy',
+			'shop_order',
+			array(
+				'default_term' => 'new_term',
+			),
+		);
+
+		// Set user who has access to create term.
+		$current_user_id = get_current_user_id();
+		$user            = new WP_User( wp_create_user( 'test', '' ) );
+		$user->set_role( 'administrator' );
+		wp_set_current_user( $user->ID );
+
+		$order = wc_create_order();
+
+		wp_set_current_user( $current_user_id );
+		$order_terms = wp_list_pluck( wp_get_object_terms( $order->get_id(), $custom_taxonomy->name ), 'name' );
+		$this->assertContains( 'new_term', $order_terms );
 	}
 }

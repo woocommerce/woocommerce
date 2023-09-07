@@ -597,7 +597,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function connect_wcpay() {
 		if ( ! class_exists( 'WC_Payments_Account' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
 		$connect_url = add_query_arg(

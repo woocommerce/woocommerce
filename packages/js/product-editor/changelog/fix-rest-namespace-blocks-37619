@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Adding apifetch middleware to override product api endpoint only for the product editor.

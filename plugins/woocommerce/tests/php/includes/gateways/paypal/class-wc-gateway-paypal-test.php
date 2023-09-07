@@ -29,8 +29,8 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		update_post_meta( $order->get_id(), '_paypal_status', 'pending' );
-		update_post_meta( $order->get_id(), '_transaction_id', $this->transaction_id_26960 );
+		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( 'paypal' );
 		$order->save();
 
@@ -56,8 +56,8 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		update_post_meta( $order->get_id(), '_paypal_status', 'pending' );
-		update_post_meta( $order->get_id(), '_transaction_id', $this->transaction_id_26960 );
+		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( 'paypal' );
 		$order->save();
 

@@ -218,25 +218,26 @@ class Controller extends \WC_REST_Reports_Controller {
 				'name',
 				'username',
 				'email',
+				'all',
 			),
 		);
 		$params['name_includes']           = array(
-			'description'       => __( 'Limit response to objects with specfic names.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['name_excludes']           = array(
-			'description'       => __( 'Limit response to objects excluding specfic names.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_includes']       = array(
-			'description'       => __( 'Limit response to objects with specfic usernames.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_excludes']       = array(
-			'description'       => __( 'Limit response to objects excluding specfic usernames.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -251,12 +252,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_includes']        = array(
-			'description'       => __( 'Limit response to objects with specfic countries.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_excludes']        = array(
-			'description'       => __( 'Limit response to objects excluding specfic countries.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -386,7 +387,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'type' => 'string',
 			),
 		);
-		$params['force_cache_refresh'] = array(
+		$params['force_cache_refresh']     = array(
 			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wp_validate_boolean',

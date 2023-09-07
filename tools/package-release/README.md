@@ -2,6 +2,8 @@
 
 When a package contains sufficient changes to justify a release to [NPM](https://www.npmjs.com/), follow these instructions to create a new release from the monorepo.
 
+Below are instructions for releasing using Github Workflows (recommended) and the command line. When releasing packages for the first time, release from the command line.
+
 ## Release packages using Github Workflows (recommended)
 
 ### Prepare packages
@@ -36,7 +38,7 @@ In order to prepare a package for release, a changelog will need to be compiled 
 ./tools/package-release/bin/dev prepare -a
 ```
 
-When making an initial release for a new package, pass the `--initialRelease` flag to signify a new release for a new package.
+When making an initial release for a new package, pass the `--initial-release` flag to signify a new release for a new package.
 
 2. Create a pull request with the resulting changes and merge it.
 
@@ -47,6 +49,8 @@ See more about the prepare script using `./tools/package-release/bin/dev publish
 1. Pull down the latest commits from Github.
 
 2. Run the release script from monorepo root, first as a dry run.
+
+When making an initial release for a new package, pass the `--initial-release` flag to signify a new release for a new package.
 
 ```
 ./tools/package-release/bin/dev publish -a --dry-run

@@ -6,21 +6,18 @@ import {
 	__experimentalProductFieldSection as ProductFieldSection,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
+	__experimentalDetailsNameField as DetailsNameField,
+	__experimentalDetailsFeatureField as DetailsFeatureField,
+	__experimentalDetailsSummaryField as DetailsSummaryField,
+	__experimentalDetailsDescriptionField as DetailsDescriptionField,
+	DETAILS_SECTION_ID,
+	TAB_GENERAL_ID,
 } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import {
-	DetailsNameField,
-	DetailsCategoriesField,
-	DetailsFeatureField,
-	DetailsSummaryField,
-	DetailsDescriptionField,
-} from './index';
-
-import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
-
+import { PLUGIN_ID } from '../constants';
 import './product-details-section.scss';
 
 export const DetailsSectionFills = () => (
@@ -45,13 +42,6 @@ export const DetailsSectionFills = () => (
 			pluginId={ PLUGIN_ID }
 		>
 			<DetailsNameField />
-		</WooProductFieldItem>
-		<WooProductFieldItem
-			id="categories"
-			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
-			pluginId={ PLUGIN_ID }
-		>
-			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
 			id="feature"

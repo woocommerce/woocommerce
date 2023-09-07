@@ -14,13 +14,13 @@ import {
 	CardBody,
 	CenteredSpinner,
 } from '~/marketing/components';
-import { useRecommendedPlugins } from './useRecommendedPlugins';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { PluginsTabPanel } from './PluginsTabPanel';
 import './DiscoverTools.scss';
 
 export const DiscoverTools = () => {
-	const { isInitializing, isLoading, plugins, installAndActivate } =
-		useRecommendedPlugins();
+	const { isInitializing, isLoading, data, installAndActivate } =
+		useRecommendedPluginsWithoutChannels();
 
 	/**
 	 * Renders card body.
@@ -38,7 +38,7 @@ export const DiscoverTools = () => {
 			);
 		}
 
-		if ( plugins.length === 0 ) {
+		if ( data.length === 0 ) {
 			return (
 				<CardBody className="woocommerce-marketing-discover-tools-card-body-empty-content">
 					<Icon icon={ trendingUp } size={ 32 } />
@@ -66,7 +66,7 @@ export const DiscoverTools = () => {
 
 		return (
 			<PluginsTabPanel
-				plugins={ plugins }
+				plugins={ data }
 				isLoading={ isLoading }
 				onInstallAndActivate={ installAndActivate }
 			/>

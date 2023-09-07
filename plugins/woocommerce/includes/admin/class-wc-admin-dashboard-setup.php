@@ -91,7 +91,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return string
 		 */
 		public function get_button_link( $task ) {
-			$url = $task->get_json()['actionUrl'];
+			$url = (string) $task->get_json()['actionUrl'];
 
 			if ( substr( $url, 0, 4 ) === 'http' ) {
 				return $url;

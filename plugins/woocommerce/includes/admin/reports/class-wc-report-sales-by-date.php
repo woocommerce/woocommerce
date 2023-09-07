@@ -326,7 +326,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		);
 
 		foreach ( $this->report_data->partial_refunds as $key => $order ) {
-			$this->report_data->partial_refunds[ $key ]->net_refund = $order->total_refund - ( $order->total_shipping + $order->total_tax + $order->total_shipping_tax );
+			$this->report_data->partial_refunds[ $key ]->net_refund = (float) $order->total_refund - ( (float) $order->total_shipping + (float) $order->total_tax + (float) $order->total_shipping_tax );
 		}
 
 		/**

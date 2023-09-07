@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_Tracks_Event class.
  */
+#[AllowDynamicProperties]
 class WC_Tracks_Event {
 
 	/**

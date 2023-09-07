@@ -6,10 +6,14 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +40,12 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
-		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+			$container = wc_get_container();
+			$container->get( Marketplace::class );
+
+			add_action( 'admin_menu', array( $this, 'addons_my_subscriptions' ), 70 );
+		} else {
 			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
 		}
 
@@ -169,6 +178,16 @@ class WC_Admin_Menus {
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
 		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+	}
+
+	/**
+	 * Registers the wc-addons page within the WooCommerce menu.
+	 * Temporary measure till we convert the whole page to React.
+	 *
+	 * @return void
+	 */
+	public function addons_my_subscriptions() {
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), null, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -319,8 +338,7 @@ class WC_Admin_Menus {
 	 */
 	public function orders_menu(): void {
 		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
-			$this->orders_page_controller = new Custom_Orders_PageController();
-			$this->orders_page_controller->setup();
+			wc_get_container()->get( Custom_Orders_PageController::class )->setup();
 		} else {
 			wc_get_container()->get( COTRedirectionController::class )->setup();
 		}
@@ -375,9 +393,12 @@ class WC_Admin_Menus {
 					?>
 				</ul>
 			</div>
-			<p class="button-controls">
+			<p class="button-controls" data-items-type="posttype-woocommerce-endpoints">
 				<span class="list-controls">
-					<a href="<?php echo esc_url( admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ) ); ?>" class="select-all"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a>
+					<label>
+						<input type="checkbox" class="select-all" />
+						<?php esc_html_e( 'Select all', 'woocommerce' ); ?>
+					</label>
 				</span>
 				<span class="add-to-menu">
 					<button type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints"><?php esc_html_e( 'Add to menu', 'woocommerce' ); ?></button>
@@ -424,7 +445,7 @@ class WC_Admin_Menus {
 	 * Maybe add new management product experience.
 	 */
 	public function maybe_add_new_product_management_experience() {
-		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
+		if ( Features::is_enabled( 'new-product-management-experience' ) || FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			global $submenu;
 			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
 				// Disable phpcs since we need to override submenu classes.

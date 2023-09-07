@@ -48,7 +48,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ ...headingProps }
 				className="experimental-woocommerce-tree-item__heading"
 			>
-				{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
+				{ /* eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control */ }
 				<label className="experimental-woocommerce-tree-item__label">
 					{ selection.multiple ? (
 						<CheckboxControl
@@ -60,13 +60,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 						/>
 					) : (
 						<input
-							type="radio"
+							type="checkbox"
+							className="experimental-woocommerce-tree-item__checkbox"
 							checked={ selection.checkedStatus === 'checked' }
-							className="components-radio-control__input"
 							onChange={ ( event ) =>
-								selection.onSelectChild(
-									event.currentTarget.checked
-								)
+								selection.onSelectChild( event.target.checked )
 							}
 						/>
 					) }

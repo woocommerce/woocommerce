@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
-use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,19 +38,13 @@ class PaymentsMoreInfoNeeded {
 	 * @return bool
 	 */
 	public static function should_display_note() {
-		// If user has installed WCPay, don't show this note.
-		$installed_plugins = PluginsHelper::get_installed_plugin_slugs();
-		if ( in_array( 'woocommerce-payments', $installed_plugins, true ) ) {
-			return false;
-		}
-
-		// User has dismissed the WCPay Welcome Page.
-		if ( 'yes' !== get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		// WCPay welcome page must not be visible.
+		if ( WcPayWelcomePage::instance()->must_be_visible() ) {
 			return false;
 		}
 
 		// More than 30 days since viewing the welcome page.
-		$exit_survey_timestamp = get_option( 'wc_pay_exit_survey_more_info_needed_timestamp', false );
+		$exit_survey_timestamp = get_option( 'wcpay_welcome_page_exit_survey_more_info_needed_timestamp', false );
 		if ( ! $exit_survey_timestamp ||
 			( time() - $exit_survey_timestamp < 30 * DAY_IN_SECONDS )
 		) {
@@ -69,10 +63,10 @@ class PaymentsMoreInfoNeeded {
 		if ( ! self::should_display_note() ) {
 			return;
 		}
-		$content = __( 'We recently asked you if you wanted more information about WooCommerce Payments. Run your business and manage your payments in one place with the solution built and supported by WooCommerce.', 'woocommerce' );
+		$content = __( 'We recently asked you if you wanted more information about WooPayments. Run your business and manage your payments in one place with the solution built and supported by WooCommerce.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Payments made simple with WooCommerce Payments', 'woocommerce' ) );
+		$note->set_title( __( 'Payments made simple with WooPayments', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );

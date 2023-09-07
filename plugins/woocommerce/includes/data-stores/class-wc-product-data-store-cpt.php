@@ -203,7 +203,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug', 'post_password' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_content'   => $product->get_description( 'edit' ),
 				'post_excerpt'   => $product->get_short_description( 'edit' ),
@@ -1137,7 +1137,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		/**
 		 * Check each variation to find the one that matches the $match_attributes.
 		 *
-		 * Note: Not all meta fields will be set which is why we check existance.
+		 * Note: Not all meta fields will be set which is why we check existence.
 		 */
 		foreach ( $sorted_meta as $variation_id => $variation ) {
 			$match = true;
@@ -2120,7 +2120,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 		return $wpdb->prepare(
 			"
-			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			SELECT COALESCE( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
 			WHERE meta_table.meta_key = '_stock'
 			AND meta_table.post_id = %d
 			",
