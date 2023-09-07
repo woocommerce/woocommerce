@@ -1659,6 +1659,8 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
 
 /**
+ * Set product image when image filename matches a product sku.
+ *
  * @param int $attachment_id Media attachment ID
  * @return void
  */
