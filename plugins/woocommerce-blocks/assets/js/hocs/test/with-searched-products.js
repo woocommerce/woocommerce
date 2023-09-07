@@ -49,10 +49,10 @@ describe( 'withSearchedProducts Component', () => {
 		( { selected, products, isLoading, onSearch } ) => {
 			return (
 				<div
-					products={ products }
-					selected={ selected }
-					isLoading={ isLoading }
-					onSearch={ onSearch }
+					data-products={ products }
+					data-selected={ selected }
+					data-isLoading={ isLoading }
+					data-onSearch={ onSearch }
 				/>
 			);
 		}
@@ -69,8 +69,8 @@ describe( 'withSearchedProducts Component', () => {
 
 		it( 'has expected values for props', () => {
 			props = renderer.root.findByType( 'div' ).props;
-			expect( props.selected ).toEqual( selected );
-			expect( props.products ).toEqual( [
+			expect( props[ 'data-selected' ] ).toEqual( selected );
+			expect( props[ 'data-products' ] ).toEqual( [
 				{ id: 10, name: 'foo', parent: 0 },
 				{ id: 20, name: 'bar', parent: 0 },
 			] );
@@ -80,7 +80,7 @@ describe( 'withSearchedProducts Component', () => {
 			props = renderer.root.findByType( 'div' ).props;
 
 			act( () => {
-				props.onSearch();
+				props[ 'data-onSearch' ]();
 			} );
 
 			expect( useDebouncedCallback ).toHaveBeenCalled();

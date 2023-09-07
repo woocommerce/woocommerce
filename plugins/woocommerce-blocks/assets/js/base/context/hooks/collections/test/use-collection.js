@@ -28,7 +28,7 @@ class TestErrorBoundary extends ReactComponent {
 
 	render() {
 		if ( this.state.hasError ) {
-			return <div error={ this.state.error } />;
+			return <div data-error={ this.state.error } />;
 		}
 
 		return this.props.children;
@@ -100,7 +100,7 @@ describe( 'useCollection', () => {
 			} );
 			//eslint-disable-next-line testing-library/await-async-query
 			const props = renderer.root.findByType( 'div' ).props;
-			expect( props.error.message ).toMatch( /options object/ );
+			expect( props[ 'data-error' ].message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
 			renderer.unmount();
 		}
@@ -122,7 +122,7 @@ describe( 'useCollection', () => {
 			} );
 			//eslint-disable-next-line testing-library/await-async-query
 			const props = renderer.root.findByType( 'div' ).props;
-			expect( props.error.message ).toMatch( /options object/ );
+			expect( props[ 'data-error' ].message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
 			renderer.unmount();
 		}

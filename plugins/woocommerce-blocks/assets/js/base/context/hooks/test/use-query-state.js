@@ -38,7 +38,7 @@ describe( 'Testing Query State Hooks', () => {
 	const getProps = ( testRenderer ) => {
 		//eslint-disable-next-line testing-library/await-async-query
 		const props = testRenderer.root.findByType( 'div' ).props;
-		return [ props.queryState, props.setQueryState ];
+		return [ props[ 'data-queryState' ], props[ 'data-setQueryState' ] ];
 	};
 
 	/**
@@ -75,7 +75,10 @@ describe( 'Testing Query State Hooks', () => {
 		const args = propKeysForArgs.map( ( key ) => props[ key ] );
 		const [ queryValue, setQueryValue ] = hookTested( ...args );
 		return (
-			<div queryState={ queryValue } setQueryState={ setQueryValue } />
+			<div
+				data-queryState={ queryValue }
+				data-setQueryState={ setQueryValue }
+			/>
 		);
 	};
 

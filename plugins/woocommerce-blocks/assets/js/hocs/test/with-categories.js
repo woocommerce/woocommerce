@@ -1,6 +1,7 @@
 // We need to disable the following eslint check as it's only applicable
 // to testing-library/react not `react-test-renderer` used here
 /* eslint-disable testing-library/await-async-query */
+
 /**
  * External dependencies
  */
@@ -28,9 +29,9 @@ const mockCategories = [
 const TestComponent = withCategories( ( props ) => {
 	return (
 		<div
-			error={ props.error }
-			isLoading={ props.isLoading }
-			categories={ props.categories }
+			data-error={ props.error }
+			data-isLoading={ props.isLoading }
+			data-categories={ props.categories }
 		/>
 	);
 } );
@@ -69,9 +70,9 @@ describe( 'withCategories Component', () => {
 		it( 'sets the categories props', () => {
 			const props = renderer.root.findByType( 'div' ).props;
 
-			expect( props.error ).toBeNull();
-			expect( props.isLoading ).toBe( false );
-			expect( props.categories ).toEqual( mockCategories );
+			expect( props[ 'data-error' ] ).toBeNull();
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-categories' ] ).toEqual( mockCategories );
 		} );
 	} );
 
@@ -98,9 +99,9 @@ describe( 'withCategories Component', () => {
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props.error ).toEqual( formattedError );
-			expect( props.isLoading ).toBe( false );
-			expect( props.categories ).toEqual( [] );
+			expect( props[ 'data-error' ] ).toEqual( formattedError );
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-categories' ] ).toEqual( [] );
 		} );
 	} );
 } );

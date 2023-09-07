@@ -26,10 +26,10 @@ const attributes = { categoryId: 1 };
 const TestComponent = withCategory( ( props ) => {
 	return (
 		<div
-			error={ props.error }
-			getCategory={ props.getCategory }
-			isLoading={ props.isLoading }
-			category={ props.category }
+			data-error={ props.error }
+			data-getCategory={ props.getCategory }
+			data-isLoading={ props.isLoading }
+			data-category={ props.category }
 		/>
 	);
 } );
@@ -72,7 +72,7 @@ describe( 'withCategory Component', () => {
 			const { getCategory } = mockUtils;
 			const props = renderer.root.findByType( 'div' ).props;
 
-			props.getCategory();
+			props[ 'data-getCategory' ]();
 
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
@@ -89,10 +89,10 @@ describe( 'withCategory Component', () => {
 		it( 'sets the category props', () => {
 			const props = renderer.root.findByType( 'div' ).props;
 
-			expect( props.error ).toBeNull();
-			expect( typeof props.getCategory ).toBe( 'function' );
-			expect( props.isLoading ).toBe( false );
-			expect( props.category ).toEqual( {
+			expect( props[ 'data-error' ] ).toBeNull();
+			expect( typeof props[ 'data-getCategory' ] ).toBe( 'function' );
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-category' ] ).toEqual( {
 				...mockCategory,
 				id: attributes.categoryId,
 			} );
@@ -122,10 +122,10 @@ describe( 'withCategory Component', () => {
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props.error ).toEqual( formattedError );
-			expect( typeof props.getCategory ).toBe( 'function' );
-			expect( props.isLoading ).toBe( false );
-			expect( props.category ).toBeNull();
+			expect( props[ 'data-error' ] ).toEqual( formattedError );
+			expect( typeof props[ 'data-getCategory' ] ).toBe( 'function' );
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-category' ] ).toBeNull();
 		} );
 	} );
 } );
