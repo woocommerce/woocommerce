@@ -40,13 +40,13 @@ const defaultArgs = {
 const TestComponent = withReviews( ( props ) => {
 	return (
 		<div
-			error={ props.error }
-			getReviews={ props.getReviews }
-			appendReviews={ props.appendReviews }
-			onChangeArgs={ props.onChangeArgs }
-			isLoading={ props.isLoading }
-			reviews={ props.reviews }
-			totalReviews={ props.totalReviews }
+			data-error={ props.error }
+			data-getReviews={ props.getReviews }
+			data-appendReviews={ props.appendReviews }
+			data-onChangeArgs={ props.onChangeArgs }
+			data-isLoading={ props.isLoading }
+			data-reviews={ props.reviews }
+			data-totalReviews={ props.totalReviews }
 		/>
 	);
 } );
@@ -127,10 +127,14 @@ describe( 'withReviews Component', () => {
 		it( 'sets reviews based on API response', () => {
 			const props = renderer.root.findByType( 'div' ).props;
 
-			expect( props.error ).toBeNull();
-			expect( props.isLoading ).toBe( false );
-			expect( props.reviews ).toEqual( mockReviews.slice( 0, 2 ) );
-			expect( props.totalReviews ).toEqual( mockReviews.length );
+			expect( props[ 'data-error' ] ).toBeNull();
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-reviews' ] ).toEqual(
+				mockReviews.slice( 0, 2 )
+			);
+			expect( props[ 'data-totalReviews' ] ).toEqual(
+				mockReviews.length
+			);
 		} );
 	} );
 
@@ -155,9 +159,9 @@ describe( 'withReviews Component', () => {
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props.error ).toEqual( formattedError );
-			expect( props.isLoading ).toBe( false );
-			expect( props.reviews ).toEqual( [] );
+			expect( props[ 'data-error' ] ).toEqual( formattedError );
+			expect( props[ 'data-isLoading' ] ).toBe( false );
+			expect( props[ 'data-reviews' ] ).toEqual( [] );
 		} );
 	} );
 } );
