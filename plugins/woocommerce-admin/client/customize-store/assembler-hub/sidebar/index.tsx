@@ -97,28 +97,28 @@ function SidebarScreens() {
 	useSyncPathWithURL();
 	return (
 		<>
-			<NavigatorScreen path="/customize-store">
+			<NavigatorScreen path="/customize-store/assembler-hub">
 				<SidebarNavigationScreenMain />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/color-palette">
+			<NavigatorScreen path="/customize-store/assembler-hub/color-palette">
 				<SidebarNavigationScreenColorPalette />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/typography">
+			<NavigatorScreen path="/customize-store/assembler-hub/typography">
 				<SidebarNavigationScreenTypography />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/header">
+			<NavigatorScreen path="/customize-store/assembler-hub/header">
 				<SidebarNavigationScreenHeader />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/homepage">
+			<NavigatorScreen path="/customize-store/assembler-hub/homepage">
 				<SidebarNavigationScreenHomepage />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/footer">
+			<NavigatorScreen path="/customize-store/assembler-hub/footer">
 				<SidebarNavigationScreenFooter />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/pages">
+			<NavigatorScreen path="/customize-store/assembler-hub/pages">
 				<SidebarNavigationScreenPages />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/logo">
+			<NavigatorScreen path="/customize-store/assembler-hub/logo">
 				<SidebarNavigationScreenLogo />
 			</NavigatorScreen>
 		</>
@@ -126,13 +126,11 @@ function SidebarScreens() {
 }
 
 function Sidebar() {
-	const { params: urlParams } = useLocation();
-	const initialPath = useRef( urlParams.path ?? '/customize-store' );
 	return (
 		<>
 			<NavigatorProvider
 				className="edit-site-sidebar__content"
-				initialPath={ initialPath.current }
+				initialPath={ '/customize-store/assembler-hub' }
 			>
 				<SidebarScreens />
 			</NavigatorProvider>
