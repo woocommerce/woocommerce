@@ -1,5 +1,14 @@
 <?php
 declare( strict_types=1 );
+/**
+ * Display the Customer History metabox.
+ *
+ * This template is used to display the customer history metabox on the edit order screen.
+ *
+ * @see Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory
+ * @package WooCommerce\Templates
+ * @version x.x.x
+ */
 
 defined( 'ABSPATH' ) || exit;
 
