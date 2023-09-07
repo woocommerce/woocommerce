@@ -212,7 +212,6 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 		}
 	}
 
-
 	private function track( $data ) {
 		$track_data = array(
 			'success'              => true,
