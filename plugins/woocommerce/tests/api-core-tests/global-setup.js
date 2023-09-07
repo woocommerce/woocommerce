@@ -67,6 +67,7 @@ module.exports = async ( config ) => {
 		const woocommerceZipPath = await downloadZip( params );
 
 		let adminLoggedIn = false;
+		let pluginActive = false;
 
 		console.log( '--------------------------------------' );
 		console.log( 'Running daily tests, resetting site...' );
@@ -124,25 +125,51 @@ module.exports = async ( config ) => {
 			'WooCommerce was successfully deleted.'
 		);
 
-		console.log( 'Reinstalling WooCommerce Plugin...' );
-		await setupPage.goto( 'wp-admin/plugin-install.php' );
-		await setupPage.locator( 'a.upload-view-toggle' ).click();
-		await expect( setupPage.locator( 'p.install-help' ) ).toBeVisible();
-		await expect( setupPage.locator( 'p.install-help' ) ).toContainText(
-			'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
-		);
-		const [ fileChooser ] = await Promise.all( [
-			setupPage.waitForEvent( 'filechooser' ),
-			setupPage.locator( '#pluginzip' ).click(),
-		] );
-		await fileChooser.setFiles( woocommerceZipPath );
-		await setupPage
-			.locator( '#install-plugin-submit' )
-			.click( { timeout: 60000 } );
-		await setupPage.waitForLoadState( 'networkidle' );
-		await setupPage
-			.getByRole( 'link', { name: 'Activate Plugin' } )
-			.click();
+		for ( let i = 0; i < adminRetries; i++ ) {
+			try {
+				console.log( 'Reinstalling WooCommerce Plugin...' );
+				await setupPage.goto( 'wp-admin/plugin-install.php' );
+				await setupPage.locator( 'a.upload-view-toggle' ).click();
+				await expect(
+					setupPage.locator( 'p.install-help' )
+				).toBeVisible();
+				await expect(
+					setupPage.locator( 'p.install-help' )
+				).toContainText(
+					'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+				);
+				const [ fileChooser ] = await Promise.all( [
+					setupPage.waitForEvent( 'filechooser' ),
+					setupPage.locator( '#pluginzip' ).click(),
+				] );
+				await fileChooser.setFiles( woocommerceZipPath );
+				console.log( 'Uploading nightly build...' );
+				await setupPage
+					.locator( '#install-plugin-submit' )
+					.click( { timeout: 60000 } );
+				await setupPage.waitForLoadState( 'networkidle' );
+				await expect(
+					setupPage.getByRole( 'link', { name: 'Activate Plugin' } )
+				).toBeVisible();
+				console.log( 'Activating Plugin...' );
+				await setupPage
+					.getByRole( 'link', { name: 'Activate Plugin' } )
+					.click( { timeout: 60000 } );
+				pluginActive = true;
+				break;
+			} catch ( e ) {
+				console.log(
+					`Installing and activating plugin failed, Retrying... ${ i }/${ adminRetries }`
+				);
+				console.log( e );
+			}
+		}
+		if ( ! pluginActive ) {
+			console.error(
+				'Cannot proceed api test, as installing WC failed. Please check if the test site has been setup correctly.'
+			);
+			process.exit( 1 );
+		}
 
 		console.log( 'WooCommerce Re-installed.' );
 		await expect(
@@ -151,6 +178,23 @@ module.exports = async ( config ) => {
 
 		await deleteZip( woocommerceZipPath );
 
-		// await site.reset( process.env.USER_KEY, process.env.USER_SECRET );
+		// Might need to update the database
+		await setupPage.goto( 'wp-admin/plugins.php' );
+		const updateButton = setupPage.locator(
+			'text=Update WooCommerce Database'
+		);
+		const updateCompleteMessage = setupPage.locator(
+			'text=WooCommerce database update complete.'
+		);
+		await expect( setupPage.locator( 'div.wrap > h1' ) ).toHaveText(
+			'Plugins'
+		);
+		if ( await updateButton.isVisible() ) {
+			console.log( 'Database update button present. Click it.' );
+			await updateButton.click( { timeout: 60000 } );
+			await expect( updateCompleteMessage ).toBeVisible();
+		} else {
+			console.log( 'No DB update needed' );
+		}
 	}
 };
