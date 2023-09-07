@@ -4,6 +4,8 @@
  * This is a VERY CRUDE example of how REST API documentation can be automatically generated
  * from the attributes that define the classes and their endpoints.
  * It will generate a bin/rest-api-doc.html file.
+ *
+ * This script is obsolete, please use generate-rest-api-doc.php instead.
  */
 
 if (version_compare(phpversion(), '8', '<')) {
@@ -20,8 +22,8 @@ use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\AllowUnaut
 include __DIR__ . '/../vendor/autoload.php';
 
 $directories_to_include = [
-	__DIR__ . '/../src/Internal/RestApi/Infrastructure/Attributes',
-	__DIR__ . '/../src/Internal/RestApi/Controllers'
+    __DIR__ . '/../src/Internal/RestApi/Infrastructure/Attributes',
+    __DIR__ . '/../src/Internal/RestApi/Controllers'
 ];
 
 foreach($directories_to_include as $directory) {

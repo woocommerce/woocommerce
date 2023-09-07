@@ -1,0 +1,341 @@
+(self.webpackChunk_N_E = self.webpackChunk_N_E || []).push([
+    [2521], {
+        2521: function(e, a, s) {
+            "use strict";
+            s.d(a, {
+                v: function() {
+                    return u
+                }
+            });
+            var n = s(85893),
+                t = s(94184),
+                r = s.n(t),
+                c = s(84579),
+                l = s(42101),
+                i = s.n(l);
+
+            function d(e) {
+                let {
+                    open: a,
+                    slug: s,
+                    parentName: t,
+                    parentType: l,
+                    childParamsGroups: d,
+                    oneOfObject: o = !1
+                } = e, {
+                    t: m
+                } = (0, c.$)(["parameter_table", "products"]);
+                return (0, n.jsx)("tr", {
+                    className: r()(i().childBodyParametersRows, "color-bg-subtle border-top-0"),
+                    children: (0, n.jsx)("td", {
+                        className: "has-nested-table",
+                        children: (0, n.jsxs)("details", {
+                            className: "box px-3 ml-1 mb-0",
+                            open: a,
+                            children: [(0, n.jsx)("summary", {
+                                role: "button",
+                                "aria-expanded": "false",
+                                className: "mb-2 keyboard-focus",
+                                children: o ? (0, n.jsx)("span", {
+                                    id: "".concat(s, "-").concat(t, "-").concat(l),
+                                    children: "Can be one of these objects:"
+                                }) : (0, n.jsxs)("span", {
+                                    id: "".concat(s, "-").concat(t, "-").concat(l),
+                                    children: ["Properties of ", (0, n.jsx)("code", {
+                                        children: t
+                                    })]
+                                })
+                            }), (0, n.jsxs)("table", {
+                                id: "".concat(t, "-object"),
+                                className: "mb-4 color-bg-subtle",
+                                children: [(0, n.jsx)("thead", {
+                                    className: "visually-hidden",
+                                    children: (0, n.jsx)("tr", {
+                                        children: (0, n.jsx)("th", {
+                                            children: "".concat(m("name"), ", ").concat(m("type"), ", ").concat(m("description"))
+                                        })
+                                    })
+                                }), (0, n.jsx)("tbody", {
+                                    children: d.map((e, a) => (0, n.jsx)(h, {
+                                        rowParams: e,
+                                        slug: s,
+                                        isChild: !0,
+                                        rowIndex: a
+                                    }, "".concat(e.name, "-").concat(a)))
+                                })]
+                            })]
+                        })
+                    })
+                })
+            }
+            let o = ["action", "enterprise", "installation", "organization", "repository", "sender"];
+
+            function h(e) {
+                let {
+                    rowParams: a,
+                    slug: s,
+                    numPreviews: t = 0,
+                    isChild: l = !1,
+                    rowIndex: i = 0,
+                    bodyParamExpandCallback: h,
+                    clickedBodyParameterName: m
+                } = e, {
+                    t: p
+                } = (0, c.$)(["parameter_table", "products"]), u = void 0 !== a.default;
+                return (0, n.jsxs)(n.Fragment, {
+                    children: [(0, n.jsx)("tr", {
+                        className: "".concat(l ? "color-bg-subtle" : ""),
+                        children: (0, n.jsx)("td", {
+                            className: "".concat(l ? "px-3" : ""),
+                            children: (0, n.jsxs)("div", {
+                                className: r()("pl-0 pt-1 pr-1 pb-1", "".concat(i > 0 && l ? "pt-3 border-top color-border-muted" : "")),
+                                children: [(0, n.jsx)("div", {
+                                    children: a.name ? (0, n.jsxs)(n.Fragment, {
+                                        children: [(0, n.jsx)("code", {
+                                            className: "text-bold f5",
+                                            children: a.name
+                                        }), " ", (0, n.jsx)("span", {
+                                            className: "color-fg-muted pl-2 f5",
+                                            children: Array.isArray(a.type) ? a.type.join(" or ") : a.type
+                                        }), " ", a.isRequired ? (0, n.jsx)("span", {
+                                            className: "color-fg-attention f5 pl-3",
+                                            children: p("required")
+                                        }) : null]
+                                    }) : (0, n.jsxs)(n.Fragment, {
+                                        children: [(0, n.jsx)("span", {
+                                            className: "color-fg-muted pl-1 f5",
+                                            children: Array.isArray(a.type) ? a.type.join(" or ") : a.type
+                                        }), " ", a.isRequired ? (0, n.jsx)("span", {
+                                            className: "color-fg-attention f5 pl-3",
+                                            children: p("required")
+                                        }) : null]
+                                    })
+                                }), (0, n.jsxs)("div", {
+                                    className: r()("pl-1 f5", "".concat(a.description ? "pt-2" : "pt-0")),
+                                    children: [(0, n.jsx)("div", {
+                                        dangerouslySetInnerHTML: {
+                                            __html: a.description
+                                        }
+                                    }), t > 0 && (0, n.jsx)("a", {
+                                        href: "#".concat(s, "-preview-notices"),
+                                        className: "d-inline",
+                                        children: t > 1 ? " ".concat(p("see_preview_notices")) : " ".concat(p("see_preview_notice"))
+                                    }), (0, n.jsxs)("div", {
+                                        className: r()("".concat(u || a.enum ? "pt-2" : "pt-0")),
+                                        children: [u && (0, n.jsxs)("p", {
+                                            children: [(0, n.jsxs)("span", {
+                                                children: [p("default"), ": "]
+                                            }), (0, n.jsx)("code", {
+                                                children: "string" == typeof a.default ? a.default || '""' : JSON.stringify(a.default)
+                                            })]
+                                        }), a.enum && a.enum.length && (0, n.jsxs)("p", {
+                                            children: [(0, n.jsxs)("span", {
+                                                children: [p(1 === a.enum.length ? "single_enum_description" : "enum_description_title"), ":", " "]
+                                            }), a.enum.map((e, a, s) => (0, n.jsxs)("span", {
+                                                children: [(0, n.jsx)("code", {
+                                                    children: null === e ? (0, n.jsx)("i", {
+                                                        children: "null"
+                                                    }) : e
+                                                }), a !== s.length - 1 && ",", " "]
+                                            }, "".concat(e).concat(a)))]
+                                        })]
+                                    })]
+                                })]
+                            })
+                        })
+                    }), a.childParamsGroups && a.childParamsGroups.length > 0 && (0, n.jsx)(d, {
+                        slug: s,
+                        parentName: a.name,
+                        parentType: a.type ? Array.isArray(a.type) ? a.type.join(" or ") : a.type : void 0,
+                        childParamsGroups: a.childParamsGroups,
+                        open: a.name === m,
+                        oneOfObject: a.oneOfObject
+                    }), a.type && (a.type.includes("object") || a.type.includes("array of")) && a.childParamsGroups && 0 === a.childParamsGroups.length && !o.includes(a.name) ? (0, n.jsx)("tr", {
+                        className: "border-top-0",
+                        children: (0, n.jsx)("td", {
+                            className: "has-nested-table",
+                            children: (0, n.jsx)("details", {
+                                "data-nested-param-id": a.name,
+                                className: "box px-3 ml-1 mb-0",
+                                onToggle: e => {
+                                    if (h) {
+                                        let a = e.target;
+                                        h(a)
+                                    }
+                                },
+                                children: (0, n.jsx)("summary", {
+                                    role: "button",
+                                    "aria-expanded": "false",
+                                    className: "mb-2 keyboard-focus",
+                                    children: a.oneOfObject ? (0, n.jsxs)("span", {
+                                        id: "".concat(s, "-").concat(a.name),
+                                        children: ["Can be one of these objects: ", (0, n.jsx)("code", {
+                                            children: a.name
+                                        })]
+                                    }) : (0, n.jsxs)("span", {
+                                        id: "".concat(s, "-").concat(a.name),
+                                        children: ["Properties of ", (0, n.jsx)("code", {
+                                            children: a.name
+                                        })]
+                                    })
+                                })
+                            })
+                        })
+                    }) : null]
+                })
+            }
+            var m = s(32619),
+                p = s.n(m);
+
+            function u(e) {
+                let {
+                    slug: a,
+                    numPreviews: s = 0,
+                    heading: t = "",
+                    headers: l = [],
+                    parameters: i = [],
+                    bodyParameters: d,
+                    bodyParamExpandCallback: o,
+                    clickedBodyParameterName: m = "",
+                    variant: u = "rest"
+                } = e, {
+                    t: x
+                } = (0, c.$)(["parameter_table", "products"]), j = i.filter(e => "query" === e.in), b = i.filter(e => "path" === e.in);
+                return (0, n.jsxs)(n.Fragment, {
+                    children: [t && (0, n.jsx)("h3", {
+                        className: "mt-4 mb-3 pt-3 h4",
+                        id: "".concat(a, "--parameters"),
+                        children: (0, n.jsx)("a", {
+                            href: "#".concat(a, "--parameters"),
+                            children: t
+                        })
+                    }),
+
+                    // Rendering of HTTP headers section removed for the hack week project
+                    /* l.length > 0 && (0, n.jsx)(n.Fragment, {
+                        children: (0, n.jsxs)("table", {
+                            className: r()(p().parameterTable),
+                            summary: "Column one describes the parameter. The first line includes the name, type, and whether the parameter is required. The second line is a description of the parameter.",
+                            "aria-labelledby": "headers-table-heading",
+                            children: [(0, n.jsx)("caption", {
+                                className: "mt-3 mb-3 h5 float-left",
+                                children: x("headers")
+                            }), (0, n.jsx)("thead", {
+                                className: "visually-hidden",
+                                children: (0, n.jsx)("tr", {
+                                    children: (0, n.jsx)("th", {
+                                        scope: "col",
+                                        children: "".concat(x("name"), ", ").concat(x("type"), ", ").concat(x("description"))
+                                    })
+                                })
+                            }), (0, n.jsx)("tbody", {
+                                children: l.map((e, t) => (0, n.jsx)(h, {
+                                    rowParams: e,
+                                    slug: a,
+                                    numPreviews: s
+                                }, "".concat(t, "-").concat(e.name)))
+                            })]
+                        })
+                    }),*/
+
+                     b.length > 0 && (0, n.jsx)(n.Fragment, {
+                        children: (0, n.jsxs)("table", {
+                            className: r()(p().parameterTable),
+                            summary: "Column one describes the parameter. The first line includes the name, type, and whether the parameter is required. The second line is a description of the parameter.",
+                            "aria-labelledby": "path-table-heading",
+                            children: [(0, n.jsx)("caption", {
+                                className: "mt-3 mb-3 h5 float-left",
+                                children: x("path")
+                            }), (0, n.jsx)("thead", {
+                                className: "visually-hidden",
+                                children: (0, n.jsx)("tr", {
+                                    children: (0, n.jsx)("th", {
+                                        scope: "col",
+                                        children: "".concat(x("name"), ", ").concat(x("type"), ", ").concat(x("description"))
+                                    })
+                                })
+                            }), (0, n.jsx)("tbody", {
+                                children: b.map((e, s) => (0, n.jsx)(h, {
+                                    rowParams: {
+                                        name: e.name,
+                                        type: e.schema.type,
+                                        description: e.description,
+                                        isRequired: e.required,
+                                        default: e.schema.default,
+                                        enum: e.schema.enum
+                                    },
+                                    slug: a
+                                }, "".concat(s, "-").concat(e)))
+                            })]
+                        })
+                    }), j.length > 0 && (0, n.jsx)(n.Fragment, {
+                        children: (0, n.jsxs)("table", {
+                            className: r()(p().parameterTable),
+                            summary: "Column one describes the parameter. The first line includes the name, type, and whether the parameter is required. The second line is a description of the parameter.",
+                            "aria-labelledby": "query-table-heading",
+                            children: [(0, n.jsx)("caption", {
+                                className: "mt-3 mb-3 h5 float-left",
+                                children: x("query")
+                            }), (0, n.jsx)("thead", {
+                                className: "visually-hidden",
+                                children: (0, n.jsx)("tr", {
+                                    children: (0, n.jsx)("th", {
+                                        scope: "col",
+                                        children: "".concat(x("name"), ", ").concat(x("type"), ", ").concat(x("description"))
+                                    })
+                                })
+                            }), (0, n.jsx)("tbody", {
+                                children: j.map((e, s) => (0, n.jsx)(h, {
+                                    rowParams: {
+                                        name: e.name,
+                                        type: e.schema.type,
+                                        description: e.description,
+                                        isRequired: e.required,
+                                        default: e.schema.default,
+                                        enum: e.schema.enum
+                                    },
+                                    slug: a
+                                }, "".concat(s, "-").concat(e)))
+                            })]
+                        })
+                    }), d.length > 0 && (0, n.jsx)(n.Fragment, {
+                        children: (0, n.jsxs)("table", {
+                            className: r()(p().parameterTable),
+                            summary: "Column one describes the parameter. The first line includes the name, type, and whether the parameter is required. The second line is a description of the parameter.",
+                            "aria-labelledby": "body-table-heading",
+                            children: [(0, n.jsx)("caption", {
+                                className: "mt-3 mb-3 h5 float-left",
+                                children: x("rest" === u ? "body" : "webhook-body")
+                            }), (0, n.jsx)("thead", {
+                                className: "visually-hidden",
+                                children: (0, n.jsx)("tr", {
+                                    children: (0, n.jsx)("th", {
+                                        scope: "col",
+                                        children: "".concat(x("name"), ", ").concat(x("type"), ", ").concat(x("description"))
+                                    })
+                                })
+                            }), (0, n.jsx)("tbody", {
+                                children: d.map((e, s) => (0, n.jsx)(h, {
+                                    bodyParamExpandCallback: o,
+                                    clickedBodyParameterName: m,
+                                    rowParams: e,
+                                    slug: a
+                                }, "".concat(s, "-").concat(e)))
+                            })]
+                        })
+                    })]
+                })
+            }
+        },
+        42101: function(e) {
+            e.exports = {
+                childBodyParametersRows: "ChildBodyParametersRows_childBodyParametersRows__aCN2f"
+            }
+        },
+        32619: function(e) {
+            e.exports = {
+                parameterTable: "ParameterTable_parameterTable__NVZ8g"
+            }
+        }
+    }
+]);

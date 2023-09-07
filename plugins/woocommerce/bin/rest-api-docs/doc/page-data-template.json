@@ -1,0 +1,650 @@
+{
+    "props": {
+      "pageProps": {
+        "restOperations": [
+          {
+            "serverUrl": "https://api.github.com",
+            "verb": "get",
+            "requestPath": "/xrepos/{owner}/{repo}/actions/artifacts",
+            "title": "xList artifacts for a repository",
+            "category": "actions",
+            "subcategory": "artifacts",
+            "parameters": [
+              {
+                "name": "owner",
+                "description": "<p>The account owner of the repository. The name is not case sensitive.</p>",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "repo",
+                "description": "<p>The name of the repository without the <code>.git</code> extension. The name is not case sensitive.</p>",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "per_page",
+                "description": "<p>The number of results per page (max 100).</p>",
+                "in": "query",
+                "schema": {
+                  "type": "integer",
+                  "default": 30
+                }
+              },
+              {
+                "name": "page",
+                "description": "<p>Page number of the results to fetch.</p>",
+                "in": "query",
+                "schema": {
+                  "type": "integer",
+                  "default": 1
+                }
+              },
+              {
+                "name": "name",
+                "description": "<p>The name field of an artifact. When specified, only artifacts with this name will be returned.</p>",
+                "in": "query",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "bodyParameters": [],
+            "codeExamples": [
+              {
+                "key": "default",
+                "request": {
+                  "description": "Example",
+                  "acceptHeader": "application/vnd.github.v3+json",
+                  "parameters": {
+                    "owner": "OWNER",
+                    "repo": "REPO"
+                  }
+                },
+                "response": {
+                  "statusCode": "200",
+                  "contentType": "application/json",
+                  "description": "<p>Response</p>",
+                  "example": {
+                    "total_count": 2,
+                    "artifacts": [
+                      {
+                        "id": 11,
+                        "node_id": "MDg6QXJ0aWZhY3QxMQ==",
+                        "name": "Rails",
+                        "size_in_bytes": 556,
+                        "url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/11",
+                        "archive_download_url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/11/zip",
+                        "expired": false,
+                        "created_at": "2020-01-10T14:59:22Z",
+                        "expires_at": "2020-03-21T14:59:22Z",
+                        "updated_at": "2020-02-21T14:59:22Z",
+                        "workflow_run": {
+                          "id": 2332938,
+                          "repository_id": 1296269,
+                          "head_repository_id": 1296269,
+                          "head_branch": "main",
+                          "head_sha": "328faa0536e6fef19753d9d91dc96a9931694ce3"
+                        }
+                      },
+                      {
+                        "id": 13,
+                        "node_id": "MDg6QXJ0aWZhY3QxMw==",
+                        "name": "Test output",
+                        "size_in_bytes": 453,
+                        "url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/13",
+                        "archive_download_url": "https://api.github.com/repos/octo-org/octo-docs/actions/artifacts/13/zip",
+                        "expired": false,
+                        "created_at": "2020-01-10T14:59:22Z",
+                        "expires_at": "2020-03-21T14:59:22Z",
+                        "updated_at": "2020-02-21T14:59:22Z",
+                        "workflow_run": {
+                          "id": 2332942,
+                          "repository_id": 1296269,
+                          "head_repository_id": 1296269,
+                          "head_branch": "main",
+                          "head_sha": "178f4f6090b3fccad4a65b3e83d076a622d59652"
+                        }
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "total_count",
+                      "artifacts"
+                    ],
+                    "properties": {
+                      "total_count": {
+                        "type": "integer"
+                      },
+                      "artifacts": {
+                        "type": "array",
+                        "items": {
+                          "title": "Artifact",
+                          "description": "An artifact",
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "examples": [
+                                5
+                              ]
+                            },
+                            "node_id": {
+                              "type": "string",
+                              "examples": [
+                                "MDEwOkNoZWNrU3VpdGU1"
+                              ]
+                            },
+                            "name": {
+                              "description": "The name of the artifact.",
+                              "type": "string",
+                              "examples": [
+                                "AdventureWorks.Framework"
+                              ]
+                            },
+                            "size_in_bytes": {
+                              "description": "The size in bytes of the artifact.",
+                              "type": "integer",
+                              "examples": [
+                                12345
+                              ]
+                            },
+                            "url": {
+                              "type": "string",
+                              "examples": [
+                                "https://api.github.com/repos/github/hello-world/actions/artifacts/5"
+                              ]
+                            },
+                            "archive_download_url": {
+                              "type": "string",
+                              "examples": [
+                                "https://api.github.com/repos/github/hello-world/actions/artifacts/5/zip"
+                              ]
+                            },
+                            "expired": {
+                              "description": "Whether or not the artifact has expired.",
+                              "type": "boolean"
+                            },
+                            "created_at": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "date-time"
+                            },
+                            "expires_at": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "date-time"
+                            },
+                            "workflow_run": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "examples": [
+                                    10
+                                  ]
+                                },
+                                "repository_id": {
+                                  "type": "integer",
+                                  "examples": [
+                                    42
+                                  ]
+                                },
+                                "head_repository_id": {
+                                  "type": "integer",
+                                  "examples": [
+                                    42
+                                  ]
+                                },
+                                "head_branch": {
+                                  "type": "string",
+                                  "examples": [
+                                    "main"
+                                  ]
+                                },
+                                "head_sha": {
+                                  "type": "string",
+                                  "examples": [
+                                    "009b8a3a9ccbb128af87f9b1c0f4c62e8a304f6d"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "node_id",
+                            "name",
+                            "size_in_bytes",
+                            "url",
+                            "archive_download_url",
+                            "expired",
+                            "created_at",
+                            "expires_at",
+                            "updated_at"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "previews": [],
+            "descriptionHTML": "<p>Lists all artifacts for a repository. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the <code>repo</code> scope. GitHub Apps must have the <code>actions:read</code> permission to use this endpoint.</p>",
+            "statusCodes": [
+              {
+                "httpStatusCode": "200",
+                "description": "<p>OK</p>"
+              }
+            ]
+          }
+        ],
+        "mainContext": {
+          "breadcrumbs": [],
+          "communityRedirect": {},
+          "currentProduct": {},
+          "currentLayoutName": "default",
+          "isHomepageVersion": false,
+          "error": "",
+          "data": {
+            "ui": {
+              "meta": {},
+              "header": {
+                "github_docs": "WooCommerce REST API Docs",
+                "contact": "Contact",
+                "notices": {},
+                "sign_up_cta": "Sign up",
+                "menu": "Menu"
+              },
+              "picker": {
+                "language_picker_label": "Language",
+                "product_picker_default_text": "",
+                "version_picker_default_text": "Choose a version"
+              },
+              "release_notes": {
+                "banner_text": "GitHub began rolling these changes out to enterprises on"
+              },
+              "search": {
+                "need_help": "Need help?",
+                "placeholder": "Search GitHub Docs",
+                "search_results_for": "Search results for",
+                "no_content": "No content",
+                "matches_found": "Results found",
+                "matches_displayed": "Matches displayed",
+                "search_error": "An error occurred trying to perform the search.",
+                "description": "Enter a search term to find it in the GitHub Docs.",
+                "label": "Search GitHub Docs",
+                "n_results": "{n} results",
+                "one_result": "1 result",
+                "search_validation_error": "Validation error with search query"
+              },
+              "homepage": {
+                "explore_by_product": "Explore by product",
+                "version_picker": "Version",
+                "description": "Help for wherever you are on your GitHub journey."
+              },
+              "toc": {
+                "getting_started": "Getting started",
+                "popular": "Popular",
+                "startHere": "Start here",
+                "whats_new": "What's new",
+                "videos": "Videos",
+                "all_changelogs": "All changelog posts"
+              },
+              "pages": {
+                "article_version": "Article version",
+                "miniToc": "In this article",
+                "all_enterprise_releases": "All Enterprise Server releases",
+                "about_versions": "About versions",
+                "permissions_statement": "Who can use this feature",
+                "video_from_transcript": "See video for this transcript"
+              },
+              "errors": {
+                "oops": "Ooops!",
+                "something_went_wrong": "It looks like something went wrong.",
+                "we_track_errors": "We track these errors automatically, but if the problem persists please feel free to contact us.",
+                "page_doesnt_exist": "It looks like this page doesn't exist."
+              },
+              "support": {
+                "still_need_help": "Still need help?",
+                "contact_support": "Contact support",
+                "ask_community": "Ask the GitHub community"
+              },
+              "survey": {
+                "able_to_find": "Did this doc help you?",
+                "yes": "Yes",
+                "no": "No",
+                "comment_yes_label": "Let us know what we do well",
+                "comment_no_label": "Let us know what we can do better",
+                "optional": "Optional",
+                "required": "Required",
+                "email_placeholder": "email@example.com",
+                "email_label": "If we can contact you with more questions, please enter your email address",
+                "email_validation": "Please enter a valid email address",
+                "send": "Send",
+                "feedback": "Thank you! We received your feedback.",
+                "not_support": "If you need a reply, please contact support instead.",
+                "privacy_policy": "Privacy policy"
+              },
+              "contribution_cta": {
+                "title": "Help us make these docs great!",
+                "body": "All GitHub docs are open source. See something that's wrong or unclear? Submit a pull request.",
+                "button": "Make a contribution",
+                "to_guidelines": "Learn how to contribute"
+              },
+              "parameter_table": {
+                "body": "Body parameters",
+                "webhook-body": "Webhook request body parameters",
+                "default": "Default",
+                "description": "Description",
+                "enum_description_title": "Can be one of",
+                "headers": "Headers",
+                "name": "Name",
+                "path": "Path parameters",
+                "query": "Query parameters",
+                "required": "Required",
+                "see_preview_notice": "See preview notice",
+                "see_preview_notices": "See preview notices",
+                "type": "Type",
+                "single_enum_description": "Value"
+              },
+              "products": {
+                "button_text": {
+                  "copy_to_clipboard": "Copy to clipboard",
+                  "copied": "Copied!"
+                },
+                "rest": {
+                  "banner": {
+                    "api_versioned": "The REST API is now versioned.",
+                    "api_version_info": "For more information, see \"<a href=\"{{ versionWithApiVersion }}/rest/overview/api-versions\">About API versioning</a>.\"",
+                    "ghes_api_versioned": "After a site administrator upgrades your Enterprise Server instance to {{ firstGhesReleaseWithApiVersions.versionTitle }} or later, the REST API will be versioned. To learn how to find your instance's version, see \"<a href=\"/{{ currentVersion }}/get-started/learning-about-github/about-versions-of-github-docs#github-enterprise-server\">About versions of GitHub Docs</a>\".",
+                    "redirect_notice": "We've recently moved some of the REST API documentation.",
+                    "redirect_repo": "If you can't find what you're looking for, you might try the new {{ newRestPagesLinks }} REST API pages.",
+                    "redirect_enterprise": "If you can't find what you're looking for, you might try the {{ actionsPageLink }} REST API page.",
+                    "actions_api_title": "Actions"
+                  },
+                  "versioning": {
+                    "about_versions": "About REST API versions"
+                  },
+                  "overview": {
+                  },
+                  "reference": {
+                    "in": "In",
+                    "description": "Description",
+                    "notes": "Notes",
+                    "parameters": "Parameters for \"{{ RESTOperationTitle }}\"",
+                    "response": "Response",
+                    "example_response": "Example response",
+                    "status_code": "Status code",
+                    "http_status_code": "HTTP response status codes for \"{{ RESTOperationTitle }}\"",
+                    "code_sample": "Code sample",
+                    "code_samples": "Code samples for \"{{ RESTOperationTitle }}\"",
+                    "preview_notice": "Preview notice for \"{{ RESTOperationTitle }}\"",
+                    "preview_notices": "Preview notices for \"{{ RESTOperationTitle }}\"",
+                    "preview_header_is_required": "This header is <strong>required</strong>",
+                    "preview_notice_to_change": "This API is under preview and subject to change",
+                    "works_with": "Works with",
+                    "api_reference": "REST API reference",
+                    "enum_description_title": "Can be one of",
+                    "required": "Required",
+                    "headers": "Headers",
+                    "query": "Query parameters",
+                    "path": "Path parameters",
+                    "body": "Body parameters",
+                    "response_options": {
+                      "example": "Example response",
+                      "schema": "Response schema"
+                    },
+                    "code_sample_options": {
+                      "ghcli": "GitHub CLI",
+                      "javascript": "JavaScript",
+                      "curl": "cURL"
+                    }
+                  }
+                },
+                "webhooks": {}
+              },
+              "footer": {
+                "support_heading": "Help and support",
+                "legal_heading": "Legal",
+                "imprint": "Imprint",
+                "terms": "Terms",
+                "privacy": "Privacy",
+                "status": "Status",
+                "pricing": "Pricing",
+                "expert_services": "Expert services",
+                "blog": "Blog"
+              },
+              "product_landing": {
+                "quickstart": "Quickstart",
+                "reference": "Reference",
+                "overview": "Overview",
+                "guides": "Guides",
+                "explore_guides": "Explore guides",
+                "code_examples": "Code examples",
+                "search_code_examples": "Search code examples",
+                "search_results_for": "Search results for",
+                "matches_displayed": "Matches displayed",
+                "show_more": "Show more",
+                "explore_people_and_projects": "Explore people and projects",
+                "sorry": "Sorry, there is no result for",
+                "no_example": "It looks like we don't have an example that fits your filter.",
+                "try_another": "Try another filter or add your code example.",
+                "no_result": "Sorry, there are no guides that match your filter.",
+                "learn": "Learn how to add a code example",
+                "communities_using_discussions": "Communities on GitHub.com using discussions",
+                "add_your_community": "Add your community",
+                "sponsor_community": "GitHub Sponsors community",
+                "supported_releases": "Supported releases",
+                "release_notes_for": "Release notes for",
+                "upgrade_from": "Upgrade from",
+                "browse_all_docs": "Browse all docs",
+                "browse_all": "Browse all",
+                "docs": "docs",
+                "explore_release_notes": "Explore release notes",
+                "view": "View all",
+                "view_transcript": "View video transcript",
+                "all_docs": "All {{ title }} docs",
+                "code_example": {
+                  "search_button": "Search",
+                  "search_examples": "Search code examples:"
+                }
+              },
+              "product_guides": {
+                "learning_paths_title": "{{ name }} learning paths",
+                "start_path": "Start learning path",
+                "learning_paths_desc": "Learning paths are a collection of guides that help you master a particular subject.",
+                "more_guides": "more guides",
+                "load_more": "Load more guides",
+                "all_guides_title": "All {{ name }} guides",
+                "filter_instructions": "Filter the guide list using these controls",
+                "filters": {
+                  "type": "Type",
+                  "topic": "Topic",
+                  "all": "All"
+                },
+                "guides_found": {
+                  "multiple": "{n} guides found",
+                  "one": "1 guide found",
+                  "none": "No guides found"
+                },
+                "guide_types": {
+                  "overview": "Overview",
+                  "quick_start": "Quickstart",
+                  "tutorial": "Tutorial",
+                  "how_to": "How-to guide",
+                  "reference": "Reference"
+                }
+              },
+              "learning_track_nav": {
+                "prev_guide": "Previous",
+                "next_guide": "Next",
+                "more_guides": "More guides →",
+                "current_progress": "{i} of {n} in learning path"
+              },
+              "toggle_images": {
+                "off": "Images are off, click to show",
+                "on": "Images are on, click to hide",
+                "hide_single": "Hide image",
+                "show_single": "Show image"
+              },
+              "scroll_button": {
+                "scroll_to_top": "Scroll to top"
+              }
+            },
+            "reusables": {},
+            "variables": {
+              "release_candidate": {
+                "version": null
+              }
+            }
+          },
+          "currentCategory": "artifacts",
+          "currentPathWithoutLanguage": "/rest/actions/artifacts",
+          "relativePath": "rest/actions/artifacts.md",
+          "page": {
+            "languageVariants": [
+              {
+                "name": "English",
+                "code": "en",
+                "hreflang": "en",
+                "href": "/en/rest/actions/artifacts"
+              }
+            ],
+            "documentType": "article",
+            "type": null,
+            "title": "xGitHub Actions Artifacts",
+            "fullTitle": "yGitHub Actions Artifacts - GitHub Docs",
+            "topics": [
+              "API"
+            ],
+            "introPlainText": "Use the REST API to interact with artifacts in GitHub Actions.",
+            "permalinks": [],
+            "hidden": false,
+            "noEarlyAccessBanner": false
+          },
+          "enterpriseServerReleases": {
+          },
+          "enterpriseServerVersions": [
+          ],
+          "allVersions": {
+            "free-pro-team@latest": {
+              "version": "free-pro-team@latest",
+              "versionTitle": "Free, Pro, & Team",
+              "latestVersion": "free-pro-team@latest",
+              "currentRelease": "latest",
+              "openApiVersionName": "fpt",
+              "miscVersionName": "dotcom",
+              "apiVersions": [
+                "2022-11-28"
+              ],
+              "latestApiVersion": "2022-11-28",
+              "plan": "free-pro-team",
+              "planTitle": "Free, Pro, & Team",
+              "shortName": "fpt",
+              "releases": [
+                "latest"
+              ],
+              "latestRelease": "latest",
+              "nonEnterpriseDefault": true,
+              "hasNumberedReleases": false,
+              "openApiBaseName": "fpt",
+              "miscBaseName": "dotcom"
+            }
+          },
+          "currentVersion": "free-pro-team@latest",
+          "currentProductTree": null,
+          "sidebarTree": {
+            "href": "",
+            "title": "REST API",
+            "childPages": [
+              {
+                "href": "/en/rest/actions",
+                "title": "Actions",
+                "childPages": [
+                  {
+                    "href": "/en/rest/actions/artifacts",
+                    "title": "Artifacts",
+                    "childPages": []
+                  }
+                ]
+              }
+            ]
+          },
+          "featureFlags": {},
+          "searchVersions": {
+            "free-pro-team@latest": "dotcom",
+            "enterprise-cloud@latest": "ghec",
+            "enterprise-server@3.10": "3.10",
+            "enterprise-server@3.9": "3.9",
+            "enterprise-server@3.8": "3.8",
+            "enterprise-server@3.7": "3.7",
+            "enterprise-server@3.6": "3.6",
+            "github-ae@latest": "ghae"
+          },
+          "nonEnterpriseDefaultVersion": "free-pro-team@latest",
+          "status": 200,
+          "fullUrl": "https://ghdocs-prod.azurewebsites.net/en/rest/actions/artifacts?apiVersion=2022-11-28"
+        },
+        "automatedPageContext": {
+          "title": "GitHub Actions Artifacts",
+          "intro": "<p>Use the REST API to interact with artifacts in GitHub Actions.</p>",
+          "renderedPage": "<h2 id=\"about-artifacts-in-github-actions\" tabindex=\"-1\"><a class=\"heading-link\" href=\"#about-artifacts-in-github-actions\">About artifacts in GitHub Actions<span class=\"heading-link-symbol\" aria-hidden=\"true\"></span></a></h2>\n<p>You can use the REST API to download, delete, and retrieve information about workflow artifacts in GitHub Actions. Artifacts enable you to share data between jobs in a workflow and store data once that workflow has completed. For more information, see \"<a href=\"/en/actions/using-workflows/storing-workflow-data-as-artifacts\">Storing workflow data as artifacts</a>.\"</p>",
+          "miniTocItems": [],
+          "product": "",
+          "permissions": ""
+        }
+      },
+      "languagesContext": {
+        "languages": {
+          "en": {
+            "name": "English",
+            "code": "en"
+          }
+        }
+      },
+      "__N_SSP": true
+    },
+    "page": "/[versionId]/rest/[category]/[subcategory]",
+    "query": {
+      "apiVersion": "2022-11-28",
+      "versionId": "free-pro-team@latest",
+      "category": "actions",
+      "subcategory": "artifacts"
+    },
+    "buildId": "p_N9EVRhCxJk1JQaisLg3",
+    "isFallback": false,
+    "gssp": true,
+    "customServer": true,
+    "appGip": true,
+    "locale": "en",
+    "locales": [
+      "en"
+    ],
+    "defaultLocale": "en",
+    "scriptLoader": []
+  }

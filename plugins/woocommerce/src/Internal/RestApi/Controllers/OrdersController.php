@@ -7,11 +7,20 @@ namespace Automattic\WooCommerce\Internal\RestApi\Controller;
 
 use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\AboutTitleAttribute as AboutTitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\AboutTextAttribute as AboutText;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\SidebarPathAttribute as SidebarPath;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionTitleAttribute as DescriptionTitle;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\DescriptionAttribute as Description;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\Enums\InputParameterLocation;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\HttpStatusCodeAttribute as HttpStatusCode;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\InputParameterAttribute as InputParameter;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\InputTypeAttribute as InputType;
+use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\Documentation\OutputTypeAttribute as OutputType;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\ControllerBase;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiControllerAttribute as RestApiController;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\RestApiEndpointAttribute as RestApiEndpoint;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\AllowedRolesAttribute as AllowedRoles;
-use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Attributes\DescriptionAttribute as Description;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\ResponseException;
 use Automattic\WooCommerce\Internal\RestApi\Infrastructure\Responses;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -19,7 +28,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 // phpcs:disable Squiz.Commenting.ClassComment.Missing
 
 #[RestApiController( 'orders' )]
-#[Description( 'Handles WooCommerce orders.' )]
+#[SidebarPath('WooCommerce Orders/Orders')]
+#[DescriptionTitle('Orders')]
+#[Description( 'invoke::OrdersTexts::controller_subtitle' )]
+#[AboutTitle('About WooCommerce Orders')]
+#[AboutText( 'invoke::OrdersTexts::controller_about_text' )]
 class OrdersController extends ControllerBase {
 
 	/**
@@ -55,7 +68,11 @@ class OrdersController extends ControllerBase {
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 	#[RestApiEndpoint( 'GET', '(?<id>:int:)' )]
-	#[Description( 'Get the details of an order.' )]
+	#[DescriptionTitle( 'Get order' )]
+	#[Description( 'Get the full details of an order. Refunds are not included.' )]
+	#[InputParameter('id', 'Identifier of the order.', InputParameterLocation::Path, 'int', true )]
+	#[HttpStatusCode(200, 'Ok')]
+	#[HttpStatusCode(404, 'Order not found')]
 	public static function get_order( \WP_Rest_Request $request, ?\WP_User $user ) {
 		$order_id = $request->get_param( 'id' );
 		$order    = self::get_existing_order( $order_id, $user );
@@ -68,7 +85,11 @@ class OrdersController extends ControllerBase {
 	}
 
 	#[RestApiEndpoint( 'GET', '(?<id>:int:)/notes' )]
-	#[Description( 'Get the notes of an order.' )]
+	#[DescriptionTitle( 'Get the notes associated to a given order' )]
+	#[Description( 'Retrieve the existing notes associated to a given order. Pagination is available.' )]
+	#[InputParameter('id', 'Identifier of the order.', InputParameterLocation::Path, 'int', true )]
+	#[InputParameter('page', 'Page number of the results to fetch.', InputParameterLocation::Query, 'int', false, 1)]
+	#[InputParameter('per_page', 'The number of results per page (max 100).', InputParameterLocation::Query, 'int', false, 30)]
 	public static function get_order_notes( \WP_Rest_Request $request, ?\WP_User $user ) {
 		$order_id = $request->get_param( 'id' );
 		self::get_existing_order( $order_id, $user );
@@ -89,7 +110,11 @@ class OrdersController extends ControllerBase {
 	}
 
 	#[RestApiEndpoint( 'POST', '(?<id>:int:)/notes' )]
-	#[Description( 'Add a note to an order.' )]
+	#[DescriptionTitle( 'Add a note to an order' )]
+	#[Description( 'Used to add a note to an order. Can\'t be used to update an existing order.' )]
+	#[InputParameter('id', 'Identifier of the order.', InputParameterLocation::Path, 'int', true )]
+	#[HttpStatusCode(204, 'Created.')]
+	#[HttpStatusCode(404, 'Invalid order id.')]
 	public static function add_order_note( \WP_Rest_Request $request, ?\WP_User $user ) {
 		$order_id = $request->get_param( 'id' );
 		$order    = self::get_existing_order( $order_id, $user );
@@ -110,7 +135,8 @@ class OrdersController extends ControllerBase {
 	}
 
 	#[RestApiEndpoint( 'GET', 'hpos_is_active' )]
-	#[Description( 'Check if HPOS is active.' )]
+	#[DescriptionTitle( 'Check if HPOS is active' )]
+	#[Description( 'Returns `true` if the orders table is authoritative, `false` otherwise.' )]
 	#[AllowedRoles( 'administrator' )]
 	public static function get_hpos_is_active( \WP_Rest_Request $request, ?\WP_User $user ) {
 		return self::$container->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
