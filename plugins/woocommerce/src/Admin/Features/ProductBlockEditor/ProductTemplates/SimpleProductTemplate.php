@@ -135,6 +135,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
+		$general_group->add_block(
+			[
+				'id'         => 'product-name-list',
+				'blockName'  => 'woocommerce/product-name-field',
+				'order'      => 10,
+				'attributes' => [
+					'name'      => 'Product name',
+					'autoFocus' => true,
+				],
+			]
+		);
 		$basic_details->add_block(
 			[
 				'id'         => 'product-name',

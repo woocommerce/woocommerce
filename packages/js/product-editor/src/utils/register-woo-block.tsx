@@ -49,6 +49,24 @@ function getEditComponent< T extends Record< string, any > = Record< string, any
 }
 
 /**
+ * Get the block metadata, including any Woo related context or support properties.
+ *
+ * @param metadata Original block metadata.
+ * @returns Updated block metadata.
+ */
+export function getParsedMetadata< T extends Record< string, any >>( metadata: BlockConfiguration< T > ): BlockConfiguration< T > {
+	return {
+		...metadata,
+		usesContext: [
+			...( metadata.usesContext || [] ),
+			'uiContext',
+			'product',
+			'persistedProduct',
+		],
+	}
+}
+
+/**
  * Function to register an individual block.
  *
  * @param block The block to be registered.
@@ -64,5 +82,6 @@ export function registerWooBlock<
 	const { metadata, settings, name } = block;
 	const { edit } = settings;
 	const editComponent = getEditComponent< T >( edit );
-	return registerBlockType< T >( { name, ...metadata }, { ...settings, edit: editComponent } );
+	const parsedMetadata = getParsedMetadata( metadata );
+	return registerBlockType< T >( { name, ...parsedMetadata }, { ...settings, edit: editComponent } );
 }

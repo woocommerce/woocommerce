@@ -48,7 +48,7 @@ type BlockEditorProps = {
 export function BlockEditor( {
 	context,
 	settings: _settings,
-	product,
+	product: persistedProduct,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges();
 
@@ -84,7 +84,7 @@ export function BlockEditor( {
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		'product',
-		{ id: product.id }
+		{ id: persistedProduct.id }
 	);
 
 	useLayoutEffect( () => {
@@ -92,7 +92,15 @@ export function BlockEditor( {
 			synchronizeBlocksWithTemplate( [], _settings?.template ),
 			{}
 		);
-	}, [ product.id ] );
+	}, [ persistedProduct.id ] );
+
+	const product: Product = useSelect( ( select ) =>
+		select( 'core' ).getEditedEntityRecord(
+			'postType',
+			'product',
+			persistedProduct.id
+		)
+	);
 
 	if ( ! blocks ) {
 		return null;
@@ -100,7 +108,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
+			<BlockContextProvider value={ { ...context, product, persistedProduct } }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

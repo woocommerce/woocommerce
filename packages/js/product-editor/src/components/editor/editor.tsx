@@ -80,6 +80,7 @@ export function Editor( { product, settings }: EditorProps ) {
 													selectedTab,
 													postType: 'product',
 													postId: product.id,
+													uiContext: 'list',
 												} }
 											/>
 											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }

@@ -10,6 +10,7 @@ import { createElement } from '@wordpress/element';
  */
 import { NameBlockAttributes } from '../types';
 
-export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
-	return <div>list view</div>;
+// @ts-ignore
+export function Edit( { attributes, context }: BlockEditProps< NameBlockAttributes > ) {
+	return <div>Product name list view: { context.product.name }</div>;
 }

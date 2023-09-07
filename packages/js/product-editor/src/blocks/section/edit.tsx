@@ -5,6 +5,8 @@ import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import {
+	// @ts-expect-error no exported member.
+	BlockContextProvider,
 	useBlockProps,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
@@ -51,7 +53,11 @@ export function Edit( {
 				</HeadingTagName>
 			) }
 
-			<div { ...innerBlockProps } />
+			<BlockContextProvider value={ {
+				uiContext: 'default'
+			} }>
+				<div { ...innerBlockProps } />
+			</BlockContextProvider>
 		</SectionTagName>
 	);
 }
