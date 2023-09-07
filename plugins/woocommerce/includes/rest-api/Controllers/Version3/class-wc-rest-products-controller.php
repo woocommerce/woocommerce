@@ -333,17 +333,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
-					if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_image_sku' ) ) {
-						$attachment = get_post( $attachment_id );
-						if ( 0 === (int) $attachment->post_parent ) {
-							wp_update_post(
-								array(
-									'ID'          => $attachment_id,
-									'post_parent' => $product->get_id()
-								)
-							);
-						}
-					}
+					wc_product_attach_featured_image( $attachment_id, $product );
 				} else {
 					$gallery[] = $attachment_id;
 				}

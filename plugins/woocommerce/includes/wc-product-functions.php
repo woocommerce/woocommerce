@@ -12,6 +12,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1659,13 +1660,14 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
 
 /**
- * Set product image when image filename matches a product sku.
+ * Attach product featured image. Use image filename to match a product sku when product ID is not provided.
  *
- * @param int $attachment_id Media attachment ID
+ * @param int $attachment_id Media attachment ID.
+ * @param WC_Product $product_id Optional product object.
  * @return void
  */
-function wc_product_add_featured_image_by_sku( $attachment_id ) {
-	if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_image_sku' ) ) {
+function wc_product_attach_featured_image( $attachment_id, $product = null ) {
+	if ( ! FeaturesUtil::feature_is_enabled( 'product_image_sku' ) ) {
 		return;
 	}
 
@@ -1673,21 +1675,31 @@ function wc_product_add_featured_image_by_sku( $attachment_id ) {
 	if ( ! $attachment_post ) {
 		return;
 	}
-	// On upload the attachment post title is the uploaded file's filename.
-	$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
-	if ( ! $file_name ) {
+
+	if ( null === $product ) {
+		// On upload the attachment post title is the uploaded file's filename.
+		$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
+		if ( ! $file_name ) {
+			return;
+		}
+
+		$product_id = wc_get_product_id_by_sku( $file_name );
+		$product    = wc_get_product( $product_id );
+	}
+
+	if ( ! $product ) {
 		return;
 	}
 
-	$product_id = wc_get_product_id_by_sku( $file_name );
-	if ( $product_id ) {
-		return;
-	}
-
-	set_post_thumbnail( $product_id, $attachment_id );
-
-	if ( $attachment_post->post_parent === 0 ) {
-		wp_update_post( array( 'ID' => $attachment_id, 'post_parent' => $product_id ) );
+	$product->set_image_id( $attachment_id );
+	$product->save();
+	if ( 0 === $attachment_post->post_parent ) {
+		wp_update_post(
+			array(
+				'ID'          => $attachment_id,
+				'post_parent' => $product->get_id(),
+			)
+		);
 	}
 }
-add_action( 'add_attachment', 'wc_product_add_featured_image_by_sku' );
+add_action( 'add_attachment', 'wc_product_attach_featured_image' );
