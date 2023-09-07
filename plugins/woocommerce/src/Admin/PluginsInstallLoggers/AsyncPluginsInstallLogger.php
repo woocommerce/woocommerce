@@ -14,11 +14,6 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 */
 	private $option_name;
 
-	/*
-	 * $var int $started_time time when the logger was created.
-	 */
-	private $started_time;
-
 	/**
 	 * Constructor.
 	 *
@@ -26,7 +21,6 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 */
 	public function __construct( string $option_name ) {
 		$this->option_name  = $option_name;
-		$this->started_time = time();
 		add_option(
 			$this->option_name,
 			array(
@@ -221,7 +215,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 				},
 				$data['installed']
 			),
-			'total_time'           => $this->get_timeframe( ( time() - $this->started_time ) * 1000 ),
+			'total_time'           => $this->get_timeframe( ( time() - $data['start_time'] ) * 1000 ),
 		);
 
 		foreach ( $data['installed'] as $plugin ) {

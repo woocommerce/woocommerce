@@ -186,11 +186,12 @@ class PluginsHelper {
 		include_once ABSPATH . '/wp-admin/includes/class-wp-upgrader.php';
 		include_once ABSPATH . '/wp-admin/includes/class-plugin-upgrader.php';
 
-		$existing_plugins  = self::get_installed_plugins_paths();
-		$installed_plugins = array();
-		$results           = array();
-		$time              = array();
-		$errors            = new WP_Error();
+		$existing_plugins   = self::get_installed_plugins_paths();
+		$installed_plugins  = array();
+		$results            = array();
+		$time               = array();
+		$errors             = new WP_Error();
+		$install_start_time = time();
 
 		foreach ( $plugins as $plugin ) {
 			$slug = sanitize_key( $plugin );
@@ -312,7 +313,7 @@ class PluginsHelper {
 			'time'      => $time,
 		);
 
-		$logger && $logger->complete( $data );
+		$logger && $logger->complete( array_merge( $data, array( 'start_time' => $install_start_time ) ) );
 
 		return $data;
 	}
