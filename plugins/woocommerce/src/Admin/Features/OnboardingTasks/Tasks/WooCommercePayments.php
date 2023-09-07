@@ -38,6 +38,21 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
+	 * Badge.
+	 *
+	 * @return string
+	 */
+	public function get_badge() {
+		/**
+		 * Filter WooPayments onboarding task badge.
+		 *
+		 * @param string     $badge    Badge content.
+		 * @since 8.2.0
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_badge', '' );
+	}
+
+	/**
 	 * Content.
 	 *
 	 * @return string
