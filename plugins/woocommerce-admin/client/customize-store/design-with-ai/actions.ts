@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign } from 'xstate';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -75,10 +76,34 @@ const logAIAPIRequestError = () => {
 	console.log( 'API Request error' );
 };
 
+const updateQueryStep = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { path } = getQuery() as { path: string };
+	const step = ( action as { step: string } ).step;
+	const pathFragments = path.split( '/' ); // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
+	if (
+		pathFragments[ 1 ] === 'customize-store' &&
+		pathFragments[ 2 ] === 'design-with-ai'
+	) {
+		if ( pathFragments[ 3 ] !== step ) {
+			// this state machine is only concerned with [2], so we ignore changes to [3]
+			// [1] is handled by router at root of wc-admin
+			updateQueryString(
+				{},
+				`/customize-store/design-with-ai/${ step }`
+			);
+		}
+	}
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
 	assignLookAndTone,
 	logAIAPIRequestError,
+	updateQueryStep,
 };

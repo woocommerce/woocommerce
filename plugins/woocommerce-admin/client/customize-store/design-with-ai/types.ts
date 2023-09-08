@@ -24,10 +24,7 @@ export type designWithAiStateMachineEvents =
 			type: 'TONE_OF_VOICE_COMPLETE';
 	  }
 	| {
-			type: 'API_CALL_TO_AI_SUCCCESSFUL';
-	  }
-	| {
-			type: 'API_CALL_TO_AI_FAILED';
+			type: 'EXTERNAL_URL_UPDATE';
 	  };
 
 export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
