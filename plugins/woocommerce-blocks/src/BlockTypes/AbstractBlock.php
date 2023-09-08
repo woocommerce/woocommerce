@@ -210,6 +210,37 @@ abstract class AbstractBlock {
 		}
 
 		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+
+		/**
+		 * We always want to load block styles separately, for every theme.
+		 * When the core assets are loaded separately, other blocks' styles get
+		 * enqueued separately too. Thus we only need to handle the remaining
+		 * case.
+		 */
+		if (
+			! is_admin() &&
+			! wc_current_theme_is_fse_theme() &&
+			$block_settings['style'] &&
+			(
+				! function_exists( 'wp_should_load_separate_core_block_assets' ) ||
+				! wp_should_load_separate_core_block_assets()
+			)
+		) {
+			$style_handles           = $block_settings['style'];
+			$block_settings['style'] = null;
+			add_filter(
+				'render_block',
+				function( $html, $block ) use ( $style_handles ) {
+					if ( $block['blockName'] === $this->get_block_type() ) {
+						array_map( 'wp_enqueue_style', $style_handles );
+					}
+					return $html;
+				},
+				10,
+				2
+			);
+		}
+
 		// Prefer to register with metadata if the path is set in the block's class.
 		if ( ! empty( $metadata_path ) ) {
 			register_block_type_from_metadata(
@@ -303,12 +334,9 @@ abstract class AbstractBlock {
 	 * @return string[]|null
 	 */
 	protected function get_block_type_style() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->asset_api->register_style( 'wc-blocks-style-' . $this->block_name, $this->asset_api->get_block_asset_build_path( $this->block_name, 'css' ), [], 'all', true );
-			return [ 'wc-blocks-style', 'wc-blocks-style-' . $this->block_name ];
-		}
+		$this->asset_api->register_style( 'wc-blocks-style-' . $this->block_name, $this->asset_api->get_block_asset_build_path( $this->block_name, 'css' ), [], 'all', true );
 
-		return [ 'wc-all-blocks-style' ];
+		return [ 'wc-blocks-style', 'wc-blocks-style-' . $this->block_name ];
 	}
 
 	/**
