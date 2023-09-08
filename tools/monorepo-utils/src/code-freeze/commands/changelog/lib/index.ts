@@ -81,7 +81,8 @@ export const updateReleaseBranchChangelogs = async (
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
 	const { owner, name, version } = options;
 	try {
-		await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
+		// Do a full checkout so that we can find the correct PR numbers for changelog entries.
+		await checkoutRemoteBranch( tmpRepoPath, releaseBranch, false );
 	} catch ( e ) {
 		if ( e.message.includes( "couldn't find remote ref" ) ) {
 			Logger.error(
