@@ -1858,8 +1858,8 @@ FROM $order_meta_table
 		if ( $row ) {
 			$result[] = array(
 				'table'  => self::get_orders_table_name(),
-				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
-				'format' => array_merge( $row['format'], array( 'id' => '%d' ) ),
+				'data'   => array_merge( $row['data'], array( 'id' => $order->get_id(), 'type' => $order->get_type() ) ),
+				'format' => array_merge( $row['format'], array( 'id' => '%d', 'type' => '%s' ) ),
 			);
 		}
 
@@ -1927,8 +1927,6 @@ FROM $order_meta_table
 	 */
 	protected function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
 		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
-
-		$changes['type'] = $order->get_type();
 
 		// Make sure 'status' is correctly prefixed.
 		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
@@ -2163,16 +2161,6 @@ FROM $order_meta_table
 			'_wp_trash_meta_time'   => time(),
 		);
 
-		foreach ( $trash_metadata as $meta_key => $meta_value ) {
-			$this->add_meta(
-				$order,
-				(object) array(
-					'key'   => $meta_key,
-					'value' => $meta_value,
-				)
-			);
-		}
-
 		$wpdb->update(
 			self::get_orders_table_name(),
 			array(
@@ -2185,6 +2173,16 @@ FROM $order_meta_table
 		);
 
 		$order->set_status( 'trash' );
+
+		foreach ( $trash_metadata as $meta_key => $meta_value ) {
+			$this->add_meta(
+				$order,
+				(object) array(
+					'key'   => $meta_key,
+					'value' => $meta_value,
+				)
+			);
+		}
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( $data_synchronizer->data_sync_is_enabled() ) {
@@ -2787,13 +2785,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing at least ->id).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
 		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2807,13 +2806,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Add new piece of meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @param WC_Data  $object WC_Data object.
+	 * @param \stdClass $meta (containing ->key and ->value).
 	 *
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2827,13 +2827,14 @@ CREATE TABLE $meta_table (
 	/**
 	 * Update meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 * @param WC_Data   $object WC_Data object.
+	 * @param \stdClass $meta (containing ->id, ->key and ->value).
 	 *
-	 * @return bool
+	 * @return
 	 */
 	public function update_meta( &$object, $meta ) {
 		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+		$this->after_meta_change( $object, $meta );
 
 		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
@@ -2842,5 +2843,23 @@ CREATE TABLE $meta_table (
 		}
 
 		return $update_meta;
+	}
+
+	/**
+	 * Perform after meta change operations, including updating the date_modified field, clearing caches and applying changes.
+	 *
+	 * @param WC_Abstract_Order $order Order object.
+	 * @param \WC_Meta_Data     $meta  Metadata object.
+	 */
+	protected function after_meta_change( &$order, $meta ) {
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
+		$this->clear_caches( $order );
+
+		// Prevent this happening multiple time in same request.
+		if ( $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+			$order->save();
+		}
 	}
 }
