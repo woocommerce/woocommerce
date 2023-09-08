@@ -1,7 +1,6 @@
 /**
  * Internal dependencies
  */
-import { encodeHtmlEntities } from './htmlEntities';
 import { getAvailableCategories } from '../product-category/utils';
 
 interface HTMLWPListElement extends HTMLElement {
@@ -79,6 +78,7 @@ const createCategory = async ( category: NewCategory ) => {
 
 			const parsedResponse = window.wpAjax.parseAjaxResponse( args[ 0 ] );
 			if ( ! parsedResponse?.responses?.[ 0 ].data ) {
+				console.log( parsedResponse );
 				throw new Error( 'Unable to parse the ajax response' );
 			}
 
@@ -138,7 +138,7 @@ const getCategoriesToCreate = async (
 	orderedList.every( ( categoryName, index ) => {
 		const matchingCategory = availableCategories.find( ( category ) => {
 			return (
-				category.name === encodeHtmlEntities( categoryName ) &&
+				category.name === categoryName &&
 				category.parent === parentCategoryId
 			);
 		} );

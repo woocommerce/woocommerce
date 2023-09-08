@@ -103,11 +103,21 @@ export const ProductCategorySuggestions = () => {
 	const onNewCategorySuggestionsGenerated = async (
 		newCategorySuggestions: string[]
 	) => {
-		const filtered = newCategorySuggestions.filter(
-			( suggestion ) =>
-				isSuggestionValid( suggestion, getCategories() ) &&
-				! existingSuggestions.includes( suggestion )
-		);
+		let filtered: string[] = [];
+		try {
+			const availableCategories = await getAvailableCategoryPaths();
+
+			// Only show suggestions that are valid, NOT already available, and not already in the list of existing suggestions.
+			filtered = newCategorySuggestions.filter(
+				( suggestion ) =>
+					isSuggestionValid( suggestion, getCategories() ) &&
+					! availableCategories.includes( suggestion ) &&
+					! existingSuggestions.includes( suggestion )
+			);
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Unable to fetch available categories.', e );
+		}
 
 		if ( filtered.length === 0 ) {
 			setNewSuggestionsState( SuggestionsState.None );
