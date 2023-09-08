@@ -78,10 +78,11 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 * @param  string   $meta_type Meta type.
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ) {
+	protected function delete_meta_with_type( &$object, $meta, $meta_type ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) ) {
@@ -91,7 +92,19 @@ abstract class CustomMetaDataStore {
 		$db_info = $this->get_db_info();
 		$meta_id = absint( $meta->id );
 
-		return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
+		$result = (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
+
+		/**
+		 * Fires immediately after deleting metadata.
+		 *
+		 * @param int    $meta_id    ID of updated metadata entry.
+		 * @param int    $object_id  Post ID.
+		 * @param string $meta_key   Metadata key.
+		 * @param mixed  $meta_value Metadata value.
+		 */
+		do_action( "deleted_{$meta_type}_meta", $meta_id, $object->get_id(), $meta->key, $meta->value );
+
+		return $result;
 	}
 
 	/**
@@ -99,9 +112,11 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @param  string   $meta_type Meta type.
+	 *
 	 * @return int meta ID
 	 */
-	public function add_meta( &$object, $meta ) {
+	protected function add_meta_with_type( &$object, $meta, $meta_type ) {
 		global $wpdb;
 
 		$db_info = $this->get_db_info();
@@ -120,8 +135,19 @@ abstract class CustomMetaDataStore {
 			)
 		);
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$meta_id = $result ? (int) $wpdb->insert_id : false;
 
-		return $result ? (int) $wpdb->insert_id : false;
+		/**
+		 * Fires immediately after adding metadata.
+		 *
+		 * @param int    $meta_id    ID of updated metadata entry.
+		 * @param int    $object_id  Post ID.
+		 * @param string $meta_key   Metadata key.
+		 * @param mixed  $meta_value Metadata value.
+		 */
+		do_action( "added_{$meta_type}_meta", $meta_id, $object->get_id(), $meta_key, $meta_value );
+
+		return $meta_id;
 	}
 
 	/**
@@ -129,10 +155,11 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 * @param  string   $meta_type Meta type.
 	 *
 	 * @return bool
 	 */
-	public function update_meta( &$object, $meta ) {
+	protected function update_meta_with_type( &$object, $meta, $meta_type ) {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) || empty( $meta->key ) ) {
@@ -155,6 +182,16 @@ abstract class CustomMetaDataStore {
 			'%s',
 			'%d'
 		);
+
+		/**
+		 * Fires immediately after updating metadata.
+		 *
+		 * @param int    $meta_id    ID of updated metadata entry.
+		 * @param int    $object_id  Post ID.
+		 * @param string $meta_key   Metadata key.
+		 * @param mixed  $meta_value Metadata value.
+		 */
+		do_action( "updated_{$meta_type}_meta", $meta->id, $object->get_id(), $meta->key, $meta->value );
 
 		return 1 === $result;
 	}
