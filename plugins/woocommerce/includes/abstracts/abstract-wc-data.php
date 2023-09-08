@@ -683,15 +683,67 @@ abstract class WC_Data {
 		foreach ( $this->meta_data as $array_key => $meta ) {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
+					/**
+					 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+					 *
+					 * @param WC_Data          $this The object being saved.
+					 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+					 */
+					do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 					$this->data_store->delete_meta( $this, $meta );
+
+					/**
+					 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+					 *
+					 * @param WC_Data          $this The object being saved.
+					 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+					 */
+					do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
+				/**
+				 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+				 *
+				 * @param WC_Data          $this The object being saved.
+				 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+				 */
+				do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 				$meta->id = $this->data_store->add_meta( $this, $meta );
+
+				/**
+				 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+				 *
+				 * @param WC_Data          $this The object being saved.
+				 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+				 */
+				do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 				$meta->apply_changes();
 			} else {
 				if ( $meta->get_changes() ) {
+					/**
+					 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+					 *
+					 * @param WC_Data          $this The object being saved.
+					 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+					 */
+					do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 					$this->data_store->update_meta( $this, $meta );
+
+					/**
+					 * Trigger action before saving to the DB. Allows you to adjust order props before save.
+					 *
+					 * @param WC_Data          $this The object being saved.
+					 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+					 */
+					do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 					$meta->apply_changes();
 				}
 			}
