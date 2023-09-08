@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
 class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 	const ID           = 'remote_inbox_notifications';
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json',
+		// 'https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json',
+		'https://gist.githubusercontent.com/psealock/bde9264b5fdda289d5988cde10146f69/raw/a1db34f0a6df07f738b3e2ed6865cbaeae4f40fb/notifications.json',
 	);
 	/**
 	 * Class instance.
