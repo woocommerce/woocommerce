@@ -34,9 +34,13 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' };
 
-const updateQueryStep = ( _context: unknown, _evt: unknown, meta: unknown ) => {
+const updateQueryStep = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
 	const { path } = getQuery() as { path: string };
-	const step = ( meta as { step: string } ).step;
+	const step = ( action as { step: string } ).step;
 	const pathFragments = path.split( '/' ); // [0] '', [1] 'customize-store', [2] step slug [3] design-with-ai, assembler-hub path fragments
 	if ( pathFragments[ 1 ] === 'customize-store' ) {
 		if ( pathFragments[ 2 ] !== step ) {
