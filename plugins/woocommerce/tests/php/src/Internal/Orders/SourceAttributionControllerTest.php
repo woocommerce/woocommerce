@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\OrderSourceAttribution\Test;
+namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
@@ -11,7 +11,7 @@ use WC_Logger;
 use WC_Order;
 use WP_UnitTestCase;
 
-class AttributionFieldsTest extends WP_UnitTestCase {
+class SourceAttributionControllerTest extends WP_UnitTestCase {
 
 	protected SourceAttributionController $attribution_fields_class;
 
