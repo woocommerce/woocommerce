@@ -167,6 +167,20 @@ onboarding profile:
 }
 ```
 
+`in` and `!in` allow checking if a value is found (or not found) in a provided array. For example, using the `in` comparison operator to check if the base country location value is found in a given array, as below. This rule matches if the `base_location_country` is `US`, `NZ`, or `ZA`.
+
+```json
+{
+	"type": "base_location_country",
+  	"value": [
+		"US",
+		"NZ",
+		"ZA"
+	],
+	"operation": "in"
+}
+```
+
 ### Plugins activated
 
 This passes if all of the listed plugins are installed and activated.
