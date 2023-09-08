@@ -167,7 +167,7 @@
 		"@wordpress/data-controls": "2.2.7",
 		"@wordpress/dependency-extraction-webpack-plugin": "3.2.1",
 		"@wordpress/dom": "3.27.0",
-		"@wordpress/e2e-test-utils": "10.1.0",
+		"@wordpress/e2e-test-utils": "10.12.0",
 		"@wordpress/e2e-test-utils-playwright": "0.6.0",
 		"@wordpress/e2e-tests": "^4.6.0",
 		"@wordpress/element": "4.20.0",
