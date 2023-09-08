@@ -46,9 +46,24 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'woocommerce/product-gallery',
 		} );
 
-		const block = await editorUtils.getBlockByName( blockData.name );
+		const thumbnailsBlock = await editorUtils.getBlockByName(
+			blockData.name
+		);
+		const largeImageBlock = await editorUtils.getBlockByName(
+			'woocommerce/product-gallery-large-image'
+		);
 
-		await expect( block ).toBeVisible();
+		const thumbnailsBlockBoundingRect = await thumbnailsBlock.boundingBox();
+		const largeImageBlockBoundingRect = await largeImageBlock.boundingBox();
+
+		await expect( thumbnailsBlock ).toBeVisible();
+		// Check the default position: on the left of the large image
+		await expect( thumbnailsBlockBoundingRect?.y ).toBeGreaterThan(
+			largeImageBlockBoundingRect?.y as number
+		);
+		await expect( thumbnailsBlockBoundingRect?.x ).toBeLessThan(
+			largeImageBlockBoundingRect?.x as number
+		);
 
 		await Promise.all( [
 			editor.saveSiteEditorEntities(),
@@ -61,11 +76,27 @@ test.describe( `${ blockData.name }`, () => {
 			waitUntil: 'commit',
 		} );
 
-		const blockFrontend = await frontendUtils.getBlockByName(
-			'woocommerce/product-gallery'
+		const thumbnailsBlockFrontend = await frontendUtils.getBlockByName(
+			blockData.name
 		);
 
-		await expect( blockFrontend ).toBeVisible();
+		const largeImageBlockFrontend = await frontendUtils.getBlockByName(
+			'woocommerce/product-gallery-large-image'
+		);
+
+		const thumbnailsBlockFrontendBoundingRect =
+			await thumbnailsBlockFrontend.boundingBox();
+		const largeImageBlockFrontendBoundingRect =
+			await largeImageBlockFrontend.boundingBox();
+
+		await expect( thumbnailsBlockFrontend ).toBeVisible();
+		// Check the default position: on the left of the large image
+		await expect( thumbnailsBlockFrontendBoundingRect?.y ).toBeGreaterThan(
+			largeImageBlockFrontendBoundingRect?.y as number
+		);
+		await expect( thumbnailsBlockFrontendBoundingRect?.x ).toBeLessThan(
+			largeImageBlockFrontendBoundingRect?.x as number
+		);
 	} );
 
 	test.describe( `${ blockData.name } Settings`, () => {
