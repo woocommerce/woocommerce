@@ -1,9 +1,3 @@
-if (
-	process.env.API_BASE_URL &&
-	! process.env.API_BASE_URL.includes( 'localhost' )
-) {
-	const { chromium, expect } = require( '@playwright/test' );
-}
 const { GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
@@ -14,6 +8,8 @@ module.exports = async ( config ) => {
 		process.env.API_BASE_URL &&
 		! process.env.API_BASE_URL.includes( 'localhost' )
 	) {
+		const { chromium, expect } = require( '@playwright/test' );
+
 		const { baseURL, userAgent } = config.projects[ 0 ].use;
 		const contextOptions = { baseURL, userAgent };
 
