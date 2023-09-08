@@ -22,7 +22,7 @@
 		}
 		// Hide third and above product cards on Discover page due to API result count
 		// These are progressively displayed at larger screen sizes.
-		&__discover .woocommerce-marketplace__product-card:nth-child(n+3){
+		&__discover .woocommerce-marketplace__product-card:nth-child(n+3) {
 			display: none;
 		}
 	}
