@@ -11,14 +11,23 @@ import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
+	privateApis as blockEditorPrivateApis,
 	BlockList,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
+// @ts-ignore No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { noop } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
+import {
+	FontFamiliesLoader,
+	FontFamily,
+} from './sidebar/global-styles/font-pairing-variations/font-families-loader';
+import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 
 const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
@@ -26,6 +35,8 @@ const { Provider: DisabledProvider } = Disabled.Context;
 
 // This is used to avoid rendering the block list if the sizes change.
 let MemoizedBlockList: typeof BlockList | undefined;
+
+const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -48,6 +59,13 @@ function ScaledBlockPreview( {
 	onClickNavigationItem,
 }: ScaledBlockPreviewProps ) {
 	const { setLogoBlock } = useContext( LogoBlockContext );
+	const [ fontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies.theme'
+	) as [ FontFamily[] ];
+
+	const externalFontFamilies = fontFamilies.filter(
+		( { slug } ) => slug !== SYSTEM_FONT_SLUG
+	);
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
@@ -254,6 +272,13 @@ function ScaledBlockPreview( {
 				</style>
 				{ contentResizeListener }
 				<MemoizedBlockList renderAppender={ false } />
+				{ /* Only load  font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
+				{ externalFontFamilies.length === 2 && (
+					<FontFamiliesLoader
+						fontFamilies={ externalFontFamilies }
+						onLoad={ noop }
+					/>
+				) }
 			</Iframe>
 		</DisabledProvider>
 	);
