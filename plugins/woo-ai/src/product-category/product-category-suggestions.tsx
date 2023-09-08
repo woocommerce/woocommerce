@@ -35,10 +35,36 @@ export const ProductCategorySuggestions = () => {
 	>( [] );
 	const [ newSuggestions, setNewSuggestions ] = useState< string[] >( [] );
 	const [ showFeedback, setShowFeedback ] = useState( false );
+	let feedbackTimeout: number | null = null;
 
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
 	}, [] );
+
+	/**
+	 * Show the feedback box after a delay.
+	 */
+	const showFeedbackAfterDelay = () => {
+		if ( feedbackTimeout ) {
+			clearTimeout( feedbackTimeout );
+			feedbackTimeout = null;
+		}
+
+		feedbackTimeout = setTimeout( () => {
+			setShowFeedback( true );
+		}, 5000 );
+	};
+
+	/**
+	 * Reset the feedback box.
+	 */
+	const resetFeedbackBox = () => {
+		if ( feedbackTimeout ) {
+			clearTimeout( feedbackTimeout );
+			feedbackTimeout = null;
+		}
+		setShowFeedback( false );
+	};
 
 	/**
 	 * Check if a suggestion is valid.
@@ -87,6 +113,7 @@ export const ProductCategorySuggestions = () => {
 		}
 		setExistingSuggestions( filtered );
 
+		showFeedbackAfterDelay();
 		recordCategoryTracks( 'stop', {
 			reason: 'finished',
 			suggestions_type: 'existing',
@@ -126,6 +153,7 @@ export const ProductCategorySuggestions = () => {
 		}
 		setNewSuggestions( filtered );
 
+		showFeedbackAfterDelay();
 		recordCategoryTracks( 'stop', {
 			reason: 'finished',
 			suggestions_type: 'new',
@@ -195,8 +223,6 @@ export const ProductCategorySuggestions = () => {
 				selected_category: suggestion,
 				suggestions_type: 'existing',
 			} );
-
-			setShowFeedback( true );
 		},
 		[ existingSuggestions ]
 	);
@@ -220,8 +246,6 @@ export const ProductCategorySuggestions = () => {
 					selected_category: suggestion,
 					suggestions_type: 'new',
 				} );
-
-				setShowFeedback( true );
 			} catch ( e ) {
 				// eslint-disable-next-line no-console
 				console.error( 'Unable to create category', e );
@@ -231,7 +255,7 @@ export const ProductCategorySuggestions = () => {
 	);
 
 	const fetchProductSuggestions = async () => {
-		setShowFeedback( false );
+		resetFeedbackBox();
 		setExistingSuggestions( [] );
 		setNewSuggestions( [] );
 		setExistingSuggestionsState( SuggestionsState.Fetching );
