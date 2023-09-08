@@ -6,6 +6,7 @@ const base64String = Buffer.from(
 
 const headers = {
 	Authorization: `Basic ${ base64String }`,
+	cookie: '',
 };
 
 /**
