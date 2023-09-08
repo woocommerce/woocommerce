@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: #### Message <!-- Add a changelog message here -->\r\n\r\n#### Comment <!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of Patch -->\r\n\r\nImproved visibility/layout of store alerts on WooCommerce > Extensions pages.
+
+
