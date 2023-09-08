@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use correct object reference when cloning a cart

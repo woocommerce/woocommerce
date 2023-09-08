@@ -4,7 +4,10 @@
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useState } from '@wordpress/element';
-import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductDefaultAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -25,7 +28,10 @@ export function useProductVariationsHelper() {
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
 	const generateProductVariations = useCallback(
-		async ( attributes: EnhancedProductAttribute[] ) => {
+		async (
+			attributes: EnhancedProductAttribute[],
+			defaultAttributes?: ProductDefaultAttribute[]
+		) => {
 			setIsGenerating( true );
 
 			const hasVariableAttribute = attributes.some(
@@ -42,6 +48,7 @@ export function useProductVariationsHelper() {
 				{
 					type: hasVariableAttribute ? 'variable' : 'simple',
 					attributes,
+					default_attributes: defaultAttributes,
 				},
 				{
 					delete: true,

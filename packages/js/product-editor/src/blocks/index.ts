@@ -1,5 +1,4 @@
 export { init as initCatalogVisibility } from './catalog-visibility';
-export { init as initCategory } from './category';
 export { init as initCheckbox } from './checkbox';
 export { init as initCollapsible } from './collapsible';
 export { init as initConditional } from './conditional';
@@ -18,6 +17,7 @@ export { init as initShippingClass } from './shipping-class';
 export { init as initShippingDimensions } from './shipping-dimensions';
 export { init as initSummary } from './summary';
 export { init as initTab } from './tab';
+export { init as initTag } from './tag';
 export { init as initInventoryQuantity } from './inventory-quantity';
 export { init as initToggle } from './toggle';
 export { init as attributesInit } from './attributes';
@@ -26,3 +26,4 @@ export { init as initRequirePassword } from './password';
 export { init as initVariationItems } from './variation-items';
 export { init as initVariationOptions } from './variation-options';
 export { init as initNotice } from './notice';
+export { init as initTaxonomy } from './taxonomy';

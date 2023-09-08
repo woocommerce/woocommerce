@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+FIx WC Admin pages are empty for WP 6.2 and below.

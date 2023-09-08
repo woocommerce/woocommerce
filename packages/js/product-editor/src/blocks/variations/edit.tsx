@@ -6,6 +6,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { Product, ProductAttribute } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	createElement,
 	useState,
@@ -36,16 +37,7 @@ import {
 import { getAttributeId } from '../../components/attribute-control/utils';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 import { hasAttributesUsedForVariations } from '../../utils';
-
-function getFirstOptionFromEachAttribute(
-	attributes: Product[ 'attributes' ]
-): Product[ 'default_attributes' ] {
-	return attributes.map( ( attribute ) => ( {
-		id: attribute.id,
-		name: attribute.name,
-		option: attribute.options[ 0 ],
-	} ) );
-}
+import { TRACKS_SOURCE } from '../../constants';
 
 export function Edit( {
 	attributes,
@@ -66,12 +58,10 @@ export function Edit( {
 			allAttributes: productAttributes,
 			isVariationAttributes: true,
 			productId: useEntityId( 'postType', 'product' ),
-			onChange( values ) {
+			onChange( values, defaultAttributes ) {
 				setProductAttributes( values );
-				setDefaultProductAttributes(
-					getFirstOptionFromEachAttribute( values )
-				);
-				generateProductVariations( values );
+				setDefaultProductAttributes( defaultAttributes );
+				generateProductVariations( values, defaultAttributes );
 			},
 		}
 	);
@@ -101,15 +91,22 @@ export function Edit( {
 	};
 
 	const handleAdd = ( newOptions: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...newOptions.filter(
-				( newAttr ) =>
-					! variationOptions.find(
-						( attr: ProductAttribute ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newOptions.filter(
+			( newAttr ) =>
+				! variationOptions.some(
+					( attr: ProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( attr )
+				)
+		);
+		recordEvent( 'product_options_add', {
+			source: TRACKS_SOURCE,
+			options: addedAttributesOnly.map( ( attribute ) => ( {
+				attribute: attribute.name,
+				values: attribute.options,
+			} ) ),
+		} );
+
+		handleChange( addedAttributesOnly );
 		closeNewModal();
 	};
 
@@ -161,6 +158,7 @@ export function Edit( {
 					disabledAttributeIds={ productAttributes
 						.filter( ( attr ) => ! attr.variation )
 						.map( ( attr ) => attr.id ) }
+					termsAutoSelection="all"
 				/>
 			) }
 		</div>

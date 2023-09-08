@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createMachine } from 'xstate';
+import { createMachine, sendParent } from 'xstate';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import {
 	ApiCallLoader,
 } from './pages';
 import { actions } from './actions';
-
+import { services } from './services';
 export const designWithAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithAi',
@@ -31,6 +31,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			businessInfoDescription: {
 				descriptionText: '',
 			},
+
 			lookAndFeel: {
 				choice: '',
 			},
@@ -62,8 +63,16 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 					},
 					postBusinessInfoDescription: {
-						always: {
-							target: '#lookAndFeel',
+						invoke: {
+							src: 'getLookAndTone',
+							onError: {
+								actions: [ 'logAIAPIRequestError' ],
+								target: '#lookAndFeel',
+							},
+							onDone: {
+								actions: [ 'assignLookAndTone' ],
+								target: '#lookAndFeel',
+							},
 						},
 					},
 				},
@@ -83,6 +92,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
+								actions: [ 'assignLookAndFeel' ],
 								target: 'postLookAndFeel',
 							},
 						},
@@ -109,6 +119,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
+								actions: [ 'assignToneOfVoice' ],
 								target: 'postToneOfVoice',
 							},
 						},
@@ -140,13 +151,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 		},
 		on: {
 			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-				// TODO: handle this event when the 'x' is clicked at any point
-				// probably bail (to where?) and log the tracks for which step it is in plus
-				// whatever details might be helpful to know why they bailed
+				actions: sendParent( ( _context, event ) => event ),
 			},
 		},
 	},
 	{
 		actions,
+		services,
 	}
 );

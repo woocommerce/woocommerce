@@ -27,14 +27,6 @@ final class WC_Cart_Fees {
 	private $fees = array();
 
 	/**
-	 * Reference to cart object.
-	 *
-	 * @since 3.2.0
-	 * @var WC_Cart
-	 */
-	private $cart;
-
-	/**
 	 * New fees are made out of these props.
 	 *
 	 * @var array
@@ -51,16 +43,18 @@ final class WC_Cart_Fees {
 	/**
 	 * Constructor. Reference to the cart.
 	 *
+	 * @param null $deprecated Deprecated since WooCommerce 8.2.0.
+	 *
 	 * @since 3.2.0
-	 * @throws Exception If missing WC_Cart object.
-	 * @param WC_Cart $cart Cart object.
 	 */
-	public function __construct( &$cart ) {
-		if ( ! is_a( $cart, 'WC_Cart' ) ) {
-			throw new Exception( 'A valid WC_Cart object is required' );
+	public function __construct( $deprecated = null ) {
+		if ( isset( $deprecated ) ) {
+			wc_doing_it_wrong(
+				'new WC_Cart_Fees',
+				'You don\'t need to pass a cart parameter to the WC_Cart_Fees constructor anymore',
+				'8.2.0'
+			);
 		}
-
-		$this->cart = $cart;
 	}
 
 	/**

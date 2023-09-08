@@ -4,18 +4,17 @@
 /**
  * External dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 
 import { useSelect, useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { Button, __experimentalHStack as HStack } from '@wordpress/components';
-import { __, sprintf, _n } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
-// @ts-ignore No types for this exist yet.
-import { check } from '@wordpress/icons';
+
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -23,7 +22,7 @@ import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
-import SaveButton from '@wordpress/edit-site/build-module/components/save-button';
+import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -51,61 +50,35 @@ export const SaveHub = () => {
 	const { createSuccessNotice, createErrorNotice, removeNotice } =
 		useDispatch( noticesStore );
 
-	const { dirtyCurrentEntity, countUnsavedChanges, isDirty, isSaving } =
-		useSelect(
-			( select ) => {
-				const {
-					// @ts-ignore No types for this exist yet.
-					__experimentalGetDirtyEntityRecords,
-					// @ts-ignore No types for this exist yet.
-					isSavingEntityRecord,
-				} = select( coreStore );
-				const dirtyEntityRecords =
-					__experimentalGetDirtyEntityRecords();
-				let calcDirtyCurrentEntity = null;
+	const {
+		dirtyEntityRecords,
+		isDirty,
+	}: {
+		dirtyEntityRecords: {
+			key?: string | number;
+			kind: string;
+			name: string;
+			property?: string;
+			title: string;
+		}[];
+		isDirty: boolean;
+	} = useIsDirty();
 
-				if ( dirtyEntityRecords.length === 1 ) {
-					// if we are on global styles
-					if (
-						params.path?.includes( 'color-palette' ) ||
-						params.path?.includes( 'fonts' )
-					) {
-						calcDirtyCurrentEntity = dirtyEntityRecords.find(
-							// @ts-ignore No types for this exist yet.
-							( record ) => record.name === 'globalStyles'
-						);
-					}
-					// if we are on pages
-					else if ( params.postId ) {
-						calcDirtyCurrentEntity = dirtyEntityRecords.find(
-							// @ts-ignore No types for this exist yet.
-							( record ) =>
-								record.name === params.postType &&
-								String( record.key ) === params.postId
-						);
-					}
-				}
-
-				return {
-					dirtyCurrentEntity: calcDirtyCurrentEntity,
-					isDirty: dirtyEntityRecords.length > 0,
-					isSaving: dirtyEntityRecords.some(
-						( record: {
-							kind: string;
-							name: string;
-							key: string;
-						} ) =>
-							isSavingEntityRecord(
-								record.kind,
-								record.name,
-								record.key
-							)
-					),
-					countUnsavedChanges: dirtyEntityRecords.length,
-				};
-			},
-			[ params.path, params.postType, params.postId ]
-		);
+	const { isSaving } = useSelect(
+		( select ) => {
+			return {
+				isSaving: dirtyEntityRecords.some( ( record ) =>
+					// @ts-ignore No types for this exist yet.
+					select( coreStore ).isSavingEntityRecord(
+						record.kind,
+						record.name,
+						record.key
+					)
+				),
+			};
+		},
+		[ dirtyEntityRecords ]
+	);
 
 	const {
 		// @ts-ignore No types for this exist yet.
@@ -116,32 +89,72 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	const saveCurrentEntity = async () => {
-		if ( ! dirtyCurrentEntity ) return;
+	useEffect( () => {
+		dirtyEntityRecords.forEach( ( entity ) => {
+			/* This is a hack to reset the entity record when the user navigates away from editing page to main page.
+			This is needed because Gutenberg does not provide a way to reset the entity record. Replace this when we have a better way to do this.
+			We will need to add different conditions here when we implement editing for other entities.
+			 */
 
+			if (
+				entity.kind === 'root' &&
+				entity.name === 'site' &&
+				entity.property
+			) {
+				// Reset site icon edit
+				editEntityRecord(
+					'root',
+					'site',
+					undefined,
+					{
+						[ entity.property ]: undefined,
+					},
+					{ undoIgnore: true }
+				);
+			} else {
+				editEntityRecord(
+					entity.kind,
+					entity.name,
+					entity.key,
+					{
+						selection: undefined,
+						blocks: undefined,
+						content: undefined,
+					},
+					{ undoIgnore: true }
+				);
+			}
+		} );
+		// Only run when path changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ params.path ] );
+
+	const save = async () => {
 		removeNotice( saveNoticeId );
-		const { kind, name, key, property } = dirtyCurrentEntity;
 
 		try {
-			if ( dirtyCurrentEntity.kind === 'root' && name === 'site' ) {
-				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
-					property,
-				] );
-			} else {
-				if (
-					PUBLISH_ON_SAVE_ENTITIES.some(
-						( typeToPublish ) =>
-							typeToPublish.kind === kind &&
-							typeToPublish.name === name
-					)
-				) {
-					editEntityRecord( kind, name, key, { status: 'publish' } );
+			for ( const { kind, name, key, property } of dirtyEntityRecords ) {
+				if ( kind === 'root' && name === 'site' ) {
+					await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
+						property,
+					] );
+				} else {
+					if (
+						PUBLISH_ON_SAVE_ENTITIES.some(
+							( typeToPublish ) =>
+								typeToPublish.kind === kind &&
+								typeToPublish.name === name
+						)
+					) {
+						editEntityRecord( kind, name, key, {
+							status: 'publish',
+						} );
+					}
+
+					await saveEditedEntityRecord( kind, name, key );
+					__unstableMarkLastChangeAsPersistent();
 				}
-
-				await saveEditedEntityRecord( kind, name, key );
 			}
-
-			__unstableMarkLastChangeAsPersistent();
 
 			createSuccessNotice( __( 'Site updated.', 'woocommerce' ), {
 				type: 'snackbar',
@@ -155,44 +168,7 @@ export const SaveHub = () => {
 	};
 
 	const renderButton = () => {
-		// if we have only one unsaved change and it matches current context, we can show a more specific label
-		let label = dirtyCurrentEntity
-			? __( 'Save', 'woocommerce' )
-			: sprintf(
-					// translators: %d: number of unsaved changes (number).
-					_n(
-						'Review %d change…',
-						'Review %d changes…',
-						countUnsavedChanges,
-						'woocommerce'
-					),
-					countUnsavedChanges
-			  );
-
-		if ( isSaving ) {
-			label = __( 'Saving', 'woocommerce' );
-		}
-
-		if ( dirtyCurrentEntity ) {
-			return (
-				<Button
-					variant="primary"
-					onClick={ saveCurrentEntity }
-					isBusy={ isSaving }
-					disabled={ isSaving }
-					aria-disabled={ isSaving }
-					className="edit-site-save-hub__button"
-					// @ts-ignore No types for this exist yet.
-
-					__next40pxDefaultSize
-				>
-					{ label }
-				</Button>
-			);
-		}
-		const disabled = isSaving || ! isDirty;
-
-		if ( ! isSaving && ! isDirty ) {
+		if ( params.path === '/customize-store' ) {
 			return (
 				<Button
 					variant="primary"
@@ -208,15 +184,26 @@ export const SaveHub = () => {
 			);
 		}
 
+		// if we have only one unsaved change and it matches current context, we can show a more specific label
+		const label = isSaving
+			? __( 'Saving', 'woocommerce' )
+			: __( 'Save', 'woocommerce' );
+
+		const isDisabled = ! isDirty || isSaving;
+
 		return (
-			<SaveButton
+			<Button
+				variant="primary"
+				onClick={ save }
+				isBusy={ isSaving }
+				disabled={ isDisabled }
+				aria-disabled={ isDisabled }
 				className="edit-site-save-hub__button"
-				variant={ disabled ? null : 'primary' }
-				showTooltip={ false }
-				icon={ disabled && ! isSaving ? check : null }
-				defaultLabel={ label }
+				// @ts-ignore No types for this exist yet.
 				__next40pxDefaultSize
-			/>
+			>
+				{ label }
+			</Button>
 		);
 	};
 

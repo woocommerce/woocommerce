@@ -6,19 +6,26 @@
  * External dependencies
  */
 import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useContext } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
 	BlockList,
-	MemoizedBlockList,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { LogoBlockContext } from './logo-block-context';
 
 const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
+
+// This is used to avoid rendering the block list if the sizes change.
+let MemoizedBlockList: typeof BlockList | undefined;
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -40,10 +47,13 @@ function ScaledBlockPreview( {
 	additionalStyles,
 	onClickNavigationItem,
 }: ScaledBlockPreviewProps ) {
+	const { setLogoBlock } = useContext( LogoBlockContext );
+
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
 	}
 
+	// @ts-ignore No types for this exist yet.
 	const [ contentResizeListener, { height: contentHeight } ] =
 		useResizeObserver();
 
@@ -59,7 +69,7 @@ function ScaledBlockPreview( {
 	}, [ settings.styles ] );
 
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
-	const RenderedBlockList = MemoizedBlockList || pure( BlockList );
+	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
 	const scale = containerWidth / viewportWidth;
 
 	return (
@@ -155,6 +165,22 @@ function ScaledBlockPreview( {
 								true
 							);
 						} );
+
+						// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
+						// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
+						// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
+						const siteLogo = bodyElement.querySelector(
+							'.wp-block-site-logo'
+						);
+
+						const blockClientId = siteLogo
+							? siteLogo.getAttribute( 'data-block' )
+							: null;
+
+						setLogoBlock( {
+							clientId: blockClientId,
+							isLoading: false,
+						} );
 					};
 
 					// Stop mousemove event listener to disable block tool insertion feature.
@@ -176,6 +202,10 @@ function ScaledBlockPreview( {
 					return () => {
 						observer.disconnect();
 						possiblyRemoveAllListeners();
+						setLogoBlock( {
+							clientId: null,
+							isLoading: true,
+						} );
 					};
 				}, [] ) }
 				aria-hidden
@@ -223,7 +253,7 @@ function ScaledBlockPreview( {
 					` }
 				</style>
 				{ contentResizeListener }
-				<RenderedBlockList renderAppender={ false } />
+				<MemoizedBlockList renderAppender={ false } />
 			</Iframe>
 		</DisabledProvider>
 	);

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { WooFooterItem } from '@woocommerce/admin-layout';
 import { __ } from '@wordpress/i18n';
 import { check, commentContent, shield } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
@@ -12,13 +11,13 @@ import { createInterpolateElement } from '@wordpress/element';
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
 import WooIcon from '../../assets/images/woo-icon.svg';
-import { MARKETPLACE_URL } from '../constants';
+import { MARKETPLACE_HOST } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
 	__( '30 day <a>money back guarantee</a>', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_URL + '/refund-policy/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/refund-policy/' } />,
 	}
 );
 
@@ -26,7 +25,7 @@ const supportTitle = createInterpolateElement(
 	__( '<a>Get help</a> when you need it', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_URL + '/docs/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/docs/' } />,
 	}
 );
 
@@ -34,13 +33,13 @@ const paymentTitle = createInterpolateElement(
 	__( '<a>Products</a> you can trust', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
-		a: <a href={ MARKETPLACE_URL + '/products/' } />,
+		a: <a href={ MARKETPLACE_HOST + '/products/' } />,
 	}
 );
 
 function FooterContent(): JSX.Element {
 	return (
-		<div className="woocommerce-marketplace__footer">
+		<div className="woocommerce-marketplace__footer-content">
 			<h2 className="woocommerce-marketplace__footer-title">
 				{ __(
 					'Hundreds of vetted products and services. Unlimited potential.',
@@ -83,8 +82,8 @@ function FooterContent(): JSX.Element {
 
 export default function Footer(): JSX.Element {
 	return (
-		<WooFooterItem>
+		<div className="woocommerce-marketplace__footer">
 			<FooterContent />
-		</WooFooterItem>
+		</div>
 	);
 }

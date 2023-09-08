@@ -128,6 +128,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$basic_details = $general_group->add_section(
 			[
 				'id'         => 'basic-details',
+				'order'      => 10,
 				'attributes' => [
 					'title'       => __( 'Basic details', 'woocommerce' ),
 					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
@@ -138,6 +139,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-name',
 				'blockName'  => 'woocommerce/product-name-field',
+				'order'      => 10,
 				'attributes' => [
 					'name'      => 'Product name',
 					'autoFocus' => true,
@@ -148,18 +150,21 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-summary',
 				'blockName' => 'woocommerce/product-summary-field',
+				'order'     => 20,
 			]
 		);
 		$pricing_columns  = $basic_details->add_block(
 			[
 				'id'        => 'product-pricing-columns',
 				'blockName' => 'core/columns',
+				'order'     => 30,
 			]
 		);
 		$pricing_column_1 = $pricing_columns->add_block(
 			[
 				'id'         => 'product-pricing-column-1',
 				'blockName'  => 'core/column',
+				'order'      => 10,
 				'attributes' => [
 					'templateLock' => 'all',
 				],
@@ -169,6 +174,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-regular-price',
 				'blockName'  => 'woocommerce/product-regular-price-field',
+				'order'      => 10,
 				'attributes' => [
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
@@ -181,6 +187,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-pricing-column-2',
 				'blockName'  => 'core/column',
+				'order'      => 20,
 				'attributes' => [
 					'templateLock' => 'all',
 				],
@@ -190,6 +197,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-sale-price',
 				'blockName'  => 'woocommerce/product-sale-price-field',
+				'order'      => 10,
 				'attributes' => [
 					'label' => __( 'Sale price', 'woocommerce' ),
 				],
@@ -200,6 +208,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$description_section = $general_group->add_section(
 			[
 				'id'         => 'product-description-section',
+				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Description', 'woocommerce' ),
 					'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
@@ -210,12 +219,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-description',
 				'blockName' => 'woocommerce/product-description-field',
+				'order'     => 10,
 			]
 		);
 		// Images section.
 		$images_section = $general_group->add_section(
 			[
 				'id'         => 'product-images-section',
+				'order'      => 30,
 				'attributes' => [
 					'title'       => __( 'Images', 'woocommerce' ),
 					'description' => sprintf(
@@ -231,6 +242,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-images',
 				'blockName'  => 'woocommerce/product-images-field',
+				'order'      => 10,
 				'attributes' => [
 					'images' => [],
 				],
@@ -247,6 +259,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_catalog_section = $organization_group->add_section(
 			[
 				'id'         => 'product-catalog-section',
+				'order'      => 10,
 				'attributes' => [
 					'title' => __( 'Product catalog', 'woocommerce' ),
 				],
@@ -255,9 +268,22 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_catalog_section->add_block(
 			[
 				'id'         => 'product-categories',
-				'blockName'  => 'woocommerce/product-category-field',
+				'blockName'  => 'woocommerce/product-taxonomy-field',
+				'order'      => 10,
 				'attributes' => [
-					'name' => 'categories',
+					'slug'        => 'product_cat',
+					'property'    => 'categories',
+					'label'       => __( 'Categories', 'woocommerce' ),
+					'createTitle' => __( 'Create new category', 'woocommerce' ),
+				],
+			]
+		);
+		$product_catalog_section->add_block(
+			[
+				'id'         => 'product-tags',
+				'blockName'  => 'woocommerce/product-tag-field',
+				'attributes' => [
+					'name' => 'tags',
 				],
 			]
 		);
@@ -265,6 +291,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-catalog-search-visibility',
 				'blockName'  => 'woocommerce/product-catalog-visibility-field',
+				'order'      => 20,
 				'attributes' => [
 					'label'      => __( 'Hide in product catalog', 'woocommerce' ),
 					'visibility' => 'search',
@@ -275,6 +302,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-catalog-catalog-visibility',
 				'blockName'  => 'woocommerce/product-catalog-visibility-field',
+				'order'      => 30,
 				'attributes' => [
 					'label'      => __( 'Hide from search results', 'woocommerce' ),
 					'visibility' => 'catalog',
@@ -285,6 +313,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-enable-product-reviews',
 				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 40,
 				'attributes' => [
 					'label'    => __( 'Enable product reviews', 'woocommerce' ),
 					'property' => 'reviews_allowed',
@@ -295,6 +324,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-post-password',
 				'blockName'  => 'woocommerce/product-password-field',
+				'order'      => 50,
 				'attributes' => [
 					'label' => __( 'Require a password', 'woocommerce' ),
 				],
@@ -304,6 +334,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_catalog_section = $organization_group->add_section(
 			[
 				'id'         => 'product-attributes-section',
+				'order'      => 20,
 				'attributes' => [
 					'title' => __( 'Attributes', 'woocommerce' ),
 				],
@@ -313,6 +344,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-attributes',
 				'blockName' => 'woocommerce/product-attributes-field',
+				'order'     => 10,
 			]
 		);
 	}
@@ -326,6 +358,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'pricing-has-variations-notice',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'order'      => 10,
 				'attributes' => [
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
@@ -337,6 +370,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_pricing_section = $pricing_group->add_section(
 			[
 				'id'         => 'product-pricing-section',
+				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Pricing', 'woocommerce' ),
 					'description' => sprintf(
@@ -353,12 +387,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-pricing-group-pricing-columns',
 				'blockName' => 'core/columns',
+				'order'     => 10,
 			]
 		);
 		$pricing_column_1        = $pricing_columns->add_block(
 			[
 				'id'         => 'product-pricing-group-pricing-column-1',
 				'blockName'  => 'core/column',
+				'order'      => 10,
 				'attributes' => [
 					'templateLock' => 'all',
 				],
@@ -368,6 +404,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-pricing-regular-price',
 				'blockName'  => 'woocommerce/product-regular-price-field',
+				'order'      => 10,
 				'attributes' => [
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
@@ -378,6 +415,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-pricing-group-pricing-column-2',
 				'blockName'  => 'core/column',
+				'order'      => 20,
 				'attributes' => [
 					'templateLock' => 'all',
 				],
@@ -387,6 +425,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-pricing-sale-price',
 				'blockName'  => 'woocommerce/product-sale-price-field',
+				'order'      => 10,
 				'attributes' => [
 					'label' => __( 'Sale price', 'woocommerce' ),
 				],
@@ -396,12 +435,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-pricing-schedule-sale-fields',
 				'blockName' => 'woocommerce/product-schedule-sale-fields',
+				'order'     => 20,
 			]
 		);
 		$product_pricing_section->add_block(
 			[
 				'id'         => 'product-sale-tax',
 				'blockName'  => 'woocommerce/product-radio-field',
+				'order'      => 30,
 				'attributes' => [
 					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
 					'property' => 'tax_status',
@@ -426,6 +467,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-pricing-advanced',
 				'blockName'  => 'woocommerce/product-collapsible',
+				'order'      => 40,
 				'attributes' => [
 					'toggleText'       => __( 'Advanced', 'woocommerce' ),
 					'initialCollapsed' => true,
@@ -437,6 +479,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-tax-class',
 				'blockName'  => 'woocommerce/product-radio-field',
+				'order'      => 10,
 				'attributes' => [
 					'title'       => __( 'Tax class', 'woocommerce' ),
 					'description' => sprintf(
@@ -474,6 +517,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product_variation_notice_inventory_tab',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'order'      => 10,
 				'attributes' => [
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
@@ -485,6 +529,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_inventory_section       = $inventory_group->add_section(
 			[
 				'id'         => 'product-inventory-section',
+				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Inventory', 'woocommerce' ),
 					'description' => sprintf(
@@ -499,23 +544,32 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section = $product_inventory_section->add_section(
 			[
-				'id' => 'product-inventory-inner-section',
+				'id'    => 'product-inventory-inner-section',
+				'order' => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
 				'id'        => 'product-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
+				'order'     => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
 				'id'         => 'product-track-stock',
 				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 20,
 				'attributes' => [
 					'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property' => 'manage_stock',
 					'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+					'disabledCopy' => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 				],
 			]
 		);
@@ -523,6 +577,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-inventory-quantity-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
+				'order'      => 30,
 				'attributes' => [
 					'mustMatch' => [
 						'manage_stock' => [ true ],
@@ -534,12 +589,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-inventory-quantity',
 				'blockName' => 'woocommerce/product-inventory-quantity-field',
+				'order'     => 10,
 			]
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
 			[
 				'id'         => 'product-stock-status-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
+				'order'      => 20,
 				'attributes' => [
 					'mustMatch' => [
 						'manage_stock' => [ false ],
@@ -551,6 +608,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-stock-status',
 				'blockName'  => 'woocommerce/product-radio-field',
+				'order'      => 10,
 				'attributes' => [
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
@@ -575,6 +633,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-inventory-advanced',
 				'blockName'  => 'woocommerce/product-collapsible',
+				'order'      => 30,
 				'attributes' => [
 					'toggleText'       => __( 'Advanced', 'woocommerce' ),
 					'initialCollapsed' => true,
@@ -585,6 +644,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
 			[
 				'blockName'  => 'woocommerce/product-section',
+				'order'      => 10,
 				'attributes' => [
 					'blockGap' => 'unit-40',
 				],
@@ -594,6 +654,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-out-of-stock-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
+				'order'      => 10,
 				'attributes' => [
 					'mustMatch' => [
 						'manage_stock' => [ true ],
@@ -605,6 +666,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-out-of-stock',
 				'blockName'  => 'woocommerce/product-radio-field',
+				'order'      => 10,
 				'attributes' => [
 					'title'    => __( 'When out of stock', 'woocommerce' ),
 					'property' => 'backorders',
@@ -632,6 +694,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-inventory-email',
 				'blockName' => 'woocommerce/product-inventory-email-field',
+				'order'     => 20,
 			]
 		);
 
@@ -639,6 +702,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product-limit-purchase',
 				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 20,
 				'attributes' => [
 					'title'    => __(
 						'Restrictions',
@@ -667,6 +731,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product_variation_notice_shipping_tab',
 				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'order'      => 10,
 				'attributes' => [
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
@@ -678,6 +743,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
 				'id'         => 'product-fee-and-dimensions-section',
+				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(
@@ -693,12 +759,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-shipping-class',
 				'blockName' => 'woocommerce/product-shipping-class-field',
+				'order'     => 10,
 			]
 		);
 		$product_fee_and_dimensions_section->add_block(
 			[
 				'id'        => 'product-shipping-dimensions',
 				'blockName' => 'woocommerce/product-shipping-dimensions-fields',
+				'order'     => 20,
 			]
 		);
 	}
@@ -715,6 +783,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'         => 'product_variation-field-group',
 				'blockName'  => 'woocommerce/product-variations-fields',
+				'order'      => 10,
 				'attributes' => [
 					'description' => sprintf(
 					/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
@@ -725,19 +794,27 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		$variation_fields->add_block(
+		$variation_options_section = $variation_fields->add_block(
 			[
-				'id'         => 'product-variation-options',
-				'blockName'  => 'woocommerce/product-variations-options-field',
+				'id'         => 'product-variation-options-section',
+				'blockName'  => 'woocommerce/product-section',
+				'order'      => 10,
 				'attributes' => [
 					'title' => __( 'Variation options', 'woocommerce' ),
 				],
+			]
+		);
+		$variation_options_section->add_block(
+			[
+				'id'        => 'product-variation-options',
+				'blockName' => 'woocommerce/product-variations-options-field',
 			]
 		);
 		$variation_section = $variation_fields->add_block(
 			[
 				'id'         => 'product-variation-section',
 				'blockName'  => 'woocommerce/product-section',
+				'order'      => 20,
 				'attributes' => [
 					'title' => __( 'Variations', 'woocommerce' ),
 				],
@@ -748,6 +825,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			[
 				'id'        => 'product-variation-items',
 				'blockName' => 'woocommerce/product-variation-items-field',
+				'order'     => 10,
 			]
 		);
 	}

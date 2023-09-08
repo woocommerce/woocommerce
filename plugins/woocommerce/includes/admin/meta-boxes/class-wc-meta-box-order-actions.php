@@ -103,7 +103,7 @@ class WC_Meta_Box_Order_Actions {
 			$trash_order_url = add_query_arg(
 				array(
 					'action'           => 'trash',
-					'order'            => array( $order_id ),
+					'id'            => array( $order_id ),
 					'_wp_http_referer' => $order_list_url,
 				),
 				$order_list_url

@@ -6,9 +6,8 @@ import { ProductVariation } from '@woocommerce/data';
 export type ShippingMenuItemProps = {
 	variation: ProductVariation;
 	handlePrompt(
-		propertyName: keyof ProductVariation,
 		label?: string,
-		parser?: ( value: string ) => unknown
+		parser?: ( value: string ) => Partial< ProductVariation > | null
 	): void;
 	onClose(): void;
 };

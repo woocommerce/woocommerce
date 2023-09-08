@@ -39,6 +39,7 @@ export type SortableProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
+	className?: string;
 };
 
 const THROTTLE_TIME = 16;
@@ -52,6 +53,7 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
+	className,
 }: SortableProps ) => {
 	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
@@ -227,7 +229,7 @@ export const Sortable = ( {
 	return (
 		<SortableContext.Provider value={ {} }>
 			<ol
-				className={ classnames( 'woocommerce-sortable', {
+				className={ classnames( 'woocommerce-sortable', className, {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }

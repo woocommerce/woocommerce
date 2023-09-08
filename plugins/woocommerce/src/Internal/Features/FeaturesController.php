@@ -96,14 +96,14 @@ class FeaturesController {
 		$features           = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
-				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
+				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
 			),
 			'new_navigation'       => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
-				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+				'description'     => __( 'Add the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 				'disable_ui'      => false,
 			),
@@ -114,15 +114,17 @@ class FeaturesController {
 				'disable_ui'      => false,
 			),
 			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
-				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+			'custom_order_tables'    => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
+				'name'               => __( 'High-Performance Order Storage (HPOS)', 'woocommerce' ),
 				'enabled_by_default' => false,
 			),
 			$hpos_authoritative    => array(
-				'name'            => __( 'High performance order storage', 'woocommerce' ),
+				'name'             => __( 'High-Performance Order Storage', 'woocommerce' ),
+				'order'            => 10,
 			),
 			$hpos_enable_sync      => array(
 				'name'            => '',
+				'order'            => 9,
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -592,6 +594,9 @@ class FeaturesController {
 		$features = $this->get_features( true );
 
 		$feature_ids              = array_keys( $features );
+		usort( $feature_ids, function( $feature_id_a, $feature_id_b ) use ( $features ) {
+			return ( $features[ $feature_id_b ]['order'] ?? 0 ) <=> ( $features[ $feature_id_a ]['order'] ?? 0 );
+		} );
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
 			function( $feature_id ) use ( $features ) {

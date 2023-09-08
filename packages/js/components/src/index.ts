@@ -27,7 +27,7 @@ export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
-export { default as Pagination } from './pagination';
+export * from './pagination';
 export { default as Pill } from './pill';
 export { default as Plugins } from './plugins';
 export { default as ProductImage } from './product-image';
@@ -111,3 +111,4 @@ export {
 	ProductFieldSection as __experimentalProductFieldSection,
 } from './product-section-layout';
 export { DisplayState } from './display-state';
+export { ProgressBar } from './progress-bar';

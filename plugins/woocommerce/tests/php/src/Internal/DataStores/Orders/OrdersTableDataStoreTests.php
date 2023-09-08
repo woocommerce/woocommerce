@@ -2740,5 +2740,90 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		remove_action( 'woocommerce_update_order', $callback );
 	}
 
+	/**
+	 * @testDox Stale data is not read when sync is off, but then switched on again after a while.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $different_request Whether to simulate different requests (as much as we can in a unit test)
+	 */
+	public function test_stale_data_is_not_read_sync_off_on( $different_request ) {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
 
+		$cot_store = wc_get_container()->get( OrdersTableDataStore::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 1 ); // Change a custom table column.
+		$order->set_billing_address_1( 'test' ); // Change an address column and a meta row.
+		$order->set_download_permissions_granted( true ); // Change an operational data column.
+		$order->save();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+		sleep(2);
+
+		$this->disable_cot_sync();
+		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
+		$r_order->add_meta_data( 'test_key2', 'test_value2' );
+		$r_order->save_meta_data();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$this->enable_cot_sync();
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value_updated', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value2', $r_order->get_meta( 'test_key2', true ) );
+	}
+
+	/**
+	 * Helper method to reset order data store state (to help simulate multiple requests).
+	 *
+	 * @param OrdersTableDataStore $sut System under test.
+	 */
+	private function reset_order_data_store_state( $sut ) {
+		$reset_state = function () use ( $sut ) {
+			self::$backfilling_order_ids = [];
+			self::$reading_order_ids = [];
+		};
+		$reset_state->call( $sut );
+		wp_cache_flush();
+	}
+
+	/**
+	 * @testDox Test that we can delete metadata just by sending the meta ID.
+	 */
+	public function test_allow_deleting_meta_with_id_only() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$meta_data = $this->sut->read_meta( $order );
+
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $r_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), 'test_key', true ) );
+	}
 }

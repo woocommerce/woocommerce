@@ -6,9 +6,7 @@ import { ApiCallLoader } from '../pages';
 import { WithCustomizeYourStoreLayout } from './WithCustomizeYourStoreLayout';
 
 export const ApiCallLoaderPage = () => (
-	<ApiCallLoader
-		context={ {} as designWithAiStateMachineContext }
-	/>
+	<ApiCallLoader context={ {} as designWithAiStateMachineContext } />
 );
 
 export default {
