@@ -279,7 +279,7 @@ export const ProductCategorySuggestions = () => {
 					existingSuggestionsState === SuggestionsState.Fetching ||
 					newSuggestionsState === SuggestionsState.Fetching
 				}
-				label={ __( 'Suggest category using AI', 'woocommerce' ) }
+				label={ __( 'Suggest a category using AI', 'woocommerce' ) }
 			/>
 			{ ( existingSuggestionsState === SuggestionsState.Fetching ||
 				newSuggestionsState === SuggestionsState.Fetching ) && (
