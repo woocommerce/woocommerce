@@ -78,7 +78,6 @@ const createCategory = async ( category: NewCategory ) => {
 
 			const parsedResponse = window.wpAjax.parseAjaxResponse( args[ 0 ] );
 			if ( ! parsedResponse?.responses?.[ 0 ].data ) {
-				console.log( parsedResponse );
 				throw new Error( 'Unable to parse the ajax response' );
 			}
 
