@@ -39,11 +39,13 @@ class WC_Helper_Admin {
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
+		$store_location = wc_get_base_location();
 		$settings['wccomHelper'] = array(
 			'isConnected' => WC_Helper::is_site_connected(),
 			'connectURL'  => self::get_connection_url(),
 			'userEmail'   => $auth_user_email,
 			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry' => $store_location['country'],
 		);
 
 		return $settings;
