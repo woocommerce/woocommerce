@@ -5,6 +5,11 @@ import { BlockAttributes, BlockInstance } from '@wordpress/blocks';
 import { select, dispatch } from '@wordpress/data';
 
 /**
+ * Internal dependencies
+ */
+import { ThumbnailsPosition } from './inner-blocks/product-gallery-thumbnails/constants';
+
+/**
  * Generates layout attributes based on the position of thumbnails.
  *
  * @param {string} thumbnailsPosition - The position of thumbnails ('bottom' or other values).
@@ -122,6 +127,29 @@ const findBlock = ( {
 };
 
 /**
+ * Sets the layout of group block based on the thumbnails' position.
+ *
+ * @param {ThumbnailsPosition} thumbnailsPosition - The position of thumbnails.
+ * @param {string}             clientId           - The client ID of the block to update.
+ */
+const setGroupBlockLayoutByThumbnailsPosition = (
+	thumbnailsPosition: ThumbnailsPosition,
+	clientId: string
+): void => {
+	const block = select( 'core/block-editor' ).getBlock( clientId );
+	block?.innerBlocks.forEach( ( innerBlock ) => {
+		if ( innerBlock.name === 'core/group' ) {
+			updateBlockAttributes(
+				{
+					layout: getGroupLayoutAttributes( thumbnailsPosition ),
+				},
+				innerBlock
+			);
+		}
+	} );
+};
+
+/**
  * Moves inner blocks to a position based on provided attributes.
  *
  * @param {BlockAttributes} attributes - The attributes of the parent block.
@@ -174,6 +202,10 @@ export const moveInnerBlocksToPosition = (
 			} );
 
 			const { thumbnailsPosition } = attributes;
+			setGroupBlockLayoutByThumbnailsPosition(
+				thumbnailsPosition,
+				clientId
+			);
 
 			if (
 				( ( thumbnailsPosition === 'bottom' ||
@@ -198,29 +230,4 @@ export const moveInnerBlocksToPosition = (
 			} );
 		}
 	}
-};
-
-/**
- * Updates the type of group block based on provided attributes.
- *
- * @param {BlockAttributes} attributes - The attributes of the parent block.
- * @param {string}          clientId   - The clientId of the parent block.
- */
-export const updateGroupBlockType = (
-	attributes: BlockAttributes,
-	clientId: string
-): void => {
-	const block = select( 'core/block-editor' ).getBlock( clientId );
-	block?.innerBlocks.forEach( ( innerBlock ) => {
-		if ( innerBlock.name === 'core/group' ) {
-			updateBlockAttributes(
-				{
-					layout: getGroupLayoutAttributes(
-						attributes.thumbnailsPosition
-					),
-				},
-				innerBlock
-			);
-		}
-	} );
 };
