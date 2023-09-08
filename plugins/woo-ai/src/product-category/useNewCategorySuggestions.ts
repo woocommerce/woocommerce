@@ -59,14 +59,14 @@ export const useNewCategorySuggestions = (
 			'You are a WooCommerce SEO and marketing expert.',
 			`Using the product's ${ productPropsInstructions.includedProps.join(
 				', '
-			) } suggest suitable product categories using the Google standard taxonomy hierarchy.`,
-			'Categories can have parents and multi-level children structures like Parent Category > Child Category.',
+			) } suggest the best matching category from the Google standard product category taxonomy hierarchy.`,
+			'The category can optionally have multi-level children structures like Parent Category > Child Category.',
 			"The product's properties are:",
 			...productPropsInstructions.instructions,
-			'Return only a comma-separated list of the product categories, children categories must be separated by >.',
+			'Return only one best matching product category, children categories must be separated by >.',
 			'Here is an example of a valid response:',
-			'Parent Category 1 > Subcategory 1, Parent Category 2 > Subcategory 2 > Another Subcategory 2',
-			'Do not output the example response. Respond only with the suggested categories. Do not say anything else.',
+			'Parent Category > Child Category > Child of Child Category',
+			'Do not output the example response. Respond only with the one suggested category. Do not say anything else.',
 		];
 
 		return instructions.join( '\n' );

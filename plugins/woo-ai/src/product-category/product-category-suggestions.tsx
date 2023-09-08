@@ -255,7 +255,7 @@ export const ProductCategorySuggestions = () => {
 					existingSuggestionsState === SuggestionsState.Fetching ||
 					newSuggestionsState === SuggestionsState.Fetching
 				}
-				label={ __( 'Suggest categories using AI', 'woocommerce' ) }
+				label={ __( 'Suggest category using AI', 'woocommerce' ) }
 			/>
 			{ ( existingSuggestionsState === SuggestionsState.Fetching ||
 				newSuggestionsState === SuggestionsState.Fetching ) && (
@@ -300,52 +300,42 @@ export const ProductCategorySuggestions = () => {
 			{ ( existingSuggestionsState === SuggestionsState.Complete ||
 				newSuggestionsState === SuggestionsState.Complete ) && (
 				<div>
-					<div className="wc-product-category-suggestions__suggestions">
-						{ existingSuggestions && (
-							<ul className="wc-product-category-suggestions__existing-categories">
-								{ existingSuggestions.map( ( suggestion ) => (
-									<li key={ suggestion }>
-										<button
-											title={ __(
-												'Select category',
-												'woocommerce'
-											) }
-											className="button-link"
-											onClick={ () =>
-												handleExistingSuggestionClick(
-													suggestion
-												)
-											}
-										>
-											+ { suggestion }
-										</button>
-									</li>
-								) ) }
-							</ul>
-						) }
-						{ newSuggestions && (
-							<ul className="wc-product-category-suggestions__new-categories">
-								{ newSuggestions.map( ( suggestion ) => (
-									<li key={ suggestion }>
-										<button
-											title={ __(
-												'Add and select category',
-												'woocommerce'
-											) }
-											className="button-link"
-											onClick={ () =>
-												handleNewSuggestionClick(
-													suggestion
-												)
-											}
-										>
-											+ { suggestion }
-										</button>
-									</li>
-								) ) }
-							</ul>
-						) }
-					</div>
+					<ul className="wc-product-category-suggestions__suggestions">
+						{ existingSuggestions.map( ( suggestion ) => (
+							<li key={ suggestion }>
+								<button
+									title={ __(
+										'Select category',
+										'woocommerce'
+									) }
+									className="button-link"
+									onClick={ () =>
+										handleExistingSuggestionClick(
+											suggestion
+										)
+									}
+								>
+									{ suggestion }
+								</button>
+							</li>
+						) ) }
+						{ newSuggestions.map( ( suggestion ) => (
+							<li key={ suggestion }>
+								<button
+									title={ __(
+										'Add and select category',
+										'woocommerce'
+									) }
+									className="button-link"
+									onClick={ () =>
+										handleNewSuggestionClick( suggestion )
+									}
+								>
+									{ suggestion }
+								</button>
+							</li>
+						) ) }
+					</ul>
 					{ showFeedback && (
 						<div className="wc-product-category-suggestions__feedback">
 							<CategorySuggestionFeedback />

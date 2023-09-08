@@ -31,7 +31,7 @@ export const useExistingCategorySuggestions = (
 		},
 		onCompletionFinished: async ( reason, content ) => {
 			if ( reason === 'error' ) {
-				throw Error( 'Unable to parse suggestions' );
+				throw Error( 'Invalid response' );
 			}
 			if ( ! content ) {
 				throw Error( 'No suggestions were generated' );
@@ -68,18 +68,18 @@ export const useExistingCategorySuggestions = (
 			'You are a WooCommerce SEO and marketing expert.',
 			`Using the product's ${ productPropsInstructions.includedProps.join(
 				', '
-			) } suggest suitable product categories.`,
+			) } suggest only one category that best matches the product.`,
 			'Categories can have parents and multi-level children structures like Parent Category > Child Category.',
 			availableCategories
-				? `You will be given a list of available categories. Find the best matching categories from this list. Available categories are: ${ availableCategories.join(
+				? `You will be given a list of available categories. Find the best matching category from this list. Available categories are: ${ availableCategories.join(
 						', '
 				  ) }`
 				: '',
 			"The product's properties are:",
 			...productPropsInstructions.instructions,
-			'Return only a comma-separated list of the product categories, children categories must be separated by >.',
+			'Return only one product category, children categories must be separated by >.',
 			'Here is an example of a valid response:',
-			'Parent Category 1 > Subcategory 1, Parent Category 2 > Subcategory 2 > Another Subcategory 2',
+			'Parent Category > Subcategory > Another Subcategory',
 			'Do not output the example response. Respond only with the suggested categories. Do not say anything else.',
 		];
 
