@@ -35,7 +35,7 @@ class WPConsentAPI {
 	 *
 	 * @return void
 	 */
-	private function on_plugins_loaded() {
+	protected function on_plugins_loaded() {
 		// Include integration to WP Consent Level API if available
 		if ( ! $this->is_wp_consent_api_active() ) {
 			return;
