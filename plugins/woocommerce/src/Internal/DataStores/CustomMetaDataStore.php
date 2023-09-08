@@ -114,7 +114,7 @@ abstract class CustomMetaDataStore {
 	 * @param  stdClass $meta (containing ->key and ->value).
 	 * @param  string   $meta_type Meta type.
 	 *
-	 * @return int meta ID
+	 * @return int|false meta ID
 	 */
 	protected function add_meta_with_type( &$object, $meta, $meta_type ) {
 		global $wpdb;
@@ -159,7 +159,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	protected function update_meta_with_type( &$object, $meta, $meta_type ) {
+	protected function update_meta_with_type( &$object, $meta, $meta_type ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) || empty( $meta->key ) ) {

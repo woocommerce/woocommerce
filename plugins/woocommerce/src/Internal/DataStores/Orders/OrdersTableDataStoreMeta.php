@@ -38,7 +38,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ) {
+	public function delete_meta( &$object, $meta ) : bool {
 		return $this->delete_meta_with_type( $object, $meta, 'order' );
 	}
 
@@ -48,7 +48,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
 	 *
-	 * @return int meta ID
+	 * @return int|false meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
 		return $this->add_meta_with_type( $object, $meta, 'order' );
@@ -62,7 +62,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function update_meta( &$object, $meta ) {
+	public function update_meta( &$object, $meta ) : bool {
 		return $this->update_meta_with_type( $object, $meta, 'order' );
 	}
 }
