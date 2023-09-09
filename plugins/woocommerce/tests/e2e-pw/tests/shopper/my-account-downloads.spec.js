@@ -31,6 +31,7 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 				downloadable: true,
 				downloads: [
 					{
+						name: 'Test file',
 						file: `${ baseURL }/test-file/`,
 					},
 				],
