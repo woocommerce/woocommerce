@@ -2,8 +2,8 @@
 /**
  * Currency formatting information
  *
- * @package WooCommerce\Payments\i18n
- * @version 3.5.0
+ * @package WooCommerce\i18n
+ * @version 8.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
