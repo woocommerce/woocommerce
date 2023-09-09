@@ -111,7 +111,7 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		);
 		await expect(
 			page.locator( '.woocommerce-MyAccount-downloads-file' )
-		).toContainText( 'test-file' );
+		).toContainText( 'Test file' );
 
 		// click to simulate downloading and verify the file doesn't exist anymore in downloads
 		await page.locator( '.woocommerce-MyAccount-downloads-file' ).click();
