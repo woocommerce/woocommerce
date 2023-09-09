@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
 // 259 countries total
 const countryCodes = [
@@ -306,7 +306,7 @@ test.describe( 'Data API tests', () => {
 					countries: [
 						{
 							code: 'AO',
-							name: 'Angolan kwanza',
+							name: 'Angolan Kwanza',
 							currency_code: 'AOA',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -318,7 +318,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BF',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -330,7 +330,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BI',
-							name: 'Burundian franc',
+							name: 'Burundian Franc',
 							currency_code: 'BIF',
 							currency_pos: 'right',
 							decimal_sep: ',',
@@ -342,7 +342,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BJ',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -354,7 +354,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BW',
-							name: 'Botswana pula',
+							name: 'Botswanan Pula',
 							currency_code: 'BWP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -366,31 +366,31 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CD',
-							name: 'Congolese franc',
+							name: 'Congolese Franc',
 							currency_code: 'CDF',
-							currency_pos: 'left_space',
-							decimal_sep: ',',
-							dimension_unit: 'cm',
-							num_decimals: 2,
-							thousand_sep: '.',
-							weight_unit: 'kg',
-							states: [],
-						},
-						{
-							code: 'CF',
-							name: 'Central African CFA franc',
-							currency_code: 'XAF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
-							num_decimals: 0,
+							num_decimals: 2,
 							thousand_sep: ' ',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
+							code: 'CF',
+							name: 'Central African CFA Franc',
+							currency_code: 'XAF',
+							currency_pos: 'left',
+							decimal_sep: ',',
+							dimension_unit: 'cm',
+							num_decimals: 0,
+							thousand_sep: '.',
+							weight_unit: 'kg',
+							states: [],
+						},
+						{
 							code: 'CG',
-							name: 'Central African CFA franc',
+							name: 'Central African CFA Franc',
 							currency_code: 'XAF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -402,7 +402,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CI',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -414,7 +414,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CM',
-							name: 'Central African CFA franc',
+							name: 'Central African CFA Franc',
 							currency_code: 'XAF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -426,7 +426,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CV',
-							name: 'Cape Verdean escudo',
+							name: 'Cape Verdean Escudo',
 							currency_code: 'CVE',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -438,7 +438,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'DJ',
-							name: 'Djiboutian franc',
+							name: 'Djiboutian Franc',
 							currency_code: 'DJF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -450,9 +450,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'DZ',
-							name: 'Algerian dinar',
+							name: 'Algerian Dinar',
 							currency_code: 'DZD',
-							currency_pos: 'left_space',
+							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
 							num_decimals: 2,
@@ -462,7 +462,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'EG',
-							name: 'Egyptian pound',
+							name: 'Egyptian Pound',
 							currency_code: 'EGP',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -474,9 +474,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'EH',
-							name: 'Moroccan dirham',
+							name: 'Moroccan Dirham',
 							currency_code: 'MAD',
-							currency_pos: 'left_space',
+							currency_pos: 'right_space',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
@@ -486,7 +486,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ER',
-							name: 'Eritrean nakfa',
+							name: 'Eritrean Nakfa',
 							currency_code: 'ERN',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -498,7 +498,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ET',
-							name: 'Ethiopian birr',
+							name: 'Ethiopian Birr',
 							currency_code: 'ETB',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -510,7 +510,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GA',
-							name: 'Central African CFA franc',
+							name: 'Central African CFA Franc',
 							currency_code: 'XAF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -522,7 +522,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GH',
-							name: 'Ghana cedi',
+							name: 'Ghanaian Cedi',
 							currency_code: 'GHS',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -534,7 +534,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GM',
-							name: 'Gambian dalasi',
+							name: 'Gambian Dalasi',
 							currency_code: 'GMD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -546,7 +546,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GN',
-							name: 'Guinean franc',
+							name: 'Guinean Franc',
 							currency_code: 'GNF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -558,7 +558,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GQ',
-							name: 'Central African CFA franc',
+							name: 'Central African CFA Franc',
 							currency_code: 'XAF',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -570,7 +570,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GW',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -582,7 +582,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KE',
-							name: 'Kenyan shilling',
+							name: 'Kenyan Shilling',
 							currency_code: 'KES',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -594,7 +594,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KM',
-							name: 'Comorian franc',
+							name: 'Comorian Franc',
 							currency_code: 'KMF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -606,7 +606,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LR',
-							name: 'Liberian dollar',
+							name: 'Liberian Dollar',
 							currency_code: 'LRD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -618,21 +618,21 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LS',
-							name: 'Lesotho loti',
+							name: 'Lesotho Loti',
 							currency_code: 'LSL',
 							currency_pos: 'left',
-							decimal_sep: '.',
+							decimal_sep: ',',
 							dimension_unit: 'cm',
 							num_decimals: 2,
-							thousand_sep: ',',
+							thousand_sep: ' ',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'LY',
-							name: 'Libyan dinar',
+							name: 'Libyan Dinar',
 							currency_code: 'LYD',
-							currency_pos: 'left_space',
+							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
 							num_decimals: 3,
@@ -642,9 +642,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MA',
-							name: 'Moroccan dirham',
+							name: 'Moroccan Dirham',
 							currency_code: 'MAD',
-							currency_pos: 'left_space',
+							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
 							num_decimals: 2,
@@ -654,7 +654,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MG',
-							name: 'Malagasy ariary',
+							name: 'Malagasy Ariary',
 							currency_code: 'MGA',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -666,7 +666,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ML',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -678,7 +678,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MR',
-							name: 'Mauritanian ouguiya',
+							name: 'Mauritanian Ouguiya',
 							currency_code: 'MRU',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -690,7 +690,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MU',
-							name: 'Mauritian rupee',
+							name: 'Mauritian Rupee',
 							currency_code: 'MUR',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -702,9 +702,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MW',
-							name: 'Malawian kwacha',
+							name: 'Malawian Kwacha',
 							currency_code: 'MWK',
-							currency_pos: 'left',
+							currency_pos: 'left_space',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
@@ -714,7 +714,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MZ',
-							name: 'Mozambican metical',
+							name: 'Mozambican Metical',
 							currency_code: 'MZN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -726,7 +726,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NA',
-							name: 'Namibian dollar',
+							name: 'Namibian Dollar',
 							currency_code: 'NAD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -738,7 +738,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NE',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -750,7 +750,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NG',
-							name: 'Nigerian naira',
+							name: 'Nigerian Naira',
 							currency_code: 'NGN',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -774,7 +774,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'RW',
-							name: 'Rwandan franc',
+							name: 'Rwandan Franc',
 							currency_code: 'RWF',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -786,7 +786,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SC',
-							name: 'Seychellois rupee',
+							name: 'Seychellois Rupee',
 							currency_code: 'SCR',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -798,7 +798,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SD',
-							name: 'Sudanese pound',
+							name: 'Sudanese Pound',
 							currency_code: 'SDG',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -810,7 +810,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SH',
-							name: 'Saint Helena pound',
+							name: 'St. Helena Pound',
 							currency_code: 'SHP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -822,19 +822,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SL',
-							name: 'Sierra Leonean leone',
-							currency_code: 'SLL',
+							name: 'Sierra Leonean Leone',
+							currency_code: 'SLE',
 							currency_pos: 'left',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
-							num_decimals: 0,
+							num_decimals: 2,
 							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'SN',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -846,7 +846,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SO',
-							name: 'Somali shilling',
+							name: 'Somali Shilling',
 							currency_code: 'SOS',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -858,7 +858,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SS',
-							name: 'South Sudanese pound',
+							name: 'South Sudanese Pound',
 							currency_code: 'SSP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -870,7 +870,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ST',
-							name: 'São Tomé and Príncipe dobra',
+							name: 'São Tomé & Príncipe Dobra',
 							currency_code: 'STN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -882,7 +882,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SZ',
-							name: 'Swazi lilangeni',
+							name: 'Swazi Lilangeni',
 							currency_code: 'SZL',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -894,7 +894,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TD',
-							name: 'Central African CFA franc',
+							name: 'Central African CFA Franc',
 							currency_code: 'XAF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -906,7 +906,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TG',
-							name: 'West African CFA franc',
+							name: 'West African CFA Franc',
 							currency_code: 'XOF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -918,9 +918,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TN',
-							name: 'Tunisian dinar',
+							name: 'Tunisian Dinar',
 							currency_code: 'TND',
-							currency_pos: 'left_space',
+							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
 							num_decimals: 3,
@@ -930,7 +930,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TZ',
-							name: 'Tanzanian shilling',
+							name: 'Tanzanian Shilling',
 							currency_code: 'TZS',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -942,7 +942,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'UG',
-							name: 'Ugandan shilling',
+							name: 'Ugandan Shilling',
 							currency_code: 'UGX',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -966,19 +966,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ZA',
-							name: 'South African rand',
+							name: 'South African Rand',
 							currency_code: 'ZAR',
 							currency_pos: 'left',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
-							thousand_sep: ' ',
+							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: expect.arrayContaining( [] ),
 						},
 						{
 							code: 'ZM',
-							name: 'Zambian kwacha',
+							name: 'Zambian Kwacha',
 							currency_code: 'ZMW',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -990,7 +990,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ZW',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1032,7 +1032,14 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TF',
-							name: 'French Southern Territories',
+							name: 'Euro',
+							currency_code: 'EUR',
+							currency_pos: 'right_space',
+							decimal_sep: ',',
+							dimension_unit: 'cm',
+							num_decimals: 2,
+							thousand_sep: ' ',
+							weight_unit: 'kg',
 							states: [],
 						},
 					],
@@ -1047,19 +1054,19 @@ test.describe( 'Data API tests', () => {
 					countries: [
 						{
 							code: 'AE',
-							name: 'United Arab Emirates dirham',
+							name: 'United Arab Emirates Dirham',
 							currency_code: 'AED',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
-							thousand_sep: '.',
+							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'AF',
-							name: 'Afghan afghani',
+							name: 'Afghan Afghani',
 							currency_code: 'AFN',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -1071,7 +1078,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AM',
-							name: 'Armenian dram',
+							name: 'Armenian Dram',
 							currency_code: 'AMD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1083,7 +1090,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AZ',
-							name: 'Azerbaijani manat',
+							name: 'Azerbaijani Manat',
 							currency_code: 'AZN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1095,7 +1102,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BD',
-							name: 'Bangladeshi taka',
+							name: 'Bangladeshi Taka',
 							currency_code: 'BDT',
 							currency_pos: 'right',
 							decimal_sep: '.',
@@ -1107,7 +1114,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BH',
-							name: 'Bahraini dinar',
+							name: 'Bahraini Dinar',
 							currency_code: 'BHD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1119,7 +1126,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BN',
-							name: 'Brunei dollar',
+							name: 'Brunei Dollar',
 							currency_code: 'BND',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -1131,7 +1138,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BT',
-							name: 'Bhutanese ngultrum',
+							name: 'Bhutanese Ngultrum',
 							currency_code: 'BTN',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1143,7 +1150,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CC',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1155,7 +1162,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CN',
-							name: 'Chinese yuan',
+							name: 'Chinese Yuan',
 							currency_code: 'CNY',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1167,7 +1174,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CX',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1191,7 +1198,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GE',
-							name: 'Georgian lari',
+							name: 'Georgian Lari',
 							currency_code: 'GEL',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1203,7 +1210,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'HK',
-							name: 'Hong Kong dollar',
+							name: 'Hong Kong Dollar',
 							currency_code: 'HKD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1215,7 +1222,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'ID',
-							name: 'Indonesian rupiah',
+							name: 'Indonesian Rupiah',
 							currency_code: 'IDR',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -1227,7 +1234,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IL',
-							name: 'Israeli new shekel',
+							name: 'Israeli New Shekel',
 							currency_code: 'ILS',
 							currency_pos: 'right_space',
 							decimal_sep: '.',
@@ -1239,7 +1246,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IN',
-							name: 'Indian rupee',
+							name: 'Indian Rupee',
 							currency_code: 'INR',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1251,7 +1258,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IO',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1263,7 +1270,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IQ',
-							name: 'Iraqi dinar',
+							name: 'Iraqi Dinar',
 							currency_code: 'IQD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1275,7 +1282,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IR',
-							name: 'Iranian rial',
+							name: 'Iranian Rial',
 							currency_code: 'IRR',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -1287,7 +1294,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'JO',
-							name: 'Jordanian dinar',
+							name: 'Jordanian Dinar',
 							currency_code: 'JOD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1299,7 +1306,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'JP',
-							name: 'Japanese yen',
+							name: 'Japanese Yen',
 							currency_code: 'JPY',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1311,7 +1318,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KG',
-							name: 'Kyrgyzstani som',
+							name: 'Kyrgystani Som',
 							currency_code: 'KGS',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1323,7 +1330,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KH',
-							name: 'Cambodian riel',
+							name: 'Cambodian Riel',
 							currency_code: 'KHR',
 							currency_pos: 'right',
 							decimal_sep: ',',
@@ -1335,7 +1342,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KP',
-							name: 'North Korean won',
+							name: 'North Korean Won',
 							currency_code: 'KPW',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1347,7 +1354,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KR',
-							name: 'South Korean won',
+							name: 'South Korean Won',
 							currency_code: 'KRW',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1359,7 +1366,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KW',
-							name: 'Kuwaiti dinar',
+							name: 'Kuwaiti Dinar',
 							currency_code: 'KWD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1371,7 +1378,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KZ',
-							name: 'Kazakhstani tenge',
+							name: 'Kazakhstani Tenge',
 							currency_code: 'KZT',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1383,7 +1390,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LA',
-							name: 'Lao kip',
+							name: 'Laotian Kip',
 							currency_code: 'LAK',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -1395,7 +1402,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LB',
-							name: 'Lebanese pound',
+							name: 'Lebanese Pound',
 							currency_code: 'LBP',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1407,7 +1414,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LK',
-							name: 'Sri Lankan rupee',
+							name: 'Sri Lankan Rupee',
 							currency_code: 'LKR',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1419,7 +1426,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MM',
-							name: 'Burmese kyat',
+							name: 'Myanmar Kyat',
 							currency_code: 'MMK',
 							currency_pos: 'right_space',
 							decimal_sep: '.',
@@ -1431,7 +1438,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MN',
-							name: 'Mongolian tögrög',
+							name: 'Mongolian Tugrik',
 							currency_code: 'MNT',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -1443,7 +1450,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MO',
-							name: 'Macanese pataca',
+							name: 'Macanese Pataca',
 							currency_code: 'MOP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1455,19 +1462,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MV',
-							name: 'Maldivian rufiyaa',
+							name: 'Maldivian Rufiyaa',
 							currency_code: 'MVR',
 							currency_pos: 'left_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
-							thousand_sep: '.',
+							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'MY',
-							name: 'Malaysian ringgit',
+							name: 'Malaysian Ringgit',
 							currency_code: 'MYR',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1479,7 +1486,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NP',
-							name: 'Nepalese rupee',
+							name: 'Nepalese Rupee',
 							currency_code: 'NPR',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -1491,7 +1498,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'OM',
-							name: 'Omani rial',
+							name: 'Omani Rial',
 							currency_code: 'OMR',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1503,7 +1510,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PH',
-							name: 'Philippine peso',
+							name: 'Philippine Peso',
 							currency_code: 'PHP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1515,9 +1522,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PK',
-							name: 'Pakistani rupee',
+							name: 'Pakistani Rupee',
 							currency_code: 'PKR',
-							currency_pos: 'left_space',
+							currency_pos: 'left',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
@@ -1527,19 +1534,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PS',
-							name: 'Jordanian dinar',
-							currency_code: 'JOD',
+							name: 'Israeli New Shekel',
+							currency_code: 'ILS',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
-							num_decimals: 3,
+							num_decimals: 2,
 							thousand_sep: '.',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'QA',
-							name: 'Qatari riyal',
+							name: 'Qatari Riyal',
 							currency_code: 'QAR',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1551,7 +1558,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SA',
-							name: 'Saudi riyal',
+							name: 'Saudi Riyal',
 							currency_code: 'SAR',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1563,7 +1570,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SG',
-							name: 'Singapore dollar',
+							name: 'Singapore Dollar',
 							currency_code: 'SGD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1575,7 +1582,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SY',
-							name: 'Syrian pound',
+							name: 'Syrian Pound',
 							currency_code: 'SYP',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1587,7 +1594,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TH',
-							name: 'Thai baht',
+							name: 'Thai Baht',
 							currency_code: 'THB',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1599,7 +1606,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TJ',
-							name: 'Tajikistani somoni',
+							name: 'Tajikistani Somoni',
 							currency_code: 'TJS',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1611,7 +1618,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TL',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1623,7 +1630,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TM',
-							name: 'Turkmenistan manat',
+							name: 'Turkmenistani Manat',
 							currency_code: 'TMT',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1635,7 +1642,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TW',
-							name: 'New Taiwan dollar',
+							name: 'New Taiwan Dollar',
 							currency_code: 'TWD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1647,7 +1654,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'UZ',
-							name: 'Uzbekistani som',
+							name: 'Uzbekistani Som',
 							currency_code: 'UZS',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1659,7 +1666,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VN',
-							name: 'Vietnamese đồng',
+							name: 'Vietnamese Dong',
 							currency_code: 'VND',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1671,7 +1678,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'YE',
-							name: 'Yemeni rial',
+							name: 'Yemeni Rial',
 							currency_code: 'YER',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1705,7 +1712,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AL',
-							name: 'Albanian lek',
+							name: 'Albanian Lek',
 							currency_code: 'ALL',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1741,7 +1748,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BA',
-							name: 'Bosnia and Herzegovina convertible mark',
+							name: 'Bosnia-Herzegovina Convertible Mark',
 							currency_code: 'BAM',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1765,7 +1772,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BG',
-							name: 'Bulgarian lev',
+							name: 'Bulgarian Lev',
 							currency_code: 'BGN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1777,7 +1784,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BY',
-							name: 'Belarusian ruble',
+							name: 'Belarusian Ruble',
 							currency_code: 'BYN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1789,7 +1796,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CH',
-							name: 'Swiss franc',
+							name: 'Swiss Franc',
 							currency_code: 'CHF',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -1801,7 +1808,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CZ',
-							name: 'Czech koruna',
+							name: 'Czech Koruna',
 							currency_code: 'CZK',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1825,7 +1832,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'DK',
-							name: 'Danish krone',
+							name: 'Danish Krone',
 							currency_code: 'DKK',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1873,7 +1880,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'FO',
-							name: 'Danish krone',
+							name: 'Danish Krone',
 							currency_code: 'DKK',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -1897,7 +1904,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GB',
-							name: 'Pound sterling',
+							name: 'British Pound',
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1909,7 +1916,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GG',
-							name: 'Pound sterling',
+							name: 'British Pound',
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1921,7 +1928,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GI',
-							name: 'Gibraltar pound',
+							name: 'Gibraltar Pound',
 							currency_code: 'GIP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1957,12 +1964,12 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'HU',
-							name: 'Hungarian forint',
+							name: 'Hungarian Forint',
 							currency_code: 'HUF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
-							num_decimals: 2,
+							num_decimals: 0,
 							thousand_sep: ' ',
 							weight_unit: 'kg',
 							states: expect.arrayContaining( [] ),
@@ -1981,7 +1988,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IM',
-							name: 'Pound sterling',
+							name: 'British Pound',
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -1993,7 +2000,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'IS',
-							name: 'Icelandic króna',
+							name: 'Icelandic Króna',
 							currency_code: 'ISK',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2017,7 +2024,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'JE',
-							name: 'Pound sterling',
+							name: 'British Pound',
 							currency_code: 'GBP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2029,7 +2036,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LI',
-							name: 'Swiss franc',
+							name: 'Swiss Franc',
 							currency_code: 'CHF',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -2089,7 +2096,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MD',
-							name: 'Moldovan leu',
+							name: 'Moldovan Leu',
 							currency_code: 'MDL',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2113,7 +2120,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MK',
-							name: 'Macedonian denar',
+							name: 'Macedonian Denar',
 							currency_code: 'MKD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2149,19 +2156,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NO',
-							name: 'Norwegian krone',
+							name: 'Norwegian Krone',
 							currency_code: 'NOK',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
-							num_decimals: 2,
+							num_decimals: 0,
 							thousand_sep: ' ',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'PL',
-							name: 'Polish złoty',
+							name: 'Polish Zloty',
 							currency_code: 'PLN',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2185,7 +2192,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'RO',
-							name: 'Romanian leu',
+							name: 'Romanian Leu',
 							currency_code: 'RON',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2197,7 +2204,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'RS',
-							name: 'Serbian dinar',
+							name: 'Serbian Dinar',
 							currency_code: 'RSD',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2209,7 +2216,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'RU',
-							name: 'Russian ruble',
+							name: 'Russian Ruble',
 							currency_code: 'RUB',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2221,7 +2228,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SE',
-							name: 'Swedish krona',
+							name: 'Swedish Krona',
 							currency_code: 'SEK',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2245,7 +2252,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SJ',
-							name: 'Norwegian krone',
+							name: 'Norwegian Krone',
 							currency_code: 'NOK',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -2281,7 +2288,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TR',
-							name: 'Turkish lira',
+							name: 'Turkish Lira',
 							currency_code: 'TRY',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -2293,7 +2300,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'UA',
-							name: 'Ukrainian hryvnia',
+							name: 'Ukrainian Hryvnia',
 							currency_code: 'UAH',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2327,7 +2334,7 @@ test.describe( 'Data API tests', () => {
 					countries: [
 						{
 							code: 'AG',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2339,7 +2346,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AI',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2351,7 +2358,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AW',
-							name: 'Aruban florin',
+							name: 'Aruban Florin',
 							currency_code: 'AWG',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -2363,7 +2370,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BB',
-							name: 'Barbadian dollar',
+							name: 'Barbadian Dollar',
 							currency_code: 'BBD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2387,7 +2394,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BM',
-							name: 'Bermudian dollar',
+							name: 'Bermudan Dollar',
 							currency_code: 'BMD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2399,7 +2406,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BQ',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -2411,7 +2418,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BS',
-							name: 'Bahamian dollar',
+							name: 'Bahamian Dollar',
 							currency_code: 'BSD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2423,7 +2430,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BZ',
-							name: 'Belize dollar',
+							name: 'Belize Dollar',
 							currency_code: 'BZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2435,7 +2442,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CA',
-							name: 'Canadian dollar',
+							name: 'Canadian Dollar',
 							currency_code: 'CAD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2447,7 +2454,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CR',
-							name: 'Costa Rican colón',
+							name: 'Costa Rican Colón',
 							currency_code: 'CRC',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -2459,8 +2466,8 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CU',
-							name: 'Cuban convertible peso',
-							currency_code: 'CUC',
+							name: 'Cuban Peso',
+							currency_code: 'CUP',
 							currency_pos: 'left',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
@@ -2471,19 +2478,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CW',
-							name: 'Netherlands Antillean guilder',
+							name: 'Netherlands Antillean Guilder',
 							currency_code: 'ANG',
 							currency_pos: 'left_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
-							thousand_sep: '.',
+							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: [],
 						},
 						{
 							code: 'DM',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2495,7 +2502,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'DO',
-							name: 'Dominican peso',
+							name: 'Dominican Peso',
 							currency_code: 'DOP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2507,7 +2514,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GD',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2519,7 +2526,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GL',
-							name: 'Danish krone',
+							name: 'Danish Krone',
 							currency_code: 'DKK',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -2543,7 +2550,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GT',
-							name: 'Guatemalan quetzal',
+							name: 'Guatemalan Quetzal',
 							currency_code: 'GTQ',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2555,7 +2562,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'HN',
-							name: 'Honduran lempira',
+							name: 'Honduran Lempira',
 							currency_code: 'HNL',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2567,8 +2574,8 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'HT',
-							name: 'United States (US) dollar',
-							currency_code: 'USD',
+							name: 'Haitian Gourde',
+							currency_code: 'HTG',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
@@ -2579,7 +2586,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'JM',
-							name: 'Jamaican dollar',
+							name: 'Jamaican Dollar',
 							currency_code: 'JMD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2591,7 +2598,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KN',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2603,7 +2610,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KY',
-							name: 'Cayman Islands dollar',
+							name: 'Cayman Islands Dollar',
 							currency_code: 'KYD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2615,7 +2622,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'LC',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2651,7 +2658,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MS',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2663,7 +2670,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MX',
-							name: 'Mexican peso',
+							name: 'Mexican Peso',
 							currency_code: 'MXN',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2675,7 +2682,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NI',
-							name: 'Nicaraguan córdoba',
+							name: 'Nicaraguan Córdoba',
 							currency_code: 'NIO',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2687,8 +2694,8 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PA',
-							name: 'United States (US) dollar',
-							currency_code: 'USD',
+							name: 'Panamanian Balboa',
+							currency_code: 'PAB',
 							currency_pos: 'left',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
@@ -2711,7 +2718,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PR',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2723,7 +2730,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SV',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2735,7 +2742,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SX',
-							name: 'Netherlands Antillean guilder',
+							name: 'Netherlands Antillean Guilder',
 							currency_code: 'ANG',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2747,7 +2754,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TC',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2759,7 +2766,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TT',
-							name: 'Trinidad and Tobago dollar',
+							name: 'Trinidad & Tobago Dollar',
 							currency_code: 'TTD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2771,7 +2778,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'US',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2783,7 +2790,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VC',
-							name: 'East Caribbean dollar',
+							name: 'East Caribbean Dollar',
 							currency_code: 'XCD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2795,7 +2802,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VG',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2807,7 +2814,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VI',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2829,7 +2836,7 @@ test.describe( 'Data API tests', () => {
 					countries: [
 						{
 							code: 'AS',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2841,7 +2848,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'AU',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2853,7 +2860,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CK',
-							name: 'New Zealand dollar',
+							name: 'New Zealand Dollar',
 							currency_code: 'NZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2865,7 +2872,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'FJ',
-							name: 'Fijian dollar',
+							name: 'Fijian Dollar',
 							currency_code: 'FJD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2877,7 +2884,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'FM',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2889,7 +2896,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GU',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2901,7 +2908,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'KI',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2913,7 +2920,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MH',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2925,7 +2932,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'MP',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2937,7 +2944,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NC',
-							name: 'CFP franc',
+							name: 'CFP Franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -2949,7 +2956,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NF',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2961,7 +2968,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NR',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2973,7 +2980,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NU',
-							name: 'New Zealand dollar',
+							name: 'New Zealand Dollar',
 							currency_code: 'NZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2985,7 +2992,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'NZ',
-							name: 'New Zealand dollar',
+							name: 'New Zealand Dollar',
 							currency_code: 'NZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -2997,7 +3004,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PF',
-							name: 'CFP franc',
+							name: 'CFP Franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -3009,9 +3016,9 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PG',
-							name: 'Papua New Guinean kina',
+							name: 'Papua New Guinean Kina',
 							currency_code: 'PGK',
-							currency_pos: 'left',
+							currency_pos: 'right_space',
 							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 2,
@@ -3021,7 +3028,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PN',
-							name: 'New Zealand dollar',
+							name: 'New Zealand Dollar',
 							currency_code: 'NZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3033,7 +3040,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PW',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3045,7 +3052,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'SB',
-							name: 'Solomon Islands dollar',
+							name: 'Solomon Islands Dollar',
 							currency_code: 'SBD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3057,7 +3064,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TK',
-							name: 'New Zealand dollar',
+							name: 'New Zealand Dollar',
 							currency_code: 'NZD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3069,7 +3076,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TO',
-							name: 'Tongan paʻanga',
+							name: 'Tongan Paʻanga',
 							currency_code: 'TOP',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -3081,7 +3088,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'TV',
-							name: 'Australian dollar',
+							name: 'Australian Dollar',
 							currency_code: 'AUD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3093,7 +3100,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'UM',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3105,7 +3112,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VU',
-							name: 'Vanuatu vatu',
+							name: 'Vanuatu Vatu',
 							currency_code: 'VUV',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3117,7 +3124,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'WF',
-							name: 'CFP franc',
+							name: 'CFP Franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
@@ -3129,7 +3136,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'WS',
-							name: 'Samoan tālā',
+							name: 'Samoan Tala',
 							currency_code: 'WST',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3151,7 +3158,7 @@ test.describe( 'Data API tests', () => {
 					countries: [
 						{
 							code: 'AR',
-							name: 'Argentine peso',
+							name: 'Argentine Peso',
 							currency_code: 'ARS',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -3163,7 +3170,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BO',
-							name: 'Bolivian boliviano',
+							name: 'Bolivian Boliviano',
 							currency_code: 'BOB',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -3175,7 +3182,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BR',
-							name: 'Brazilian real',
+							name: 'Brazilian Real',
 							currency_code: 'BRL',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -3187,7 +3194,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CL',
-							name: 'Chilean peso',
+							name: 'Chilean Peso',
 							currency_code: 'CLP',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -3199,7 +3206,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'CO',
-							name: 'Colombian peso',
+							name: 'Colombian Peso',
 							currency_code: 'COP',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -3211,7 +3218,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'EC',
-							name: 'United States (US) dollar',
+							name: 'US Dollar',
 							currency_code: 'USD',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -3223,7 +3230,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'FK',
-							name: 'Falkland Islands pound',
+							name: 'Falkland Islands Pound',
 							currency_code: 'FKP',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3247,7 +3254,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'GY',
-							name: 'Guyanese dollar',
+							name: 'Guyanaese Dollar',
 							currency_code: 'GYD',
 							currency_pos: 'left',
 							decimal_sep: '.',
@@ -3259,7 +3266,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PE',
-							name: 'Sol',
+							name: 'Peruvian Sol',
 							currency_code: 'PEN',
 							currency_pos: 'left_space',
 							decimal_sep: '.',
@@ -3271,19 +3278,19 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'PY',
-							name: 'Paraguayan guaraní',
+							name: 'Paraguayan Guarani',
 							currency_code: 'PYG',
 							currency_pos: 'left_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
-							thousand_sep: '.',
+							thousand_sep: ',',
 							weight_unit: 'kg',
 							states: expect.arrayContaining( [] ),
 						},
 						{
 							code: 'SR',
-							name: 'Surinamese dollar',
+							name: 'Surinamese Dollar',
 							currency_code: 'SRD',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -3295,7 +3302,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'UY',
-							name: 'Uruguayan peso',
+							name: 'Uruguayan Peso',
 							currency_code: 'UYU',
 							currency_pos: 'left_space',
 							decimal_sep: ',',
@@ -3307,7 +3314,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VE',
-							name: 'Bolívar soberano',
+							name: 'Venezuelan Bolívar',
 							currency_code: 'VES',
 							currency_pos: 'left',
 							decimal_sep: ',',
@@ -3351,7 +3358,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'AL',
-						name: 'Albanian lek',
+						name: 'Albanian Lek',
 						currency_code: 'ALL',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3387,7 +3394,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'BA',
-						name: 'Bosnia and Herzegovina convertible mark',
+						name: 'Bosnia-Herzegovina Convertible Mark',
 						currency_code: 'BAM',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3411,7 +3418,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'BG',
-						name: 'Bulgarian lev',
+						name: 'Bulgarian Lev',
 						currency_code: 'BGN',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3423,7 +3430,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'BY',
-						name: 'Belarusian ruble',
+						name: 'Belarusian Ruble',
 						currency_code: 'BYN',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3435,7 +3442,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'CH',
-						name: 'Swiss franc',
+						name: 'Swiss Franc',
 						currency_code: 'CHF',
 						currency_pos: 'left_space',
 						decimal_sep: '.',
@@ -3447,7 +3454,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'CZ',
-						name: 'Czech koruna',
+						name: 'Czech Koruna',
 						currency_code: 'CZK',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3471,7 +3478,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'DK',
-						name: 'Danish krone',
+						name: 'Danish Krone',
 						currency_code: 'DKK',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3519,7 +3526,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'FO',
-						name: 'Danish krone',
+						name: 'Danish Krone',
 						currency_code: 'DKK',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3543,7 +3550,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'GB',
-						name: 'Pound sterling',
+						name: 'British Pound',
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
@@ -3555,7 +3562,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'GG',
-						name: 'Pound sterling',
+						name: 'British Pound',
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
@@ -3567,7 +3574,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'GI',
-						name: 'Gibraltar pound',
+						name: 'Gibraltar Pound',
 						currency_code: 'GIP',
 						currency_pos: 'left',
 						decimal_sep: '.',
@@ -3603,12 +3610,12 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'HU',
-						name: 'Hungarian forint',
+						name: 'Hungarian Forint',
 						currency_code: 'HUF',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
 						dimension_unit: 'cm',
-						num_decimals: 2,
+						num_decimals: 0,
 						thousand_sep: ' ',
 						weight_unit: 'kg',
 						states: expect.arrayContaining( [] ),
@@ -3627,7 +3634,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'IM',
-						name: 'Pound sterling',
+						name: 'British Pound',
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
@@ -3639,7 +3646,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'IS',
-						name: 'Icelandic króna',
+						name: 'Icelandic Króna',
 						currency_code: 'ISK',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3663,7 +3670,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'JE',
-						name: 'Pound sterling',
+						name: 'British Pound',
 						currency_code: 'GBP',
 						currency_pos: 'left',
 						decimal_sep: '.',
@@ -3675,7 +3682,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'LI',
-						name: 'Swiss franc',
+						name: 'Swiss Franc',
 						currency_code: 'CHF',
 						currency_pos: 'left_space',
 						decimal_sep: '.',
@@ -3735,7 +3742,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'MD',
-						name: 'Moldovan leu',
+						name: 'Moldovan Leu',
 						currency_code: 'MDL',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3759,7 +3766,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'MK',
-						name: 'Macedonian denar',
+						name: 'Macedonian Denar',
 						currency_code: 'MKD',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3795,19 +3802,19 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'NO',
-						name: 'Norwegian krone',
+						name: 'Norwegian Krone',
 						currency_code: 'NOK',
 						currency_pos: 'left_space',
 						decimal_sep: ',',
 						dimension_unit: 'cm',
-						num_decimals: 2,
+						num_decimals: 0,
 						thousand_sep: ' ',
 						weight_unit: 'kg',
 						states: [],
 					},
 					{
 						code: 'PL',
-						name: 'Polish złoty',
+						name: 'Polish Zloty',
 						currency_code: 'PLN',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3831,7 +3838,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'RO',
-						name: 'Romanian leu',
+						name: 'Romanian Leu',
 						currency_code: 'RON',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3843,7 +3850,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'RS',
-						name: 'Serbian dinar',
+						name: 'Serbian Dinar',
 						currency_code: 'RSD',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3855,7 +3862,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'RU',
-						name: 'Russian ruble',
+						name: 'Russian Ruble',
 						currency_code: 'RUB',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3867,7 +3874,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'SE',
-						name: 'Swedish krona',
+						name: 'Swedish Krona',
 						currency_code: 'SEK',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
@@ -3891,7 +3898,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'SJ',
-						name: 'Norwegian krone',
+						name: 'Norwegian Krone',
 						currency_code: 'NOK',
 						currency_pos: 'left_space',
 						decimal_sep: ',',
@@ -3927,7 +3934,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'TR',
-						name: 'Turkish lira',
+						name: 'Turkish Lira',
 						currency_code: 'TRY',
 						currency_pos: 'left',
 						decimal_sep: ',',
@@ -3939,7 +3946,7 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'UA',
-						name: 'Ukrainian hryvnia',
+						name: 'Ukrainian Hryvnia',
 						currency_code: 'UAH',
 						currency_pos: 'right_space',
 						decimal_sep: ',',

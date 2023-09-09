@@ -10,8 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 $locales = include WCPAY_ABSPATH . '/i18n/currency-info.php';
 
-return [
-	'AC' => [
+return array(
+	'AC' => array(
 		'currency_code'  => 'SHP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -27,8 +27,8 @@ return [
 		'plural'         => 'St. Helena pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['SHP'],
-	],
-	'AD' => [
+	),
+	'AD' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -44,8 +44,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'AE' => [
+	),
+	'AE' => array(
 		'currency_code'  => 'AED',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ',',
@@ -61,8 +61,8 @@ return [
 		'plural'         => 'UAE dirhams',
 		'short_symbol'   => null,
 		'locales'        => $locales['AED'],
-	],
-	'AF' => [
+	),
+	'AF' => array(
 		'currency_code'  => 'AFN',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -78,8 +78,8 @@ return [
 		'plural'         => 'Afghan Afghanis',
 		'short_symbol'   => '؋',
 		'locales'        => $locales['AFN'],
-	],
-	'AG' => [
+	),
+	'AG' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -95,8 +95,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'AI' => [
+	),
+	'AI' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -112,8 +112,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'AL' => [
+	),
+	'AL' => array(
 		'currency_code'  => 'ALL',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -129,8 +129,8 @@ return [
 		'plural'         => 'Albanian lekë',
 		'short_symbol'   => null,
 		'locales'        => $locales['ALL'],
-	],
-	'AM' => [
+	),
+	'AM' => array(
 		'currency_code'  => 'AMD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -146,8 +146,8 @@ return [
 		'plural'         => 'Armenian drams',
 		'short_symbol'   => '֏',
 		'locales'        => $locales['AMD'],
-	],
-	'AO' => [
+	),
+	'AO' => array(
 		'currency_code'  => 'AOA',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -163,8 +163,8 @@ return [
 		'plural'         => 'Angolan kwanzas',
 		'short_symbol'   => 'Kz',
 		'locales'        => $locales['AOA'],
-	],
-	'AR' => [
+	),
+	'AR' => array(
 		'currency_code'  => 'ARS',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -180,8 +180,8 @@ return [
 		'plural'         => 'Argentine pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['ARS'],
-	],
-	'AS' => [
+	),
+	'AS' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -197,8 +197,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'AT' => [
+	),
+	'AT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ' ',
@@ -214,8 +214,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'AU' => [
+	),
+	'AU' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -231,8 +231,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'AW' => [
+	),
+	'AW' => array(
 		'currency_code'  => 'AWG',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -248,8 +248,8 @@ return [
 		'plural'         => 'Aruban florin',
 		'short_symbol'   => null,
 		'locales'        => $locales['AWG'],
-	],
-	'AX' => [
+	),
+	'AX' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -265,8 +265,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'AZ' => [
+	),
+	'AZ' => array(
 		'currency_code'  => 'AZN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -282,8 +282,8 @@ return [
 		'plural'         => 'Azerbaijani manats',
 		'short_symbol'   => '₼',
 		'locales'        => $locales['AZN'],
-	],
-	'BA' => [
+	),
+	'BA' => array(
 		'currency_code'  => 'BAM',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -299,8 +299,8 @@ return [
 		'plural'         => 'Bosnia-Herzegovina convertible marks',
 		'short_symbol'   => 'KM',
 		'locales'        => $locales['BAM'],
-	],
-	'BB' => [
+	),
+	'BB' => array(
 		'currency_code'  => 'BBD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -316,8 +316,8 @@ return [
 		'plural'         => 'Barbadian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['BBD'],
-	],
-	'BD' => [
+	),
+	'BD' => array(
 		'currency_code'  => 'BDT',
 		'currency_pos'   => 'right',
 		'thousand_sep'   => ',',
@@ -333,8 +333,8 @@ return [
 		'plural'         => 'Bangladeshi takas',
 		'short_symbol'   => '৳',
 		'locales'        => $locales['BDT'],
-	],
-	'BE' => [
+	),
+	'BE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -350,8 +350,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'BF' => [
+	),
+	'BF' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -367,8 +367,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'BG' => [
+	),
+	'BG' => array(
 		'currency_code'  => 'BGN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -384,8 +384,8 @@ return [
 		'plural'         => 'Bulgarian leva',
 		'short_symbol'   => null,
 		'locales'        => $locales['BGN'],
-	],
-	'BH' => [
+	),
+	'BH' => array(
 		'currency_code'  => 'BHD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -401,8 +401,8 @@ return [
 		'plural'         => 'Bahraini dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['BHD'],
-	],
-	'BI' => [
+	),
+	'BI' => array(
 		'currency_code'  => 'BIF',
 		'currency_pos'   => 'right',
 		'thousand_sep'   => '.',
@@ -418,8 +418,8 @@ return [
 		'plural'         => 'Burundian francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['BIF'],
-	],
-	'BJ' => [
+	),
+	'BJ' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -435,8 +435,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'BL' => [
+	),
+	'BL' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -452,8 +452,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'BM' => [
+	),
+	'BM' => array(
 		'currency_code'  => 'BMD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -469,8 +469,8 @@ return [
 		'plural'         => 'Bermudan dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['BMD'],
-	],
-	'BN' => [
+	),
+	'BN' => array(
 		'currency_code'  => 'BND',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -486,8 +486,8 @@ return [
 		'plural'         => 'Brunei dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['BND'],
-	],
-	'BO' => [
+	),
+	'BO' => array(
 		'currency_code'  => 'BOB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -503,8 +503,8 @@ return [
 		'plural'         => 'Bolivian bolivianos',
 		'short_symbol'   => 'Bs',
 		'locales'        => $locales['BOB'],
-	],
-	'BQ' => [
+	),
+	'BQ' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -520,8 +520,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'BR' => [
+	),
+	'BR' => array(
 		'currency_code'  => 'BRL',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -537,8 +537,8 @@ return [
 		'plural'         => 'Brazilian reals',
 		'short_symbol'   => 'R$',
 		'locales'        => $locales['BRL'],
-	],
-	'BS' => [
+	),
+	'BS' => array(
 		'currency_code'  => 'BSD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -554,8 +554,8 @@ return [
 		'plural'         => 'Bahamian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['BSD'],
-	],
-	'BT' => [
+	),
+	'BT' => array(
 		'currency_code'  => 'BTN',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -571,8 +571,8 @@ return [
 		'plural'         => 'Bhutanese ngultrums',
 		'short_symbol'   => null,
 		'locales'        => $locales['BTN'],
-	],
-	'BW' => [
+	),
+	'BW' => array(
 		'currency_code'  => 'BWP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -588,8 +588,8 @@ return [
 		'plural'         => 'Botswanan pulas',
 		'short_symbol'   => 'P',
 		'locales'        => $locales['BWP'],
-	],
-	'BY' => [
+	),
+	'BY' => array(
 		'currency_code'  => 'BYN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -605,8 +605,8 @@ return [
 		'plural'         => 'Belarusian rubles',
 		'short_symbol'   => 'р.',
 		'locales'        => $locales['BYN'],
-	],
-	'BZ' => [
+	),
+	'BZ' => array(
 		'currency_code'  => 'BZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -622,8 +622,8 @@ return [
 		'plural'         => 'Belize dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['BZD'],
-	],
-	'CA' => [
+	),
+	'CA' => array(
 		'currency_code'  => 'CAD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -639,8 +639,8 @@ return [
 		'plural'         => 'Canadian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['CAD'],
-	],
-	'CC' => [
+	),
+	'CC' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -656,8 +656,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'CD' => [
+	),
+	'CD' => array(
 		'currency_code'  => 'CDF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -673,8 +673,8 @@ return [
 		'plural'         => 'Congolese francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['CDF'],
-	],
-	'CF' => [
+	),
+	'CF' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -690,8 +690,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'CG' => [
+	),
+	'CG' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -707,8 +707,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'CH' => [
+	),
+	'CH' => array(
 		'currency_code'  => 'CHF',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '\'',
@@ -724,8 +724,8 @@ return [
 		'plural'         => 'Swiss francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['CHF'],
-	],
-	'CI' => [
+	),
+	'CI' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -741,8 +741,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'CK' => [
+	),
+	'CK' => array(
 		'currency_code'  => 'NZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -758,8 +758,8 @@ return [
 		'plural'         => 'New Zealand dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NZD'],
-	],
-	'CL' => [
+	),
+	'CL' => array(
 		'currency_code'  => 'CLP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -775,8 +775,8 @@ return [
 		'plural'         => 'Chilean pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['CLP'],
-	],
-	'CM' => [
+	),
+	'CM' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -792,8 +792,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'CN' => [
+	),
+	'CN' => array(
 		'currency_code'  => 'CNY',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -809,8 +809,8 @@ return [
 		'plural'         => 'Chinese yuan',
 		'short_symbol'   => '¥',
 		'locales'        => $locales['CNY'],
-	],
-	'CO' => [
+	),
+	'CO' => array(
 		'currency_code'  => 'COP',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -826,8 +826,8 @@ return [
 		'plural'         => 'Colombian pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['COP'],
-	],
-	'CR' => [
+	),
+	'CR' => array(
 		'currency_code'  => 'CRC',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ' ',
@@ -843,8 +843,8 @@ return [
 		'plural'         => 'Costa Rican colóns',
 		'short_symbol'   => '₡',
 		'locales'        => $locales['CRC'],
-	],
-	'CU' => [
+	),
+	'CU' => array(
 		'currency_code'  => 'CUP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -860,8 +860,8 @@ return [
 		'plural'         => 'Cuban pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['CUP'],
-	],
-	'CV' => [
+	),
+	'CV' => array(
 		'currency_code'  => 'CVE',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -877,8 +877,8 @@ return [
 		'plural'         => 'Cape Verdean escudos',
 		'short_symbol'   => null,
 		'locales'        => $locales['CVE'],
-	],
-	'CW' => [
+	),
+	'CW' => array(
 		'currency_code'  => 'ANG',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -894,8 +894,8 @@ return [
 		'plural'         => 'Netherlands Antillean guilders',
 		'short_symbol'   => null,
 		'locales'        => $locales['ANG'],
-	],
-	'CX' => [
+	),
+	'CX' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -911,8 +911,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'CY' => [
+	),
+	'CY' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -928,14 +928,14 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'CZ' => [
+	),
+	'CZ' => array(
 		'currency_code'  => 'CZK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
 		'decimal_sep'    => ',',
 		'negativity'     => '-',
-		'num_decimals'   => 0,
+		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
@@ -945,8 +945,8 @@ return [
 		'plural'         => 'Czech korunas',
 		'short_symbol'   => 'Kč',
 		'locales'        => $locales['CZK'],
-	],
-	'DE' => [
+	),
+	'DE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -962,8 +962,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'DG' => [
+	),
+	'DG' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -979,8 +979,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'DJ' => [
+	),
+	'DJ' => array(
 		'currency_code'  => 'DJF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -996,8 +996,8 @@ return [
 		'plural'         => 'Djiboutian francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['DJF'],
-	],
-	'DK' => [
+	),
+	'DK' => array(
 		'currency_code'  => 'DKK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1013,8 +1013,8 @@ return [
 		'plural'         => 'Danish kroner',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['DKK'],
-	],
-	'DM' => [
+	),
+	'DM' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1030,8 +1030,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'DO' => [
+	),
+	'DO' => array(
 		'currency_code'  => 'DOP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1047,8 +1047,8 @@ return [
 		'plural'         => 'Dominican pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['DOP'],
-	],
-	'DZ' => [
+	),
+	'DZ' => array(
 		'currency_code'  => 'DZD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1064,8 +1064,8 @@ return [
 		'plural'         => 'Algerian dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['DZD'],
-	],
-	'EA' => [
+	),
+	'EA' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1081,8 +1081,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'EC' => [
+	),
+	'EC' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -1098,8 +1098,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'EE' => [
+	),
+	'EE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1115,8 +1115,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'EG' => [
+	),
+	'EG' => array(
 		'currency_code'  => 'EGP',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1132,8 +1132,8 @@ return [
 		'plural'         => 'Egyptian pounds',
 		'short_symbol'   => 'E£',
 		'locales'        => $locales['EGP'],
-	],
-	'EH' => [
+	),
+	'EH' => array(
 		'currency_code'  => 'MAD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ',',
@@ -1149,8 +1149,8 @@ return [
 		'plural'         => 'Moroccan dirhams',
 		'short_symbol'   => null,
 		'locales'        => $locales['MAD'],
-	],
-	'ER' => [
+	),
+	'ER' => array(
 		'currency_code'  => 'ERN',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1166,8 +1166,8 @@ return [
 		'plural'         => 'Eritrean nakfas',
 		'short_symbol'   => null,
 		'locales'        => $locales['ERN'],
-	],
-	'ES' => [
+	),
+	'ES' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1183,8 +1183,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'ET' => [
+	),
+	'ET' => array(
 		'currency_code'  => 'ETB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1200,8 +1200,8 @@ return [
 		'plural'         => 'Ethiopian birrs',
 		'short_symbol'   => null,
 		'locales'        => $locales['ETB'],
-	],
-	'FI' => [
+	),
+	'FI' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1217,8 +1217,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'FJ' => [
+	),
+	'FJ' => array(
 		'currency_code'  => 'FJD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1234,8 +1234,8 @@ return [
 		'plural'         => 'Fijian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['FJD'],
-	],
-	'FK' => [
+	),
+	'FK' => array(
 		'currency_code'  => 'FKP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1251,8 +1251,8 @@ return [
 		'plural'         => 'Falkland Islands pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['FKP'],
-	],
-	'FM' => [
+	),
+	'FM' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1268,8 +1268,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'FO' => [
+	),
+	'FO' => array(
 		'currency_code'  => 'DKK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1285,8 +1285,8 @@ return [
 		'plural'         => 'Danish kroner',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['DKK'],
-	],
-	'FR' => [
+	),
+	'FR' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1302,8 +1302,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'GA' => [
+	),
+	'GA' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1319,8 +1319,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'GB' => [
+	),
+	'GB' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1336,8 +1336,8 @@ return [
 		'plural'         => 'British pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GBP'],
-	],
-	'GD' => [
+	),
+	'GD' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1353,8 +1353,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'GE' => [
+	),
+	'GE' => array(
 		'currency_code'  => 'GEL',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1370,8 +1370,8 @@ return [
 		'plural'         => 'Georgian laris',
 		'short_symbol'   => '₾',
 		'locales'        => $locales['GEL'],
-	],
-	'GF' => [
+	),
+	'GF' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1387,8 +1387,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'GG' => [
+	),
+	'GG' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1404,8 +1404,8 @@ return [
 		'plural'         => 'British pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GBP'],
-	],
-	'GH' => [
+	),
+	'GH' => array(
 		'currency_code'  => 'GHS',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1421,8 +1421,8 @@ return [
 		'plural'         => 'Ghanaian cedis',
 		'short_symbol'   => 'GH₵',
 		'locales'        => $locales['GHS'],
-	],
-	'GI' => [
+	),
+	'GI' => array(
 		'currency_code'  => 'GIP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1438,8 +1438,8 @@ return [
 		'plural'         => 'Gibraltar pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GIP'],
-	],
-	'GL' => [
+	),
+	'GL' => array(
 		'currency_code'  => 'DKK',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -1455,8 +1455,8 @@ return [
 		'plural'         => 'Danish kroner',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['DKK'],
-	],
-	'GM' => [
+	),
+	'GM' => array(
 		'currency_code'  => 'GMD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1472,8 +1472,8 @@ return [
 		'plural'         => 'Gambian dalasis',
 		'short_symbol'   => null,
 		'locales'        => $locales['GMD'],
-	],
-	'GN' => [
+	),
+	'GN' => array(
 		'currency_code'  => 'GNF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1489,8 +1489,8 @@ return [
 		'plural'         => 'Guinean francs',
 		'short_symbol'   => 'FG',
 		'locales'        => $locales['GNF'],
-	],
-	'GP' => [
+	),
+	'GP' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1506,8 +1506,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'GQ' => [
+	),
+	'GQ' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -1523,8 +1523,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'GR' => [
+	),
+	'GR' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1540,8 +1540,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'GT' => [
+	),
+	'GT' => array(
 		'currency_code'  => 'GTQ',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1557,8 +1557,8 @@ return [
 		'plural'         => 'Guatemalan quetzals',
 		'short_symbol'   => 'Q',
 		'locales'        => $locales['GTQ'],
-	],
-	'GU' => [
+	),
+	'GU' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1574,8 +1574,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'GW' => [
+	),
+	'GW' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1591,8 +1591,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'GY' => [
+	),
+	'GY' => array(
 		'currency_code'  => 'GYD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1608,8 +1608,8 @@ return [
 		'plural'         => 'Guyanaese dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['GYD'],
-	],
-	'HK' => [
+	),
+	'HK' => array(
 		'currency_code'  => 'HKD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1625,8 +1625,8 @@ return [
 		'plural'         => 'Hong Kong dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['HKD'],
-	],
-	'HN' => [
+	),
+	'HN' => array(
 		'currency_code'  => 'HNL',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1642,8 +1642,8 @@ return [
 		'plural'         => 'Honduran lempiras',
 		'short_symbol'   => 'L',
 		'locales'        => $locales['HNL'],
-	],
-	'HR' => [
+	),
+	'HR' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1659,8 +1659,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'HT' => [
+	),
+	'HT' => array(
 		'currency_code'  => 'HTG',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1676,8 +1676,8 @@ return [
 		'plural'         => 'Haitian gourdes',
 		'short_symbol'   => null,
 		'locales'        => $locales['HTG'],
-	],
-	'HU' => [
+	),
+	'HU' => array(
 		'currency_code'  => 'HUF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1693,8 +1693,8 @@ return [
 		'plural'         => 'Hungarian forints',
 		'short_symbol'   => 'Ft',
 		'locales'        => $locales['HUF'],
-	],
-	'IC' => [
+	),
+	'IC' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1710,8 +1710,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'ID' => [
+	),
+	'ID' => array(
 		'currency_code'  => 'IDR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -1727,8 +1727,8 @@ return [
 		'plural'         => 'Indonesian rupiahs',
 		'short_symbol'   => 'Rp',
 		'locales'        => $locales['IDR'],
-	],
-	'IE' => [
+	),
+	'IE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1744,8 +1744,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'IL' => [
+	),
+	'IL' => array(
 		'currency_code'  => 'ILS',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ',',
@@ -1761,8 +1761,8 @@ return [
 		'plural'         => 'Israeli new shekels',
 		'short_symbol'   => '₪',
 		'locales'        => $locales['ILS'],
-	],
-	'IM' => [
+	),
+	'IM' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1778,8 +1778,8 @@ return [
 		'plural'         => 'British pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GBP'],
-	],
-	'IN' => [
+	),
+	'IN' => array(
 		'currency_code'  => 'INR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1795,8 +1795,8 @@ return [
 		'plural'         => 'Indian rupees',
 		'short_symbol'   => '₹',
 		'locales'        => $locales['INR'],
-	],
-	'IO' => [
+	),
+	'IO' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1812,8 +1812,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'IQ' => [
+	),
+	'IQ' => array(
 		'currency_code'  => 'IQD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1829,8 +1829,8 @@ return [
 		'plural'         => 'Iraqi dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['IQD'],
-	],
-	'IR' => [
+	),
+	'IR' => array(
 		'currency_code'  => 'IRR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -1846,8 +1846,8 @@ return [
 		'plural'         => 'Iranian rials',
 		'short_symbol'   => null,
 		'locales'        => $locales['IRR'],
-	],
-	'IS' => [
+	),
+	'IS' => array(
 		'currency_code'  => 'ISK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1863,8 +1863,8 @@ return [
 		'plural'         => 'Icelandic krónur',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['ISK'],
-	],
-	'IT' => [
+	),
+	'IT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1880,8 +1880,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'JE' => [
+	),
+	'JE' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1897,8 +1897,8 @@ return [
 		'plural'         => 'British pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GBP'],
-	],
-	'JM' => [
+	),
+	'JM' => array(
 		'currency_code'  => 'JMD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1914,8 +1914,8 @@ return [
 		'plural'         => 'Jamaican dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['JMD'],
-	],
-	'JO' => [
+	),
+	'JO' => array(
 		'currency_code'  => 'JOD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -1931,8 +1931,8 @@ return [
 		'plural'         => 'Jordanian dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['JOD'],
-	],
-	'JP' => [
+	),
+	'JP' => array(
 		'currency_code'  => 'JPY',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -1948,8 +1948,8 @@ return [
 		'plural'         => 'Japanese yen',
 		'short_symbol'   => '¥',
 		'locales'        => $locales['JPY'],
-	],
-	'KE' => [
+	),
+	'KE' => array(
 		'currency_code'  => 'KES',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -1965,8 +1965,8 @@ return [
 		'plural'         => 'Kenyan shillings',
 		'short_symbol'   => null,
 		'locales'        => $locales['KES'],
-	],
-	'KG' => [
+	),
+	'KG' => array(
 		'currency_code'  => 'KGS',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -1982,8 +1982,8 @@ return [
 		'plural'         => 'Kyrgystani soms',
 		'short_symbol'   => null,
 		'locales'        => $locales['KGS'],
-	],
-	'KH' => [
+	),
+	'KH' => array(
 		'currency_code'  => 'KHR',
 		'currency_pos'   => 'right',
 		'thousand_sep'   => '.',
@@ -1999,8 +1999,8 @@ return [
 		'plural'         => 'Cambodian riels',
 		'short_symbol'   => '៛',
 		'locales'        => $locales['KHR'],
-	],
-	'KI' => [
+	),
+	'KI' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2016,8 +2016,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'KM' => [
+	),
+	'KM' => array(
 		'currency_code'  => 'KMF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2033,8 +2033,8 @@ return [
 		'plural'         => 'Comorian francs',
 		'short_symbol'   => 'CF',
 		'locales'        => $locales['KMF'],
-	],
-	'KN' => [
+	),
+	'KN' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2050,8 +2050,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'KP' => [
+	),
+	'KP' => array(
 		'currency_code'  => 'KPW',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2067,8 +2067,8 @@ return [
 		'plural'         => 'North Korean won',
 		'short_symbol'   => '₩',
 		'locales'        => $locales['KPW'],
-	],
-	'KR' => [
+	),
+	'KR' => array(
 		'currency_code'  => 'KRW',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2084,8 +2084,8 @@ return [
 		'plural'         => 'South Korean won',
 		'short_symbol'   => '₩',
 		'locales'        => $locales['KRW'],
-	],
-	'KW' => [
+	),
+	'KW' => array(
 		'currency_code'  => 'KWD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2101,8 +2101,8 @@ return [
 		'plural'         => 'Kuwaiti dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['KWD'],
-	],
-	'KY' => [
+	),
+	'KY' => array(
 		'currency_code'  => 'KYD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2118,8 +2118,8 @@ return [
 		'plural'         => 'Cayman Islands dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['KYD'],
-	],
-	'KZ' => [
+	),
+	'KZ' => array(
 		'currency_code'  => 'KZT',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2135,8 +2135,8 @@ return [
 		'plural'         => 'Kazakhstani tenges',
 		'short_symbol'   => '₸',
 		'locales'        => $locales['KZT'],
-	],
-	'LA' => [
+	),
+	'LA' => array(
 		'currency_code'  => 'LAK',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -2152,8 +2152,8 @@ return [
 		'plural'         => 'Laotian kips',
 		'short_symbol'   => '₭',
 		'locales'        => $locales['LAK'],
-	],
-	'LB' => [
+	),
+	'LB' => array(
 		'currency_code'  => 'LBP',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2169,8 +2169,8 @@ return [
 		'plural'         => 'Lebanese pounds',
 		'short_symbol'   => 'L£',
 		'locales'        => $locales['LBP'],
-	],
-	'LC' => [
+	),
+	'LC' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2186,8 +2186,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'LI' => [
+	),
+	'LI' => array(
 		'currency_code'  => 'CHF',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '\'',
@@ -2203,8 +2203,8 @@ return [
 		'plural'         => 'Swiss francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['CHF'],
-	],
-	'LK' => [
+	),
+	'LK' => array(
 		'currency_code'  => 'LKR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2220,8 +2220,8 @@ return [
 		'plural'         => 'Sri Lankan rupees',
 		'short_symbol'   => 'Rs',
 		'locales'        => $locales['LKR'],
-	],
-	'LR' => [
+	),
+	'LR' => array(
 		'currency_code'  => 'LRD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2237,8 +2237,8 @@ return [
 		'plural'         => 'Liberian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['LRD'],
-	],
-	'LS' => [
+	),
+	'LS' => array(
 		'currency_code'  => 'LSL',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ' ',
@@ -2254,8 +2254,8 @@ return [
 		'plural'         => 'Lesotho lotis',
 		'short_symbol'   => null,
 		'locales'        => $locales['LSL'],
-	],
-	'LT' => [
+	),
+	'LT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2271,8 +2271,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'LU' => [
+	),
+	'LU' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2288,8 +2288,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'LV' => [
+	),
+	'LV' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2305,8 +2305,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'LY' => [
+	),
+	'LY' => array(
 		'currency_code'  => 'LYD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2322,8 +2322,8 @@ return [
 		'plural'         => 'Libyan dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['LYD'],
-	],
-	'MA' => [
+	),
+	'MA' => array(
 		'currency_code'  => 'MAD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2339,8 +2339,8 @@ return [
 		'plural'         => 'Moroccan dirhams',
 		'short_symbol'   => null,
 		'locales'        => $locales['MAD'],
-	],
-	'MC' => [
+	),
+	'MC' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2356,8 +2356,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'MD' => [
+	),
+	'MD' => array(
 		'currency_code'  => 'MDL',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2373,8 +2373,8 @@ return [
 		'plural'         => 'Moldovan lei',
 		'short_symbol'   => null,
 		'locales'        => $locales['MDL'],
-	],
-	'ME' => [
+	),
+	'ME' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2390,8 +2390,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'MF' => [
+	),
+	'MF' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2407,8 +2407,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'MG' => [
+	),
+	'MG' => array(
 		'currency_code'  => 'MGA',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2424,8 +2424,8 @@ return [
 		'plural'         => 'Malagasy ariaries',
 		'short_symbol'   => 'Ar',
 		'locales'        => $locales['MGA'],
-	],
-	'MH' => [
+	),
+	'MH' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2441,8 +2441,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'MK' => [
+	),
+	'MK' => array(
 		'currency_code'  => 'MKD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2458,8 +2458,8 @@ return [
 		'plural'         => 'Macedonian denari',
 		'short_symbol'   => null,
 		'locales'        => $locales['MKD'],
-	],
-	'ML' => [
+	),
+	'ML' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2475,8 +2475,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'MM' => [
+	),
+	'MM' => array(
 		'currency_code'  => 'MMK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ',',
@@ -2492,8 +2492,8 @@ return [
 		'plural'         => 'Myanmar kyats',
 		'short_symbol'   => 'K',
 		'locales'        => $locales['MMK'],
-	],
-	'MN' => [
+	),
+	'MN' => array(
 		'currency_code'  => 'MNT',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2509,8 +2509,8 @@ return [
 		'plural'         => 'Mongolian tugriks',
 		'short_symbol'   => '₮',
 		'locales'        => $locales['MNT'],
-	],
-	'MO' => [
+	),
+	'MO' => array(
 		'currency_code'  => 'MOP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2526,8 +2526,8 @@ return [
 		'plural'         => 'Macanese patacas',
 		'short_symbol'   => null,
 		'locales'        => $locales['MOP'],
-	],
-	'MP' => [
+	),
+	'MP' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2543,8 +2543,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'MQ' => [
+	),
+	'MQ' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2560,8 +2560,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'MR' => [
+	),
+	'MR' => array(
 		'currency_code'  => 'MRU',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2577,8 +2577,8 @@ return [
 		'plural'         => 'Mauritanian ouguiyas',
 		'short_symbol'   => null,
 		'locales'        => $locales['MRU'],
-	],
-	'MS' => [
+	),
+	'MS' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2594,8 +2594,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'MT' => [
+	),
+	'MT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2611,8 +2611,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'MU' => [
+	),
+	'MU' => array(
 		'currency_code'  => 'MUR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2628,8 +2628,8 @@ return [
 		'plural'         => 'Mauritian rupees',
 		'short_symbol'   => 'Rs',
 		'locales'        => $locales['MUR'],
-	],
-	'MV' => [
+	),
+	'MV' => array(
 		'currency_code'  => 'MVR',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2645,8 +2645,8 @@ return [
 		'plural'         => 'Maldivian rufiyaas',
 		'short_symbol'   => null,
 		'locales'        => $locales['MVR'],
-	],
-	'MW' => [
+	),
+	'MW' => array(
 		'currency_code'  => 'MWK',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2662,8 +2662,8 @@ return [
 		'plural'         => 'Malawian kwachas',
 		'short_symbol'   => null,
 		'locales'        => $locales['MWK'],
-	],
-	'MX' => [
+	),
+	'MX' => array(
 		'currency_code'  => 'MXN',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2679,8 +2679,8 @@ return [
 		'plural'         => 'Mexican pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['MXN'],
-	],
-	'MY' => [
+	),
+	'MY' => array(
 		'currency_code'  => 'MYR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2696,8 +2696,8 @@ return [
 		'plural'         => 'Malaysian ringgits',
 		'short_symbol'   => 'RM',
 		'locales'        => $locales['MYR'],
-	],
-	'MZ' => [
+	),
+	'MZ' => array(
 		'currency_code'  => 'MZN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2713,8 +2713,8 @@ return [
 		'plural'         => 'Mozambican meticals',
 		'short_symbol'   => null,
 		'locales'        => $locales['MZN'],
-	],
-	'NA' => [
+	),
+	'NA' => array(
 		'currency_code'  => 'NAD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2730,8 +2730,8 @@ return [
 		'plural'         => 'Namibian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NAD'],
-	],
-	'NC' => [
+	),
+	'NC' => array(
 		'currency_code'  => 'XPF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2747,8 +2747,8 @@ return [
 		'plural'         => 'CFP francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XPF'],
-	],
-	'NE' => [
+	),
+	'NE' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2764,8 +2764,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'NF' => [
+	),
+	'NF' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2781,8 +2781,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'NG' => [
+	),
+	'NG' => array(
 		'currency_code'  => 'NGN',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2798,8 +2798,8 @@ return [
 		'plural'         => 'Nigerian nairas',
 		'short_symbol'   => '₦',
 		'locales'        => $locales['NGN'],
-	],
-	'NI' => [
+	),
+	'NI' => array(
 		'currency_code'  => 'NIO',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2815,8 +2815,8 @@ return [
 		'plural'         => 'Nicaraguan córdobas',
 		'short_symbol'   => 'C$',
 		'locales'        => $locales['NIO'],
-	],
-	'NL' => [
+	),
+	'NL' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -2832,8 +2832,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'NO' => [
+	),
+	'NO' => array(
 		'currency_code'  => 'NOK',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ' ',
@@ -2849,8 +2849,8 @@ return [
 		'plural'         => 'Norwegian kroner',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['NOK'],
-	],
-	'NP' => [
+	),
+	'NP' => array(
 		'currency_code'  => 'NPR',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2866,8 +2866,8 @@ return [
 		'plural'         => 'Nepalese rupees',
 		'short_symbol'   => 'Rs',
 		'locales'        => $locales['NPR'],
-	],
-	'NR' => [
+	),
+	'NR' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2883,8 +2883,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'NU' => [
+	),
+	'NU' => array(
 		'currency_code'  => 'NZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2900,8 +2900,8 @@ return [
 		'plural'         => 'New Zealand dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NZD'],
-	],
-	'NZ' => [
+	),
+	'NZ' => array(
 		'currency_code'  => 'NZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2917,8 +2917,8 @@ return [
 		'plural'         => 'New Zealand dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NZD'],
-	],
-	'OM' => [
+	),
+	'OM' => array(
 		'currency_code'  => 'OMR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -2934,8 +2934,8 @@ return [
 		'plural'         => 'Omani rials',
 		'short_symbol'   => null,
 		'locales'        => $locales['OMR'],
-	],
-	'PA' => [
+	),
+	'PA' => array(
 		'currency_code'  => 'PAB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -2951,8 +2951,8 @@ return [
 		'plural'         => 'Panamanian balboas',
 		'short_symbol'   => null,
 		'locales'        => $locales['PAB'],
-	],
-	'PE' => [
+	),
+	'PE' => array(
 		'currency_code'  => 'PEN',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -2968,8 +2968,8 @@ return [
 		'plural'         => 'Peruvian soles',
 		'short_symbol'   => null,
 		'locales'        => $locales['PEN'],
-	],
-	'PF' => [
+	),
+	'PF' => array(
 		'currency_code'  => 'XPF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -2985,8 +2985,8 @@ return [
 		'plural'         => 'CFP francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XPF'],
-	],
-	'PG' => [
+	),
+	'PG' => array(
 		'currency_code'  => 'PGK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ',',
@@ -3002,8 +3002,8 @@ return [
 		'plural'         => 'Papua New Guinean kina',
 		'short_symbol'   => null,
 		'locales'        => $locales['PGK'],
-	],
-	'PH' => [
+	),
+	'PH' => array(
 		'currency_code'  => 'PHP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3019,8 +3019,8 @@ return [
 		'plural'         => 'Philippine pesos',
 		'short_symbol'   => '₱',
 		'locales'        => $locales['PHP'],
-	],
-	'PK' => [
+	),
+	'PK' => array(
 		'currency_code'  => 'PKR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3036,8 +3036,8 @@ return [
 		'plural'         => 'Pakistani rupees',
 		'short_symbol'   => 'Rs',
 		'locales'        => $locales['PKR'],
-	],
-	'PL' => [
+	),
+	'PL' => array(
 		'currency_code'  => 'PLN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3053,8 +3053,8 @@ return [
 		'plural'         => 'Polish zlotys',
 		'short_symbol'   => 'zł',
 		'locales'        => $locales['PLN'],
-	],
-	'PM' => [
+	),
+	'PM' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3070,8 +3070,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'PN' => [
+	),
+	'PN' => array(
 		'currency_code'  => 'NZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3087,8 +3087,8 @@ return [
 		'plural'         => 'New Zealand dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NZD'],
-	],
-	'PR' => [
+	),
+	'PR' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3104,8 +3104,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'PS' => [
+	),
+	'PS' => array(
 		'currency_code'  => 'ILS',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3121,8 +3121,8 @@ return [
 		'plural'         => 'Israeli new shekels',
 		'short_symbol'   => '₪',
 		'locales'        => $locales['ILS'],
-	],
-	'PT' => [
+	),
+	'PT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3138,8 +3138,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'PW' => [
+	),
+	'PW' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3155,8 +3155,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'PY' => [
+	),
+	'PY' => array(
 		'currency_code'  => 'PYG',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -3172,8 +3172,8 @@ return [
 		'plural'         => 'Paraguayan guaranis',
 		'short_symbol'   => '₲',
 		'locales'        => $locales['PYG'],
-	],
-	'QA' => [
+	),
+	'QA' => array(
 		'currency_code'  => 'QAR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3189,8 +3189,8 @@ return [
 		'plural'         => 'Qatari riyals',
 		'short_symbol'   => null,
 		'locales'        => $locales['QAR'],
-	],
-	'RE' => [
+	),
+	'RE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3206,8 +3206,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'RO' => [
+	),
+	'RO' => array(
 		'currency_code'  => 'RON',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3223,8 +3223,8 @@ return [
 		'plural'         => 'Romanian lei',
 		'short_symbol'   => 'lei',
 		'locales'        => $locales['RON'],
-	],
-	'RS' => [
+	),
+	'RS' => array(
 		'currency_code'  => 'RSD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3240,8 +3240,8 @@ return [
 		'plural'         => 'Serbian dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['RSD'],
-	],
-	'RU' => [
+	),
+	'RU' => array(
 		'currency_code'  => 'RUB',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3257,8 +3257,8 @@ return [
 		'plural'         => 'Russian rubles',
 		'short_symbol'   => '₽',
 		'locales'        => $locales['RUB'],
-	],
-	'RW' => [
+	),
+	'RW' => array(
 		'currency_code'  => 'RWF',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -3274,8 +3274,8 @@ return [
 		'plural'         => 'Rwandan francs',
 		'short_symbol'   => 'RF',
 		'locales'        => $locales['RWF'],
-	],
-	'SA' => [
+	),
+	'SA' => array(
 		'currency_code'  => 'SAR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3291,8 +3291,8 @@ return [
 		'plural'         => 'Saudi riyals',
 		'short_symbol'   => null,
 		'locales'        => $locales['SAR'],
-	],
-	'SB' => [
+	),
+	'SB' => array(
 		'currency_code'  => 'SBD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3308,8 +3308,8 @@ return [
 		'plural'         => 'Solomon Islands dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['SBD'],
-	],
-	'SC' => [
+	),
+	'SC' => array(
 		'currency_code'  => 'SCR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3325,8 +3325,8 @@ return [
 		'plural'         => 'Seychellois rupees',
 		'short_symbol'   => null,
 		'locales'        => $locales['SCR'],
-	],
-	'SD' => [
+	),
+	'SD' => array(
 		'currency_code'  => 'SDG',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3342,14 +3342,14 @@ return [
 		'plural'         => 'Sudanese pounds',
 		'short_symbol'   => null,
 		'locales'        => $locales['SDG'],
-	],
-	'SE' => [
+	),
+	'SE' => array(
 		'currency_code'  => 'SEK',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
 		'decimal_sep'    => ',',
 		'negativity'     => '-',
-		'num_decimals'   => 0,
+		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
@@ -3359,8 +3359,8 @@ return [
 		'plural'         => 'Swedish kronor',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['SEK'],
-	],
-	'SG' => [
+	),
+	'SG' => array(
 		'currency_code'  => 'SGD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3376,8 +3376,8 @@ return [
 		'plural'         => 'Singapore dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['SGD'],
-	],
-	'SH' => [
+	),
+	'SH' => array(
 		'currency_code'  => 'SHP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3393,8 +3393,8 @@ return [
 		'plural'         => 'St. Helena pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['SHP'],
-	],
-	'SI' => [
+	),
+	'SI' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3410,14 +3410,14 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'SJ' => [
+	),
+	'SJ' => array(
 		'currency_code'  => 'NOK',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ' ',
 		'decimal_sep'    => ',',
 		'negativity'     => 'o -',
-		'num_decimals'   => 0,
+		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
@@ -3427,8 +3427,8 @@ return [
 		'plural'         => 'Norwegian kroner',
 		'short_symbol'   => 'kr',
 		'locales'        => $locales['NOK'],
-	],
-	'SK' => [
+	),
+	'SK' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3444,8 +3444,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'SL' => [
+	),
+	'SL' => array(
 		'currency_code'  => 'SLE',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3461,8 +3461,8 @@ return [
 		'plural'         => 'Sierra Leonean leones',
 		'short_symbol'   => null,
 		'locales'        => $locales['SLE'],
-	],
-	'SM' => [
+	),
+	'SM' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3478,8 +3478,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'SN' => [
+	),
+	'SN' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -3495,8 +3495,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'SO' => [
+	),
+	'SO' => array(
 		'currency_code'  => 'SOS',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3512,8 +3512,8 @@ return [
 		'plural'         => 'Somali shillings',
 		'short_symbol'   => null,
 		'locales'        => $locales['SOS'],
-	],
-	'SR' => [
+	),
+	'SR' => array(
 		'currency_code'  => 'SRD',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -3529,8 +3529,8 @@ return [
 		'plural'         => 'Surinamese dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['SRD'],
-	],
-	'SS' => [
+	),
+	'SS' => array(
 		'currency_code'  => 'SSP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3546,8 +3546,8 @@ return [
 		'plural'         => 'South Sudanese pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['SSP'],
-	],
-	'ST' => [
+	),
+	'ST' => array(
 		'currency_code'  => 'STN',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3563,8 +3563,8 @@ return [
 		'plural'         => 'São Tomé & Príncipe dobras',
 		'short_symbol'   => 'Db',
 		'locales'        => $locales['STN'],
-	],
-	'SV' => [
+	),
+	'SV' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3580,8 +3580,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'SX' => [
+	),
+	'SX' => array(
 		'currency_code'  => 'ANG',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3597,8 +3597,8 @@ return [
 		'plural'         => 'Netherlands Antillean guilders',
 		'short_symbol'   => null,
 		'locales'        => $locales['ANG'],
-	],
-	'SY' => [
+	),
+	'SY' => array(
 		'currency_code'  => 'SYP',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3614,8 +3614,8 @@ return [
 		'plural'         => 'Syrian pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['SYP'],
-	],
-	'SZ' => [
+	),
+	'SZ' => array(
 		'currency_code'  => 'SZL',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3631,8 +3631,8 @@ return [
 		'plural'         => 'Swazi emalangeni',
 		'short_symbol'   => null,
 		'locales'        => $locales['SZL'],
-	],
-	'TA' => [
+	),
+	'TA' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3648,8 +3648,8 @@ return [
 		'plural'         => 'British pounds',
 		'short_symbol'   => '£',
 		'locales'        => $locales['GBP'],
-	],
-	'TC' => [
+	),
+	'TC' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3665,8 +3665,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'TD' => [
+	),
+	'TD' => array(
 		'currency_code'  => 'XAF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3682,8 +3682,8 @@ return [
 		'plural'         => 'Central African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XAF'],
-	],
-	'TF' => [
+	),
+	'TF' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3699,8 +3699,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'TG' => [
+	),
+	'TG' => array(
 		'currency_code'  => 'XOF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3716,8 +3716,8 @@ return [
 		'plural'         => 'West African CFA francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
-	],
-	'TH' => [
+	),
+	'TH' => array(
 		'currency_code'  => 'THB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3733,8 +3733,8 @@ return [
 		'plural'         => 'Thai baht',
 		'short_symbol'   => '฿',
 		'locales'        => $locales['THB'],
-	],
-	'TJ' => [
+	),
+	'TJ' => array(
 		'currency_code'  => 'TJS',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3750,8 +3750,8 @@ return [
 		'plural'         => 'Tajikistani somonis',
 		'short_symbol'   => null,
 		'locales'        => $locales['TJS'],
-	],
-	'TK' => [
+	),
+	'TK' => array(
 		'currency_code'  => 'NZD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3767,8 +3767,8 @@ return [
 		'plural'         => 'New Zealand dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['NZD'],
-	],
-	'TL' => [
+	),
+	'TL' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3784,8 +3784,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'TM' => [
+	),
+	'TM' => array(
 		'currency_code'  => 'TMT',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3801,8 +3801,8 @@ return [
 		'plural'         => 'Turkmenistani manat',
 		'short_symbol'   => null,
 		'locales'        => $locales['TMT'],
-	],
-	'TN' => [
+	),
+	'TN' => array(
 		'currency_code'  => 'TND',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -3818,8 +3818,8 @@ return [
 		'plural'         => 'Tunisian dinars',
 		'short_symbol'   => null,
 		'locales'        => $locales['TND'],
-	],
-	'TO' => [
+	),
+	'TO' => array(
 		'currency_code'  => 'TOP',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -3835,8 +3835,8 @@ return [
 		'plural'         => 'Tongan paʻanga',
 		'short_symbol'   => 'T$',
 		'locales'        => $locales['TOP'],
-	],
-	'TR' => [
+	),
+	'TR' => array(
 		'currency_code'  => 'TRY',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -3852,8 +3852,8 @@ return [
 		'plural'         => 'Turkish Lira',
 		'short_symbol'   => '₺',
 		'locales'        => $locales['TRY'],
-	],
-	'TT' => [
+	),
+	'TT' => array(
 		'currency_code'  => 'TTD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3869,8 +3869,8 @@ return [
 		'plural'         => 'Trinidad & Tobago dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['TTD'],
-	],
-	'TV' => [
+	),
+	'TV' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3886,8 +3886,8 @@ return [
 		'plural'         => 'Australian dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['AUD'],
-	],
-	'TW' => [
+	),
+	'TW' => array(
 		'currency_code'  => 'TWD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3903,8 +3903,8 @@ return [
 		'plural'         => 'New Taiwan dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['TWD'],
-	],
-	'TZ' => [
+	),
+	'TZ' => array(
 		'currency_code'  => 'TZS',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -3920,8 +3920,8 @@ return [
 		'plural'         => 'Tanzanian shillings',
 		'short_symbol'   => null,
 		'locales'        => $locales['TZS'],
-	],
-	'UA' => [
+	),
+	'UA' => array(
 		'currency_code'  => 'UAH',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -3937,8 +3937,8 @@ return [
 		'plural'         => 'Ukrainian hryvnias',
 		'short_symbol'   => '₴',
 		'locales'        => $locales['UAH'],
-	],
-	'UG' => [
+	),
+	'UG' => array(
 		'currency_code'  => 'UGX',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => ',',
@@ -3954,8 +3954,8 @@ return [
 		'plural'         => 'Ugandan shillings',
 		'short_symbol'   => null,
 		'locales'        => $locales['UGX'],
-	],
-	'UM' => [
+	),
+	'UM' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3971,8 +3971,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'US' => [
+	),
+	'US' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -3988,8 +3988,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'UY' => [
+	),
+	'UY' => array(
 		'currency_code'  => 'UYU',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
@@ -4005,8 +4005,8 @@ return [
 		'plural'         => 'Uruguayan pesos',
 		'short_symbol'   => '$',
 		'locales'        => $locales['UYU'],
-	],
-	'UZ' => [
+	),
+	'UZ' => array(
 		'currency_code'  => 'UZS',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -4022,8 +4022,8 @@ return [
 		'plural'         => 'Uzbekistani som',
 		'short_symbol'   => null,
 		'locales'        => $locales['UZS'],
-	],
-	'VA' => [
+	),
+	'VA' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -4039,8 +4039,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'VC' => [
+	),
+	'VC' => array(
 		'currency_code'  => 'XCD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4056,8 +4056,8 @@ return [
 		'plural'         => 'East Caribbean dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['XCD'],
-	],
-	'VE' => [
+	),
+	'VE' => array(
 		'currency_code'  => 'VES',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
@@ -4073,8 +4073,8 @@ return [
 		'plural'         => 'Venezuelan bolívars',
 		'short_symbol'   => null,
 		'locales'        => $locales['VES'],
-	],
-	'VG' => [
+	),
+	'VG' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4090,8 +4090,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'VI' => [
+	),
+	'VI' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4107,8 +4107,8 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-	'VN' => [
+	),
+	'VN' => array(
 		'currency_code'  => 'VND',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -4124,8 +4124,8 @@ return [
 		'plural'         => 'Vietnamese dong',
 		'short_symbol'   => '₫',
 		'locales'        => $locales['VND'],
-	],
-	'VU' => [
+	),
+	'VU' => array(
 		'currency_code'  => 'VUV',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4141,8 +4141,8 @@ return [
 		'plural'         => 'Vanuatu vatus',
 		'short_symbol'   => null,
 		'locales'        => $locales['VUV'],
-	],
-	'WF' => [
+	),
+	'WF' => array(
 		'currency_code'  => 'XPF',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -4158,8 +4158,8 @@ return [
 		'plural'         => 'CFP francs',
 		'short_symbol'   => null,
 		'locales'        => $locales['XPF'],
-	],
-	'WS' => [
+	),
+	'WS' => array(
 		'currency_code'  => 'WST',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4175,8 +4175,8 @@ return [
 		'plural'         => 'Samoan tala',
 		'short_symbol'   => null,
 		'locales'        => $locales['WST'],
-	],
-	'XK' => [
+	),
+	'XK' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -4192,8 +4192,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'YE' => [
+	),
+	'YE' => array(
 		'currency_code'  => 'YER',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => '.',
@@ -4209,8 +4209,8 @@ return [
 		'plural'         => 'Yemeni rials',
 		'short_symbol'   => null,
 		'locales'        => $locales['YER'],
-	],
-	'YT' => [
+	),
+	'YT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
@@ -4226,8 +4226,8 @@ return [
 		'plural'         => 'euros',
 		'short_symbol'   => '€',
 		'locales'        => $locales['EUR'],
-	],
-	'ZA' => [
+	),
+	'ZA' => array(
 		'currency_code'  => 'ZAR',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4243,8 +4243,8 @@ return [
 		'plural'         => 'South African rand',
 		'short_symbol'   => 'R',
 		'locales'        => $locales['ZAR'],
-	],
-	'ZM' => [
+	),
+	'ZM' => array(
 		'currency_code'  => 'ZMW',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4260,8 +4260,8 @@ return [
 		'plural'         => 'Zambian kwachas',
 		'short_symbol'   => 'ZK',
 		'locales'        => $locales['ZMW'],
-	],
-	'ZW' => [
+	),
+	'ZW' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
@@ -4277,5 +4277,5 @@ return [
 		'plural'         => 'US dollars',
 		'short_symbol'   => '$',
 		'locales'        => $locales['USD'],
-	],
-];
+	),
+);
