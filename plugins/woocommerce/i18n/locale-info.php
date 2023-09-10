@@ -2839,7 +2839,7 @@ return array(
 		'thousand_sep'   => ' ',
 		'decimal_sep'    => ',',
 		'negativity'     => 'o -',
-		'num_decimals'   => 0,
+		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
