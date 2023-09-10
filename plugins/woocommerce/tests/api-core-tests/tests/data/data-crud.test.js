@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL !== undefined;
+const shouldSkip = false; // API_BASE_URL !== undefined;
 
 // 259 countries total
 const countryCodes = [
@@ -2161,7 +2161,7 @@ test.describe( 'Data API tests', () => {
 							currency_pos: 'left_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
-							num_decimals: 0,
+							num_decimals: 2,
 							thousand_sep: ' ',
 							weight_unit: 'kg',
 							states: [],
@@ -3807,7 +3807,7 @@ test.describe( 'Data API tests', () => {
 						currency_pos: 'left_space',
 						decimal_sep: ',',
 						dimension_unit: 'cm',
-						num_decimals: 0,
+						num_decimals: 2,
 						thousand_sep: ' ',
 						weight_unit: 'kg',
 						states: [],

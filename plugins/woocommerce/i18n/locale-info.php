@@ -2843,7 +2843,7 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
-		'default_locale' => 'no_NO',
+		'default_locale' => 'nb_NO',
 		'name'           => 'Norwegian Krone',
 		'singular'       => 'Norwegian krone',
 		'plural'         => 'Norwegian kroner',
