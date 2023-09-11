@@ -28,6 +28,8 @@ if ( ! function_exists( 'YOUR_PREFIX_on_block_template_register' ) ) {
 	}
 	add_action( 'woocommerce_block_template_register', 'YOUR_PREFIX_on_block_template_register' );
 ```
+Result:
+![Adding field next to other field](_media/adding-field-next-to-other-field.png)
 
 ## Hiding a group/section/field
 
