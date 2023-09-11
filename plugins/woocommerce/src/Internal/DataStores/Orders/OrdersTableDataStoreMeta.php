@@ -29,4 +29,5 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	protected function get_object_id_field() {
 		return 'order_id';
 	}
+
 }
