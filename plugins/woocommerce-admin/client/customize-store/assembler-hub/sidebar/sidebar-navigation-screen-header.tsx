@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement } from '@wordpress/element';
+import { useCallback, createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { Spinner } from '@wordpress/components';
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
@@ -12,9 +13,36 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../../hooks/use-patterns';
+import { useEditBlocks } from '../../hooks/use-edit-blocks';
 
 export const SidebarNavigationScreenHeader = () => {
-	const patterns = usePatternsByCategory( 'header' );
+	const { isLoading, patterns } = usePatternsByCategory( 'header' );
+	const [ blocks, , onChange ] = useEditBlocks();
+
+	const onClickHeaderPattern = useCallback(
+		( _pattern, selectedBlocks ) => {
+			const newHeaderBlock = {
+				...selectedBlocks[ 0 ],
+				attributes: {
+					...selectedBlocks[ 0 ].attributes,
+					slug: 'header',
+				},
+			};
+
+			onChange(
+				[
+					...blocks.map( ( block ) => {
+						if ( block.attributes?.slug === 'header' ) {
+							return newHeaderBlock;
+						}
+						return block;
+					} ),
+				],
+				{ selection: {} }
+			);
+		},
+		[ blocks, onChange ]
+	);
 
 	return (
 		<SidebarNavigationScreen
@@ -36,21 +64,29 @@ export const SidebarNavigationScreenHeader = () => {
 			content={
 				<>
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
-						<BlockPatternList
-							shownPatterns={ patterns }
-							blockPatterns={ patterns }
-							onClickPattern={ () => {
-								console.log( 'clicked!' );
-							} }
-							label={ 'Headers' }
-							orientation="vertical"
-							category={ 'header' }
-							isDraggable={ false }
-							showTitlesAsTooltip={ true }
-						/>
+						{ isLoading && (
+							<span className="components-placeholder__preview">
+								<Spinner />
+							</span>
+						) }
+
+						{ ! isLoading && (
+							<BlockPatternList
+								shownPatterns={ patterns }
+								blockPatterns={ patterns }
+								onClickPattern={ onClickHeaderPattern }
+								label={ 'Headers' }
+								orientation="vertical"
+								category={ 'header' }
+								isDraggable={ false }
+								showTitlesAsTooltip={ true }
+							/>
+						) }
 					</div>
 				</>
 			}
 		/>
 	);
+
+	// return null;
 };

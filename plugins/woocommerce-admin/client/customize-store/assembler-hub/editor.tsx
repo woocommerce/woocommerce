@@ -30,8 +30,8 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 import { BlockEditor } from './block-editor';
 
 export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
-	const { record: template } = useEditedEntityRecord();
-	const { id: templateId, type: templateType } = template;
+	// const { record: template } = useEditedEntityRecord();
+	// const { id: templateId, type: templateType } = template;
 	const { context, hasPageContentFocus } = useSelect( ( select ) => {
 		const {
 			getEditedPostContext,
@@ -68,33 +68,26 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 	return (
 		<>
 			{ isLoading ? <CanvasSpinner /> : null }
-			<EntityProvider kind="root" type="site">
-				<EntityProvider
-					kind="postType"
-					type={ templateType }
-					id={ templateId }
-				>
-					<BlockContextProvider value={ blockContext }>
-						<InterfaceSkeleton
-							enableRegionNavigation={ false }
-							className={ classnames(
-								'woocommerce-customize-store__edit-site-editor',
-								'edit-site-editor__interface-skeleton',
-								{
-									'show-icon-labels': false,
-									'is-loading': isLoading,
-								}
-							) }
-							content={
-								<>
-									<GlobalStylesRenderer />
-									<BlockEditor />
-								</>
-							}
-						/>
-					</BlockContextProvider>
-				</EntityProvider>
-			</EntityProvider>
+
+			<BlockContextProvider value={ blockContext }>
+				<InterfaceSkeleton
+					enableRegionNavigation={ false }
+					className={ classnames(
+						'woocommerce-customize-store__edit-site-editor',
+						'edit-site-editor__interface-skeleton',
+						{
+							'show-icon-labels': false,
+							'is-loading': isLoading,
+						}
+					) }
+					content={
+						<>
+							<GlobalStylesRenderer />
+							<BlockEditor />
+						</>
+					}
+				/>
+			</BlockContextProvider>
 		</>
 	);
 };

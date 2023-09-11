@@ -30,6 +30,8 @@ import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-bo
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { NavigableRegion } from '@wordpress/interface';
+import { EntityProvider } from '@wordpress/core-data';
+import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 
 /**
  * Internal dependencies
@@ -66,6 +68,9 @@ export const Layout = () => {
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
+	const { record: template } = useEditedEntityRecord();
+	const { id: templateId, type: templateType } = template;
+
 	return (
 		<LogoBlockContext.Provider
 			value={ {
@@ -73,112 +78,126 @@ export const Layout = () => {
 				setLogoBlock,
 			} }
 		>
-			<div className={ classnames( 'edit-site-layout' ) }>
-				<motion.div
-					className="edit-site-layout__header-container"
-					animate={ 'view' }
+			<EntityProvider kind="root" type="site">
+				<EntityProvider
+					kind="postType"
+					type={ templateType }
+					id={ templateId }
 				>
-					<SiteHub
-						as={ motion.div }
-						variants={ {
-							view: { x: 0 },
-						} }
-						isTransparent={ false }
-						className="edit-site-layout__hub"
-					/>
-				</motion.div>
-
-				<div className="edit-site-layout__content">
-					<NavigableRegion
-						ariaLabel={ __( 'Navigation', 'woocommerce' ) }
-						className="edit-site-layout__sidebar-region"
-					>
+					<div className={ classnames( 'edit-site-layout' ) }>
 						<motion.div
-							animate={ { opacity: 1 } }
-							transition={ {
-								type: 'tween',
-								duration:
-									// Disable transitiont in mobile to emulate a full page transition.
-									disableMotion || isMobileViewport
-										? 0
-										: ANIMATION_DURATION,
-								ease: 'easeOut',
-							} }
-							className="edit-site-layout__sidebar"
+							className="edit-site-layout__header-container"
+							animate={ 'view' }
 						>
-							<Sidebar />
+							<SiteHub
+								as={ motion.div }
+								variants={ {
+									view: { x: 0 },
+								} }
+								isTransparent={ false }
+								className="edit-site-layout__hub"
+							/>
 						</motion.div>
-					</NavigableRegion>
 
-					{ ! isMobileViewport && (
-						<div
-							className={ classnames(
-								'edit-site-layout__canvas-container'
-							) }
-						>
-							{ canvasResizer }
-							{ !! canvasSize.width && (
+						<div className="edit-site-layout__content">
+							<NavigableRegion
+								ariaLabel={ __( 'Navigation', 'woocommerce' ) }
+								className="edit-site-layout__sidebar-region"
+							>
 								<motion.div
-									whileHover={ {
-										scale: 1.005,
-										transition: {
-											duration: disableMotion ? 0 : 0.5,
-											ease: 'easeOut',
-										},
-									} }
-									initial={ false }
-									layout="position"
-									className={ classnames(
-										'edit-site-layout__canvas'
-									) }
+									animate={ { opacity: 1 } }
 									transition={ {
 										type: 'tween',
-										duration: disableMotion
-											? 0
-											: ANIMATION_DURATION,
+										duration:
+											// Disable transitiont in mobile to emulate a full page transition.
+											disableMotion || isMobileViewport
+												? 0
+												: ANIMATION_DURATION,
 										ease: 'easeOut',
 									} }
+									className="edit-site-layout__sidebar"
 								>
-									<ErrorBoundary>
-										<ResizableFrame
-											isReady={ ! isEditorLoading }
-											duringGuideTour={
-												shouldTourBeShown &&
-												! onboardingTourProps.showWelcomeTour
-											}
-											isFullWidth={ false }
-											defaultSize={ {
-												width:
-													canvasSize.width -
-													24 /* $canvas-padding */,
-												height: canvasSize.height,
+									<Sidebar />
+								</motion.div>
+							</NavigableRegion>
+
+							{ ! isMobileViewport && (
+								<div
+									className={ classnames(
+										'edit-site-layout__canvas-container'
+									) }
+								>
+									{ canvasResizer }
+									{ !! canvasSize.width && (
+										<motion.div
+											whileHover={ {
+												scale: 1.005,
+												transition: {
+													duration: disableMotion
+														? 0
+														: 0.5,
+													ease: 'easeOut',
+												},
 											} }
-											isOversized={
-												isResizableFrameOversized
-											}
-											setIsOversized={
-												setIsResizableFrameOversized
-											}
-											innerContentStyle={ {
-												background:
-													gradientValue ??
-													backgroundColor,
+											initial={ false }
+											layout="position"
+											className={ classnames(
+												'edit-site-layout__canvas'
+											) }
+											transition={ {
+												type: 'tween',
+												duration: disableMotion
+													? 0
+													: ANIMATION_DURATION,
+												ease: 'easeOut',
 											} }
 										>
-											<Editor
-												isLoading={ isEditorLoading }
-											/>
-										</ResizableFrame>
-									</ErrorBoundary>
-								</motion.div>
+											<ErrorBoundary>
+												<ResizableFrame
+													isReady={
+														! isEditorLoading
+													}
+													duringGuideTour={
+														shouldTourBeShown &&
+														! onboardingTourProps.showWelcomeTour
+													}
+													isFullWidth={ false }
+													defaultSize={ {
+														width:
+															canvasSize.width -
+															24 /* $canvas-padding */,
+														height: canvasSize.height,
+													} }
+													isOversized={
+														isResizableFrameOversized
+													}
+													setIsOversized={
+														setIsResizableFrameOversized
+													}
+													innerContentStyle={ {
+														background:
+															gradientValue ??
+															backgroundColor,
+													} }
+												>
+													<Editor
+														isLoading={
+															isEditorLoading
+														}
+													/>
+												</ResizableFrame>
+											</ErrorBoundary>
+										</motion.div>
+									) }
+								</div>
 							) }
 						</div>
+					</div>
+					{ shouldTourBeShown && (
+						<OnboardingTour { ...onboardingTourProps } />
 					) }
-				</div>
-			</div>
-			{ shouldTourBeShown && (
-				<OnboardingTour { ...onboardingTourProps } />
-			) }
+				</EntityProvider>
+			</EntityProvider>
 		</LogoBlockContext.Provider>
 	);
 };

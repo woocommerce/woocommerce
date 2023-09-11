@@ -20,9 +20,13 @@ type PatternWithBlocks = Pattern & {
 };
 
 export const usePatternsByCategory = ( category: string ) => {
-	const { blockPatterns } = useSelect(
+	const { blockPatterns, isLoading } = useSelect(
 		( select ) => ( {
 			blockPatterns: select( coreStore ).getBlockPatterns(),
+			isLoading:
+				! select( coreStore ).hasFinishedResolution(
+					'getBlockPatterns'
+				),
 		} ),
 		[]
 	);
@@ -42,5 +46,5 @@ export const usePatternsByCategory = ( category: string ) => {
 			} );
 	}, [ blockPatterns, category ] );
 
-	return patternsByCategory;
+	return { isLoading, patterns: patternsByCategory };
 };
