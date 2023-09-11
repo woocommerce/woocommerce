@@ -78,6 +78,31 @@ trait BlockContainerTrait {
 	}
 
 	/**
+	 * Get a block by ID.
+	 *
+	 * @param string $block_id The block ID.
+	 */
+	public function get_block( string $block_id ): ?BlockInterface {
+		foreach ( $this->inner_blocks as $block ) {
+			if ( $block->get_id() === $block_id ) {
+				return $block;
+			}
+		}
+
+		foreach ( $this->inner_blocks as $block ) {
+			if ( $block instanceof ContainerInterface ) {
+				$block = $block->get_block( $block_id );
+
+				if ( $block ) {
+					return $block;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Remove a block from the block container.
 	 *
 	 * @param string $block_id The block ID.
@@ -108,10 +133,6 @@ trait BlockContainerTrait {
 
 		$parent = $block->get_parent();
 		$parent->remove_inner_block( $block );
-
-		// Detach block from parent and root template.
-		$block->detach();
-
 	}
 
 	/**

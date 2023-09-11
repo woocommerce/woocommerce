@@ -161,38 +161,29 @@ class AbstractBlock implements BlockInterface {
 
 	/**
 	 * Get the template that this block belongs to.
-	 *
-	 * @throws \RuntimeException If the block does not have a root template.
 	 */
 	public function &get_root_template(): BlockTemplateInterface {
-		if ( is_null( $this->root_template ) ) {
-			throw new \RuntimeException( 'The block does not have a root template.' );
-		}
-
 		return $this->root_template;
 	}
 
 	/**
 	 * Get the parent block container.
-	 *
-	 * @throws \RuntimeException If the block does not have a parent.
 	 */
 	public function &get_parent(): ContainerInterface {
-		if ( is_null( $this->parent ) ) {
-			throw new \RuntimeException( 'The block does not have a parent.' );
-		}
-
 		return $this->parent;
 	}
 
 	/**
-	 * Detach the block from its parent block container and the template it belongs to.
+	 * Check if the block is detached from its parent block container or the template it belongs to.
+	 *
+	 * @return bool True if the block is detached from its parent block container or the template it belongs to.
 	 */
-	public function detach() {
-		$this->parent        = null;
-		$this->root_template = null;
-	}
+	public function is_detached(): bool {
+		$is_in_parent        = $this->parent->get_block( $this->id ) === $this;
+		$is_in_root_template = $this->get_root_template()->get_block( $this->id ) === $this;
 
+		return ! $is_in_parent || ! $is_in_root_template;
+	}
 	/**
 	 * Get the block configuration as a formatted template.
 	 *
