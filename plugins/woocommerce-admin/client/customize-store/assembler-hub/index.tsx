@@ -92,8 +92,13 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 		) => fetchLinkSuggestions( search, searchOptions, settings );
 		settings.__experimentalFetchRichUrlData = fetchUrlData;
 
-		// @ts-ignore No types for this exist yet.
-		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters();
+		const reapplyBlockTypeFilters =
+			// @ts-ignore No types for this exist yet.
+			dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters || // GB < 16.6
+			// @ts-ignore No types for this exist yet.
+			dispatch( blocksStore ).reapplyBlockTypeFilters; // GB >= 16.6
+		reapplyBlockTypeFilters();
+
 		const coreBlocks = __experimentalGetCoreBlocks().filter(
 			( { name }: { name: string } ) =>
 				name !== 'core/freeform' && ! getBlockType( name )
