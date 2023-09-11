@@ -528,7 +528,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Helper function to get alias for address table, this is used in select query.
 	 *
-	 * @param string $type Address type.
+	 * @param string $type Type of address. Available options: 'billing' or 'shipping'.
 	 *
 	 * @return string Alias.
 	 */

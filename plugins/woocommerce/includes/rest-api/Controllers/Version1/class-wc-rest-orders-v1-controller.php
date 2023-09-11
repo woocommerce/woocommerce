@@ -595,7 +595,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @param WC_Order $order
 	 * @param array $posted
-	 * @param string $type
+	 * @param string $type Type of address. Available options: 'billing' or 'shipping'.
 	 */
 	protected function update_address( $order, $posted, $type = 'billing' ) {
 		foreach ( $posted as $key => $value ) {

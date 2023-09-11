@@ -25,7 +25,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	/**
 	 * PostToOrderAddressTableMigrator constructor.
 	 *
-	 * @param string $type Type of addresses being migrated, could be billing|shipping.
+	 * @param string $type Type of address being migrated. Available options: 'billing' or 'shipping'.
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;
