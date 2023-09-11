@@ -23,8 +23,8 @@ const wcPages = [
 			{
 				name: 'Customers',
 				heading: 'Customers',
-				element: '.woocommerce-table__empty-item',
-				text: 'No data to display',
+				element: '#search-inline-input-0',
+				text: 'Move backward for selected items',
 			},
 			{
 				name: 'Coupons',
@@ -58,8 +58,8 @@ const wcPages = [
 			{
 				name: 'All Products',
 				heading: 'Products',
-				element: '.product_cat.column-product_cat',
-				text: 'Uncategorized',
+				element: '#dropdown_product_type',
+				text: 'Filter by product type',
 			},
 			{
 				name: 'Add New',
@@ -107,6 +107,16 @@ const wcPages = [
 	},
 ];
 
+let productId, orderId;
+const productName = 'Simple Product Name';
+const productPrice = '15.99';
+const randomNum = new Date().getTime().toString();
+const customer = {
+	username: `customer${ randomNum }`,
+	password: 'password',
+	email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
+};
+
 for ( const currentPage of wcPages ) {
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
@@ -133,6 +143,53 @@ for ( const currentPage of wcPages ) {
 					'Onboarding profile data has been updated.'
 				);
 			}
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			// create a simple product
+			await api
+				.post( 'products', {
+					name: productName,
+					type: 'simple',
+					regular_price: productPrice,
+				} )
+				.then( ( response ) => {
+					productId = response.data.id;
+				} );
+			// create an order
+			await api
+				.post( 'orders', {
+					line_items: [
+						{
+							product_id: productId,
+							quantity: 1,
+						},
+					],
+				} )
+				.then( ( response ) => {
+					orderId = response.data.id;
+				} );
+			// create customer
+			await api
+				.post( 'customers', customer )
+				.then( ( response ) => ( customer.id = response.data.id ) );
+		} );
+
+		test.afterAll( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api.delete( `products/${ productId }`, {
+				force: true,
+			} );
+			await api.delete( `orders/${ orderId }`, { force: true } );
+			await api.delete( `customers/${ customer.id }`, { force: true } );
 		} );
 
 		test.beforeEach( async ( { page } ) => {
