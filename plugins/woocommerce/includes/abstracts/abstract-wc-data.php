@@ -687,10 +687,10 @@ abstract class WC_Data {
 					/**
 					 * Fires immediately after deleting metadata.
 					 *
-					 * @param int    $meta_id    ID of added metadata entry.
+					 * @param int    $meta_id    ID of deleted metadata entry.
 					 * @param int    $object_id  Object ID.
 					 * @param string $meta_key   Metadata key.
-					 * @param mixed  $meta_value Metadata value.
+					 * @param mixed  $meta_value Metadata value (will be empty for delete).
 					 */
 					do_action( "deleted_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
 
@@ -715,7 +715,7 @@ abstract class WC_Data {
 					/**
 					 * Fires immediately after updating metadata.
 					 *
-					 * @param int    $meta_id    ID of added metadata entry.
+					 * @param int    $meta_id    ID of updated metadata entry.
 					 * @param int    $object_id  Object ID.
 					 * @param string $meta_key   Metadata key.
 					 * @param mixed  $meta_value Metadata value.
