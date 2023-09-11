@@ -164,7 +164,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 * @return string - Time frame.
 	 */
 	function get_timeframe( $timeInMs ) {
-		$timeFrames = [
+		$time_frames = [
 			[
 				'name' => '0-2s',
 				'max'  => 2,
@@ -196,12 +196,12 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 			[ 'name' => '>60s' ],
 		];
 
-		foreach ( $timeFrames as $timeFrame ) {
-			if ( ! isset( $timeFrame['max'] ) ) {
-				return $timeFrame['name'];
+		foreach ( $time_frames as $time_frame ) {
+			if ( ! isset( $time_frame['max'] ) ) {
+				return $time_frame['name'];
 			}
-			if ( $timeInMs < $timeFrame['max'] * 1000 ) {
-				return $timeFrame['name'];
+			if ( $timeInMs < $time_frame['max'] * 1000 ) {
+				return $time_frame['name'];
 			}
 		}
 	}
