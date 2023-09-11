@@ -25,7 +25,7 @@ describe( 'useBackgroundRemoval hook', () => {
 		const imageFile = new File( [ new ArrayBuffer( 51200 ) ], 'test.png', {
 			type: 'image/png',
 		} );
-		const returnedImageType = 'jpg';
+		const returnedImageType = 'jpeg';
 		const returnedImageSize = 'hd';
 		const token = 'test-token';
 

@@ -11,7 +11,7 @@ import { createExtendedError } from '../utils/create-extended-error';
 
 export type BackgroundRemovalParams = {
 	imageFile: File;
-	returnedImageType?: 'png' | 'jpg';
+	returnedImageType?: 'png' | 'jpeg';
 	returnedImageSize?: 'hd' | 'medium' | 'preview';
 	token: string;
 };
@@ -69,22 +69,12 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 			return;
 		}
 
-		// Set the image type when creating the blob.
-		let imageType: string;
-		switch ( returnedImageType ) {
-			case 'png':
-				imageType = 'image/png';
-				break;
-			case 'jpg':
-			default:
-				imageType = 'image/jpeg';
-				break;
-		}
+		const imageType = returnedImageType ?? 'jpeg';
 
 		setLoading( true );
 		const formData = new FormData();
 		formData.append( 'image_file', imageFile );
-		formData.append( 'returned_image_type', returnedImageType ?? 'jpg' );
+		formData.append( 'returned_image_type', imageType );
 		formData.append( 'returned_image_size', returnedImageSize ?? 'hd' );
 		formData.append( 'token', token );
 
@@ -99,7 +89,7 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 			} );
 
 			const blob = new Blob( [ response as ArrayBuffer ], {
-				type: imageType,
+				type: `image/${ imageType }`,
 			} );
 			setImageData( blob );
 		} catch ( err ) {
