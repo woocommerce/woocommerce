@@ -347,4 +347,52 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 
 		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
+
+	/**
+	 * @testdox A regular query will still work even if the pre-query escape hook returns null for the whole 3-tuple.
+	 */
+	public function test_pre_query_escape_hook_return_null() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			// Just return null.
+			return null;
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery();
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( null, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox A regular query with a limit will still work even if the pre-query escape hook returns null for the whole 3-tuple.
+	 */
+	public function test_pre_query_escape_hook_return_null_limit() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			// Just return null.
+			return null;
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit' => 5,
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( 1, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
 }

@@ -222,7 +222,7 @@ class OrdersTableQuery {
 		 *
 		 * @since 8.2.0
 		 *
-		 * @param array $order_data {
+		 * @param array|null $order_data {
 		 *     An array of order data.
 		 *     @type int[] $orders        Return an array of order IDs data to short-circuit the HPOS query,
 		 *                                or null to allow HPOS to run its normal query.
