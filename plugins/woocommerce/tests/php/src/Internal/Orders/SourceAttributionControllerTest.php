@@ -35,7 +35,7 @@ class SourceAttributionControllerTest extends WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->attribution_fields_class = $this->getMockBuilder( SourceAttributionController::class )->getMock();
+		$this->attribution_fields_class = new SourceAttributionController();
 
 		/** @var MockableLegacyProxy $legacy_proxy */
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
