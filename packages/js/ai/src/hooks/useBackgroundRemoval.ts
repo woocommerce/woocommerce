@@ -4,10 +4,15 @@
 import { useState } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Internal dependencies
+ */
+import { createExtendedError } from '../utils/create-extended-error';
+
 export type BackgroundRemovalParams = {
 	imageFile: File;
-	returnPngImage?: boolean;
-	returnedImageSize?: string;
+	returnedImageType?: 'png' | 'jpg';
+	returnedImageSize?: 'hd' | 'medium' | 'preview';
 	token: string;
 };
 
@@ -18,43 +23,69 @@ type BackgroundRemovalResponse = {
 	fetchImage: ( params: BackgroundRemovalParams ) => void;
 };
 
-const useBackgroundRemoval = (): BackgroundRemovalResponse => {
+export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const [ loading, setLoading ] = useState( false );
 	const [ error, setError ] = useState< Error | null >( null );
 	const [ imageData, setImageData ] = useState< Blob | null >( null );
 
 	const fetchImage = async ( params: BackgroundRemovalParams ) => {
-		const { returnPngImage, returnedImageSize, imageFile, token } = params;
+		const { returnedImageType, returnedImageSize, imageFile, token } =
+			params;
 
 		if ( ! token ) {
-			setError( new Error( 'Invalid token' ) );
+			setError( createExtendedError( 'Invalid token', 'invalid_jwt' ) );
 			return;
 		}
 		// Validate that the file is an image and has actual content.
 		if ( ! imageFile.type.startsWith( 'image/' ) ) {
-			setError( new Error( 'Invalid image file' ) );
+			setError(
+				createExtendedError(
+					'Invalid image file',
+					'invalid_image_file'
+				)
+			);
 			return;
 		}
 
 		const fileSizeInKB = params.imageFile.size / 1024;
 		if ( fileSizeInKB < 5 ) {
 			setError(
-				new Error( 'Image file too small, must be at least 5KB' )
+				createExtendedError(
+					'Image file too small, must be at least 5KB',
+					'invalid_image_file_size'
+				)
 			);
 			return;
 		}
 
 		// The WPCOM REST API endpoint has a 10MB image size limit.
 		if ( fileSizeInKB > 10240 ) {
-			setError( new Error( 'Image file too large, must be under 10MB' ) );
+			setError(
+				createExtendedError(
+					'Image file too large, must be under 10MB',
+					'invalid_image_file_size'
+				)
+			);
 			return;
+		}
+
+		// Set the image type when creating the blob.
+		let imageType: string;
+		switch ( returnedImageType ) {
+			case 'png':
+				imageType = 'image/png';
+				break;
+			case 'jpg':
+			default:
+				imageType = 'image/jpeg';
+				break;
 		}
 
 		setLoading( true );
 		const formData = new FormData();
 		formData.append( 'image_file', imageFile );
-		formData.append( 'return_png_image', returnPngImage ? 'yes' : 'no' );
-		formData.append( 'returned_image_size', returnedImageSize || '' );
+		formData.append( 'returned_image_type', returnedImageType ?? 'jpg' );
+		formData.append( 'returned_image_size', returnedImageSize ?? 'hd' );
 		formData.append( 'token', token );
 
 		try {
@@ -66,7 +97,7 @@ const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 					'Content-Type': 'multipart/form-data',
 				},
 			} );
-			const imageType = returnPngImage ? 'image/png' : 'image/jpeg';
+
 			const blob = new Blob( [ response as ArrayBuffer ], {
 				type: imageType,
 			} );
@@ -80,5 +111,3 @@ const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 
 	return { loading, error, imageData, fetchImage };
 };
-
-export default useBackgroundRemoval;

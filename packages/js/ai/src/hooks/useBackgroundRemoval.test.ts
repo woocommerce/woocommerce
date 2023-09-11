@@ -8,9 +8,10 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import useBackgroundRemoval, {
+import {
 	BackgroundRemovalParams,
-} from './useBackgroundRemoval'; // adjust the import to your file structure
+	useBackgroundRemoval,
+} from './useBackgroundRemoval';
 
 // Mocking the apiFetch function
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
@@ -24,13 +25,13 @@ describe( 'useBackgroundRemoval hook', () => {
 		const imageFile = new File( [ new ArrayBuffer( 51200 ) ], 'test.png', {
 			type: 'image/png',
 		} );
-		const returnPngImage = false;
+		const returnedImageType = 'jpg';
 		const returnedImageSize = 'hd';
 		const token = 'test-token';
 
 		mockRequestParams = {
 			imageFile,
-			returnPngImage,
+			returnedImageType,
 			returnedImageSize,
 			token,
 		};
@@ -43,7 +44,7 @@ describe( 'useBackgroundRemoval hook', () => {
 		expect( result.current.error ).toBeNull();
 	} );
 
-	it.only( 'should return error on empty token', async () => {
+	it( 'should return error on empty token', async () => {
 		mockRequestParams.token = '';
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		act( () => {
