@@ -48,6 +48,7 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		await api
 			.post( 'orders', {
 				set_paid: true,
+				status: 'completed',
 				billing: {
 					first_name: 'Jane',
 					last_name: 'Smith',
@@ -67,10 +68,6 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		await api.put( `orders/${ orderId }`, {
 			customer_id: customer.id,
 		} );
-		// enable COD payment
-		await api.put( 'payment_gateways/cod', {
-			enabled: true,
-		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -85,9 +82,6 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
 		await api.delete( `customers/${ customer.id }`, { force: true } );
-		await api.put( 'payment_gateways/cod', {
-			enabled: false,
-		} );
 	} );
 
 	test( 'can see downloadable file and click to download it', async ( {
