@@ -88,7 +88,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Add Product Collection Rows pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10857)
 - Add Simple Grid Product Collection pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10835)
 - Product Hero Pattern > Adjust the content width. (https://github.com/woocommerce/woocommerce-blocks/pull/10832)
-- Create the `Featured Categories Grid` pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10806)
 - Fix: Load blocks style separately for classic themes. (https://github.com/woocommerce/woocommerce-blocks/pull/10758)
 - Adjust `Follow us on social media` pattern icon alignment. (https://github.com/woocommerce/woocommerce-blocks/pull/10709)
 - Add Product Collection Full Grid pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10665)
