@@ -85,23 +85,24 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 #### Enhancements
 
-- Add Product Collection Rows pattern. ([10857](https://github.com/woocommerce/woocommerce-blocks/pull/10857))
-- Add Simple Grid Product Collection pattern. ([10835](https://github.com/woocommerce/woocommerce-blocks/pull/10835))
-- Product Hero Pattern > Adjust the content width. ([10832](https://github.com/woocommerce/woocommerce-blocks/pull/10832))
-- Fix: Load blocks style separately for classic themes. ([10758](https://github.com/woocommerce/woocommerce-blocks/pull/10758))
-- Adjust `Follow us on social media` pattern icon alignment. ([10709](https://github.com/woocommerce/woocommerce-blocks/pull/10709))
-- Add Product Collection Full Grid pattern. ([10665](https://github.com/woocommerce/woocommerce-blocks/pull/10665))
+- Add Product Collection Rows pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10857)
+- Add Simple Grid Product Collection pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10835)
+- Product Hero Pattern > Adjust the content width. (https://github.com/woocommerce/woocommerce-blocks/pull/10832)
+- Create the `Featured Categories Grid` pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10806)
+- Fix: Load blocks style separately for classic themes. (https://github.com/woocommerce/woocommerce-blocks/pull/10758)
+- Adjust `Follow us on social media` pattern icon alignment. (https://github.com/woocommerce/woocommerce-blocks/pull/10709)
+- Add Product Collection Full Grid pattern. (https://github.com/woocommerce/woocommerce-blocks/pull/10665)
 
 #### Bug Fixes
 
-- Change default number of columns in Related Products. ([10875](https://github.com/woocommerce/woocommerce-blocks/pull/10875))
-- Product Image: Fix bug that prevented block styles being applied within the editor. ([10859](https://github.com/woocommerce/woocommerce-blocks/pull/10859))
-- Fix bug with wpautop for the empty cart. ([10768](https://github.com/woocommerce/woocommerce-blocks/pull/10768))
-- Prevent the Cart block reloading when adding an item to it from the Empty Cart block. ([10624](https://github.com/woocommerce/woocommerce-blocks/pull/10624))
-- Product button: Sync temporary number of items on instantiation. ([10604](https://github.com/woocommerce/woocommerce-blocks/pull/10604))
-- Customer Account Block: Fixed an issue that would make the account icon scale incorrectly in certain environments (prominently in the TT1 theme). ([10533](https://github.com/woocommerce/woocommerce-blocks/pull/10533))
-- Customer Account Block: Fixed an issue that caused padding to be inconsistent between the editor and the front-end. ([10476](https://github.com/woocommerce/woocommerce-blocks/pull/10476))
-- Fixed notice displaying on Cart and Checkout template. ([10151](https://github.com/woocommerce/woocommerce-blocks/pull/10151))
+- Change default number of columns in Related Products. (https://github.com/woocommerce/woocommerce-blocks/pull/10875)
+- Product Image: Fix bug that prevented block styles being applied within the editor. (https://github.com/woocommerce/woocommerce-blocks/pull/10859)
+- Fix bug with wpautop for the empty cart. (https://github.com/woocommerce/woocommerce-blocks/pull/10768)
+- Prevent the Cart block reloading when adding an item to it from the Empty Cart block. (https://github.com/woocommerce/woocommerce-blocks/pull/10624)
+- Product button: Sync temporary number of items on instantiation. (https://github.com/woocommerce/woocommerce-blocks/pull/10604)
+- Customer Account Block: Fixed an issue that would make the account icon scale incorrectly in certain environments (prominently in the TT1 theme). (https://github.com/woocommerce/woocommerce-blocks/pull/10533)
+- Customer Account Block: Fixed an issue that caused padding to be inconsistent between the editor and the front-end. (https://github.com/woocommerce/woocommerce-blocks/pull/10476)
+- Fixed notice displaying on Cart and Checkout template. (https://github.com/woocommerce/woocommerce-blocks/pull/10151)
 
 = 11.0.0 - 2023-08-30 =
 
