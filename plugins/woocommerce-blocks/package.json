@@ -147,7 +147,7 @@
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.2",
 		"@types/wordpress__data-controls": "2.2.0",
-		"@types/wordpress__editor": "^11.0.0",
+		"@types/wordpress__editor": "^13.6.3",
 		"@types/wordpress__notices": "^3.5.0",
 		"@types/wordpress__wordcount": "^2.4.2",
 		"@typescript-eslint/eslint-plugin": "5.56.0",
