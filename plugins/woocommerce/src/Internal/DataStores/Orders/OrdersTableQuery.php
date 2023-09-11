@@ -201,7 +201,17 @@ class OrdersTableQuery {
 		$require_limit_data = ( $this->arg_isset( 'limit' ) || $this->arg_isset( 'page' ) || $this->arg_isset( 'offset' ) );
 
 		$this->build_query();
+		if ( ! $this->maybe_override_query() ) {
+			$this->run_query();
+		}
+	}
 
+	/**
+	 * Lets the `woocommerce_hpos_pre_query` filter override the query.
+	 *
+	 * @return boolean Whether the query was overridden or not.
+	 */
+	private function maybe_override_query(): bool {
 		/**
 		 * Filters the orders array before the query takes place.
 		 *
@@ -233,9 +243,9 @@ class OrdersTableQuery {
 				}
 				$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 			}
-		} else {
-			$this->run_query();
+			return true;
 		}
+		return false;
 	}
 
 	/**
