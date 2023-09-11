@@ -61,6 +61,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 											},
 										},
 									},
+									lock: { move: true },
 								},
 							],
 							[
@@ -70,6 +71,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 										type: 'flex',
 										verticalAlignment: 'bottom',
 									},
+									lock: { move: true, remove: true },
 								},
 							],
 						],
