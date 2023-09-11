@@ -70,13 +70,13 @@ export const SidebarNavigationScreenColorPalette = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
+							href={ `${ ADMIN_URL }site-editor.php` }
 							type="external"
 						/>
 					),
 					StyleLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php?path=%2Fwp_global_styles&canvas=edit` }
+							href={ `${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit` }
 							type="external"
 						/>
 					),

@@ -22,7 +22,7 @@ export const SidebarNavigationScreenFooter = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
+							href={ `${ ADMIN_URL }site-editor.php` }
 							type="external"
 						/>
 					),
