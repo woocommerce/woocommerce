@@ -230,6 +230,7 @@ class OrdersTableQuery {
 		 *     @type int   $max_num_pages The number of pages.
 		 * }
 		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
+		 * @param string             $sql The OrdersTableQuery instance.
 		 */
 		list( $this->orders, $this->found_orders, $this->max_num_pages ) = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
 		// If the filter set the orders, make sure the others values are set as well and skip running the query.
