@@ -4,13 +4,18 @@
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { usePatternsByCategory } from '../../hooks/use-patterns';
 
 export const SidebarNavigationScreenHeader = () => {
+	const patterns = usePatternsByCategory( 'header' );
+
 	return (
 		<SidebarNavigationScreen
 			title={ __( 'Change your header', 'woocommerce' ) }
@@ -30,7 +35,20 @@ export const SidebarNavigationScreenHeader = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header"></div>
+					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
+						<BlockPatternList
+							shownPatterns={ patterns }
+							blockPatterns={ patterns }
+							onClickPattern={ () => {
+								console.log( 'clicked!' );
+							} }
+							label={ 'Headers' }
+							orientation="vertical"
+							category={ 'header' }
+							isDraggable={ false }
+							showTitlesAsTooltip={ true }
+						/>
+					</div>
 				</>
 			}
 		/>
