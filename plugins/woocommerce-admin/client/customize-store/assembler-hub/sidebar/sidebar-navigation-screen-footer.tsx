@@ -16,7 +16,7 @@ export const SidebarNavigationScreenFooter = () => {
 			title={ __( 'Change your footer', 'woocommerce' ) }
 			description={ createInterpolateElement(
 				__(
-					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+					"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
 					'woocommerce'
 				),
 				{
@@ -30,7 +30,7 @@ export const SidebarNavigationScreenFooter = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header"></div>
+					<div className="edit-site-sidebar-navigation-screen-patterns__group-footer"></div>
 				</>
 			}
 		/>
