@@ -335,7 +335,6 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
 
-		echo 'setting limit arg to 5. ';
 		$query = new OrdersTableQuery(
 			array(
 				'limit' => 5,
