@@ -195,8 +195,16 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			meta: {
-				component: AssemblerHub,
+			initial: 'assemblerHub',
+			states: {
+				assemblerHub: {
+					entry: [
+						{ type: 'updateQueryStep', step: 'assembler-hub' },
+					],
+					meta: {
+						component: AssemblerHub,
+					},
+				},
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {

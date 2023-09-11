@@ -13,10 +13,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalUseNavigator as useNavigator,
 } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
@@ -31,8 +27,12 @@ import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages'
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 
 import { SaveHub } from './save-hub';
-
-const { useLocation, useHistory } = unlock( routerPrivateApis );
+import {
+	addHistoryListener,
+	getQuery,
+	updateQueryString,
+	useQuery,
+} from '@woocommerce/navigation';
 
 function isSubset(
 	subset: {
@@ -48,18 +48,27 @@ function isSubset(
 }
 
 function useSyncPathWithURL() {
-	const history = useHistory();
-	const { params: urlParams } = useLocation();
-	const { location: navigatorLocation, params: navigatorParams } =
-		useNavigator();
+	const urlParams = useQuery();
+	const {
+		location: navigatorLocation,
+		params: navigatorParams,
+		goTo,
+	} = useNavigator();
 	const isMounting = useRef( true );
 
 	useEffect(
 		() => {
-			// The navigatorParams are only initially filled properly when the
-			// navigator screens mount. so we ignore the first synchronisation.
+			// The navigatorParams are only initially filled properly after the
+			// navigator screens mounts. so we don't do the query string update initially.
+			// however we also do want to add an event listener for popstate so that we can
+			// update the navigator when the user navigates using the browser back button
 			if ( isMounting.current ) {
 				isMounting.current = false;
+				addHistoryListener( ( event: PopStateEvent ) => {
+					if ( event.type === 'popstate' ) {
+						goTo( ( getQuery() as Record< string, string > ).path );
+					}
+				} );
 				return;
 			}
 
@@ -73,7 +82,7 @@ function useSyncPathWithURL() {
 					...urlParams,
 					...newUrlParams,
 				};
-				history.push( updatedParams );
+				updateQueryString( {}, updatedParams.path );
 			}
 
 			updateUrlParams( {
@@ -126,11 +135,15 @@ function SidebarScreens() {
 }
 
 function Sidebar() {
+	const urlParams = getQuery() as Record< string, string >;
+	const initialPath = useRef(
+		urlParams.path ?? '/customize-store/assembler-hub'
+	);
 	return (
 		<>
 			<NavigatorProvider
 				className="edit-site-sidebar__content"
-				initialPath={ '/customize-store/assembler-hub' }
+				initialPath={ initialPath.current }
 			>
 				<SidebarScreens />
 			</NavigatorProvider>
