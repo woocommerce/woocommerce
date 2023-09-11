@@ -475,13 +475,16 @@
 }
 
 .woocommerce-customize-store_global-styles-variations_item {
-	border: 1px solid transparent;
+	border-radius: 2px;
+	padding: 2.5px;
+
+	.woocommerce-customize-store_global-styles-variations_item-preview {
+		border: 1px solid #dcdcde;
+		background: #fff;
+	}
 
 	&:hover,
 	&.is-active {
-		border-radius: 2px;
-		border: 1px solid #dcdcde;
-		background: #fff;
-		box-shadow: 0 0 0 4px  var(--wp-admin-theme-color), 0 0 0 2.5px #fff;
+		box-shadow: 0 0 0 1.5px  var(--wp-admin-theme-color), 0 0 0 2.5px #fff;
 	}
 }
