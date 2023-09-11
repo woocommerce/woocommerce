@@ -32,3 +32,5 @@ if ( ! function_exists( 'YOUR_PREFIX_on_block_template_register' ) ) {
 ## Hiding a group/section/field
 
 ## Reordering groups/saections/fields
+
+Previous: [Hooks](hooks.md)
