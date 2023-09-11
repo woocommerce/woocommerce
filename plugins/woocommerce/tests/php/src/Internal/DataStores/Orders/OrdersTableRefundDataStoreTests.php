@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableRefundDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
-use Automattic\WooCommerce\Tests\Caching\InMemoryCacheEngine;
 
 /**
  * Class OrdersTableRefundDataStoreTests.
@@ -51,16 +50,6 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->order_data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator         = wc_get_container()->get( PostsToOrdersMigrationController::class );
 		$this->cpt_data_store   = new WC_Order_Refund_Data_Store_CPT();
-
-		add_filter( 'wc_object_cache_get_engine', fn()=>new InMemoryCacheEngine() );
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'wc_object_cache_get_engine' );
 	}
 
 	/**

@@ -4,7 +4,6 @@ use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderDataCache;
 use Automattic\WooCommerce\Caching\CacheException;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Tests\Caching\InMemoryCacheEngine;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -25,17 +24,8 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		add_filter( 'wc_object_cache_get_engine', fn()=>new InMemoryCacheEngine() );
 		$this->sut = wc_get_container()->get( OrderCache::class );
 		$this->sut->flush();
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'wc_object_cache_get_engine' );
 	}
 
 	/**
