@@ -148,6 +148,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				true
 			);
 		}
+		
 		add_action( 'woocommerce_plugins_install_error', array( $this, 'log_plugins_install_error' ), 10, 4 );
 		add_action( 'woocommerce_plugins_install_api_error', array( $this, 'log_plugins_install_api_error' ), 10, 2 );
 	}
