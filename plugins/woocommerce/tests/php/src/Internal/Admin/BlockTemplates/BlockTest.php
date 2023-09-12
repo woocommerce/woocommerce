@@ -290,6 +290,49 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a block added to a detached block is detached.
+	 */
+	public function test_block_added_to_detached_block_is_detached() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->remove_block( 'test-block-id' );
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id' ),
+			'Failed asserting that the block was removed from the root template.'
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is not in the root template.'
+		);
+
+		$this->assertNotNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is in the parent.'
+		);
+
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the nested descendent block is detached from its parent and root template.'
+		);
+	}
+
+	/**
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
 	public function test_get_formatted_template() {
