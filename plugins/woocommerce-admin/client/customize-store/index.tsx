@@ -17,6 +17,7 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
+import { Transitional, events as transitionalEvents } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -30,6 +31,7 @@ export type customizeStoreStateMachineEvents =
 	| introEvents
 	| designWithAiEvents
 	| assemblerHubEvents
+	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } };
 
 export const customizeStoreStateMachineServices = {
@@ -121,10 +123,20 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
-					target: 'backToHomescreen',
+					target: 'transitionalScreen',
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
+				},
+			},
+		},
+		transitionalScreen: {
+			meta: {
+				component: Transitional,
+			},
+			on: {
+				GO_BACK_TO_HOME: {
+					target: 'backToHomescreen',
 				},
 			},
 		},
