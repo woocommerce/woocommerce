@@ -4031,20 +4031,17 @@ table.wc-shipping-classes {
 		text-align: center;
 
 		&::before {
-			content: "\f333";
-			font-family: "Dashicons";
-			text-align: center;
-			line-height: 1;
-			color: #999;
+			content: "";
+			mask: url(../images/icons/move-icon.svg);
+			background-color: #999;
 			display: block;
 			width: 17px;
 			float: left;
-			height: 100%;
-			line-height: 24px;
+			height: 24px;
 		}
 
 		&:hover::before {
-			color: #333;
+			background-color: #333;
 		}
 	}
 
