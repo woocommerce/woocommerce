@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { createMachine } from 'xstate';
+import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -33,17 +34,52 @@ export type customizeStoreStateMachineEvents =
 	| assemblerHubEvents
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } };
+	| { type: 'EXTERNAL_URL_UPDATE' };
 
-export const customizeStoreStateMachineServices = {
-	...introServices,
+const updateQueryStep = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { path } = getQuery() as { path: string };
+	const step = ( action as { step: string } ).step;
+	const pathFragments = path.split( '/' ); // [0] '', [1] 'customize-store', [2] step slug [3] design-with-ai, assembler-hub path fragments
+	if ( pathFragments[ 1 ] === 'customize-store' ) {
+		if ( pathFragments[ 2 ] !== step ) {
+			// this state machine is only concerned with [2], so we ignore changes to [3]
+			// [1] is handled by router at root of wc-admin
+			updateQueryString( {}, `/customize-store/${ step }` );
+		}
+	}
+};
+
+const browserPopstateHandler =
+	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
+		const popstateHandler = () => {
+			sendBack( { type: 'EXTERNAL_URL_UPDATE' } );
+		};
+		window.addEventListener( 'popstate', popstateHandler );
+		return () => {
+			window.removeEventListener( 'popstate', popstateHandler );
+		};
+	};
+
+export const machineActions = {
+	updateQueryStep,
 };
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
+	...machineActions,
+};
+
+export const customizeStoreStateMachineServices = {
+	...introServices,
+	browserPopstateHandler,
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
-	initial: 'intro',
+	initial: 'navigate',
 	predictableActionArguments: true,
 	preserveActionOrder: true,
 	schema: {
@@ -59,7 +95,47 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			activeTheme: '',
 		},
 	} as customizeStoreStateMachineContext,
+	invoke: {
+		src: 'browserPopstateHandler',
+	},
+	on: {
+		EXTERNAL_URL_UPDATE: {
+			target: 'navigate',
+		},
+		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
+			target: 'intro',
+			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
+	},
 	states: {
+		navigate: {
+			always: [
+				{
+					target: 'intro',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'intro',
+					},
+				},
+				{
+					target: 'designWithAi',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'design-with-ai',
+					},
+				},
+				{
+					target: 'assemblerHub',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'assembler-hub',
+					},
+				},
+				{
+					target: 'intro',
+				},
+			],
+		},
 		intro: {
 			id: 'intro',
 			initial: 'preIntro',
@@ -109,6 +185,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithAi,
 					},
+					entry: [
+						{ type: 'updateQueryStep', step: 'design-with-ai' },
+					],
 				},
 			},
 			on: {
@@ -118,8 +197,16 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			meta: {
-				component: AssemblerHub,
+			initial: 'assemblerHub',
+			states: {
+				assemblerHub: {
+					entry: [
+						{ type: 'updateQueryStep', step: 'assembler-hub' },
+					],
+					meta: {
+						component: AssemblerHub,
+					},
+				},
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
@@ -143,13 +230,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		backToHomescreen: {},
 		appearanceTask: {},
 	},
-	on: {
-		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-			actions: () => {
-				// TODO: when navigation has been implemented, this should navigate back to the Intro screen
-			},
-		},
-	},
 } );
 
 export const CustomizeStoreController = ( {
@@ -171,7 +251,16 @@ export const CustomizeStoreController = ( {
 				...customizeStoreStateMachineActions,
 				...actionOverrides,
 			},
-			guards: {},
+			guards: {
+				hasStepInUrl: ( _ctx, _evt, { cond }: { cond: unknown } ) => {
+					const { path = '' } = getQuery() as { path: string };
+					const pathFragments = path.split( '/' );
+					return (
+						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
+						( cond as { step: string | undefined } ).step
+					);
+				},
+			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
