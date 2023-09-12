@@ -218,7 +218,7 @@ class OrdersTableQuery {
 		 * Return a non-null value to bypass the HPOS default order queries.
 		 *
 		 * If the query includes limits via the `limit`, `page`, or `offset` arguments, we
-		 * require the `found_orders` and `max_num_pages` properties to also be set.
+		 * encourage the `found_orders` and `max_num_pages` properties to also be set.
 		 *
 		 * @since 8.2.0
 		 *
