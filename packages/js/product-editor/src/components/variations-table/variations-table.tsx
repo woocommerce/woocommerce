@@ -378,7 +378,22 @@ export function VariationsTable() {
 								}
 							) }
 						>
-							{ formatAmount( variation.price ) }
+							{ variation.on_sale && (
+								<span className="woocommerce-product-variations__sale-price">
+									{ formatAmount( variation.sale_price ) }
+								</span>
+							) }
+							<span
+								className={ classnames(
+									'woocommerce-product-variations__regular-price',
+									{
+										'woocommerce-product-variations__regular-price--on-sale':
+											variation.on_sale,
+									}
+								) }
+							>
+								{ formatAmount( variation.regular_price ) }
+							</span>
 						</div>
 						<div
 							className={ classnames(

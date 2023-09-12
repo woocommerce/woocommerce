@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign } from 'xstate';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -10,19 +11,99 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 } from './types';
-import { businessInfoDescriptionCompleteEvent } from './pages';
+import {
+	businessInfoDescriptionCompleteEvent,
+	lookAndFeelCompleteEvent,
+	toneOfVoiceCompleteEvent,
+} from './pages';
+import { LookAndToneCompletionResponse } from './services';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	businessInfoDescription: ( context, event: unknown ) => {
+	businessInfoDescription: ( _context, event: unknown ) => {
 		return {
 			descriptionText: ( event as businessInfoDescriptionCompleteEvent )
 				.payload,
 		};
 	},
 } );
+
+const assignLookAndFeel = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	lookAndFeel: ( _context, event: unknown ) => {
+		return {
+			choice: ( event as lookAndFeelCompleteEvent ).payload,
+		};
+	},
+} );
+
+const assignToneOfVoice = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	toneOfVoice: ( _context, event: unknown ) => {
+		return {
+			choice: ( event as toneOfVoiceCompleteEvent ).payload,
+		};
+	},
+} );
+
+const assignLookAndTone = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	lookAndFeel: ( _context, event: unknown ) => {
+		return {
+			choice: ( event as { data: LookAndToneCompletionResponse } ).data
+				.look,
+		};
+	},
+	toneOfVoice: ( _context, event: unknown ) => {
+		return {
+			choice: ( event as { data: LookAndToneCompletionResponse } ).data
+				.tone,
+		};
+	},
+} );
+
+const logAIAPIRequestError = () => {
+	// log AI API request error
+	// eslint-disable-next-line no-console
+	console.log( 'API Request error' );
+};
+
+const updateQueryStep = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { path } = getQuery() as { path: string };
+	const step = ( action as { step: string } ).step;
+	const pathFragments = path.split( '/' ); // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
+	if (
+		pathFragments[ 1 ] === 'customize-store' &&
+		pathFragments[ 2 ] === 'design-with-ai'
+	) {
+		if ( pathFragments[ 3 ] !== step ) {
+			// this state machine is only concerned with [2], so we ignore changes to [3]
+			// [1] is handled by router at root of wc-admin
+			updateQueryString(
+				{},
+				`/customize-store/design-with-ai/${ step }`
+			);
+		}
+	}
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
+	assignLookAndFeel,
+	assignToneOfVoice,
+	assignLookAndTone,
+	logAIAPIRequestError,
+	updateQueryStep,
 };

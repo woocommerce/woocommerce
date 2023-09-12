@@ -48,6 +48,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 		{
 			id: 'optional',
 			title: 'This task is optional',
+			badge: '',
 			isComplete: false,
 			isVisible: true,
 			time: '1 minute',
@@ -70,6 +71,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 		{
 			id: 'required',
 			title: 'This task is required',
+			badge: '',
 			isComplete: false,
 			isVisible: true,
 			time: '1 minute',
@@ -93,6 +95,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 		{
 			id: 'completed',
 			title: 'This task is completed',
+			badge: '',
 			isComplete: true,
 			isVisible: true,
 			time: '1 minute',
@@ -117,6 +120,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 		{
 			id: 'extension',
 			title: 'This task is an extension',
+			badge: '',
 			isComplete: false,
 			isVisible: true,
 			time: '1 minute',

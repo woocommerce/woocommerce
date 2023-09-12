@@ -268,10 +268,22 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_catalog_section->add_block(
 			[
 				'id'         => 'product-categories',
-				'blockName'  => 'woocommerce/product-category-field',
+				'blockName'  => 'woocommerce/product-taxonomy-field',
 				'order'      => 10,
 				'attributes' => [
-					'name' => 'categories',
+					'slug'        => 'product_cat',
+					'property'    => 'categories',
+					'label'       => __( 'Categories', 'woocommerce' ),
+					'createTitle' => __( 'Create new category', 'woocommerce' ),
+				],
+			]
+		);
+		$product_catalog_section->add_block(
+			[
+				'id'         => 'product-tags',
+				'blockName'  => 'woocommerce/product-tag-field',
+				'attributes' => [
+					'name' => 'tags',
 				],
 			]
 		);
@@ -552,6 +564,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property' => 'manage_stock',
 					'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+					'disabledCopy' => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 				],
 			]
 		);

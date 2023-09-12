@@ -17,8 +17,11 @@ import {
 	__experimentalGetCoreBlocks,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-library';
-// @ts-ignore No types for this exist yet.
-import { getBlockType, store as blocksStore } from '@wordpress/blocks';
+import {
+	getBlockType,
+	// @ts-ignore No types for this exist yet.
+	store as blocksStore,
+} from '@wordpress/blocks';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -33,6 +36,8 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
 import { GlobalStylesProvider } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
+import { MediaUpload } from '@wordpress/media-utils';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -43,6 +48,11 @@ import './style.scss';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
+addFilter(
+	'editor.MediaUpload',
+	'woo/customize-store/assembler-hub',
+	() => MediaUpload
+);
 type CustomizeStoreComponentProps = Parameters< CustomizeStoreComponent >[ 0 ];
 
 export const CustomizeStoreContext = createContext< {
@@ -59,7 +69,6 @@ export type events =
 
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const { setCanvasMode } = unlock( useDispatch( editSiteStore ) );
-
 	useEffect( () => {
 		if ( ! window.wcBlockSettings ) {
 			// eslint-disable-next-line no-console
@@ -83,8 +92,13 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 		) => fetchLinkSuggestions( search, searchOptions, settings );
 		settings.__experimentalFetchRichUrlData = fetchUrlData;
 
-		// @ts-ignore No types for this exist yet.
-		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters();
+		const reapplyBlockTypeFilters =
+			// @ts-ignore No types for this exist yet.
+			dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters || // GB < 16.6
+			// @ts-ignore No types for this exist yet.
+			dispatch( blocksStore ).reapplyBlockTypeFilters; // GB >= 16.6
+		reapplyBlockTypeFilters();
+
 		const coreBlocks = __experimentalGetCoreBlocks().filter(
 			( { name }: { name: string } ) =>
 				name !== 'core/freeform' && ! getBlockType( name )

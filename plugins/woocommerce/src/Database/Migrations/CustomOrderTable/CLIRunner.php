@@ -102,10 +102,6 @@ class CLIRunner {
 	 * @return int The number of orders to be migrated.*
 	 */
 	public function count_unmigrated( $args = array(), $assoc_args = array() ) : int {
-		if ( ! $this->is_enabled() ) {
-			return 0;
-		}
-
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$order_count = $this->synchronizer->get_current_orders_pending_sync_count();
 
@@ -152,10 +148,6 @@ class CLIRunner {
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
 	public function sync( $args = array(), $assoc_args = array() ) {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
 		if ( ! $this->synchronizer->check_orders_table_exists() ) {
 			WP_CLI::warning( __( 'Custom order tables does not exist, creating...', 'woocommerce' ) );
 			$this->synchronizer->create_database_tables();
@@ -324,7 +316,9 @@ class CLIRunner {
 	 */
 	public function verify_cot_data( $args = array(), $assoc_args = array() ) {
 		global $wpdb;
-		if ( ! $this->is_enabled() ) {
+
+		if ( ! $this->synchronizer->check_orders_table_exists() ) {
+			WP_CLI::error( __( 'Orders table does not exist.', 'woocommerce' ) );
 			return;
 		}
 

@@ -33,13 +33,23 @@ final class WC_Cart_Session {
 	 *
 	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
-	public function __construct( &$cart ) {
+	public function __construct( $cart ) {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			throw new Exception( 'A valid WC_Cart object is required' );
 		}
 
+		$this->set_cart( $cart );
+	}
+
+	/**
+	 * Sets the cart instance.
+	 *
+	 * @param WC_Cart $cart Cart object.
+	 */
+	public function set_cart( WC_Cart $cart ) {
 		$this->cart = $cart;
 	}
+
 
 	/**
 	 * Register methods for this object on the appropriate WordPress hooks.
