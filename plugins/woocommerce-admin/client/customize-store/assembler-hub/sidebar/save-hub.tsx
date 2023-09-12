@@ -111,6 +111,20 @@ export const SaveHub = () => {
 					},
 					{ undoIgnore: true }
 				);
+			} else if (
+				entity.kind === 'root' &&
+				entity.name === 'globalStyles'
+			) {
+				editEntityRecord(
+					entity.kind,
+					entity.name,
+					entity.key,
+					{
+						styles: undefined,
+						settings: undefined,
+					},
+					{ undoIgnore: true }
+				);
 			} else {
 				editEntityRecord(
 					entity.kind,

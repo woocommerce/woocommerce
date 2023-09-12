@@ -55,7 +55,7 @@ export const SidebarNavigationScreenHeader = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
+							href={ `${ ADMIN_URL }site-editor.php` }
 							type="external"
 						/>
 					),

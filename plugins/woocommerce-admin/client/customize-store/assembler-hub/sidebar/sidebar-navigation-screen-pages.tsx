@@ -23,13 +23,13 @@ export const SidebarNavigationScreenPages = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
+							href={ `${ ADMIN_URL }site-editor.php` }
 							type="external"
 						/>
 					),
 					PageLink: (
 						<Link
-							href={ `${ ADMIN_URL }/edit.php?post_type=page` }
+							href={ `${ ADMIN_URL }edit.php?post_type=page` }
 							type="external"
 						/>
 					),
