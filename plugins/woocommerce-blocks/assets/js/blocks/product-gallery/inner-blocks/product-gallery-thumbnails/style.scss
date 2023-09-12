@@ -1,4 +1,8 @@
-.woocommerce {
+.wp-block-woocommerce-product-gallery-thumbnails {
+	img {
+		cursor: pointer;
+	}
+
 	.is-vertical .wc-block-components-product-gallery-thumbnails {
 		display: flex;
 		flex-direction: row;

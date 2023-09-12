@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+
 /**
  * ProductGalleryLargeImage class.
  */
@@ -69,28 +71,23 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$processor->remove_class( 'wp-block-woocommerce-product-gallery-large-image' );
 		$content = $processor->get_updated_html();
 
-		$image_html = wp_get_attachment_image(
-			$product->get_image_id(),
-			'full',
-			false,
-			array(
-				'class' => 'wc-block-woocommerce-product-gallery-large-image__image',
-			)
-		);
+		[ $visible_main_image, $main_images ] = $this->get_main_images_html( $block->context, $post_id );
 
-		[$directives, $image_html] = $block->context['hoverZoom'] ? $this->get_html_with_interactivity( $image_html ) : array( array(), $image_html );
+		$directives = $this->get_directives( $block->context );
 
 		return strtr(
 			'<div class="wp-block-woocommerce-product-gallery-large-image" {directives}>
-				{image}
+				{visible_main_image}
+				{main_images}
 				<div class="wc-block-woocommerce-product-gallery-large-image__content">
 					{content}
 				</div>
 			</div>',
 			array(
-				'{image}'      => $image_html,
-				'{content}'    => $content,
-				'{directives}' => array_reduce(
+				'{visible_main_image}' => $visible_main_image,
+				'{main_images}'        => implode( ' ', $main_images ),
+				'{content}'            => $content,
+				'{directives}'         => array_reduce(
 					array_keys( $directives ),
 					function( $carry, $key ) use ( $directives ) {
 						return $carry . ' ' . $key . '="' . esc_attr( $directives[ $key ] ) . '"';
@@ -102,12 +99,54 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get the HTML that adds interactivity to the image. This is used for the hover zoom effect.
+	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
 	 *
-	 * @param string $image_html The image HTML.
+	 * @param array $context The block context.
+	 * @param int   $product_id The product id.
+	 *
 	 * @return array
 	 */
-	private function get_html_with_interactivity( $image_html ) {
+	private function get_main_images_html( $context, $product_id ) {
+		$attributes = array(
+			'data-wc-bind--hidden' => '!selectors.woocommerce.isSelected',
+			'hidden'               => true,
+			'class'                => 'wc-block-woocommerce-product-gallery-large-image__image',
+
+		);
+
+		if ( $context['hoverZoom'] ) {
+			$attributes['class']              .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
+			$attributes['data-wc-bind--style'] = 'selectors.woocommerce.styles';
+		}
+
+		$main_images = ProductGalleryUtils::get_product_gallery_images(
+			$product_id,
+			'full',
+			$attributes
+		);
+
+		$visible_main_image           = array_shift( $main_images );
+		$visible_main_image_processor = new \WP_HTML_Tag_Processor( $visible_main_image );
+		$visible_main_image_processor->next_tag();
+		$visible_main_image_processor->remove_attribute( 'hidden' );
+		$visible_main_image = $visible_main_image_processor->get_updated_html();
+
+		return array( $visible_main_image, $main_images );
+
+	}
+
+	/**
+	 * Get directives for the hover zoom.
+	 *
+	 * @param array $block_context The block context.
+	 *
+	 * @return array
+	 */
+	private function get_directives( $block_context ) {
+		if ( ! $block_context['hoverZoom'] ) {
+			return array();
+		}
+
 		$context = array(
 			'woocommerce' => array(
 				'styles' => array(
@@ -117,21 +156,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			),
 		);
 
-		$directives = array(
+		return array(
 			'data-wc-on--mousemove'  => 'actions.woocommerce.handleMouseMove',
 			'data-wc-on--mouseleave' => 'actions.woocommerce.handleMouseLeave',
 			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
-		);
-
-		$image_html_processor = new \WP_HTML_Tag_Processor( $image_html );
-		$image_html_processor->next_tag( 'img' );
-		$image_html_processor->add_class( 'wc-block-woocommerce-product-gallery-large-image__image--hoverZoom' );
-		$image_html_processor->set_attribute( 'data-wc-bind--style', 'selectors.woocommerce.styles' );
-		$image_html = $image_html_processor->get_updated_html();
-
-		return array(
-			$directives,
-			$image_html,
 		);
 	}
 }
