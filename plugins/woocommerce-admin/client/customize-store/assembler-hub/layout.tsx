@@ -30,7 +30,9 @@ import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-bo
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { NavigableRegion } from '@wordpress/interface';
+// @ts-ignore No types for this exist yet.
 import { EntityProvider } from '@wordpress/core-data';
+// @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 
 /**

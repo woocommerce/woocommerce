@@ -1,3 +1,5 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
@@ -5,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { useCallback, createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
+// @ts-ignore No types for this exist yet.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
