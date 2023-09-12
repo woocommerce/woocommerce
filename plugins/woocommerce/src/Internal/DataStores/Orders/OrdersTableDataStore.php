@@ -2791,7 +2791,7 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		if ( $this->should_backfill_post_record() && isset( $meta->id ) && ! isset( $meta->key ) ) {
+		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
 			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
 			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
 			if ( $db_meta ) {
@@ -2827,7 +2827,7 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
+			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
@@ -2868,7 +2868,7 @@ CREATE TABLE $meta_table (
 		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
-		if ( $this->should_save_after_meta_change( $order )  ) {
+		if ( $this->should_save_after_meta_change( $order ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
 			return true;
