@@ -198,8 +198,6 @@ class OrdersTableQuery {
 		// TODO: args to be implemented.
 		unset( $this->args['customer_note'], $this->args['name'] );
 
-		$require_limit_data = ( $this->arg_isset( 'limit' ) || $this->arg_isset( 'page' ) || $this->arg_isset( 'offset' ) );
-
 		$this->build_query();
 		if ( ! $this->maybe_override_query() ) {
 			$this->run_query();
