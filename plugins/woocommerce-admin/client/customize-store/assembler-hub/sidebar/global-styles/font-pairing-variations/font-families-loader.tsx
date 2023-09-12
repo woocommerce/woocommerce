@@ -1,3 +1,4 @@
+// TODO: We should Download webfonts and host them locally on a site before launching CYS in Core.
 // Load font families from wp.com.
 
 /**
