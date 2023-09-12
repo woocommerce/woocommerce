@@ -13,7 +13,8 @@
 		position: initial;
 
 		.edit-site-site-hub__view-mode-toggle-container,
-		.edit-site-site-icon__image {
+		.edit-site-site-icon__image,
+		svg {
 			height: 32px;
 			width: 32px;
 			background: transparent;
@@ -78,6 +79,12 @@
 		align-items: center;
 		justify-content: center;
 
+		.mshots-image__container {
+			width: 600px;
+			height: 371px;
+			border-radius: 16px;
+		}
+
 		img {
 			border-radius: 16px;
 		}
@@ -130,20 +137,8 @@
 
 
 // mshots component
-.mshots-image__container {
-	height: 100%;
-}
-
-.hover-scroll {
-	background-size: 100%;
-	background-position: top;
-	background-repeat: no-repeat;
-	margin-left: auto;
-	margin-right: auto;
-
-	&:hover {
-		background-position: bottom;
-	}
+.mshots-image__loader {
+	@include placeholder();
 }
 
 .mshots-image-visible {

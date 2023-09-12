@@ -22,6 +22,7 @@ export type MShotsOptions = {
 	h?: number;
 	screen_height?: number;
 	format?: 'png' | 'jpeg';
+	requeue?: boolean;
 };
 
 // eslint-disable-next-line no-console
@@ -170,7 +171,7 @@ export const MShotsImage = ( {
 }: MShotsImageProps ) => {
 	const maybeImage = useMshotsImg( url, options );
 	const src: string = maybeImage?.src || '';
-	const visible = !! src;
+	const visible = false;
 	const backgroundImage = maybeImage?.src && `url( ${ maybeImage?.src } )`;
 
 	const animationScrollSpeedInPixelsPerSecond = 400;

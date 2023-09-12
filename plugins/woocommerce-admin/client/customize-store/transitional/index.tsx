@@ -70,6 +70,7 @@ export const Transitional = ( {
 							vph: 742,
 							w: 588,
 							h: 363.58,
+							requeue: true,
 						} }
 					/>
 				</div>
