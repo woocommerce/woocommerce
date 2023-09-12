@@ -33,6 +33,4 @@ Result:
 
 ## Hiding a group/section/field
 
-## Reordering groups/saections/fields
-
-Previous: [Hooks](hooks.md)
+## Reordering groups/sections/fields
