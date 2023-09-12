@@ -21,6 +21,7 @@
 		"pagerDisplayMode": "pagerDisplayMode",
 		"hoverZoom": "hoverZoom"
 	},
+	"usesContext": [ "postId" ],
 	"attributes": {
 		"thumbnailsPosition": {
 			"type": "string",
@@ -55,5 +56,5 @@
 			"default": "insideTheImage"
 		}
 	},
-	"viewScript": "wc-product-gallery-interactivity-frontend"
+	"viewScript": "wc-product-gallery-frontend"
 }

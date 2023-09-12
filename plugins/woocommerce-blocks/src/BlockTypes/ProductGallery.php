@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+
 /**
  * ProductGallery class.
  */
@@ -13,15 +15,6 @@ class ProductGallery extends AbstractBlock {
 	protected $block_name = 'product-gallery';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -30,6 +23,8 @@ class ProductGallery extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// This is a temporary solution. We have to refactor this code when the block will have to be addable on every page/post https://github.com/woocommerce/woocommerce-blocks/issues/10882.
+		global $product;
 		$classname          = $attributes['className'] ?? '';
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( sprintf( 'woocommerce %1$s', $classname ) ) ) );
 		$html               = sprintf(
@@ -39,13 +34,20 @@ class ProductGallery extends AbstractBlock {
 			$wrapper_attributes,
 			$content
 		);
-		$p                  = new \WP_HTML_Tag_Processor( $content );
+
+		$p = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', true );
 			$p->set_attribute(
 				'data-wc-context',
-				wp_json_encode( array( 'woocommerce' => array( 'productGallery' => array( 'numberOfThumbnails' => 0 ) ) ) )
+				wp_json_encode(
+					array(
+						'woocommerce' => array(
+							'selectedImage' => $product->get_image_id(),
+						),
+					)
+				)
 			);
 			$html = $p->get_updated_html();
 		}

@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 
 /**
  * ProductGalleryLargeImage class.
@@ -54,33 +55,38 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			$html              = '';
 
 			if ( $product ) {
-				$attachment_ids = $product->get_gallery_image_ids();
-				if ( $attachment_ids && $post_thumbnail_id ) {
-					$html                .= wc_get_gallery_image_html( $post_thumbnail_id, true );
+				$post_thumbnail_id      = $product->get_image_id();
+				$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array() );
+				if ( $product_gallery_images && $post_thumbnail_id ) {
 					$number_of_thumbnails = isset( $block->context['thumbnailsNumberOfThumbnails'] ) ? $block->context['thumbnailsNumberOfThumbnails'] : 3;
 					$thumbnails_count     = 1;
 
-					foreach ( $attachment_ids as $attachment_id ) {
-						if ( $thumbnails_count >= $number_of_thumbnails ) {
+					foreach ( $product_gallery_images as $product_gallery_image_html ) {
+						if ( $thumbnails_count > $number_of_thumbnails ) {
 							break;
 						}
 
-						/**
-						 * Filter the HTML markup for a single product image thumbnail in the gallery.
-						 *
-						 * @param string $thumbnail_html The HTML markup for the thumbnail.
-						 * @param int    $attachment_id  The attachment ID of the thumbnail.
-						 *
-						 * @since 7.9.0
-						 */
-						$html .= apply_filters( 'woocommerce_single_product_image_thumbnail_html', wc_get_gallery_image_html( $attachment_id ), $attachment_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+						$html .= '<div class="wp-block-woocommerce-product-gallery-thumbnails__thumbnail">';
+
+						$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
+
+						if ( $processor->next_tag() ) {
+							$processor->set_attribute(
+								'data-wc-on--click',
+								'actions.woocommerce.handleClick'
+							);
+
+							$html .= $processor->get_updated_html();
+						}
+
+						$html .= '</div>';
 
 						$thumbnails_count++;
 					}
 				}
 
 				return sprintf(
-					'<div class="wc-block-components-product-gallery-thumbnails %1$s" style="%2$s">
+					'<div class="wc-block-components-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s">
 						%3$s
 					</div>',
 					esc_attr( $classes_and_styles['classes'] ),

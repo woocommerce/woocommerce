@@ -9,15 +9,20 @@ interface State {
 
 interface Context {
 	woocommerce: {
-		productGallery: { numberOfThumbnails: number };
+		selectedImage: string;
+		imageId: string;
 	};
 }
 
 interface Selectors {
 	woocommerce: {
-		productGallery: {
-			numberOfPages: ( store: unknown ) => number;
-		};
+		isSelected: ( store: unknown ) => boolean;
+	};
+}
+
+interface Actions {
+	woocommerce: {
+		handleClick: ( context: Context ) => void;
 	};
 }
 
@@ -25,22 +30,27 @@ interface Store {
 	state: State;
 	context: Context;
 	selectors: Selectors;
-	ref: HTMLElement;
+	actions: Actions;
+	ref?: HTMLElement;
 }
 
-type SelectorsStore = Pick< Store, 'context' | 'selectors' >;
-
 interactivityApiStore( {
+	state: {},
 	selectors: {
 		woocommerce: {
-			productGallery: {
-				numberOfPages: ( store: SelectorsStore ) => {
-					const { context } = store;
-
-					return context.woocommerce.productGallery
-						.numberOfThumbnails;
-				},
+			isSelected: ( { context }: Store ) => {
+				return (
+					context?.woocommerce.selectedImage ===
+					context?.woocommerce.imageId
+				);
 			},
 		},
 	},
-} as Store );
+	actions: {
+		woocommerce: {
+			handleClick: ( { context }: Store ) => {
+				context.woocommerce.selectedImage = context.woocommerce.imageId;
+			},
+		},
+	},
+} );
