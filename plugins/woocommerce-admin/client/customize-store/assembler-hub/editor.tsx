@@ -7,8 +7,6 @@
 import classnames from 'classnames';
 import { useMemo } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
-import { EntityProvider } from '@wordpress/core-data';
-// @ts-ignore No types for this exist yet.
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { useSelect, useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
@@ -17,8 +15,6 @@ import { BlockContextProvider } from '@wordpress/block-editor';
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
 import CanvasSpinner from '@wordpress/edit-site/build-module/components/canvas-spinner';
-// @ts-ignore No types for this exist yet.
-import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
@@ -30,8 +26,6 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 import { BlockEditor } from './block-editor';
 
 export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
-	// const { record: template } = useEditedEntityRecord();
-	// const { id: templateId, type: templateType } = template;
 	const { context, hasPageContentFocus } = useSelect( ( select ) => {
 		const {
 			getEditedPostContext,
