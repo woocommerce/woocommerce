@@ -25,9 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td width="1%" class="wc-shipping-zone-worldwide"></td>
 			<td class="wc-shipping-zone-name">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
-				<div class="row-actions">
-					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Manage shipping methods', 'woocommerce' ); ?></a>
-				</div>
 			</td>
 			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
 			<td class="wc-shipping-zone-methods">
@@ -48,7 +45,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</ul>
 			</td>
-			<td class="shipping-zone-actions" />
+			<td class="shipping-zone-actions">
+				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+			</td>
 		</tr>
 	</tbody>
 </table>
