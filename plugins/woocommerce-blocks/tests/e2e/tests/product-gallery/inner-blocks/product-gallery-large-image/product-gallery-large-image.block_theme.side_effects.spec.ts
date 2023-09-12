@@ -97,7 +97,9 @@ test.describe( `${ blockData.name }`, () => {
 			);
 
 			// img[style] is the selector because the style attribute is Interactivity API.
-			const imgElement = blockFrontend.locator( 'img[style]' );
+			const imgElement = blockFrontend.locator(
+				'img[style]:not([hidden])'
+			);
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
 			await expect( style.transform ).toBe( 'scale(1)' );
@@ -135,9 +137,13 @@ test.describe( `${ blockData.name }`, () => {
 			);
 
 			// img[style] is the selector because the style attribute is added by Interactivity API. In this case, the style attribute should not be added.
-			const imgElement = blockFrontend.locator( 'img[style]' );
+			const imgElement = blockFrontend.locator(
+				'img[style]:not([hidden])'
+			);
 			await expect( imgElement ).toBeHidden();
-			await expect( blockFrontend.locator( 'img' ) ).toBeVisible();
+			await expect(
+				blockFrontend.locator( 'img:not([hidden])' )
+			).toBeVisible();
 		} );
 	} );
 } );
