@@ -124,7 +124,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: getTranslationFor( 'Add' ),
 				} )
 				.click();
 
@@ -161,10 +161,10 @@ test.describe( 'General tab', () => {
 			}
 			await expect( foundProductPrice && foundSalePrice ).toBeTruthy();
 
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-			await page.getByRole( 'link', { name: 'View cart' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart') } ).click();
+			await page.getByRole( 'link', { name: getTranslationFor( 'View cart' ) } ).click();
 			await expect(
-				page.locator( 'td[data-title=Product]' ).first()
+				page.locator( `td[data-title=${getTranslationFor( 'Product' )}]` ).first()
 			).toContainText( productData.name );
 			await page
 				.locator( `a.remove[data-product_id='${ productId }']` )

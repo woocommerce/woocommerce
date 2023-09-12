@@ -15,6 +15,7 @@ const en_GB = {
     'Add new': 'Add new',
     'Add New': 'Add New',
     'Add new order': 'Add new order',
+    'Add new product': 'Add new product',
     'Add Performance section': 'Add Performance section',
     '"Add Performance section"': '"Add Performance section"',
     'Addresses': 'Addresses',
@@ -99,6 +100,7 @@ const en_GB = {
     'Industry': 'Industry',
     'Invalid file type. The importer supports CSV and TXT file formats.':
         'Invalid file type. The importer supports CSV and TXT file formats.',
+    '/Invalid or duplicated SKU./': /Invalid or duplicated SKU./,
     'Invoice for order #': 'Invoice for order #',
     'In which industry does the store operate?':
         'In which industry does the store operate?',
@@ -138,6 +140,7 @@ const en_GB = {
     'No thanks': 'No thanks',
     'on': 'on',
     'Onboarding profile data has been updated.': 'Onboarding profile data has been updated.',
+    'Options': 'Options',
     'Order #OrderId details': 'Order #OrderId details',
     'Order received': 'Order received',
     orderReceivedTextsplit: 6,
@@ -256,6 +259,7 @@ const en_GB = {
     'Tax': 'Tax',
     '"Tax"': '"Tax"',
     'Tell us about your business': 'Tell us about your business',
+    'Turn off the new product form': 'Turn off the new product form',
     'United States': 'United States',
     'United States (US) — California': 'United States (US) — California',
     'Unlimited': 'Unlimited',

@@ -101,6 +101,7 @@ const es_ES = {
     'Industry': 'Sector',
     'Invalid file type. The importer supports CSV and TXT file formats.':
         'Tipo de archivo no válido. El importador es compatible con archivos en formatos CSV y TXT.',
+    '/Invalid or duplicated SKU./': /SKU no válido o duplicado./,
     'Invoice for order #': 'Recibo del pedido #',
     'In which industry does the store operate?': '¿En qué sector opera la tienda?',
     'is now live.': 'está ahora visible.',
@@ -140,6 +141,7 @@ const es_ES = {
     'No thanks': 'No, gracias',
     'on': 'en',
     'Onboarding profile data has been updated.': 'Los datos del perfil de la puesta en marcha se han actualizado.',
+    'Options': 'Opciones',
     'Order #OrderId details': 'Detalles de Pedido #OrderId',
     'Order received': 'Pedido recibido',
     orderReceivedTextsplit: 8,
@@ -261,6 +263,7 @@ const es_ES = {
     'Tax': 'Impuesto',
     '"Tax"': '"Impuesto"',
     'Tell us about your business': 'Háblanos de tu negocio',
+    'Turn off the new product form': 'Desactivar el nuevo formulario de productos',
     'United States': 'Estados Unidos',
     'United States (US) — California': 'Estados Unidos (EEUU) — California',
     'Unlimited': 'Ilimitado',

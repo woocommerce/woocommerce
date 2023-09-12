@@ -1,4 +1,6 @@
 const { test } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../../../test-data/data');
+
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
@@ -64,11 +66,11 @@ test.describe( 'Disable block product editor', () => {
 		// turn off block product editor from the header
 		await page
 			.locator( '.components-dropdown-menu' )
-			.getByRole( 'button', { name: 'Options' } )
+			.getByRole( 'button', { name: getTranslationFor( 'Options' ) } )
 			.click();
 		await page
 			.getByRole( 'menuitem', {
-				name: 'Turn off the new product form',
+				name: getTranslationFor( 'Turn off the new product form' ),
 			} )
 			.click();
 		await dismissFeedbackModalIfShown( page );
