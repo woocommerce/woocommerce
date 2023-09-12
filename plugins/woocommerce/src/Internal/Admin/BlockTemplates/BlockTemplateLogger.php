@@ -139,9 +139,9 @@ class BlockTemplateLogger {
 	private function format_exception( \Exception $exception ): array {
 		return [
 			'message' => $exception->getMessage(),
-			'source' => "{$exception->getFile()}: {$exception->getLine()}",
+			'source'  => "{$exception->getFile()}: {$exception->getLine()}",
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-			'trace'  => print_r( $this->format_exception_trace( $exception->getTrace() ), true ),
+			'trace'   => print_r( $this->format_exception_trace( $exception->getTrace() ), true ),
 		];
 	}
 
