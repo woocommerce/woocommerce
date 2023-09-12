@@ -33,7 +33,7 @@ export type customizeStoreStateMachineEvents =
 	| designWithAiEvents
 	| assemblerHubEvents
 	| transitionalEvents
-	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } };
+	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' };
 
 const updateQueryStep = (
