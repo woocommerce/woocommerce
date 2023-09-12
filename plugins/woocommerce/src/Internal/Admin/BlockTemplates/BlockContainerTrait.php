@@ -27,18 +27,18 @@ trait BlockContainerTrait {
 	 * @throws \ValueError If the block configuration is invalid.
 	 * @throws \ValueError If a block with the specified ID already exists in the template.
 	 * @throws \UnexpectedValueException If the block container is not the parent of the block.
+	 * @throws \UnexpectedValueException If the block container's root template is not the same as the block's root template.
 	 */
 	protected function &add_inner_block( BlockInterface $block ): BlockInterface {
-		if ( ! $block instanceof BlockInterface ) {
-			throw new \UnexpectedValueException( 'The block must return an instance of BlockInterface.' );
-		}
-
 		if ( $block->get_parent() !== $this ) {
 			throw new \UnexpectedValueException( 'The block container is not the parent of the block.' );
 		}
 
-		$root_template = $block->get_root_template();
-		$root_template->cache_block( $block );
+		if ( $block->get_root_template() !== $this->get_root_template() ) {
+			throw new \UnexpectedValueException( 'The block container\'s root template is not the same as the block\'s root template.' );
+		}
+
+		$this->get_root_template()->cache_block( $block );
 		$this->inner_blocks[] = &$block;
 
 		/**
