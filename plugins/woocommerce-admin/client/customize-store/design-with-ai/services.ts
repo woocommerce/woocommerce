@@ -4,6 +4,7 @@
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -101,6 +102,18 @@ export const getLookAndTone = async (
 	return parseLookAndToneCompletionResponse( data );
 };
 
+const browserPopstateHandler =
+	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
+		const popstateHandler = () => {
+			sendBack( { type: 'EXTERNAL_URL_UPDATE' } );
+		};
+		window.addEventListener( 'popstate', popstateHandler );
+		return () => {
+			window.removeEventListener( 'popstate', popstateHandler );
+		};
+	};
+
 export const services = {
 	getLookAndTone,
+	browserPopstateHandler,
 };
