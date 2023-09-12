@@ -89,7 +89,7 @@ async function clickOnTab( tabName, page ) {
 	await page
 		// .locator( '.woocommerce-product-tab__general-content' )
 		.locator( '.woocommerce-product-tabs' )
-		.getByRole( 'button', { name: tabName } )
+		.getByRole( 'button', { name: getTranslationFor( tabName ) } )
 		.click();
 }
 
