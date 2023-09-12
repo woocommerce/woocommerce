@@ -2915,4 +2915,30 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$this->assertEquals( $value, $order_data[ $order->get_id() ]->{$key}, "Unable to match $key for {$order_data[ $order->get_id() ]->{$key}}. Expected $value" );
 		}
 	}
+
+	/**
+	 * @testDox Test that duplicate key, value pairs are also synced properly.
+	 */
+	public function test_duplicate_meta_is_synced_properly() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 1, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+
+		wp_cache_flush();
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		wp_cache_flush();
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 2, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+		$this->assertEquals( 'test_value', $post_meta[1] );
+	}
 }

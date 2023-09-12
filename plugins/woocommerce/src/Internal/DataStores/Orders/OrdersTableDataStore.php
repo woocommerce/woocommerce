@@ -2920,14 +2920,25 @@ CREATE TABLE $meta_table (
 	 * @param \WC_Meta_Data     $meta  Metadata object.
 	 */
 	protected function after_meta_change( &$order, $meta ) {
-		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
-		if ( $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) ) {
+		if ( $this->should_save_after_meta_change( $order )  ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Helper function to check whether the modified date needs to be updated after a meta save.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return bool Whether the modified date needs to be updated.
+	 */
+	private function should_save_after_meta_change( $order ) {
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() );
 	}
 }
