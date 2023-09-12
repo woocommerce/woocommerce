@@ -1,5 +1,5 @@
 // See https://github.com/Automattic/wp-calypso/blob/6923bed938911a931e722a1efa6fcbbf942677a9/packages/onboarding/src/mshots-image/index.tsx
-// TODO: @automattic/onboarding is not published to npm, so we can't use it here. We could remove this when it's published.
+// TODO: @automattic/onboarding is not published to npm, so we can't use it here. We'll need to add the "requeue" option to MShotsOptions and we could remove this when it's published.
 /**
  * External dependencies
  */
