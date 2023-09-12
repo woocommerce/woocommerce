@@ -38,7 +38,11 @@ trait BlockContainerTrait {
 			throw new \UnexpectedValueException( 'The block container\'s root template is not the same as the block\'s root template.' );
 		}
 
-		$this->get_root_template()->cache_block( $block );
+		$is_detached = method_exists( $this, 'is_detached' ) && $this->is_detached();
+		if ( ! $is_detached ) {
+			$this->get_root_template()->cache_block( $block );
+		}
+
 		$this->inner_blocks[] = &$block;
 
 		/**
