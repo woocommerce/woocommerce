@@ -53,6 +53,25 @@ trait SourceAttributionMeta {
 	private $field_prefix = '';
 
 	/**
+	 * @since x.x.x
+	 *
+	 * @param array $values
+	 *
+	 * @return void
+	 */
+	protected function get_device_type( array $values ): string {
+		$detector = new MobileDetect( array(), $values['user_agent'] );
+
+		if ( $detector->isMobile() ) {
+			return __( 'Mobile', 'woocommerce' );
+		} elseif ( $detector->isTablet() ) {
+			return __( 'Tablet', 'woocommerce' );
+		} else {
+			return __( 'Desktop', 'woocommerce' );
+		}
+	}
+
+	/**
 	 * Set the meta fields and the field prefix.
 	 *
 	 * @since x.x.x
@@ -115,14 +134,7 @@ trait SourceAttributionMeta {
 
 		// Determine the device type from the user agent.
 		if ( ! array_key_exists( 'device_type', $return ) && array_key_exists( 'user_agent', $return ) ) {
-			$detector = new MobileDetect( array(), $return['user_agent'] );
-			if ( $detector->isMobile() ) {
-				$return['device_type'] = __( 'Mobile', 'woocommerce' );
-			} elseif ( $detector->isTablet() ) {
-				$return['device_type'] = __( 'Tablet', 'woocommerce' );
-			} else {
-				$return['device_type'] = __( 'Desktop', 'woocommerce' );
-			}
+			$return['device_type'] = $this->get_device_type( $return );
 		}
 
 		// Determine the origin based on source type and referrer.
@@ -279,15 +291,7 @@ trait SourceAttributionMeta {
 
 		// Set the device type if possible using the user agent.
 		if ( array_key_exists( 'user_agent', $values ) && ! empty( $values['user_agent'] ) ) {
-			$detector = new MobileDetect( array(), $values['user_agent'] );
-
-			if ( $detector->isMobile() ) {
-				$values[ 'device_type' ] = __( 'Mobile', 'woocommerce' );
-			} elseif ( $detector->isTablet() ) {
-				$values[ 'device_type' ] = __( 'Tablet', 'woocommerce' );
-			} else {
-				$values[ 'device_type' ] = __( 'Desktop', 'woocommerce' );
-			}
+			$values['device_type'] = $this->get_device_type( $values );
 		}
 
 		// Set the origin label
