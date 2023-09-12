@@ -92,7 +92,7 @@ abstract class ObjectCache {
 	 *
 	 * @return CacheEngine
 	 */
-	private function get_cache_engine(): CacheEngine {
+	protected function get_cache_engine(): CacheEngine {
 		if ( null === $this->cache_engine ) {
 			$engine = $this->get_cache_engine_instance();
 
@@ -154,7 +154,7 @@ abstract class ObjectCache {
 		$this->last_cached_data = $object;
 		return $this->get_cache_engine()->cache_object(
 			$id,
-			$object,
+			$this->transform_for_caching( $object ),
 			self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration,
 			$this->get_object_type()
 		);
@@ -207,7 +207,7 @@ abstract class ObjectCache {
 	 * @return void
 	 * @throws CacheException Expiration time is negative or higher than MAX_EXPIRATION.
 	 */
-	private function verify_expiration_value( int $expiration ): void {
+	protected function verify_expiration_value( int $expiration ): void {
 		if ( self::DEFAULT_EXPIRATION !== $expiration && ( ( $expiration < 1 ) || ( $expiration > self::MAX_EXPIRATION ) ) ) {
 			throw new CacheException( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION', $this );
 		}
@@ -233,7 +233,7 @@ abstract class ObjectCache {
 
 		$this->verify_expiration_value( $expiration );
 
-		$data = $this->get_cache_engine()->get_cached_object( $id, $this->get_object_type() );
+		$data = $this->detransform_from_cache( $this->get_cache_engine()->get_cached_object( $id, $this->get_object_type() ) );
 		if ( null === $data ) {
 			$object = null;
 			if ( $get_from_datastore_callback ) {
@@ -248,6 +248,29 @@ abstract class ObjectCache {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Transforms an object right before being passed to the caching engine.
+	 * This method must be symmetrical with detransform_from_cache.
+	 * (e.g.: if transform is "return ['data'=>$object]", detransform must be "return $object['data']).
+	 *
+	 * @param object|array $object The object to transform.
+	 * @return object|array The transformed object.
+	 */
+	protected function transform_for_caching( $object ) {
+		return $object;
+	}
+
+	/**
+	 * Detransforms an object right after being retrieved from the caching engine.
+	 * This method must be symmetrical with transform_for_caching.
+	 *
+	 * @param object|array $object The object to detransform.
+	 * @return object|array The detransformed object.
+	 */
+	protected function detransform_from_cache( $object ) {
+		return $object;
 	}
 
 	/**

@@ -6,7 +6,7 @@
  * @version 2.2.0
  */
 
-use Automattic\WooCommerce\Caches\OrderDataCache;
+use Automattic\WooCommerce\Caches\OrderCache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -2022,17 +2022,19 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	private function get_possibly_cached_order_data( string $data_array_key, callable $get_authoritative_data_callback ) {
 		$order_id               = $this->get_id();
-		$cache                  = wc_get_container()->get( OrderDataCache::class );
-		$full_cached_order_data = $cache->get( $order_id ) ?? array( 'order_id' => $order_id );
-		$cached_data            = $full_cached_order_data[ $data_array_key ] ?? null;
+		$cache                  = wc_get_container()->get( OrderCache::class );
 
-		if ( null !== $cached_data ) {
+		if(!$cache->is_cached($order_id)) {
+			$cache->set($this, $order_id);
+		}
+
+		$cached_data = $cache->get_data($order_id, $data_array_key);
+		if ( !is_null( $cached_data )) {
 			return $cached_data;
 		}
 
-		$authoritative_data                        = $get_authoritative_data_callback();
-		$full_cached_order_data[ $data_array_key ] = $authoritative_data;
-		$cache->set( $full_cached_order_data );
+		$authoritative_data = $get_authoritative_data_callback();
+		$cache->set_data( $order_id, $data_array_key, $authoritative_data );
 		return $authoritative_data;
 	}
 

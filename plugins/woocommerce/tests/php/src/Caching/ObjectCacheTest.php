@@ -548,4 +548,55 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $engine_passed_to_filter, wc_get_container()->get( WPCacheEngine::class ) );
 		$this->assertEquals( $cache_passed_to_filter, $sut );
 	}
+
+	/**
+	 * @testdox 'transform_for_caching' and 'detransform_from_cache' can be used to alter the shape of what gets passed to the caching engine.
+	 */
+	public function test_data_transformation() {
+		$engine = new WPCacheEngine();
+
+		$sut = new class($engine) extends ObjectCache {
+			// phpcs:disable Squiz.Commenting
+
+			public $retrieved_from_engine;
+
+			private $engine;
+
+			public function __construct( $engine ) {
+				$this->engine = $engine;
+				parent::__construct();
+			}
+
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $object ) {
+			}
+
+			protected function validate( $object ): ?array {
+				return null;
+			}
+
+			protected function get_from_datastore( $id ) {
+			}
+
+			protected function transform_for_caching( $object ) {
+				return array( 'transformed' => $object );
+			}
+
+			protected function detransform_from_cache( $object ) {
+				$this->retrieved_from_engine = $object;
+				return $object['transformed'];
+			}
+
+			// phpcs:enable Squiz.Commenting
+		};
+
+		$object = array( 'foo' );
+		$sut->set( $object, 'the_id' );
+
+		$this->assertEquals( $object, $sut->get( 'the_id' ) );
+		$this->assertEquals( array( 'transformed' => array( 'foo' ) ), $sut->retrieved_from_engine );
+	}
 }

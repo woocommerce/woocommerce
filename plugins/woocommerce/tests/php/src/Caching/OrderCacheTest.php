@@ -90,70 +90,101 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox "set" deletes associated order data from the orders data cache.
+	 * @testdox get_data throws an exception if there's no order with the specified id.
 	 */
-	public function test_set_deletes_cached_order_data() {
-		$this->subtest_deletion_of_order_data(
-			function() {
-				$order = new \WC_Order();
-				$order->set_id( 1234 );
-				$this->sut->set( $order );
-			}
-		);
+	public function test_get_data_throws_if_order_not_cached() {
+		$this->expectException( CacheException::class );
+
+		$this->sut->get_data(1, 'the_key');
 	}
 
 	/**
-	 * @testdox "update" deletes associated order data from the orders data cache.
+	 * @testdox set_data throws an exception if there's no order with the specified id.
 	 */
-	public function test_update_deletes_cached_order_data() {
-		$this->subtest_deletion_of_order_data(
-			function() {
-				$order = new \WC_Order();
-				$order->set_id( 1234 );
-				$this->sut->update_if_cached( $order );
-			}
-		);
+	public function test_set_data_throws_if_order_not_cached() {
+		$this->expectException( CacheException::class );
+
+		$this->sut->set_data(1, 'the_key', 'the_value');
 	}
 
 	/**
-	 * @testdox "remove" deletes associated order data from the orders data cache.
+	 * @testdox get_data and set_data preserve the cached order object.
 	 */
-	public function test_remove_deletes_cached_order_data() {
-		$this->subtest_deletion_of_order_data(
-			function() {
-				$this->sut->remove( 1234 );
-			}
-		);
-	}
-
-	/**
-	 * @testdox "flush" deletes associated order data from the orders data cache.
-	 */
-	public function test_flush_deletes_cached_order_data() {
-		$this->subtest_deletion_of_order_data(
-			function() {
-				$this->sut->flush();
-			}
-		);
-	}
-
-	/**
-	 * Auxiliary method to run the order data deletion tests.
-	 *
-	 * @param callable $cache_operation The callback to execute once the order data is cached.
-	 */
-	private function subtest_deletion_of_order_data( callable $cache_operation ) {
-		$order = new \WC_Order();
+	public function test_get_and_set_data_preserve_the_order_object() {
+		$order = new WC_Order();
 		$order->set_id( 1234 );
 		$this->sut->set( $order );
 
-		$order_data_cache = wc_get_container()->get( OrderDataCache::class );
-		$order_data       = array( 'order_id' => 1234 );
-		$order_data_cache->set( $order_data );
-		$this->assertTrue( $order_data_cache->is_cached( 1234 ) );
+		$this->sut->set_data(1234, 'the_data', 'the_key');
+		$this->sut->get_data(1234, 'the_data');
 
-		$cache_operation();
+		$retrieved = $this->sut->get( 1234 );
+		$this->assertEquals( $order->get_id(), $retrieved->get_id() );
+	}
 
-		$this->assertFalse( $order_data_cache->is_cached( 1234 ) );
+	/**
+	 * @testdox get_data returns null if there's no data cached with the specified key and no default value is provided.
+	 */
+	public function test_get_data_returns_null_for_not_cached_data_and_no_default_provided() {
+		$order = new WC_Order();
+		$order->set_id( 1234 );
+		$this->sut->set( $order );
+
+		$retrieved = $this->sut->get_data(1234, 'the_data');
+		$this->assertNull($retrieved);
+	}
+
+	/**
+	 * @testdox get_data returns the provided default value if there's no data cached with the specified key.
+	 */
+	public function test_get_data_returns_provided_default_for_not_cached_data() {
+		$order = new WC_Order();
+		$order->set_id( 1234 );
+		$this->sut->set( $order );
+
+		$retrieved = $this->sut->get_data(1234, 'the_data', 'the_default');
+		$this->assertEquals('the_default', $retrieved);
+	}
+
+	/**
+	 * @testdox get_data and set_data work together consistently (get_data will return what was set with set_data).
+	 */
+	public function test_get_and_set_data_work_consistently() {
+		$order1 = new WC_Order();
+		$order1->set_id( 1 );
+		$this->sut->set( $order1 );
+
+		$order2 = new WC_Order();
+		$order2->set_id( 2 );
+		$this->sut->set( $order2 );
+
+		$this->sut->set_data(1, 'foo', 'foo_1');
+		$this->sut->set_data(1, 'bar', 'bar_1');
+		$this->sut->set_data(2, 'foo', 'foo_2');
+		$this->sut->set_data(2, 'bar', 'bar_2');
+
+		$this->assertEquals('foo_1', $this->sut->get_data(1, 'foo'));
+		$this->assertEquals('bar_1', $this->sut->get_data(1, 'bar'));
+		$this->assertEquals('foo_2', $this->sut->get_data(2, 'foo'));
+		$this->assertEquals('bar_2', $this->sut->get_data(2, 'bar'));
+	}
+
+	/**
+	 * @testdox remove_all_data uncaches all the data cached for an order, while preserving the order itself in the cache.
+	 */
+	public function test_remove_all_data() {
+		$order = new WC_Order();
+		$order->set_id( 1234 );
+		$this->sut->set( $order );
+
+		$this->sut->set_data(1234, 'foo', 'foo_data');
+		$this->sut->set_data(1234, 'bar', 'bar_data');
+		$this->assertEquals('foo_data', $this->sut->get_data(1234, 'foo'));
+		$this->assertEquals('bar_data', $this->sut->get_data(1234, 'bar'));
+
+		$this->sut->remove_all_data(1234);
+
+		$this->assertNull($this->sut->get_data(1234, 'foo'));
+		$this->assertNull($this->sut->get_data(1234, 'bar'));
 	}
 }
