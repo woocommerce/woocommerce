@@ -2924,6 +2924,10 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->enable_cot_sync();
 
 		$order = WC_Helper_Order::create_order();
+		// Force an earlier modified date to trigger the `should_save_after_meta_change` to be true later in the test.
+		$order->set_date_modified( date( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) );
+		$order->save();
+
 		$order->add_meta_data( 'test_key', 'test_value' );
 		$order->save_meta_data();
 
