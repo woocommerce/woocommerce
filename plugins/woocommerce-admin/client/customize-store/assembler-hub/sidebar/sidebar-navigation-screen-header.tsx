@@ -13,11 +13,11 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../../hooks/use-patterns';
-import { useEditBlocks } from '../../hooks/use-edit-blocks';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 
 export const SidebarNavigationScreenHeader = () => {
 	const { isLoading, patterns } = usePatternsByCategory( 'header' );
-	const [ blocks, , onChange ] = useEditBlocks();
+	const [ blocks, , onChange ] = useEditorBlocks();
 
 	const onClickHeaderPattern = useCallback(
 		( _pattern, selectedBlocks ) => {

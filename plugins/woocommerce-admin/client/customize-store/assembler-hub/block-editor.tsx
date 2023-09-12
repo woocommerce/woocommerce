@@ -18,7 +18,7 @@ import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/
  */
 import BlockPreview from './block-preview';
 import { useCallback } from '@wordpress/element';
-import { useEditBlocks } from '../hooks/use-edit-blocks';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -36,7 +36,7 @@ export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const location = useLocation();
 	const settings = useSiteEditorSettings();
-	const [ blocks ] = useEditBlocks();
+	const [ blocks ] = useEditorBlocks();
 
 	// // See packages/block-library/src/page-list/edit.js.
 	const { records: pages } = useEntityRecords( 'postType', 'page', {
