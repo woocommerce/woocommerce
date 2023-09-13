@@ -272,7 +272,7 @@ function ScaledBlockPreview( {
 				</style>
 				{ contentResizeListener }
 				<MemoizedBlockList renderAppender={ false } />
-				{ /* Only load  font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
+				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
 				{ externalFontFamilies.length === 2 && (
 					<FontFamiliesLoader
 						fontFamilies={ externalFontFamilies }
