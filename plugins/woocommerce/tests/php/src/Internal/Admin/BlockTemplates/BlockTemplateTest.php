@@ -55,9 +55,11 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 
 			if ( $root_template->get_block( 'test-block-id-2' ) ) {
 				// The block was already added, so just return.
-				// This short-circuiting is needed because this hook will be called two times:
+				// This short-circuiting done because this hook will be called two times:
 				// 1. When the `test-block-id` block is added to the root template.
 				// 2. When the `test-block-id-2` block is added to the template in this hook.
+				// Without this short-circuiting, the second time `add_block` is called in this
+				// hook would throw an exception, which is handled by the API (an error gets logged).
 				return;
 			}
 
