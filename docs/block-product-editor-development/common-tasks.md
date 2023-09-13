@@ -2,7 +2,7 @@
 
 ## How to add a new field to the product editor
 
-TODO: Describe how to add a new field, including adding it to the REST API.
+_TODO: Describe how to add a new field, including adding it to the REST API._
 
 ## Adding a group/section/field next to an existing one
 

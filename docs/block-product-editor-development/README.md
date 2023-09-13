@@ -8,7 +8,7 @@ The block product editor's UI consists of Groups (currently rendered as tabs), S
 
 ![Product editor structure](_media/block-product-editor-structure.png)
 
-TODO: Describe UX guidelines on when to create a new Group or Section, and when to add a new Field to an existing Section.
+_TODO: Describe UX guidelines on when to create a new Group or Section, and when to add a new Field to an existing Section._
 
 The form's structure is currently stored statically in PHP in a tree structure we call a Template. The way of tapping into the block product editor structure is by consuming the [Template API](../../plugins/woocommerce/src/Internal/Admin/BlockTemplates/README.md) by attaching custom code to the correct [hook](../../plugins/woocommerce/src/Internal/Admin/BlockTemplateRegistry/README.md). This object-oriented API allows extensions to add new Groups, Sections, and Fields to the product editor, as well as modify existing ones. All of the editor's blocks are added through the same API, so by using it, the changes will be treated as first-class citizens by the block product editor.
 
