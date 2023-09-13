@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
@@ -18,11 +18,14 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
+import { getMshotsUrl } from '../../transitional/mshots-image';
+import { PREVIEW_IMAGE_OPTION } from '../../transitional';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -35,6 +38,7 @@ export const SaveHub = () => {
 	const saveNoticeId = 'site-edit-save-notice';
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
+	const [ isResolving, setIsResolving ] = useState< boolean >( false );
 
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
@@ -179,8 +183,27 @@ export const SaveHub = () => {
 			return (
 				<Button
 					variant="primary"
+					isBusy={ isResolving }
 					onClick={ () => {
-						sendEvent( 'FINISH_CUSTOMIZATION' );
+						const homeUrl: string = getSetting( 'homeUrl', '' );
+						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
+						const WAIT_BEFORE_REDIRECT = 5000;
+
+						setIsResolving( true );
+						// Pre-fetch the site preview image for the site for transitional page.
+						window
+							.fetch(
+								getMshotsUrl( homeUrl, PREVIEW_IMAGE_OPTION )
+							)
+							.catch( () => {
+								// Ignore errors
+							} )
+							.finally( () => {
+								setTimeout( () => {
+									sendEvent( 'FINISH_CUSTOMIZATION' );
+									setIsResolving( false );
+								}, WAIT_BEFORE_REDIRECT );
+							} );
 					} }
 					className="edit-site-save-hub__button"
 					// @ts-ignore No types for this exist yet.

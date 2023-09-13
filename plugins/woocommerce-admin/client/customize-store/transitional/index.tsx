@@ -19,6 +19,13 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import './style.scss';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
+export const PREVIEW_IMAGE_OPTION = {
+	vpw: 1200,
+	vph: 742,
+	w: 588,
+	h: 363.58,
+	requeue: true,
+};
 
 export const Transitional = ( {
 	sendEvent,
@@ -65,13 +72,7 @@ export const Transitional = ( {
 							'Your store screenshot',
 							'woocommerce'
 						) }
-						options={ {
-							vpw: 1200,
-							vph: 742,
-							w: 588,
-							h: 363.58,
-							requeue: true,
-						} }
+						options={ PREVIEW_IMAGE_OPTION }
 					/>
 				</div>
 				<div className="woocommerce-customize-store__transitional-actions">
