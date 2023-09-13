@@ -4,7 +4,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, createInterpolateElement } from '@wordpress/element';
+import {
+	useCallback,
+	createInterpolateElement,
+	useContext,
+	useEffect,
+} from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
@@ -15,8 +20,9 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { usePatternsByCategory } from '../../hooks/use-patterns';
-import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { usePatternsByCategory } from '../hooks/use-patterns';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu-with-search',
@@ -28,10 +34,16 @@ const SUPPORTED_HEADER_PATTERNS = [
 export const SidebarNavigationScreenHeader = () => {
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
+	const { setHighlightedBlockIndex } = useContext( HighlightedBlockContext );
 
 	const headerPatterns = patterns.filter( ( pattern ) =>
 		SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
 	);
+
+	useEffect( () => {
+		// Highlight the header block in the editor preview.
+		setHighlightedBlockIndex( 0 );
+	}, [ setHighlightedBlockIndex ] );
 
 	const onClickHeaderPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
