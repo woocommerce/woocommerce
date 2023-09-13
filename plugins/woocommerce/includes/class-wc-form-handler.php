@@ -191,10 +191,11 @@ class WC_Form_Handler {
 		 *
 		 * Allow developers to add custom validation logic and throw an error to prevent save.
 		 *
+		 * @since 3.6.0
 		 * @param int         $user_id User ID being saved.
 		 * @param string      $address_type Type of address; 'billing' or 'shipping'.
 		 * @param array       $address The address fields.
-		 * @param WC_Customer $customer The customer object being saved. @since 3.6.0
+		 * @param WC_Customer $customer The customer object being saved.
 		 */
 		do_action( 'woocommerce_after_save_address_validation', $user_id, $address_type, $address, $customer );
 
@@ -206,6 +207,15 @@ class WC_Form_Handler {
 
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 
+		/**
+		 * Hook: woocommerce_customer_save_address.
+		 *
+		 * Fires after a customer address has been saved.
+		 *
+		 * @since 3.6.0
+		 * @param int    $user_id User ID being saved.
+		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 */
 		do_action( 'woocommerce_customer_save_address', $user_id, $address_type );
 
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );

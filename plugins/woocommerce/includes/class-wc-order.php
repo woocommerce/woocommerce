@@ -557,8 +557,8 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
-	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @param  string $address_type Type of address; 'billing' or 'shipping'.
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
 	protected function get_address_prop( $prop, $address_type = 'billing', $context = 'view' ) {
@@ -568,6 +568,15 @@ class WC_Order extends WC_Abstract_Order {
 			$value = isset( $this->changes[ $address_type ][ $prop ] ) ? $this->changes[ $address_type ][ $prop ] : $this->data[ $address_type ][ $prop ];
 
 			if ( 'view' === $context ) {
+				/**
+				 * Filter: 'woocommerce_order_get_[billing|shipping]_[prop]'
+				 *
+				 * Allow developers to change the returned value for any order address property.
+				 *
+				 * @since 3.6.0
+				 * @param string   $value The address property value.
+				 * @param WC_Order $order The order object being read.
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
 			}
 		}
@@ -900,6 +909,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array The stored address after filter.
 	 */
 	public function get_address( $address_type = 'billing' ) {
+		/**
+		 * Filter: 'woocommerce_get_order_address'
+		 *
+		 * Allow developers to change the returned value for an order's billing or shipping address.
+		 *
+		 * @since 2.4.0
+		 * @param array  $address_data The raw address data merged with the data from get_prop.
+		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 */
 		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $address_type ], $this->get_prop( $address_type, 'view' ) ), $address_type, $this );
 	}
 

@@ -454,8 +454,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
-	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'. What the value is for. Valid values are view and edit.
 	 * @param  string $address_type Type of address; 'billing' or 'shipping'.
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return mixed
 	 */
 	protected function get_address_prop( $prop, $address_type = 'billing', $context = 'view' ) {
@@ -465,6 +465,15 @@ class WC_Customer extends WC_Legacy_Customer {
 			$value = isset( $this->changes[ $address_type ][ $prop ] ) ? $this->changes[ $address_type ][ $prop ] : $this->data[ $address_type ][ $prop ];
 
 			if ( 'view' === $context ) {
+				/**
+				 * Filter: 'woocommerce_customer_get_[billing|shipping]_[prop]'
+				 *
+				 * Allow developers to change the returned value for any customer address property.
+				 *
+				 * @since 3.6.0
+				 * @param string      $value    The address property value.
+				 * @param WC_Customer $customer The customer object being read.
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
 			}
 		}
