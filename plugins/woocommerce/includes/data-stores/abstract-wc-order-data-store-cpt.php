@@ -748,7 +748,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $keys_to_delete as $meta_key ) {
 			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
 				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
-					delete_post_meta( $order->get_id(), $meta_key, $meta_value );
+					delete_post_meta( $order->get_id(), $meta_key, maybe_unserialize( $meta_value ) );
 				}
 			}
 		}
