@@ -18,31 +18,24 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../../hooks/use-patterns';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 
+const SUPPORTED_HEADER_PATTERNS = [
+	'woocommerce-blocks/header-centered-menu-with-search',
+	'woocommerce-blocks/header-essential',
+	'woocommerce-blocks/header-large',
+	'woocommerce-blocks/header-minimal',
+];
+
 export const SidebarNavigationScreenHeader = () => {
-	const { isLoading, patterns } = usePatternsByCategory( 'header' );
+	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
+
+	const headerPatterns = patterns.filter( ( pattern ) =>
+		SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
+	);
 
 	const onClickHeaderPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			const newHeaderBlock = {
-				...selectedBlocks[ 0 ],
-				attributes: {
-					...selectedBlocks[ 0 ].attributes,
-					slug: 'header',
-				},
-			};
-
-			onChange(
-				[
-					...blocks.map( ( block ) => {
-						if ( block.attributes?.slug === 'header' ) {
-							return newHeaderBlock;
-						}
-						return block;
-					} ),
-				],
-				{ selection: {} }
-			);
+			onChange( [ selectedBlocks[ 0 ], ...blocks ], { selection: {} } );
 		},
 		[ blocks, onChange ]
 	);
@@ -75,8 +68,8 @@ export const SidebarNavigationScreenHeader = () => {
 
 						{ ! isLoading && (
 							<BlockPatternList
-								shownPatterns={ patterns }
-								blockPatterns={ patterns }
+								shownPatterns={ headerPatterns }
+								blockPatterns={ headerPatterns }
 								onClickPattern={ onClickHeaderPattern }
 								label={ 'Headers' }
 								orientation="vertical"
@@ -90,6 +83,4 @@ export const SidebarNavigationScreenHeader = () => {
 			}
 		/>
 	);
-
-	// return null;
 };
