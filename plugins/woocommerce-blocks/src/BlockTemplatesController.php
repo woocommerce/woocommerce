@@ -158,7 +158,7 @@ class BlockTemplatesController {
 	 * @return string The render.
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
-		if ( 'woocommerce/woocommerce' === $attributes['theme'] ) {
+		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
 			$template_part = BlockTemplateUtils::get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 
 			if ( $template_part && ! empty( $template_part->content ) ) {
