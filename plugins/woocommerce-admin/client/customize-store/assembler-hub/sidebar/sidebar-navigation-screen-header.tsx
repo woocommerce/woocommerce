@@ -35,7 +35,9 @@ export const SidebarNavigationScreenHeader = () => {
 
 	const onClickHeaderPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			onChange( [ selectedBlocks[ 0 ], ...blocks ], { selection: {} } );
+			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
+				selection: {},
+			} );
 		},
 		[ blocks, onChange ]
 	);
