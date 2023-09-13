@@ -233,6 +233,27 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that removing a block by calling remove on it detaches it.
+	 */
+	public function test_remove_block_self() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$block->remove();
+
+		$this->assertTrue(
+			$block->is_detached(),
+			'Failed asserting that the block is detached from its parent and root template.'
+		);
+	}
+
+	/**
 	 * Test that adding nested blocks sets the parent and root template correctly.
 	 */
 	public function test_nested_add_block() {

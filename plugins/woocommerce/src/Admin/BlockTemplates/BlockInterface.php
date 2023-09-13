@@ -71,6 +71,11 @@ interface BlockInterface {
 	public function &get_root_template(): BlockTemplateInterface;
 
 	/**
+	 * Remove the block from its parent.
+	 */
+	public function remove();
+
+	/**
 	 * Check if the block is detached from its parent or root template.
 	 *
 	 * @return bool True if the block is detached from its parent or root template.

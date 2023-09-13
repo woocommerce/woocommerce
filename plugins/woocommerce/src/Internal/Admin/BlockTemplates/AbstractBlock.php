@@ -174,6 +174,13 @@ class AbstractBlock implements BlockInterface {
 	}
 
 	/**
+	 * Remove the block from its parent.
+	 */
+	public function remove() {
+		$this->parent->remove_block( $this->id );
+	}
+
+	/**
 	 * Check if the block is detached from its parent block container or the template it belongs to.
 	 *
 	 * @return bool True if the block is detached from its parent block container or the template it belongs to.
