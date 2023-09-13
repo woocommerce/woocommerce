@@ -346,7 +346,11 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
 			$precision = 'default' === $precision ? 'second' : $precision;
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// YYYY-MM-DD queries have 'day' precision for backwards compat.
+			// For backwards compat (see https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date)
+			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
+			$date = date( 'Y-m-d', strtotime( $date ) );
+
+			// By default, YYYY-MM-DD queries have 'day' precision for backwards compat.
 			$date      = wc_string_to_datetime( $date . ' ' . $timezone );
 			$precision = 'default' === $precision ? 'day' : $precision;
 		}
