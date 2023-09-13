@@ -17,9 +17,8 @@ import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { useCallback, useContext } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
-import { HighlightedBlockContext } from './context/highlighted-block-context';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -38,7 +37,6 @@ export const BlockEditor = ( {} ) => {
 	const location = useLocation();
 	const settings = useSiteEditorSettings();
 	const [ blocks ] = useEditorBlocks();
-	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
 
 	// // See packages/block-library/src/page-list/edit.js.
 	const { records: pages } = useEntityRecords( 'postType', 'page', {
@@ -134,27 +132,13 @@ export const BlockEditor = ( {} ) => {
 		);
 	}
 
-	console.log( 'highlightedBlockIndex', highlightedBlockIndex );
-
-	// Highlight the currently "highlighted" block in the preview
-	const blockHighlightStyles =
-		highlightedBlockIndex > -1
-			? `
-		.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .wp-block:not(:nth-child(${
-			highlightedBlockIndex + 1
-		})) {
-			border: 2px solid red;
-		}
-	`
-			: '';
-
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>
 				<BlockPreview
 					blocks={ blocks }
 					settings={ settings }
-					additionalStyles={ blockHighlightStyles }
+					additionalStyles={ '' }
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }

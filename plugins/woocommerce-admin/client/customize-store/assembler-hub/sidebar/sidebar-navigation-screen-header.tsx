@@ -36,14 +36,13 @@ export const SidebarNavigationScreenHeader = () => {
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex } = useContext( HighlightedBlockContext );
 
+	useEffect( () => {
+		setHighlightedBlockIndex( 0 );
+	}, [ setHighlightedBlockIndex ] );
+
 	const headerPatterns = patterns.filter( ( pattern ) =>
 		SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
 	);
-
-	useEffect( () => {
-		// Highlight the header block in the editor preview.
-		setHighlightedBlockIndex( 0 );
-	}, [ setHighlightedBlockIndex ] );
 
 	const onClickHeaderPattern = useCallback(
 		( _pattern, selectedBlocks ) => {

@@ -44,10 +44,7 @@ import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
-import {
-	HighlightedBlockContext,
-	HighlightedBlockContextProvider,
-} from './context/highlighted-block-context';
+import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
