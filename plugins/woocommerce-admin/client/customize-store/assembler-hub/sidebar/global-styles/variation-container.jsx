@@ -9,10 +9,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { isEqual } from 'lodash';
 
-const { GlobalStylesContext, areGlobalStyleConfigsEqual } = unlock(
-	blockEditorPrivateApis
-);
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
@@ -31,8 +30,14 @@ export const VariationContainer = ( { variation, children } ) => {
 	const selectVariation = () => {
 		setUserConfig( () => {
 			return {
-				settings: variation.settings,
-				styles: variation.styles,
+				settings: mergeBaseAndUserConfigs(
+					user.settings,
+					variation.settings
+				),
+				styles: mergeBaseAndUserConfigs(
+					user.styles,
+					variation.styles
+				),
 			};
 		} );
 	};
@@ -45,7 +50,13 @@ export const VariationContainer = ( { variation, children } ) => {
 	};
 
 	const isActive = useMemo( () => {
-		return areGlobalStyleConfigsEqual( user, variation );
+		if ( variation.settings.color ) {
+			return isEqual( variation.settings.color, user.settings.color );
+		}
+		return isEqual(
+			variation.settings.typography,
+			user.settings.typography
+		);
 	}, [ user, variation ] );
 
 	let label = variation?.title;
