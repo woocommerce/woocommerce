@@ -16,6 +16,7 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, SearchAPIProductType } from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export default function Extensions(): JSX.Element {
 	const [ productList, setProductList ] = useState< Product[] >( [] );
@@ -36,6 +37,11 @@ export default function Extensions(): JSX.Element {
 
 		if ( query.category ) {
 			params.append( 'category', query.category );
+		}
+
+		const wccomSettings = getAdminSetting( 'wccomHelper', false );
+		if ( wccomSettings.storeCountry ) {
+			params.append( 'country', wccomSettings.storeCountry );
 		}
 
 		const wccomSearchEndpoint =
