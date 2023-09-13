@@ -2962,5 +2962,16 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		 */
 		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
 		$this->assertTrue( in_array( 'test_value3', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'test_key2', 'test_value5' );
+		$order->add_meta_data( 'test_key2', 'test_value4' );
+		$order->save();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
+		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
+		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
 	}
 }

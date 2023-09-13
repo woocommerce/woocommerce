@@ -724,18 +724,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				}
 
 				if ( is_array( $existing_meta_data[ $meta_data->key ] ) ) {
-					$key_search = array_search( $meta_data->value, $existing_meta_data[ $meta_data->key ], true );
-					if ( false !== $key_search ) {
-						unset( $existing_meta_data[ $meta_data->key ][ $key_search ] );
+					$value_index = array_search( $meta_data->value, $existing_meta_data[ $meta_data->key ], true );
+					if ( false !== $value_index ) {
+						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
 						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {
 							unset( $existing_meta_data[ $meta_data->key ] );
 						}
 						continue;
 					}
 				}
-
-				unset( $existing_meta_data[ $meta_data->key ] );
-				delete_post_meta( $order->get_id(), $meta_data->key, $meta_data->value );
 			}
 			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
 		}
@@ -749,7 +746,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {
-			delete_post_meta( $order->get_id(), $meta_key );
+			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
+				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
+					delete_post_meta( $order->get_id(), $meta_key, $meta_value );
+				}
+			}
 		}
 
 		$this->update_post_meta( $order );
