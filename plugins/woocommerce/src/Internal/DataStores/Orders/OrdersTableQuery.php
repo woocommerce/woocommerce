@@ -335,20 +335,20 @@ class OrdersTableQuery {
 	 * @param string $timezone The timezone to use for the date.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
-	private function date_to_date_query_arg( $date, $timezone ): array {
+	private function date_to_date_query_arg( $date, $timezone = 'UTC', $precision = 'default' ): array {
 		$result    = array(
 			'year'  => '',
 			'month' => '',
 			'day'   => '',
 		);
-		$precision = 'second';
 
 		if ( is_numeric( $date ) ) {
-			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
+			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
+			$precision = 'default' === $precision ? 'second' : $precision;
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
 			// YYYY-MM-DD queries have 'day' precision for backwards compat.
-			$date      = wc_string_to_datetime( $date );
-			$precision = 'day';
+			$date      = wc_string_to_datetime( $date . ' ' . $timezone );
+			$precision = 'default' === $precision ? 'day' : $precision;
 		}
 
 		$result['year']  = $date->date( 'Y' );
