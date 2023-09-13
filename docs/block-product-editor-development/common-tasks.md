@@ -1,5 +1,9 @@
 # Common tasks
 
+## How to add a new field to the product editor
+
+TODO: Describe how to add a new field, including adding it to the REST API.
+
 ## Adding a group/section/field next to an existing one
 
 Here's a snippet that adds a new block to the catalog section for simple products, between the first and second fields (order 15):
