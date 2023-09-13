@@ -70,7 +70,6 @@ import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
 import { getCountryCode } from '~/dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { resolve } from 'tinymce';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
