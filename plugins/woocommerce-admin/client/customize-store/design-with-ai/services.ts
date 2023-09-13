@@ -50,17 +50,14 @@ export const parseLookAndToneCompletionResponse = (
 		}
 	} catch {
 		recordEvent(
-			'customize_your_store_look_and_tone_ai_completion_response_error',
+			'customize_your_store_ai_wizard_completion_response_error',
 			{ error_type: 'json_parse_error', response: JSON.stringify( obj ) }
 		);
 	}
-	recordEvent(
-		'customize_your_store_look_and_tone_ai_completion_response_error',
-		{
-			error_type: 'valid_json_invalid_values',
-			response: JSON.stringify( obj ),
-		}
-	);
+	recordEvent( 'customize_your_store_ai_wizard_completion_response_error', {
+		error_type: 'valid_json_invalid_values',
+		response: JSON.stringify( obj ),
+	} );
 	throw new Error( 'Could not parse Look and Tone completion response.' );
 };
 
