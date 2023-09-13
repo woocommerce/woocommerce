@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -59,8 +60,12 @@ export const Transitional = ( {
 				<Button
 					className="woocommerce-customize-store__transitional-preview-button"
 					variant="primary"
-					href={ homeUrl }
-					target="_blank"
+					onClick={ () => {
+						recordEvent(
+							'customize_your_transitional_preview_store_click'
+						);
+						window.open( homeUrl, '_blank' );
+					} }
 				>
 					{ __( 'Preview store', 'woocommerce' ) }
 				</Button>
@@ -89,7 +94,12 @@ export const Transitional = ( {
 						</p>
 						<Button
 							variant="tertiary"
-							href={ `${ ADMIN_URL }site-editor.php` }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_transitional_editor_click'
+								);
+								window.location.href = `${ ADMIN_URL }site-editor.php`;
+							} }
 						>
 							{ __( 'Go to the Editor', 'woocommerce' ) }
 						</Button>
@@ -110,11 +120,14 @@ export const Transitional = ( {
 						</p>
 						<Button
 							variant="tertiary"
-							onClick={ () =>
+							onClick={ () => {
+								recordEvent(
+									'customize_your_transitional_home_click'
+								);
 								sendEvent( {
 									type: 'GO_BACK_TO_HOME',
-								} )
-							}
+								} );
+							} }
 						>
 							{ __( 'Back to Home', 'woocommerce' ) }
 						</Button>
