@@ -399,18 +399,26 @@ class OrdersTableQuery {
 			$date_value = $this->args[ $date_key ];
 			$operator   = '=';
 			$dates      = array();
-			$timezone   = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
+			$is_local   = ! in_array( $date_key, $gmt_date_keys, true );
+			$timezone   = ! $is_local ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
 
 				if ( ! empty( $matches[1] ) ) {
-					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone );
+					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone, $is_local ? 'second' : '' );
 				}
 
-				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone );
+				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone, $is_local ? 'second' : '' );
 			} else {
-				$dates[] = $this->date_to_date_query_arg( $date_value, $timezone );
+				$q_date = $this->date_to_date_query_arg( $date_value, $timezone, $is_local ? 'second' : '' );
+				$dates[] = $q_date;
+
+				// YYYY-MM-DD in local time needs to be converted to a range in UTC as it needs to cover the entire day.
+				if ( $is_local ) {
+					$operator = '...';
+					$dates[] = $this->date_to_date_query_arg( strtotime( get_gmt_from_date( $date_value ) ) + DAY_IN_SECONDS, 'UTC', $is_local ? 'second' : '' );
+				}
 			}
 
 			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
