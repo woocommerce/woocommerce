@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\VariableProductTemplate;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
@@ -50,6 +51,7 @@ class Init {
 			// Register the product block template.
 			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
 			$template_registry->register( new SimpleProductTemplate() );
+			$template_registry->register( new VariableProductTemplate() );
 
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
