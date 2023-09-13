@@ -495,7 +495,6 @@
 					var description = $( this ).find( 'option:selected' ).data( 'description' );
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
 					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
-					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();

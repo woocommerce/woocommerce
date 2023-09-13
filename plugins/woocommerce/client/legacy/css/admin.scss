@@ -4247,7 +4247,7 @@ table.wc-shipping-classes {
 
 		tr {
 			th {
-				width: 30%;
+				width: 40%;
 				position: relative;
 
 				.woocommerce-help-tip {
@@ -4272,6 +4272,7 @@ table.wc-shipping-classes {
 					width: auto;
 					min-width: 16px;
 				}
+				width: 40%;
 			}
 
 			td,
@@ -6989,6 +6990,7 @@ table.bar_chart {
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
+		width: 50%;
 		max-width: 100%;
 		min-width: 500px;
 
@@ -6998,8 +7000,11 @@ table.bar_chart {
 	}
 
 	&.wc-backbone-modal-shipping-method-settings .wc-backbone-modal-content {
-		width: 75%;
 		min-width: 500px;
+	}
+
+	&.wc-backbone-modal-add-shipping-method .wc-backbone-modal-content article {
+		min-height: 180px
 	}
 
 	.select2-container {

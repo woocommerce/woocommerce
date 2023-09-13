@@ -178,7 +178,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </script>
 
 <script type="text/template" id="tmpl-wc-modal-add-shipping-method">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-add-shipping-method">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
