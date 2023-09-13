@@ -1128,6 +1128,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									const currencyUpdate = updateStoreCurrency(
 										context.businessInfo.location as string
 									);
+
 									return Promise.all( [
 										skipped,
 										businessLocation,
