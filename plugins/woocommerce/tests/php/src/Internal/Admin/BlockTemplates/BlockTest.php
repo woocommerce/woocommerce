@@ -106,7 +106,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template.
 	 */
 	public function test_remove_block() {
@@ -145,7 +145,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_nested_block() {
@@ -184,7 +184,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_block_and_descendants() {
