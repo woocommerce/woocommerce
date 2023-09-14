@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates\GeneralBlocksHelper;
 
 /**
  * Block template class.
@@ -54,5 +55,12 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function add_group( array $block_config ): GroupInterface {
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
+	}
+
+	/**
+	 * Add the default blocks.
+	 */
+	protected function add_default_blocks() {
+        new GeneralBlocksHelper( $this );
 	}
 }

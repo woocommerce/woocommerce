@@ -27,7 +27,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * SimpleProductTemplate constructor.
 	 */
 	public function __construct() {
-		new GeneralBlocksHelper( $this );
+		$this->add_default_blocks();
 
 		$this->add_group_blocks();
 		$this->add_organization_group_blocks();

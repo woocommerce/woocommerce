@@ -16,7 +16,7 @@ class VariableProductTemplate extends AbstractProductFormTemplate implements Pro
 	 * VariableProductTemplate constructor.
 	 */
 	public function __construct() {
-        new GeneralBlocksHelper( $this );
+        $this->add_default_blocks();
 	}
 
 	/**
