@@ -249,7 +249,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @return void
 	 */
 	private function unschedule_background_sync() {
-		WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );as_unschedule_all_actions();
+		WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
 	}
 
 	/**
