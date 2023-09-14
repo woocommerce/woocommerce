@@ -279,6 +279,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 			case 'continuous':
 				// This method already checks if a processor is enqueued before adding it to avoid duplication.
 				$this->batch_processing_controller->enqueue_processor( self::class );
+				$this->unschedule_background_sync();
 				break;
 		}
 	}
