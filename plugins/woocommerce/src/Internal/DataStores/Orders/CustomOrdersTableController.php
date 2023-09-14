@@ -28,11 +28,6 @@ class CustomOrdersTableController {
 
 	use AccessiblePrivateMethods;
 
-	/**
-	 * The hook that fires for the recurring event to check for pending order syncs.
-	 */
-	public const SYNC_CHECK_EVENT_HOOK = 'woocommerce_custom_orders_table_check_for_pending_syncs';
-
 	private const SYNC_QUERY_ARG = 'wc_hpos_sync_now';
 
 	/**
@@ -128,7 +123,6 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
-		self::add_action( self::SYNC_CHECK_EVENT_HOOK, array( $this, 'check_for_pending_syncs' ) );
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 	}
@@ -358,80 +352,9 @@ class CustomOrdersTableController {
 		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
-			$this->maybe_schedule_pending_sync_check();
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
-			$this->maybe_unschedule_pending_sync_check();
 		}
-	}
-
-	/**
-	 * Schedule a recurring event to check for pending order syncs.
-	 *
-	 * Wrapper to avoid throwing an error if Action Scheduler isn't initialized yet.
-	 *
-	 * @return void
-	 */
-	private function maybe_schedule_pending_sync_check() {
-		if ( ! ActionScheduler::is_initialized() ) {
-			return;
-		}
-
-		$has_scheduled_action = WC()->queue()->search( array(
-			'hook'   => self::SYNC_CHECK_EVENT_HOOK,
-			'status' => array( 'in-progress', 'pending' ),
-		) );
-
-		/**
-		 * Modify the time interval for the recurring event to check for pending order syncs.
-		 *
-		 * @param int $sync_check_interval The time, in seconds, between sync checks. Defaults to 21600 (6 hours).
-		 */
-		$interval = apply_filters( 'woocommerce_custom_orders_table_sync_check_interval', 6 * HOUR_IN_SECONDS );
-
-		if ( ! $has_scheduled_action ) {
-			WC()->queue()->schedule_recurring(
-				time() + HOUR_IN_SECONDS,
-				$interval,
-				self::SYNC_CHECK_EVENT_HOOK
-			);
-		}
-	}
-
-	/**
-	 * Remove any previously scheduled events to check for pending order syncs.
-	 *
-	 * Wrapper to avoid throwing an error if Action Scheduler isn't initialized yet.
-	 *
-	 * @return void
-	 */
-	private function maybe_unschedule_pending_sync_check() {
-		if ( ! ActionScheduler::is_initialized() ) {
-			return;
-		}
-
-		WC()->queue()->cancel_all( self::SYNC_CHECK_EVENT_HOOK );
-	}
-
-	/**
-	 * When sync is turned on, check to see if there are any pending syncs and if so, queue the processor.
-	 *
-	 * Runs as a recurring callback for SYNC_CHECK_EVENT_HOOK.
-	 *
-	 * @return void
-	 */
-	private function check_for_pending_syncs() {
-		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
-			$this->maybe_unschedule_pending_sync_check();
-			return;
-		}
-
-		$pending_count = $this->data_synchronizer->get_total_pending_count();
-		if ( $pending_count <= 0 ) {
-			return;
-		}
-
-		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 	}
 
 	/**
@@ -585,11 +508,11 @@ class CustomOrdersTableController {
 	 */
 	private function get_hpos_setting_for_sync( $sync_status ) {
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
-		$sync_message     = '';
+		$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
+		$sync_message     = array();
 
 		if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
-			$sync_message = sprintf(
+			$sync_message[] = sprintf(
 				// translators: %d: number of pending orders.
 				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
 				$sync_status['current_pending_count']
@@ -602,13 +525,13 @@ class CustomOrdersTableController {
 				wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 			);
 
-			$sync_message .= wp_kses_data( __(
+			$sync_message[] = wp_kses_data( __(
 				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
 				'woocommerce'
 			) );
 
-			$sync_message .= sprintf(
-				'<br /><a href="%1$s" class="button button-link">%2$s</a>',
+			$sync_message[] = sprintf(
+				'<a href="%1$s" class="button button-link">%2$s</a>',
 				esc_url( $sync_now_url ),
 				sprintf(
 					// translators: %d: number of pending orders.
@@ -623,13 +546,17 @@ class CustomOrdersTableController {
 			);
 		}
 
+		if ( ! $sync_enabled && $this->data_synchronizer->background_sync_is_enabled() ) {
+			$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
+		}
+
 		return array(
 			'id'        => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 			'title'     => '',
 			'type'      => 'checkbox',
 			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'     => $sync_enabled,
-			'desc_tip'  => $sync_message,
+			'value'     => $sync_enabled ? 'yes' : 'no',
+			'desc_tip'  => implode( '<br />', $sync_message ),
 			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}
