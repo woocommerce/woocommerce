@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useCallback } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useContext,
+	useEffect,
+} from '@wordpress/element';
 import { Link, CollapsibleContent } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 
@@ -15,6 +20,7 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory, Pattern } from '../hooks/use-pattern';
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 function filterPatternsByNames( patterns: Pattern[], namesToFilter: string[] ) {
 	return patterns.filter( ( pattern: Pattern ) =>
@@ -24,6 +30,14 @@ function filterPatternsByNames( patterns: Pattern[], namesToFilter: string[] ) {
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
+	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
+	);
+
+	useEffect( () => {
+		setHighlightedBlockIndex( 0 );
+	}, [ setHighlightedBlockIndex ] );
+
 	const lists = [
 		{
 			label: __( 'Hero', 'woocommerce' ),
@@ -73,19 +87,24 @@ export const SidebarNavigationScreenHomepage = () => {
 	const [ blocks, onChange ] = useEditorBlocks();
 	const onClickPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			const newHeaderBlock = {
+			const newMainBlock = {
 				...selectedBlocks[ 0 ],
 				attributes: {
 					...selectedBlocks[ 0 ].attributes,
-					tagName: 'main',
+					slug: 'homepage',
 				},
 			};
 
 			onChange(
 				[
 					...blocks.map( ( block ) => {
-						if ( block.attributes?.tagName === 'main' ) {
-							return newHeaderBlock;
+						// blocks[1] doesn't have slug attribute
+						// Try slug first, then tagName
+						if (
+							block.attributes?.slug === 'homepage' ||
+							block.attributes?.tagName === 'main'
+						) {
+							return newMainBlock;
 						}
 						return block;
 					} ),
@@ -99,6 +118,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ __( 'Change your homepage', 'woocommerce' ) }
+			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
 					'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
