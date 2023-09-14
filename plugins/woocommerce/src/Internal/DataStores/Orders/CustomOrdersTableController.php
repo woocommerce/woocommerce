@@ -33,6 +33,8 @@ class CustomOrdersTableController {
 	 */
 	public const SYNC_CHECK_EVENT_HOOK = 'woocommerce_custom_orders_table_check_for_pending_syncs';
 
+	private const SYNC_QUERY_ARG = 'wc_hpos_sync_now';
+
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
@@ -128,6 +130,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
 		self::add_action( self::SYNC_CHECK_EVENT_HOOK, array( $this, 'check_for_pending_syncs' ) );
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
+		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 	}
 
 	/**
@@ -442,9 +445,22 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( filter_input( INPUT_GET, 'hpos_sync_now', FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		}
+	}
+
+	/**
+	 * Tell WP Admin to remove the sync query arg from the URL.
+	 *
+	 * @param array $query_args The query args that are removable.
+	 *
+	 * @return array
+	 */
+	private function register_removable_query_arg( $query_args ) {
+		$query_args[] = self::SYNC_QUERY_ARG;
+
+		return $query_args;
 	}
 
 	/**
@@ -581,7 +597,7 @@ class CustomOrdersTableController {
 		} elseif ( $sync_status['current_pending_count'] > 0 ) {
 			$sync_now_url = add_query_arg(
 				array(
-					'hpos_sync_now' => true,
+					self::SYNC_QUERY_ARG => true,
 				),
 				wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 			);
