@@ -3,36 +3,40 @@
  * General
  */
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Groups;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates;
 
-trait General {
+class GeneralBlocksHelper {
     /**
-     * Get the group ID.
+     * Group ID.
      */
-    public function get_general_id() {
-        return 'general';
+    const ID = 'general';
+
+    public function __construct( $template ) {
+        $this->template = $template;
+        $this->add_group();
+        $this->add_blocks();
     }
 
     /**
      * Add the group.
      */
-    private function add_general_group() {
-        $this->add_group(
-			[
-				'id'         => $this->get_general_id(),
-				'order'      => 10,
-				'attributes' => [
-					'title' => __( 'General', 'woocommerce' ),
-				],
-			]
-		);
+    private function add_group() {
+        $this->template->add_group(
+            [
+                'id'         => self::ID,
+                'order'      => 10,
+                'attributes' => [
+                    'title' => __( 'General', 'woocommerce' ),
+                ],
+            ]
+        );
     }
 
     /**
 	 * Adds the general group blocks to the template.
 	 */
-	private function add_general_blocks() {
-		$general_group = $this->get_group_by_id( $this->get_general_id() );
+	private function add_blocks() {
+		$general_group = $this->template->get_group_by_id( self::ID );
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[

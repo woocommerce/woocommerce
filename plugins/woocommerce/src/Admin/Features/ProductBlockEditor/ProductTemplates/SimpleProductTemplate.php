@@ -6,14 +6,12 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Groups\General;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates\GeneralBlocksHelper;
 
 /**
  * Simple Product Template.
  */
 class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
-	use General;
-
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -29,8 +27,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * SimpleProductTemplate constructor.
 	 */
 	public function __construct() {
-		$this->add_general_group();
-		$this->add_general_blocks();
+		new GeneralBlocksHelper( $this );
 
 		$this->add_group_blocks();
 		$this->add_organization_group_blocks();
