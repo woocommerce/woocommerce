@@ -4,23 +4,21 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords, useEntityBlockEditor } from '@wordpress/core-data';
+import { useEntityRecords } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-import { BlockInstance } from '@wordpress/blocks';
+
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
 import { useCallback } from '@wordpress/element';
+import { useEditorBlocks } from './hooks/use-editor-blocks';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -38,19 +36,7 @@ export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const location = useLocation();
 	const settings = useSiteEditorSettings();
-
-	const { templateType } = useSelect( ( select ) => {
-		const { getEditedPostType } = unlock( select( editSiteStore ) );
-
-		return {
-			templateType: getEditedPostType(),
-		};
-	}, [] );
-
-	const [ blocks ]: [ BlockInstance[] ] = useEntityBlockEditor(
-		'postType',
-		templateType
-	);
+	const [ blocks ] = useEditorBlocks();
 
 	// // See packages/block-library/src/page-list/edit.js.
 	const { records: pages } = useEntityRecords( 'postType', 'page', {
@@ -145,6 +131,7 @@ export const BlockEditor = ( {} ) => {
 			</div>
 		);
 	}
+
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>

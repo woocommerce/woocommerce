@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useMemo } from '@wordpress/element';
+import { memo, useContext, useMemo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
@@ -16,11 +16,14 @@ import {
 	AutoHeightBlockPreview,
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
+import { HighlightedBlockContext } from './context/highlighted-block-context';
+import { useScrollOpacity } from './hooks/use-scroll-opacity';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
+	additionalStyles,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
@@ -32,13 +35,45 @@ export const BlockPreview = ( {
 		[ blocks ]
 	);
 
+	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
+	const previewOpacity = useScrollOpacity(
+		'.interface-navigable-region.interface-interface-skeleton__content',
+		'topDown'
+	);
+
+	const opacityStyles =
+		highlightedBlockIndex === -1
+			? ''
+			: `
+		.wp-block.preview-opacity {
+			opacity: ${ previewOpacity };
+		}
+	`;
+
 	return (
 		<BlockEditorProvider
-			value={ renderedBlocks }
+			value={ renderedBlocks.map( ( block, i ) => {
+				if ( i === highlightedBlockIndex ) {
+					return block;
+				}
+
+				return {
+					...block,
+					attributes: {
+						...block.attributes,
+						className:
+							block.attributes.className + ' preview-opacity',
+					},
+				};
+			} ) }
 			settings={ settings }
 			useSubRegistry={ useSubRegistry }
 		>
-			<AutoHeightBlockPreview settings={ settings } { ...props } />
+			<AutoHeightBlockPreview
+				settings={ settings }
+				additionalStyles={ `${ opacityStyles } ${ additionalStyles }` }
+				{ ...props }
+			/>
 		</BlockEditorProvider>
 	);
 };
