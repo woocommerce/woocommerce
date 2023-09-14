@@ -45,6 +45,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const ID_TYPE_DELETED_FROM_ORDERS_TABLE = 3;
 	public const ID_TYPE_DELETED_FROM_POSTS_TABLE  = 4;
 
+	private const BACKGROUND_SYNC_EVENT_HOOK = 'woocommerce_custom_orders_table_background_sync';
+
 	/**
 	 * The data store object to use.
 	 *
@@ -96,6 +98,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
+		self::add_action( 'init', array( $this, 'handle_background_sync' ) );
+		self::add_action( self::BACKGROUND_SYNC_EVENT_HOOK, array( $this, 'maybe_enqueue_data_sync' ) );
 
 		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
@@ -181,12 +185,111 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Is the data sync between old and new tables currently enabled?
+	 * Is the real-time data sync between old and new tables currently enabled?
 	 *
 	 * @return bool
 	 */
 	public function data_sync_is_enabled(): bool {
 		return 'yes' === get_option( self::ORDERS_DATA_SYNC_ENABLED_OPTION );
+	}
+
+	/**
+	 * Is the background data sync between old and new tables currently enabled?
+	 *
+	 * @return bool
+	 */
+	public function background_sync_is_enabled(): bool {
+		$enabled = $this->data_sync_is_enabled();
+
+		/**
+		 * Toggle for background sync.
+		 *
+		 * This allows for background sync to be enabled even when real-time sync is disabled.
+		 *
+		 * @param bool $enabled True to enabled background sync.
+		 */
+		return apply_filters( 'woocommerce_custom_orders_table_background_sync_enabled', $enabled );
+	}
+
+	/**
+	 * Schedule an event to run background sync when the mode is not set to continuous.
+	 *
+	 * @return void
+	 */
+	private function schedule_background_sync() {
+		$has_scheduled_action = WC()->queue()->search( array(
+			'hook'   => self::BACKGROUND_SYNC_EVENT_HOOK,
+			'status' => array( 'pending' ),
+		) );
+
+		if ( ! $has_scheduled_action ) {
+			/**
+			 * Modify the time interval between background syncs.
+			 *
+			 * Note that the background sync mode must first be set to 'interval' using the
+			 * 'woocommerce_custom_orders_table_background_sync_mode' filter hook before this will work.
+			 *
+			 * @param int $interval The time interval, in seconds, between background syncs. Defaults to 3600 (1 hour).
+			 */
+			$interval = apply_filters( 'woocommerce_custom_orders_table_background_sync_interval', HOUR_IN_SECONDS );
+
+			as_schedule_single_action(
+				time() + $interval,
+				self::BACKGROUND_SYNC_EVENT_HOOK,
+				array(),
+				'',
+				true
+			);
+		}
+	}
+
+	/**
+	 * Keep background sync running, if it's enabled.
+	 *
+	 * @return void
+	 */
+	private function handle_background_sync() {
+		if ( ! $this->background_sync_is_enabled() ) {
+			WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
+			return;
+		}
+
+		/**
+		 * Modify the background sync mode.
+		 *
+		 * @param string $mode The mode for background sync. 'interval' or 'continuous'. Defaults to 'interval'.
+		 */
+		$mode = apply_filters( 'woocommerce_custom_orders_table_background_sync_mode', 'interval' );
+
+		switch ( $mode ) {
+			case 'interval':
+			default:
+				$this->schedule_background_sync();
+				break;
+
+			case 'continuous':
+				// This method already checks if a processor is enqueued before adding it to avoid duplication.
+				$this->batch_processing_controller->enqueue_processor( self::class );
+				break;
+		}
+	}
+
+	/**
+	 * Callback to check for pending syncs and enqueue the synchronizer when background sync is in interval mode.
+	 *
+	 * @return void
+	 */
+	private function maybe_enqueue_data_sync() {
+		if ( ! $this->background_sync_is_enabled() ) {
+			return;
+		}
+
+		$pending_count = $this->get_total_pending_count();
+		if ( $pending_count > 0 ) {
+			$this->batch_processing_controller->enqueue_processor( self::class );
+		}
+
+		$this->schedule_background_sync();
 	}
 
 	/**
