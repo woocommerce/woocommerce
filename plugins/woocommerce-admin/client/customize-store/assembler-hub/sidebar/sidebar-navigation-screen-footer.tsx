@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useCallback } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useContext,
+	useEffect,
+} from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 // @ts-expect-error Missing type in core-data.
@@ -15,6 +20,7 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../hooks/use-pattern';
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const footerPatternNames = [
 	'woocommerce-blocks/footer-large',
@@ -33,22 +39,30 @@ export const SidebarNavigationScreenFooter = () => {
 		footerPatternNames.includes( pattern.name )
 	);
 
+	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
+	);
+
+	useEffect( () => {
+		setHighlightedBlockIndex( 0 );
+	}, [ setHighlightedBlockIndex ] );
+
 	const [ blocks, onChange ] = useEditorBlocks();
 	const onClickFooterPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			const newHeaderBlock = {
+			const newFooterBlock = {
 				...selectedBlocks[ 0 ],
 				attributes: {
 					...selectedBlocks[ 0 ].attributes,
-					tagName: 'footer',
+					slug: 'footer',
 				},
 			};
 
 			onChange(
 				[
 					...blocks.map( ( block ) => {
-						if ( block.attributes?.tagName === 'footer' ) {
-							return newHeaderBlock;
+						if ( block.attributes?.slug === 'footer' ) {
+							return newFooterBlock;
 						}
 						return block;
 					} ),
@@ -62,6 +76,7 @@ export const SidebarNavigationScreenFooter = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ __( 'Change your footer', 'woocommerce' ) }
+			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
 					"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
@@ -92,7 +107,7 @@ export const SidebarNavigationScreenFooter = () => {
 								onClickPattern={ onClickFooterPattern }
 								label={ 'Footers' }
 								orientation="vertical"
-								category={ 'footers' }
+								category={ 'footer' }
 								isDraggable={ false }
 								showTitlesAsTooltip={ true }
 							/>
