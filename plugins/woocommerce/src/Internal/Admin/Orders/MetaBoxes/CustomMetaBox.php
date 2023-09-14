@@ -305,16 +305,9 @@ class CustomMetaBox {
 			wp_die();
 		}
 
-		$order_data_store = WC_Data_Store::load( 'order' );
-		$count            = 0;
-		$meta_object      = new WC_Meta_Data(
-			array(
-				'id'    => $mid,
-				'key'   => $key,
-				'value' => $value,
-			)
-		);
-		$order_data_store->update_meta( $order, $meta_object );
+		$count = 0;
+		$order->update_meta_data( $key, $value, $mid );
+		$order->save_meta_data();
 		$response = new WP_Ajax_Response(
 			array(
 				'what'     => 'meta',
