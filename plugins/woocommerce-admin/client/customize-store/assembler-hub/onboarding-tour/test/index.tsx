@@ -69,4 +69,38 @@ describe( 'OnboardingTour', () => {
 			'customize_your_store_assembler_hub_tour_skip'
 		);
 	} );
+
+	it( 'should record an event when clicking on "Skip" button', () => {
+		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
+
+		screen
+			.getByRole( 'button', {
+				name: 'Close Tour',
+			} )
+			.click();
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'customize_your_store_assembler_hub_tour_close'
+		);
+	} );
+
+	it( 'should record an event when complete the tour', () => {
+		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
+
+		screen
+			.getByRole( 'button', {
+				name: 'Next',
+			} )
+			.click();
+
+		screen
+			.getByRole( 'button', {
+				name: 'Done',
+			} )
+			.click();
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'customize_your_store_assembler_hub_tour_complete'
+		);
+	} );
 } );

@@ -90,13 +90,9 @@ export const OnboardingTour = ( {
 							);
 							setShowWelcomeTour( false );
 						} else {
-							if ( showWelcomeTour ) {
-								// Click on "Skip" button
-								recordEvent(
-									'customize_your_store_assembler_hub_tour_skip'
-								);
-							}
-
+							recordEvent(
+								'customize_your_store_assembler_hub_tour_skip'
+							);
 							onClose();
 						}
 					},
@@ -208,7 +204,19 @@ export const OnboardingTour = ( {
 						},
 					},
 				],
-				closeHandler: onClose,
+				closeHandler: ( _steps, _currentStepIndex, source ) => {
+					if ( source === 'done-btn' ) {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_complete'
+						);
+					} else {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_close'
+						);
+					}
+
+					onClose();
+				},
 			} }
 		></TourKit>
 	);
