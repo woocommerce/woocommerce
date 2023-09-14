@@ -244,13 +244,22 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Remove any pending background sync events.
+	 *
+	 * @return void
+	 */
+	private function unschedule_background_sync() {
+		WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );as_unschedule_all_actions();
+	}
+
+	/**
 	 * Keep background sync running, if it's enabled.
 	 *
 	 * @return void
 	 */
 	private function handle_background_sync() {
 		if ( ! $this->background_sync_is_enabled() ) {
-			WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
+			$this->unschedule_background_sync();
 			return;
 		}
 
