@@ -27,6 +27,7 @@ import useTaxonomySearch from './use-taxonomy-search';
 type CreateTaxonomyModalProps = {
 	initialName?: string;
 	dialogNameHelpText?: string;
+	parentTaxonomyText?: string;
 	hierarchical: boolean;
 	slug: string;
 	title: string;
@@ -41,6 +42,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	slug,
 	hierarchical,
 	dialogNameHelpText,
+	parentTaxonomyText,
 	title,
 } ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
@@ -130,7 +132,10 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					<SelectTree
 						isLoading={ isResolving }
 						label={ createInterpolateElement(
-							__( 'Parent <optional/>', 'woocommerce' ),
+							`${
+								parentTaxonomyText ||
+								__( 'Parent', 'woocommerce' )
+							} <optional/>`,
 							{
 								optional: (
 									<span className="woocommerce-create-new-taxonomy-modal__optional">
