@@ -133,7 +133,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 							__( 'Parent <optional/>', 'woocommerce' ),
 							{
 								optional: (
-									<span className="woocommerce-product-form__optional-input">
+									<span className="woocommerce-create-new-taxonomy-modal__optional">
 										{ __( '(optional)', 'woocommerce' ) }
 									</span>
 								),
