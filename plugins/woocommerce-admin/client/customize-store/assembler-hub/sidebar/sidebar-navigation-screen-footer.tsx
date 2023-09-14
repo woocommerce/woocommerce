@@ -16,24 +16,38 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../hooks/use-pattern';
 
-export const SidebarNavigationScreenFooter = () => {
-	const { isLoading, patterns } = usePatternsByCategory( 'footer' );
-	const [ blocks, onChange ] = useEditorBlocks();
+const footerPatternNames = [
+	'woocommerce-blocks/footer-large',
+	'woocommerce-blocks/footer-large-dark',
+	'woocommerce-blocks/footer-simple',
+	'woocommerce-blocks/footer-simple-dark',
+	'woocommerce-blocks/footer-simple-menu-and-cart',
+	'woocommerce-blocks/footer-with-2-menus',
+	'woocommerce-blocks/footer-with-2-menus-dark',
+	'woocommerce-blocks/footer-with-3-menus',
+];
 
-	const onClickHeaderPattern = useCallback(
+export const SidebarNavigationScreenFooter = () => {
+	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
+	const footerPatterns = patterns.filter( ( pattern ) =>
+		footerPatternNames.includes( pattern.name )
+	);
+
+	const [ blocks, onChange ] = useEditorBlocks();
+	const onClickFooterPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
 			const newHeaderBlock = {
 				...selectedBlocks[ 0 ],
 				attributes: {
 					...selectedBlocks[ 0 ].attributes,
-					slug: 'footer',
+					tagName: 'footer',
 				},
 			};
 
 			onChange(
 				[
 					...blocks.map( ( block ) => {
-						if ( block.attributes?.slug === 'footer' ) {
+						if ( block.attributes?.tagName === 'footer' ) {
 							return newHeaderBlock;
 						}
 						return block;
@@ -73,9 +87,9 @@ export const SidebarNavigationScreenFooter = () => {
 
 						{ ! isLoading && (
 							<BlockPatternList
-								shownPatterns={ patterns }
-								blockPatterns={ patterns }
-								onClickPattern={ onClickHeaderPattern }
+								shownPatterns={ footerPatterns }
+								blockPatterns={ footerPatterns }
+								onClickPattern={ onClickFooterPattern }
 								label={ 'Footers' }
 								orientation="vertical"
 								category={ 'footers' }
