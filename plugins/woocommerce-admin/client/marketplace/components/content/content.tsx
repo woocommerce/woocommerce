@@ -9,12 +9,15 @@ import { useContext } from '@wordpress/element';
 import './content.scss';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
+import Themes from '../themes/themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 const renderContent = ( selectedTab?: string ): JSX.Element => {
 	switch ( selectedTab ) {
 		case 'extensions':
 			return <Extensions />;
+		case 'themes':
+			return <Themes />;
 		default:
 			return <Discover />;
 	}
