@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import { createInterpolateElement } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
