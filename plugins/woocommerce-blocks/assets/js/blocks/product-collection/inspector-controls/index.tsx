@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import { InspectorControls, BlockControls } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { type ElementType, useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
@@ -39,7 +39,6 @@ import AttributesControl from './attributes-control';
 import TaxonomyControls from './taxonomy-controls';
 import HandPickedProductsControl from './hand-picked-products-control';
 import AuthorControl from './author-control';
-import DisplayLayoutControl from './display-layout-control';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -65,9 +64,6 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
-			<BlockControls>
-				<DisplayLayoutControl { ...displayControlProps } />
-			</BlockControls>
 			<ToolsPanel
 				label={ __( 'Settings', 'woo-gutenberg-products-block' ) }
 				resetAll={ () => {

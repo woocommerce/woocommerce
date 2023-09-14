@@ -3,6 +3,7 @@
  * Title: Product Collection Simple Grid
  * Slug: woocommerce-blocks/product-collection-simple-grid
  * Categories: WooCommerce
+ * Block Types: woocommerce/product-collection
  */
 ?>
 

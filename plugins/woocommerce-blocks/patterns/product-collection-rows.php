@@ -3,6 +3,7 @@
  * Title: Product Collection Rows
  * Slug: woocommerce-blocks/product-collection-rows
  * Categories: WooCommerce
+ * Block Types: woocommerce/product-collection
  */
 ?>
 
