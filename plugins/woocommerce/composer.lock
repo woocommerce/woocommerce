@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c27792dd3b1927fff20aa226d428068",
+    "content-hash": "6f2cf671cf43bf97d8dcb86bbdd0916a",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1004,16 +1004,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "11.0.0",
+            "version": "11.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "926f174399738ea25de191b1db05cf42ef4635d3"
+                "reference": "9a9749f72c16bbb9cd75e23061f6b19dec01c262"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/926f174399738ea25de191b1db05cf42ef4635d3",
-                "reference": "926f174399738ea25de191b1db05cf42ef4635d3",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/9a9749f72c16bbb9cd75e23061f6b19dec01c262",
+                "reference": "9a9749f72c16bbb9cd75e23061f6b19dec01c262",
                 "shasum": ""
             },
             "require": {
@@ -1023,7 +1023,7 @@
                 "ext-json": "*"
             },
             "require-dev": {
-                "mockery/mockery": "1.6.5",
+                "mockery/mockery": "1.6.6",
                 "nikic/php-parser": "4.16.0 as 1.0.0",
                 "phpdocumentor/reflection": "3.0.1",
                 "phpunit/php-code-coverage": "9.2.27",
@@ -1062,9 +1062,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.0.0"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.1.0"
             },
-            "time": "2023-08-30T10:20:08+00:00"
+            "time": "2023-09-12T13:56:36+00:00"
         }
     ],
     "packages-dev": [
@@ -3947,5 +3947,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.3.0"
 }

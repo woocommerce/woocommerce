@@ -9,10 +9,10 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
   - [Initial Setup](#initial-setup)
     - [MySQL database](#mysql-database)
     - [Setup instructions](#setup-instructions)
-  - [Running Tests](#running-tests)
+  - [Running Unit Tests](#running-unit-tests)
     - [Troubleshooting](#troubleshooting)
     - [Running tests in PHP 8](#running-tests-in-php-8)
-  - [Writing Tests](#writing-tests)
+  - [Guide for Writing Unit Tests](#guide-for-writing-unit-tests)
   - [Automated Tests](#automated-tests)
   - [Code Coverage](#code-coverage)
 
@@ -51,7 +51,7 @@ Example:
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
 
-## Running Tests
+## Running Unit Tests
 
 Change to the plugin root directory and type:
 
@@ -97,7 +97,7 @@ $ tests/bin/install.sh woocommerce_tests_1 root root
 
 Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `woocommerce_tests` database already exists due to the prior command.
 
-## Writing Tests
+## Guide for Writing Unit Tests
 
 There are three different unit test directories:
 

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createMachine, sendParent } from 'xstate';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -18,6 +19,20 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
+
+export const hasStepInUrl = (
+	_ctx: unknown,
+	_evt: unknown,
+	{ cond }: { cond: unknown }
+) => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 3 ] === // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
+		( cond as { step: string | undefined } ).step
+	);
+};
+
 export const designWithAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithAi',
@@ -26,6 +41,17 @@ export const designWithAiStateMachineDefinition = createMachine(
 		schema: {
 			context: {} as designWithAiStateMachineContext,
 			events: {} as designWithAiStateMachineEvents,
+		},
+		invoke: {
+			src: 'browserPopstateHandler',
+		},
+		on: {
+			EXTERNAL_URL_UPDATE: {
+				target: 'navigate',
+			},
+			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
+				actions: sendParent( ( _context, event ) => event ),
+			},
 		},
 		context: {
 			businessInfoDescription: {
@@ -39,8 +65,43 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 		},
-		initial: 'businessInfoDescription',
+		initial: 'navigate',
 		states: {
+			navigate: {
+				always: [
+					{
+						target: 'businessInfoDescription',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'business-info-description',
+						},
+					},
+					{
+						target: 'lookAndFeel',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'look-and-feel',
+						},
+					},
+					{
+						target: 'toneOfVoice',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'tone-of-voice',
+						},
+					},
+					{
+						target: 'apiCallLoader',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'api-call-loader',
+						},
+					},
+					{
+						target: 'businessInfoDescription',
+					},
+				],
+			},
 			businessInfoDescription: {
 				id: 'businessInfoDescription',
 				initial: 'preBusinessInfoDescription',
@@ -90,6 +151,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: LookAndFeel,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'look-and-feel',
+							},
+						],
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
 								actions: [ 'assignLookAndFeel' ],
@@ -117,6 +184,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: ToneOfVoice,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'tone-of-voice',
+							},
+						],
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
 								actions: [ 'assignToneOfVoice' ],
@@ -144,19 +217,23 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: ApiCallLoader,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'api-call-loader',
+							},
+						],
 					},
 					postApiCallLoader: {},
 				},
-			},
-		},
-		on: {
-			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-				actions: sendParent( ( _context, event ) => event ),
 			},
 		},
 	},
 	{
 		actions,
 		services,
+		guards: {
+			hasStepInUrl,
+		},
 	}
 );
