@@ -1,0 +1,16 @@
+{
+	"name": "woocommerce/collection-filters",
+	"version": "1.0.0",
+	"title": "Collection Filters",
+	"description": "A block that adds product filters to the product collection.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce", "Filters" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
+	"ancestor": [ "woocommerce/product-collection" ],
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

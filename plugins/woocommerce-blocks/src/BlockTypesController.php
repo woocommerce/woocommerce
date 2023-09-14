@@ -234,6 +234,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductGalleryLargeImageNextPrevious';
 			$block_types[] = 'ProductGalleryPager';
 			$block_types[] = 'ProductGalleryThumbnails';
+			$block_types[] = 'CollectionFilters';
 		}
 
 		/**
