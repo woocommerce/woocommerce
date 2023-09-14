@@ -34,7 +34,9 @@ const SUPPORTED_HEADER_PATTERNS = [
 export const SidebarNavigationScreenHeader = () => {
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
-	const { setHighlightedBlockIndex } = useContext( HighlightedBlockContext );
+	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
+	);
 
 	useEffect( () => {
 		setHighlightedBlockIndex( 0 );
@@ -56,6 +58,7 @@ export const SidebarNavigationScreenHeader = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ __( 'Change your header', 'woocommerce' ) }
+			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",

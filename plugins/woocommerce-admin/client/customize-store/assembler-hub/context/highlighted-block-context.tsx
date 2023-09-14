@@ -10,6 +10,9 @@ export const HighlightedBlockContext = createContext( {
 	setHighlightedBlockIndex: ( index: number ) => {
 		// No op by default.
 	},
+	resetHighlightedBlockIndex: () => {
+		// No op by default.
+	},
 } );
 
 // A Provider that keeps track of which block is "focussed" in the Assembler Hub.
@@ -22,9 +25,17 @@ export const HighlightedBlockContextProvider = ( {
 	// Create some state
 	const [ highlightedBlockIndex, setHighlightedBlockIndex ] = useState( -1 );
 
+	const resetHighlightedBlockIndex = () => {
+		setHighlightedBlockIndex( -1 );
+	};
+
 	return (
 		<HighlightedBlockContext.Provider
-			value={ { highlightedBlockIndex, setHighlightedBlockIndex } }
+			value={ {
+				highlightedBlockIndex,
+				setHighlightedBlockIndex,
+				resetHighlightedBlockIndex,
+			} }
 		>
 			{ children }
 		</HighlightedBlockContext.Provider>
