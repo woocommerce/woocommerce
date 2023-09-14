@@ -38,6 +38,10 @@ const tabs: Tabs = {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
 	},
+	themes: {
+		name: 'themes',
+		title: __( 'Themes', 'woocommerce' ),
+	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My Subscriptions', 'woocommerce' ),
