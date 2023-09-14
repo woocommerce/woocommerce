@@ -4,6 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
@@ -22,8 +24,20 @@ export const SidebarNavigationScreenHeader = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'header',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}

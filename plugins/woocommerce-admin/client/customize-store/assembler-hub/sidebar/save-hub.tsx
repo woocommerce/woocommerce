@@ -18,6 +18,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -137,6 +138,13 @@ export const SaveHub = () => {
 	}, [ urlParams.path ] );
 
 	const save = async () => {
+		const source = `${ urlParams.path.replace(
+			'/customize-store/assembler-hub/',
+			''
+		) }`;
+		recordEvent( 'customize_your_store_assembler_hub_save_click', {
+			source,
+		} );
 		removeNotice( saveNoticeId );
 
 		try {
@@ -180,6 +188,10 @@ export const SaveHub = () => {
 				<Button
 					variant="primary"
 					onClick={ () => {
+						recordEvent(
+							'customize_your_store_assembler_hub_done_click'
+						);
+
 						sendEvent( 'FINISH_CUSTOMIZATION' );
 					} }
 					className="edit-site-save-hub__button"

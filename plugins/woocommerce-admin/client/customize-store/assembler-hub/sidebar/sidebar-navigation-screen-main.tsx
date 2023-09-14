@@ -20,8 +20,8 @@ import {
 	header,
 	home,
 	footer,
-	pages,
 } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import { Link } from '@woocommerce/components';
@@ -45,8 +45,20 @@ export const SidebarNavigationScreenMain = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'main',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}
@@ -114,14 +126,15 @@ export const SidebarNavigationScreenMain = () => {
 						>
 							{ __( 'Change your footer', 'woocommerce' ) }
 						</NavigatorButton>
-						<NavigatorButton
+						{ /* TODO: Turn on this in Phrase 2  */ }
+						{ /* <NavigatorButton
 							as={ SidebarNavigationItem }
 							path="/customize-store/assembler-hub/pages"
 							withChevron
 							icon={ pages }
 						>
 							{ __( 'Add and edit other pages', 'woocommerce' ) }
-						</NavigatorButton>
+						</NavigatorButton> */ }
 					</ItemGroup>
 				</>
 			}
