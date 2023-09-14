@@ -21,7 +21,6 @@ const EXPERIMENT_NAME =
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-
 	const isNewExperienceEnabled =
 		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
