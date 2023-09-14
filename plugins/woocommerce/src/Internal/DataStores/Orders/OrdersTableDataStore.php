@@ -2803,7 +2803,7 @@ CREATE TABLE $meta_table (
 		$delete_meta     = $this->data_store_meta->delete_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
