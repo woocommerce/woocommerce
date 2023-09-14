@@ -67,6 +67,21 @@ The word 'Total' that precedes the amount due, present in both the Cart _and_ Ch
 
 There are no additional arguments passed to this filter.
 
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust the total label.
+registerCheckoutFilters( 'example-extension', {
+  totalLabel: ( value, extensions, args ) => {
+    return 'Deposit due today';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/3323310/267275008-91bd6aeb-4824-4f8c-80ec-79bc63185bc6.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267274984-721e0be5-31a6-4190-947c-326462d6fd98.png"> |
+
 ## Coupons
 
 The current functionality is to display the coupon codes in the Cart and Checkout sidebars. This could be undesirable if you dynamically generate a coupon code that is not user-friendly. It may, therefore, be desirable to change the way this code is displayed. To achieve this, the filter `coupons` exists. This filter could also be used to show or hide coupons. This filter must _not_ be used to alter the value/totals of a coupon. This will not carry through to the Cart totals.
