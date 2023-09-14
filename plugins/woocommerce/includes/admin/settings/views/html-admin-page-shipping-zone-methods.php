@@ -8,6 +8,45 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+
+if ( 0 !== $zone->get_id() ) {
+	WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true );
+
+	$options = array();
+	foreach ( $shipping_continents as $continent_code => $continent ) {
+		$continent_data = array(
+			'value'    => 'continent:' . esc_attr( $continent_code ),
+			'label'    => esc_html( $continent['name'] ),
+			'children' => array(),
+		);
+
+		$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+
+		foreach ( $countries as $country_code ) {
+			$country_data = array(
+				'value'    => 'country:' . esc_attr( $country_code ),
+				'label'    => esc_html( $allowed_countries[ $country_code ] ),
+				'children' => array(),
+			);
+
+			$states = WC()->countries->get_states( $country_code );
+
+			if ( $states ) {
+				foreach ( $states as $state_code => $state_name ) {
+					$country_data['children'][] = array(
+						'value' => 'state:' . esc_attr( $country_code . ':' . $state_code ),
+						'label' => esc_html( $state_name . ', ' . $allowed_countries[ $country_code ] ),
+					);
+				}
+			}
+			$continent_data['children'][] = $country_data;
+		}
+		$options[] = $continent_data;
+	}
+}
+
 ?>
 
 <h2>
@@ -37,6 +76,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
 						<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
 					</label>
+				</th>
+				<td id="wc-shipping-zone-region-picker-root" data-options='<?php echo wp_json_encode( $options ); ?>' data-values='<?php echo wp_json_encode( $locations ); ?>'/>
+		</tr>
+			<tr valign="top" class="">
+				<th scope="row" class="titledesc">
+					<label for="zone_locations">
+						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
+					</label>
+					<p class="wc-shipping-zone-help-text">
+						<?php esc_html_e( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
+					</p>
 				</th>
 				<td class="forminp">
 					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_attr_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
