@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
+use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -81,6 +81,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $order_cache_controller;
 
 	/**
+	 * The batch processing controller.
+	 *
+	 * @var BatchProcessingController
+	 */
+	private $batch_processing_controller;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -101,6 +108,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
 	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
 	 * @param OrderCacheController             $order_cache_controller The order cache controller instance to use.
+	 * @param BatchProcessingController        $batch_processing_controller The batch processing controller to use.
 	 * @internal
 	 */
 	final public function init(
@@ -108,13 +116,15 @@ class DataSynchronizer implements BatchProcessorInterface {
 		DatabaseUtil $database_util,
 		PostsToOrdersMigrationController $posts_to_cot_migrator,
 		LegacyProxy $legacy_proxy,
-		OrderCacheController $order_cache_controller
+		OrderCacheController $order_cache_controller,
+		BatchProcessingController $batch_processing_controller
 	) {
-		$this->data_store             = $data_store;
-		$this->database_util          = $database_util;
-		$this->posts_to_cot_migrator  = $posts_to_cot_migrator;
-		$this->error_logger           = $legacy_proxy->call_function( 'wc_get_logger' );
-		$this->order_cache_controller = $order_cache_controller;
+		$this->data_store                  = $data_store;
+		$this->database_util               = $database_util;
+		$this->posts_to_cot_migrator       = $posts_to_cot_migrator;
+		$this->error_logger                = $legacy_proxy->call_function( 'wc_get_logger' );
+		$this->order_cache_controller      = $order_cache_controller;
+		$this->batch_processing_controller = $batch_processing_controller;
 	}
 
 	/**
