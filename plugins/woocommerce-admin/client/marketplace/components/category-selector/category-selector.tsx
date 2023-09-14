@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';
 import { useQuery } from '@woocommerce/navigation';
@@ -14,6 +14,7 @@ import CategoryLink from './category-link';
 import CategoryDropdown from './category-dropdown';
 import { Category, CategoryAPIItem } from './types';
 import { fetchCategories } from '../../utils/functions';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 import './category-selector.scss';
 
 const ALL_CATEGORIES_SLUG = '_all';
@@ -23,6 +24,8 @@ export default function CategorySelector(): JSX.Element {
 	const [ dropdownItems, setDropdownItems ] = useState< Category[] >( [] );
 	const [ selected, setSelected ] = useState< Category >();
 	const [ isLoading, setIsLoading ] = useState( false );
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { selectedTab } = marketplaceContextValue;
 
 	const query = useQuery();
 
@@ -48,7 +51,7 @@ export default function CategorySelector(): JSX.Element {
 	useEffect( () => {
 		setIsLoading( true );
 
-		fetchCategories()
+		fetchCategories( selectedTab )
 			.then( ( categoriesFromAPI: CategoryAPIItem[] ) => {
 				const categories: Category[] = categoriesFromAPI
 					.map( ( categoryAPIItem: CategoryAPIItem ): Category => {
