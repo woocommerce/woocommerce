@@ -9,7 +9,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { useMemo } from '@wordpress/element';
 import { BlockInstance, parse } from '@wordpress/blocks';
 
-type Pattern = {
+export type Pattern = {
 	blockTypes: string[];
 	categories: string[];
 	content: string;
