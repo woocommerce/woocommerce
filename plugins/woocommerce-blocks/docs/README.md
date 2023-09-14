@@ -87,7 +87,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   REST API
         -   [Exposing your data in the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
         -   [Available endpoints to extend with ExtendSchema](third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md)
-        -   [Adding an endpoint to ExtendSchema](third-party-developers/extensibility/rest-api/extend-rest-api-new-endpoint.md)
+        -   [Adding an endpoint to ExtendSchema](internal-developers/rest-api/extend-rest-api-new-endpoint.md)
         -   [Available Formatters](third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
         -   [Updating the cart with the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
     -   Checkout Payment Methods

@@ -15,7 +15,7 @@
     -   [Passed Parameters](#passed-parameters-3)
     -   [Key](#key-3)
 
-To see how to add your data to Store API using ExtendSchema, [check this document](./extend-rest-api-add-data.md). If you want to add a new endpoint, [check this document](./extend-rest-api-new-endpoint.md).
+To see how to add your data to Store API using ExtendSchema, [check this document](./extend-rest-api-add-data.md). If you want to add a new endpoint, [check this document](../../../internal-developers/rest-api/extend-rest-api-new-endpoint.md).
 
 This is a list of available endpoints that you can extend. For other endpoints, [see here](./../../../../src/StoreApi/README.md).
 

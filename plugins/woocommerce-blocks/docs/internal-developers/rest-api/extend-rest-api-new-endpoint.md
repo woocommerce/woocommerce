@@ -1,6 +1,6 @@
 # Adding an endpoint to ExtendSchema <!-- omit in toc -->
 
-This document is intended for contrubtors to WooCommerce Blocks plugin, if you feel like a new endpoint should be added, feel free to open an issue or a PR detailing why.
+This document is intended for internal developers of the WooCommerce Blocks plugin. If you feel like a new endpoint should be added, feel free to open an issue or a PR detailing why.
 
 ## Extending `GET` endpoints in Store API
 
@@ -46,7 +46,7 @@ Extending a new endpoint is usually half the work, you will need to receive this
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-new-endpoint.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/rest-api/extend-rest-api-new-endpoint.md)
 
 <!-- /FEEDBACK -->
 
