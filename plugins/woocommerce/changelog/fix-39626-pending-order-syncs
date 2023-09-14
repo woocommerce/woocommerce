@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Add a recurring event when HPOS compatibility mode is enabled to check for unsynced orders and sync them. Also add a button on the Features screen to trigger an order sync manually.
+Add a background sync that can run independently of the normal real-time HPOS data sync. Also add a button on the Features screen to trigger an order sync manually.
