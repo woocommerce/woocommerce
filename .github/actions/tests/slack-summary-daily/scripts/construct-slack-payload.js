@@ -108,7 +108,7 @@ module.exports = async ( { context, core, github } ) => {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: '<https://woocommerce.github.io/woocommerce-test-reports/daily|*Smoke tests on daily build*>',
+					text: `<${ URL_GITHUB_RUN_LOG }|*Smoke tests on daily build*>`,
 				},
 			},
 			{
