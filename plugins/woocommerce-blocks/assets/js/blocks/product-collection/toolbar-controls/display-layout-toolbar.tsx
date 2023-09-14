@@ -9,11 +9,11 @@ import { list, grid } from '@wordpress/icons';
  * Internal dependencies
  */
 import {
-	DisplayLayoutControlProps,
+	DisplayLayoutToolbarProps,
 	ProductCollectionDisplayLayout,
 } from '../types';
 
-const DisplayLayoutControl = ( props: DisplayLayoutControlProps ) => {
+const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
 	const { type, columns } = props.displayLayout;
 	const setDisplayLayout = (
 		displayLayout: ProductCollectionDisplayLayout
@@ -39,4 +39,4 @@ const DisplayLayoutControl = ( props: DisplayLayoutControlProps ) => {
 	return <ToolbarGroup controls={ displayLayoutControls } />;
 };
 
-export default DisplayLayoutControl;
+export default DisplayLayoutToolbar;
