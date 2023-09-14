@@ -26,6 +26,8 @@ function Search(): JSX.Element {
 	useEffect( () => {
 		if ( query.term ) {
 			setSearchTerm( query.term );
+		} else {
+			setSearchTerm( '' );
 		}
 	}, [ query.term ] );
 
