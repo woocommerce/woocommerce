@@ -90,6 +90,9 @@ const blocks = {
 	},
 	'single-product': {},
 	'stock-filter': {},
+	'collection-filters': {
+		isExperimental: true,
+	},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,
