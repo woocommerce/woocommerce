@@ -199,7 +199,52 @@ class OrdersTableQuery {
 		unset( $this->args['customer_note'], $this->args['name'] );
 
 		$this->build_query();
-		$this->run_query();
+		if ( ! $this->maybe_override_query() ) {
+			$this->run_query();
+		}
+	}
+
+	/**
+	 * Lets the `woocommerce_hpos_pre_query` filter override the query.
+	 *
+	 * @return boolean Whether the query was overridden or not.
+	 */
+	private function maybe_override_query(): bool {
+		/**
+		 * Filters the orders array before the query takes place.
+		 *
+		 * Return a non-null value to bypass the HPOS default order queries.
+		 *
+		 * If the query includes limits via the `limit`, `page`, or `offset` arguments, we
+		 * encourage the `found_orders` and `max_num_pages` properties to also be set.
+		 *
+		 * @since 8.2.0
+		 *
+		 * @param array|null $order_data {
+		 *     An array of order data.
+		 *     @type int[] $orders        Return an array of order IDs data to short-circuit the HPOS query,
+		 *                                or null to allow HPOS to run its normal query.
+		 *     @type int   $found_orders  The number of orders found.
+		 *     @type int   $max_num_pages The number of pages.
+		 * }
+		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
+		 * @param string             $sql The OrdersTableQuery instance.
+		 */
+		list( $this->orders, $this->found_orders, $this->max_num_pages ) = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
+		// If the filter set the orders, make sure the others values are set as well and skip running the query.
+		if ( is_array( $this->orders ) ) {
+			if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
+				$this->found_orders = count( $this->orders );
+			}
+			if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
+				if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
+					$this->args['limit'] = 10;
+				}
+				$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**

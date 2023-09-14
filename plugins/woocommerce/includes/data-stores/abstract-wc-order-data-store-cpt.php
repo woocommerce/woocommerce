@@ -715,15 +715,24 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
-				// We don't know if the meta is single or array, so we assume it to be array.
+				// We don't know if the meta is single or array, so we assume it to be an array.
 				$meta_value = is_array( $meta_data->value ) ? $meta_data->value : array( $meta_data->value );
+
 				if ( $existing_meta_data[ $meta_data->key ] === $meta_value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}
 
-				unset( $existing_meta_data[ $meta_data->key ] );
-				delete_post_meta( $order->get_id(), $meta_data->key );
+				if ( is_array( $existing_meta_data[ $meta_data->key ] ) ) {
+					$value_index = array_search( $meta_data->value, $existing_meta_data[ $meta_data->key ], true );
+					if ( false !== $value_index ) {
+						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
+						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {
+							unset( $existing_meta_data[ $meta_data->key ] );
+						}
+						continue;
+					}
+				}
 			}
 			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
 		}
@@ -737,7 +746,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {
-			delete_post_meta( $order->get_id(), $meta_key );
+			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
+				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
+					delete_post_meta( $order->get_id(), $meta_key, maybe_unserialize( $meta_value ) );
+				}
+			}
 		}
 
 		$this->update_post_meta( $order );
