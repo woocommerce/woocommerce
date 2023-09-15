@@ -8,12 +8,12 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { createExtendedError } from '../utils/create-extended-error';
+import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 export type BackgroundRemovalParams = {
 	imageFile: File;
 	returnedImageType?: 'png' | 'jpeg';
 	returnedImageSize?: 'hd' | 'medium' | 'preview';
-	token: string;
 };
 
 type BackgroundRemovalResponse = {
@@ -29,8 +29,9 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const [ imageData, setImageData ] = useState< Blob | null >( null );
 
 	const fetchImage = async ( params: BackgroundRemovalParams ) => {
-		const { returnedImageType, returnedImageSize, imageFile, token } =
-			params;
+		setLoading( true );
+		const { returnedImageType, returnedImageSize, imageFile } = params;
+		const { token } = await requestJetpackToken();
 
 		if ( ! token ) {
 			setError( createExtendedError( 'Invalid token', 'invalid_jwt' ) );
@@ -71,7 +72,6 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 
 		const imageType = returnedImageType ?? 'jpeg';
 
-		setLoading( true );
 		const formData = new FormData();
 		formData.append( 'image_file', imageFile );
 		formData.append( 'returned_image_type', imageType );

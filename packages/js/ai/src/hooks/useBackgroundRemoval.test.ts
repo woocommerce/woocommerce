@@ -12,9 +12,14 @@ import {
 	BackgroundRemovalParams,
 	useBackgroundRemoval,
 } from './useBackgroundRemoval';
+import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 // Mocking the apiFetch function
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '../utils/requestJetpackToken' );
+const mockedRequestJetpackToken = requestJetpackToken as jest.MockedFunction<
+	typeof requestJetpackToken
+>;
 
 describe( 'useBackgroundRemoval hook', () => {
 	let mockRequestParams: BackgroundRemovalParams;
@@ -27,14 +32,13 @@ describe( 'useBackgroundRemoval hook', () => {
 		} );
 		const returnedImageType = 'jpeg';
 		const returnedImageSize = 'hd';
-		const token = 'test-token';
 
 		mockRequestParams = {
 			imageFile,
 			returnedImageType,
 			returnedImageSize,
-			token,
 		};
+		mockedRequestJetpackToken.mockResolvedValue( { token: 'fake_token' } );
 	} );
 
 	it( 'should initialize with correct default values', () => {
@@ -45,7 +49,7 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should return error on empty token', async () => {
-		mockRequestParams.token = '';
+		mockedRequestJetpackToken.mockResolvedValue( { token: '' } );
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		act( () => {
 			result.current.fetchImage( mockRequestParams );
@@ -112,11 +116,17 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
+		mockedRequestJetpackToken.mockResolvedValueOnce(
+			new Promise( ( resolve ) =>
+				setTimeout( () => resolve( { token: 'fake_token' } ), 100 )
+			)
+		);
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		act( () => {
 			result.current.fetchImage( mockRequestParams );
 		} );
 		await waitFor( () => expect( result.current.loading ).toBeTruthy() );
+		expect( mockedRequestJetpackToken ).toHaveBeenCalled();
 	} );
 
 	it( 'should handle successful API call', async () => {
