@@ -369,6 +369,80 @@ class OrdersTableQuery {
 	}
 
 	/**
+	 * Returns UTC-based date query arguments for a combination of local time dates and a date shorthand operator.
+	 *
+	 * @param  array $dates_raw Array of dates (in local time) to use in combination with the operator.
+	 * @param  string $operator One of the operators supported by date queries (<, <=, =, ..., >, >=).
+	 * @return array Partial date query arg with relevant dates now UTC-based.
+	 *
+	 * @since 8.2.0
+	 */
+	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
+		$result = array();
+
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date only date is relevant (time is ignored).
+		foreach ( $dates_raw as &$raw_date ) {
+			$raw_date = strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
+		}
+
+		$date1  = end( $dates_raw );
+
+		switch ( $operator ) {
+			case '>':
+				$result = array(
+					'after'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+					'inclusive' => true,
+				);
+				break;
+			case '>=':
+				$result = array(
+					'after'     => $this->date_to_date_query_arg( $date1 ),
+					'inclusive' => true,
+				);
+				break;
+			case '=':
+				$result = array(
+					'relation' => 'AND',
+					array(
+						'after'     => $this->date_to_date_query_arg( $date1 ),
+						'inclusive' => true,
+					),
+					array(
+						'before'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+						'inclusive'  => false,
+					)
+				);
+				break;
+			case '<=':
+				$result = array(
+					'before'    => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+					'inclusive' => false,
+				);
+				break;
+			case '<':
+				$result = array(
+					'before'    => $this->date_to_date_query_arg( $date1 ),
+					'inclusive' => false,
+				);
+				break;
+			case '...':
+				$result = array(
+					'relation' => 'AND',
+					$this->local_time_to_gmt_date_query( array( $dates_raw[1] ), '<=' ),
+					$this->local_time_to_gmt_date_query( array( $dates_raw[0] ), '>=' ),
+				);
+
+				break;
+		}
+
+		if ( ! $result ) {
+			throw new \Exception( 'Please specify a valid date shorthand operator.' );
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Processes date-related query args and merges the result into 'date_query'.
 	 *
 	 * @return void
