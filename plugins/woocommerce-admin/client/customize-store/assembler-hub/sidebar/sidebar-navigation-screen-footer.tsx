@@ -23,10 +23,6 @@ import { usePatternsByCategory } from '../hooks/use-pattern';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const footerPatternNames = [
-	'woocommerce-blocks/footer-large',
-	'woocommerce-blocks/footer-large-dark',
-	'woocommerce-blocks/footer-simple',
-	'woocommerce-blocks/footer-simple-dark',
 	'woocommerce-blocks/footer-simple-menu-and-cart',
 	'woocommerce-blocks/footer-with-2-menus',
 	'woocommerce-blocks/footer-with-2-menus-dark',
