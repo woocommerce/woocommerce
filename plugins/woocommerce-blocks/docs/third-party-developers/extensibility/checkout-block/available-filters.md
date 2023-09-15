@@ -81,6 +81,78 @@ registerCheckoutFilters( 'example-extension', {
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | <img width="789" alt="image" src="https://user-images.githubusercontent.com/6242098/268092313-d981f064-f274-4175-8291-1671ed55535b.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267265204-7afbbe1a-de1a-4696-a2d9-881de3016060.png"> |
 
+### itemName
+
+A code snippet to adjust the item name of the order summary items can be found below:
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust item name of the order summary items.
+registerCheckoutFilters( 'example-extension', {
+  itemName: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Summary context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'summary' ) {
+      return value;
+    }
+    return '🪴 ' + value + ' 🪴';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/6242098/268092313-d981f064-f274-4175-8291-1671ed55535b.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267250835-6f4dade5-b4fe-4e55-a639-61b85f41ef28.png"> |
+
+### cartItemPrice
+
+A code snippet to adjust the cart item price of the order summary items can be found below:
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust cart item price of the order summary items.
+registerCheckoutFilters( 'example-extension', {
+  cartItemPrice: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Summary context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'summary' ) {
+      return value;
+    }
+    return '<price/> for all items';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/6242098/268092313-d981f064-f274-4175-8291-1671ed55535b.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267262765-a0d9e26c-51c0-4101-ae80-b626f8dd1f00.png"> |
+
+### cartItemClass
+
+A code snippet to adjust the cart item class of the order summary items can be found below:
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust cart item class of the order summary items.
+registerCheckoutFilters( 'example-extension', {
+  cartItemClass: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Summary context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'summary' ) {
+      return value;
+    }
+    return 'my-custom-class';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/6242098/268092313-d981f064-f274-4175-8291-1671ed55535b.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267264072-cd665949-ef82-497d-8c88-7391082dc431.png"> |
+
 ## Totals footer item (in Mini-Cart, Cart and Checkout)
 
 The word 'Total' that precedes the amount due, present in both the Cart _and_ Checkout blocks, is also passed through filters.
