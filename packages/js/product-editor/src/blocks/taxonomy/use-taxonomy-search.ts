@@ -45,6 +45,15 @@ interface UseTaxonomySearchOptions {
 	fetchParents?: boolean;
 }
 
+function htmlEscape( string: string ) {
+	return string
+		.replace( /&/g, '&amp;' )
+		.replace( /'/g, '&apos;' )
+		.replace( /"/g, '&quot;' )
+		.replace( />/g, '&gt;' )
+		.replace( /</g, '&lt;' );
+}
+
 const useTaxonomySearch = (
 	taxonomyName: string,
 	options: UseTaxonomySearchOptions = { fetchParents: true }
@@ -61,7 +70,7 @@ const useTaxonomySearch = (
 				Taxonomy[]
 			>( 'taxonomy', taxonomyName, {
 				per_page: PAGINATION_SIZE,
-				search,
+				search: htmlEscape( search ),
 			} );
 			if ( options?.fetchParents ) {
 				taxonomies = await getTaxonomiesMissingParents(
