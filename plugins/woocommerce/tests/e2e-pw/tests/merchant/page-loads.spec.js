@@ -110,14 +110,14 @@ const wcPages = [
 let productId, orderId;
 const productName = 'Simple Product Name';
 const productPrice = '15.99';
-const randomNum = new Date().getTime().toString();
-const customer = {
-	username: `customer${ randomNum }`,
-	password: 'password',
-	email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
-};
 
 for ( const currentPage of wcPages ) {
+	const randomNum = new Date().getTime().toString();
+	const customer = {
+		username: `customer${ randomNum }`,
+		password: 'password',
+		email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
+	};
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -232,6 +232,10 @@ for ( const currentPage of wcPages ) {
 				await expect(
 					page.locator( 'h1.components-text' )
 				).toContainText( currentPage.subpages[ i ].heading );
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+				).toBeVisible();
 
 				await expect(
 					page.locator( currentPage.subpages[ i ].element )
