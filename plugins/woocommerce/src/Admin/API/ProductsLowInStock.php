@@ -156,6 +156,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
 
 		$query_string = $this->get_query( $sidewide_stock_threshold_only );
+
 		$query_results = $wpdb->get_results(
 			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 			$wpdb->prepare( $query_string, $status, $low_stock_threshold, $offset, $per_page ),
@@ -168,9 +169,11 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
 		);
 
+		$total_results = $count_query_results[0]->total;
+
 		return array(
 			'results' => $query_results,
-			'total'   => (int) $count_query_results[0]->total,
+			'total'   => (int) $total_results,
 			'pages'   => (int) ceil( $total_results / (int) $per_page ),
 		);
 	}
