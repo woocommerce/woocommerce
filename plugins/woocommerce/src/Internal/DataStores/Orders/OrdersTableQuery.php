@@ -347,7 +347,7 @@ class OrdersTableQuery {
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
 			// For backwards compat (see https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
-			$date      = date( 'Y-m-d', strtotime( $date ) );
+			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
 		}
 
