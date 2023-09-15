@@ -76,6 +76,10 @@ const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
 	console.log( 'API Request error' );
+	recordEvent(
+		'customize_your_store_look_and_tone_ai_completion_response_error',
+		{ error_type: 'http_network_error' }
+	);
 };
 
 const updateQueryStep = (
