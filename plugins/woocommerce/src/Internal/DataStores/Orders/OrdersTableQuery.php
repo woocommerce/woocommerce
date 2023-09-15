@@ -470,33 +470,43 @@ class OrdersTableQuery {
 		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
 
 		foreach ( $date_keys as $date_key ) {
+			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
+
 			$operator   = '=';
+			$dates_raw  = array();
 			$dates      = array();
-			$is_local   = ! in_array( $date_key, $gmt_date_keys, true );
-			$timezone   = ! $is_local ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
 
 				if ( ! empty( $matches[1] ) ) {
-					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone, $is_local ? 'second' : '' );
+					$dates_raw[] = $matches[1];
 				}
 
-				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone, $is_local ? 'second' : '' );
+				$dates_raw[] = $matches[3];
 			} else {
-				$q_date = $this->date_to_date_query_arg( $date_value, $timezone, $is_local ? 'second' : '' );
-				$dates[] = $q_date;
-
-				// YYYY-MM-DD in local time needs to be converted to a range in UTC as it needs to cover the entire day.
-				if ( $is_local ) {
-					$operator = '...';
-					$dates[] = $this->date_to_date_query_arg( strtotime( get_gmt_from_date( $date_value ) ) + DAY_IN_SECONDS, 'UTC', $is_local ? 'second' : '' );
-				}
+				$dates_raw[] = $date_value;
 			}
 
-			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
+			if ( empty( $dates_raw ) || ! $operator || ( '...' === $operator && count( $dates_raw ) < 2 ) ) {
 				throw new \Exception( 'Invalid date_query' );
+			}
+
+			if ( $is_local ) {
+				$date_key = $local_to_gmt_date_keys[ $date_key ];
+
+				if ( ! is_numeric( $dates_raw[0] ) && ! is_numeric( $dates_raw[1] ) ) {
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date.
+					$date_queries[] = array_merge(
+						array(
+							'column' => $date_key,
+						),
+						$this->local_time_to_gmt_date_query( $dates_raw, $operator )
+					);
+
+					continue;
+				}
 			}
 
 			$operator_to_keys = array();
@@ -509,7 +519,7 @@ class OrdersTableQuery {
 				$operator_to_keys[] = 'before';
 			}
 
-			$date_key       = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
+			$dates          = array_map( array( $this, 'date_to_date_query_arg' ), $dates_raw );
 			$date_queries[] = array_merge(
 				array(
 					'column'    => $date_key,
@@ -601,7 +611,7 @@ class OrdersTableQuery {
 			$op               = isset( $query['after'] ) ? 'after' : 'before';
 			$date_value_local = $query[ $op ];
 			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;
