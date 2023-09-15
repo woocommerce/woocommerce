@@ -62,7 +62,7 @@ const InheritQueryControl = ( {
 			isShownByDefault
 			onDeselect={ () => {
 				setQueryAttribute( {
-					inherit: null,
+					inherit: defaultValue,
 				} );
 			} }
 		>
