@@ -104,6 +104,8 @@ class BatchProcessingController {
 			/**
 			 * Modify the delay interval for the batch processor's watchdog events.
 			 *
+			 * @since 8.2.0
+			 *
 			 * @param int $delay Time, in seconds, before the watchdog process will run. Defaults to 3600 (1 hour).
 			 */
 			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );

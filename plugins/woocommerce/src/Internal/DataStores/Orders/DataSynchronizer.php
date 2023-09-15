@@ -206,6 +206,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 		 *
 		 * This allows for background sync to be enabled even when real-time sync is disabled.
 		 *
+		 * @since 8.2.0
+		 *
 		 * @param bool $enabled True to enabled background sync.
 		 */
 		return apply_filters( 'woocommerce_custom_orders_table_background_sync_enabled', $enabled );
@@ -228,6 +230,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 			 *
 			 * Note that the background sync mode must first be set to 'interval' using the
 			 * 'woocommerce_custom_orders_table_background_sync_mode' filter hook before this will work.
+			 *
+			 * @since 8.2.0
 			 *
 			 * @param int $interval The time interval, in seconds, between background syncs. Defaults to 3600 (1 hour).
 			 */
@@ -265,6 +269,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 		/**
 		 * Modify the background sync mode.
+		 *
+		 * @since 8.2.0
 		 *
 		 * @param string $mode The mode for background sync. 'interval' or 'continuous'. Defaults to 'interval'.
 		 */
