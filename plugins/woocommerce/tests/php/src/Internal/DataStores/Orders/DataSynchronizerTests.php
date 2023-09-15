@@ -582,4 +582,118 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertEquals( $sync_setting['value'], 'no' );
 		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
 	}
+
+	/**
+	 * Delete an order directly from the wc_orders table so that the usual hooks and filters don't run.
+	 *
+	 * @param int $order_id The ID of the order to delete.
+	 *
+	 * @return void
+	 */
+	private function direct_delete_cot_order( $order_id ) {
+		global $wpdb;
+
+		$wpdb->delete(
+			OrdersTableDataStore::get_orders_table_name(),
+			array( 'id' => $order_id ),
+			array( '%d' )
+		);
+	}
+
+	/**
+	 * @testDox When data sync is enabled, there should be a background sync process scheduled, and running it should
+	 *          enqueue the DataSynchronizer batch processor when there are pending orders.
+	 */
+	public function test_bg_sync_while_sync_enabled() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$handler_method = $reflection->getMethod( 'handle_background_sync' );
+		$handler_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+		$this->enable_cot_sync();
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		$this->sut->handle_background_sync();
+		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$cot_order = OrderHelper::create_complex_data_store_order();
+		$this->direct_delete_cot_order( $cot_order->get_id() );
+		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$this->disable_cot_sync();
+		$this->sut->handle_background_sync();
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+	}
+
+	/**
+	 * @testDox When data sync is disabled, but background sync is enabled, there should be a background sync process
+	 *          scheduled, and running it should enqueue the DataSynchronizer batch processor when there are pending orders.
+	 */
+	public function test_bg_sync_while_sync_disabled_interval_mode() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$handler_method = $reflection->getMethod( 'handle_background_sync' );
+		$handler_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		add_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		$this->sut->handle_background_sync();
+		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$this->enable_cot_sync();
+		$cot_order = OrderHelper::create_complex_data_store_order();
+		$this->disable_cot_sync();
+		$this->direct_delete_cot_order( $cot_order->get_id() );
+		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		remove_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
+		$this->sut->handle_background_sync();
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+	}
+
+	/**
+	 * @testDox When data sync is disabled, but background sync is enabled and set to continuous mode, there should not
+	 *          be a background sync process scheduled, but the DataSynchronizer batch processor should be enqueued anyway.
+	 */
+	public function test_bg_sync_while_sync_disabled_continuous_mode() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$handler_method = $reflection->getMethod( 'handle_background_sync' );
+		$handler_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		add_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
+		add_filter( 'woocommerce_custom_orders_table_background_sync_mode', function() {
+			return $this->sut::BACKGROUND_SYNC_MODE_CONTINUOUS;
+		} );
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		$this->sut->handle_background_sync();
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+	}
 }

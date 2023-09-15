@@ -45,10 +45,10 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const ID_TYPE_DELETED_FROM_ORDERS_TABLE = 3;
 	public const ID_TYPE_DELETED_FROM_POSTS_TABLE  = 4;
 
-	private const BACKGROUND_SYNC_EVENT_HOOK                = 'woocommerce_custom_orders_table_background_sync';
+	public const BACKGROUND_SYNC_EVENT_HOOK                 = 'woocommerce_custom_orders_table_background_sync';
 	private const BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY = 'woocommerce_custom_orders_table_background_sync_scheduled';
-	private const BACKGROUND_SYNC_MODE_INTERVAL             = 'interval';
-	private const BACKGROUND_SYNC_MODE_CONTINUOUS           = 'continuous';
+	public const BACKGROUND_SYNC_MODE_INTERVAL              = 'interval';
+	public const BACKGROUND_SYNC_MODE_CONTINUOUS            = 'continuous';
 
 	/**
 	 * The data store object to use.
