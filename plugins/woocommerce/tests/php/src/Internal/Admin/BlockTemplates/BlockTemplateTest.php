@@ -71,42 +71,44 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			);
 		};
 
-		add_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
+		try {
+			add_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
 
-		$specific_hook_called = false;
+			$specific_hook_called = false;
 
-		$specific_after_add_block_hook = function( BlockInterface $block ) use ( &$specific_hook_called ) {
-			if ( 'test-block-id' === $block->get_id() ) {
-				$specific_hook_called = true;
-			}
-		};
+			$specific_after_add_block_hook = function( BlockInterface $block ) use ( &$specific_hook_called ) {
+				if ( 'test-block-id' === $block->get_id() ) {
+					$specific_hook_called = true;
+				}
+			};
 
-		add_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
+			add_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
 
-		$template->add_block(
-			[
-				'id'        => 'test-block-id',
-				'blockName' => 'test-block-name',
-			]
-		);
+			$template->add_block(
+				[
+					'id'        => 'test-block-id',
+					'blockName' => 'test-block-name',
+				]
+			);
 
-		$this->assertTrue(
-			$hook_called,
-			'Failed asserting that that the hook was called.'
-		);
+			$this->assertTrue(
+				$hook_called,
+				'Failed asserting that that the hook was called.'
+			);
 
-		$this->assertTrue(
-			$specific_hook_called,
-			'Failed asserting that that the specific hook was called.'
-		);
+			$this->assertTrue(
+				$specific_hook_called,
+				'Failed asserting that that the specific hook was called.'
+			);
 
-		$this->assertNotNull(
-			$template->get_block( 'test-block-id-2' ),
-			'Failed asserting that the block was added to the template from the hook.'
-		);
-
-		remove_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
-		remove_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
+			$this->assertNotNull(
+				$template->get_block( 'test-block-id-2' ),
+				'Failed asserting that the block was added to the template from the hook.'
+			);
+		} finally {
+			remove_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
+			remove_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
+		}
 	}
 
 	/**
@@ -127,8 +129,6 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			$root_template = $block->get_root_template();
 		};
 
-		add_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
-
 		$specific_hook_called = false;
 
 		$specific_after_remove_block_hook = function( BlockInterface $block ) use ( &$specific_hook_called ) {
@@ -137,34 +137,37 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 			}
 		};
 
-		add_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+		try {
+			add_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
+			add_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
 
-		$block = $template->add_block(
-			[
-				'id'        => 'test-block-id',
-				'blockName' => 'test-block-name',
-			]
-		);
+			$block = $template->add_block(
+				[
+					'id'        => 'test-block-id',
+					'blockName' => 'test-block-name',
+				]
+			);
 
-		$block->remove();
+			$block->remove();
 
-		$this->assertTrue(
-			$hook_called,
-			'Failed asserting that that the hook was called.'
-		);
+			$this->assertTrue(
+				$hook_called,
+				'Failed asserting that that the hook was called.'
+			);
 
-		$this->assertTrue(
-			$specific_hook_called,
-			'Failed asserting that that the specific hook was called.'
-		);
+			$this->assertTrue(
+				$specific_hook_called,
+				'Failed asserting that that the specific hook was called.'
+			);
 
-		$this->assertTrue(
-			$block->is_detached(),
-			'Failed asserting that the block was added to the template from the hook.'
-		);
-
-		remove_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
-		remove_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+			$this->assertTrue(
+				$block->is_detached(),
+				'Failed asserting that the block was added to the template from the hook.'
+			);
+		} finally {
+			remove_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
+			remove_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+		}
 	}
 
 	/**
