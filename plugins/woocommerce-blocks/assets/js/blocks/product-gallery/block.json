@@ -49,11 +49,15 @@
 		},
 		"fullScreenOnClick": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"nextPreviousButtonsPosition":{
 			"type": "string",
 			"default": "insideTheImage"
+		},
+		"mode": {
+			"type": "string",
+			"default": "standard"
 		}
 	},
 	"viewScript": "wc-product-gallery-frontend"

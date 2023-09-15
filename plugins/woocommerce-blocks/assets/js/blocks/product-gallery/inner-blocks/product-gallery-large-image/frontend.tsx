@@ -11,6 +11,7 @@ type Context = {
 			transform: string;
 			transition: string;
 		};
+		isDialogOpen: boolean;
 	};
 };
 
@@ -63,6 +64,9 @@ interactivityStore(
 				handleMouseLeave: ( { context }: { context: Context } ) => {
 					context.woocommerce.styles.transform = `scale(1.0)`;
 					context.woocommerce.styles[ 'transform-origin' ] = '';
+				},
+				handleClick: ( { context }: { context: Context } ) => {
+					context.woocommerce.isDialogOpen = true;
 				},
 			},
 		},

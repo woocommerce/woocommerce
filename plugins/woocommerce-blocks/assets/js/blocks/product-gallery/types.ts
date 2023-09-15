@@ -9,6 +9,7 @@ export interface ProductGalleryBlockAttributes {
 	cropImages?: boolean;
 	hoverZoom?: boolean;
 	fullScreenOnClick?: boolean;
+	mode: 'standard' | 'full';
 }
 
 export interface ProductGalleryThumbnailsBlockAttributes {

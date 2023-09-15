@@ -3,7 +3,6 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Locator, Page } from '@playwright/test';
-import { FrontendUtils } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -21,23 +20,23 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
+			frontendUtils,
+			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 export const getVisibleLargeImageId = async (
-	frontendUtils: FrontendUtils
+	mainImageBlockLocator: Locator
 ) => {
-	const mainImageBlock = await frontendUtils.getBlockByName(
-		'woocommerce/product-gallery-large-image'
-	);
-
-	const mainImage = mainImageBlock.locator( 'img:not([hidden])' ) as Locator;
+	const mainImage = mainImageBlockLocator.locator(
+		'img:not([hidden])'
+	) as Locator;
 
 	const mainImageContext = ( await mainImage.getAttribute(
 		'data-wc-context'
@@ -48,7 +47,7 @@ export const getVisibleLargeImageId = async (
 	return mainImageParsedContext.woocommerce.imageId;
 };
 
-export const waitForJavascriptFrontendFileIsLoaded = async ( page: Page ) => {
+const waitForJavascriptFrontendFileIsLoaded = async ( page: Page ) => {
 	await page.waitForResponse(
 		( response ) =>
 			response.url().includes( 'product-gallery-frontend' ) &&
@@ -56,15 +55,11 @@ export const waitForJavascriptFrontendFileIsLoaded = async ( page: Page ) => {
 	);
 };
 
-export const getThumbnailImageIdByNth = async (
+const getThumbnailImageIdByNth = async (
 	nth: number,
-	frontendUtils: FrontendUtils
+	thumbnailsLocator: Locator
 ) => {
-	const thumbnailsBlock = await frontendUtils.getBlockByName(
-		'woocommerce/product-gallery-thumbnails'
-	);
-
-	const image = thumbnailsBlock.locator( 'img' ).nth( nth );
+	const image = thumbnailsLocator.locator( 'img' ).nth( nth );
 
 	const imageContext = ( await image.getAttribute(
 		'data-wc-context'
@@ -91,75 +86,154 @@ test.describe( `${ blockData.name }`, () => {
 		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 	} );
 
-	test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
-		page,
-		editorUtils,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+	test.describe( 'with thumbnails', () => {
+		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-		await editorUtils.saveTemplate();
+			await editorUtils.saveTemplate();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
+
+			const visibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const firstImageThumbnailId = await getThumbnailImageIdByNth(
+				0,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
 		} );
 
-		const visibleLargeImageId = await getVisibleLargeImageId(
-			frontendUtils
-		);
+		// @todo: Fix this test. It's failing because the thumbnail images aren't generated correctly when the products are imported via .xml: https://github.com/woocommerce/woocommerce/issues/31646
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip( 'should change the image when the user click on a thumbnail image', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-		const firstImageThumbnailId = await getThumbnailImageIdByNth(
-			0,
-			frontendUtils
-		);
+			await editorUtils.saveTemplate();
 
-		expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'load',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			const visibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const secondImageThumbnailId = await getThumbnailImageIdByNth(
+				1,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( visibleLargeImageId ).not.toBe( secondImageThumbnailId );
+
+			await (
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			 )
+				.locator( 'img' )
+				.nth( 1 )
+				.click();
+
+			const newVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+		} );
 	} );
 
-	// @todo: Fix this test. It's failing because the thumbnail images aren't generated correctly when the products are imported via .xml: https://github.com/woocommerce/woocommerce/issues/31646
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'should change the image when the user click on a thumbnail image', async ( {
-		page,
-		editorUtils,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+	test.describe( 'full-screen when clicked option', () => {
+		test( 'should be enabled by default', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editor.openDocumentSettingsSidebar();
+			const fullScreenOption =
+				await pageObject.getFullScreenOnClickSetting();
 
-		await editorUtils.saveTemplate();
+			await expect( fullScreenOption ).toBeChecked();
+		} );
 
-		await Promise.all( [
-			page.goto( blockData.productPage, {
-				waitUntil: 'load',
-			} ),
-			waitForJavascriptFrontendFileIsLoaded( page ),
-		] );
+		test( 'should open dialog on the frontend', async ( {
+			pageObject,
+			page,
+			editorUtils,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editorUtils.saveTemplate();
 
-		const visibleLargeImageId = await getVisibleLargeImageId(
-			frontendUtils
-		);
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'domcontentloaded',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
 
-		const secondImageThumbnailId = await getThumbnailImageIdByNth(
-			1,
-			frontendUtils
-		);
+			const mainImageBlock = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
 
-		expect( visibleLargeImageId ).not.toBe( secondImageThumbnailId );
+			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-		await (
-			await frontendUtils.getBlockByName(
-				'woocommerce/product-gallery-thumbnails'
-			)
-		 )
-			.locator( 'img' )
-			.nth( 1 )
-			.click();
+			await mainImageBlock.click();
 
-		const newVisibleLargeImageId = await getVisibleLargeImageId(
-			frontendUtils
-		);
+			await expect( page.locator( 'dialog' ) ).toBeVisible();
+		} );
 
-		expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+		test( 'should not open dialog when the setting is disable on the frontend', async ( {
+			pageObject,
+			page,
+			editor,
+			editorUtils,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editor.openDocumentSettingsSidebar();
+			await pageObject.toggleFullScreenOnClickSetting( false );
+			await editorUtils.saveTemplate();
+
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'domcontentloaded',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			await expect( page.locator( 'dialog' ) ).toBeHidden();
+
+			const mainImageBlock = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
+
+			await mainImageBlock.click();
+
+			await expect( page.locator( 'dialog' ) ).toBeHidden();
+		} );
 	} );
 } );
