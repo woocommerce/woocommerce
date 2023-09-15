@@ -33,11 +33,11 @@ export function EditorCanvas( {
 		<Iframe
 			ref={ mouseMoveTypingRef }
 			name="editor-canvas"
+			header={ <EditorStyles styles={ settings?.styles } />}
 			className="edit-site-visual-editor__editor-canvas"
 			{ ...props }
 		>
 			<>
-				<EditorStyles styles={ settings?.styles } />
 				<style>
 					{
 						// Forming a "block formatting context" to prevent margin collapsing.
