@@ -47,6 +47,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	private const BACKGROUND_SYNC_EVENT_HOOK                = 'woocommerce_custom_orders_table_background_sync';
 	private const BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY = 'woocommerce_custom_orders_table_background_sync_scheduled';
+	private const BACKGROUND_SYNC_MODE_INTERVAL             = 'interval';
+	private const BACKGROUND_SYNC_MODE_CONTINUOUS           = 'continuous';
 
 	/**
 	 * The data store object to use.
@@ -325,15 +327,15 @@ class DataSynchronizer implements BatchProcessorInterface {
 		 *
 		 * @param string $mode The mode for background sync. 'interval' or 'continuous'. Defaults to 'interval'.
 		 */
-		$mode = apply_filters( 'woocommerce_custom_orders_table_background_sync_mode', 'interval' );
+		$mode = apply_filters( 'woocommerce_custom_orders_table_background_sync_mode', self::BACKGROUND_SYNC_MODE_INTERVAL );
 
 		switch ( $mode ) {
-			case 'interval':
+			case self::BACKGROUND_SYNC_MODE_INTERVAL:
 			default:
 				$this->schedule_background_sync();
 				break;
 
-			case 'continuous':
+			case self::BACKGROUND_SYNC_MODE_CONTINUOUS:
 				// This method already checks if a processor is enqueued before adding it to avoid duplication.
 				$this->batch_processing_controller->enqueue_processor( self::class );
 				$this->unschedule_background_sync();
