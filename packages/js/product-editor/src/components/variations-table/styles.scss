@@ -82,7 +82,7 @@ $table-row-height: calc($grid-unit * 9);
 	&__actions {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
+		justify-content: center;
 		gap: $gap-smaller;
 
 		&--delete {
