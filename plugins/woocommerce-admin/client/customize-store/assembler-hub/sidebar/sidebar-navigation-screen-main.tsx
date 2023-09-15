@@ -45,7 +45,7 @@ export const SidebarNavigationScreenMain = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
+							href={ `${ ADMIN_URL }site-editor.php` }
 							type="external"
 						/>
 					),
@@ -61,7 +61,7 @@ export const SidebarNavigationScreenMain = () => {
 					<ItemGroup>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/logo"
+							path="/customize-store/assembler-hub/logo"
 							withChevron
 							icon={ siteLogo }
 						>
@@ -69,7 +69,7 @@ export const SidebarNavigationScreenMain = () => {
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/color-palette"
+							path="/customize-store/assembler-hub/color-palette"
 							withChevron
 							icon={ color }
 						>
@@ -77,7 +77,7 @@ export const SidebarNavigationScreenMain = () => {
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/typography"
+							path="/customize-store/assembler-hub/typography"
 							withChevron
 							icon={ typography }
 						>
@@ -92,7 +92,7 @@ export const SidebarNavigationScreenMain = () => {
 					<ItemGroup>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/header"
+							path="/customize-store/assembler-hub/header"
 							withChevron
 							icon={ header }
 						>
@@ -100,7 +100,7 @@ export const SidebarNavigationScreenMain = () => {
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/homepage"
+							path="/customize-store/assembler-hub/homepage"
 							withChevron
 							icon={ home }
 						>
@@ -108,7 +108,7 @@ export const SidebarNavigationScreenMain = () => {
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/footer"
+							path="/customize-store/assembler-hub/footer"
 							withChevron
 							icon={ footer }
 						>
@@ -116,7 +116,7 @@ export const SidebarNavigationScreenMain = () => {
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
-							path="/customize-store/pages"
+							path="/customize-store/assembler-hub/pages"
 							withChevron
 							icon={ pages }
 						>

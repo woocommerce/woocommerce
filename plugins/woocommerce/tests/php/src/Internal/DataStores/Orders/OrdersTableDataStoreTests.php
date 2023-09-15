@@ -2677,7 +2677,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->toggle_cot_authoritative( $cot_is_authoritative );
 		$this->disable_cot_sync();
 
-		$new_count = $update_count = 0;
+		$new_count    = 0;
+		$update_count = 0;
 
 		$callback = function( $order_id ) use ( &$new_count, &$update_count ) {
 			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
@@ -2745,7 +2746,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $different_request Whether to simulate different requests (as much as we can in a unit test)
+	 * @param bool $different_request Whether to simulate different requests (as much as we can in a unit test).
 	 */
 	public function test_stale_data_is_not_read_sync_off_on( $different_request ) {
 		$this->toggle_cot_authoritative( true );
@@ -2773,7 +2774,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep(2);
+		sleep( 2 );
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
@@ -2798,8 +2799,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	private function reset_order_data_store_state( $sut ) {
 		$reset_state = function () use ( $sut ) {
-			self::$backfilling_order_ids = [];
-			self::$reading_order_ids = [];
+			self::$backfilling_order_ids = array();
+			self::$reading_order_ids     = array();
 		};
 		$reset_state->call( $sut );
 		wp_cache_flush();
@@ -2825,5 +2826,152 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$r_order = wc_get_order( $order->get_id() );
 		$this->assertEmpty( $r_order->get_meta_data() );
 		$this->assertEquals( '', get_post_meta( $order->get_id(), 'test_key', true ) );
+	}
+
+	/**
+	 * @testDox Test that the protected method get_order_data_for_ids stays backward compatible.
+	 */
+	public function test_get_order_data_for_ids_is_back_compat() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		$order = OrderHelper::create_complex_data_store_order( $this->sut );
+		$order->set_date_paid( new \WC_DateTime( '2023-01-01 00:00:00' ) );
+		$order->set_date_completed( new \WC_DateTime( '2023-01-01 00:00:00' ) );
+		$order->set_cart_tax( '1.23' );
+		$order->set_customer_id( 1 );
+		$order->set_shipping_address_1( 'Line1 Shipping' );
+		$order->set_shipping_city( 'City Shipping' );
+		$order->set_shipping_postcode( '12345' );
+		$order->set_shipping_tax( '12.34' );
+		$order->set_shipping_total( '123.45' );
+		$order->set_total( '25' );
+		$order->set_discount_tax( '2.111' );
+		$order->set_discount_total( '1.23' );
+		$order->save();
+
+		$call_protected = function( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+
+		$order_data = $call_protected->call( $this->sut, array( $order->get_id() ) );
+
+		$expected_data_array = array(
+			'id'                           => $order->get_id(),
+			'status'                       => 'wc-' . $order->get_status(),
+			'type'                         => $order->get_type(),
+			'currency'                     => $order->get_currency(),
+			'cart_tax'                     => '1.23000000',
+			'total'                        => '25.00000000',
+			'customer_id'                  => $order->get_customer_id(),
+			'billing_email'                => $order->get_billing_email(),
+			'date_created'                 => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->format( 'U' ) ),
+			'date_modified'                => gmdate( 'Y-m-d H:i:s', $order->get_date_modified()->format( 'U' ) ),
+			'parent_id'                    => $order->get_parent_id(),
+			'payment_method'               => $order->get_payment_method(),
+			'payment_method_title'         => $order->get_payment_method_title(),
+			'customer_ip_address'          => $order->get_customer_ip_address(),
+			'transaction_id'               => $order->get_transaction_id(),
+			'customer_user_agent'          => $order->get_customer_user_agent(),
+			'customer_note'                => $order->get_customer_note(),
+			'billing_first_name'           => $order->get_billing_first_name(),
+			'billing_last_name'            => $order->get_billing_last_name(),
+			'billing_company'              => $order->get_billing_company(),
+			'billing_address_1'            => $order->get_billing_address_1(),
+			'billing_address_2'            => $order->get_billing_address_2(),
+			'billing_city'                 => $order->get_billing_city(),
+			'billing_state'                => $order->get_billing_state(),
+			'billing_postcode'             => $order->get_billing_postcode(),
+			'billing_country'              => $order->get_billing_country(),
+			'billing_phone'                => $order->get_billing_phone(),
+			'shipping_first_name'          => $order->get_shipping_first_name(),
+			'shipping_last_name'           => $order->get_shipping_last_name(),
+			'shipping_company'             => $order->get_shipping_company(),
+			'shipping_address_1'           => $order->get_shipping_address_1(),
+			'shipping_address_2'           => $order->get_shipping_address_2(),
+			'shipping_city'                => $order->get_shipping_city(),
+			'shipping_state'               => $order->get_shipping_state(),
+			'shipping_postcode'            => $order->get_shipping_postcode(),
+			'shipping_country'             => $order->get_shipping_country(),
+			'shipping_phone'               => $order->get_shipping_phone(),
+			'created_via'                  => $order->get_created_via(),
+			'version'                      => $order->get_version(),
+			'prices_include_tax'           => $order->get_prices_include_tax(),
+			'recorded_coupon_usage_counts' => $order->get_recorded_coupon_usage_counts(),
+			'download_permissions_granted' => $order->get_download_permissions_granted(),
+			'cart_hash'                    => $order->get_cart_hash(),
+			'new_order_email_sent'         => $order->get_new_order_email_sent(),
+			'order_key'                    => $order->get_order_key(),
+			'order_stock_reduced'          => $order->get_order_stock_reduced(),
+			'date_paid'                    => gmdate( 'Y-m-d H:i:s', $order->get_date_paid()->format( 'U' ) ),
+			'date_completed'               => gmdate( 'Y-m-d H:i:s', $order->get_date_completed()->format( 'U' ) ),
+			'shipping_tax'                 => '12.34000000',
+			'shipping_total'               => '123.45000000',
+			'discount_tax'                 => '2.11100000',
+			'discount_total'               => '1.23000000',
+			'recorded_sales'               => $order->get_recorded_sales(),
+		);
+
+		foreach ( $expected_data_array as $key => $value ) {
+			$this->assertEquals( $value, $order_data[ $order->get_id() ]->{$key}, "Unable to match $key for {$order_data[ $order->get_id() ]->{$key}}. Expected $value" );
+		}
+	}
+
+	/**
+	 * @testDox Test that duplicate key, value pairs are also synced properly.
+	 */
+	public function test_duplicate_meta_is_synced_properly() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// Force an earlier modified date to trigger the `should_save_after_meta_change` to be true later in the test.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		assert( $order->get_date_modified() < $current_date_time ); // Meta check, to make sure our test stay effective if we run testsuite in a different timezone.
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 1, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 2, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+		$this->assertEquals( 'test_value', $post_meta[1] );
+
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 3, $post_meta );
+		$this->assertTrue( in_array( 'test_value2', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) );
+		$order->save();
+		$order->update_meta_data( 'test_key', 'test_value3' );
+		$order->save_meta_data();
+
+		/**
+		 * Note that WC_Data has a bug where if we update a duplicate key, it will delete rest of other keys. But since this bug has been there for 5 years as of writing this code, we will not assert whether postmeta is exactly the same as order_meta but only test that out value was saved.
+		 */
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertTrue( in_array( 'test_value3', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'test_key2', 'test_value5' );
+		$order->add_meta_data( 'test_key2', 'test_value4' );
+		$order->save();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
+		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
+		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
 	}
 }

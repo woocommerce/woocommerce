@@ -30,6 +30,10 @@ import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-bo
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { NavigableRegion } from '@wordpress/interface';
+// @ts-ignore No types for this exist yet.
+import { EntityProvider } from '@wordpress/core-data';
+// @ts-ignore No types for this exist yet.
+import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
 
 /**
  * Internal dependencies
@@ -40,6 +44,7 @@ import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
+import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -66,6 +71,9 @@ export const Layout = () => {
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
+	const { record: template } = useEditedEntityRecord();
+	const { id: templateId, type: templateType } = template;
+
 	return (
 		<LogoBlockContext.Provider
 			value={ {
@@ -73,112 +81,132 @@ export const Layout = () => {
 				setLogoBlock,
 			} }
 		>
-			<div className={ classnames( 'edit-site-layout' ) }>
-				<motion.div
-					className="edit-site-layout__header-container"
-					animate={ 'view' }
-				>
-					<SiteHub
-						as={ motion.div }
-						variants={ {
-							view: { x: 0 },
-						} }
-						isTransparent={ false }
-						className="edit-site-layout__hub"
-					/>
-				</motion.div>
-
-				<div className="edit-site-layout__content">
-					<NavigableRegion
-						ariaLabel={ __( 'Navigation', 'woocommerce' ) }
-						className="edit-site-layout__sidebar-region"
+			<HighlightedBlockContextProvider>
+				<EntityProvider kind="root" type="site">
+					<EntityProvider
+						kind="postType"
+						type={ templateType }
+						id={ templateId }
 					>
-						<motion.div
-							animate={ { opacity: 1 } }
-							transition={ {
-								type: 'tween',
-								duration:
-									// Disable transitiont in mobile to emulate a full page transition.
-									disableMotion || isMobileViewport
-										? 0
-										: ANIMATION_DURATION,
-								ease: 'easeOut',
-							} }
-							className="edit-site-layout__sidebar"
-						>
-							<Sidebar />
-						</motion.div>
-					</NavigableRegion>
+						<div className={ classnames( 'edit-site-layout' ) }>
+							<motion.div
+								className="edit-site-layout__header-container"
+								animate={ 'view' }
+							>
+								<SiteHub
+									as={ motion.div }
+									variants={ {
+										view: { x: 0 },
+									} }
+									isTransparent={ false }
+									className="edit-site-layout__hub"
+								/>
+							</motion.div>
 
-					{ ! isMobileViewport && (
-						<div
-							className={ classnames(
-								'edit-site-layout__canvas-container'
-							) }
-						>
-							{ canvasResizer }
-							{ !! canvasSize.width && (
-								<motion.div
-									whileHover={ {
-										scale: 1.005,
-										transition: {
-											duration: disableMotion ? 0 : 0.5,
-											ease: 'easeOut',
-										},
-									} }
-									initial={ false }
-									layout="position"
-									className={ classnames(
-										'edit-site-layout__canvas'
+							<div className="edit-site-layout__content">
+								<NavigableRegion
+									ariaLabel={ __(
+										'Navigation',
+										'woocommerce'
 									) }
-									transition={ {
-										type: 'tween',
-										duration: disableMotion
-											? 0
-											: ANIMATION_DURATION,
-										ease: 'easeOut',
-									} }
+									className="edit-site-layout__sidebar-region"
 								>
-									<ErrorBoundary>
-										<ResizableFrame
-											isReady={ ! isEditorLoading }
-											duringGuideTour={
-												shouldTourBeShown &&
-												! onboardingTourProps.showWelcomeTour
-											}
-											isFullWidth={ false }
-											defaultSize={ {
-												width:
-													canvasSize.width -
-													24 /* $canvas-padding */,
-												height: canvasSize.height,
-											} }
-											isOversized={
-												isResizableFrameOversized
-											}
-											setIsOversized={
-												setIsResizableFrameOversized
-											}
-											innerContentStyle={ {
-												background:
-													gradientValue ??
-													backgroundColor,
-											} }
-										>
-											<Editor
-												isLoading={ isEditorLoading }
-											/>
-										</ResizableFrame>
-									</ErrorBoundary>
-								</motion.div>
-							) }
+									<motion.div
+										animate={ { opacity: 1 } }
+										transition={ {
+											type: 'tween',
+											duration:
+												// Disable transitiont in mobile to emulate a full page transition.
+												disableMotion ||
+												isMobileViewport
+													? 0
+													: ANIMATION_DURATION,
+											ease: 'easeOut',
+										} }
+										className="edit-site-layout__sidebar"
+									>
+										<Sidebar />
+									</motion.div>
+								</NavigableRegion>
+
+								{ ! isMobileViewport && (
+									<div
+										className={ classnames(
+											'edit-site-layout__canvas-container'
+										) }
+									>
+										{ canvasResizer }
+										{ !! canvasSize.width && (
+											<motion.div
+												whileHover={ {
+													scale: 1.005,
+													transition: {
+														duration: disableMotion
+															? 0
+															: 0.5,
+														ease: 'easeOut',
+													},
+												} }
+												initial={ false }
+												layout="position"
+												className={ classnames(
+													'edit-site-layout__canvas'
+												) }
+												transition={ {
+													type: 'tween',
+													duration: disableMotion
+														? 0
+														: ANIMATION_DURATION,
+													ease: 'easeOut',
+												} }
+											>
+												<ErrorBoundary>
+													<ResizableFrame
+														isReady={
+															! isEditorLoading
+														}
+														duringGuideTour={
+															shouldTourBeShown &&
+															! onboardingTourProps.showWelcomeTour
+														}
+														isFullWidth={ false }
+														defaultSize={ {
+															width:
+																canvasSize.width -
+																24 /* $canvas-padding */,
+															height: canvasSize.height,
+														} }
+														isOversized={
+															isResizableFrameOversized
+														}
+														setIsOversized={
+															setIsResizableFrameOversized
+														}
+														innerContentStyle={ {
+															background:
+																gradientValue ??
+																backgroundColor,
+														} }
+													>
+														<Editor
+															isLoading={
+																isEditorLoading
+															}
+														/>
+													</ResizableFrame>
+												</ErrorBoundary>
+											</motion.div>
+										) }
+									</div>
+								) }
+							</div>
 						</div>
-					) }
-				</div>
-			</div>
-			{ shouldTourBeShown && (
-				<OnboardingTour { ...onboardingTourProps } />
-			) }
+						{ shouldTourBeShown && (
+							<OnboardingTour { ...onboardingTourProps } />
+						) }
+					</EntityProvider>
+				</EntityProvider>
+			</HighlightedBlockContextProvider>
 		</LogoBlockContext.Provider>
 	);
 };

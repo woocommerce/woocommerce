@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[HPOS] Modify query to have less characters before the `FROM` keyword.

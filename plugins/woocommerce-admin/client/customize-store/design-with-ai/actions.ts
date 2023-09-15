@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { assign } from 'xstate';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -10,6 +12,7 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 } from './types';
+import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
 	businessInfoDescriptionCompleteEvent,
 	lookAndFeelCompleteEvent,
@@ -73,6 +76,65 @@ const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
 	console.log( 'API Request error' );
+	recordEvent(
+		'customize_your_store_look_and_tone_ai_completion_response_error',
+		{ error_type: 'http_network_error' }
+	);
+};
+
+const updateQueryStep = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { path } = getQuery() as { path: string };
+	const step = ( action as { step: string } ).step;
+	const pathFragments = path.split( '/' ); // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
+	if (
+		pathFragments[ 1 ] === 'customize-store' &&
+		pathFragments[ 2 ] === 'design-with-ai'
+	) {
+		if ( pathFragments[ 3 ] !== step ) {
+			// this state machine is only concerned with [2], so we ignore changes to [3]
+			// [1] is handled by router at root of wc-admin
+			updateQueryString(
+				{},
+				`/customize-store/design-with-ai/${ step }`
+			);
+		}
+	}
+};
+
+const recordTracksStepViewed = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_view', {
+		step,
+	} );
+};
+
+const recordTracksStepClosed = (
+	_context: unknown,
+	event: aiWizardClosedBeforeCompletionEvent
+) => {
+	const { step } = event.payload;
+	recordEvent( `customize_your_store_ai_wizard_step_close`, {
+		step: step.replaceAll( '-', '_' ),
+	} );
+};
+
+const recordTracksStepCompleted = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_complete', {
+		step,
+	} );
 };
 
 export const actions = {
@@ -81,4 +143,8 @@ export const actions = {
 	assignToneOfVoice,
 	assignLookAndTone,
 	logAIAPIRequestError,
+	updateQueryStep,
+	recordTracksStepViewed,
+	recordTracksStepClosed,
+	recordTracksStepCompleted,
 };

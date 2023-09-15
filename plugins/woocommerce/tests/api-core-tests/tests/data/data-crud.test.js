@@ -7794,112 +7794,56 @@ test.describe( 'Data API tests', () => {
 				} ),
 			] )
 		);
-		if ( ! shouldSkip ) {
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						code: 'VEF',
-						name: 'Venezuelan bol&iacute;var (2008–2018)',
-						symbol: 'Bs F',
-						_links: {
-							self: [
-								{
-									href: expect.stringContaining(
-										'data/currencies/VEF'
-									),
-								},
-							],
-							collection: [
-								{
-									href: expect.stringContaining(
-										'data/currencies'
-									),
-								},
-							],
-						},
-					} ),
-				] )
-			);
-		} else {
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						code: 'VEF',
-						name: 'Venezuelan bol&iacute;var',
-						symbol: 'Bs F',
-						_links: {
-							self: [
-								{
-									href: expect.stringContaining(
-										'data/currencies/VEF'
-									),
-								},
-							],
-							collection: [
-								{
-									href: expect.stringContaining(
-										'data/currencies'
-									),
-								},
-							],
-						},
-					} ),
-				] )
-			);
-		}
-		if ( ! shouldSkip ) {
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						code: 'VES',
-						name: 'Venezuelan bol&iacute;var',
-						symbol: 'Bs.',
-						_links: {
-							self: [
-								{
-									href: expect.stringContaining(
-										'data/currencies/VES'
-									),
-								},
-							],
-							collection: [
-								{
-									href: expect.stringContaining(
-										'data/currencies'
-									),
-								},
-							],
-						},
-					} ),
-				] )
-			);
-		} else {
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						code: 'VES',
-						name: 'Bol&iacute;var soberano',
-						symbol: 'Bs.S',
-						_links: {
-							self: [
-								{
-									href: expect.stringContaining(
-										'data/currencies/VES'
-									),
-								},
-							],
-							collection: [
-								{
-									href: expect.stringContaining(
-										'data/currencies'
-									),
-								},
-							],
-						},
-					} ),
-				] )
-			);
-		}
+		expect( responseJSON ).toEqual(
+			expect.arrayContaining( [
+				expect.objectContaining( {
+					code: 'VEF',
+					name: 'Venezuelan bol&iacute;var (2008–2018)',
+					symbol: 'Bs F',
+					_links: {
+						self: [
+							{
+								href: expect.stringContaining(
+									'data/currencies/VEF'
+								),
+							},
+						],
+						collection: [
+							{
+								href: expect.stringContaining(
+									'data/currencies'
+								),
+							},
+						],
+					},
+				} ),
+			] )
+		);
+		expect( responseJSON ).toEqual(
+			expect.arrayContaining( [
+				expect.objectContaining( {
+					code: 'VES',
+					name: 'Venezuelan bol&iacute;var',
+					symbol: 'Bs.',
+					_links: {
+						self: [
+							{
+								href: expect.stringContaining(
+									'data/currencies/VES'
+								),
+							},
+						],
+						collection: [
+							{
+								href: expect.stringContaining(
+									'data/currencies'
+								),
+							},
+						],
+					},
+				} ),
+			] )
+		);
 		expect( responseJSON ).toEqual(
 			expect.arrayContaining( [
 				expect.objectContaining( {
