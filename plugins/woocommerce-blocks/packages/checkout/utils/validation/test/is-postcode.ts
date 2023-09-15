@@ -119,6 +119,12 @@ describe( 'isPostcode', () => {
 		[ false, '9385', 'LI' ],
 		[ false, '9475', 'LI' ],
 
+		// Nicaraguan postcodes
+		[ true, '12345', 'NI' ],
+		[ false, '01234', 'NI' ],
+		[ false, '1234', 'NI' ],
+		[ false, '123456', 'NI' ],
+
 		// Dutch postcodes
 		[ true, '3852GC', 'NL' ],
 		[ true, '3852 GC', 'NL' ],
