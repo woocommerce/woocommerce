@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Do not send user meta data back in `woocommerce_get_customer_details` response.
