@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix cached refund not deleted when the refund is deleted with HPOS active
