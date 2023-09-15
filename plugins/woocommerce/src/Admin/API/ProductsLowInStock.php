@@ -153,19 +153,24 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$offset              = ( $page - 1 ) * $per_page;
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
-		$query_string = $this->get_query( $this->is_using_sitewide_stock_threshold_only() );
+		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
 
+		$query_string = $this->get_query( $sidewide_stock_threshold_only );
 		$query_results = $wpdb->get_results(
 			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 			$wpdb->prepare( $query_string, $status, $low_stock_threshold, $offset, $per_page ),
 			OBJECT_K
 		);
 
-		$total_results = $wpdb->get_var( 'SELECT FOUND_ROWS()' );
+		$count_query_string = $this->get_query( $sidewide_stock_threshold_only, true );
+		$count_query_results = $wpdb->get_results(
+		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
+		);
 
 		return array(
 			'results' => $query_results,
-			'total'   => (int) $total_results,
+			'total'   => (int) $count_query_results[0]->total,
 			'pages'   => (int) ceil( $total_results / (int) $per_page ),
 		);
 	}
@@ -216,16 +221,15 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * Generate a query.
 	 *
 	 * @param bool $siteside_only generates a query for sitewide low stock threshold only query.
+	 * @param bool $return_count_query returns country query instead of the actual query.
 	 *
 	 * @return string
 	 */
-	protected function get_query( $siteside_only = false ) {
+	protected function get_query( $siteside_only = false, $return_count_query = false ) {
 		global $wpdb;
 		$query = "
 			SELECT
-				SQL_CALC_FOUND_ROWS wp_posts.*,
-				:postmeta_select
-				wc_product_meta_lookup.stock_quantity
+				:selects
 			FROM
 			  {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
 			  LEFT JOIN {$wpdb->posts} wp_posts ON wp_posts.ID = wc_product_meta_lookup.product_id
@@ -236,9 +240,35 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock')
 			  :postmeta_wheres
-			order by wc_product_meta_lookup.product_id DESC
-			limit %d, %d
+			  :orderAndLimit
 		";
+
+
+		if ( $return_count_query === false ) {
+
+			$query = strtr(
+				$query,
+				array (
+					':selects' => '
+						wp_posts.*,
+						:postmeta_select
+						wc_product_meta_lookup.stock_quantity
+					',
+					':orderAndLimit'=> '
+						order by wc_product_meta_lookup.product_id DESC
+						limit %d, %d
+					'
+				)
+			);
+		} else {
+			$query = strtr(
+				$query,
+				array (
+					':selects' => 'count(*) as total',
+					':orderAndLimit'=> ''
+				)
+			);
+		}
 
 		$postmeta = array(
 			'select' => '',
