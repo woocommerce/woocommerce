@@ -19,7 +19,7 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { usePatternsByCategory } from '../hooks/use-pattern';
+import { usePatternsByCategory } from '../hooks/use-patterns';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const footerPatternNames = [
