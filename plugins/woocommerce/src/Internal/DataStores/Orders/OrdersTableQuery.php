@@ -332,10 +332,9 @@ class OrdersTableQuery {
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
 	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
-	 * @param string $timezone The timezone to use for the date.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
-	private function date_to_date_query_arg( $date, $timezone = 'UTC', $precision = 'default' ): array {
+	private function date_to_date_query_arg( $date ): array {
 		$result    = array(
 			'year'  => '',
 			'month' => '',
@@ -343,16 +342,13 @@ class OrdersTableQuery {
 		);
 
 		if ( is_numeric( $date ) ) {
-			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
-			$precision = 'default' === $precision ? 'second' : $precision;
+			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
+			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
 			// For backwards compat (see https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
-			$date = date( 'Y-m-d', strtotime( $date ) );
-
-			// By default, YYYY-MM-DD queries have 'day' precision for backwards compat.
-			$date      = wc_string_to_datetime( $date . ' ' . $timezone );
-			$precision = 'default' === $precision ? 'day' : $precision;
+			$date      = date( 'Y-m-d', strtotime( $date ) );
+			$precision = 'day';
 		}
 
 		$result['year']  = $date->date( 'Y' );
