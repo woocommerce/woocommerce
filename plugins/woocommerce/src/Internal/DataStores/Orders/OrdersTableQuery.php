@@ -378,7 +378,7 @@ class OrdersTableQuery {
 
 		// Convert YYYY-MM-DD to UTC timestamp. Per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
-			$raw_date = strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
+			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
 
 		$date1  = end( $dates_raw );
@@ -492,7 +492,7 @@ class OrdersTableQuery {
 			if ( $is_local ) {
 				$date_key = $local_to_gmt_date_keys[ $date_key ];
 
-				if ( ! is_numeric( $dates_raw[0] ) && ! is_numeric( $dates_raw[1] ) ) {
+				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
 					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date.
 					$date_queries[] = array_merge(
 						array(
