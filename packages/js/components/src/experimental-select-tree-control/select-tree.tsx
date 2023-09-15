@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, TextControl } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -131,7 +132,7 @@ export const SelectTree = function SelectTree( {
 			setInputValue( event.target.value );
 		},
 		placeholder,
-		value: inputValue,
+		value: decodeEntities( inputValue ),
 	};
 
 	return (
@@ -185,7 +186,7 @@ export const SelectTree = function SelectTree( {
 					) : (
 						<TextControl
 							{ ...inputProps }
-							value={ props.createValue || '' }
+							value={ decodeEntities( props.createValue || '' ) }
 							onChange={ ( value ) => {
 								if ( onInputChange ) onInputChange( value );
 								const item = items.find(
