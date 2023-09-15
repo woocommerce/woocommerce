@@ -42,6 +42,40 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'products/count-low-in-stock',
+			array(
+				'args'   => array(),
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_low_in_stock_count' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_count_low_in_stock_params(),
+				),
+				'schema' => array( $this, 'get_count_low_in_stock_count_schema' ),
+			)
+		);
+	}
+
+	public function get_low_in_stock_count( $request ) {
+		global $wpdb;
+		$status              = $request->get_param( 'status' );
+		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+
+		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
+		$count_query_string            = $this->get_query( $sidewide_stock_threshold_only, true );
+		$count_query_results           = $wpdb->get_results(
+		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
+		);
+
+		$total_results = $count_query_results[0]->total;
+		$response      = rest_ensure_response( array( 'total' => $total_results ) );
+		$response->header( 'X-WP-Total', $total_results );
+		$response->header( 'X-WP-TotalPages', 120 );
+
+		return $response;
 	}
 
 	/**
@@ -163,7 +197,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			OBJECT_K
 		);
 
-		$count_query_string = $this->get_query( $sidewide_stock_threshold_only, true );
+		$count_query_string  = $this->get_query( $sidewide_stock_threshold_only, true );
 		$count_query_results = $wpdb->get_results(
 		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
@@ -246,29 +280,27 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			  :orderAndLimit
 		";
 
-
 		if ( $return_count_query === false ) {
-
 			$query = strtr(
 				$query,
-				array (
-					':selects' => '
+				array(
+					':selects'       => '
 						wp_posts.*,
 						:postmeta_select
 						wc_product_meta_lookup.stock_quantity
 					',
-					':orderAndLimit'=> '
+					':orderAndLimit' => '
 						order by wc_product_meta_lookup.product_id DESC
 						limit %d, %d
-					'
+					',
 				)
 			);
 		} else {
 			$query = strtr(
 				$query,
-				array (
-					':selects' => 'count(*) as total',
-					':orderAndLimit'=> ''
+				array(
+					':selects'       => 'count(*) as total',
+					':orderAndLimit' => '',
 				)
 			);
 		}
@@ -348,5 +380,45 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the query params for collections for /count-low-in-stock endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_count_low_in_stock_params() {
+		$params                       = array();
+		$params['context']            = $this->get_context_param();
+		$params['context']['default'] = 'view';
+		$params['status']             = array(
+			'default'           => 'publish',
+			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
+	}
+
+	/**
+	 * Get the schema for /count-low-in-stock response.
+	 *
+	 * @return array
+	 */
+	public function get_count_low_in_stock_count_schema() {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'Count Low in Stock Items',
+			'type'       => 'object',
+			'properties' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'total' => 'integer',
+				),
+			),
+		);
 	}
 }
