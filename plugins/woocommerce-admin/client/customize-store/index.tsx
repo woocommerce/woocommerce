@@ -18,7 +18,11 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import { Transitional, events as transitionalEvents } from './transitional';
+import {
+	Transitional,
+	events as transitionalEvents,
+	services as transitionalServices,
+} from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -75,6 +79,7 @@ export const customizeStoreStateMachineActions = {
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
+	...transitionalServices,
 	browserPopstateHandler,
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
@@ -207,10 +212,20 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						component: AssemblerHub,
 					},
 				},
+				postAssemblerHub: {
+					after: {
+						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
+						5000: {
+							target: '#customizeStore.transitionalScreen',
+						},
+					},
+				},
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
-					target: 'transitionalScreen',
+					// Pre-fetch the site preview image for the site for transitional page.
+					actions: [ 'prefetchSitePreview' ],
+					target: '.postAssemblerHub',
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
@@ -267,7 +282,6 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
-
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< CustomizeStoreComponentMeta >(

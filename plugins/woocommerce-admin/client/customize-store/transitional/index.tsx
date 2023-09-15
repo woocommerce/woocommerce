@@ -17,6 +17,7 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { MShotsImage } from './mshots-image';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import './style.scss';
+export * as services from './services';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
 export const PREVIEW_IMAGE_OPTION = {
