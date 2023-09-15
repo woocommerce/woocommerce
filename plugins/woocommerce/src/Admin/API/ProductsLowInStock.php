@@ -51,9 +51,9 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_low_in_stock_count' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_count_low_in_stock_params(),
+					'args'                => $this->get_low_in_stock_count_params(),
 				),
-				'schema' => array( $this, 'get_count_low_in_stock_count_schema' ),
+				'schema' => array( $this, 'get_low_in_stock_count_schema' ),
 			)
 		);
 	}
@@ -387,7 +387,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_count_low_in_stock_params() {
+	public function get_low_in_stock_count_params() {
 		$params                       = array();
 		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';
@@ -408,7 +408,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_count_low_in_stock_count_schema() {
+	public function get_low_in_stock_count_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'Count Low in Stock Items',
