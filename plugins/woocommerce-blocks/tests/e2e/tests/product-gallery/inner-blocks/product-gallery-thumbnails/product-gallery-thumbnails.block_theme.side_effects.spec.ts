@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 
 /**
  * Internal dependencies
  */
 import { addBlock } from './utils';
+import { ProductGalleryPage } from '../../product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery-thumbnails',
@@ -25,6 +26,17 @@ const blockData = {
 	productPage: '/product/v-neck-t-shirt/',
 };
 
+const test = base.extend< { pageObject: ProductGalleryPage } >( {
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+		const pageObject = new ProductGalleryPage( {
+			page,
+			editor,
+			frontendUtils,
+			editorUtils,
+		} );
+		await use( pageObject );
+	},
+} );
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
@@ -39,19 +51,18 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'Renders Product Gallery Thumbnails block on the editor and frontend side', async ( {
 		page,
 		editor,
-		editorUtils,
-		frontendUtils,
+		pageObject,
 	} ) => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
 		} );
 
-		const thumbnailsBlock = await editorUtils.getBlockByName(
-			blockData.name
-		);
-		const largeImageBlock = await editorUtils.getBlockByName(
-			'woocommerce/product-gallery-large-image'
-		);
+		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+			page: 'editor',
+		} );
+		const largeImageBlock = await pageObject.getMainImageBlock( {
+			page: 'editor',
+		} );
 
 		const thumbnailsBlockBoundingRect = await thumbnailsBlock.boundingBox();
 		const largeImageBlockBoundingRect = await largeImageBlock.boundingBox();
@@ -76,13 +87,13 @@ test.describe( `${ blockData.name }`, () => {
 			waitUntil: 'commit',
 		} );
 
-		const thumbnailsBlockFrontend = await frontendUtils.getBlockByName(
-			blockData.name
-		);
+		const thumbnailsBlockFrontend = await pageObject.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
 
-		const largeImageBlockFrontend = await frontendUtils.getBlockByName(
-			'woocommerce/product-gallery-large-image'
-		);
+		const largeImageBlockFrontend = await pageObject.getMainImageBlock( {
+			page: 'frontend',
+		} );
 
 		const thumbnailsBlockFrontendBoundingRect =
 			await thumbnailsBlockFrontend.boundingBox();

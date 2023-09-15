@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { EditorUtils, FrontendUtils } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
+import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-sale-badge',
@@ -29,6 +30,18 @@ const blockData = {
 	productPage: '/product/hoodie/',
 	productPageNotOnSale: '/product/album/',
 };
+
+const test = base.extend< { pageObject: ProductGalleryPage } >( {
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+		const pageObject = new ProductGalleryPage( {
+			page,
+			editor,
+			frontendUtils,
+			editorUtils,
+		} );
+		await use( pageObject );
+	},
+} );
 
 const getBoundingClientRect = async ( {
 	frontendUtils,
@@ -92,10 +105,15 @@ test.describe( `${ blockData.name }`, () => {
 			frontendUtils,
 			editor,
 			page,
+			pageObject,
 		} ) => {
+			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
+
+			await pageObject.toggleFullScreenOnClickSetting( false );
+
 			await Promise.all( [
 				editor.saveSiteEditorEntities(),
 				page.waitForResponse( ( response ) =>
@@ -116,10 +134,15 @@ test.describe( `${ blockData.name }`, () => {
 			frontendUtils,
 			editor,
 			page,
+			pageObject,
 		} ) => {
+			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
+
+			await pageObject.toggleFullScreenOnClickSetting( false );
+
 			await Promise.all( [
 				editor.saveSiteEditorEntities(),
 				page.waitForResponse( ( response ) =>
@@ -141,10 +164,14 @@ test.describe( `${ blockData.name }`, () => {
 			editorUtils,
 			editor,
 			page,
+			pageObject,
 		} ) => {
+			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
+
+			await pageObject.toggleFullScreenOnClickSetting( false );
 
 			const block = await editorUtils.getBlockByName( blockData.name );
 
@@ -189,10 +216,14 @@ test.describe( `${ blockData.name }`, () => {
 			editorUtils,
 			editor,
 			page,
+			pageObject,
 		} ) => {
+			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
+
+			await pageObject.toggleFullScreenOnClickSetting( false );
 
 			const block = await editorUtils.getBlockByName( blockData.name );
 
@@ -241,10 +272,13 @@ test.describe( `${ blockData.name }`, () => {
 			editorUtils,
 			editor,
 			page,
+			pageObject,
 		} ) => {
+			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
+			await pageObject.toggleFullScreenOnClickSetting( false );
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,

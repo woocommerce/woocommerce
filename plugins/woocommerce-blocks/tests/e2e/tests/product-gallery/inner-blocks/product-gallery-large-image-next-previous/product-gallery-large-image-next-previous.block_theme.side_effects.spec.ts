@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { EditorUtils, FrontendUtils } from '@woocommerce/e2e-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 
 /**
  * Internal dependencies
  */
 import { addBlock } from './utils';
+import { ProductGalleryPage } from '../../product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery-large-image-next-previous',
@@ -40,33 +40,51 @@ const blockData = {
 };
 
 const getBoundingClientRect = async ( {
-	frontendUtils,
-	editorUtils,
 	leftArrowSelector,
 	rightArrowSelector,
 	isFrontend,
+	pageObject,
 }: {
-	frontendUtils: FrontendUtils;
-	editorUtils: EditorUtils;
+	pageObject: ProductGalleryPage;
 	leftArrowSelector: string;
 	rightArrowSelector: string;
 	isFrontend: boolean;
 } ) => {
-	const page = isFrontend ? frontendUtils.page : editorUtils.editor.canvas;
+	const page = isFrontend ? 'frontend' : 'editor';
 	return {
-		leftArrow: await page
+		leftArrow: await (
+			await pageObject.getNextPreviousButtonsBlock( {
+				page,
+			} )
+		 )
 			.locator( leftArrowSelector )
 			.evaluate( ( el ) => el.getBoundingClientRect() ),
-		rightArrow: await page
+		rightArrow: await (
+			await pageObject.getNextPreviousButtonsBlock( {
+				page,
+			} )
+		 )
 			.locator( rightArrowSelector )
 			.evaluate( ( el ) => el.getBoundingClientRect() ),
 		gallery: await (
-			await ( isFrontend ? frontendUtils : editorUtils ).getBlockByName(
-				'woocommerce/product-gallery-large-image'
-			)
+			await pageObject.getMainImageBlock( {
+				page,
+			} )
 		 ).evaluate( ( el ) => el.getBoundingClientRect() ),
 	};
 };
+
+const test = base.extend< { pageObject: ProductGalleryPage } >( {
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+		const pageObject = new ProductGalleryPage( {
+			page,
+			editor,
+			frontendUtils,
+			editorUtils,
+		} );
+		await use( pageObject );
+	},
+} );
 
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
@@ -85,14 +103,16 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test( 'Renders Next/Previous Button block on the editor side', async ( {
-		editorUtils,
 		editor,
+		pageObject,
 	} ) => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
 		} );
 
-		const block = await editorUtils.getBlockByName( blockData.name );
+		const block = await pageObject.getNextPreviousButtonsBlock( {
+			page: 'editor',
+		} );
 
 		await expect( block ).toBeVisible();
 	} );
@@ -100,9 +120,9 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'Renders Next/Previous Button block on the frontend side', async ( {
 		admin,
 		editorUtils,
-		frontendUtils,
 		editor,
 		page,
+		pageObject,
 	} ) => {
 		await addBlock( admin, editor, editorUtils );
 
@@ -117,7 +137,9 @@ test.describe( `${ blockData.name }`, () => {
 			waitUntil: 'commit',
 		} );
 
-		const block = await frontendUtils.getBlockByName( blockData.name );
+		const block = await pageObject.getNextPreviousButtonsBlock( {
+			page: 'frontend',
+		} );
 
 		await expect( block ).toBeVisible();
 	} );
@@ -127,13 +149,17 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
+			pageObject,
 			admin,
 		} ) => {
 			await addBlock( admin, editor, editorUtils );
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 			await editor.openDocumentSettingsSidebar();
+
 			await page
 				.locator( blockData.selectors.editor.noArrowsOption )
 				.click();
@@ -168,7 +194,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
-			frontendUtils,
+			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
 			const parentBlock = await editorUtils.getBlockByName(
@@ -188,7 +214,9 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 
 			await editor.openDocumentSettingsSidebar();
@@ -197,8 +225,7 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editorUtils,
+				pageObject,
 				leftArrowSelector:
 					blockData.selectors.editor.leftArrow.outsideTheImage,
 				rightArrowSelector:
@@ -226,8 +253,7 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editorUtils,
+				pageObject,
 				leftArrowSelector:
 					blockData.selectors.editor.leftArrow.outsideTheImage,
 				rightArrowSelector:
@@ -248,7 +274,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
-			frontendUtils,
+			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
 			const parentBlock = await editorUtils.getBlockByName(
@@ -268,7 +294,9 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 
 			await editor.openDocumentSettingsSidebar();
@@ -277,8 +305,7 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editorUtils,
+				pageObject,
 				leftArrowSelector:
 					blockData.selectors.editor.leftArrow.insideTheImage,
 				rightArrowSelector:
@@ -306,8 +333,7 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editorUtils,
+				pageObject,
 				leftArrowSelector:
 					blockData.selectors.editor.leftArrow.insideTheImage,
 				rightArrowSelector:
@@ -328,7 +354,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
-			frontendUtils,
+			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
 			const parentBlock = await editorUtils.getBlockByName(
@@ -348,12 +374,16 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 
 			await editorUtils.setLayoutOption( 'Align Top' );
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await pageObject.getNextPreviousButtonsBlock( {
+				page: 'editor',
+			} );
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-start' );
 
@@ -368,8 +398,10 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const frontendBlock = await frontendUtils.getBlockByName(
-				blockData.name
+			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
+				{
+					page: 'frontend',
+				}
 			);
 
 			await expect( frontendBlock ).toHaveCSS(
@@ -382,7 +414,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
-			frontendUtils,
+			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
 			const parentBlock = await editorUtils.getBlockByName(
@@ -402,12 +434,16 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 
 			await editorUtils.setLayoutOption( 'Align Middle' );
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await pageObject.getNextPreviousButtonsBlock( {
+				page: 'editor',
+			} );
 
 			await expect( block ).toHaveCSS( 'align-items', 'center' );
 
@@ -422,8 +458,10 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const frontendBlock = await frontendUtils.getBlockByName(
-				blockData.name
+			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
+				{
+					page: 'frontend',
+				}
 			);
 
 			await expect( frontendBlock ).toHaveCSS( 'align-items', 'center' );
@@ -433,7 +471,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			editorUtils,
-			frontendUtils,
+			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
 			const parentBlock = await editorUtils.getBlockByName(
@@ -453,10 +491,14 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await editorUtils.getBlockByName( blockData.name )
+				await pageObject.getNextPreviousButtonsBlock( {
+					page: 'editor',
+				} )
 			 ).click();
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await pageObject.getNextPreviousButtonsBlock( {
+				page: 'editor',
+			} );
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
 
@@ -471,8 +513,10 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const frontendBlock = await frontendUtils.getBlockByName(
-				blockData.name
+			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
+				{
+					page: 'frontend',
+				}
 			);
 
 			await expect( frontendBlock ).toHaveCSS(

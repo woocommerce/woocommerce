@@ -11,18 +11,22 @@ interface Context {
 	woocommerce: {
 		selectedImage: string;
 		imageId: string;
+		isDialogOpen: boolean;
 	};
 }
 
 interface Selectors {
 	woocommerce: {
 		isSelected: ( store: unknown ) => boolean;
+		isDialogOpen: ( store: unknown ) => boolean;
 	};
 }
 
 interface Actions {
 	woocommerce: {
-		handleClick: ( context: Context ) => void;
+		thumbnails: {
+			handleClick: ( context: Context ) => void;
+		};
 	};
 }
 
@@ -44,12 +48,18 @@ interactivityApiStore( {
 					context?.woocommerce.imageId
 				);
 			},
+			isDialogOpen: ( { context }: Store ) => {
+				return context?.woocommerce.isDialogOpen;
+			},
 		},
 	},
 	actions: {
 		woocommerce: {
-			handleClick: ( { context }: Store ) => {
-				context.woocommerce.selectedImage = context.woocommerce.imageId;
+			thumbnails: {
+				handleClick: ( { context }: Store ) => {
+					context.woocommerce.selectedImage =
+						context.woocommerce.imageId;
+				},
 			},
 		},
 	},
