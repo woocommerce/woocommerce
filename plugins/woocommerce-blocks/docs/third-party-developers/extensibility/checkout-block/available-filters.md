@@ -231,6 +231,8 @@ registerCheckoutFilters( 'newsletter-plugin', {
 } );
 ```
 
+<img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267215471-816eb52a-b052-4d98-a69e-e96b01dffd6a.png">
+
 ### Changing the wording of the Totals label in the Mini-Cart, Cart and Checkout
 
 For this example, let's suppose we are building an extension that lets customers pay a deposit, and defer the full amount until a later date. To make it easier to understand what the customer is paying and why, let's change the value of `Total` to `Deposit due today`.
