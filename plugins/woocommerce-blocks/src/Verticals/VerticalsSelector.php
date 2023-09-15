@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Verticals;
 
+use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\Verticals\Client as VerticalsAPIClient;
 
 
@@ -19,50 +20,68 @@ class VerticalsSelector {
 	private $verticals_api_client;
 
 	/**
-	 * The GPT client.
+	 * The AI Connection.
 	 *
-	 * @var ChatGPTClient
+	 * @var Connection
 	 */
-	private $chat_gpt_client;
+	private $ai_connection;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param VerticalsAPIClient $verticals_api_client The verticals API client.
-	 * @param ChatGPTClient      $chat_gpt_client The ChatGPT client.
 	 */
-	public function __construct( VerticalsAPIClient $verticals_api_client, ChatGPTClient $chat_gpt_client ) {
-		$this->verticals_api_client = $verticals_api_client;
-		$this->chat_gpt_client      = $chat_gpt_client;
+	public function __construct() {
+		$this->verticals_api_client = new VerticalsAPIClient();
+		$this->ai_connection        = new Connection();
 	}
 
 	/**
 	 * Gets the vertical id that better matches the business description using the GPT API.
 	 *
+	 * @param string $business_description The business description.
+	 *
 	 * @return string|\WP_Error The vertical id, or WP_Error if the request failed.
 	 */
-	public function get_vertical_id() {
-		$business_description = $this->get_business_description();
+	public function get_vertical_id( $business_description = '' ) {
 		if ( empty( $business_description ) ) {
+			$business_description = $this->get_business_description();
+		}
+
+		if ( ! is_string( $business_description ) ) {
 			return new \WP_Error(
-				'empty_business_description',
-				__( 'The business description is empty.', 'woo-gutenberg-products-block' )
+				'missing_business_description',
+				__( 'The business description is required to generate the content for your site.', 'woo-gutenberg-products-block' )
 			);
 		}
 
 		$verticals = $this->verticals_api_client->get_verticals();
 		if ( is_wp_error( $verticals ) ) {
-			return $verticals; // TODO: should wrap the error in another WP_Error???
+			return $verticals;
 		}
 
-		$prompt = $this->build_prompt( $verticals, $business_description );
+		$prompt  = $this->build_prompt( $verticals, $business_description );
+		$site_id = $this->ai_connection->get_site_id();
 
-		$answer = $this->chat_gpt_client->text_completion( $prompt );
-		if ( is_wp_error( $answer ) ) {
-			return $answer; // TODO: should wrap the error in another WP_Error???
+		if ( is_wp_error( $site_id ) ) {
+			return $site_id;
 		}
 
-		return $this->parse_answer( $answer );
+		$token = $this->ai_connection->get_jwt_token( $site_id );
+
+		if ( is_wp_error( $token ) ) {
+			return $token;
+		}
+
+		$ai_response = $this->ai_connection->fetch_ai_response( $token, $prompt );
+
+		if ( is_wp_error( $ai_response ) ) {
+			return $ai_response;
+		}
+
+		if ( ! isset( $ai_response['completion'] ) ) {
+			return new \WP_Error( 'invalid_ai_response', __( 'The AI response is invalid.', 'woo-gutenberg-products-block' ) );
+		}
+
+		return $this->parse_answer( $ai_response['completion'] );
 	}
 
 	/**
@@ -97,10 +116,7 @@ class VerticalsSelector {
 		$verticals = implode( ', ', $verticals );
 
 		return sprintf(
-			'Filter the objects provided below and return the one that has a title that better matches this' .
-			' description of an online store with the following description: "%s". Objects: %s.' .
-			' The response should include exclusively the ID of the object that better matches' .
-			' the description in the following format: [id=selected_id]. Do not include other text or explanation.',
+			'Filter the objects provided below and return the one that has a title that better matches this description of an online store with the following description: "%s". The response should include exclusively the ID of the object that better matches. The response should be a number, with absolutely no texts and without any explanations \n %s.',
 			$business_description,
 			$verticals
 		);
@@ -109,17 +125,17 @@ class VerticalsSelector {
 	/**
 	 * Parse the answer from the GPT API and return the id of the selected vertical.
 	 *
-	 * @param string $answer The answer from the GPT API.
+	 * @param string $ai_response The answer from the GPT API.
 	 *
-	 * @return string The id of the selected vertical.
+	 * @return int|\WP_Error The id of the selected vertical.
 	 */
-	private function parse_answer( string $answer ): string {
-		$pattern = '/\[id=(\d+)]/';
+	private function parse_answer( $ai_response ) {
+		$vertical_id = preg_replace( '/[^0-9]/', '', $ai_response );
 
-		if ( preg_match( $pattern, $answer, $matches ) ) {
-			return $matches[1];
+		if ( ! is_numeric( $vertical_id ) ) {
+			return new \WP_Error( 'invalid_ai_response', __( 'The AI response is invalid.', 'woo-gutenberg-products-block' ) );
 		}
 
-		return '';
+		return (int) $vertical_id;
 	}
 }
