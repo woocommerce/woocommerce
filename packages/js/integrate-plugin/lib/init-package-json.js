@@ -9,6 +9,7 @@ const { info, error } = require( '../node_modules/@wordpress/create-block/lib/lo
 
 module.exports = async ( {
 	author,
+	textdomain,
 	description,
 	license,
 	pluginURI,
