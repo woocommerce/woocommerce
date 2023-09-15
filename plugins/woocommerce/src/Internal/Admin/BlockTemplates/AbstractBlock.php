@@ -189,7 +189,7 @@ class AbstractBlock implements BlockInterface {
 		$is_in_parent        = $this->parent->get_block( $this->id ) === $this;
 		$is_in_root_template = $this->get_root_template()->get_block( $this->id ) === $this;
 
-		return ! $is_in_parent || ! $is_in_root_template;
+		return ! ( $is_in_parent && $is_in_root_template );
 	}
 	/**
 	 * Get the block configuration as a formatted template.
