@@ -207,6 +207,32 @@ CartCoupon {
 }
 ```
 
+A code snippet to replace coupon label for matching coupon(s) can be found below:
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Replace coupon label for matching coupon(s).
+registerCheckoutFilters( 'example-extension', {
+    coupons: ( coupons ) => {
+        return coupons.map( ( coupon ) => {
+            // Regex to match autocoupon then unlimited undersores and numbers
+            if ( ! coupon.label.match( /autocoupon(?:_\d+)+/ ) ) {
+                return coupon;
+            }
+            return {
+                ...coupon,
+                label: 'Automatic coupon',
+            };
+        } );
+    }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/3323310/267266272-bb6ff77e-7c40-46f7-8d66-a7825ea78fff.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267266261-029f993a-cf32-4f9b-abb5-af05df2477cd.png"> |
+
 ## Proceed to Checkout Button Label
 
 The Cart block contains a button which is labelled 'Proceed to Checkout' by default. It can be changed using the following filter.
