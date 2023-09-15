@@ -179,6 +179,32 @@ The Cart block contains a button which is labelled 'Proceed to Checkout' and lin
 | ----------------------------- | ----------------------------------------------------------- | ----------- |
 | `proceedToCheckoutButtonLink` | The URL that the Proceed to Checkout button should link to. | `string`    |
 
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust the proceed to checkout button link.
+registerCheckoutFilters( 'example-extension', {
+  proceedToCheckoutButtonLink: ( value, extensions, args ) => {
+    if ( ! args?.cart.items ) {
+      return value;
+    }
+ 
+    const isSunglassesInCart = args?.cart.items.some(
+      ( item ) => item.name === 'Sunglasses'
+    );
+ 
+    // Return the default value if sunglasses is not in the cart.
+    if ( ! isSunglassesInCart ) {
+      return value;
+    }
+ 
+    return '/sunglasses-checkout';
+  }
+} );
+```
+
+<img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267270560-2964d529-771d-4d00-9fff-646b15d59cbf.png">
+
 ## Place Order Button Label
 
 The Checkout block contains a button which is labelled 'Place Order' by default, but can be changed using the following filter. This filter has the current cart passed to it in the third parameter.
