@@ -50,21 +50,12 @@ export const SidebarNavigationScreenFooter = () => {
 				...selectedBlocks[ 0 ],
 				attributes: {
 					...selectedBlocks[ 0 ].attributes,
-					slug: 'footer',
 				},
 			};
 
-			onChange(
-				[
-					...blocks.map( ( block ) => {
-						if ( block.attributes?.slug === 'footer' ) {
-							return newFooterBlock;
-						}
-						return block;
-					} ),
-				],
-				{ selection: {} }
-			);
+			onChange( [ ...blocks.slice( 0, -1 ), newFooterBlock ], {
+				selection: {},
+			} );
 		},
 		[ blocks, onChange ]
 	);
