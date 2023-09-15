@@ -3,10 +3,11 @@
  */
 import './product-list-content.scss';
 import ProductCard from '../product-card/product-card';
-import { Product } from '../product-list/types';
+import { Product, ProductType } from '../product-list/types';
 
 export default function ProductListContent( props: {
 	products: Product[];
+	type?: ProductType;
 } ): JSX.Element {
 	const { products } = props;
 	return (
@@ -14,9 +15,10 @@ export default function ProductListContent( props: {
 			{ products.map( ( product ) => (
 				<ProductCard
 					key={ product.id }
-					type="classic"
+					type={ props.type }
 					product={ {
 						title: product.title,
+						image: product.image,
 						icon: product.icon,
 						vendorName: product.vendorName,
 						vendorUrl: product.vendorUrl,

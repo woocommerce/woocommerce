@@ -8,16 +8,16 @@ import { Card } from '@wordpress/components';
  * Internal dependencies
  */
 import './product-card.scss';
-import { Product } from '../product-list/types';
+import { Product, ProductType } from '../product-list/types';
 import { appendUTMParams } from '../../utils/functions';
 
 export interface ProductCardProps {
-	type?: string;
+	type?: ProductType;
 	product: Product;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const { product } = props;
+	const { product, type = ProductType.classic } = props;
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
@@ -42,7 +42,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	}
 
 	return (
-		<Card className="woocommerce-marketplace__product-card">
+		<Card
+			className={ `woocommerce-marketplace__product-card woocommerce-marketplace__product-card--${ type }` }
+		>
 			<div className="woocommerce-marketplace__product-card__content">
 				<div className="woocommerce-marketplace__product-card__header">
 					<div className="woocommerce-marketplace__product-card__details">
