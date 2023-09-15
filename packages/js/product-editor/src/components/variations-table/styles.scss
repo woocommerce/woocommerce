@@ -26,6 +26,7 @@ $table-row-height: calc($grid-unit * 9);
 				border-color: $gray-600;
 			}
 		}
+		margin-left: $gap-smallest;
 	}
 
 	&__filters {
