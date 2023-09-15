@@ -57,6 +57,30 @@ In the Checkout block, there is a sidebar that contains a summary of what the cu
 
 Each of these filters has the following additional arguments passed to it: `{ context: 'summary', cartItem: CartItem }` ([CartItem](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L113))
 
+### subtotalPriceFormat
+
+A code snippet to adjust subtotal price format of the order summary items can be found below:
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust subtotal price format of the order summary items.
+registerCheckoutFilters( 'example-extension', {
+  subtotalPriceFormat: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Summary context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'summary' ) {
+      return value;
+    }
+    return '<price/> per item';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/6242098/268092313-d981f064-f274-4175-8291-1671ed55535b.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267265204-7afbbe1a-de1a-4696-a2d9-881de3016060.png"> |
+
 ## Totals footer item (in Mini-Cart, Cart and Checkout)
 
 The word 'Total' that precedes the amount due, present in both the Cart _and_ Checkout blocks, is also passed through filters.
