@@ -27,6 +27,8 @@ $break-small: 600px;
 		> li {
 			margin: 0;
 			width: 100%;
+			// Below style is required to override high-specificity Storefront styles
+			list-style: none;
 		}
 
 		@include break-small {
