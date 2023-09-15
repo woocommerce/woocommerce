@@ -2,56 +2,65 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Blocks\Verticals\Client as VerticalsAPIClient;
+use Automattic\WooCommerce\Blocks\Verticals\Client;
 use WP_Error;
 
 /**
  * Pattern Images class.
  */
 class PatternImages {
+	/**
+	 * The patterns content option name.
+	 */
 	const WC_BLOCKS_PATTERNS_CONTENT = 'wc_blocks_patterns_content';
 
 	/**
-	 * The verticals API client.
+	 * Get the Patterns Dictionary.
 	 *
-	 * @var VerticalsAPIClient
+	 * @return mixed|WP_Error|null
 	 */
-	private $verticals_api_client;
+	public function get_patterns_dictionary() {
+		$patterns_dictionary = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
-	/**
-	 * The patterns dictionary.
-	 *
-	 * @var array
-	 */
-	private $patterns_dictionary;
+		if ( ! file_exists( $patterns_dictionary ) ) {
+			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
+		}
 
-	/**
-	 * Constructor.
-	 *
-	 * @param VerticalsAPIClient $verticals_api_client The verticals API client.
-	 * @param array              $patterns_dictionary The patterns dictionary.
-	 */
-	public function __construct( VerticalsAPIClient $verticals_api_client, array $patterns_dictionary ) {
-		$this->verticals_api_client = $verticals_api_client;
-		$this->patterns_dictionary  = $patterns_dictionary;
+		return wp_json_file_decode( $patterns_dictionary, array( 'associative' => true ) );
 	}
 
 	/**
 	 * Creates the patterns content for the given vertical.
 	 *
-	 * @param int $vertical_id The vertical id.
+	 * @param  int    $vertical_id  The vertical id.
+	 * @param  Client $verticals_api_client  The verticals API client.
 	 *
-	 * @return void|WP_Error
+	 * @return bool|WP_Error
 	 */
-	public function create_patterns_content( int $vertical_id ) {
-		$vertical_images = $this->verticals_api_client->get_vertical_images( $vertical_id );
+	public function create_patterns_content( $vertical_id, $verticals_api_client ) {
+		if ( ! is_int( $vertical_id ) ) {
+			return new WP_Error( 'invalid_vertical_id', __( 'The vertical id is invalid.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$vertical_images = $verticals_api_client->get_vertical_images( $vertical_id );
+
 		if ( is_wp_error( $vertical_images ) ) {
-			return $vertical_images; // TODO: should wrap the error in another WP_Error???
+			return $vertical_images;
 		}
 
 		$patterns_with_images = $this->get_patterns_with_images( $vertical_images );
 
-		update_option( self::WC_BLOCKS_PATTERNS_CONTENT, $patterns_with_images );
+		if ( get_option( self::WC_BLOCKS_PATTERNS_CONTENT ) === $patterns_with_images ) {
+			return true;
+		}
+
+		$updated_content = update_option( self::WC_BLOCKS_PATTERNS_CONTENT, $patterns_with_images );
+
+		if ( ! $updated_content ) {
+			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+		}
+
+		return $updated_content;
 	}
 
 	/**
@@ -61,10 +70,16 @@ class PatternImages {
 	 *
 	 * @return array The patterns with images.
 	 */
-	private function get_patterns_with_images( array $vertical_images ): array {
+	private function get_patterns_with_images( $vertical_images ) {
+		$patterns_dictionary = $this->get_patterns_dictionary();
+
+		if ( is_wp_error( $patterns_dictionary ) ) {
+			return $patterns_dictionary;
+		}
+
 		$patterns_with_images = array();
 
-		foreach ( $this->patterns_dictionary as $pattern ) {
+		foreach ( $patterns_dictionary as $pattern ) {
 			if ( ! $this->pattern_has_images( $pattern ) ) {
 				continue;
 			}
