@@ -711,20 +711,15 @@ class ListTable extends WP_List_Table {
 		global $wpdb;
 
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$utc_offset = wc_timezone_offset();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
 			"
-				SELECT DISTINCT YEAR( date_created_gmt ) AS year,
-								MONTH( date_created_gmt ) AS month
-
-				FROM $orders_table
-
-				WHERE status NOT IN (
-					'trash'
-				)
-
-				ORDER BY year DESC, month DESC;
+				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+								MONTH( t.date_created_local ) AS month
+				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
+				ORDER BY year DESC, month DESC
 			"
 		);
 
