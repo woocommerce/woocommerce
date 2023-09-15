@@ -73,7 +73,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 						if ( $processor->next_tag() ) {
 							$processor->set_attribute(
 								'data-wc-on--click',
-								'actions.woocommerce.handleClick'
+								'actions.woocommerce.thumbnails.handleClick'
 							);
 
 							$html .= $processor->get_updated_html();

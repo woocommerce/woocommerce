@@ -19,10 +19,12 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
+			frontendUtils,
+			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -48,12 +50,13 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'Renders Product Gallery Large Image block on the editor and frontend side', async ( {
 		page,
 		editorUtils,
-		frontendUtils,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-		const block = await editorUtils.getBlockByName( blockData.name );
+		const block = await pageObject.getMainImageBlock( {
+			page: 'editor',
+		} );
 
 		await expect( block ).toBeVisible();
 
@@ -63,9 +66,9 @@ test.describe( `${ blockData.name }`, () => {
 			waitUntil: 'commit',
 		} );
 
-		const blockFrontend = await frontendUtils.getBlockByName(
-			blockData.name
-		);
+		const blockFrontend = await pageObject.getMainImageBlock( {
+			page: 'frontend',
+		} );
 
 		await expect( blockFrontend ).toBeVisible();
 	} );
@@ -81,7 +84,6 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should work on frontend when is enabled', async ( {
 			pageObject,
 			editorUtils,
-			frontendUtils,
 			page,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
@@ -92,9 +94,9 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const blockFrontend = await frontendUtils.getBlockByName(
-				blockData.name
-			);
+			const blockFrontend = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
 
 			// img[style] is the selector because the style attribute is Interactivity API.
 			const imgElement = blockFrontend.locator(
@@ -116,7 +118,6 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
 			editorUtils,
-			frontendUtils,
 			page,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
@@ -132,9 +133,9 @@ test.describe( `${ blockData.name }`, () => {
 				waitUntil: 'commit',
 			} );
 
-			const blockFrontend = await frontendUtils.getBlockByName(
-				blockData.name
-			);
+			const blockFrontend = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
 
 			// img[style] is the selector because the style attribute is added by Interactivity API. In this case, the style attribute should not be added.
 			const imgElement = blockFrontend.locator(

@@ -1,0 +1,10 @@
+.wp-block-woocommerce-product-gallery {
+	dialog {
+		position: fixed;
+		width: 90vw;
+		height: 90vh;
+		top: 0;
+		margin: $gap-largest;
+		z-index: 9999;
+	}
+}

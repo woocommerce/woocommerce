@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * ProductGallery class.
@@ -13,6 +13,45 @@ class ProductGallery extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-gallery';
+
+	/**
+	 * Return the dialog content.
+	 *
+	 * @return string
+	 */
+	protected function render_dialog() {
+		$template_part = BlockTemplateUtils::get_template_part( 'product-gallery' );
+
+		$parsed_template = parse_blocks(
+			$template_part
+		);
+
+		$html = array_reduce(
+			$parsed_template,
+			function( $carry, $item ) {
+				return $carry . render_block( $item );
+			},
+			''
+		);
+
+		$gallery_dialog = '<dialog data-wc-bind--open="selectors.woocommerce.isDialogOpen">' . $html . '</dialog>';
+		return $gallery_dialog;
+	}
+
+
+	/**
+	 * This function remove the div wrapper.
+	 * The content has a <div> with the class wp-block-woocommerce-product-gallery>.
+	 * We don't need since that we add it in the render method.
+	 *
+	 * @param string $content Block content.
+	 * @return string Rendered block type output.
+	 */
+	private function remove_div_wrapper( $content ) {
+		$parsed_string = preg_replace( '/<div class="wp-block-woocommerce-product-gallery">/', '', $content );
+		$parsed_string = preg_replace( '/<\/div>$/', '', $parsed_string );
+		return $parsed_string;
+	}
 
 	/**
 	 * Include and render the block.
@@ -27,15 +66,18 @@ class ProductGallery extends AbstractBlock {
 		global $product;
 		$classname          = $attributes['className'] ?? '';
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( sprintf( 'woocommerce %1$s', $classname ) ) ) );
+		$gallery            = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
 		$html               = sprintf(
-			'<div data-wc-interactive %1$s>
+			'<div %1$s>
 				%2$s
+				%3$s
 			</div>',
 			$wrapper_attributes,
-			$content
+			$this->remove_div_wrapper( $content ),
+			$gallery
 		);
 
-		$p = new \WP_HTML_Tag_Processor( $content );
+		$p = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', true );
@@ -45,6 +87,7 @@ class ProductGallery extends AbstractBlock {
 					array(
 						'woocommerce' => array(
 							'selectedImage' => $product->get_image_id(),
+							'isDialogOpen'  => false,
 						),
 					)
 				)

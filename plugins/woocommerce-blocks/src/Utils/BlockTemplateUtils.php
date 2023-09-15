@@ -38,6 +38,8 @@ class BlockTemplateUtils {
 		'TEMPLATE_PARTS'            => 'parts',
 	);
 
+	const TEMPLATES_ROOT_DIR = 'templates';
+
 	/**
 	 * WooCommerce plugin slug
 	 *
@@ -272,6 +274,29 @@ class BlockTemplateUtils {
 			}
 		}
 		return $path_list;
+	}
+
+	/**
+	 * Gets the directory where templates of a specific template type can be found.
+	 *
+	 * @param string $template_type wp_template or wp_template_part.
+	 *
+	 * @return string
+	 */
+	public static function get_templates_directory( $template_type = 'wp_template' ) {
+			$root_path                = dirname( __DIR__, 2 ) . '/' . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
+			$templates_directory      = $root_path . self::DIRECTORY_NAMES['TEMPLATES'];
+			$template_parts_directory = $root_path . self::DIRECTORY_NAMES['TEMPLATE_PARTS'];
+
+		if ( 'wp_template_part' === $template_type ) {
+			return $template_parts_directory;
+		}
+
+		if ( self::should_use_blockified_product_grid_templates() ) {
+			return $templates_directory . '/blockified';
+		}
+
+		return $templates_directory;
 	}
 
 	/**
@@ -734,5 +759,29 @@ class BlockTemplateUtils {
 			},
 			$saved_woo_templates
 		);
+	}
+
+	/**
+	 * Gets the template part by slug
+	 *
+	 * @param string $slug The template part slug.
+	 *
+	 * @return string The template part content.
+	 */
+	public static function get_template_part( $slug ) {
+		$templates_from_db = self::get_block_templates_from_db( array( $slug ), 'wp_template_part' );
+		if ( count( $templates_from_db ) > 0 ) {
+			$template_slug_to_load = $templates_from_db[0]->theme;
+		} else {
+			$theme_has_template    = self::theme_has_template_part( $slug );
+			$template_slug_to_load = $theme_has_template ? get_stylesheet() : self::PLUGIN_SLUG;
+		}
+		$template_part = self::get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
+
+		if ( $template_part && ! empty( $template_part->content ) ) {
+			return $template_part->content;
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		return file_get_contents( self::get_templates_directory( 'wp_template_part' ) . DIRECTORY_SEPARATOR . $slug . '.html' );
 	}
 }
