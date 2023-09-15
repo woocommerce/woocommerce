@@ -116,11 +116,6 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
-		mockedRequestJetpackToken.mockResolvedValueOnce(
-			new Promise( ( resolve ) =>
-				setTimeout( () => resolve( { token: 'fake_token' } ), 100 )
-			)
-		);
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		act( () => {
 			result.current.fetchImage( mockRequestParams );
