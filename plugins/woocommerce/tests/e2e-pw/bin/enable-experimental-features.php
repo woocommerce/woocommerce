@@ -19,7 +19,7 @@ function register_feature_flag_routes() {
 		'e2e-feature-flags',
 		'/reset',
 		array(
-			'methods'             => 'POST',
+			'methods'             => 'GET',
 			'callback'            => 'reset_feature_flags',
 			'permission_callback' => 'is_allowed',
 		)
