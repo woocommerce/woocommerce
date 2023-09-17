@@ -4,7 +4,7 @@ const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 const { features } = require( '../../utils' );
 
-// Skipping Onbaording tests when the core-profiler is enabled.
+// Skipping Onboarding tests when the core-profiler is enabled.
 const testRunner = features.is_enabled( 'core-profiler' )
 	? test.describe.skip
 	: test.describe;
@@ -65,7 +65,6 @@ testRunner( 'Store owner can complete onboarding wizard', () => {
 	test( 'can discard industry changes when navigating back to "Store Details"', async ( {
 		page,
 	} ) => {
-
 		// set up pre-condition to ensure Industries stored in
 		// storeDetails.us.industries2 have been set
 		await onboarding.completeIndustrySection(
@@ -84,7 +83,9 @@ testRunner( 'Store owner can complete onboarding wizard', () => {
 		if ( saveChangesModalVisible ) {
 			// Save the changes to ensure the test is now in the correct state
 			// independent of the previous test results
-			await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+			await onboarding.handleSaveChangesModal( page, {
+				saveChanges: true,
+			} );
 		}
 
 		// test proper begins
@@ -160,7 +161,7 @@ testRunner( 'Store owner can complete onboarding wizard', () => {
 	} );
 } );
 
-// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
+// Skipping Onboarding tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
 testRunner(
 	'A Liberian store can complete the selective bundle install but does not include WCPay.',
