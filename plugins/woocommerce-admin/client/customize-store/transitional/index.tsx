@@ -122,7 +122,7 @@ export const Transitional = ( {
 							variant="tertiary"
 							onClick={ () => {
 								recordEvent(
-									'customize_your_transitional_home_click'
+									'customize_your_store_transitional_home_click'
 								);
 								sendEvent( {
 									type: 'GO_BACK_TO_HOME',
