@@ -78,7 +78,7 @@ describe( 'Transitional', () => {
 			.click();
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_transitional_preview_store_click'
+			'customize_your_store_transitional_preview_store_click'
 		);
 	} );
 
@@ -100,7 +100,7 @@ describe( 'Transitional', () => {
 			.click();
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_transitional_editor_click'
+			'customize_your_store_transitional_editor_click'
 		);
 	} );
 
@@ -118,7 +118,7 @@ describe( 'Transitional', () => {
 			type: 'GO_BACK_TO_HOME',
 		} );
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_transitional_home_click'
+			'customize_your_store_transitional_home_click'
 		);
 	} );
 } );
