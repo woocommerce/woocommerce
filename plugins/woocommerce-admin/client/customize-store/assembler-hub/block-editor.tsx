@@ -4,25 +4,25 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords, useEntityBlockEditor } from '@wordpress/core-data';
+import { useEntityRecords } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-import { BlockInstance } from '@wordpress/blocks';
+
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
 import { useCallback } from '@wordpress/element';
+import { useEditorBlocks } from './hooks/use-editor-blocks';
+import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { useQuery } from '@woocommerce/navigation';
 
-const { useHistory, useLocation } = unlock( routerPrivateApis );
+const { useHistory } = unlock( routerPrivateApis );
 
 type Page = {
 	link: string;
@@ -36,20 +36,18 @@ const MAX_PAGE_COUNT = 100;
 
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
-	const location = useLocation();
 	const settings = useSiteEditorSettings();
+	const [ blocks ] = useEditorBlocks();
+	const urlParams = useQuery();
 
-	const { templateType } = useSelect( ( select ) => {
-		const { getEditedPostType } = unlock( select( editSiteStore ) );
+	const scrollDirection =
+		urlParams.path === '/customize-store/assembler-hub/footer'
+			? 'bottomUp'
+			: 'topDown';
 
-		return {
-			templateType: getEditedPostType(),
-		};
-	}, [] );
-
-	const [ blocks ]: [ BlockInstance[] ] = useEntityBlockEditor(
-		'postType',
-		templateType
+	const previewOpacity = useScrollOpacity(
+		'.interface-navigable-region.interface-interface-skeleton__content',
+		scrollDirection
 	);
 
 	// // See packages/block-library/src/page-list/edit.js.
@@ -79,22 +77,22 @@ export const BlockEditor = ( {} ) => {
 				);
 			if ( clickedPage ) {
 				history.push( {
-					...location.params,
+					...urlParams,
 					postId: clickedPage.id,
 					postType: 'page',
 				} );
 			} else {
 				// Home page
-				const { postId, postType, ...params } = location.params;
+				const { postId, postType, ...params } = urlParams;
 				history.push( {
 					...params,
 				} );
 			}
 		},
-		[ history, location.params, pages ]
+		[ history, urlParams, pages ]
 	);
 
-	if ( location.params.path === '/customize-store/homepage' ) {
+	if ( urlParams.path === '/customize-store/assembler-hub/homepage' ) {
 		// When assembling the homepage preview, we need to render the blocks in a different way than the rest of the pages.
 		// Because we want to show a action bar when hovering over a pattern. This is not needed for the rest of the pages and will cause an issue with logo editing.
 		return (
@@ -138,6 +136,7 @@ export const BlockEditor = ( {} ) => {
 								onClickNavigationItem={ onClickNavigationItem }
 								// Use sub registry because we have multiple previews
 								useSubRegistry={ true }
+								previewOpacity={ previewOpacity }
 							/>
 						</div>
 					);
@@ -145,6 +144,7 @@ export const BlockEditor = ( {} ) => {
 			</div>
 		);
 	}
+
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>
@@ -155,6 +155,7 @@ export const BlockEditor = ( {} ) => {
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
+					previewOpacity={ previewOpacity }
 				/>
 			</div>
 		</div>

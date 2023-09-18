@@ -2,7 +2,7 @@
 @import './shared/_reset.scss';
 
 // Some WooCommerce Admin page specific resets.
-.woocommerce-page {
+.woocommerce-admin-page {
 	.wp-has-current-submenu::after {
 		right: 0;
 		border: 8px solid transparent;

@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { createMachine } from 'xstate';
+import { createMachine, sendParent } from 'xstate';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -17,6 +18,20 @@ import {
 	ApiCallLoader,
 } from './pages';
 import { actions } from './actions';
+import { services } from './services';
+
+export const hasStepInUrl = (
+	_ctx: unknown,
+	_evt: unknown,
+	{ cond }: { cond: unknown }
+) => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 3 ] === // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
+		( cond as { step: string | undefined } ).step
+	);
+};
 
 export const designWithAiStateMachineDefinition = createMachine(
 	{
@@ -27,10 +42,25 @@ export const designWithAiStateMachineDefinition = createMachine(
 			context: {} as designWithAiStateMachineContext,
 			events: {} as designWithAiStateMachineEvents,
 		},
+		invoke: {
+			src: 'browserPopstateHandler',
+		},
+		on: {
+			EXTERNAL_URL_UPDATE: {
+				target: 'navigate',
+			},
+			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
+				actions: [
+					sendParent( ( _context, event ) => event ),
+					'recordTracksStepClosed',
+				],
+			},
+		},
 		context: {
 			businessInfoDescription: {
 				descriptionText: '',
 			},
+
 			lookAndFeel: {
 				choice: '',
 			},
@@ -38,8 +68,43 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 		},
-		initial: 'businessInfoDescription',
+		initial: 'navigate',
 		states: {
+			navigate: {
+				always: [
+					{
+						target: 'businessInfoDescription',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'business-info-description',
+						},
+					},
+					{
+						target: 'lookAndFeel',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'look-and-feel',
+						},
+					},
+					{
+						target: 'toneOfVoice',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'tone-of-voice',
+						},
+					},
+					{
+						target: 'apiCallLoader',
+						cond: {
+							type: 'hasStepInUrl',
+							step: 'api-call-loader',
+						},
+					},
+					{
+						target: 'businessInfoDescription',
+					},
+				],
+			},
 			businessInfoDescription: {
 				id: 'businessInfoDescription',
 				initial: 'preBusinessInfoDescription',
@@ -54,6 +119,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: BusinessInfoDescription,
 						},
+						entry: [
+							{
+								type: 'recordTracksStepViewed',
+								step: 'business_info_description',
+							},
+						],
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
 								actions: [ 'assignBusinessInfoDescription' ],
@@ -62,8 +133,28 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 					},
 					postBusinessInfoDescription: {
-						always: {
-							target: '#lookAndFeel',
+						invoke: {
+							src: 'getLookAndTone',
+							onError: {
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'logAIAPIRequestError',
+								],
+								target: '#lookAndFeel',
+							},
+							onDone: {
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'assignLookAndTone',
+								],
+								target: '#lookAndFeel',
+							},
 						},
 					},
 				},
@@ -81,8 +172,25 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: LookAndFeel,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'look-and-feel',
+							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'look_and_feel',
+							},
+						],
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'look_and_feel',
+									},
+									'assignLookAndFeel',
+								],
 								target: 'postLookAndFeel',
 							},
 						},
@@ -107,8 +215,25 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: ToneOfVoice,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'tone-of-voice',
+							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'tone_of_voice',
+							},
+						],
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
+								actions: [
+									'assignToneOfVoice',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'tone_of_voice',
+									},
+								],
 								target: 'postToneOfVoice',
 							},
 						},
@@ -133,20 +258,23 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: ApiCallLoader,
 						},
+						entry: [
+							{
+								type: 'updateQueryStep',
+								step: 'api-call-loader',
+							},
+						],
 					},
 					postApiCallLoader: {},
 				},
 			},
 		},
-		on: {
-			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-				// TODO: handle this event when the 'x' is clicked at any point
-				// probably bail (to where?) and log the tracks for which step it is in plus
-				// whatever details might be helpful to know why they bailed
-			},
-		},
 	},
 	{
 		actions,
+		services,
+		guards: {
+			hasStepInUrl,
+		},
 	}
 );

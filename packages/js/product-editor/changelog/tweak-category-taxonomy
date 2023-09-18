@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove __experimentalDetailsCategoriesField and woocommerce/product-category-field block

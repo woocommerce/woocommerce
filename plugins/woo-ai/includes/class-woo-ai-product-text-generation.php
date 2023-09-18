@@ -20,6 +20,7 @@ class Woo_AI_Product_Text_Generation {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_register_script' ) );
 		add_action( 'media_buttons', array( $this, 'add_gpt_button' ), 40 );
+		add_action( 'media_buttons', array( $this, 'add_short_description_gpt_button' ), 50 );
 		add_action( 'edit_form_before_permalink', array( $this, 'add_name_generation_form' ) );
 		add_filter( 'the_editor', array( $this, 'add_gpt_form' ), 10, 1 );
 	}
@@ -80,6 +81,19 @@ class Woo_AI_Product_Text_Generation {
 		}
 
 		echo '<div id="woocommerce-ai-app-product-gpt-button"></div>';
+	}
+
+	/**
+	 * Add gpt button to the editor.
+	 *
+	 * @param String $editor_id Editor Id.
+	 */
+	public function add_short_description_gpt_button( $editor_id ) {
+		if ( 'excerpt' !== $editor_id || ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) ) {
+			return;
+		}
+
+		echo '<div id="woocommerce-ai-app-product-short-description-gpt-button"></div>';
 	}
 
 	/**

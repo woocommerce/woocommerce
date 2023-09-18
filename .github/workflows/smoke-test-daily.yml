@@ -32,6 +32,7 @@ jobs:
             CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
             CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
+            UPDATE_WC: 'nightly'
         steps:
             - uses: actions/checkout@v3
 
@@ -44,12 +45,6 @@ jobs:
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
-
-            - name: Run 'Update WooCommerce' test.
-              working-directory: plugins/woocommerce
-              env:
-                  UPDATE_WC: nightly
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
 
             - name: Run API tests.
               working-directory: plugins/woocommerce
@@ -79,7 +74,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [api-tests]
+        #  needs: [api-tests]
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}

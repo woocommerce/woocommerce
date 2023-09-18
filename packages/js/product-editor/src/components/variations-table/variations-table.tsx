@@ -40,8 +40,6 @@ import { useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import HiddenIcon from './hidden-icon';
-import VisibleIcon from './visible-icon';
 import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
 	DEFAULT_VARIATION_PER_PAGE_OPTION,
@@ -51,10 +49,9 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
+import HiddenWithHelpIcon from '../../icons/hidden-with-help-icon';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
-const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
-const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
 export function VariationsTable() {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
@@ -378,7 +375,22 @@ export function VariationsTable() {
 								}
 							) }
 						>
-							{ formatAmount( variation.price ) }
+							{ variation.on_sale && (
+								<span className="woocommerce-product-variations__sale-price">
+									{ formatAmount( variation.sale_price ) }
+								</span>
+							) }
+							<span
+								className={ classnames(
+									'woocommerce-product-variations__regular-price',
+									{
+										'woocommerce-product-variations__regular-price--on-sale':
+											variation.on_sale,
+									}
+								) }
+							>
+								{ formatAmount( variation.regular_price ) }
+							</span>
 						</div>
 						<div
 							className={ classnames(
@@ -402,63 +414,14 @@ export function VariationsTable() {
 						<div className="woocommerce-product-variations__actions">
 							{ variation.status === 'private' && (
 								<Tooltip
+									// @ts-expect-error className is missing in TS, should remove this when it is included.
+									className="woocommerce-attribute-list-item__actions-tooltip"
 									position="top center"
 									text={ NOT_VISIBLE_TEXT }
 								>
-									<Button
-										className="components-button--hidden"
-										aria-label={
-											isUpdating[ variation.id ]
-												? UPDATING_TEXT
-												: NOT_VISIBLE_TEXT
-										}
-										aria-disabled={
-											isUpdating[ variation.id ]
-										}
-										onClick={ () =>
-											handleVariationChange(
-												variation.id,
-												{ status: 'publish' }
-											)
-										}
-									>
-										{ isUpdating[ variation.id ] ? (
-											<Spinner />
-										) : (
-											<HiddenIcon />
-										) }
-									</Button>
-								</Tooltip>
-							) }
-
-							{ variation.status === 'publish' && (
-								<Tooltip
-									position="top center"
-									text={ VISIBLE_TEXT }
-								>
-									<Button
-										className="components-button--visible"
-										aria-label={
-											isUpdating[ variation.id ]
-												? UPDATING_TEXT
-												: VISIBLE_TEXT
-										}
-										aria-disabled={
-											isUpdating[ variation.id ]
-										}
-										onClick={ () =>
-											handleVariationChange(
-												variation.id,
-												{ status: 'private' }
-											)
-										}
-									>
-										{ isUpdating[ variation.id ] ? (
-											<Spinner />
-										) : (
-											<VisibleIcon />
-										) }
-									</Button>
+									<div>
+										<HiddenWithHelpIcon />
+									</div>
 								</Tooltip>
 							) }
 							<VariationActionsMenu

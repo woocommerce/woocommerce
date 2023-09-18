@@ -11,7 +11,8 @@
     },
     "mappings": {
         "wp-cli.yml": "./tests/wp-cli.yml",
-        "wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php"
+        "wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
+        "wp-content/plugins/enable-experimental-features.php": "./tests/e2e-pw/bin/enable-experimental-features.php"
     },
     "lifecycleScripts": {
         "afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",

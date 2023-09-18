@@ -9,7 +9,7 @@ const shouldSkip = API_BASE_URL != undefined;
  * @group shipping
  */
 
-test.describe( 'Shipping zones API tests', () => {
+test.describe.serial( 'Shipping zones API tests', () => {
 
 	//Shipping zone to be created, retrieved, updated, and deleted by the tests.
 	let shippingZone = getShippingZoneExample();
@@ -169,14 +169,10 @@ test.describe( 'Shipping zones API tests', () => {
 		});
 
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
-		expect( putResponseStateOnly.status() ).toEqual( 200 );
+		await expect( putResponseStateOnly.status() ).toEqual( 200 );
 
-		// external host starts with default shipping region
-		if ( ! shouldSkip ) {
-		expect( putResponseStateOnlyJSON).toHaveLength(0);
-		} else {
-			expect( putResponseStateOnlyJSON ).toHaveLength(1);
-		}
+		await expect( putResponseStateOnlyJSON ).toHaveLength(0);
+
 	} );
 
 	test( 'can delete a shipping zone', async ({request}) => {
@@ -189,13 +185,16 @@ test.describe( 'Shipping zones API tests', () => {
 		const deleteResponseJSON = await deleteResponse.json();
 
 		//validate response
-		expect( deleteResponse.status() ).toEqual( 200 );
-		expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
+		await expect( deleteResponse.status() ).toEqual( 200 );
+		await expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
 
-		//call API to attempt to retrieve the deleted shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
-		//validate response
-		expect( response.status() ).toEqual( 404 );
+		// only run on wp-env because caching on external hosts makes unreliable
+		if ( ! shouldSkip ) {
+			//call API to attempt to retrieve the deleted shipping zone
+			const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+			//validate response
+			await expect( response.status() ).toEqual( 404 );
+		}
 	} );
 
 

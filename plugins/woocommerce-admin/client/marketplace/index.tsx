@@ -1,29 +1,22 @@
 /**
- * External dependencies
- */
-import { useState } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import './marketplace.scss';
-import { DEFAULT_TAB_KEY } from './components/constants';
+import { MarketplaceContextProvider } from './contexts/marketplace-context';
 import Header from './components/header/header';
 import Content from './components/content/content';
-import { ProductListContextProvider } from './contexts/product-list-context';
+import Footer from './components/footer/footer';
+import FeedbackModal from './components/feedback-modal/feedback-modal';
 
 export default function Marketplace() {
-	const [ selectedTab, setSelectedTab ] = useState( DEFAULT_TAB_KEY );
-
 	return (
-		<ProductListContextProvider>
+		<MarketplaceContextProvider>
 			<div className="woocommerce-marketplace">
-				<Header
-					selectedTab={ selectedTab }
-					setSelectedTab={ setSelectedTab }
-				/>
-				<Content selectedTab={ selectedTab } />
+				<Header />
+				<Content />
+				<FeedbackModal />
+				<Footer />
 			</div>
-		</ProductListContextProvider>
+		</MarketplaceContextProvider>
 	);
 }

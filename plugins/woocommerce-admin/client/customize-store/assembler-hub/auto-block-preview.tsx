@@ -11,21 +11,31 @@ import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
+	privateApis as blockEditorPrivateApis,
 	BlockList,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
+// @ts-ignore No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { noop } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
+import {
+	FontFamiliesLoader,
+	FontFamily,
+} from './sidebar/global-styles/font-pairing-variations/font-families-loader';
+import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 
-const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
 
 // This is used to avoid rendering the block list if the sizes change.
 let MemoizedBlockList: typeof BlockList | undefined;
+
+const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -48,6 +58,13 @@ function ScaledBlockPreview( {
 	onClickNavigationItem,
 }: ScaledBlockPreviewProps ) {
 	const { setLogoBlock } = useContext( LogoBlockContext );
+	const [ fontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies.theme'
+	) as [ FontFamily[] ];
+
+	const externalFontFamilies = fontFamilies.filter(
+		( { slug } ) => slug !== SYSTEM_FONT_SLUG
+	);
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
@@ -213,9 +230,6 @@ function ScaledBlockPreview( {
 				style={ {
 					width: viewportWidth,
 					height: contentHeight,
-					// This is a catch-all max-height for patterns.
-					// Reference: https://github.com/WordPress/gutenberg/pull/38175.
-					maxHeight: MAX_HEIGHT,
 					minHeight:
 						scale !== 0 && scale < 1 && minHeight
 							? minHeight / scale
@@ -244,6 +258,7 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 						}
 
+						.wp-block-navigation-item .wp-block-navigation-item__content,
 						.wp-block-navigation .wp-block-pages-list__item__link {
 							pointer-events: all !important;
 							cursor: pointer !important;
@@ -254,6 +269,13 @@ function ScaledBlockPreview( {
 				</style>
 				{ contentResizeListener }
 				<MemoizedBlockList renderAppender={ false } />
+				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
+				{ externalFontFamilies.length === 2 && (
+					<FontFamiliesLoader
+						fontFamilies={ externalFontFamilies }
+						onLoad={ noop }
+					/>
+				) }
 			</Iframe>
 		</DisabledProvider>
 	);

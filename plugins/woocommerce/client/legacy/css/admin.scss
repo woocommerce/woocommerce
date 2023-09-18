@@ -876,7 +876,8 @@
 		margin-right: 20px;
 	}
 
-	&.woocommerce-page {
+	// NOTE: .woocommerce-page is removed within admin.
+	&.woocommerce-page, &.woocommerce-admin-page {
 		.wrap {
 			margin-top: 32px;
 		}

@@ -62,7 +62,7 @@ export const DefaultProgressHeader: React.FC< DefaultProgressHeaderProps > = ( {
 						<progress
 							className="woocommerce-task-progress-header__progress-bar"
 							max={ tasksCount }
-							value={ completedCount || 0 }
+							value={ completedCount || 0.25 }
 						/>
 					</>
 				) : null }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -9,14 +9,17 @@ import { useEffect, useState } from '@wordpress/element';
 import ProductList from '../product-list/product-list';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 import './discover.scss';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
-	const [ isLoading, setIsLoading ] = useState( false );
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { isLoading, setIsLoading } = marketplaceContextValue;
 
+	// Get the content for this screen
 	useEffect( () => {
 		setIsLoading( true );
 

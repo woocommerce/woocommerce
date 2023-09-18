@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
@@ -12,10 +12,10 @@ import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
  */
 import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { MarketplaceContextType } from '../../contexts/types';
 
 export interface TabsProps {
-	selectedTab?: string | undefined;
-	setSelectedTab: ( value: string ) => void;
 	additionalClassNames?: Array< string > | undefined;
 }
 
@@ -63,8 +63,8 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const renderTabs = ( props: TabsProps ) => {
-	const { selectedTab, setSelectedTab } = props;
+const renderTabs = ( contextValue: MarketplaceContextType ) => {
+	const { selectedTab, setSelectedTab } = contextValue;
 	const tabContent = [];
 	for ( const tabKey in tabs ) {
 		tabContent.push(
@@ -104,14 +104,11 @@ const renderTabs = ( props: TabsProps ) => {
 };
 
 const Tabs = ( props: TabsProps ): JSX.Element => {
-	const { setSelectedTab, additionalClassNames } = props;
+	const { additionalClassNames } = props;
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { setSelectedTab } = marketplaceContextValue;
 
-	interface Query {
-		path?: string;
-		tab?: string;
-	}
-
-	const query: Query = useQuery();
+	const query: Record< string, string > = useQuery();
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
@@ -128,7 +125,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( props ) }
+			{ renderTabs( marketplaceContextValue ) }
 		</nav>
 	);
 };

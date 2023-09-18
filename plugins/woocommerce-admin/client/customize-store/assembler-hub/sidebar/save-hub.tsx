@@ -4,23 +4,22 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
-
+import { useContext, useEffect, useState } from '@wordpress/element';
+import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
-// @ts-ignore No types for this exist yet.
-import { Button, __experimentalHStack as HStack } from '@wordpress/components';
+import {
+	// @ts-ignore No types for this exist yet.
+	__experimentalHStack as HStack,
+	Button,
+	Spinner,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
-
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
 import { store as noticesStore } from '@wordpress/notices';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
 
@@ -28,8 +27,6 @@ import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
-
-const { useLocation } = unlock( routerPrivateApis );
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -40,8 +37,9 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 
 export const SaveHub = () => {
 	const saveNoticeId = 'site-edit-save-notice';
-	const { params } = useLocation();
+	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
+	const [ isResolving, setIsResolving ] = useState< boolean >( false );
 
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
@@ -111,6 +109,20 @@ export const SaveHub = () => {
 					},
 					{ undoIgnore: true }
 				);
+			} else if (
+				entity.kind === 'root' &&
+				entity.name === 'globalStyles'
+			) {
+				editEntityRecord(
+					entity.kind,
+					entity.name,
+					entity.key,
+					{
+						styles: undefined,
+						settings: undefined,
+					},
+					{ undoIgnore: true }
+				);
 			} else {
 				editEntityRecord(
 					entity.kind,
@@ -127,7 +139,7 @@ export const SaveHub = () => {
 		} );
 		// Only run when path changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ params.path ] );
+	}, [ urlParams.path ] );
 
 	const save = async () => {
 		removeNotice( saveNoticeId );
@@ -168,18 +180,19 @@ export const SaveHub = () => {
 	};
 
 	const renderButton = () => {
-		if ( params.path === '/customize-store' ) {
+		if ( urlParams.path === '/customize-store/assembler-hub' ) {
 			return (
 				<Button
 					variant="primary"
 					onClick={ () => {
+						setIsResolving( true );
 						sendEvent( 'FINISH_CUSTOMIZATION' );
 					} }
 					className="edit-site-save-hub__button"
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
-					{ __( 'Done', 'woocommerce' ) }
+					{ isResolving ? <Spinner /> : __( 'Done', 'woocommerce' ) }
 				</Button>
 			);
 		}

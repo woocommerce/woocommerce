@@ -158,6 +158,7 @@ export function Edit( {
 					disabledAttributeIds={ productAttributes
 						.filter( ( attr ) => ! attr.variation )
 						.map( ( attr ) => attr.id ) }
+					termsAutoSelection="all"
 				/>
 			) }
 		</div>
