@@ -184,7 +184,8 @@ describe( 'colorPairing.responseValidation', () => {
 			background: '#ffffff',
 		};
 
-		const parsedResult = defaultColorPalette.responseValidation( validPalette );
+		const parsedResult =
+			defaultColorPalette.responseValidation( validPalette );
 		expect( parsedResult ).toEqual( validPalette );
 	} );
 
