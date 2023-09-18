@@ -94,7 +94,7 @@ class Loader {
 
 		add_action( 'admin_init', array( __CLASS__, 'deactivate_wc_admin_plugin' ) );
 
-		add_action( 'in_admin_footer', array( __CLASS__, 'add_appearance_theme_view_tracks_event' ) );
+		add_action( 'load-themes.php', array( __CLASS__, 'add_appearance_theme_view_tracks_event' ) );
 	}
 
 	/**
@@ -578,10 +578,6 @@ class Loader {
 	 * Adds the appearance_theme_view Tracks event.
 	 */
 	public static function add_appearance_theme_view_tracks_event() {
-		$screen = get_current_screen();
-
-		if ( 'themes' === $screen->id ) {
-			wc_admin_record_tracks_event( 'appearance_theme_view', array() );
-		}
+		wc_admin_record_tracks_event( 'appearance_theme_view', array() );
 	}
 }
