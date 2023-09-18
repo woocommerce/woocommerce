@@ -122,7 +122,7 @@ for ( const currentPage of wcPages ) {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
-			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+			const coreProfilerEnabled = features.isEnabled( 'core-profiler' );
 
 			if ( coreProfilerEnabled ) {
 				const response = await new wcApi( {

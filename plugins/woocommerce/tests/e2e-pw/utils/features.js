@@ -1,6 +1,6 @@
 const { encodeCredentials } = require( './plugin-utils' );
 
-const set_feature_flag = async ( request, baseURL, flagName, enable ) => {
+const setFeatureFlag = async ( request, baseURL, flagName, enable ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
@@ -18,7 +18,7 @@ const set_feature_flag = async ( request, baseURL, flagName, enable ) => {
 	} );
 };
 
-const reset_feature_flags = async ( request, baseURL ) => {
+const resetFeatureFlags = async ( request, baseURL ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
@@ -35,7 +35,7 @@ const reset_feature_flags = async ( request, baseURL ) => {
 	} );
 };
 
-function is_enabled( feature ) {
+function isEnabled( feature ) {
 	const phase = process.env.WC_ADMIN_PHASE;
 	let config = 'development.json';
 	if ( ! [ 'core', 'developer' ].includes( phase ) ) {
@@ -48,7 +48,7 @@ function is_enabled( feature ) {
 }
 
 module.exports = {
-	is_enabled,
-	set_feature_flag,
-	reset_feature_flags,
+	isEnabled,
+	setFeatureFlag,
+	resetFeatureFlags,
 };

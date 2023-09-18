@@ -5,7 +5,7 @@ const { api } = require( '../../utils' );
 const { features } = require( '../../utils' );
 
 // Skipping Onboarding tests when the core-profiler is enabled.
-const testRunner = features.is_enabled( 'core-profiler' )
+const testRunner = features.isEnabled( 'core-profiler' )
 	? test.describe.skip
 	: test.describe;
 

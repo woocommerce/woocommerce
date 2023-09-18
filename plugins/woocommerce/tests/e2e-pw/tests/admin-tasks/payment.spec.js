@@ -8,7 +8,7 @@ test.describe( 'Payment setup task', () => {
 	test.beforeEach( async ( { page, baseURL } ) => {
 		// Skip skipping the setup wizard if the core profiler is enabled.
 		// When the core-profiler is enabled, the following code won't work, causing the tests to fail.
-		if ( ! features.is_enabled( 'core-profiler' ) ) {
+		if ( ! features.isEnabled( 'core-profiler' ) ) {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 			);

@@ -18,7 +18,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 			'yes'
 		);
 
-		await features.set_feature_flag(
+		await features.setFeatureFlag(
 			request,
 			baseURL,
 			'customize-store',
@@ -30,7 +30,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await features.reset_feature_flags( request, baseURL );
+		await features.resetFeatureFlags( request, baseURL );
 
 		// Reset theme back to twentynineteen
 		await activateTheme( 'twentynineteen' );
