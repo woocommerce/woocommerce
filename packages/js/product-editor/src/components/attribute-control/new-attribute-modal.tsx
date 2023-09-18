@@ -403,7 +403,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																}
 																value={
 																	attribute ===
-																	null
+																		null ||
+																	attribute ===
+																		undefined
 																		? []
 																		: attribute.terms
 																}
