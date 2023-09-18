@@ -45,6 +45,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	private $cot_state;
 
 	/**
+	 * Temporarily store webhook delivery counters.
+	 * @var array
+	 */
+	private $delivery_counter = array();
+
+	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -3050,5 +3056,82 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$r_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key' ) );
+	}
+
+	/**
+	 * @testDox Test that order save is not called frequently on meta save.
+	 */
+	public function test_order_save_is_not_called_frequently_on_meta_save() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = wc_create_order();
+
+		assert( empty( $order->get_changes() ), 'Order was not saved properly, test cannot continue.' );
+		$call_private = function ( $order ) {
+			return $this->should_save_after_meta_change( $order );
+		};
+
+		$order->set_date_modified( time() - 1 );
+		$order->save();
+
+		$this->assertTrue( $call_private->call( $this->sut, $order ) );
+
+		$count = 0;
+		add_filter(
+			'woocommerce_before_order_object_save',
+			function () use ( &$count ) {
+				$count++;
+			}
+		);
+
+		$order->add_meta_data( 'key1', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value2' );
+		$order->save_meta_data();
+		$order->update_meta_data( 'key1', 'value2' );
+		$order->save_meta_data();
+		$order->delete_meta_data( 'key1' );
+		$order->save_meta_data();
+		$this->assertEquals( 1, $count );
+		remove_all_actions( 'woocommerce_before_order_object_save' );
+	}
+
+	/**
+	 * @testDox Test webhooks are not fired multiple times on order save.
+	 */
+	public function test_order_updated_webhook_delivered_once() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$webhook_tests = new WC_Tests_Webhook_Functions();
+		$webhook       = $webhook_tests->create_webhook( 'order.updated' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_modified( time() - 100 );
+		$order->save();
+
+		$this->assertTrue( wc_load_webhooks( 'active' ) );
+		add_action( 'woocommerce_webhook_process_delivery', array( $webhook_tests, 'woocommerce_webhook_process_delivery' ), 1, 2 );
+		add_filter( 'woocommerce_webhook_should_deliver', '__return_true' );
+		$call_private = function ( $order ) {
+			return $this->should_save_after_meta_change( $order );
+		};
+		$this->assertTrue( $call_private->call( $this->sut, $order ) );
+		$order->add_meta_data( 'test', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value2' );
+		$order->save_meta_data();
+		$order->update_meta_data( 'key1', 'value2' );
+		$order->save_meta_data();
+		$order->delete_meta_data( 'key1' );
+		$order->save_meta_data();
+		$this->assertEquals( 1, $webhook_tests->delivery_counter[ $webhook->get_id() . $order->get_id() ] );
+		remove_all_actions( 'woocommerce_webhook_process_delivery' );
+		remove_all_actions( 'woocommerce_webhook_should_deliver' );
 	}
 }
