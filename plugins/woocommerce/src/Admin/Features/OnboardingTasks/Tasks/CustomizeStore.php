@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Jetpack_Gutenberg;
 
 /**
  * Customize Your Store Task
@@ -182,5 +183,10 @@ class CustomizeStore extends Task {
 		 * @since 8.0.3
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+
+		// Load Jetpack's block editor assets because they are not enqueued by default.
+		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
+			Jetpack_Gutenberg::enqueue_block_editor_assets();
+		}
 	}
 }
