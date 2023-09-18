@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name: Enable or Disable Experimental Features
- * Description: Utility designed for E2E testing purposes. It activates or deactivates experimental features in WooCommerce via REST API.
+ * Plugin Name: Test Helper APIs
+ * Description: Utility REST API designed for E2E testing purposes. Allows turning features on or off, and setting option values
  */
-function register_feature_flag_routes() {
+function register_helper_api() {
 	register_rest_route(
 		'e2e-feature-flags',
 		'/update',
@@ -24,9 +24,19 @@ function register_feature_flag_routes() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-options',
+		'/update',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'api_update_option',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
-add_action( 'rest_api_init', 'register_feature_flag_routes' );
+add_action( 'rest_api_init', 'register_helper_api' );
 
 /**
  * Update feature flags
@@ -70,6 +80,22 @@ function enable_experimental_features( $features ) {
 }
 
 add_filter( 'woocommerce_admin_get_feature_config', 'enable_experimental_features' );
+
+/**
+ * Update a WordPress option.
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response
+ */
+function api_update_option( WP_REST_Request $request ) {
+	$option_name  = sanitize_text_field( $request['option_name'] );
+	$option_value = sanitize_text_field( $request['option_value'] );
+
+	if ( update_option( $option_name, $option_value ) ) {
+		return new WP_REST_Response( 'Option updated', 200 );
+	}
+
+	return new WP_REST_Response( 'Invalid request body', 400 );
+}
 
 /**
  * Check if user is admin

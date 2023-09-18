@@ -1,6 +1,7 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { features } = require( '../../utils' );
 const { activateTheme } = require( '../../utils/themes' );
+const { setOption } = require( '../../utils/options' );
 
 const ASSEMBLER_HUB_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub';
@@ -9,6 +10,14 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
+		// In some environments the tour blocks clicking other elements.
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'yes'
+		);
+
 		await features.set_feature_flag(
 			request,
 			baseURL,
@@ -25,6 +34,14 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 
 		// Reset theme back to twentynineteen
 		await activateTheme( 'twentynineteen' );
+
+		// Reset tour to visible.
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'no'
+		);
 	} );
 
 	test( 'Can view the Assembler Hub page', async ( { page } ) => {
