@@ -11,7 +11,7 @@ export const useScrollOpacity = (
 	sensitivity = 0.2
 ) => {
 	const [ opacity, setOpacity ] = useState( 0.05 );
-
+	console.log( direction );
 	useEffect( () => {
 		const targetElement = document.querySelector( selector );
 

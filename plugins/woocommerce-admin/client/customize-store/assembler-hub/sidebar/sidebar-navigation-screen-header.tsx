@@ -23,6 +23,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
+import { useEditorScroll } from '../hooks/use-editor-scroll';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu-with-search',
@@ -32,6 +33,12 @@ const SUPPORTED_HEADER_PATTERNS = [
 ];
 
 export const SidebarNavigationScreenHeader = () => {
+	useEditorScroll( {
+		editorSelector:
+			'.interface-navigable-region.interface-interface-skeleton__content',
+		scrollDirection: 'top',
+	} );
+
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(

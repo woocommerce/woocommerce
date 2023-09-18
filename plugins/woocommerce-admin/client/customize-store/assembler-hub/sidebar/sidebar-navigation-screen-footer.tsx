@@ -23,6 +23,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
+import { useEditorScroll } from '../hooks/use-editor-scroll';
 
 const footerPatternNames = [
 	'woocommerce-blocks/footer-large',
@@ -31,6 +32,12 @@ const footerPatternNames = [
 ];
 
 export const SidebarNavigationScreenFooter = () => {
+	useEditorScroll( {
+		editorSelector:
+			'.interface-navigable-region.interface-interface-skeleton__content',
+		scrollDirection: 'bottom',
+	} );
+
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
@@ -38,8 +45,10 @@ export const SidebarNavigationScreenFooter = () => {
 	);
 
 	useEffect( () => {
-		setHighlightedBlockIndex( 0 );
-	}, [ setHighlightedBlockIndex ] );
+		if ( blocks && blocks.length ) {
+			setHighlightedBlockIndex( blocks.length - 1 );
+		}
+	}, [ setHighlightedBlockIndex, blocks ] );
 
 	const footerPatterns = patterns.filter( ( pattern ) =>
 		footerPatternNames.includes( pattern.name )
