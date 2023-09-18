@@ -67,7 +67,7 @@ module.exports = {
 	`,
 	previewBody: ( body ) => `
 	<div id="wpwrap">
-		<div class="woocommerce-layout woocommerce-page">
+		<div class="woocommerce-layout woocommerce-admin-page">
 			${ body }
 
 	`,

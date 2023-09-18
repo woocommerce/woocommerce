@@ -177,7 +177,7 @@ class Loader {
 		}
 
 		$classes   = explode( ' ', trim( $admin_body_class ) );
-		$classes[] = 'woocommerce-page';
+		$classes[] = 'woocommerce-admin-page';
 		if ( PageController::is_embed_page() ) {
 			$classes[] = 'woocommerce-embed-page';
 		}
