@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { LookAndToneCompletionResponse } from '../types';
-import { lookAndTone, colorPairing } from '../prompts';
+import { lookAndTone, defaultColorPalette } from '../prompts';
 import { getCompletion } from '../services';
 
 jest.mock( '@woocommerce/tracks', () => ( {
@@ -41,6 +41,7 @@ describe( 'getCompletion', () => {
 			prompt: 'test prompt',
 			responseValidation,
 			retryCount: 0,
+			version: '1',
 		} );
 
 		expect( result ).toEqual( { key: 'value' } );
@@ -50,6 +51,7 @@ describe( 'getCompletion', () => {
 			{
 				query_id: 'query1',
 				retry_count: 0,
+				version: '1',
 			}
 		);
 	} );
@@ -68,6 +70,7 @@ describe( 'getCompletion', () => {
 				prompt: 'test prompt',
 				responseValidation: () => {},
 				retryCount: 0,
+				version: '1',
 			} )
 		).rejects.toThrow( 'API error' );
 
@@ -77,6 +80,7 @@ describe( 'getCompletion', () => {
 				query_id: 'query1',
 				retry_count: 0,
 				error_type: 'api_request_error',
+				version: '1',
 			}
 		);
 	} );
@@ -95,6 +99,7 @@ describe( 'getCompletion', () => {
 				prompt: 'test prompt',
 				responseValidation: () => {},
 				retryCount: 0,
+				version: '1',
 			} )
 		).rejects.toThrow(
 			`Error validating Jetpack AI text completions response for query1`
@@ -107,6 +112,7 @@ describe( 'getCompletion', () => {
 				retry_count: 0,
 				error_type: 'json_parse_error',
 				response: 'invalid json',
+				version: '1',
 			}
 		);
 	} );
@@ -128,6 +134,7 @@ describe( 'getCompletion', () => {
 				prompt: 'test prompt',
 				responseValidation,
 				retryCount: 0,
+				version: '1',
 			} )
 		).rejects.toThrow( 'Validation error' );
 
@@ -138,6 +145,7 @@ describe( 'getCompletion', () => {
 				retry_count: 0,
 				error_type: 'valid_json_invalid_values',
 				response: JSON.stringify( { key: 'invalid value' } ),
+				version: '1',
 			}
 		);
 	} );
@@ -176,7 +184,7 @@ describe( 'colorPairing.responseValidation', () => {
 			background: '#ffffff',
 		};
 
-		const parsedResult = colorPairing.responseValidation( validPalette );
+		const parsedResult = defaultColorPalette.responseValidation( validPalette );
 		expect( parsedResult ).toEqual( validPalette );
 	} );
 
@@ -188,7 +196,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => colorPairing.responseValidation( invalidPalette ) )
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -210,7 +218,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => colorPairing.responseValidation( invalidPalette ) )
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -233,7 +241,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => colorPairing.responseValidation( invalidPalette ) )
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -256,7 +264,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#invalid_color',
 			background: '#ffffff',
 		};
-		expect( () => colorPairing.responseValidation( invalidPalette ) )
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -287,7 +295,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#fffff',
 		};
-		expect( () => colorPairing.responseValidation( invalidPalette ) )
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {

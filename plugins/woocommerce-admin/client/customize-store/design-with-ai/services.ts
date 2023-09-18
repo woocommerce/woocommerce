@@ -123,6 +123,7 @@ export const queryAiEndpoint = createMachine(
 			// these values are all overwritten by incoming parameters
 			prompt: '',
 			queryId: '',
+			version: '',
 			responseValidation: () => true,
 			retryCount: 0,
 			validatedResponse: {} as unknown,

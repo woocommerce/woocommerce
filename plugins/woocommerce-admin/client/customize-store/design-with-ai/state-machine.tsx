@@ -20,7 +20,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { colorPairing } from './prompts';
+import { defaultColorPalette } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -275,8 +275,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 									src: 'queryAiEndpoint',
 									data: ( context ) => {
 										return {
-											...colorPairing,
-											prompt: colorPairing.prompt(
+											...defaultColorPalette,
+											prompt: defaultColorPalette.prompt(
 												context.businessInfoDescription
 													.descriptionText,
 												context.lookAndFeel.choice,

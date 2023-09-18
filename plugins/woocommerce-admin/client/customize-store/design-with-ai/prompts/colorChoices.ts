@@ -5,14 +5,7 @@ import { z } from 'zod';
 /**
  * Internal dependencies
  */
-import {
-	Look,
-	Tone,
-	VALID_LOOKS,
-	VALID_TONES,
-	LookAndToneCompletionResponse,
-	ColorPalette,
-} from './types';
+import { ColorPalette } from '../types';
 
 const colorChoices: ColorPalette[] = [
 	{
@@ -205,9 +198,7 @@ const colorChoices: ColorPalette[] = [
 		background: '#13161E',
 	},
 ];
-
 const allowedNames: string[] = colorChoices.map( ( palette ) => palette.name );
-
 const hexColorRegex = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
 
 export const colorPaletteValidator = z.object( {
@@ -228,10 +219,11 @@ export const colorPaletteValidator = z.object( {
 		.regex( hexColorRegex, { message: 'Invalid background color' } ),
 } );
 
-export const colorPairing = {
-	queryId: 'color_pairing', // for tracks purposes
+export const defaultColorPalette = {
+	queryId: 'default_color_palette',
+
 	// make sure version is updated every time the prompt is changed
-	version: '2023-10-18', // to facilitate prompt analysis, the reason we don't use WC version is because the prompt won't change every version
+	version: '2023-10-18',
 	prompt: ( businessDescription: string, look: string, tone: string ) => {
 		return `
             You are a WordPress theme expert. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme.
@@ -245,45 +237,4 @@ export const colorPairing = {
         `;
 	},
 	responseValidation: colorPaletteValidator.parse,
-};
-
-export const isLookAndToneCompletionResponse = (
-	obj: unknown
-): obj is LookAndToneCompletionResponse => {
-	return (
-		obj !== undefined &&
-		obj !== null &&
-		typeof obj === 'object' &&
-		'look' in obj &&
-		VALID_LOOKS.includes( obj.look as Look ) &&
-		'tone' in obj &&
-		VALID_TONES.includes( obj.tone as Tone )
-	);
-};
-
-export const lookAndTone = {
-	queryId: 'look_and_tone',
-	// make sure version is updated every time the prompt is changed
-	version: '2023-09-18',
-	prompt: ( businessInfoDescription: string ) => {
-		return [
-			'You are a WordPress theme expert.',
-			'Analyze the following store description and determine the look and tone of the theme.',
-			`For look, you can choose between ${ VALID_LOOKS.join( ',' ) }.`,
-			`For tone of the description, you can choose between ${ VALID_TONES.join(
-				','
-			) }.`,
-			'Your response should be in json with look and tone values.',
-			'\n',
-			businessInfoDescription,
-		].join( '\n' );
-	},
-	responseValidation: ( response: unknown ) => {
-		if ( isLookAndToneCompletionResponse( response ) ) {
-			return response;
-		}
-		throw new Error(
-			'Invalid values in Look and Tone completion response'
-		);
-	},
 };
