@@ -264,7 +264,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 	} );
 
 	test( 'can see products showcase', async ( { page } ) => {
-		// Create as a merchant a new page with Products block
+		// create as a merchant a new page with Products block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
 		const welcomeModalVisible = await page
@@ -303,7 +303,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			page.getByText( `${ pageTitle } is now live.` )
 		).toBeVisible();
 
-		// Go to created page with products showcase
+		// go to created page with products showcase
 		await page.goto( 'product-showcase' );
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			pageTitle
