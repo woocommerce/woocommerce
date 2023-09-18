@@ -216,34 +216,6 @@ trait SourceAttributionMeta {
 	}
 
 	/**
-	 * Returns the label based on the source type.
-	 *
-	 * @param string $source_type The source type.
-	 *
-	 * @return string The label for the source type.
-	 */
-	private function get_source_label( string $source_type ) {
-		$label = '';
-
-		switch ( $source_type ) {
-			case 'utm':
-				/* translators: %s is the source value */
-				$label = __( 'Source: %s', 'woocommerce' );
-				break;
-			case 'organic':
-				/* translators: %s is the source value */
-				$label = __( 'Organic: %s', 'woocommerce' );
-				break;
-			case 'referral':
-				/* translators: %s is the source value */
-				$label = __( 'Referral: %s', 'woocommerce' );
-				break;
-		}
-
-		return $label;
-	}
-
-	/**
 	 * Get the order object with HPOS compatibility.
 	 *
 	 * @param WP_Post|int $post The post ID or object.
@@ -311,10 +283,62 @@ trait SourceAttributionMeta {
 	 * @return string
 	 */
 	private function get_origin_label( string $source_type, string $source ): string {
-		$formatted_source = ucfirst( trim( $source, '()' ) );
-		$label            = $this->get_source_label( $source_type );
+		// Set up the label based on the source type.
+		switch ( $source_type ) {
+			case 'utm':
+				/* translators: %s is the source value */
+				$label = __( 'Source: %s', 'woocommerce' );
+				break;
+			case 'organic':
+				/* translators: %s is the source value */
+				$label = __( 'Organic: %s', 'woocommerce' );
+				break;
+			case 'referral':
+				/* translators: %s is the source value */
+				$label = __( 'Referral: %s', 'woocommerce' );
+				break;
 
-		if ( empty( $label ) ) {
+			default:
+				$label = '';
+				break;
+		}
+
+		/**
+		 * Filter the formatted source for the order origin.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $formatted_source The formatted source.
+		 * @param string $source           The source.
+		 */
+		$formatted_source = apply_filters(
+			'wc_order_source_attribution_origin_formatted_source',
+			ucfirst( trim( $source, '()' ) ),
+			$source
+		);
+
+		/**
+		 * Filter the label for the order origin.
+		 *
+		 * This label should have a %s placeholder for the formatted source to be inserted
+		 * via sprintf().
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $label            The label for the order origin.
+		 * @param string $source_type      The source type.
+		 * @param string $source           The source.
+		 * @param string $formatted_source The formatted source.
+		 */
+		$label = (string) apply_filters(
+			'wc_order_source_attribution_origin_label',
+			$label,
+			$source_type,
+			$source,
+			$formatted_source
+		);
+
+		if ( false === strpos( $label, '%' ) ) {
 			return $formatted_source;
 		}
 
