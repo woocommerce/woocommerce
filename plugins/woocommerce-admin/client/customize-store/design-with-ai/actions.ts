@@ -12,6 +12,7 @@ import {
 	ColorPalette,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	FontPairing,
 	LookAndToneCompletionResponse,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
@@ -91,6 +92,24 @@ const assignDefaultColorPalette = assign<
 	},
 } );
 
+const assignFontPairing = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			fontPairing: (
+				event as {
+					data: {
+						response: FontPairing;
+					};
+				}
+			 ).data.response.pair_name,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -158,6 +177,7 @@ export const actions = {
 	assignToneOfVoice,
 	assignLookAndTone,
 	assignDefaultColorPalette,
+	assignFontPairing,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
