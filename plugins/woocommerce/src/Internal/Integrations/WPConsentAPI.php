@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Integrations;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use WP_CONSENT_API;
 
@@ -86,7 +87,7 @@ class WPConsentAPI {
 				WC_PLUGIN_FILE
 			),
 			array( 'jquery', 'wp-consent-api' ),
-			WC_VERSION,
+			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
 	}
