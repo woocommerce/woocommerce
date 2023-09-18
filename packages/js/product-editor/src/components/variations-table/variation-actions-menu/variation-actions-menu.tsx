@@ -78,7 +78,7 @@ export function VariationActionsMenu( {
 							label={ __( 'Delete variation', 'woocommerce' ) }
 							variant="link"
 							onClick={ () => {
-								onDelete( selection.id );
+								onDelete( selection );
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"

@@ -26,6 +26,8 @@ import useTaxonomySearch from './use-taxonomy-search';
 
 type CreateTaxonomyModalProps = {
 	initialName?: string;
+	dialogNameHelpText?: string;
+	parentTaxonomyText?: string;
 	hierarchical: boolean;
 	slug: string;
 	title: string;
@@ -39,6 +41,8 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 	initialName,
 	slug,
 	hierarchical,
+	dialogNameHelpText,
+	parentTaxonomyText,
 	title,
 } ) => {
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
@@ -113,7 +117,7 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 				<BaseControl
 					id={ id }
 					label={ __( 'Name', 'woocommerce' ) }
-					help={ errorMessage }
+					help={ errorMessage || dialogNameHelpText }
 					className={ classNames( {
 						'has-error': errorMessage,
 					} ) }
@@ -128,10 +132,13 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					<SelectTree
 						isLoading={ isResolving }
 						label={ createInterpolateElement(
-							__( 'Parent <optional/>', 'woocommerce' ),
+							`${
+								parentTaxonomyText ||
+								__( 'Parent', 'woocommerce' )
+							} <optional/>`,
 							{
 								optional: (
-									<span className="woocommerce-product-form__optional-input">
+									<span className="woocommerce-create-new-taxonomy-modal__optional">
 										{ __( '(optional)', 'woocommerce' ) }
 									</span>
 								),
@@ -173,19 +180,19 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 				) }
 				<div className="woocommerce-create-new-taxonomy-modal__buttons">
 					<Button
-						isSecondary
+						variant="tertiary"
 						onClick={ onCancel }
 						disabled={ isCreating }
 					>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						disabled={ name.length === 0 || isCreating }
 						isBusy={ isCreating }
 						onClick={ onSave }
 					>
-						{ __( 'Save', 'woocommerce' ) }
+						{ __( 'Create', 'woocommerce' ) }
 					</Button>
 				</div>
 			</div>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[HPOS] Use objects method instead of calling datastore directly.

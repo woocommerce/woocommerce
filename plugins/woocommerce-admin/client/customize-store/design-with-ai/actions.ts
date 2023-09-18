@@ -3,6 +3,7 @@
  */
 import { assign } from 'xstate';
 import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -11,6 +12,7 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 } from './types';
+import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
 	businessInfoDescriptionCompleteEvent,
 	lookAndFeelCompleteEvent,
@@ -74,6 +76,10 @@ const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
 	console.log( 'API Request error' );
+	recordEvent(
+		'customize_your_store_look_and_tone_ai_completion_response_error',
+		{ error_type: 'http_network_error' }
+	);
 };
 
 const updateQueryStep = (
@@ -99,6 +105,38 @@ const updateQueryStep = (
 	}
 };
 
+const recordTracksStepViewed = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_view', {
+		step,
+	} );
+};
+
+const recordTracksStepClosed = (
+	_context: unknown,
+	event: aiWizardClosedBeforeCompletionEvent
+) => {
+	const { step } = event.payload;
+	recordEvent( `customize_your_store_ai_wizard_step_close`, {
+		step: step.replaceAll( '-', '_' ),
+	} );
+};
+
+const recordTracksStepCompleted = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_complete', {
+		step,
+	} );
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -106,4 +144,7 @@ export const actions = {
 	assignLookAndTone,
 	logAIAPIRequestError,
 	updateQueryStep,
+	recordTracksStepViewed,
+	recordTracksStepClosed,
+	recordTracksStepCompleted,
 };
