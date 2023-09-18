@@ -7,7 +7,7 @@ declare( strict_types=1 );
  *
  * @see Automattic\WooCommerce\Internal\Orders\SourceAttributionController
  * @package WooCommerce\Templates
- * @version x.x.x
+ * @version 8.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
