@@ -29,31 +29,20 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 
 	test( 'Can view the Assembler Hub page', async ( { page } ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
-		await page.waitForSelector( `h1:text("Let's get creative")`, {
-			timeout: 5000,
-		} );
+		const locator = page.locator( 'h1:visible' );
+		await expect( locator ).toHaveText( "Let's get creative" );
 	} );
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {
 		page,
 	} ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
-		await page.waitForSelector( `h1:text("Let's get creative")`, {
-			timeout: 5000,
-		} );
-
 		await page.click( 'text=Change your header' );
 
-		// Wait for at least one element to appear
-		await page.waitForSelector(
-			'.block-editor-block-patterns-list__list-item',
-			{ timeout: 5000 }
-		);
-
-		// Now query all elements and check their count
-		const elements = await page.$$(
+		const locator = page.locator(
 			'.block-editor-block-patterns-list__list-item'
 		);
-		expect( elements.length ).toBe( 4 );
+
+		await expect( locator ).toHaveCount( 4 );
 	} );
 } );
