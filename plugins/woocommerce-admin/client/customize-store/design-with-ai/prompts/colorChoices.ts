@@ -223,7 +223,7 @@ export const defaultColorPalette = {
 	queryId: 'default_color_palette',
 
 	// make sure version is updated every time the prompt is changed
-	version: '2023-10-18',
+	version: '2023-09-18',
 	prompt: ( businessDescription: string, look: string, tone: string ) => {
 		return `
             You are a WordPress theme expert. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme.
