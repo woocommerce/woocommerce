@@ -1,4 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, request } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
+const pageTitle = 'Product Showcase';
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '5.00';
@@ -23,6 +25,8 @@ let product1Id,
 	attributeId;
 
 test.describe( 'Browse product tags and attributes from the product page', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
+
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -159,6 +163,32 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		await api.post( 'products/attributes/batch', {
 			delete: [ attributeId ],
 		} );
+		await api.put(
+			'settings/products/woocommerce_attribute_lookup_enabled',
+			{
+				value: 'no',
+			}
+		);
+		const base64auth = Buffer.from(
+			`${ admin.username }:${ admin.password }`
+		).toString( 'base64' );
+		const wpApi = await request.newContext( {
+			baseURL: `${ baseURL }/wp-json/wp/v2/`,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ base64auth }`,
+			},
+		} );
+		let response = await wpApi.get( `pages` );
+		const allPages = await response.json();
+		await allPages.forEach( async ( page ) => {
+			if ( page.title.rendered === pageTitle ) {
+				response = await wpApi.delete( `pages/${ page.id }`, {
+					data: {
+						force: true,
+					},
+				} );
+			}
+		} );
 	} );
 
 	test( 'should see shop catalog with all its products', async ( {
@@ -167,6 +197,24 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		await page.goto( 'shop/' );
 		await expect( page.locator( 'h1.page-title' ) ).toContainText( 'Shop' );
 		await expect( page.locator( '.woocommerce-ordering' ) ).toBeVisible();
+
+		const addToCart = page.getByRole( 'add_to_cart_button' );
+		for ( let i = 0; i < addToCart.count(); ++i )
+			await expect( addToCart.nth( i ) ).toBeVisible();
+
+		const productPrice = page.getByRole( 'woocommerce-Price-amount' );
+		for ( let i = 0; i < productPrice.count(); ++i )
+			await expect( productPrice.nth( i ) ).toBeVisible();
+
+		const productTitle = page.getByRole(
+			'woocommerce-loop-product__title'
+		);
+		for ( let i = 0; i < productTitle.count(); ++i )
+			await expect( productTitle.nth( i ) ).toBeVisible();
+
+		const productImage = page.getByRole( 'wp-post-image' );
+		for ( let i = 0; i < productImage.count(); ++i )
+			await expect( productImage.nth( i ) ).toBeVisible();
 	} );
 
 	test( 'should see and sort tags page with all the products', async ( {
@@ -191,6 +239,12 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 	test( 'should see and sort attributes page with all its products', async ( {
 		page,
 	} ) => {
+		// the api setting for enabling attribute term page doesn't apply for some reason
+		// but I could see it as checked/enabled in the settings
+		// workaround for the change to take effect is to just save the settings.
+		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+		await page.locator( 'text=Save changes' ).click();
+
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		await page.goto( `product/${ slug }` );
 		await page
@@ -207,5 +261,69 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		await expect(
 			page.locator( '.woocommerce-result-count' )
 		).toContainText( 'Showing all 3 results' );
+	} );
+
+	test( 'can see products showcase', async ( { page } ) => {
+		// Create as a merchant a new page with Products block
+		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+
+		const welcomeModalVisible = await page
+			.getByRole( 'heading', {
+				name: 'Welcome to the block editor',
+			} )
+			.isVisible();
+
+		if ( welcomeModalVisible ) {
+			await page.getByRole( 'button', { name: 'Close' } ).click();
+		}
+
+		await page
+			.getByRole( 'textbox', { name: 'Add Title' } )
+			.fill( pageTitle );
+
+		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+
+		await page
+			.getByRole( 'document', {
+				name: 'Empty block; start writing or type forward slash to choose a block',
+			} )
+			.fill( '/products' );
+		await page.keyboard.press( 'Enter' );
+
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+
+		await page
+			.getByRole( 'region', { name: 'Editor publish' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+
+		await expect(
+			page.getByText( `${ pageTitle } is now live.` )
+		).toBeVisible();
+
+		// Go to created page with products showcase
+		await page.goto( 'product-showcase' );
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			pageTitle
+		);
+		const addToCart = page.getByRole( 'add_to_cart_button' );
+		for ( let i = 0; i < addToCart.count(); ++i )
+			await expect( addToCart.nth( i ) ).toBeVisible();
+
+		const productPrice = page.getByRole( 'woocommerce-Price-amount' );
+		for ( let i = 0; i < productPrice.count(); ++i )
+			await expect( productPrice.nth( i ) ).toBeVisible();
+
+		const productTitle = page.getByRole(
+			'woocommerce-loop-product__title'
+		);
+		for ( let i = 0; i < productTitle.count(); ++i )
+			await expect( productTitle.nth( i ) ).toBeVisible();
+
+		const productImage = page.getByRole( 'wp-post-image' );
+		for ( let i = 0; i < productImage.count(); ++i )
+			await expect( productImage.nth( i ) ).toBeVisible();
 	} );
 } );
