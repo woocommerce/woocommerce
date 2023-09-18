@@ -67,6 +67,6 @@ class Appearance extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return 'twentytwentythree' !== get_stylesheet() ;
+		return 'twentytwentythree' !== get_stylesheet();
 	}
 }
