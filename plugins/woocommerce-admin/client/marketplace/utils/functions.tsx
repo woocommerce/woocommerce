@@ -70,6 +70,10 @@ const appendURLParams = (
 	url: string,
 	utmParams: Array< [ string, string ] >
 ): string => {
+	if ( ! url ) {
+		return url;
+	}
+
 	const urlObject = new URL( url );
 	if ( ! urlObject ) {
 		return url;
