@@ -10,7 +10,7 @@ const useAppearanceClick = () => {
 	const { actionTask } = useDispatch( 'wc/admin/onboarding' );
 	const onClick = () => {
 		actionTask( 'appearance' );
-		window.location = 'theme-install.php?browse=block-themes';
+		window.location = 'themes.php';
 	};
 
 	return { onClick };
