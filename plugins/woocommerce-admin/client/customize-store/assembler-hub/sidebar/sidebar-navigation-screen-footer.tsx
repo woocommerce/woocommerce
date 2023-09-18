@@ -1,3 +1,5 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
@@ -30,10 +32,7 @@ const footerPatternNames = [
 
 export const SidebarNavigationScreenFooter = () => {
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-	const footerPatterns = patterns.filter( ( pattern ) =>
-		footerPatternNames.includes( pattern.name )
-	);
-
+	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
@@ -42,17 +41,13 @@ export const SidebarNavigationScreenFooter = () => {
 		setHighlightedBlockIndex( 0 );
 	}, [ setHighlightedBlockIndex ] );
 
-	const [ blocks, onChange ] = useEditorBlocks();
+	const footerPatterns = patterns.filter( ( pattern ) =>
+		footerPatternNames.includes( pattern.name )
+	);
+
 	const onClickFooterPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			const newFooterBlock = {
-				...selectedBlocks[ 0 ],
-				attributes: {
-					...selectedBlocks[ 0 ].attributes,
-				},
-			};
-
-			onChange( [ ...blocks.slice( 0, -1 ), newFooterBlock ], {
+			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
 			} );
 		},
