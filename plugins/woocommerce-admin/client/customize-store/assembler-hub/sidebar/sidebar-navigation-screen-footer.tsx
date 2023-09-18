@@ -9,6 +9,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -25,10 +26,10 @@ import { usePatternsByCategory } from '../hooks/use-patterns';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 
-const footerPatternNames = [
-	'woocommerce-blocks/footer-large',
+const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu-and-cart',
 	'woocommerce-blocks/footer-with-3-menus',
+	'woocommerce-blocks/footer-large',
 ];
 
 export const SidebarNavigationScreenFooter = () => {
@@ -50,8 +51,18 @@ export const SidebarNavigationScreenFooter = () => {
 		}
 	}, [ setHighlightedBlockIndex, blocks ] );
 
-	const footerPatterns = patterns.filter( ( pattern ) =>
-		footerPatternNames.includes( pattern.name )
+	const footerPatterns = useMemo(
+		() =>
+			patterns
+				.filter( ( pattern ) =>
+					SUPPORTED_FOOTER_PATTERNS.includes( pattern.name )
+				)
+				.sort(
+					( a, b ) =>
+						SUPPORTED_FOOTER_PATTERNS.indexOf( a.name ) -
+						SUPPORTED_FOOTER_PATTERNS.indexOf( b.name )
+				),
+		[ patterns ]
 	);
 
 	const onClickFooterPattern = useCallback(

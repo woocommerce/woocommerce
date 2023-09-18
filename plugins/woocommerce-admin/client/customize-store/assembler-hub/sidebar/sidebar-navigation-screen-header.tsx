@@ -9,6 +9,7 @@ import {
 	createInterpolateElement,
 	useContext,
 	useEffect,
+	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -26,10 +27,10 @@ import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 
 const SUPPORTED_HEADER_PATTERNS = [
-	'woocommerce-blocks/header-centered-menu-with-search',
 	'woocommerce-blocks/header-essential',
-	'woocommerce-blocks/header-large',
 	'woocommerce-blocks/header-minimal',
+	'woocommerce-blocks/header-large',
+	'woocommerce-blocks/header-centered-menu-with-search',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
@@ -49,8 +50,18 @@ export const SidebarNavigationScreenHeader = () => {
 		setHighlightedBlockIndex( 0 );
 	}, [ setHighlightedBlockIndex ] );
 
-	const headerPatterns = patterns.filter( ( pattern ) =>
-		SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
+	const headerPatterns = useMemo(
+		() =>
+			patterns
+				.filter( ( pattern ) =>
+					SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
+				)
+				.sort(
+					( a, b ) =>
+						SUPPORTED_HEADER_PATTERNS.indexOf( a.name ) -
+						SUPPORTED_HEADER_PATTERNS.indexOf( b.name )
+				),
+		[ patterns ]
 	);
 
 	const onClickHeaderPattern = useCallback(
