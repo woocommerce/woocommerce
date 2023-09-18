@@ -132,7 +132,7 @@ export const SelectTree = function SelectTree( {
 			setInputValue( event.target.value );
 		},
 		placeholder,
-		value: decodeEntities( inputValue ),
+		value: inputValue,
 	};
 
 	return (
