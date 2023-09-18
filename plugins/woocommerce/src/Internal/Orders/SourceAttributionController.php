@@ -104,7 +104,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
-				$source_data = $this->get_source_values();
+				// phpcs:ignore WordPress.Security.NonceVerification
+				$source_data = $this->get_source_values( $_POST );
 				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
 			}
@@ -283,7 +284,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function set_customer_source_data( WC_Customer $customer ) {
-		foreach ( $this->get_source_values() as $key => $value ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		foreach ( $this->get_source_values( $_POST ) as $key => $value ) {
 			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
 
