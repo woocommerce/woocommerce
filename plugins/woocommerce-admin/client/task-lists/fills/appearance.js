@@ -5,12 +5,13 @@ import React from 'react';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
+import { getAdminLink } from '@woocommerce/settings';
 
 const useAppearanceClick = () => {
 	const { actionTask } = useDispatch( 'wc/admin/onboarding' );
 	const onClick = () => {
 		actionTask( 'appearance' );
-		window.location = 'themes.php';
+		window.location = getAdminLink( 'themes.php' );
 	};
 
 	return { onClick };
