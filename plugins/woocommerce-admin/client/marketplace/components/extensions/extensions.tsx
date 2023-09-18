@@ -64,6 +64,7 @@ export default function Extensions(): JSX.Element {
 							id: product.id,
 							title: product.title,
 							image: product.image,
+							type: product.type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,

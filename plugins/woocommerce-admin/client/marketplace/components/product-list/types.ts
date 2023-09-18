@@ -1,6 +1,7 @@
 export type SearchAPIProductType = {
 	title: string;
 	image: string;
+	type: ProductType;
 	excerpt: string;
 	link: string;
 	demo_url: string;
@@ -20,6 +21,7 @@ export interface Product {
 	id?: number;
 	title: string;
 	image: string;
+	type: ProductType;
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
