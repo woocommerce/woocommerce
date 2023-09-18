@@ -96,7 +96,7 @@ export const Transitional = ( {
 							variant="tertiary"
 							onClick={ () => {
 								recordEvent(
-									'customize_your_transitional_editor_click'
+									'customize_your_store_transitional_editor_click'
 								);
 								window.location.href = `${ ADMIN_URL }site-editor.php`;
 							} }
