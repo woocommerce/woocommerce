@@ -4,7 +4,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useCallback } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useMemo,
+} from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 
@@ -17,25 +21,38 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { useHomeTemplates } from '../hooks/use-home-templates';
+import { BlockInstance } from '@wordpress/blocks';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { isLoading, homeTemplates } = useHomeTemplates();
 
-	const [ blocks, onChange ] = useEditorBlocks();
+	const [ blocks, , onChange ] = useEditorBlocks();
 	const onClickPattern = useCallback(
-		( templateName: string ) => {
-			const newMainBlocks = homeTemplates[ templateName ].map(
-				( pattern ) => pattern.blocks[ 0 ]
-			);
+		( _pattern, selectedBlocks ) => {
 			onChange(
-				[ blocks[ 0 ], ...newMainBlocks, blocks[ blocks.length - 1 ] ],
+				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 		},
-		[ blocks, onChange, homeTemplates ]
+		[ blocks, onChange ]
 	);
 
-	console.log( homeTemplates );
+	const homePatterns = useMemo( () => {
+		return Object.entries( homeTemplates ).map(
+			( [ templateName, patterns ] ) => {
+				return {
+					name: templateName,
+					blocks: patterns.reduce(
+						( acc: BlockInstance[], pattern ) => [
+							...acc,
+							...pattern.blocks,
+						],
+						[]
+					),
+				};
+			}
+		);
+	}, [ homeTemplates ] );
 
 	return (
 		<SidebarNavigationScreen
@@ -55,39 +72,26 @@ export const SidebarNavigationScreenHomepage = () => {
 				}
 			) }
 			content={
-				<>
+				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
-						{ isLoading && (
+						{ isLoading ? (
 							<span className="components-placeholder__preview">
 								<Spinner />
 							</span>
+						) : (
+							<BlockPatternList
+								shownPatterns={ homePatterns }
+								blockPatterns={ homePatterns }
+								onClickPattern={ onClickPattern }
+								label={ 'Hompeage' }
+								orientation="vertical"
+								category={ 'homepage' }
+								isDraggable={ false }
+								showTitlesAsTooltip={ false }
+							/>
 						) }
-
-						{ ! isLoading &&
-							Object.entries( homeTemplates ).map(
-								( [ templateName, patterns ], index ) => {
-									if ( patterns.length === 0 ) {
-										return null;
-									}
-									return (
-										<BlockPatternList
-											key={ index }
-											shownPatterns={ [ patterns[ 0 ] ] }
-											blockPatterns={ [ patterns[ 0 ] ] }
-											onClickPattern={ () => {
-												onClickPattern( templateName );
-											} }
-											label={ 'Hompeage' }
-											orientation="vertical"
-											category={ 'homepage' }
-											isDraggable={ false }
-											showTitlesAsTooltip={ false }
-										/>
-									);
-								}
-							) }
 					</div>
-				</>
+				</div>
 			}
 		/>
 	);

@@ -35,8 +35,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 
 export const SidebarNavigationScreenHeader = () => {
 	useEditorScroll( {
-		editorSelector:
-			'.interface-navigable-region.interface-interface-skeleton__content',
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
 	} );
 

@@ -34,8 +34,7 @@ const SUPPORTED_FOOTER_PATTERNS = [
 
 export const SidebarNavigationScreenFooter = () => {
 	useEditorScroll( {
-		editorSelector:
-			'.interface-navigable-region.interface-interface-skeleton__content',
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
 	} );
 
