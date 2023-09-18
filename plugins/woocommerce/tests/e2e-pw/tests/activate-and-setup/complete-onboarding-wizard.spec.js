@@ -3,13 +3,9 @@ const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 const { features } = require( '../../utils' );
+const { describe } = require('node:test');
 
-// Skipping Onbaording tests when the core-profiler is enabled.
-const testRunner = features.is_enabled( 'core-profiler' )
-	? test.describe.skip
-	: test.describe;
-
-testRunner( 'Store owner can complete onboarding wizard', () => {
+describe( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -162,7 +158,7 @@ testRunner( 'Store owner can complete onboarding wizard', () => {
 
 // Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
-testRunner(
+describe(
 	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
@@ -257,7 +253,7 @@ testRunner(
 );
 
 // Skipping this test because it's very flaky.
-testRunner( 'Store owner can go through setup Task List', () => {
+describe( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
