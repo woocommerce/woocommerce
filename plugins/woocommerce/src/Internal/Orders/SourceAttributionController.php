@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -169,7 +170,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'sourcebuster-js',
 			plugins_url( "assets/js/frontend/sourcebuster{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
-			WC_VERSION,
+			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
 
@@ -177,7 +178,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'woocommerce-order-source-attribution-js',
 			plugins_url( "assets/js/frontend/order-source-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery', 'sourcebuster-js' ),
-			WC_VERSION,
+			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
 
@@ -211,7 +212,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'woocommerce-order-source-attribution-admin-js',
 			plugins_url( "assets/js/admin/order-source-attribution-admin{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
-			WC_VERSION
+			Constants::get_constant( 'WC_VERSION' )
 		);
 	}
 
