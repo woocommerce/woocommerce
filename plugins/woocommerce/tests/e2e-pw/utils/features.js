@@ -1,4 +1,3 @@
-const { admin } = require( '../test-data/data' );
 const { encodeCredentials } = require( './plugin-utils' );
 
 const set_feature_flag = async ( request, baseURL, flagName, enable ) => {
