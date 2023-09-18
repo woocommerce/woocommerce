@@ -245,15 +245,16 @@ trait SourceAttributionMeta {
 	/**
 	 * Map posted values to meta values.
 	 *
+	 * @param array $raw_values The raw values from the submitted data.
+	 *
 	 * @return array
 	 */
-	private function get_source_values(): array {
+	private function get_source_values( array $raw_values = array() ): array {
 		$values = array();
 
 		// Look through each field in POST data.
 		foreach ( $this->fields as $field ) {
-			// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$value = sanitize_text_field( wp_unslash( $_POST[ $this->get_prefixed_field( $field ) ] ?? '(none)' ) );
+			$value = sanitize_text_field( wp_unslash( $raw_values[ $this->get_prefixed_field( $field ) ] ?? '(none)' ) );
 			if ( '(none)' === $value ) {
 				continue;
 			}
@@ -343,5 +344,29 @@ trait SourceAttributionMeta {
 		}
 
 		return sprintf( $label, $formatted_source );
+	}
+
+	/**
+	 * Get the description for the order source attribution field.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $field The field name.
+	 *
+	 * @return string
+	 */
+	private function get_field_description( string $field ): string {
+		/* translators: %s is the field name */
+		$description = sprintf( __( 'Order source attribution field: %s', 'woocommerce' ), $field );
+
+		/**
+		 * Filter the description for the order source attribution field.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $description The description for the order source attribution field.
+		 * @param string $field       The field name.
+		 */
+		return (string) apply_filters( 'wc_order_source_attribution_field_description', $description, $field );
 	}
 }
