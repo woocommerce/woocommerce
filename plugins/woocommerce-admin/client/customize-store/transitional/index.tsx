@@ -62,7 +62,7 @@ export const Transitional = ( {
 					variant="primary"
 					onClick={ () => {
 						recordEvent(
-							'customize_your_transitional_preview_store_click'
+							'customize_your_store_transitional_preview_store_click'
 						);
 						window.open( homeUrl, '_blank' );
 					} }
