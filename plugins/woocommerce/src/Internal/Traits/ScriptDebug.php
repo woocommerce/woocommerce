@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Trait ScriptDebug
  *
@@ -16,6 +18,6 @@ trait ScriptDebug {
 	 * @return string
 	 */
 	protected function get_script_suffix(): string {
-		return defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		return Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 	}
 }

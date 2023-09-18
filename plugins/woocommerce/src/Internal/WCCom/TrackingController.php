@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\WCCom;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
@@ -89,7 +90,7 @@ class TrackingController implements RegisterHooksInterface {
 			'wccom-integration-js',
 			plugins_url( "assets/js/frontend/wccom-integration{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'woocommerce-order-source-attribution-js' ),
-			WC_VERSION,
+			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
 	}
