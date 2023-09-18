@@ -121,6 +121,35 @@
 			font-weight: 400;
 			line-height: $medium-gap;
 		}
+
+		&.woocommerce-marketplace__product-card--theme {
+			padding: 0;
+			overflow: hidden;
+
+			.woocommerce-marketplace__product-card__content {
+				grid-template-rows: auto 1fr auto;
+				grid-template-columns: 2fr 1fr;
+			}
+			.woocommerce-marketplace__product-card__image {
+				grid-column-start: span 2;
+			}
+			.woocommerce-marketplace__product-card__image-inner {
+				width: 100%;
+			}
+			.woocommerce-marketplace__product-card__header {
+				padding-left: $medium-gap;
+			}
+			.woocommerce-marketplace__product-card__price {
+				padding-right: $medium-gap;
+				text-align: right;
+				display: inline-flex;
+				align-items: flex-end;
+				line-height: 1.5;
+			}
+			.woocommerce-marketplace__product-card__price-label {
+				margin-left: auto;
+			}
+		}
 	}
 }
 

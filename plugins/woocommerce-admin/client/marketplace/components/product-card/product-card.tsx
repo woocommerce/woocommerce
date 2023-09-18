@@ -21,6 +21,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
+	const isTheme = type === ProductType.theme;
+
 	// Append UTM parameters to the vendor URL
 	let vendorUrl = '';
 	if ( product.vendorUrl ) {
@@ -46,9 +48,18 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			className={ `woocommerce-marketplace__product-card woocommerce-marketplace__product-card--${ type }` }
 		>
 			<div className="woocommerce-marketplace__product-card__content">
+				{ isTheme && (
+					<div className="woocommerce-marketplace__product-card__image">
+						<img
+							className="woocommerce-marketplace__product-card__image-inner"
+							src={ product.image }
+							alt={ product.title }
+						/>
+					</div>
+				) }
 				<div className="woocommerce-marketplace__product-card__header">
 					<div className="woocommerce-marketplace__product-card__details">
-						{ product.icon && (
+						{ ! isTheme && product.icon && (
 							<img
 								className="woocommerce-marketplace__product-card__icon"
 								src={ product.icon }
@@ -75,11 +86,13 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						</div>
 					</div>
 				</div>
-				<p className="woocommerce-marketplace__product-card__description">
-					{ product.description }
-				</p>
+				{ ! isTheme && (
+					<p className="woocommerce-marketplace__product-card__description">
+						{ product.description }
+					</p>
+				) }
 				<div className="woocommerce-marketplace__product-card__price">
-					<span>
+					<span className="woocommerce-marketplace__product-card__price-label">
 						{
 							// '0' is a free product
 							product.price === 0
