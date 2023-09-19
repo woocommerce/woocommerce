@@ -64,6 +64,50 @@ registerCheckoutFilters( 'example-extension', {
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268245369-6cd0aad9-4a7e-45e1-915b-3294db101246.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267216388-08bc3af0-6290-4ec4-b7f5-5ee21d66ed7f.png"> |
 
+### cartItemPrice
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust cart item price of the cart line items.
+registerCheckoutFilters( 'example-extension', {
+  cartItemPrice: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Cart context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'cart' ) {
+      return value;
+    }
+    return '<price/> for all items';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268245369-6cd0aad9-4a7e-45e1-915b-3294db101246.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267218100-6f427b42-f985-4724-a537-8f83d9eff84a.png"> |
+
+### cartItemClass
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust cart item class of the cart line items.
+registerCheckoutFilters( 'example-extension', {
+  cartItemClass: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Cart context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'cart' ) {
+      return value;
+    }
+    return 'my-custom-class';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268705467-6059c77a-6375-4087-a3e5-485d7077ac54.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267219896-58ed0551-998b-4309-bc22-3f7be84565d6.png"> |
+
 ### subtotalPriceFormat
 
 ```ts
@@ -107,6 +151,28 @@ registerCheckoutFilters( 'example-extension', {
 | Before                                                                                                                                   | After                                                                                                                                    |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268295858-ec76f525-e2cf-468c-9634-ae9e84e5aa48.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268295935-3171cd92-33f1-4182-b875-bc7e422771a0.png"> |
+
+### saleBadgePriceFormat
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+ 
+// Adjust sale badge price format of the cart line items.
+registerCheckoutFilters( 'example-extension', {
+  saleBadgePriceFormat: ( value, extensions, args ) => {
+    // Return early since this filter is not being applied in the Cart context.
+    // We must return the original value we received here.
+    if ( args?.context !== 'cart' ) {
+      return value;
+    }
+    return '<price/> per item';
+  }
+} );
+```
+
+| Before                                                                                                                                   | After                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="761" alt="image" src="https://user-images.githubusercontent.com/6242098/268295858-ec76f525-e2cf-468c-9634-ae9e84e5aa48.png"> | <img width="761" alt="image" src="https://user-images.githubusercontent.com/3323310/267230515-d5e9d791-2429-4cac-b4fb-106a3dbe07ce.png"> |
 
 ## Order Summary Items
 
