@@ -83,9 +83,6 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				url: 'https://public-api.wordpress.com/wpcom/v2/ai-background-removal',
 				method: 'POST',
 				body: formData,
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
 			} );
 
 			const blob = new Blob( [ response as ArrayBuffer ], {
