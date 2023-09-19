@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Remove core-profiler checks from the tests -- core profiler is enabled by default now.
+Remove core-profiler checks from the tests -- core profiler is enabled by default.
