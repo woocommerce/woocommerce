@@ -32,8 +32,6 @@
 	{
 		"name": "Discount Banner",
 		"slug": "woocommerce-blocks/discount-banner",
-		"images_total": 1,
-		"images_format": "square",
 		"content": {
 			"titles": [
 				{
@@ -326,8 +324,6 @@
 	{
 		"name": "Just Arrived Full Hero",
 		"slug": "woocommerce-blocks/just-arrived-full-hero",
-		"images_total": 1,
-		"images_format": "landscape",
 		"content": {
 			"titles": [
 				{

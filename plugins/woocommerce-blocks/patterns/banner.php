@@ -4,6 +4,9 @@
  * Slug: woocommerce-blocks/banner
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/banner' );
 ?>
 <!-- wp:group {"align":"wide","style":{"color":{"background":"#f9eddb","text":"#443127"},"spacing":{"padding":{"right":"50px","bottom":"50px","left":"50px","top":"50px"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide has-text-color has-background" style="color:#443127;background-color:#f9eddb;padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px"><!-- wp:columns -->
@@ -33,10 +36,28 @@
 <!-- /wp:group --></div>
 <!-- /wp:column -->
 
-<!-- wp:column {"verticalAlignment":"center"} -->
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/wood-home-wall-decoration-shelf-living-room.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a banner.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/></figure>
-<!-- /wp:image --></div>
-<!-- /wp:column --></div>
-<!-- /wp:columns --></div>
-<!-- /wp:group -->
+		<!-- wp:buttons {"style":{"spacing":{"blockGap":"0","margin":{"top":"20px","bottom":"0"}}}} -->
+		<div class="wp-block-buttons" style="margin-top:20px;margin-bottom:0">
+			<!-- wp:button {"style":{"typography":{"fontSize":"16px"},"color":{"text":"#000000","background":"#ffffff"},"border":{"width":"0px","style":"none"}},"className":"is-style-fill"} -->
+			<div class="wp-block-button has-custom-font-size is-style-fill" style="font-size:16px">
+				<a class="wp-block-button__link has-text-color has-background wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-style:none;border-width:0px;color:#000000;background-color:#ffffff">
+					Shop Holiday Sales
+				</a>
+			</div>
+			<!-- /wp:button -->
+		</div>
+		<!-- /wp:buttons -->
+	</div>
+	<!-- /wp:column -->
+
+	<!-- wp:column {"verticalAlignment":"center"} -->
+	<div class="wp-block-column is-vertically-aligned-center">
+		<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
+		<figure class="wp-block-image size-full">
+			<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/wood-home-wall-decoration-shelf-living-room.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a banner.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1" />
+		</figure>
+		<!-- /wp:image -->
+	</div>
+	<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->

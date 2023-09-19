@@ -4,6 +4,12 @@
  * Slug: woocommerce-blocks/hero-product-chessboard
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-chessboard' );
+
+$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-restaurant-celebration-food-chocolate-cupcake.png' );
+$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/dish-meal-food-breakfast-dessert-eat.png' );
 ?>
 
 <!-- wp:group {"align":"full","layout":{"type":"constrained"}} -->
@@ -12,9 +18,9 @@
 	<div class="wp-block-columns alignwide" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 		<!-- wp:column -->
 		<div class="wp-block-column">
-			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/person-winter-blur-wood-girl-woman.png', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.54,"y":0.52},"isDark":false,"style":{"color":{}}} -->
+			<!-- wp:cover {"url":"<?php echo esc_url( $image1 ); ?>","dimRatio":0,"focalPoint":{"x":0.54,"y":0.52},"isDark":false,"style":{"color":{}}} -->
 			<div class="wp-block-cover is-light">
-				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/person-winter-blur-wood-girl-woman.png', dirname( __FILE__ ) ) ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
+				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image1 ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
 				<div class="wp-block-cover__inner-container">
 				</div>
 			</div>
@@ -118,9 +124,9 @@
 
 		<!-- wp:column {"verticalAlignment":"center"} -->
 		<div class="wp-block-column is-vertically-aligned-center">
-			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.33,"y":0.06},"style":{"color":{}}} -->
+			<!-- wp:cover {"url":"<?php echo esc_url( $image2 ); ?>","dimRatio":0,"focalPoint":{"x":0.33,"y":0.06},"style":{"color":{}}} -->
 			<div class="wp-block-cover">
-				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png', dirname( __FILE__ ) ) ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
+				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image2 ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
 				<div class="wp-block-cover__inner-container">
 				</div>
 			</div>

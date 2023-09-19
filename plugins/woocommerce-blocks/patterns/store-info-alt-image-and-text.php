@@ -4,7 +4,14 @@
  * Slug: woocommerce-blocks/alt-image-and-text
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/alt-image-and-text' );
+
+$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/crafting-pots.png' );
+$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/hand-made-pots.png' );
 ?>
+
 <!-- wp:group {"align":"wide"} -->
 <div class="wp-block-group alignwide">
 	<!-- wp:columns {"align":"wide"} -->
@@ -13,7 +20,7 @@
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%">
 			<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/crafting-pots.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a person making a clay pot.', 'woo-gutenberg-products-block' ); ?>" />
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the left column.', 'woo-gutenberg-products-block' ); ?>" />
 			</figure>
 			<!-- /wp:image -->
 		</div>
@@ -88,7 +95,7 @@
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:52%">
 			<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/hand-made-pots.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent clay pots.', 'woo-gutenberg-products-block' ); ?>" />
+				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the right column.', 'woo-gutenberg-products-block' ); ?>" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

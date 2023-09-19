@@ -4,7 +4,16 @@
  * Slug: woocommerce-blocks/featured-products-fresh-and-tasty
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/featured-products-fresh-and-tasty' );
+
+$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-organic-lemons.png' );
+$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/fresh-organic-tomatoes.png' );
+$image3 = PatternImages::get_image_url( $images, 2, 'images/pattern-placeholders/fresh-lettuce-washed.png' );
+$image4 = PatternImages::get_image_url( $images, 3, 'images/pattern-placeholders/russet-organic-potatoes.png' );
 ?>
+
 <!-- wp:heading {"level":3,"align":"wide"} -->
 <h3 class="wp-block-heading alignwide"><?php esc_html_e( 'Fresh &amp; tasty goods', 'woo-gutenberg-products-block' ); ?></h3>
 <!-- /wp:heading -->
@@ -15,7 +24,7 @@
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/sweet-organic-lemons.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased as Sweet organic Lemons.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -45,7 +54,7 @@
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/fresh-organic-tomatoes.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased as Fresh Organic Tomatoes.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -75,7 +84,7 @@
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/fresh-lettuce-washed.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased as Fresh Lettuce Washed.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -105,7 +114,7 @@
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/russet-organic-potatoes.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased as Russet Organic Potatoes.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 

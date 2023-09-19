@@ -4,6 +4,14 @@
  * Slug: woocommerce-blocks/product-collections-featured-collections
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/product-collections-featured-collections' );
+
+$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
+$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
+$image3 = PatternImages::get_image_url( $images, 2, 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
+$image4 = PatternImages::get_image_url( $images, 3, 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":{"top":"0","left":"0"}}}} -->
@@ -28,13 +36,13 @@
 		<div class="wp-block-group">
 			<!-- wp:image {"width":140,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" />
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" />
 			</figure>
 			<!-- /wp:image -->
 
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>
@@ -62,13 +70,13 @@
 		<div class="wp-block-group">
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

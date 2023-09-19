@@ -4,6 +4,10 @@
  * Slug: woocommerce-blocks/product-collection-banner
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/product-collection-banner' );
+$image  = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
 ?>
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained","contentSize":"1000px"}} -->
@@ -12,10 +16,10 @@
 	<div class="wp-block-columns alignwide has-background" style="background-color:#ffedf5">
 		<!-- wp:column {"width":"58%"} -->
 		<div class="wp-block-column" style="flex-basis:58%">
-			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg', dirname( __FILE__ ) ) ); ?>","dimRatio":20,"minHeight":430,"minHeightUnit":"px","isDark":false,"style":{"spacing":{"padding":{"top":"80px","right":"80px","bottom":"80px","left":"80px"}}}} -->
+			<!-- wp:cover {"url":"<?php echo esc_url( $image ); ?>","dimRatio":20,"minHeight":430,"minHeightUnit":"px","isDark":false,"style":{"spacing":{"padding":{"top":"80px","right":"80px","bottom":"80px","left":"80px"}}}} -->
 			<div class="wp-block-cover is-light" style="padding-top:80px;padding-right:80px;padding-bottom:80px;padding-left:80px;min-height:430px">
 				<span aria-hidden="true" class="wp-block-cover__background has-background-dim-20 has-background-dim"></span>
-				<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg', dirname( __FILE__ ) ) ); ?>" data-object-fit="cover" />
+				<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( $image ); ?>" data-object-fit="cover" />
 				<div class="wp-block-cover__inner-container">
 					<!-- wp:paragraph {"align":"center","placeholder":"Write title…","style":{"typography":{"fontSize":"40px","textTransform":"uppercase","fontStyle":"normal","fontWeight":"700","lineHeight":"1.3"},"color":{"text":"#ffffff"}},"fontFamily":"inter"} -->
 					<p class="has-text-align-center has-text-color has-inter-font-family" style="color:#ffffff;font-size:40px;font-style:normal;font-weight:700;line-height:1.3;text-transform:uppercase">Brand New for the Holidays</p>
