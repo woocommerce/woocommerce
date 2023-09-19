@@ -60,6 +60,7 @@ const blocks = {
 	'product-gallery-large-image-next-previous': {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
+		isExperimental: true,
 	},
 	'product-gallery-pager': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
