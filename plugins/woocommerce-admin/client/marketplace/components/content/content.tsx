@@ -40,6 +40,7 @@ export default function Content(): JSX.Element {
 		}
 
 		setIsLoading( true );
+		setProductList( [] );
 
 		const params = new URLSearchParams();
 
