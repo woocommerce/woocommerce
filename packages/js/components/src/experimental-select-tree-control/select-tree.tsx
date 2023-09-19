@@ -29,6 +29,13 @@ interface SelectTreeProps extends TreeControlProps {
 	initialInputValue?: string | undefined;
 }
 
+function escapeHTML( string: string ) {
+	return string
+		.replace( /&/g, '&amp;' )
+		.replace( />/g, '&gt;' )
+		.replace( /</g, '&lt;' );
+}
+
 export const SelectTree = function SelectTree( {
 	items,
 	treeRef: ref,
@@ -190,7 +197,7 @@ export const SelectTree = function SelectTree( {
 							onChange={ ( value ) => {
 								if ( onInputChange ) onInputChange( value );
 								const item = items.find(
-									( i ) => i.label === value
+									( i ) => i.label === escapeHTML( value )
 								);
 								if ( props.onSelect && item ) {
 									props.onSelect( item );
