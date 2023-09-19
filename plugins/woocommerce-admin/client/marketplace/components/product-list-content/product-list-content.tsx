@@ -22,16 +22,14 @@ export default function ProductListContent( props: {
 						title: product.title,
 						icon: product.icon,
 						vendorName: product.vendorName,
-						vendorUrl: (
-							product.vendorUrl ?
-							appendURLParams( product.vendorUrl, [
-								[ 'utm_source', 'extensionsscreen' ],
-								[ 'utm_medium', 'product' ],
-								[ 'utm_campaign', 'wcaddons' ],
-								[ 'utm_content', 'devpartner' ],
-							] ) :
-							''
-						),
+						vendorUrl: product.vendorUrl
+							? appendURLParams( product.vendorUrl, [
+									[ 'utm_source', 'extensionsscreen' ],
+									[ 'utm_medium', 'product' ],
+									[ 'utm_campaign', 'wcaddons' ],
+									[ 'utm_content', 'devpartner' ],
+							  ] )
+							: '',
 						price: product.price,
 						url: appendURLParams(
 							product.url,
