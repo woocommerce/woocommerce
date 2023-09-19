@@ -23,6 +23,7 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	hide?: boolean;
 }
 
 interface Tabs {
@@ -30,6 +31,11 @@ interface Tabs {
 }
 
 const tabs: Tabs = {
+	search: {
+		name: 'search',
+		title: __( 'Search results', 'woocommerce' ),
+		hide: true,
+	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
@@ -67,10 +73,21 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
+const activeTabs = ( selectedTab: string ) => {
+	const currentActiveTabs = { ...tabs };
+	if ( selectedTab === 'search' ) {
+		currentActiveTabs.search.hide = false;
+	}
+	return currentActiveTabs;
+};
+
 const renderTabs = ( contextValue: MarketplaceContextType ) => {
 	const { selectedTab, setSelectedTab } = contextValue;
 	const tabContent = [];
-	for ( const tabKey in tabs ) {
+	for ( const tabKey in activeTabs( selectedTab ) ) {
+		if ( tabs[ tabKey ]?.hide === true ) {
+			continue;
+		}
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a

@@ -34,7 +34,7 @@ function Search(): JSX.Element {
 
 		// When the search term changes, we reset the category on purpose.
 		navigateTo( {
-			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+			url: getNewPath( { term, category: null, tab: 'search' } ),
 		} );
 
 		return [];
