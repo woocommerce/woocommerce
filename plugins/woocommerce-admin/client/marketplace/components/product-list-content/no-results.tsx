@@ -90,13 +90,15 @@ export default function NoResults(): JSX.Element {
 					className="woocommerce-marketplace__no-results__icon"
 					src={ NoResultsIcon }
 					alt={ __( 'No results.', 'woocommerce' ) }
+					width="80"
+					height="80"
 				/>
 				<div className="woocommerce-marketplace__no-results__description">
 					<h3 className="woocommerce-marketplace__no-results__description--bold">
 						{ sprintf(
 							// translators: %s: search term
 							__(
-								'We didn\'t find any results for "%s"',
+								"We didn't find any results for “%s”",
 								'woocommerce'
 							),
 							noResultsTerm
