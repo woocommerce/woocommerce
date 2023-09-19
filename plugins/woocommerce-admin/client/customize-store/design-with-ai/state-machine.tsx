@@ -13,6 +13,7 @@ import {
 	ColorPalette,
 	FontPairing,
 	Header,
+	Footer,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -22,7 +23,12 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette, fontPairings, defaultHeader } from './prompts';
+import {
+	defaultColorPalette,
+	fontPairings,
+	defaultHeader,
+	defaultFooter,
+} from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -74,6 +80,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				defaultColorPalette: {} as ColorPalette,
 				fontPairing: '' as FontPairing[ 'pair_name' ],
 				header: '' as Header[ 'slug' ],
+				footer: '' as Footer[ 'slug' ],
 			},
 		},
 		initial: 'navigate',
@@ -330,6 +337,25 @@ export const designWithAiStateMachineDefinition = createMachine(
 									},
 									onDone: {
 										actions: [ 'assignHeader' ],
+									},
+								},
+							},
+							chooseFooter: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...defaultFooter,
+											prompt: defaultFooter.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [ 'assignFooter' ],
 									},
 								},
 							},

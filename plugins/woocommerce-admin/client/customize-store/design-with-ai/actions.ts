@@ -15,6 +15,7 @@ import {
 	FontPairing,
 	LookAndToneCompletionResponse,
 	Header,
+	Footer,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -129,6 +130,24 @@ const assignHeader = assign<
 	},
 } );
 
+const assignFooter = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			footer: (
+				event as {
+					data: {
+						response: Footer;
+					};
+				}
+			 ).data.response.slug,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -198,6 +217,7 @@ export const actions = {
 	assignDefaultColorPalette,
 	assignFontPairing,
 	assignHeader,
+	assignFooter,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
