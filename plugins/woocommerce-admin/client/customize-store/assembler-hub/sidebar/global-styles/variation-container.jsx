@@ -28,7 +28,12 @@ export const VariationContainer = ( { variation, children } ) => {
 	}, [ variation, base ] );
 
 	const selectVariation = () => {
-		if ( variation.settings.color ) {
+		// Remove the hasCreatedOwnColors flag if the user is switching to a color palette
+		if (
+			variation.settings.color &&
+			user.settings.color &&
+			user.settings.color.hasCreatedOwnColors
+		) {
 			delete user.settings.color.palette.hasCreatedOwnColors;
 		}
 
