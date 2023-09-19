@@ -1797,7 +1797,8 @@ class WC_Order extends WC_Abstract_Order {
 					$this->get_cancel_endpoint()
 				),
 				'woocommerce-cancel_order'
-			)
+			),
+			$this
 		);
 	}
 
@@ -1819,7 +1820,8 @@ class WC_Order extends WC_Abstract_Order {
 					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
 				),
 				$this->get_cancel_endpoint()
-			)
+			),
+			$this
 		);
 	}
 
