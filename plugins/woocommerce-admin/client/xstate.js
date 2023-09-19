@@ -23,7 +23,7 @@ async function enableXStateInspect() {
 }
 
 if (
-	process.env.NODE_ENV === 'development' &&
+	// process.env.NODE_ENV === 'development' &&
 	window.localStorage.getItem( 'xstate_inspect' ) === 'true'
 ) {
 	enableXStateInspect();

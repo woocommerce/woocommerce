@@ -14,6 +14,7 @@ import {
 	designWithAiStateMachineEvents,
 	FontPairing,
 	LookAndToneCompletionResponse,
+	Header,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -110,6 +111,24 @@ const assignFontPairing = assign<
 	},
 } );
 
+const assignHeader = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			header: (
+				event as {
+					data: {
+						response: Header;
+					};
+				}
+			 ).data.response.slug,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -178,6 +197,7 @@ export const actions = {
 	assignLookAndTone,
 	assignDefaultColorPalette,
 	assignFontPairing,
+	assignHeader,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
