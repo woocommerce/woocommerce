@@ -97,7 +97,6 @@ test.describe( 'Edit order', () => {
 			version: 'wc/v3',
 		} );
 
-		// Debug note: this request will fail with HTTP status 400 if the test is re-run without first resetting state.
 		await api
 			.post( 'customers', {
 				email: 'archie123@email.addr',
@@ -152,6 +151,9 @@ test.describe( 'Edit order', () => {
 		expect( 'billing' in response ).toBeTruthy();
 		expect( response.billing.first_name ).toContain( 'Archibald' );
 		expect( response.meta_data ).toBeUndefined();
+
+		// Clean-up.
+		await api.delete( `customers/${ customerId }`, { force: true } );
 	} );
 } );
 
