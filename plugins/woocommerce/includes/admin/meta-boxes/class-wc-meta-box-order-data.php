@@ -8,6 +8,7 @@
  * @version     2.2.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -706,6 +707,37 @@ class WC_Meta_Box_Order_Data {
 		// Customer note.
 		if ( isset( $_POST['customer_note'] ) ) {
 			$props['customer_note'] = sanitize_textarea_field( wp_unslash( $_POST['customer_note'] ) );
+		}
+
+		// Metadata (only needed when HPOS table is in use).
+		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			$order_meta = $order->get_meta_data();
+
+			$order_meta =
+				array_combine(
+					array_map( fn( $meta ) => $meta->id, $order_meta ),
+					array_map( fn( $meta ) => $meta, $order_meta )
+				);
+
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+
+			foreach ( ( $_POST['meta'] ?? array() ) as $request_meta_id => $request_meta_data ) {
+				$request_meta_id    = wp_unslash( $request_meta_id );
+				$request_meta_key   = wp_unslash( $request_meta_data['key'] );
+				$request_meta_value = wp_unslash( $request_meta_data['value'] );
+				if ( array_key_exists( $request_meta_id, $order_meta ) &&
+					( $order_meta[ $request_meta_id ]->key !== $request_meta_key || $order_meta[ $request_meta_id ]->value !== $request_meta_value ) ) {
+					$order->update_meta_data( $request_meta_key, $request_meta_value, $request_meta_id );
+				}
+			}
+
+			$request_new_key   = wp_unslash( $_POST['metakeyinput'] ?? '' );
+			$request_new_value = wp_unslash( $_POST['metavalue'] ?? '' );
+			if ( '' !== $request_new_key ) {
+				$order->add_meta_data( $request_new_key, $request_new_value );
+			}
+
+			// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		}
 
 		// Save order data.
