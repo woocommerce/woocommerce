@@ -81,12 +81,20 @@ export function Edit( {
 
 	const { ref: variationTableRef } = useValidation< Product >(
 		`variations`,
-		async function regularPriceValidator( defaultValue, additionalData ) {
+		async function regularPriceValidator( defaultValue, newData ) {
+			/**
+			 * We cause a validation error if there is:
+			 * - more then one variation without a price.
+			 * - the notice hasn't been dismissed.
+			 * - The product hasn't already been published.
+			 * - We are publishing the product.
+			 */
 			if (
 				totalCountWithoutPrice > 0 &&
 				! noticeDimissed.current &&
 				productStatus !== 'publish' &&
-				additionalData?.status === 'publish'
+				// New status.
+				newData?.status === 'publish'
 			) {
 				if ( itemsWithoutPriceNoticeDismissed !== 'yes' ) {
 					updateUserPreferences( {
