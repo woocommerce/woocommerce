@@ -10,9 +10,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
-use Automattic\WooCommerce\Blocks\Utils\SettingsUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateMigrationUtils;
-use \WP_Post;
 
 /**
  * BlockTypesController class.
@@ -65,9 +63,6 @@ class BlockTemplatesController {
 
 		if ( wc_current_theme_is_fse_theme() ) {
 			add_action( 'init', array( $this, 'maybe_migrate_content' ) );
-			add_filter( 'woocommerce_settings_pages', array( $this, 'template_permalink_settings' ) );
-			add_filter( 'pre_update_option', array( $this, 'update_template_permalink' ), 10, 2 );
-			add_action( 'woocommerce_admin_field_permalink', array( SettingsUtils::class, 'permalink_input_field' ) );
 
 			// By default, the Template Part Block only supports template parts that are in the current theme directory.
 			// This render_callback wrapper allows us to add support for plugin-housed template parts.
@@ -113,6 +108,27 @@ class BlockTemplatesController {
 				},
 				10,
 				2
+			);
+
+			/**
+			 * Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
+			 * We want to avoid this flow and point users towards the site editor instead.
+			 */
+			add_action(
+				'current_screen',
+				function () {
+					if ( ! is_admin() ) {
+						return;
+					}
+
+					$current_screen = get_current_screen();
+
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), [ wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ], true ) ) {
+						wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
+					}
+				},
+				10
 			);
 		}
 	}
@@ -742,142 +758,10 @@ class BlockTemplatesController {
 		}
 
 		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'cart' ) ) {
-			BlockTemplateMigrationUtils::migrate_page( 'cart', CartTemplate::get_placeholder_page() );
+			BlockTemplateMigrationUtils::migrate_page( 'cart' );
 		}
 		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'checkout' ) ) {
-			BlockTemplateMigrationUtils::migrate_page( 'checkout', CheckoutTemplate::get_placeholder_page() );
+			BlockTemplateMigrationUtils::migrate_page( 'checkout' );
 		}
-	}
-
-	/**
-	 * Replaces page settings in WooCommerce with text based permalinks which point to a template.
-	 *
-	 * @param array $settings Settings pages.
-	 * @return array
-	 */
-	public function template_permalink_settings( $settings ) {
-		foreach ( $settings as $key => $setting ) {
-			if ( 'woocommerce_checkout_page_id' === $setting['id'] ) {
-				$checkout_page    = CheckoutTemplate::get_placeholder_page();
-				$settings[ $key ] = [
-					'title'    => __( 'Checkout page', 'woo-gutenberg-products-block' ),
-					'desc'     => sprintf(
-						// translators: %1$s: opening anchor tag, %2$s: closing anchor tag.
-						__( 'The checkout template can be %1$s edited here%2$s.', 'woo-gutenberg-products-block' ),
-						'<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template&postId=woocommerce%2Fwoocommerce%2F%2F' . CheckoutTemplate::get_slug() ) ) . '" target="_blank">',
-						'</a>'
-					),
-					'desc_tip' => __( 'This is the URL to the checkout page.', 'woo-gutenberg-products-block' ),
-					'id'       => 'woocommerce_checkout_page_endpoint',
-					'type'     => 'permalink',
-					'default'  => $checkout_page ? $checkout_page->post_name : CheckoutTemplate::get_slug(),
-					'autoload' => false,
-				];
-			}
-			if ( 'woocommerce_cart_page_id' === $setting['id'] ) {
-				$cart_page        = CartTemplate::get_placeholder_page();
-				$settings[ $key ] = [
-					'title'    => __( 'Cart page', 'woo-gutenberg-products-block' ),
-					'desc'     => sprintf(
-						// translators: %1$s: opening anchor tag, %2$s: closing anchor tag.
-						__( 'The cart template can be %1$s edited here%2$s.', 'woo-gutenberg-products-block' ),
-						'<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template&postId=woocommerce%2Fwoocommerce%2F%2F' . CartTemplate::get_slug() ) ) . '" target="_blank">',
-						'</a>'
-					),
-					'desc_tip' => __( 'This is the URL to the cart page.', 'woo-gutenberg-products-block' ),
-					'id'       => 'woocommerce_cart_page_endpoint',
-					'type'     => 'permalink',
-					'default'  => $cart_page ? $cart_page->post_name : CartTemplate::get_slug(),
-					'autoload' => false,
-				];
-			}
-		}
-
-		return $settings;
-	}
-
-	/**
-	 * Syncs entered permalink with the pages and returns the correct value.
-	 *
-	 * @param string $value     Value of the option.
-	 * @param string $option    Name of the option.
-	 * @return string
-	 */
-	public function update_template_permalink( $value, $option ) {
-		if ( 'woocommerce_checkout_page_endpoint' === $option ) {
-			return $this->sync_endpoint_with_page( CheckoutTemplate::get_placeholder_page(), 'checkout', $value );
-		}
-		if ( 'woocommerce_cart_page_endpoint' === $option ) {
-			return $this->sync_endpoint_with_page( CartTemplate::get_placeholder_page(), 'cart', $value );
-		}
-		return $value;
-	}
-
-	/**
-	 * Syncs the provided permalink with the actual WP page.
-	 *
-	 * @param WP_Post|null $page The page object, or null if it does not exist.
-	 * @param string       $page_slug The identifier for the page e.g. cart, checkout.
-	 * @param string       $permalink The new permalink to use.
-	 * @return string THe actual permalink assigned to the page. May differ from $permalink if it was already taken.
-	 */
-	protected function sync_endpoint_with_page( $page, $page_slug, $permalink ) {
-		$matching_page = get_page_by_path( $permalink, OBJECT, 'page' );
-
-		/**
-		 * Filters whether to attempt to guess a redirect URL for a 404 request.
-		 *
-		 * Returning a false value from the filter will disable the URL guessing
-		 * and return early without performing a redirect.
-		 *
-		 * @since 11.0.0
-		 *
-		 * @param bool $do_redirect_guess Whether to attempt to guess a redirect URL
-		 *                                for a 404 request. Default true.
-		 */
-		if ( ! $matching_page instanceof WP_Post && apply_filters( 'do_redirect_guess_404_permalink', true ) ) {
-			// If it is a subpage and url guessing is on, then we will need to get it via post_name as path will not match.
-			$query = new \WP_Query(
-				[
-					'post_type' => 'page',
-					'name'      => $permalink,
-				]
-			);
-
-			$matching_page = $query->have_posts() ? $query->posts[0] : null;
-		}
-
-		if ( $matching_page && 'publish' === $matching_page->post_status ) {
-			// Existing page matches given permalink; use its ID.
-			update_option( 'woocommerce_' . $page_slug . '_page_id', $matching_page->ID );
-
-			return get_page_uri( $matching_page );
-		}
-
-		// No matching page; either update current page (by ID stored in option table) or create a new page.
-		if ( ! $page ) {
-			$updated_page_id = wc_create_page(
-				esc_sql( $permalink ),
-				'woocommerce_' . $page_slug . '_page_id',
-				$page_slug,
-				'',
-				'',
-				'publish'
-			);
-		} else {
-			$updated_page_id = wp_update_post(
-				[
-					'ID'        => $page->ID,
-					'post_name' => esc_sql( $permalink ),
-				]
-			);
-		}
-
-		// Get post again in case slug was updated with a suffix.
-		if ( $updated_page_id && ! is_wp_error( $updated_page_id ) ) {
-			return get_page_uri( get_post( $updated_page_id ) );
-		}
-
-		return $permalink;
 	}
 }

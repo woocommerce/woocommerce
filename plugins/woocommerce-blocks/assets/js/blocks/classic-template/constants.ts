@@ -15,8 +15,6 @@ export const TYPES = {
 	productTaxonomy: 'product-taxonomy',
 	productSearchResults: 'product-search-results',
 	orderConfirmation: 'order-confirmation',
-	cart: 'cart',
-	checkout: 'checkout',
 	checkoutHeader: 'checkout-header',
 };
 export const PLACEHOLDERS = {
@@ -83,16 +81,6 @@ export const TEMPLATES: TemplateDetails = {
 			'woo-gutenberg-products-block'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
-	},
-	cart: {
-		type: TYPES.cart,
-		title: __( 'WooCommerce Cart Block', 'woo-gutenberg-products-block' ),
-		placeholder: 'cart',
-	},
-	checkout: {
-		type: TYPES.checkout,
-		title: __( 'Checkout Block', 'woo-gutenberg-products-block' ),
-		placeholder: 'checkout',
 	},
 	'checkout-header': {
 		type: TYPES.checkoutHeader,
