@@ -158,7 +158,7 @@ class MarketingSpecs {
 					'per_page' => 8,
 					'_embed'   => 1,
 				),
-				'https://woocommerce.com/wccom/marketing-knowledgebase/v1/posts/' . $topic
+				'https://woocommerce.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
 			);
 
 			$request = wp_remote_get(
