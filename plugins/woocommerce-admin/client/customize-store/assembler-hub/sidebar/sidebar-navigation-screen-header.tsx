@@ -12,6 +12,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
@@ -35,8 +36,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 
 export const SidebarNavigationScreenHeader = () => {
 	useEditorScroll( {
-		editorSelector:
-			'.interface-navigable-region.interface-interface-skeleton__content',
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
 	} );
 
@@ -85,8 +85,20 @@ export const SidebarNavigationScreenHeader = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'header',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}

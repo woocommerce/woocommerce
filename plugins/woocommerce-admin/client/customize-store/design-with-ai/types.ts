@@ -1,3 +1,12 @@
+/**
+ * External dependencies
+ */
+import { z } from 'zod';
+/**
+ * Internal dependencies
+ */
+import { colorPaletteValidator } from './prompts';
+
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
@@ -7,6 +16,9 @@ export type designWithAiStateMachineContext = {
 	};
 	toneOfVoice: {
 		choice: Tone | '';
+	};
+	aiSuggestions: {
+		defaultColorPalette: ColorPalette;
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
@@ -31,3 +43,10 @@ export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
 export const VALID_TONES = [ 'Informal', 'Neutral', 'Formal' ] as const;
 export type Look = ( typeof VALID_LOOKS )[ number ];
 export type Tone = ( typeof VALID_TONES )[ number ];
+
+export interface LookAndToneCompletionResponse {
+	look: Look;
+	tone: Tone;
+}
+
+export type ColorPalette = z.infer< typeof colorPaletteValidator >;
