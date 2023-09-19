@@ -1,0 +1,39 @@
+.woocommerce-customize-store-banner {
+	background: var(--woo-purple-woo-purple-0, #F2EDFF);
+	background-image: url(../../assets/images/banner-design-with-ai.svg);
+	background-repeat: no-repeat;
+	background-position: bottom right;
+	background-size: contain;
+	border-radius: 4px;
+	display: flex;
+	min-height: 343px;
+	padding: 70px 0;
+	width: 820px;
+
+	.woocommerce-customize-store-banner-content {
+		width: 345px;
+		margin-left: 50px;
+
+		h1 {
+			font-size: 24px;
+			line-height: 1.33;
+		}
+
+		p {
+			font-size: 16px;
+			line-height: 1.5;
+			margin: 1rem 0 2rem 0;
+		}
+
+		button {
+			background-color: #3858e9;
+			border: none;
+			border-radius: 2px;
+			color: white;
+			display: inline-block;
+			line-height: 1.25rem;
+			padding: 10px 15px;
+		}
+
+	}
+}
