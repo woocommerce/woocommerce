@@ -2,7 +2,7 @@ export type ValidatorResponse = Promise< ValidationError >;
 
 export type Validator< T > = (
 	initialValue?: T,
-	additionalData?: Partial< T >
+	newData?: Partial< T >
 ) => ValidatorResponse;
 
 export type ValidationContextProps< T > = {
@@ -12,7 +12,7 @@ export type ValidationContextProps< T > = {
 		validator: Validator< T >
 	): React.Ref< HTMLElement >;
 	validateField( name: string ): ValidatorResponse;
-	validateAll( additionalData?: Partial< T > ): Promise< ValidationErrors >;
+	validateAll( newData?: Partial< T > ): Promise< ValidationErrors >;
 };
 
 export type ValidationProviderProps< T > = {
@@ -26,5 +26,5 @@ export type ValidatorRegistration< T > = {
 	name: string;
 	ref: React.Ref< HTMLElement >;
 	error?: ValidationError;
-	validate( additionalData?: Partial< T > ): ValidatorResponse;
+	validate( newData?: Partial< T > ): ValidatorResponse;
 };

@@ -19,11 +19,11 @@ export function useValidations< T = unknown >() {
 
 	return {
 		isValidating,
-		async validate( additionalData?: Partial< T > ) {
+		async validate( newData?: Partial< T > ) {
 			setIsValidating( true );
 			return new Promise< void >( ( resolve, reject ) => {
 				context
-					.validateAll( additionalData )
+					.validateAll( newData )
 					.then( ( errors ) => {
 						if ( isInvalid( errors ) ) {
 							reject( errors );

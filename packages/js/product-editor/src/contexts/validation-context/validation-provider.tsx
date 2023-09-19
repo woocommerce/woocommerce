@@ -40,12 +40,12 @@ export function ValidationProvider< T >( {
 
 	async function validateField(
 		validatorId: string,
-		additionalData?: Partial< T >
+		newData?: Partial< T >
 	): ValidatorResponse {
 		const validators = validatorsRef.current;
 		if ( validatorId in validators ) {
 			const validator = validators[ validatorId ];
-			const result = validator( initialValue, additionalData );
+			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
 				setErrors( ( currentErrors ) => ( {
@@ -60,7 +60,7 @@ export function ValidationProvider< T >( {
 	}
 
 	async function validateAll(
-		additionalData: Partial< T >
+		newData: Partial< T >
 	): Promise< ValidationErrors > {
 		const newErrors: ValidationErrors = {};
 		const validators = validatorsRef.current;
@@ -68,7 +68,7 @@ export function ValidationProvider< T >( {
 		for ( const validatorId in validators ) {
 			newErrors[ validatorId ] = await validateField(
 				validatorId,
-				additionalData
+				newData
 			);
 		}
 
