@@ -124,10 +124,6 @@ test.describe( 'Edit order', () => {
 
 		// Open our test order and select the customer we just created.
 		await page.goto( `wp-admin/post.php?post=${orderId}&action=edit` );
-		await page.evaluate(
-			( customerId ) => document.getElementById( 'customer_user' ).innerHTML = `<option value=${customerId} selected></option>`,
-			customerId
-		);
 
 		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
 		const response = await page.evaluate(
