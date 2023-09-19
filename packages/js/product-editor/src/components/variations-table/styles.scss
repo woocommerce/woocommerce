@@ -83,8 +83,9 @@ $table-row-height: calc($grid-unit * 9);
 	&__actions {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: flex-end;
 		gap: $gap-smaller;
+		margin-right: $gap-smallest;
 
 		&--delete {
 			&.components-button.components-menu-item__button.is-link {
