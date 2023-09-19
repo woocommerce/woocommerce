@@ -4,31 +4,31 @@ This block is used to render a checkbox field in the product editor.
 
 _Please note that to persist a custom field in the product it also needs to be added to the WooCommerce REST API._
 
-Here's an example on how it is used for the 'Enable product reviews' field in the Product Catalog section:
+Here's an example on how it is used for the 'sold_individually' field in the Inventory section:
 
 ```php
-$organization_group = $this->get_group_by_id( $this::GROUP_IDS['ORGANIZATION'] );
-// Product Catalog Section.
-$product_catalog_section = $organization_group->add_section(
-  [
-    'id'         => 'product-catalog-section',
-    'order'      => 10,
-    'attributes' => [
-      'title' => __( 'Product catalog', 'woocommerce' ),
-    ],
-  ]
-);
-$product_catalog_section->add_block(
-  [
-    'id'         => 'product-enable-product-reviews',
-    'blockName'  => 'woocommerce/product-checkbox-field',
-    'order'      => 40,
-    'attributes' => [
-      'label'    => __( 'Enable product reviews', 'woocommerce' ),
-      'property' => 'reviews_allowed',
-    ],
-  ]
-);
+$product_inventory_advanced_wrapper->add_block(
+			[
+				'id'         => 'product-limit-purchase',
+				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 20,
+				'attributes' => [
+					'title'    => __(
+						'Restrictions',
+						'woocommerce'
+					),
+					'label'    => __(
+						'Limit purchases to 1 item per order',
+						'woocommerce'
+					),
+					'property' => 'sold_individually',
+					'tooltip'  => __(
+						'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+						'woocommerce'
+					),
+				],
+			]
+		);
 ```
 
 Here's how it looks on the product editor:
