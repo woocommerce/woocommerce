@@ -32,8 +32,8 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
+		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
 		await expect(
