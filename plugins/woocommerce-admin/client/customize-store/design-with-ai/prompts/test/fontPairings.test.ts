@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { fontChoiceValidator } from '.';
+import { fontChoiceValidator } from '..';
 
 describe( 'fontChoiceValidator', () => {
 	it( 'should validate when font choice is part of the allowed list', () => {
