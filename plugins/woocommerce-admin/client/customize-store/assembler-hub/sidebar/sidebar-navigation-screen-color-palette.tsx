@@ -15,6 +15,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 import { PanelBody } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -70,14 +71,38 @@ export const SidebarNavigationScreenColorPalette = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'color-palette',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 					StyleLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_style_link_click',
+									{
+										source: 'color-palette',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}

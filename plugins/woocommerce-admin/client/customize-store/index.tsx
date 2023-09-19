@@ -137,6 +137,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				{
+					target: 'transitionalScreen',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'transitional',
+					},
+				},
+				{
 					target: 'intro',
 				},
 			],
@@ -233,6 +240,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
+			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
 			meta: {
 				component: Transitional,
 			},

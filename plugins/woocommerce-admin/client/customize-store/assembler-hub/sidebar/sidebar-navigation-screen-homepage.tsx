@@ -14,6 +14,8 @@ import { Spinner } from '@wordpress/components';
 
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
@@ -65,8 +67,20 @@ export const SidebarNavigationScreenHomepage = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'homepage',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}
