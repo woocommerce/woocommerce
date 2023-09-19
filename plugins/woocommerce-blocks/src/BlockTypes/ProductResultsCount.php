@@ -45,7 +45,7 @@ class ProductResultsCount extends AbstractBlock {
 		return sprintf(
 			'<div class="woocommerce wc-block-product-results-count wp-block-woocommerce-product-results-count %1$s %2$s" style="%3$s">%4$s</div>',
 			esc_attr( $classes_and_styles['classes'] ),
-			$classname,
+			esc_attr( $classname ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$product_results_count
 		);

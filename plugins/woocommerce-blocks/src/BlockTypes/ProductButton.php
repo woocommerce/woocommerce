@@ -103,7 +103,7 @@ class ProductButton extends AbstractBlock {
 						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
 						$is_ajax_button ? 'ajax_add_to_cart' : '',
 						'product_type_' . $product->get_type(),
-						$styles_and_classes['classes'],
+						esc_attr( $styles_and_classes['classes'] ),
 					)
 				)
 			);
