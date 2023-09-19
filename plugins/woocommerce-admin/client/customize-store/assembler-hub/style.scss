@@ -73,6 +73,7 @@
 		padding-top: 80px;
 		padding-bottom: 0;
 		gap: 0;
+		width: 348px;
 	}
 
 	.edit-site-sidebar-navigation-screen__title-icon,
@@ -243,9 +244,13 @@
 
 	.woocommerce-customize-store__sidebar-logo-container {
 		margin: 12px 0 32px;
-		width: 324px;
 		padding: 32px;
 		cursor: pointer;
+		width: 324px;
+
+		.woocommerce-customize-store_custom-logo {
+			width: 100%;
+		}
 	}
 
 	.woocommerce-customize-store__sidebar-logo-content {
