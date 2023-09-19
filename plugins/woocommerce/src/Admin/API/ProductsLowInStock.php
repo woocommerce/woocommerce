@@ -70,10 +70,10 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
 		);
 
-		$total_results = $count_query_results[0]->total;
+		$total_results = (int) $count_query_results[0]->total;
 		$response      = rest_ensure_response( array( 'total' => $total_results ) );
 		$response->header( 'X-WP-Total', $total_results );
-		$response->header( 'X-WP-TotalPages', 120 );
+		$response->header( 'X-WP-TotalPages', 0 );
 
 		return $response;
 	}
