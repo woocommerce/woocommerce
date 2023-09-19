@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, TextControl } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -16,6 +17,7 @@ import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { SelectTreeMenu } from './select-tree-menu';
+import { escapeHTML } from '../utils';
 
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
@@ -185,11 +187,11 @@ export const SelectTree = function SelectTree( {
 					) : (
 						<TextControl
 							{ ...inputProps }
-							value={ props.createValue || '' }
+							value={ decodeEntities( props.createValue || '' ) }
 							onChange={ ( value ) => {
 								if ( onInputChange ) onInputChange( value );
 								const item = items.find(
-									( i ) => i.label === value
+									( i ) => i.label === escapeHTML( value )
 								);
 								if ( props.onSelect && item ) {
 									props.onSelect( item );
