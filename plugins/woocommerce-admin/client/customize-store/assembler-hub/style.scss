@@ -119,10 +119,14 @@
 
 	.edit-site-layout__sidebar {
 		.edit-site-sidebar__content {
+			display: flex;
+			flex-direction: column;
+
 			.components-navigator-screen {
 				will-change: auto;
 				padding: 0 16px;
 				overflow-x: hidden;
+				flex: 1;
 			}
 		}
 
