@@ -18,6 +18,16 @@ $table-row-height: calc($grid-unit * 9);
 	&__notice {
 		border-left: 0px;
 		margin: 0 0 $gap-large 0;
+		&.is-error {
+			background-color: #fcf0f1;
+		}
+
+		.components-notice__actions {
+			margin-top: $gap-small;
+			.components-button:first-child {
+				margin-left: 0px;
+			}
+		}
 	}
 
 	&__table {
