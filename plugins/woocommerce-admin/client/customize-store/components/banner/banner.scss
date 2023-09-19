@@ -25,11 +25,13 @@
 			margin: 1rem 0 2rem 0;
 		}
 
-		a.button {
+		button {
 			background-color: #3858e9;
+			border: none;
 			border-radius: 2px;
 			color: white;
 			display: inline-block;
+			line-height: 1.25rem;
 			padding: 10px 15px;
 		}
 
