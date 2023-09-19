@@ -15,7 +15,9 @@ class CustomizeStore extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
+		add_action( 'after_switch_theme', array( $this, 'mark_task_as_complete' ) );
 	}
 
 	/**
@@ -182,5 +184,12 @@ class CustomizeStore extends Task {
 		 * @since 8.0.3
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+	}
+
+	/**
+	 * Mark task as complete.
+	 */
+	public function mark_task_as_complete() {
+		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 }
