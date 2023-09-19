@@ -4,14 +4,9 @@
 import classNames from 'classnames';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
-import { Link } from '@woocommerce/components';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	createElement,
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
