@@ -14,15 +14,21 @@ import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType } from '../product-list/types';
+import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 interface ThemeProps {
 	products?: Product[];
+	perPage?: number;
 }
 
 export default function Themes( props: ThemeProps ): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading } = marketplaceContextValue;
-	const products = props.products?.slice( 0, 60 ) ?? [];
+	const products =
+		props.products?.slice(
+			0,
+			props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE
+		) ?? [];
 
 	let title = __( '0 themes found', 'woocommerce' );
 
