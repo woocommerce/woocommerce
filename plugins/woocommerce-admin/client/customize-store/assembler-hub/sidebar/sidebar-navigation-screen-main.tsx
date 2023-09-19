@@ -20,11 +20,11 @@ import {
 	header,
 	home,
 	footer,
-	pages,
 } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -45,8 +45,20 @@ export const SidebarNavigationScreenMain = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'main',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}
@@ -64,6 +76,14 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/logo"
 							withChevron
 							icon={ siteLogo }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'logo',
+									}
+								);
+							} }
 						>
 							{ __( 'Add your logo', 'woocommerce' ) }
 						</NavigatorButton>
@@ -72,6 +92,14 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/color-palette"
 							withChevron
 							icon={ color }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'color-palette',
+									}
+								);
+							} }
 						>
 							{ __( 'Change the color palette', 'woocommerce' ) }
 						</NavigatorButton>
@@ -80,6 +108,14 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/typography"
 							withChevron
 							icon={ typography }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'typography',
+									}
+								);
+							} }
 						>
 							{ __( 'Change fonts', 'woocommerce' ) }
 						</NavigatorButton>
@@ -95,6 +131,14 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/header"
 							withChevron
 							icon={ header }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'header',
+									}
+								);
+							} }
 						>
 							{ __( 'Change your header', 'woocommerce' ) }
 						</NavigatorButton>
@@ -103,6 +147,14 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/homepage"
 							withChevron
 							icon={ home }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'home',
+									}
+								);
+							} }
 						>
 							{ __( 'Change your homepage', 'woocommerce' ) }
 						</NavigatorButton>
@@ -111,17 +163,26 @@ export const SidebarNavigationScreenMain = () => {
 							path="/customize-store/assembler-hub/footer"
 							withChevron
 							icon={ footer }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_sidebar_item_click',
+									{
+										item: 'footer',
+									}
+								);
+							} }
 						>
 							{ __( 'Change your footer', 'woocommerce' ) }
 						</NavigatorButton>
-						<NavigatorButton
+						{ /* TODO: Turn on this in Phrase 2  */ }
+						{ /* <NavigatorButton
 							as={ SidebarNavigationItem }
 							path="/customize-store/assembler-hub/pages"
 							withChevron
 							icon={ pages }
 						>
 							{ __( 'Add and edit other pages', 'woocommerce' ) }
-						</NavigatorButton>
+						</NavigatorButton> */ }
 					</ItemGroup>
 				</>
 			}
