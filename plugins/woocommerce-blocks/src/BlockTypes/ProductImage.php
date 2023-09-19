@@ -105,7 +105,7 @@ class ProductImage extends AbstractBlock {
 			<span class="screen-reader-text">Product on sale</span>
 		</div>
 	',
-			$attributes['saleBadgeAlign'],
+			esc_attr( $attributes['saleBadgeAlign'] ),
 			isset( $font_size['class'] ) ? esc_attr( $font_size['class'] ) : '',
 			isset( $font_size['style'] ) ? esc_attr( $font_size['style'] ) : '',
 			esc_html__( 'Sale', 'woo-gutenberg-products-block' )
