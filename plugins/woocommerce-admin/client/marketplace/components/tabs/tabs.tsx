@@ -74,6 +74,9 @@ const setUrlTabParam = ( tabKey: string ) => {
 };
 
 const activeTabs = ( selectedTab: string ) => {
+	if ( selectedTab === '' ) {
+		return tabs;
+	}
 	const currentActiveTabs = { ...tabs };
 	if ( selectedTab === 'search' ) {
 		currentActiveTabs.search.hide = false;

@@ -35,7 +35,7 @@ export default function Content(): JSX.Element {
 
 	// Get the content for this screen
 	useEffect( () => {
-		if ( selectedTab === 'discover' ) {
+		if ( [ '', 'discover' ].includes( selectedTab ) ) {
 			return;
 		}
 
@@ -114,7 +114,7 @@ export default function Content(): JSX.Element {
 	}
 	return (
 		<div className="woocommerce-marketplace__content">
-			<ContentComponent products={ productList } />
+			{ selectedTab && <ContentComponent products={ productList } /> }
 		</div>
 	);
 }
