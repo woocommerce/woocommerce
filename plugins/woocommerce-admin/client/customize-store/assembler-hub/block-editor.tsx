@@ -45,7 +45,7 @@ export const BlockEditor = ( {} ) => {
 			: 'topDown';
 
 	const previewOpacity = useScrollOpacity(
-		'.interface-navigable-region.interface-interface-skeleton__content',
+		'.woocommerce-customize-store__block-editor iframe',
 		scrollDirection
 	);
 
