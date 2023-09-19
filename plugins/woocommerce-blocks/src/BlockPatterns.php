@@ -2,9 +2,12 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+use Automattic\WooCommerce\Blocks\Verticals\Client;
+use Automattic\WooCommerce\Blocks\Verticals\VerticalsSelector;
 
 /**
- * Registers patterns under the `./patterns/` directory.
+ * Registers patterns under the `./patterns/` directory and updates their content.
  * Each pattern is defined as a PHP file and defines its metadata using plugin-style headers.
  * The minimum required definition is:
  *
@@ -48,6 +51,8 @@ class BlockPatterns {
 		$this->patterns_path = $package->get_path( 'patterns' );
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
+		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_patterns_content_update' ), 10, 2 );
+		add_action( 'woocommerce_update_patterns_content', array( $this, 'update_patterns_content' ) );
 	}
 
 	/**
@@ -197,5 +202,53 @@ class BlockPatterns {
 
 			register_block_pattern( $pattern_data['slug'], $pattern_data );
 		}
+	}
+
+	/**
+	 * Update the patterns content when the store description is changed.
+	 *
+	 * @param string $option The option name.
+	 * @param string $value The option value.
+	 */
+	public function schedule_patterns_content_update( $option, $value ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
+
+		$action_scheduler = WP_PLUGIN_DIR . '/woocommerce/packages/action-scheduler/action-scheduler.php';
+
+		if ( ! file_exists( $action_scheduler ) ) {
+			return;
+		}
+
+		require_once $action_scheduler;
+
+		as_schedule_single_action( time(), 'woocommerce_update_patterns_content', array( $value ) );
+	}
+
+	/**
+	 * Update the patterns content.
+	 *
+	 * @param string $value The new value saved for the add_option_woo_ai_describe_store_description option.
+	 *
+	 * @return bool|int|string|\WP_Error
+	 */
+	public function update_patterns_content( $value ) {
+		$allow_ai_connection = get_option( 'woocommerce_blocks_allow_ai_connection' );
+
+		if ( ! $allow_ai_connection ) {
+			return new \WP_Error(
+				'ai_connection_not_allowed',
+				__( 'AI content generation is not allowed on this store. Update your store settings if you wish to enable this feature.', 'woo-gutenberg-products-block' )
+			);
+		}
+
+		$vertical_id = ( new VerticalsSelector() )->get_vertical_id( $value );
+
+		if ( is_wp_error( $vertical_id ) ) {
+			return $vertical_id;
+		}
+
+		return ( new PatternImages() )->create_patterns_content( $vertical_id, new Client() );
 	}
 }
