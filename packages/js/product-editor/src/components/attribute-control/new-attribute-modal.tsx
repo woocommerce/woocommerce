@@ -403,7 +403,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																}
 																value={
 																	attribute ===
-																	null
+																		null ||
+																	attribute ===
+																		undefined
 																		? []
 																		: attribute.terms
 																}
@@ -506,7 +508,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									label={ addAccessibleLabel }
 									disabled={
 										values.attributes.length === 1 &&
-										values.attributes[ 0 ] === null
+										( values.attributes[ 0 ] === null ||
+											values.attributes[ 0 ] ===
+												undefined )
 									}
 									onClick={ () =>
 										onAddingAttributes( values )
