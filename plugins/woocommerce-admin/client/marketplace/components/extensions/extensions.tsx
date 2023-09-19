@@ -112,10 +112,12 @@ export default function Extensions(): JSX.Element {
 			return <NoResults />;
 		}
 
-		return <>
-			<CategorySelector />
-			<ProductListContent products={ products } />
-		</>;
+		return (
+			<>
+				<CategorySelector />
+				<ProductListContent products={ products } />
+			</>
+		);
 	}
 
 	return (
