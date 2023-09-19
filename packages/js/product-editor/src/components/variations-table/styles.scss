@@ -15,6 +15,11 @@ $table-row-height: calc($grid-unit * 9);
 		border-bottom: 1px solid $gray-200;
 	}
 
+	&__notice {
+		border-left: 0px;
+		margin: 0 0 $gap-large 0;
+	}
+
 	&__table {
 		height: $table-row-height * 5;
 		overflow: auto;

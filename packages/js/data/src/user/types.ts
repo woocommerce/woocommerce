@@ -29,6 +29,7 @@ export type UserPreferences = {
 	variable_product_block_tour_shown?: string;
 	variations_report_columns?: string;
 	product_block_variable_options_notice_dismissed?: string;
+	variable_items_without_price_notice_dismissed?: Record< number, string >;
 };
 
 export type WoocommerceMeta = UserPreferences & {

@@ -184,6 +184,7 @@ class Init {
 			array(
 				'variable_product_block_tour_shown',
 				'product_block_variable_options_notice_dismissed',
+				'variable_items_without_price_notice_dismissed'
 			)
 		);
 	}
