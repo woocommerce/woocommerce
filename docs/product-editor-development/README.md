@@ -21,8 +21,11 @@ Depending on the complexity of the extension's UI, the implementation might be a
 
 - [Common tasks](common-tasks.md)
 - [Migrating from the legacy editor](migrating-from-the-legacy-editor.md)
+- [FAQ](faq.md)
 
 ## Related documentation
+
+[comment]: # (Link to specific parts of the documentation that exist in different parts of the repo)
 
 - [Template API documentation](../../plugins/woocommerce/src/Internal/Admin/BlockTemplates/README.md)
 - [Template Registry hooks documentation](../../plugins/woocommerce/src/Internal/Admin/BlockTemplateRegistry/README.md)
