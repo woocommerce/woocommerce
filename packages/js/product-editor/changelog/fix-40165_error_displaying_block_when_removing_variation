@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix error displaying block after removing variation #40255

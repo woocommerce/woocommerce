@@ -2974,4 +2974,36 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
 		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
 	}
+
+	/**
+	 * @testDox Test that date queries correctly handle timezones.
+	 */
+	public function test_timezone_date_query_support() {
+		$order = new WC_Order();
+		$order->set_date_created( '2023-09-01T00:30:00' ); // This would be 2023-08-31T18:00:00 UTC given the current timezone.
+		$this->sut->create( $order );
+
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) ); // Should not return anything as the order was created on 2023-08-31 UTC.
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-08-31' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '<=2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-08-31' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '>2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '<2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+	}
+
 }
