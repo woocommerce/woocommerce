@@ -17,6 +17,7 @@ import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { SelectTreeMenu } from './select-tree-menu';
+import { escapeHTML } from '../utils';
 
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
@@ -27,13 +28,6 @@ interface SelectTreeProps extends TreeControlProps {
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
-}
-
-function escapeHTML( string: string ) {
-	return string
-		.replace( /&/g, '&amp;' )
-		.replace( />/g, '&gt;' )
-		.replace( /</g, '&lt;' );
 }
 
 export const SelectTree = function SelectTree( {

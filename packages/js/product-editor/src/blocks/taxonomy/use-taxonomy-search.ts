@@ -3,6 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
+import { escapeHTML } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
@@ -43,13 +44,6 @@ const PAGINATION_SIZE = 30;
 
 interface UseTaxonomySearchOptions {
 	fetchParents?: boolean;
-}
-
-function escapeHTML( string: string ) {
-	return string
-		.replace( /&/g, '&amp;' )
-		.replace( />/g, '&gt;' )
-		.replace( /</g, '&lt;' );
 }
 
 const useTaxonomySearch = (
