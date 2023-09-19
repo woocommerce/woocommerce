@@ -9,8 +9,10 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import {
+	ColorPalette,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	LookAndToneCompletionResponse,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -18,7 +20,6 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
-import { LookAndToneCompletionResponse } from './services';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -72,14 +73,28 @@ const assignLookAndTone = assign<
 	},
 } );
 
+const assignDefaultColorPalette = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			defaultColorPalette: (
+				event as {
+					data: {
+						response: ColorPalette;
+					};
+				}
+			 ).data.response,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
 	console.log( 'API Request error' );
-	recordEvent(
-		'customize_your_store_look_and_tone_ai_completion_response_error',
-		{ error_type: 'http_network_error' }
-	);
 };
 
 const updateQueryStep = (
@@ -142,6 +157,7 @@ export const actions = {
 	assignLookAndFeel,
 	assignToneOfVoice,
 	assignLookAndTone,
+	assignDefaultColorPalette,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,

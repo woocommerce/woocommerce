@@ -10,6 +10,7 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	ColorPalette,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -19,6 +20,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
+import { defaultColorPalette } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -60,12 +62,14 @@ export const designWithAiStateMachineDefinition = createMachine(
 			businessInfoDescription: {
 				descriptionText: '',
 			},
-
 			lookAndFeel: {
 				choice: '',
 			},
 			toneOfVoice: {
 				choice: '',
+			},
+			aiSuggestions: {
+				defaultColorPalette: {} as ColorPalette,
 			},
 		},
 		initial: 'navigate',
@@ -264,6 +268,30 @@ export const designWithAiStateMachineDefinition = createMachine(
 								step: 'api-call-loader',
 							},
 						],
+						type: 'parallel',
+						states: {
+							chooseColorPairing: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...defaultColorPalette,
+											prompt: defaultColorPalette.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [
+											'assignDefaultColorPalette',
+										],
+									},
+								},
+							},
+						},
 					},
 					postApiCallLoader: {},
 				},
