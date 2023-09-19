@@ -86,6 +86,77 @@ test.describe( 'Edit order', () => {
 			'2018-12-14'
 		);
 	} );
+
+	test( 'can load billing details', async ( { page, baseURL } ) => {
+		let customerId = 0;
+
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+
+		// Debug note: this request will fail with HTTP status 400 if the test is re-run without first resetting state.
+		await api
+			.post( 'customers', {
+				email: 'archie123@email.addr',
+				first_name: 'Archie',
+				last_name: 'Greenback',
+				username: 'big.archie',
+				billing: {
+					first_name: 'Archibald',
+					last_name: 'Greenback',
+					company: 'Automattic',
+					country: 'US',
+					address_1: 'address1',
+					address_2: 'address2',
+					city: 'San Francisco',
+					state: 'CA',
+					postcode: '94107',
+					phone: '123456789',
+					email: 'archie123@email.addr',
+				}
+			} )
+			.then( ( response ) => {
+				customerId = response.data.id;
+			} );
+
+		// Open our test order and select the customer we just created.
+		await page.goto( `wp-admin/post.php?post=${orderId}&action=edit` );
+		await page.evaluate(
+			( customerId ) => document.getElementById( 'customer_user' ).innerHTML = `<option value=${customerId} selected></option>`,
+			customerId
+		);
+
+		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
+		const response = await page.evaluate(
+			async ( customerId ) => {
+				const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
+					jQuery.ajax( {
+						url: woocommerce_admin_meta_boxes.ajax_url,
+						data: {
+							user_id : customerId,
+							action  : 'woocommerce_get_customer_details',
+							security: woocommerce_admin_meta_boxes.get_customer_details_nonce
+						},
+						type: 'POST',
+						success: function( response ) {
+							resolve( response );
+						}
+					} );
+				} );
+
+				return await simulateCustomerDetailsCall;
+			},
+			customerId
+		);
+
+		// Response should contain billing address info, but should not contain user meta data.
+		expect( 'billing' in response ).toBeTruthy();
+		expect( response.billing.first_name ).toContain( 'Archibald' );
+		expect( response.meta_data ).toBeUndefined();
+	} );
 } );
 
 test.describe( 'Edit order > Downloadable product permissions', () => {
