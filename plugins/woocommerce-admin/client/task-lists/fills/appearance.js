@@ -11,7 +11,7 @@ const useAppearanceClick = () => {
 	const { actionTask } = useDispatch( 'wc/admin/onboarding' );
 	const onClick = () => {
 		actionTask( 'appearance' );
-		window.location = getAdminLink( 'themes.php' );
+		window.location = getAdminLink( 'site-editor.php' );
 	};
 
 	return { onClick };
