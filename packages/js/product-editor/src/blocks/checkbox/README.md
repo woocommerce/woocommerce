@@ -4,7 +4,7 @@ This block is used to render a checkbox field in the product editor.
 
 _Please note that to persist a custom field in the product it also needs to be added to the WooCommerce REST API._
 
-Here's an example on how it is used for fields in the Product Catalog section:
+Here's an example on how it is used for the 'Enable product reviews' field in the Product Catalog section:
 
 ```php
 $organization_group = $this->get_group_by_id( $this::GROUP_IDS['ORGANIZATION'] );
