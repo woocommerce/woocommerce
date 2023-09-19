@@ -62,7 +62,10 @@ type VariationsTableProps = {
 	onNoticeDismiss?: () => void;
 	noticeActions?: {
 		label: string;
-		onClick: () => void;
+		onClick: (
+			handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void,
+			handleDeleteAll: ( update: Partial< ProductVariation >[] ) => void
+		) => void;
 		className?: string;
 		variant?: string;
 	}[];
@@ -331,7 +334,12 @@ export const VariationsTable = forwardRef<
 					status={ noticeStatus }
 					className="woocommerce-product-variations__notice"
 					onRemove={ onNoticeDismiss }
-					actions={ noticeActions }
+					actions={ noticeActions.map( ( action ) => ( {
+						...action,
+						onClick: () => {
+							action?.onClick( handleUpdateAll, handleDeleteAll );
+						},
+					} ) ) }
 				>
 					{ noticeText }
 				</Notice>

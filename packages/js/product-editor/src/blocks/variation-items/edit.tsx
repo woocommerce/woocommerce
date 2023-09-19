@@ -5,12 +5,14 @@ import { sprintf, __ } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
+	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { useBlockProps } from '@wordpress/block-editor';
+import { recordEvent } from '@woocommerce/tracks';
 import { BlockEditProps } from '@wordpress/blocks';
 import { createElement, useMemo, useRef } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -23,6 +25,8 @@ import { VariationsTable } from '../../components/variations-table';
 import { useValidation } from '../../contexts/validation-context';
 import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
+import { TRACKS_SOURCE } from '../../constants';
+import { handlePrompt } from '../../utils/handle-prompt';
 
 export function Edit( {
 	context,
@@ -101,6 +105,36 @@ export function Edit( {
 		[ totalCountWithoutPrice ]
 	);
 
+	function onSetPrices(
+		handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void
+	) {
+		recordEvent( 'product_variations_set_prices_select', {
+			source: TRACKS_SOURCE,
+		} );
+		const productVariationsListPromise = resolveSelect(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		).getProductVariations< Pick< ProductVariation, 'id' >[] >( {
+			product_id: productId,
+			has_price: false,
+			_fields: [ 'id' ],
+		} );
+		handlePrompt( {
+			onOk( value ) {
+				recordEvent( 'product_variations_set_prices_update', {
+					source: TRACKS_SOURCE,
+				} );
+				productVariationsListPromise.then( ( variations ) => {
+					handleUpdateAll(
+						variations.map( ( { id } ) => ( {
+							id,
+							regular_price: value,
+						} ) )
+					);
+				} );
+			},
+		} );
+	}
+
 	const hasNotDismissedNotice =
 		! itemsWithoutPriceNoticeDismissed ||
 		itemsWithoutPriceNoticeDismissed[ productId ] !== 'yes';
@@ -130,6 +164,13 @@ export function Edit( {
 						},
 					} );
 				} }
+				noticeActions={ [
+					{
+						label: __( 'Set prices', 'woocommerce' ),
+						onClick: onSetPrices,
+						className: 'is-destructive',
+					},
+				] }
 				onVariationTableChange={ ( type, update ) => {
 					if (
 						type === 'delete' ||
