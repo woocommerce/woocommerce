@@ -120,7 +120,7 @@ export default function Extensions(): JSX.Element {
 			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--extensions">
 				{ title }
 			</h2>
-			<CategorySelector />
+			{ ! query.term && <CategorySelector /> }
 			{ content() }
 		</div>
 	);
