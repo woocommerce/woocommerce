@@ -230,6 +230,17 @@ class ListTable extends WP_List_Table {
 		$title         = esc_html( $post_type->labels->name );
 		$add_new       = esc_html( $post_type->labels->add_new );
 		$new_page_link = $this->page_controller->get_new_page_url( $this->order_type );
+		$search_label  = '';
+
+		if ( ! empty( $this->order_query_args['s'] ) ) {
+			$search_label  = '<span class="subtitle">';
+			$search_label .= sprintf(
+				/* translators: %s: Search query. */
+				__( 'Search results for: %s', 'woocommerce' ),
+				'<strong>' . esc_html( $this->order_query_args['s'] ) . '</strong>'
+			);
+			$search_label .= '</span>';
+		}
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
@@ -237,6 +248,7 @@ class ListTable extends WP_List_Table {
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
 				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				{$search_label}
 				<hr class='wp-header-end'>"
 		);
 
