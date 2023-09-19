@@ -33,5 +33,8 @@ export function useConfirmUnsavedProductChanges() {
 		[ productId ]
 	);
 
-	useConfirmUnsavedChanges( hasEdits || isSaving, preventLeavingProductForm );
+	useConfirmUnsavedChanges(
+		hasEdits || isSaving,
+		preventLeavingProductForm( productId )
+	);
 }
