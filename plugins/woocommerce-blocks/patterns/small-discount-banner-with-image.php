@@ -4,6 +4,9 @@
  * Slug: woocommerce-blocks/small-discount-banner-with-image
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+$images = PatternImages::get_pattern_images( 'woocommerce-blocks/small-discount-banner-with-image' );
 ?>
 
 <!-- wp:columns {"style":{"color":{"background":"#fcf8e1"},"spacing":{"padding":{"top":"20px","right":"20px","bottom":"20px","left":"20px"}}}} -->
@@ -32,7 +35,7 @@
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"center","id":1,"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image aligncenter size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1" />
+			<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" class="wp-image-1" />
 		</figure>
 		<!-- /wp:image -->
 	</div>
