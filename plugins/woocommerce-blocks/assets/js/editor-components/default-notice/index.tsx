@@ -112,7 +112,12 @@ export function DefaultNotice( { block }: { block: string } ) {
 		saveEntityRecord,
 		slug,
 	] );
-	if ( currentPostId === ORIGINAL_PAGE_ID || settingStatus === 'dismissed' ) {
+	// Avoid showing the notice on the site editor, if already set, or if dismissed earlier.
+	if (
+		( typeof pagenow === 'string' && pagenow === 'site-editor' ) ||
+		currentPostId === ORIGINAL_PAGE_ID ||
+		settingStatus === 'dismissed'
+	) {
 		return null;
 	}
 	return (

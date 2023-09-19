@@ -30,16 +30,20 @@ class BlockTemplateMigrationUtils {
 	/**
 	 * Migrates a page to a template if needed.
 	 *
-	 * @param string   $template_slug Template slug.
-	 * @param \WP_Post $page Page object.
+	 * @param string $template_slug Template slug.
 	 */
-	public static function migrate_page( $template_slug, $page ) {
+	public static function migrate_page( $template_slug ) {
 		// Get the block template for this page. If it exists, we won't migrate because the user already has custom content.
-		$block_template = BlockTemplateUtils::get_block_template( 'woocommerce/woocommerce//' . $template_slug, 'wp_template' );
-
+		$block_template = BlockTemplateUtils::get_block_template( 'woocommerce/woocommerce//page-' . $template_slug, 'wp_template' );
 		// If we were unable to get the block template, bail. Try again later.
 		if ( ! $block_template ) {
 			return;
+		}
+
+		// Skip migration if the theme has a template file for this page.
+		$theme_template = BlockTemplateUtils::get_block_template( get_stylesheet() . '//page-' . $template_slug, 'wp_template' );
+		if ( $theme_template ) {
+			return self::set_has_migrated_page( $template_slug, 'theme-file-exists' );
 		}
 
 		// If a custom template is present already, no need to migrate.
@@ -47,15 +51,7 @@ class BlockTemplateMigrationUtils {
 			return self::set_has_migrated_page( $template_slug, 'custom-template-exists' );
 		}
 
-		// Use the page template if it exists, which we'll use over our default template if found.
-		$page_template    = self::get_page_template( $page );
-		$default_template = self::get_default_template( $page );
-		$template_content = $page_template ?: $default_template;
-
-		// If at this point we have no content to migrate, bail.
-		if ( ! $template_content ) {
-			return self::set_has_migrated_page( $template_slug, 'no-content' );
-		}
+		$template_content = self::get_default_template( $template_slug );
 
 		if ( self::create_custom_template( $block_template, $template_content ) ) {
 			return self::set_has_migrated_page( $template_slug );
@@ -63,63 +59,19 @@ class BlockTemplateMigrationUtils {
 	}
 
 	/**
-	 * Get template for a page following the page hierarchy.
-	 *
-	 * @param \WP_Post|null $page Page object.
-	 * @return string
-	 */
-	protected static function get_page_template( $page ) {
-		$templates = array();
-
-		if ( $page && $page->ID ) {
-			$template = get_page_template_slug( $page->ID );
-
-			if ( $template && 0 === validate_file( $template ) ) {
-				$templates[] = $template;
-			}
-
-			$pagename = $page->post_name;
-
-			if ( $pagename ) {
-				$pagename_decoded = urldecode( $pagename );
-				if ( $pagename_decoded !== $pagename ) {
-					$templates[] = "page-{$pagename_decoded}";
-				}
-				$templates[] = "page-{$pagename}";
-			}
-		}
-
-		$block_template = false;
-
-		foreach ( $templates as $template ) {
-			$block_template = BlockTemplateUtils::get_block_template( get_stylesheet() . '//' . $template, 'wp_template' );
-
-			if ( $block_template && ! empty( $block_template->content ) ) {
-				break;
-			}
-		}
-
-		return $block_template ? $block_template->content : '';
-	}
-
-	/**
 	 * Prepare default page template.
 	 *
-	 * @param \WP_Post $page Page object.
+	 * @param string $template_slug Template slug.
 	 * @return string
 	 */
-	protected static function get_default_template( $page ) {
-		if ( ! $page || empty( $page->post_content ) ) {
-			return '';
-		}
+	protected static function get_default_template( $template_slug ) {
+
 		$default_template_content = '
-			<!-- wp:group {"layout":{"inherit":true}} -->
-			<div class="wp-block-group">
-				<!-- wp:heading {"level":1} -->
-				<h1 class="wp-block-heading">' . wp_kses_post( $page->post_title ) . '</h1>
-				<!-- /wp:heading -->
-				' . wp_kses_post( $page->post_content ) . '
-			</div>
+			<!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
+				<div class="wp-block-group"><!-- wp:woocommerce/page-content-wrapper {"page":"' . $template_slug . '"} -->
+				<!-- wp:post-title {"align":"wide"} /-->
+				<!-- wp:post-content {"align":"wide"} /-->
+				<!-- /wp:woocommerce/page-content-wrapper --></div>
 			<!-- /wp:group -->
 		';
 		return self::get_block_template_part( 'header' ) . $default_template_content . self::get_block_template_part( 'footer' );

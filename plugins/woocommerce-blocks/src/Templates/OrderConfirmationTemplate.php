@@ -21,7 +21,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 *
 	 * @return \WP_Post|null Post object or null.
 	 */
-	public static function get_placeholder_page() {
+	protected function get_placeholder_page() {
 		return null;
 	}
 

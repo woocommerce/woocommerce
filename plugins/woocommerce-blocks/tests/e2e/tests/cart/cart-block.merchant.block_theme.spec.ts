@@ -27,7 +27,7 @@ test.describe( 'Merchant → Cart', () => {
 	test.describe( 'in page editor', () => {
 		test.beforeEach( async ( { editorUtils, admin } ) => {
 			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//cart',
+				postId: 'woocommerce/woocommerce//page-cart',
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();
