@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: More-resilient handling of absent product vendor URLs when browsing WooCommerce > Extensions.
+
+

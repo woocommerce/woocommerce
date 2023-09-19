@@ -3,7 +3,7 @@
  */
 import { chevronDown } from '@wordpress/icons';
 import classNames from 'classnames';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, TextControl } from '@wordpress/components';
 
@@ -25,6 +25,7 @@ interface SelectTreeProps extends TreeControlProps {
 	isLoading?: boolean;
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
+	initialInputValue?: string | undefined;
 }
 
 export const SelectTree = function SelectTree( {
@@ -33,6 +34,7 @@ export const SelectTree = function SelectTree( {
 	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
+	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
 	...props
@@ -72,6 +74,12 @@ export const SelectTree = function SelectTree( {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const isReadOnly = ! isOpen && ! isFocused;
+
+	useEffect( () => {
+		if ( initialInputValue !== undefined && isFocused ) {
+			setInputValue( initialInputValue as string );
+		}
+	}, [ isFocused ] );
 
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
@@ -211,6 +219,7 @@ export const SelectTree = function SelectTree( {
 				className={ menuInstanceId.toString() }
 				ref={ ref }
 				isEventOutside={ isEventOutside }
+				isLoading={ isLoading }
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }

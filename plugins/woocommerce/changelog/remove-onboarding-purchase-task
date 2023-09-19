@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Removed references to the un-used Purchase task item in the onboarding task list.

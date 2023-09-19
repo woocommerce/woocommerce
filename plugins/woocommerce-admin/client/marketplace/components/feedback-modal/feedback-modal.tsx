@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Modal, Button, TextareaControl } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -12,15 +12,24 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './feedback-modal.scss';
 import LikertScale from '../likert-scale/likert-scale';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function FeedbackModal(): JSX.Element {
 	const CUSTOMER_EFFORT_SCORE_ACTION = 'marketplace_redesign_2023';
 	const LOCALSTORAGE_KEY_DISMISSAL_COUNT =
-		'marketplace_redesign_2023_dismissals'; // ensure we don't ask for feedback if the user's already given feedback or declined to multiple times
+		'marketplace_redesign_2023_dismissals'; // Ensure we don't ask for feedback if the
+	// user's already given feedback or declined to multiple times
 	const LOCALSTORAGE_KEY_LAST_REQUESTED_DATE =
-		'marketplace_redesign_2023_last_shown_date'; // ensure we don't ask for feedback more than once per day
-	const SUPPRESS_IF_DISMISSED_X_TIMES = 1; // if the user dismisses the snackbar this many times, stop asking for feedback
-	const SUPPRESS_IF_AFTER_DATE = '2024-01-01'; // if this date is reached, stop asking for feedback
+		'marketplace_redesign_2023_last_shown_date'; // Ensure we don't ask for feedback more
+	// than once per day
+	const SUPPRESS_IF_DISMISSED_X_TIMES = 1; // If the user dismisses the snackbar this many
+	// times, stop asking for feedback
+	const SUPPRESS_IF_AFTER_DATE = '2024-01-01'; // If this date is reached, stop asking for
+	// feedback
+	const SNACKBAR_TIMEOUT = 5000; // How long we wait before asking for feedback
+
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { isLoading } = marketplaceContextValue;
 
 	// Save that we dismissed the dialog or snackbar TODAY so we don't show it again until tomorrow (if ever)
 	const dismissToday = () =>
@@ -74,12 +83,17 @@ export default function FeedbackModal(): JSX.Element {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	function maybeShowSnackbar() {
-		// don't show if the user has already given feedback or otherwise suppressed:
+		// Don't show if we're still loading content
+		if ( isLoading ) {
+			return;
+		}
+
+		// Don't show if the user has already given feedback or otherwise suppressed
 		if ( isDismissedForever() ) {
 			return;
 		}
 
-		// don't show if the user has already declined to provide feedback today:
+		// Don't show if we've already shown today or user has declined today
 		const today = new Date().toDateString();
 		if (
 			today ===
@@ -88,6 +102,17 @@ export default function FeedbackModal(): JSX.Element {
 			return;
 		}
 
+		const timer = setTimeout( showSnackbar, SNACKBAR_TIMEOUT );
+
+		// Without this, navigating between screens will create a series of snackbars
+		dismissToday();
+
+		return () => {
+			clearTimeout( timer );
+		};
+	}
+
+	function showSnackbar() {
 		createNotice(
 			'success',
 			__( 'How easy is it to find an extension?', 'woocommerce' ),
@@ -142,8 +167,7 @@ export default function FeedbackModal(): JSX.Element {
 		);
 	}
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- [] => we only want this effect to run once, on first render
-	useEffect( maybeShowSnackbar, [] );
+	useEffect( maybeShowSnackbar, [ isLoading ] );
 
 	// We don't want the "How easy was it to find an extension?" dialog to appear forever:
 	const FEEDBACK_DIALOG_CAN_APPEAR =

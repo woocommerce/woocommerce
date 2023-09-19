@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -8,12 +9,7 @@
 import './content.scss';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
-import Footer from '../footer/footer';
-import FeedbackModal from '../feedback-modal/feedback-modal';
-
-export interface ContentProps {
-	selectedTab?: string | undefined;
-}
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 const renderContent = ( selectedTab?: string ): JSX.Element => {
 	switch ( selectedTab ) {
@@ -24,15 +20,12 @@ const renderContent = ( selectedTab?: string ): JSX.Element => {
 	}
 };
 
-export default function Content( props: ContentProps ): JSX.Element {
-	const { selectedTab } = props;
+export default function Content(): JSX.Element {
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { selectedTab } = marketplaceContextValue;
 	return (
-		<>
-			<div className="woocommerce-marketplace__content">
-				{ renderContent( selectedTab ) }
-			</div>
-			<Footer />
-			<FeedbackModal />
-		</>
+		<div className="woocommerce-marketplace__content">
+			{ renderContent( selectedTab ) }
+		</div>
 	);
 }

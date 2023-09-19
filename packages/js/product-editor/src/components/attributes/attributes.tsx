@@ -67,6 +67,8 @@ export const Attributes: React.FC< AttributesProps > = ( {
 					'product_remove_attribute_confirmation_cancel_click'
 				)
 			}
+			termsAutoSelection="first"
+			defaultVisibility={ true }
 		/>
 	);
 };

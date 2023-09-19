@@ -1,4 +1,5 @@
 @import "./variations-actions-menu/styles.scss";
+@import "../../icons/hidden-with-help-icon.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -48,6 +49,18 @@ $table-row-height: calc($grid-unit * 9);
 		}
 	}
 
+	&__price {
+		text-align: right;
+		padding-right: $grid-unit-40;
+	}
+
+	&__regular-price--on-sale {
+		text-decoration: line-through;
+		color: $gray-600;
+		margin-left: 6px;
+		word-wrap: normal;
+	}
+
 	&__status-dot {
 		margin-right: $gap-smaller;
 		&.green {
@@ -70,6 +83,7 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+		gap: $gap-smaller;
 
 		&--delete {
 			&.components-button.components-menu-item__button.is-link {

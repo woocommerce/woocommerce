@@ -101,7 +101,8 @@
 		"react-transition-group": "^4.4.2",
 		"react-visibility-sensor": "^5.1.1",
 		"redux": "^4.1.2",
-		"xstate": "4.37.1"
+		"xstate": "4.37.1",
+		"zod": "^3.22.2"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "^2.5.0",
@@ -145,6 +146,7 @@
 		"@typescript-eslint/parser": "^5.54.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/admin-layout": "workspace:*",
+		"@woocommerce/ai": "workspace:0.1.0-beta.0",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",

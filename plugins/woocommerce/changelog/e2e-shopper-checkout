@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adds test to check required fields on checkout
