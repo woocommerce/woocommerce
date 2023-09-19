@@ -65,6 +65,32 @@ Checkout:
 
 This slot renders inside the shipping step of Checkout and inside the shipping options in Cart.
 
+```ts
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { registerPlugin } from '@wordpress/plugins';
+import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
+ 
+const render = () => {
+  return (
+    <ExperimentalOrderShippingPackages>
+      <div>
+        {
+          __( 'Express Shipping', 'YOUR-TEXTDOMAIN' )
+        }  
+      </div>
+    </ExperimentalOrderShippingPackages>
+  );
+};
+ 
+registerPlugin( 'slot-and-fill-examples', {
+  render,
+  scope: 'woocommerce-checkout',
+} );
+```
+
 Cart:
 
 ![Example of ExperimentalOrderShippingPackages in the Cart block](https://user-images.githubusercontent.com/6165348/118399054-2b4dec80-b653-11eb-94a0-989e2e6e362a.png)
