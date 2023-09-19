@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './extensions.scss';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 import CategorySelector from '../category-selector/category-selector';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
@@ -15,10 +17,12 @@ import { Product } from '../product-list/types';
 
 interface ExtensionsProps {
 	products?: Product[];
-	isLoading?: boolean;
 }
 
 export default function Extensions( props: ExtensionsProps ): JSX.Element {
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { isLoading } = marketplaceContextValue;
+
 	const products = props.products?.slice( 0, 60 ) ?? [];
 
 	let title = __( '0 extensions found', 'woocommerce' );
@@ -37,7 +41,7 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 	}
 
 	function content() {
-		if ( props.isLoading ) {
+		if ( isLoading ) {
 			return <ProductLoader />;
 		}
 

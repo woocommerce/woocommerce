@@ -14,35 +14,31 @@ import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
+import SearchResults from '../search-results/search-results';
 import Themes from '../themes/themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
-const renderContent = (
-	selectedTab?: string,
-	products?: Product[],
-	isLoading?: boolean
-): JSX.Element => {
-	switch ( selectedTab ) {
-		case 'extensions':
-			return <Extensions products={ products } isLoading={ isLoading } />;
-		case 'themes':
-			return <Themes products={ products } isLoading={ isLoading } />;
-		default:
-			return <Discover />;
-	}
-};
+type ContentComponentType =
+	| typeof Discover
+	| typeof Extensions
+	| typeof SearchResults
+	| typeof Themes;
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 
 	const [ productList, setProductList ] = useState< Product[] >( [] );
-	const { isLoading, setIsLoading } = marketplaceContextValue;
+	const { setIsLoading } = marketplaceContextValue;
 
 	const { selectedTab } = marketplaceContextValue;
 	const query = useQuery();
 
 	// Get the content for this screen
 	useEffect( () => {
+		if ( selectedTab === 'discover' ) {
+			return;
+		}
+
 		setIsLoading( true );
 
 		const params = new URLSearchParams();
@@ -55,6 +51,8 @@ export default function Content(): JSX.Element {
 			params.append( 'category', query.category );
 		} else if ( selectedTab === 'themes' ) {
 			params.append( 'category', 'themes' );
+		} else if ( selectedTab === 'search' ) {
+			params.append( 'category', '_all' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
@@ -81,12 +79,12 @@ export default function Content(): JSX.Element {
 						return {
 							id: product.id,
 							title: product.title,
-							image: product.image.replace( '.test', '.com' ),
+							image: product.image,
 							type: product.type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,
-							icon: product.icon.replace( '.test', '.com' ),
+							icon: product.icon,
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
@@ -95,7 +93,6 @@ export default function Content(): JSX.Element {
 						};
 					}
 				);
-
 				setProductList( products );
 			} )
 			.catch( () => {
@@ -104,10 +101,19 @@ export default function Content(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [ query ] );
+	}, [ query.term, query.category, selectedTab, setIsLoading ] );
+
+	let ContentComponent: ContentComponentType = Discover;
+	if ( selectedTab === 'extensions' ) {
+		ContentComponent = Extensions;
+	} else if ( selectedTab === 'themes' ) {
+		ContentComponent = Themes;
+	} else if ( selectedTab === 'search' ) {
+		ContentComponent = SearchResults;
+	}
 	return (
 		<div className="woocommerce-marketplace__content">
-			{ renderContent( selectedTab, productList, isLoading ) }
+			<ContentComponent products={ productList } />
 		</div>
 	);
 }
