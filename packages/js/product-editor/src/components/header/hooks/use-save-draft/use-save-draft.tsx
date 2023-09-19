@@ -56,7 +56,7 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
-	const { isValidating, validate } = useValidations();
+	const { isValidating, validate } = useValidations< Product >();
 
 	const ariaDisabled =
 		disabled ||
@@ -76,7 +76,7 @@ export function useSaveDraft( {
 		}
 
 		try {
-			await validate();
+			await validate( { status: 'draft' } );
 
 			await editEntityRecord( 'postType', 'product', productId, {
 				status: 'draft',

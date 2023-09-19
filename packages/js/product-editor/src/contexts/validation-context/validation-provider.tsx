@@ -38,11 +38,14 @@ export function ValidationProvider< T >( {
 		};
 	}
 
-	async function validateField( validatorId: string ): ValidatorResponse {
+	async function validateField(
+		validatorId: string,
+		newData?: Partial< T >
+	): ValidatorResponse {
 		const validators = validatorsRef.current;
 		if ( validatorId in validators ) {
 			const validator = validators[ validatorId ];
-			const result = validator( initialValue );
+			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
 				setErrors( ( currentErrors ) => ( {
@@ -56,12 +59,17 @@ export function ValidationProvider< T >( {
 		return Promise.resolve( undefined );
 	}
 
-	async function validateAll(): Promise< ValidationErrors > {
+	async function validateAll(
+		newData: Partial< T >
+	): Promise< ValidationErrors > {
 		const newErrors: ValidationErrors = {};
 		const validators = validatorsRef.current;
 
 		for ( const validatorId in validators ) {
-			newErrors[ validatorId ] = await validateField( validatorId );
+			newErrors[ validatorId ] = await validateField(
+				validatorId,
+				newData
+			);
 		}
 
 		setErrors( newErrors );
