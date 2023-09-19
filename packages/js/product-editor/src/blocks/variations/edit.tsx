@@ -131,20 +131,9 @@ export function Edit( {
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ __( 'Add variation options', 'woocommerce' ) }
-					description={ createInterpolateElement(
-						__(
-							'Select from existing <globalAttributeLink>global attributes</globalAttributeLink> or create options for buyers to choose on the product page. You can change the order later.',
-							'woocommerce'
-						),
-						{
-							globalAttributeLink: (
-								<Link
-									href="https://woocommerce.com/document/variable-product/#add-attributes-to-use-for-variations"
-									type="external"
-									target="_blank"
-								/>
-							),
-						}
+					description={ __(
+						'Select from existing attributes or create new ones to add new variations for your product. You can change the order later.',
+						'woocommerce'
 					) }
 					createNewAttributesAsGlobal={ true }
 					notice={ '' }
