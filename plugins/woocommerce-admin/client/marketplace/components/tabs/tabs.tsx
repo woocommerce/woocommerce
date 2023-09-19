@@ -133,14 +133,15 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { setSelectedTab } = marketplaceContextValue;
 
 	const query: Record< string, string > = useQuery();
+	const queryLoaded = Object.keys( query ).length > 0;
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
-		} else {
+		} else if ( queryLoaded ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
-	}, [ query, setSelectedTab ] );
+	}, [ query, queryLoaded, setSelectedTab ] );
 
 	return (
 		<nav

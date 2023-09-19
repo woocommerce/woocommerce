@@ -53,7 +53,7 @@ export default function Content(): JSX.Element {
 		} else if ( selectedTab === 'themes' ) {
 			params.append( 'category', 'themes' );
 		} else if ( selectedTab === 'search' ) {
-			params.append( 'category', '_all' );
+			params.append( 'category', 'extensions+themes' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
@@ -104,17 +104,21 @@ export default function Content(): JSX.Element {
 			} );
 	}, [ query.term, query.category, selectedTab, setIsLoading ] );
 
-	let ContentComponent: ContentComponentType = Discover;
+	let ContentComponent: ContentComponentType | undefined;
 	if ( selectedTab === 'extensions' ) {
 		ContentComponent = Extensions;
 	} else if ( selectedTab === 'themes' ) {
 		ContentComponent = Themes;
 	} else if ( selectedTab === 'search' ) {
 		ContentComponent = SearchResults;
+	} else if ( selectedTab === 'discover' ) {
+		ContentComponent = Discover;
 	}
 	return (
 		<div className="woocommerce-marketplace__content">
-			{ selectedTab && <ContentComponent products={ productList } /> }
+			{ ContentComponent && (
+				<ContentComponent products={ productList } />
+			) }
 		</div>
 	);
 }
