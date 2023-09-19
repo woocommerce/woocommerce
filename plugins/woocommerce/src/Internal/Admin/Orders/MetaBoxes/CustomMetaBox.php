@@ -242,21 +242,22 @@ class CustomMetaBox {
 	 * @return void
 	 */
 	private function handle_add_meta( WC_Order $order, string $meta_key, string $meta_value ) {
-		$order_data_store = WC_Data_Store::load( 'order' );
 		$count            = 0;
 		if ( is_protected_meta( $meta_key ) ) {
 			wp_send_json_error( 'protected_meta' );
 			wp_die();
 		}
-		$meta_id  = $order_data_store->add_meta(
-			$order,
-			new WC_Meta_Data(
-				array(
-					'key'   => $meta_key,
-					'value' => $meta_value,
-				)
-			)
-		);
+		$metas_for_current_key = wp_list_filter( $order->get_meta_data(), array( 'key' => $meta_key ) );
+		$meta_ids              = wp_list_pluck( $metas_for_current_key, 'id' );
+		$order->add_meta_data( $meta_key, $meta_value );
+		$order->save_meta_data();
+		$metas_for_current_key_with_new = wp_list_filter( $order->get_meta_data(), array( 'key' => $meta_key ) );
+		$meta_id                        = 0;
+		$new_meta_ids                   = wp_list_pluck( $metas_for_current_key_with_new, 'id' );
+		$new_meta_ids                   = array_values( array_diff( $new_meta_ids, $meta_ids ) );
+		if ( count( $new_meta_ids ) > 0 ) {
+			$meta_id = $new_meta_ids[0];
+		}
 		$response = new WP_Ajax_Response(
 			array(
 				'what'     => 'meta',
@@ -305,16 +306,9 @@ class CustomMetaBox {
 			wp_die();
 		}
 
-		$order_data_store = WC_Data_Store::load( 'order' );
-		$count            = 0;
-		$meta_object      = new WC_Meta_Data(
-			array(
-				'id'    => $mid,
-				'key'   => $key,
-				'value' => $value,
-			)
-		);
-		$order_data_store->update_meta( $order, $meta_object );
+		$count = 0;
+		$order->update_meta_data( $key, $value, $mid );
+		$order->save_meta_data();
 		$response = new WP_Ajax_Response(
 			array(
 				'what'     => 'meta',

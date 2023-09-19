@@ -106,7 +106,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template.
 	 */
 	public function test_remove_block() {
@@ -133,13 +133,19 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the child block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the child block is detached from its parent and root template.'
+		);
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_nested_block() {
@@ -166,13 +172,19 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the nested descendent block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested descendent block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the nested descendent block is detached from its parent and root template.'
+		);
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_block_and_descendants() {
@@ -204,9 +216,41 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the nested descendent block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$block->is_detached(),
+			'Failed asserting that the block is detached from its parent and root template.'
+		);
+
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the child block is detached from its parent and root template.'
+		);
+	}
+
+	/**
+	 * Test that removing a block by calling remove on it detaches it.
+	 */
+	public function test_remove_block_self() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$block->remove();
+
+		$this->assertTrue(
+			$block->is_detached(),
+			'Failed asserting that the block is detached from its parent and root template.'
+		);
 	}
 
 	/**
@@ -263,6 +307,49 @@ class BlockTest extends WC_Unit_Test_Case {
 			$block,
 			$grandchild_parent->get_parent(),
 			'Failed asserting that the grandchild block\'s grandparent is correct.'
+		);
+	}
+
+	/**
+	 * Test that a block added to a detached block is detached.
+	 */
+	public function test_block_added_to_detached_block_is_detached() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->remove_block( 'test-block-id' );
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id' ),
+			'Failed asserting that the block was removed from the root template.'
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is not in the root template.'
+		);
+
+		$this->assertNotNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is in the parent.'
+		);
+
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the nested descendent block is detached from its parent and root template.'
 		);
 	}
 

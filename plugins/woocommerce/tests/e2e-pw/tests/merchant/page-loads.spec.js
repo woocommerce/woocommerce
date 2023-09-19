@@ -20,7 +20,17 @@ const wcPages = [
 	},
 ];
 
+let productId, orderId;
+const productName = 'Simple Product Name';
+const productPrice = '15.99';
+
 for ( const currentPage of wcPages ) {
+	const randomNum = new Date().getTime().toString();
+	const customer = {
+		username: `customer${ randomNum }`,
+		password: 'password',
+		email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
+	};
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -46,6 +56,53 @@ for ( const currentPage of wcPages ) {
 					getTranslationFor( 'Onboarding profile data has been updated.' )
 				);
 			}
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			// create a simple product
+			await api
+				.post( 'products', {
+					name: productName,
+					type: 'simple',
+					regular_price: productPrice,
+				} )
+				.then( ( response ) => {
+					productId = response.data.id;
+				} );
+			// create an order
+			await api
+				.post( 'orders', {
+					line_items: [
+						{
+							product_id: productId,
+							quantity: 1,
+						},
+					],
+				} )
+				.then( ( response ) => {
+					orderId = response.data.id;
+				} );
+			// create customer
+			await api
+				.post( 'customers', customer )
+				.then( ( response ) => ( customer.id = response.data.id ) );
+		} );
+
+		test.afterAll( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api.delete( `products/${ productId }`, {
+				force: true,
+			} );
+			await api.delete( `orders/${ orderId }`, { force: true } );
+			await api.delete( `customers/${ customer.id }`, { force: true } );
 		} );
 
 		test.beforeEach( async ( { page } ) => {
@@ -88,6 +145,14 @@ for ( const currentPage of wcPages ) {
 				await expect(
 					page.locator( 'h1.components-text' )
 				).toContainText( currentPage.subpages[ i ].heading );
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+				).toBeVisible();
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+				).toContainText( currentPage.subpages[ i ].text );
 			} );
 		}
 	} );

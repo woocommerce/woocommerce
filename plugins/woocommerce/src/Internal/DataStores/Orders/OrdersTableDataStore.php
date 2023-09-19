@@ -2850,7 +2850,7 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		if ( $this->should_backfill_post_record() && isset( $meta->id ) && ! isset( $meta->key ) ) {
+		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
 			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
 			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
 			if ( $db_meta ) {
@@ -2859,10 +2859,10 @@ CREATE TABLE $meta_table (
 			}
 		}
 
-		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
-		$this->after_meta_change( $object, $meta );
+		$delete_meta     = $this->data_store_meta->delete_meta( $object, $meta );
+		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
@@ -2880,12 +2880,13 @@ CREATE TABLE $meta_table (
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
-		$this->after_meta_change( $object, $meta );
+		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
+		$meta->id        = $add_meta;
+		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			add_post_meta( $object->get_id(), $meta->key, $meta->value, true );
+			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
@@ -2901,10 +2902,10 @@ CREATE TABLE $meta_table (
 	 * @return bool The number of rows updated, or false on error.
 	 */
 	public function update_meta( &$object, $meta ) {
-		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
-		$this->after_meta_change( $object, $meta );
+		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
+		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
@@ -2918,16 +2919,35 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param WC_Abstract_Order $order Order object.
 	 * @param \WC_Meta_Data     $meta  Metadata object.
+	 *
+	 * @return bool True if changes were applied, false otherwise.
 	 */
 	protected function after_meta_change( &$order, $meta ) {
-		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
-		if ( $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) ) {
+		if ( $this->should_save_after_meta_change( $order ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
+			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Helper function to check whether the modified date needs to be updated after a meta save.
+	 *
+	 * This method prevents order->save() call multiple times in the same request after any meta update by checking if:
+	 * 1. Order modified date is already the current date, no updates needed in this case.
+	 * 2. If there are changes already queued for order object, then we don't need to update the modified date as it will be updated ina subsequent save() call.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return bool Whether the modified date needs to be updated.
+	 */
+	private function should_save_after_meta_change( $order ) {
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() );
 	}
 }

@@ -122,10 +122,14 @@ const es_ES = {
         {
             name: 'Resumen',
             heading: 'Resumen',
+            element: '.woocommerce-marketing-card-header-description',
+            text: 'Empieza añadiendo un canal a tu tienda',
         },
         {
             name: 'Cupones',
             heading: 'Cupones',
+            element: '.woocommerce-BlankState-cta.button-primary',
+            text: 'Crea tu primer cupón',
         },
     ],
     'Move down': 'Mover abajo',
@@ -209,22 +213,32 @@ const es_ES = {
         {
             name: 'Todos los productos',
             heading: 'Productos',
+            element: '#dropdown_product_type',
+            text: 'Filtrar por tipo de producto',
         },
         {
             name: 'Añadir nuevo',
             heading: 'Añadir nuevo',
+            element: '.duplication',
+            text: 'Copiar a un nuevo borrador',
         },
         {
             name: 'Categorías',
             heading: 'Categorías del producto',
+            element: '.row-title',
+            text: 'Uncategorized',
         },
         {
             name: 'Etiquetas',
             heading: 'Etiquetas del producto',
+            element: '.no-items > td',
+            text: 'No se han encontrado etiquetas',
         },
         {
             name: 'Atributos',
             heading: 'Atributos',
+            element: '.alternate > td',
+            text: 'Actualmente no existen atributos.',
         },
     ],
     'Product published.': 'Producto publicado.',
@@ -288,30 +302,46 @@ const es_ES = {
         {
             name: 'Inicio',
             heading: 'Inicio',
+            element:
+                '.wooocommerce-inbox-card__header > .components-truncate',
+            text: 'Mensajes',
         },
         {
             name: 'Pedidos',
             heading: 'Pedidos',
+            element: '.select2-selection__placeholder',
+            text: 'Filtrar por cliente registrado',
         },
         {
             name: 'Clientes',
             heading: 'Clientes',
+            element: '#search-inline-input-0',
+            text: 'Retrocede a los artículos seleccionados',
         },
         {
             name: 'Cupones',
             heading: 'Cupones',
+            element: '.woocommerce-table__empty-item',
+            text: 'No hay datos para mostrar',
         },
         {
             name: 'Informes',
             heading: 'Pedidos',
+            element: '.nav-tab-wrapper > .nav-tab-active',
+            text: 'Pedidos',
         },
         {
             name: 'Ajustes',
             heading: 'General',
+            element: '#store_address-description',
+            text: 'Aquí es donde está situado tu negocio. Las tasas de impuestos y tasas de envío usarán esta dirección.',
+
         },
         {
             name: 'Estado',
             heading: 'Estado del sistema',
+            element: '.nav-tab-active',
+            text: 'Estado del sistema',
         },
     ],
     '/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/': 

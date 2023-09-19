@@ -127,10 +127,14 @@ const ar_AR = {
 		{
 			name: 'نظرة عامة',
 			heading: 'نظرة عامة',
+			element: '.woocommerce-marketing-card-header-description',
+            text: 'البدء بإضافة قناة إلى متجرك',
 		},
 		{
 			name: 'القسائم',
 			heading: 'القسائم',
+			element: '.woocommerce-BlankState-cta.button-primary',
+            text: 'إنشاء القسيمة الأولى الخاصة بك',
 		},
 	],
 	'manually': 'يدويًا',
@@ -216,22 +220,32 @@ const ar_AR = {
 		{
 			name: 'جميع المنتجات',
 			heading: 'المنتجات',
+			element: '#dropdown_product_type',
+            text: 'الفرز حسب نوع المنتج',
 		},
 		{
 			name: 'إضافة منتج جديد',
 			heading: 'إضافة منتج جديد',
+			element: '.duplication',
+            text: 'نسخ إلى مسوّدة جديدة',
 		},
 		{
 			name: 'التصنيفات',
 			heading: 'تصنيفات المنتج',
+			element: '.row-title',
+            text: 'Uncategorized',
 		},
 		{
 			name: 'الوسوم',
 			heading: 'وسوم المنتج',
+			element: '.no-items > td',
+            text: 'لم يتم العثور على وسوم',
 		},
 		{
 			name: 'السمات',
 			heading: 'السمات',
+			element: '.alternate > td',
+            text: 'لا توجد سمات حالياً.',
 		},
 	],
 	'Product published.': 'تم نشر المنتج.',
@@ -300,30 +314,46 @@ const ar_AR = {
 		{
 			name: 'الرئيسية',
 			heading: 'الرئيسية',
+			element:
+                '.wooocommerce-inbox-card__header > .components-truncate',
+            text: 'علبة الوارد',
 		},
 		{
 			name: 'الطلبات',
 			heading: 'الطلبات',
+			element: '.select2-selection__placeholder',
+            text: 'الفرز بواسطة عميل مسجّل',
 		},
 		{
 			name: 'العملاء',
 			heading: 'العملاء',
+			element: '#search-inline-input-0',
+            text: 'الانتقال إلى الخلف للوصول إلى العناصر المُحدَّدة',
 		},
 		{
 			name: 'القسائم',
 			heading: 'القسائم',
+			element: '.woocommerce-table__empty-item',
+            text: 'لا توجد بيانات لعرضها',
 		},
 		{
 			name: 'التقارير',
 			heading: 'الطلبات',
+			element: '.nav-tab-wrapper > .nav-tab-active',
+            text: 'الطلبات',
 		},
 		{
 			name: 'الإعدادات',
 			heading: 'عام',
+			element: '#store_address-description',
+            text: 'هذا هو المكان الذي يقع فيه نشاطك التجاري. ستستخدم معدلات الضرائب ومعدلات الشحن هذا العنوان.',
+
 		},
 		{
 			name: 'الحالة',
 			heading: 'حالة النظام',
+			element: '.nav-tab-active',
+            text: 'حالة النظام',
 		},
 	],
 	'/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/':

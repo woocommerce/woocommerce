@@ -114,10 +114,14 @@ const fr_FR = {
 	'Marketing subpages': [{
 			name: 'Vue d’ensemble',
 			heading: 'Vue d’ensemble',
+			element: '.woocommerce-marketing-card-header-description',
+            text: 'Commencez par ajouter un canal à votre boutique',
 		},
 		{
 			name: 'Codes promo',
 			heading: 'Codes promo',
+			element: '.woocommerce-BlankState-cta.button-primary',
+            text: 'Créer votre premier code promo',
 		},
 	],
 	'manually': 'manuellement',
@@ -194,22 +198,32 @@ const fr_FR = {
 	'Products subpages': [{
 			name: 'Tous les produits',
 			heading: 'Produits',
+			element: '#dropdown_product_type',
+            text: 'Filtrer par type de produit',
 		},
 		{
 			name: 'Ajouter',
 			heading: 'Ajouter',
+			element: '.duplication',
+            text: 'Copier vers un nouveau brouillon',
 		},
 		{
 			name: 'Catégories',
 			heading: 'Catégories de produits',
+			element: '.row-title',
+			text: 'Uncategorized',
 		},
 		{
 			name: 'Étiquettes',
 			heading: 'Étiquettes produit',
+			element: '.no-items > td',
+            text: 'Aucune étiquette trouvée',
 		},
 		{
 			name: 'Attributs',
 			heading: 'Attributs',
+			element: '.alternate > td',
+            text: 'Aucun attribut pour le moment.',
 		},
 	],
 	'Product published.': 'Produit publié.',
@@ -269,30 +283,45 @@ const fr_FR = {
 	'WooCommerce subpages': [{
 			name: 'Accueil',
 			heading: 'Accueil',
+			element:
+			'.wooocommerce-inbox-card__header > .components-truncate',
+		text: 'Boîte de réception',
 		},
 		{
 			name: 'Commandes',
 			heading: 'Commandes',
+			element: '.select2-selection__placeholder',
+            text: 'Filtrer par client enregistré',
 		},
 		{
 			name: 'Clients',
 			heading: 'Clients',
+			element: '#search-inline-input-0',
+            text: 'Revenir aux articles sélectionnés',
 		},
 		{
 			name: 'Codes promo',
 			heading: 'Codes promo',
+			element: '.woocommerce-table__empty-item',
+            text: 'Aucune donnée à afficher.',
 		},
 		{
 			name: 'Rapports',
 			heading: 'Commandes',
+			element: '.nav-tab-wrapper > .nav-tab-active',
+            text: 'Commandes',
 		},
 		{
 			name: 'Réglages',
 			heading: 'Général',
+			element: '#store_address-description',
+            text: 'Indique où se trouve votre entreprise. Cette adresse sera utilisée pour les taux de taxe et les frais de port.',
 		},
 		{
 			name: 'État',
 			heading: 'État du système',
+			element: '.nav-tab-active',
+            text: 'État du système',
 		},
 	],
 	'/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/': 

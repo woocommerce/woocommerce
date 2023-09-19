@@ -50,7 +50,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 				target: 'navigate',
 			},
 			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-				actions: sendParent( ( _context, event ) => event ),
+				actions: [
+					sendParent( ( _context, event ) => event ),
+					'recordTracksStepClosed',
+				],
 			},
 		},
 		context: {
@@ -116,6 +119,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: BusinessInfoDescription,
 						},
+						entry: [
+							{
+								type: 'recordTracksStepViewed',
+								step: 'business_info_description',
+							},
+						],
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
 								actions: [ 'assignBusinessInfoDescription' ],
@@ -127,11 +136,23 @@ export const designWithAiStateMachineDefinition = createMachine(
 						invoke: {
 							src: 'getLookAndTone',
 							onError: {
-								actions: [ 'logAIAPIRequestError' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'logAIAPIRequestError',
+								],
 								target: '#lookAndFeel',
 							},
 							onDone: {
-								actions: [ 'assignLookAndTone' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'assignLookAndTone',
+								],
 								target: '#lookAndFeel',
 							},
 						},
@@ -156,10 +177,20 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'look-and-feel',
 							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'look_and_feel',
+							},
 						],
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
-								actions: [ 'assignLookAndFeel' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'look_and_feel',
+									},
+									'assignLookAndFeel',
+								],
 								target: 'postLookAndFeel',
 							},
 						},
@@ -189,10 +220,20 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'tone-of-voice',
 							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'tone_of_voice',
+							},
 						],
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
-								actions: [ 'assignToneOfVoice' ],
+								actions: [
+									'assignToneOfVoice',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'tone_of_voice',
+									},
+								],
 								target: 'postToneOfVoice',
 							},
 						},
