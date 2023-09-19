@@ -1,6 +1,6 @@
 # Common tasks
 
-## How to add a new field to the product editor
+## Adding a new field to the product editor (end-to-end)
 
 _TODO: Describe how to add a new field, including adding it to the REST API._
 
