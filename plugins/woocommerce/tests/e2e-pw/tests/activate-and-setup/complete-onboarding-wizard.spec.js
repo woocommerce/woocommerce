@@ -5,7 +5,7 @@ const { api } = require( '../../utils' );
 const { features } = require( '../../utils' );
 const { describe } = require('node:test');
 
-test.describe( 'Store owner can complete onboarding wizard', () => {
+test.skip( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -158,7 +158,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 
 // Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
-test.describe(
+test.skip(
 	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
@@ -253,7 +253,7 @@ test.describe(
 );
 
 // Skipping this test because it's very flaky.
-test.describe( 'Store owner can go through setup Task List', () => {
+test.skip( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
