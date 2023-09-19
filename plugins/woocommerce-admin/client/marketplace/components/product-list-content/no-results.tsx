@@ -98,7 +98,7 @@ export default function NoResults(): JSX.Element {
 						{ sprintf(
 							// translators: %s: search term
 							__(
-								'We didn\'t find any results for "%s"',
+								"We didn't find any results for “%s”",
 								'woocommerce'
 							),
 							noResultsTerm
