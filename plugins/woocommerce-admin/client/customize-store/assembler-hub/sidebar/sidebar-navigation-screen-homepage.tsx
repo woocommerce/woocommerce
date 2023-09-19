@@ -1,9 +1,19 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useMemo,
+} from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { Spinner } from '@wordpress/components';
+
+// @ts-expect-error Missing type in core-data.
+import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -11,8 +21,41 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
+import { useHomeTemplates } from '../hooks/use-home-templates';
+import { BlockInstance } from '@wordpress/blocks';
 
 export const SidebarNavigationScreenHomepage = () => {
+	const { isLoading, homeTemplates } = useHomeTemplates();
+
+	const [ blocks, , onChange ] = useEditorBlocks();
+	const onClickPattern = useCallback(
+		( _pattern, selectedBlocks ) => {
+			onChange(
+				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
+				{ selection: {} }
+			);
+		},
+		[ blocks, onChange ]
+	);
+
+	const homePatterns = useMemo( () => {
+		return Object.entries( homeTemplates ).map(
+			( [ templateName, patterns ] ) => {
+				return {
+					name: templateName,
+					blocks: patterns.reduce(
+						( acc: BlockInstance[], pattern ) => [
+							...acc,
+							...pattern.blocks,
+						],
+						[]
+					),
+				};
+			}
+		);
+	}, [ homeTemplates ] );
+
 	return (
 		<SidebarNavigationScreen
 			title={ __( 'Change your homepage', 'woocommerce' ) }
@@ -43,9 +86,26 @@ export const SidebarNavigationScreenHomepage = () => {
 				}
 			) }
 			content={
-				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header"></div>
-				</>
+				<div className="woocommerce-customize-store__sidebar-homepage-content">
+					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
+						{ isLoading ? (
+							<span className="components-placeholder__preview">
+								<Spinner />
+							</span>
+						) : (
+							<BlockPatternList
+								shownPatterns={ homePatterns }
+								blockPatterns={ homePatterns }
+								onClickPattern={ onClickPattern }
+								label={ 'Hompeage' }
+								orientation="vertical"
+								category={ 'homepage' }
+								isDraggable={ false }
+								showTitlesAsTooltip={ false }
+							/>
+						) }
+					</div>
+				</div>
 			}
 		/>
 	);
