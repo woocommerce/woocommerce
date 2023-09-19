@@ -154,8 +154,6 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Free shipping' } )
 			).toBeVisible();
 
-			await page.getByRole( 'button', { name: 'Save changes'} ).click();
-
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
