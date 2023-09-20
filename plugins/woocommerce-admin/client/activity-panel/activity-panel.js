@@ -164,9 +164,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			ONBOARDING_STORE_NAME
 		);
 
-		const setupList = getTaskList( activeSetupList );
+		const setupList = activeSetupList && getTaskList( activeSetupList );
 
-		const isSetupTaskListHidden = setupList?.isHidden ?? true;
+		const isSetupTaskListHidden = setupList?.isHidden ?? false;
 		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
