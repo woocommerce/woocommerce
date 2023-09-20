@@ -14,7 +14,11 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
-import { Product, SearchAPIProductType } from '../product-list/types';
+import {
+	Product,
+	ProductType,
+	SearchAPIProductType,
+} from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 
@@ -113,7 +117,12 @@ export default function Extensions(): JSX.Element {
 			return <NoResults />;
 		}
 
-		return <ProductListContent products={ products } />;
+		return (
+			<ProductListContent
+				products={ products }
+				type={ ProductType.extension }
+			/>
+		);
 	}
 
 	return (

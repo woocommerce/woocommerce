@@ -7,7 +7,7 @@ import { Product, ProductType } from '../product-list/types';
 
 export default function ProductListContent( props: {
 	products: Product[];
-	type?: ProductType;
+	type: ProductType;
 } ): JSX.Element {
 	const { products } = props;
 	return (
