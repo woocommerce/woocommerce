@@ -2,18 +2,19 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
 import classnames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	MediaUploader,
 	ImageGallery,
 	ImageGalleryItem,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { useBlockProps } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -23,7 +24,7 @@ type Image = MediaItem & {
 	src: string;
 };
 
-export function Edit() {
+export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
 	const [ images, setImages ] = useEntityProp< MediaItem[] >(
 		'postType',
 		'product',
@@ -36,7 +37,7 @@ export function Edit() {
 		null
 	);
 
-	const blockProps = useBlockProps( {
+	const blockProps = useWooBlockProps( attributes, {
 		className: classnames( {
 			'has-images': images.length > 0,
 		} ),
