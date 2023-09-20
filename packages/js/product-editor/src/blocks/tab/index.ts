@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockConfiguration } from '@wordpress/blocks';
+import { registerWooBlockType } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
@@ -21,5 +22,5 @@ export const settings: Partial< BlockConfiguration< TabBlockAttributes > > = {
 };
 
 export function init() {
-	initBlock( { name, metadata, settings } );
+	registerWooBlockType( { name, metadata, settings } );
 }
