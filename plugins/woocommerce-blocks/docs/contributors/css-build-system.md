@@ -15,7 +15,7 @@ CSS files are built with Webpack, which gathers all SCSS files in the app and pr
 
 ## Right-to-left
 
-All files described above are generated in a LTR version and a RTL version. The RTL version is generated automatically with `webpack-rtl-plugin` and has a `-rtl` suffix at the end of the file name.
+All files described above are generated in a LTR version and a RTL version. The RTL version is generated automatically with `@automattic/webpack-rtl-plugin` and has a `.rtl.css` suffix at the end of the file name.
 
 ## Relevant files
 

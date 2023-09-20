@@ -164,8 +164,8 @@ describe( `${ block.name } Block`, () => {
 			await page.waitForSelector( selectors.frontend.filter );
 
 			await Promise.all( [
-				page.waitForNavigation(),
 				page.click( selectors.frontend.filter ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			] );
 
 			const products = await page.$$(
@@ -281,8 +281,8 @@ describe( `${ block.name } Block`, () => {
 			await page.waitForSelector( selectors.frontend.filter );
 
 			await Promise.all( [
-				page.waitForNavigation(),
 				page.click( selectors.frontend.filter ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			] );
 
 			const products = await page.$$(
