@@ -11,7 +11,6 @@ import {
 	headerValidator,
 	footerValidator,
 	colorPaletteResponseValidator,
-	fontChoiceValidator,
 } from './prompts';
 
 export type designWithAiStateMachineContext = {
