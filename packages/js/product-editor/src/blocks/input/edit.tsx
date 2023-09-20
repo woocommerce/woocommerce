@@ -7,6 +7,8 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { Product } from '@woocommerce/data';
+import classNames from 'classnames';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -16,6 +18,7 @@ import {
 /**
  * Internal dependencies
  */
+import { useValidation } from '../../contexts/validation-context';
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
@@ -27,6 +30,16 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	);
 
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
+
+	const { error, validate } = useValidation< Product >(
+		property,
+		async function validator() {
+			if ( required && ! value ) {
+				return __( 'This field is required.', 'woocommerce' );
+			}
+		},
+		[ value ]
+	);
 
 	return (
 		<div { ...blockProps }>
@@ -43,12 +56,17 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 						  } )
 						: label
 				}
+				className={ classNames( {
+					'has-error': error,
+				} ) }
+				help={ error }
 			>
 				<InputControl
 					id={ nameControlId }
 					placeholder={ placeholder }
 					value={ value }
 					onChange={ setValue }
+					onBlur={ validate }
 				></InputControl>
 			</BaseControl>
 		</div>
