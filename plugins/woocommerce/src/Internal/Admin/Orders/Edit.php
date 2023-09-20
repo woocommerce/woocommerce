@@ -232,9 +232,7 @@ class Edit {
 		 */
 		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
 
-		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
-			$this->custom_meta_box->handle_metadata_changes($this->order);
-		}
+		$this->custom_meta_box->handle_metadata_changes($this->order);
 
 		// Order updated message.
 		$this->message = 1;
