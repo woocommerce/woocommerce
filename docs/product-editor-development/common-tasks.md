@@ -1,5 +1,7 @@
 # Common tasks
 
+> ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
+
 ## Adding a new field to the product editor (end-to-end)
 
 _TODO: Describe how to add a new field, including adding it to the REST API._
