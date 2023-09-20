@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.3
 Tested up to: 6.3
 Requires PHP: 7.3
-Stable tag: 11.1.0
+Stable tag: 11.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -80,6 +80,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 11.1.1 - 2023-09-20 =
+
+#### Bug Fixes
+
+- Improved escaping around attributes [bb37d05](https://github.com/woocommerce/woocommerce-blocks/commit/bb37d056bccccd714fa6617c5da6f50d54837f41)
 
 = 11.1.0 - 2023-09-11 =
 
