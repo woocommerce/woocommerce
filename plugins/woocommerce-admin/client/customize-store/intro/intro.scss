@@ -1,0 +1,155 @@
+.woocommerce-profile-wizard__container {
+	display: flex;
+	flex-direction: column;
+
+	button {
+		cursor: pointer;
+	}
+}
+
+.woocommerce-customize-store-header {
+	min-height: 64px;
+	padding: 1rem;
+	width: 100%;
+
+	h1 {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		margin: 0;
+		padding: 0;
+		line-height: 1.5rem;
+	}
+
+}
+
+.woocommerce-customize-store-container {
+	display: flex;
+	flex-direction: row;
+}
+
+.woocommerce-customize-store-sidebar {
+	flex: 0 0 380px;
+	padding: 1rem;
+
+	.woocommerce-customize-store-sidebar__title {
+		color: #1e1e1e;
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0;
+		padding: 0;
+		line-height: 2.5;
+	}
+
+	button {
+		background-color: transparent;
+		border: none;
+		line-height: 1;
+		padding-right: 0;
+		vertical-align: middle;
+	}
+
+	svg {
+		color: inherit;
+		height: 24px;
+		width: 24px;
+		margin: 0.25rem;
+	}
+
+	p {
+		padding: 0 1rem;
+		color: #757575;
+		max-width: 20rem;
+	}
+}
+
+.woocommerce-customize-store-main {
+	margin-right: 2.5rem;
+
+	p {
+		color: #2f2f2f;
+		font-size: 1rem;
+		line-height: 1.5;
+		margin-bottom: 1.5rem;
+	}
+}
+
+.woocommerce-customize-store-banner {
+	background: var(--woo-purple-woo-purple-0, #F2EDFF);
+	background-image: url(../assets/images/banner-design-with-ai.svg);
+	background-repeat: no-repeat;
+	background-position: bottom right;
+	background-size: contain;
+	border-radius: 4px;
+	display: flex;
+	margin: 1.25rem 0 3.375rem;
+	min-height: 343px;
+	padding: 70px 0;
+	width: 820px;
+
+	.woocommerce-customize-store-banner-content {
+		width: 345px;
+		margin-left: 50px;
+
+		h1 {
+			font-size: 1.5rem;
+			line-height: 1.33;
+		}
+
+		p {
+			margin: 1rem 0 2rem 0;
+		}
+
+		button {
+			background-color: #3858e9;
+			border: none;
+			border-radius: 2px;
+			color: white;
+			display: inline-block;
+			line-height: 1.25rem;
+			padding: 10px 15px;
+
+			&:hover {
+				background-color: #2234e0;
+			}
+		}
+
+	}
+}
+
+.woocommerce-customize-store-theme-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2rem;
+	max-width: 820px;
+
+	.theme-card {
+		flex-basis: 45%;
+
+		img {
+			border-radius: 4px;
+			border: 1px solid #e9e9e9;
+			width: 394px;
+		}
+
+		.theme-card__title {
+			font-size: 1rem;
+			font-weight: 600;
+			margin: 1.5rem 0 0.5rem;
+		}
+	}
+}
+
+.woocommerce-customize-store-browse-themes {
+	text-align: center;
+
+	button {
+		background-color: #fff;
+		border: 1px solid #3858E9;
+		border-radius: 2px;
+		color: #3858E9;
+		display: inline-block;
+		font-size: 0.8125rem;
+		margin: 3.75rem 0;
+		padding: 0.5rem 0.75rem;
+	}
+}
