@@ -147,8 +147,8 @@ function Sidebar() {
 				initialPath={ initialPath.current }
 			>
 				<SidebarScreens />
+				<SaveHub />
 			</NavigatorProvider>
-			<SaveHub />
 		</>
 	);
 }

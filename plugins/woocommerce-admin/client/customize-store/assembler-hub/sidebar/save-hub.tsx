@@ -10,6 +10,8 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
+	// @ts-ignore No types for this exist yet.
+	__experimentalUseNavigator as useNavigator,
 	Button,
 	Spinner,
 } from '@wordpress/components';
@@ -41,13 +43,13 @@ export const SaveHub = () => {
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
+	const navigator = useNavigator();
 
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createSuccessNotice, createErrorNotice, removeNotice } =
-		useDispatch( noticesStore );
+	const { createErrorNotice, removeNotice } = useDispatch( noticesStore );
 
 	const {
 		dirtyEntityRecords,
@@ -176,10 +178,7 @@ export const SaveHub = () => {
 				}
 			}
 
-			createSuccessNotice( __( 'Site updated.', 'woocommerce' ), {
-				type: 'snackbar',
-				id: saveNoticeId,
-			} );
+			navigator.goToParent();
 		} catch ( error ) {
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
