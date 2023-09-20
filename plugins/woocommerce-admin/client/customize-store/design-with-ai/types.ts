@@ -10,6 +10,8 @@ import {
 	fontChoiceValidator,
 	headerValidator,
 	footerValidator,
+	colorPaletteResponseValidator,
+	fontChoiceValidator,
 } from './prompts';
 
 export type designWithAiStateMachineContext = {
@@ -23,7 +25,7 @@ export type designWithAiStateMachineContext = {
 		choice: Tone | '';
 	};
 	aiSuggestions: {
-		defaultColorPalette: ColorPalette;
+		defaultColorPalette: ColorPaletteResponse;
 		fontPairing: FontPairing[ 'pair_name' ];
 		header: Header[ 'slug' ];
 		footer: Footer[ 'slug' ];
@@ -58,6 +60,9 @@ export interface LookAndToneCompletionResponse {
 }
 
 export type ColorPalette = z.infer< typeof colorPaletteValidator >;
+export type ColorPaletteResponse = z.infer<
+	typeof colorPaletteResponseValidator
+>;
 
 export type FontPairing = z.infer< typeof fontChoiceValidator >;
 

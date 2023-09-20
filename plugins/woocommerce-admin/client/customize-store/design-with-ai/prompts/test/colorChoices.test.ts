@@ -1,9 +1,9 @@
 /**
  * Internal dependencies
  */
-import { defaultColorPalette } from '..';
+import { colorPaletteValidator, defaultColorPalette } from '..';
 
-describe( 'colorPairing.responseValidation', () => {
+describe( 'colorPaletteValidator', () => {
 	it( 'should validate a correct color palette', () => {
 		const validPalette = {
 			name: 'Ancient Bronze',
@@ -13,8 +13,7 @@ describe( 'colorPairing.responseValidation', () => {
 			background: '#ffffff',
 		};
 
-		const parsedResult =
-			defaultColorPalette.responseValidation( validPalette );
+		const parsedResult = colorPaletteValidator.parse( validPalette );
 		expect( parsedResult ).toEqual( validPalette );
 	} );
 
@@ -26,7 +25,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -48,7 +47,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -71,7 +70,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#ffffff',
 		};
-		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -94,7 +93,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#invalid_color',
 			background: '#ffffff',
 		};
-		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -125,7 +124,7 @@ describe( 'colorPairing.responseValidation', () => {
 			foreground: '#11163d',
 			background: '#fffff',
 		};
-		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
 		"[
 		  {
@@ -134,6 +133,103 @@ describe( 'colorPairing.responseValidation', () => {
 		    \\"message\\": \\"Invalid background color\\",
 		    \\"path\\": [
 		      \\"background\\"
+		    ]
+		  }
+		]"
+	` );
+	} );
+} );
+
+describe( 'colorPaletteResponseValidator', () => {
+	it( 'should validate a correct color palette response', () => {
+		const validPalette = {
+			default: 'Ancient Bronze',
+			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+		};
+
+		const parsedResult =
+			defaultColorPalette.responseValidation( validPalette );
+		expect( parsedResult ).toEqual( validPalette );
+	} );
+
+	it( 'should fail if array contains invalid color', () => {
+		const invalidPalette = {
+			default: 'Ancient Bronze',
+			bestColors: Array( 7 )
+				.fill( 'Ancient Bronze' )
+				.concat( [ 'Invalid Color' ] ),
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"custom\\",
+		    \\"message\\": \\"Color palette not part of allowed list\\",
+		    \\"path\\": [
+		      \\"bestColors\\",
+		      7
+		    ]
+		  }
+		]"
+	` );
+	} );
+
+	it( 'should fail if bestColors property is missing', () => {
+		const invalidPalette = {
+			default: 'Ancient Bronze',
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"invalid_type\\",
+		    \\"expected\\": \\"array\\",
+		    \\"received\\": \\"undefined\\",
+		    \\"path\\": [
+		      \\"bestColors\\"
+		    ],
+		    \\"message\\": \\"Required\\"
+		  }
+		]"
+	` );
+	} );
+	it( 'should fail if default property is missing', () => {
+		const invalidPalette = {
+			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"invalid_type\\",
+		    \\"expected\\": \\"string\\",
+		    \\"received\\": \\"undefined\\",
+		    \\"path\\": [
+		      \\"default\\"
+		    ],
+		    \\"message\\": \\"Required\\"
+		  }
+		]"
+	` );
+	} );
+
+	it( 'should fail if bestColors array is not of length 8', () => {
+		const invalidPalette = {
+			default: 'Ancient Bronze',
+			bestColors: Array( 7 ).fill( 'Ancient Bronze' ),
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"too_small\\",
+		    \\"minimum\\": 8,
+		    \\"type\\": \\"array\\",
+		    \\"inclusive\\": true,
+		    \\"exact\\": true,
+		    \\"message\\": \\"Array must contain exactly 8 element(s)\\",
+		    \\"path\\": [
+		      \\"bestColors\\"
 		    ]
 		  }
 		]"
