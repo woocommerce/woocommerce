@@ -12,8 +12,6 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
-// @ts-ignore No types for this exist yet.
-import { parse } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
