@@ -1,8 +1,8 @@
 /**
  * Internal dependencies
  */
-import { LookAndToneCompletionResponse } from '../types';
-import { lookAndTone } from '.';
+import { LookAndToneCompletionResponse } from '../../types';
+import { lookAndTone } from '..';
 
 describe( 'parseLookAndToneCompletionResponse', () => {
 	it( 'should return a valid object when given valid JSON', () => {

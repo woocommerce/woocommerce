@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { defaultColorPalette } from '.';
+import { defaultColorPalette } from '..';
 
 describe( 'colorPairing.responseValidation', () => {
 	it( 'should validate a correct color palette', () => {
