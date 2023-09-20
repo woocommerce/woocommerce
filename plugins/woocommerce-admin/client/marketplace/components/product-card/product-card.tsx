@@ -17,7 +17,7 @@ export interface ProductCardProps {
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const { product, type = ProductType.classic } = props;
+	const { product, type = ProductType.extension } = props;
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
