@@ -28,25 +28,18 @@ test.describe( 'Test the checkout header template part', async () => {
 	test( 'Template can be modified', async ( {
 		frontendUtils,
 		admin,
-		editor,
 		editorUtils,
-		page,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editor.insertBlock( {
+		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: 'Hello World in the header' },
 		} );
-		await Promise.all( [
-			editor.saveSiteEditorEntities(),
-			page.waitForResponse( ( response ) =>
-				response.url().includes( 'templates' )
-			),
-		] );
+		await editorUtils.saveTemplate();
 		await frontendUtils.goToShop();
 		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( 'Beanie' );

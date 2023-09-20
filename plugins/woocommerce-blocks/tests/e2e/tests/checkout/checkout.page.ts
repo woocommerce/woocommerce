@@ -4,9 +4,18 @@
 import { Page } from '@playwright/test';
 import { expect } from '@woocommerce/e2e-playwright-utils';
 
+/**
+ * Internal dependencies
+ */
+import {
+	FREE_SHIPPING_NAME,
+	SIMPLE_PHYSICAL_PRODUCT_NAME,
+	SIMPLE_VIRTUAL_PRODUCT_NAME,
+} from './constants';
+
 export class CheckoutPage {
 	private BLOCK_NAME = 'woocommerce/checkout';
-	private page: Page;
+	public page: Page;
 	private testData = {
 		...{
 			firstname: 'John',
@@ -73,6 +82,7 @@ export class CheckoutPage {
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		await this.page.waitForURL( /order-received/ );
 	}
+
 	async verifyAddressDetails(
 		shippingOrBilling: 'shipping' | 'billing',
 		overrideAddressDetails = {}
@@ -221,5 +231,97 @@ export class CheckoutPage {
 			} );
 		}
 		return await this.isShippingRateSelected( shippingName, shippingPrice );
+	}
+
+	async verifyOrderConfirmationDetails(
+		currentPage: Page,
+		toBeVisible = true
+	) {
+		const statusSection = currentPage.locator(
+			'[data-block-name="woocommerce/order-confirmation-status"]'
+		);
+		const summarySection = currentPage.locator(
+			'[data-block-name="woocommerce/order-confirmation-summary"]'
+		);
+		const totalsSection = currentPage.locator(
+			'[data-block-name="woocommerce/order-confirmation-totals"]'
+		);
+		const shippingAddressSection = currentPage.locator(
+			'[data-block-name="woocommerce/order-confirmation-shipping-address"]'
+		);
+		const billingAddressSection = currentPage.locator(
+			'[data-block-name="woocommerce/order-confirmation-billing-address"]'
+		);
+
+		if ( toBeVisible ) {
+			const {
+				firstname,
+				lastname,
+				addressfirstline,
+				addresssecondline,
+				city,
+				postcode,
+				email,
+				phone,
+			} = this.testData;
+
+			await expect( statusSection ).toBeVisible();
+			await expect( summarySection ).toBeVisible();
+			await expect( totalsSection ).toBeVisible();
+			await expect( shippingAddressSection ).toBeVisible();
+			await expect( billingAddressSection ).toBeVisible();
+
+			// Confirm order data are visible and correct
+			await expect(
+				currentPage.getByText(
+					'Thank you. Your order has been received.'
+				)
+			).toBeVisible();
+			await expect( currentPage.getByText( email ) ).toBeVisible();
+			await expect(
+				currentPage.getByText( FREE_SHIPPING_NAME )
+			).toBeVisible();
+			await expect(
+				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
+			).toBeVisible();
+			await expect(
+				currentPage.getByText( SIMPLE_VIRTUAL_PRODUCT_NAME )
+			).toBeVisible();
+			await expect(
+				currentPage
+					.getByText(
+						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
+					)
+					.first()
+			).toBeVisible();
+			await expect(
+				currentPage
+					.getByText(
+						`${ firstname } ${ lastname }${ addressfirstline }${ addresssecondline }${ city }, NY ${ postcode }${ phone }`
+					)
+					.nth( 1 )
+			).toBeVisible();
+		} else {
+			await expect( statusSection ).toBeVisible();
+			await expect( summarySection ).toBeHidden();
+			await expect( totalsSection ).toBeHidden();
+			await expect( shippingAddressSection ).toBeHidden();
+			await expect( billingAddressSection ).toBeHidden();
+		}
+	}
+
+	getOrderId() {
+		// Get the current URL
+		const url = this.page.url();
+		const urlObject = new URL( url );
+
+		// Extract orderId from the pathname
+		const pathnameSegments = urlObject.pathname.split( '/' );
+		const orderId =
+			pathnameSegments[
+				pathnameSegments.indexOf( 'order-received' ) + 1
+			];
+
+		return orderId;
 	}
 }

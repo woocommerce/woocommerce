@@ -679,12 +679,6 @@ class BlockTemplatesController {
 			! BlockTemplateUtils::theme_has_template( CheckoutTemplate::get_slug() ) && $this->block_template_is_available( CheckoutTemplate::get_slug() )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		} elseif (
-			is_wc_endpoint_url( 'order-received' )
-			&& ! BlockTemplateUtils::theme_has_template( OrderConfirmationTemplate::get_slug() )
-			&& $this->block_template_is_available( OrderConfirmationTemplate::get_slug() )
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} else {
 			$queried_object = get_queried_object();
 			if ( is_null( $queried_object ) ) {

@@ -5,10 +5,14 @@ import './style.scss';
 
 export interface SkeletonProps {
 	numberOfLines?: number;
+	tag?: keyof JSX.IntrinsicElements;
+	maxWidth?: string;
 }
 
 export const Skeleton = ( {
 	numberOfLines = 1,
+	tag: Tag = 'div',
+	maxWidth = '100%',
 }: SkeletonProps ): JSX.Element => {
 	const skeletonLines = Array.from(
 		{ length: numberOfLines },
@@ -21,6 +25,13 @@ export const Skeleton = ( {
 		)
 	);
 	return (
-		<div className="wc-block-components-skeleton">{ skeletonLines }</div>
+		<Tag
+			className="wc-block-components-skeleton"
+			style={ {
+				maxWidth,
+			} }
+		>
+			{ skeletonLines }
+		</Tag>
 	);
 };

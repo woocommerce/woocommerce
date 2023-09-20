@@ -96,6 +96,39 @@ const blocks = {
 	'collection-filters': {
 		isExperimental: true,
 	},
+	'order-confirmation-summary': {
+		customDir: 'order-confirmation/summary',
+	},
+	'order-confirmation-totals-wrapper': {
+		customDir: 'order-confirmation/totals-wrapper',
+	},
+	'order-confirmation-totals': {
+		customDir: 'order-confirmation/totals',
+	},
+	'order-confirmation-downloads-wrapper': {
+		customDir: 'order-confirmation/downloads-wrapper',
+	},
+	'order-confirmation-downloads': {
+		customDir: 'order-confirmation/downloads',
+	},
+	'order-confirmation-billing-address': {
+		customDir: 'order-confirmation/billing-address',
+	},
+	'order-confirmation-shipping-address': {
+		customDir: 'order-confirmation/shipping-address',
+	},
+	'order-confirmation-billing-wrapper': {
+		customDir: 'order-confirmation/billing-wrapper',
+	},
+	'order-confirmation-shipping-wrapper': {
+		customDir: 'order-confirmation/shipping-wrapper',
+	},
+	'order-confirmation-status': {
+		customDir: 'order-confirmation/status',
+	},
+	'order-confirmation-additional-information': {
+		customDir: 'order-confirmation/additional-information',
+	},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,

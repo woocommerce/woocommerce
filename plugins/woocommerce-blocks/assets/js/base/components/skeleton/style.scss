@@ -7,11 +7,11 @@
 }
 
 .wc-block-components-skeleton-text-line {
-	height: 0.8em;
+	height: 0.85em;
 	width: 100%;
 	position: relative;
-	background: $gray-200;
-	border-radius: 2em;
+	background: $universal-border-light;
+	border-radius: 2px;
 
 	&:last-child {
 		width: 80%;
