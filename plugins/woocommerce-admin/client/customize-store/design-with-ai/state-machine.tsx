@@ -10,8 +10,8 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	ColorPalette,
 	FontPairing,
+	ColorPaletteResponse,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -70,7 +70,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
-				defaultColorPalette: {} as ColorPalette,
+				defaultColorPalette: {} as ColorPaletteResponse,
 				fontPairing: '' as FontPairing[ 'pair_name' ],
 			},
 		},
