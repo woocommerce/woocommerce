@@ -99,6 +99,7 @@ export default function Themes(): JSX.Element {
 		title = sprintf(
 			// translators: %s: number of themes
 			_n( '%s theme', '%s themes', products.length, 'woocommerce' ),
+			products.length
 		);
 	}
 

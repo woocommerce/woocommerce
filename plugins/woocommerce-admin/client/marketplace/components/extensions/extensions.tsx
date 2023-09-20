@@ -120,10 +120,10 @@ export default function Extensions(): JSX.Element {
 		return (
 			<>
 				<CategorySelector />
-        <ProductListContent
-          products={ products }
-          type={ ProductType.extension }
-        />
+				<ProductListContent
+					products={ products }
+					type={ ProductType.extension }
+				/>
 			</>
 		);
 	}
