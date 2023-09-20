@@ -112,7 +112,12 @@ export default function Themes(): JSX.Element {
 			return <NoResults />;
 		}
 
-		return <ProductListContent products={ products } />;
+		return (
+			<>
+				<CategorySelector />
+				<ProductListContent products={ products } />
+			</>
+		);
 	}
 
 	return (
@@ -120,7 +125,6 @@ export default function Themes(): JSX.Element {
 			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--themes">
 				{ title }
 			</h2>
-			<CategorySelector />
 			{ content() }
 		</div>
 	);
