@@ -28,7 +28,7 @@ class Appearance extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Customize your store', 'woocommerce' );
+		return __( 'Choose your theme', 'woocommerce' );
 	}
 
 	/**
