@@ -36,11 +36,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
-function fetchCategories(): Promise< CategoryAPIItem[] > {
-	let url = MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH;
+function fetchCategories( selectedTab: string ): Promise< CategoryAPIItem[] > {
+	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
 
 	if ( LOCALE.userLocale ) {
-		url = `${ url }?locale=${ LOCALE.userLocale }`;
+		url.searchParams.set( 'locale', LOCALE.userLocale );
+	}
+
+	// We don't define parent for extensions since that is provided by default
+	// This is to ensure the old marketplace continues to work when this isn't defined
+	if ( selectedTab === 'themes' ) {
+		url.searchParams.set( 'parent', selectedTab );
 	}
 
 	return fetch( url.toString() )
@@ -64,6 +70,10 @@ const appendURLParams = (
 	url: string,
 	utmParams: Array< [ string, string ] >
 ): string => {
+	if ( ! url ) {
+		return url;
+	}
+
 	const urlObject = new URL( url );
 	if ( ! urlObject ) {
 		return url;
