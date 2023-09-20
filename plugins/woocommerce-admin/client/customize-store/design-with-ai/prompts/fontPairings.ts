@@ -112,7 +112,7 @@ export const fontPairings = {
         Chosen look and tone: ${ look } look, ${ tone } tone.
         Business description: ${ businessDescription }
 
-        Colors to choose from: 
+        Font pairings to choose from: 
         ${ JSON.stringify( fontChoices ) }
         `;
 	},
