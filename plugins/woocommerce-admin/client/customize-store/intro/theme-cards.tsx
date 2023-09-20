@@ -3,4 +3,7 @@ export type ThemeCard = {
 	name: string;
 	description: string;
 	image: string;
+	isActive: boolean;
+	styleVariations: string[];
 };
+
