@@ -4,51 +4,71 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import { Component } from '@wordpress/element';
-import PropTypes from 'prop-types';
+import { Review } from '@woocommerce/base-components/reviews/types';
 
 /**
  * Internal dependencies
  */
 import { getSortArgs } from './utils';
 import FrontendBlock from './frontend-block';
+import { ReviewBlockAttributes } from './attributes';
+
+type FrontendContainerBlockProps = {
+	attributes: ReviewBlockAttributes;
+};
 
 /**
  * Container of the block rendered in the frontend.
  */
-class FrontendContainerBlock extends Component {
-	constructor() {
-		super( ...arguments );
+class FrontendContainerBlock extends Component<
+	FrontendContainerBlockProps,
+	{ orderby: string; reviewsToDisplay: number }
+> {
+	constructor( props: FrontendContainerBlockProps ) {
+		super( props );
 		const { attributes } = this.props;
 
 		this.state = {
-			orderby: attributes.orderby,
-			reviewsToDisplay: parseInt( attributes.reviewsOnPageLoad, 10 ),
+			orderby: attributes?.orderby,
+			reviewsToDisplay: this.getReviewsOnPageLoad(),
 		};
 
 		this.onAppendReviews = this.onAppendReviews.bind( this );
 		this.onChangeOrderby = this.onChangeOrderby.bind( this );
 	}
 
-	onAppendReviews() {
+	getReviewsOnPageLoad() {
 		const { attributes } = this.props;
+
+		return typeof attributes.reviewsOnPageLoad === 'number'
+			? attributes.reviewsOnPageLoad
+			: parseInt( attributes.reviewsOnPageLoad, 10 );
+	}
+
+	getReviewsOnLoadMore() {
+		const { attributes } = this.props;
+
+		return typeof attributes.reviewsOnLoadMore === 'number'
+			? attributes.reviewsOnLoadMore
+			: parseInt( attributes.reviewsOnLoadMore, 10 );
+	}
+
+	onAppendReviews() {
 		const { reviewsToDisplay } = this.state;
 
 		this.setState( {
-			reviewsToDisplay:
-				reviewsToDisplay + parseInt( attributes.reviewsOnLoadMore, 10 ),
+			reviewsToDisplay: reviewsToDisplay + this.getReviewsOnLoadMore(),
 		} );
 	}
 
-	onChangeOrderby( event ) {
-		const { attributes } = this.props;
-
+	onChangeOrderby( event: React.ChangeEvent< HTMLSelectElement > ) {
 		this.setState( {
 			orderby: event.target.value,
-			reviewsToDisplay: parseInt( attributes.reviewsOnPageLoad, 10 ),
+			reviewsToDisplay: this.getReviewsOnPageLoad(),
 		} );
 	}
 
-	onReviewsAppended( { newReviews } ) {
+	onReviewsAppended( { newReviews }: { newReviews: Review[] } ) {
 		speak(
 			sprintf(
 				/* translators: %d is the count of reviews loaded. */
@@ -83,6 +103,7 @@ class FrontendContainerBlock extends Component {
 		const { order, orderby } = getSortArgs( this.state.orderby );
 
 		return (
+			// @ts-expect-error - TODO: Refactor WrappedComponent
 			<FrontendBlock
 				attributes={ attributes }
 				categoryIds={ categoryIds }
@@ -100,12 +121,5 @@ class FrontendContainerBlock extends Component {
 		);
 	}
 }
-
-FrontendContainerBlock.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
-};
 
 export default FrontendContainerBlock;

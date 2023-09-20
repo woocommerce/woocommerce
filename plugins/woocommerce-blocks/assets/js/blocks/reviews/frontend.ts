@@ -6,7 +6,7 @@ import { renderFrontend } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import FrontendContainerBlock from './frontend-container-block.js';
+import FrontendContainerBlock from './frontend-container-block';
 
 const selector = `
 	.wp-block-woocommerce-all-reviews,
@@ -14,7 +14,7 @@ const selector = `
 	.wp-block-woocommerce-reviews-by-category
 `;
 
-const getProps = ( el ) => {
+const getProps = ( el: HTMLElement ) => {
 	const showOrderby = el.dataset.showOrderby === 'true';
 	const showLoadMore = el.dataset.showLoadMore === 'true';
 
@@ -32,6 +32,4 @@ const getProps = ( el ) => {
 	};
 };
 
-// @ts-ignore
-// Current typing does not work with non-functional components
 renderFrontend( { selector, Block: FrontendContainerBlock, getProps } );
