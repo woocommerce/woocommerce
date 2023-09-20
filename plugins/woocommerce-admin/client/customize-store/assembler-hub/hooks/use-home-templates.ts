@@ -68,6 +68,15 @@ const SMALL_MEDIUM_BUSINESS_TEMPLATES = {
 	],
 };
 
+const TEMPLATES = {
+	template1: LARGE_BUSINESS_TEMPLATES.template1,
+	template2: LARGE_BUSINESS_TEMPLATES.template2,
+	template3: LARGE_BUSINESS_TEMPLATES.template3,
+	template4: SMALL_MEDIUM_BUSINESS_TEMPLATES.template1,
+	template5: SMALL_MEDIUM_BUSINESS_TEMPLATES.template2,
+	template6: SMALL_MEDIUM_BUSINESS_TEMPLATES.template3,
+};
+
 const getTemplatePatterns = (
 	template: string[],
 	patternsByName: Record< string, Pattern >
@@ -89,8 +98,6 @@ const getTemplatePatterns = (
 		.filter( ( pattern ) => pattern !== null ) as PatternWithBlocks[];
 
 export const useHomeTemplates = () => {
-	// TODO: Get businessType from option
-	const businessType = 'SMB' as string;
 	const { blockPatterns, isLoading } = usePatterns();
 
 	const patternsByName = useMemo( () => {
@@ -105,10 +112,7 @@ export const useHomeTemplates = () => {
 
 	const homeTemplates = useMemo( () => {
 		if ( isLoading ) return {};
-		const recommendedTemplates =
-			businessType === 'SMB'
-				? SMALL_MEDIUM_BUSINESS_TEMPLATES
-				: LARGE_BUSINESS_TEMPLATES;
+		const recommendedTemplates = TEMPLATES;
 
 		return Object.entries( recommendedTemplates ).reduce(
 			(
