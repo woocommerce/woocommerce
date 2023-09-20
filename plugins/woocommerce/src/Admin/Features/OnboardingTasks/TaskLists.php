@@ -112,12 +112,12 @@ class TaskLists {
 			'CustomizeStore',
 			'StoreDetails',
 			'Products',
+			'Appearance',
 			'WooCommercePayments',
 			'Payments',
 			'Tax',
 			'Shipping',
 			'Marketing',
-			'Appearance',
 		);
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {
