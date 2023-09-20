@@ -282,86 +282,140 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...defaultColorPalette,
-											prompt: defaultColorPalette.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultColorPalette,
+													prompt: defaultColorPalette.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignDefaultColorPalette',
+												],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [
-											'assignDefaultColorPalette',
-										],
-									},
+									success: { type: 'final' },
 								},
 							},
 							chooseFontPairing: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...fontPairings,
-											prompt: fontPairings.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...fontPairings,
+													prompt: fontPairings.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignFontPairing',
+												],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [ 'assignFontPairing' ],
-									},
+									success: { type: 'final' },
 								},
 							},
 							chooseHeader: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...defaultHeader,
-											prompt: defaultHeader.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultHeader,
+													prompt: defaultHeader.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [ 'assignHeader' ],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [ 'assignHeader' ],
-									},
+									success: { type: 'final' },
 								},
 							},
 							chooseFooter: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...defaultFooter,
-											prompt: defaultFooter.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultFooter,
+													prompt: defaultFooter.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [ 'assignFooter' ],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [ 'assignFooter' ],
-									},
+									success: { type: 'final' },
 								},
 							},
 						},
+						onDone: 'postApiCallLoader',
 					},
-					postApiCallLoader: {},
+					postApiCallLoader: {
+						invoke: {
+							src: 'assembleSite',
+							onDone: {
+								actions: [
+									sendParent( () => ( {
+										type: 'THEME_SUGGESTED',
+									} ) ),
+								],
+							},
+						},
+					},
 				},
 			},
 		},

@@ -12,7 +12,7 @@ import { parse } from '@wordpress/blocks';
 import { usePatterns, Pattern, PatternWithBlocks } from './use-patterns';
 
 // TODO: It might be better to create an API endpoint to get the templates.
-const LARGE_BUSINESS_TEMPLATES = {
+export const LARGE_BUSINESS_TEMPLATES = {
 	template1: [
 		'a8c/cover-image-with-left-aligned-call-to-action',
 		'woocommerce-blocks/featured-products-5-item-grid',
@@ -42,7 +42,7 @@ const LARGE_BUSINESS_TEMPLATES = {
 	],
 };
 
-const SMALL_MEDIUM_BUSINESS_TEMPLATES = {
+export const SMALL_MEDIUM_BUSINESS_TEMPLATES = {
 	template1: [
 		'woocommerce-blocks/featured-products-fresh-and-tasty',
 		'woocommerce-blocks/testimonials-single',
@@ -77,7 +77,7 @@ const TEMPLATES = {
 	template6: SMALL_MEDIUM_BUSINESS_TEMPLATES.template3,
 };
 
-const getTemplatePatterns = (
+export const getTemplatePatterns = (
 	template: string[],
 	patternsByName: Record< string, Pattern >
 ) =>
@@ -97,18 +97,22 @@ const getTemplatePatterns = (
 		} )
 		.filter( ( pattern ) => pattern !== null ) as PatternWithBlocks[];
 
+export const patternsToNameMap = ( blockPatterns: Pattern[] ) =>
+	blockPatterns.reduce(
+		( acc: Record< string, Pattern >, pattern: Pattern ) => {
+			acc[ pattern.name ] = pattern;
+			return acc;
+		},
+		{}
+	);
+
 export const useHomeTemplates = () => {
 	const { blockPatterns, isLoading } = usePatterns();
 
-	const patternsByName = useMemo( () => {
-		return blockPatterns.reduce(
-			( acc: Record< string, Pattern >, pattern: Pattern ) => {
-				acc[ pattern.name ] = pattern;
-				return acc;
-			},
-			{}
-		);
-	}, [ blockPatterns ] );
+	const patternsByName = useMemo(
+		() => patternsToNameMap( blockPatterns ),
+		[ blockPatterns ]
+	);
 
 	const homeTemplates = useMemo( () => {
 		if ( isLoading ) return {};
