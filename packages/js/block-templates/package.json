@@ -71,6 +71,5 @@
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix"
-	},
-	"peerDependencies": {}
+	}
 }
