@@ -21,4 +21,4 @@ Depending on the complexity of the extension's UI, the implementation might be a
 
 ## Related documentation
 
-[comment]: # (Link to specific parts of the documentation that exist in different parts of the repo)
+_TODO: Link to specific parts of the documentation that exist in different parts of the repo._
