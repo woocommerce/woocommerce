@@ -19,6 +19,7 @@ export type SearchAPIProductType = {
 export interface Product {
 	id?: number;
 	title: string;
+	image: string;
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
@@ -28,4 +29,9 @@ export interface Product {
 	productType?: string;
 	averageRating?: number | null;
 	reviewsCount?: number | null;
+}
+
+export enum ProductType {
+	theme = 'theme',
+	extension = 'extension',
 }
