@@ -74,7 +74,7 @@
 }
 
 .woocommerce-customize-store-banner {
-	background: var(--woo-purple-woo-purple-0, #F2EDFF);
+	background: var(--woo-purple-woo-purple-0, #f2edff);
 	background-image: url(../assets/images/banner-design-with-ai.svg);
 	background-repeat: no-repeat;
 	background-position: bottom right;
@@ -103,7 +103,7 @@
 			background-color: #3858e9;
 			border: none;
 			border-radius: 2px;
-			color: white;
+			color: #fff;
 			display: inline-block;
 			line-height: 1.25rem;
 			padding: 10px 15px;
@@ -144,9 +144,9 @@
 
 	button {
 		background-color: #fff;
-		border: 1px solid #3858E9;
+		border: 1px solid #3858e9;
 		border-radius: 2px;
-		color: #3858E9;
+		color: #3858e9;
 		display: inline-block;
 		font-size: 0.8125rem;
 		margin: 3.75rem 0;
