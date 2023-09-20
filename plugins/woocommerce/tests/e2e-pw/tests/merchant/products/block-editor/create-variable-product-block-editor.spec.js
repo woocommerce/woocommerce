@@ -59,18 +59,6 @@ test.describe( 'Variations tab', () => {
 		test( 'can create a variable product', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 
-			const variationsTab = await page
-				.locator( '.woocommerce-product-tabs' )
-				.getByRole( 'button', {
-					name: 'Variations',
-				} );
-			if ( ! variationsTab.isVisible() ) {
-				test.skip(
-					true,
-					'The Variations tab visibility is not being tested'
-				);
-			}
-
 			await clickOnTab( 'General', page );
 
 			await page
@@ -82,6 +70,18 @@ test.describe( 'Variations tab', () => {
 				.fill( productData.summary );
 
 			await clickOnTab( 'Variations', page );
+
+			const variationsTab = await page
+				.locator( '.woocommerce-product-tabs' )
+				.getByRole( 'button', {
+					name: 'Variations',
+				} );
+			if ( ! variationsTab.isVisible() ) {
+				test.skip(
+					true,
+					'The Variations tab visibility is not being tested'
+				);
+			}
 
 			await page
 				.locator( '.wp-block-woocommerce-product-variations-fields' )
