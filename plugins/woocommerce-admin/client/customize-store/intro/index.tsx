@@ -39,11 +39,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					<div className="woocommerce-customize-store-sidebar__title">
 						<button
 							onClick={ () => {
-								sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
+								sendEvent( 'CLICKED_ON_BREADCRUMB' );
 							} }
 						>
 							{ chevronLeft }
-						</button>					
+						</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
 					<p>{ __( 'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.', 'woocommerce' ) }</p>
