@@ -200,11 +200,14 @@ const colorChoices: ColorPalette[] = [
 ];
 const allowedNames: string[] = colorChoices.map( ( palette ) => palette.name );
 const hexColorRegex = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
+const colorPaletteNameValidator = z
+	.string()
+	.refine( ( name ) => allowedNames.includes( name ), {
+		message: 'Color palette not part of allowed list',
+	} );
 
 export const colorPaletteValidator = z.object( {
-	name: z.string().refine( ( name ) => allowedNames.includes( name ), {
-		message: 'Color palette not part of allowed list',
-	} ),
+	name: colorPaletteNameValidator,
 	primary: z
 		.string()
 		.regex( hexColorRegex, { message: 'Invalid primary color' } ),
@@ -219,6 +222,11 @@ export const colorPaletteValidator = z.object( {
 		.regex( hexColorRegex, { message: 'Invalid background color' } ),
 } );
 
+export const colorPaletteResponseValidator = z.object( {
+	default: colorPaletteNameValidator,
+	bestColors: z.array( colorPaletteNameValidator ).length( 8 ),
+} );
+
 export const defaultColorPalette = {
 	queryId: 'default_color_palette',
 
@@ -226,8 +234,8 @@ export const defaultColorPalette = {
 	version: '2023-09-18',
 	prompt: ( businessDescription: string, look: string, tone: string ) => {
 		return `
-            You are a WordPress theme expert. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme.
-            Respond only with one color scheme and only its JSON.
+            You are a WordPress theme expert. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
+            Respond in the form: "{ default: "palette name", bestColors: [ "palette name 1", "palette name 2", "palette name 3", "palette name 4", "palette name 5", "palette name 6", "palette name 7", "palette name 8" ] }"
 
             Chosen look and tone: ${ look } look, ${ tone } tone.
             Business description: ${ businessDescription }
@@ -236,5 +244,5 @@ export const defaultColorPalette = {
             ${ JSON.stringify( colorChoices ) }
         `;
 	},
-	responseValidation: colorPaletteValidator.parse,
+	responseValidation: colorPaletteResponseValidator.parse,
 };

@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import {
-	ColorPalette,
+	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 	FontPairing,
@@ -84,7 +84,7 @@ const assignDefaultColorPalette = assign<
 			defaultColorPalette: (
 				event as {
 					data: {
-						response: ColorPalette;
+						response: ColorPaletteResponse;
 					};
 				}
 			 ).data.response,
