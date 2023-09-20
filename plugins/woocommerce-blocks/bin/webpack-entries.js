@@ -60,6 +60,7 @@ const blocks = {
 	'product-gallery-large-image-next-previous': {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
+		isExperimental: true,
 	},
 	'product-gallery-pager': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
@@ -166,7 +167,7 @@ const entries = {
 		...getBlockEntries( 'index.{t,j}s{,x}' ),
 	},
 	frontend: {
-		reviews: './assets/js/blocks/reviews/frontend.js',
+		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
