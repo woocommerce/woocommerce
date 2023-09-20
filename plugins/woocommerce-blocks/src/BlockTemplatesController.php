@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateMigrationUtils;
 
 /**
@@ -429,8 +430,12 @@ class BlockTemplatesController {
 							}
 						}
 
-						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
-						$template->content = $new_content;
+						if ( post_password_required() ) {
+							$template->content = SingleProductTemplate::add_password_form( $template->content );
+						} else {
+							$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
+							$template->content = $new_content;
+						}
 					}
 				}
 
