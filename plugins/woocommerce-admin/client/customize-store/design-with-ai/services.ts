@@ -312,7 +312,7 @@ export const assembleSite = async (
 ) => {
 	try {
 		await updateGlobalStyles( {
-			colorPaletteName: context.aiSuggestions.defaultColorPalette.name,
+			colorPaletteName: context.aiSuggestions.defaultColorPalette.default,
 			fontPairingName: context.aiSuggestions.fontPairing,
 		} );
 		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
