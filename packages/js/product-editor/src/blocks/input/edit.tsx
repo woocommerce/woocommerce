@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
 import {
-	Button,
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
@@ -18,8 +18,8 @@ import {
  */
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
-	const blockProps = useBlockProps( {} );
-	const { property, label, placeholder } = attributes;
+	const blockProps = useBlockProps();
+	const { property, label, placeholder, required } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(
 		'postType',
 		'product',
@@ -30,7 +30,20 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl id={ nameControlId } label={ label }>
+			<BaseControl
+				id={ nameControlId }
+				label={
+					required
+						? createInterpolateElement( `${ label } <required />`, {
+								required: (
+									<span className="woocommerce-product-form__required-input">
+										{ __( '*', 'woocommerce' ) }
+									</span>
+								),
+						  } )
+						: label
+				}
+			>
 				<InputControl
 					id={ nameControlId }
 					placeholder={ placeholder }

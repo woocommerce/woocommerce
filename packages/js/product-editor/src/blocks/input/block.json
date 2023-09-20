@@ -17,6 +17,9 @@
 		},
 		"placeholder": {
 			"type": "string"
+		},
+		"required": {
+			"type": "boolean"
 		}
 	},
 	"supports": {
