@@ -3,7 +3,6 @@
  */
 import React from 'react';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import { useDispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { getAdminLink } from '@woocommerce/settings';
 
