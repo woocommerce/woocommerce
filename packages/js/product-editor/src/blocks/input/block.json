@@ -20,6 +20,9 @@
 		},
 		"required": {
 			"type": "boolean"
+		},
+		"validationRegex": {
+			"type": "string"
 		}
 	},
 	"supports": {
