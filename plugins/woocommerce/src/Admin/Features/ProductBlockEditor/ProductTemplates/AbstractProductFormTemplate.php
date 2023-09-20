@@ -10,6 +10,13 @@ use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
  */
 abstract class AbstractProductFormTemplate extends AbstractBlockTemplate implements ProductFormTemplateInterface {
 	/**
+	 * Get the template area.
+	 */
+	public function get_area(): string {
+		return 'product-form';
+	}
+
+	/**
 	 * Get a group block by ID.
 	 *
 	 * @param string $group_id The group block ID.

@@ -36,5 +36,4 @@ export interface Product {
 export enum ProductType {
 	theme = 'theme',
 	extension = 'extension',
-	classic = 'classic',
 }

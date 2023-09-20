@@ -395,6 +395,23 @@
 		}
 	}
 
+	/* Layout sidebar */
+	.block-editor-block-patterns-list__item {
+		.block-editor-block-preview__container {
+			border-radius: 2px;
+			border: 1.5px solid transparent;
+		}
+
+		&:hover,
+		&:focus {
+			.block-editor-block-preview__container {
+				box-shadow: none;
+				border-color: var(--wp-admin-theme-color);
+			}
+		}
+	}
+
+
 	/* Preview Canvas */
 	.edit-site-layout__canvas {
 		bottom: 16px;

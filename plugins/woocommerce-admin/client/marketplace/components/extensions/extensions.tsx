@@ -13,7 +13,7 @@ import CategorySelector from '../category-selector/category-selector';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
-import { Product } from '../product-list/types';
+import { Product, ProductType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 interface ExtensionsProps {
@@ -55,7 +55,12 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 			return <NoResults />;
 		}
 
-		return <ProductListContent products={ products } />;
+		return (
+			<ProductListContent
+				products={ products }
+				type={ ProductType.extension }
+			/>
+		);
 	}
 
 	return (
