@@ -10,10 +10,14 @@ interface TemplateBlockAttributes {
 	[ key: string ]: any;
 }
 
-export const useWooBlockProps = ( attributes: TemplateBlockAttributes ) => {
+export const useWooBlockProps = (
+	attributes: TemplateBlockAttributes,
+	props: Record< string, unknown > = {}
+) => {
 	const additionalProps = {
 		'data-template-block-id': attributes._templateBlockId,
 		'data-template-block-order': attributes._templateBlockOrder,
+		...props,
 	};
 
 	return useBlockProps( additionalProps );
