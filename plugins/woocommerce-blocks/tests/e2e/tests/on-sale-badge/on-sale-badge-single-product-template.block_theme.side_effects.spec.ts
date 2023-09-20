@@ -116,7 +116,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await Promise.all( [
 				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
+				editor.page.waitForResponse( ( response ) =>
 					response.url().includes( 'wp-json/wp/v2/templates/' )
 				),
 			] );
