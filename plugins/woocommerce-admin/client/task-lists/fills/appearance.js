@@ -8,10 +8,10 @@ import { registerPlugin } from '@wordpress/plugins';
 import { getAdminLink } from '@woocommerce/settings';
 
 const useAppearanceClick = () => {
-	const { actionTask } = useDispatch( 'wc/admin/onboarding' );
 	const onClick = () => {
-		actionTask( 'appearance' );
-		window.location = getAdminLink( 'site-editor.php' );
+		window.location = getAdminLink(
+			'theme-install.php?browse=block-themes'
+		);
 	};
 
 	return { onClick };

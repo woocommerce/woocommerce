@@ -14,6 +14,15 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 class Appearance extends Task {
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		if ( ! $this->is_complete() ) {
+			add_action( 'load-theme-install.php', array( $this, 'mark_actioned' ) );
+		}
+	}
+
+	/**
 	 * ID.
 	 *
 	 * @return string
