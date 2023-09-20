@@ -24,7 +24,7 @@ export * as services from './services';
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeCards, activeTheme },
+		intro: { themeCards },
 	} = context;
 
 	return (
@@ -90,14 +90,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					<div className="woocommerce-customize-store-theme-cards">
 						{ themeCards?.map( ( themeCard ) => (
 							<div className="theme-card" key={ themeCard.slug }>
-								<div
-									onClick={ () =>
-										sendEvent( {
-											type: 'SELECTED_NEW_THEME',
-											payload: { theme: themeCard.name },
-										} )
-									}
-								>
+								<div>
 									<img
 										src={ themeCard.image }
 										alt={ themeCard.description }
