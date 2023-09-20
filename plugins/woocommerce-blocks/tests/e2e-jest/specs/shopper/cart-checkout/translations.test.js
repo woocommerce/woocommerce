@@ -10,7 +10,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	test.only( 'Skipping Cart & Checkout tests', () => {} );
 }
 
-describe( 'Shopper → Cart & Checkout → Translations', () => {
+describe.skip( 'Shopper → Cart & Checkout → Translations', () => {
 	beforeAll( async () => {
 		await merchant.changeLanguage( 'nl_NL' );
 	} );

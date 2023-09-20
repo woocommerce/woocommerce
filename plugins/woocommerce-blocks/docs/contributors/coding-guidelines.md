@@ -68,7 +68,7 @@ Naming is not strictly tied to the DOM so it **doesn’t matter how many nested 
 
 ## RTL Styles
 
-Blocks uses the `webpack-rtl-plugin` package to generate styles for Right-to-Left languages. These are generated automatically.
+Blocks uses the `@automattic/webpack-rtl-plugin` package to generate styles for Right-to-Left languages. These are generated automatically.
 
 To make adjustments to the generated RTL styles, for example, excluding certain rules from the RTL stylesheets, you should use the [control directives here](https://rtlcss.com/learn/usage-guide/control-directives/index.html).
 

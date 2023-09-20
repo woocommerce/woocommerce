@@ -45,7 +45,12 @@ module.exports = ( { config: storybookConfig } ) => {
 	storybookConfig.module.rules.push(
 		{
 			test: /\/stories\/.+\.js$/,
-			loaders: [ require.resolve( '@storybook/source-loader' ) ],
+			use: [
+				{
+					loader: require.resolve( '@storybook/source-loader' ),
+					options: { parser: 'typescript' },
+				},
+			],
 			enforce: 'pre',
 		},
 		...wooBlocksConfig.module.rules,
