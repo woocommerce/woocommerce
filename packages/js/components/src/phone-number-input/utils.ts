@@ -44,7 +44,7 @@ const countryNames: Record< string, string > = mapValues(
 	{
 		AC: 'Ascension Island',
 		XK: 'Kosovo',
-		...window.wcSettings.countries,
+		...( window.wcSettings?.countries || [] ),
 	},
 	( name ) => decodeHtmlEntities( name )
 );
@@ -77,7 +77,7 @@ export const parseData = ( data: DataType ) => {
 	return {
 		countries: mapValues( countries, ( country ) => ( {
 			...country,
-			name: countryNames[ country.alpha2 ],
+			name: countryNames[ country.alpha2 ] ?? country.alpha2,
 			flag: countryToFlag( country.alpha2 ),
 		} ) ),
 		countryCodes: sortBy( data, 'priority' ).reduce(
