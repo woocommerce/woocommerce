@@ -6,6 +6,7 @@
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { Sender, assign, createMachine } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
@@ -207,6 +208,31 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+export const updateStorePatterns = async (
+	context: designWithAiStateMachineContext
+) => {
+	try {
+		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
+		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_blocks_allow_ai_connection: true,
+		} );
+
+		await apiFetch( {
+			path: '/wc/store/patterns',
+			method: 'POST',
+			data: {
+				business_description:
+					context.businessInfoDescription.descriptionText,
+			},
+		} );
+	} catch ( error ) {
+		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
+			error: error instanceof Error ? error.message : 'unknown',
+		} );
+		throw error;
+	}
+};
+
 // Update the current global styles of theme
 const updateGlobalStyles = async ( {
 	colorPaletteName = COLOR_PALETTES[ 0 ].title,
@@ -362,4 +388,5 @@ export const services = {
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,
+	updateStorePatterns,
 };
