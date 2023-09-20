@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -22,6 +23,8 @@ jest.mock( '../../assembler-hub/site-hub', () => ( {
 		return <div />;
 	},
 } ) );
+
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 describe( 'Transitional', () => {
 	let props: {
@@ -45,13 +48,13 @@ describe( 'Transitional', () => {
 		expect( screen.getByRole( 'img' ) ).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'link', {
+			screen.getByRole( 'button', {
 				name: /Preview store/i,
 			} )
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'link', {
+			screen.getByRole( 'button', {
 				name: /Go to the Editor/i,
 			} )
 		).toBeInTheDocument();
@@ -61,6 +64,44 @@ describe( 'Transitional', () => {
 				name: /Back to Home/i,
 			} )
 		).toBeInTheDocument();
+	} );
+
+	it( 'should record an event when clicking on "Preview store" button', () => {
+		window.open = jest.fn();
+		// @ts-ignore
+		render( <Transitional { ...props } /> );
+
+		screen
+			.getByRole( 'button', {
+				name: /Preview store/i,
+			} )
+			.click();
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'customize_your_store_transitional_preview_store_click'
+		);
+	} );
+
+	it( 'should record an event when clicking on "Go to the Editor" button', () => {
+		// @ts-ignore Mocking window location
+		delete window.location;
+		window.location = {
+			// @ts-ignore Mocking window location href
+			href: jest.fn(),
+		};
+
+		// @ts-ignore
+		render( <Transitional { ...props } /> );
+
+		screen
+			.getByRole( 'button', {
+				name: /Go to the Editor/i,
+			} )
+			.click();
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'customize_your_store_transitional_editor_click'
+		);
 	} );
 
 	it( 'should send GO_BACK_TO_HOME event when clicking on "Back to Home" button', () => {
@@ -76,5 +117,8 @@ describe( 'Transitional', () => {
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
 			type: 'GO_BACK_TO_HOME',
 		} );
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'customize_your_store_transitional_home_click'
+		);
 	} );
 } );

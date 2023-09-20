@@ -6,7 +6,7 @@
  * External dependencies
  */
 import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useMemo, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
@@ -29,7 +29,6 @@ import {
 } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 
-const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
 
@@ -53,7 +52,6 @@ export type ScaledBlockPreviewProps = {
 function ScaledBlockPreview( {
 	viewportWidth,
 	containerWidth,
-	minHeight,
 	settings,
 	additionalStyles,
 	onClickNavigationItem,
@@ -71,28 +69,14 @@ function ScaledBlockPreview( {
 		viewportWidth = containerWidth;
 	}
 
-	// @ts-ignore No types for this exist yet.
-	const [ contentResizeListener, { height: contentHeight } ] =
-		useResizeObserver();
-
-	// Avoid scrollbars for pattern previews.
-	const editorStyles = useMemo( () => {
-		return [
-			{
-				css: 'body{height:auto;overflow:hidden;border:none;padding:0;}',
-				__unstableType: 'presets',
-			},
-			...settings.styles,
-		];
-	}, [ settings.styles ] );
-
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
-	const scale = containerWidth / viewportWidth;
 
 	return (
 		<DisabledProvider value={ true }>
 			<Iframe
+				aria-hidden
+				tabIndex={ -1 }
 				contentRef={ useRefEffect( ( bodyElement: HTMLBodyElement ) => {
 					const {
 						ownerDocument: { documentElement },
@@ -226,21 +210,8 @@ function ScaledBlockPreview( {
 						} );
 					};
 				}, [] ) }
-				aria-hidden
-				tabIndex={ -1 }
-				style={ {
-					width: viewportWidth,
-					height: contentHeight,
-					// This is a catch-all max-height for patterns.
-					// Reference: https://github.com/WordPress/gutenberg/pull/38175.
-					maxHeight: MAX_HEIGHT,
-					minHeight:
-						scale !== 0 && scale < 1 && minHeight
-							? minHeight / scale
-							: minHeight,
-				} }
 			>
-				<EditorStyles styles={ editorStyles } />
+				<EditorStyles styles={ settings.styles } />
 				<style>
 					{ `
 						.block-editor-block-list__block::before,
@@ -262,6 +233,7 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 						}
 
+						.wp-block-navigation-item .wp-block-navigation-item__content,
 						.wp-block-navigation .wp-block-pages-list__item__link {
 							pointer-events: all !important;
 							cursor: pointer !important;
@@ -270,7 +242,6 @@ function ScaledBlockPreview( {
 						${ additionalStyles }
 					` }
 				</style>
-				{ contentResizeListener }
 				<MemoizedBlockList renderAppender={ false } />
 				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
 				{ externalFontFamilies.length === 2 && (

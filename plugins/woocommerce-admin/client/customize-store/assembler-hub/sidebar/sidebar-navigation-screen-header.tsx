@@ -9,8 +9,10 @@ import {
 	createInterpolateElement,
 	useContext,
 	useEffect,
+	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
@@ -23,15 +25,21 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
+import { useEditorScroll } from '../hooks/use-editor-scroll';
 
 const SUPPORTED_HEADER_PATTERNS = [
-	'woocommerce-blocks/header-centered-menu-with-search',
 	'woocommerce-blocks/header-essential',
-	'woocommerce-blocks/header-large',
 	'woocommerce-blocks/header-minimal',
+	'woocommerce-blocks/header-large',
+	'woocommerce-blocks/header-centered-menu-with-search',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
+	useEditorScroll( {
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
+		scrollDirection: 'top',
+	} );
+
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
@@ -42,8 +50,18 @@ export const SidebarNavigationScreenHeader = () => {
 		setHighlightedBlockIndex( 0 );
 	}, [ setHighlightedBlockIndex ] );
 
-	const headerPatterns = patterns.filter( ( pattern ) =>
-		SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
+	const headerPatterns = useMemo(
+		() =>
+			patterns
+				.filter( ( pattern ) =>
+					SUPPORTED_HEADER_PATTERNS.includes( pattern.name )
+				)
+				.sort(
+					( a, b ) =>
+						SUPPORTED_HEADER_PATTERNS.indexOf( a.name ) -
+						SUPPORTED_HEADER_PATTERNS.indexOf( b.name )
+				),
+		[ patterns ]
 	);
 
 	const onClickHeaderPattern = useCallback(
@@ -67,8 +85,20 @@ export const SidebarNavigationScreenHeader = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'header',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}

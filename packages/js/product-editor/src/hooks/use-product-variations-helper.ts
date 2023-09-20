@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { resolveSelect, useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useState } from '@wordpress/element';
+import { getNewPath, getPath, navigateTo } from '@woocommerce/navigation';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	Product,
 	ProductDefaultAttribute,
 } from '@woocommerce/data';
 
@@ -34,6 +36,13 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
+			const lastStatus = (
+				( await resolveSelect( 'core' ).getEditedEntityRecord(
+					'postType',
+					'product',
+					productId
+				) ) as Product
+			 ).status;
 			const hasVariableAttribute = attributes.some(
 				( attr ) => attr.variation
 			);
@@ -64,6 +73,13 @@ export function useProductVariationsHelper() {
 				} )
 				.finally( () => {
 					setIsGenerating( false );
+					if (
+						lastStatus === 'auto-draft' &&
+						getPath().endsWith( 'add-product' )
+					) {
+						const url = getNewPath( {}, `/product/${ productId }` );
+						navigateTo( { url } );
+					}
 				} );
 		},
 		[]

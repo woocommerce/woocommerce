@@ -77,7 +77,10 @@ export const ToneOfVoice = ( {
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
-						{ __( 'How would you like to sound?', 'woocommerce' ) }
+						{ __(
+							'Which writing style do you prefer?',
+							'woocommerce'
+						) }
 					</h1>
 					<div className="choices">
 						{ choices.map( ( { title, subtitle, key } ) => {
