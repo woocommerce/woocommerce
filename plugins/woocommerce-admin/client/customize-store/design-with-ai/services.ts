@@ -347,6 +347,16 @@ export const assembleSite = async (
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 	}
+
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+
+	// Invalid the selectors so that the new template/style are used in assembler hub.
+	invalidateResolutionForStoreSelector( 'getEntityRecord' );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
+	);
+	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 };
 
 export const services = {
