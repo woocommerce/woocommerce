@@ -4,103 +4,13 @@
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
-import { Sender } from 'xstate';
+import { Sender, assign, createMachine } from 'xstate';
 
 /**
  * Internal dependencies
  */
-import {
-	Look,
-	Tone,
-	VALID_LOOKS,
-	VALID_TONES,
-	designWithAiStateMachineContext,
-} from './types';
-
-export interface LookAndToneCompletionResponse {
-	look: Look;
-	tone: Tone;
-}
-
-interface MaybeLookAndToneCompletionResponse {
-	completion: string;
-}
-
-export const isLookAndToneCompletionResponse = (
-	obj: unknown
-): obj is LookAndToneCompletionResponse => {
-	return (
-		obj !== undefined &&
-		obj !== null &&
-		typeof obj === 'object' &&
-		'look' in obj &&
-		VALID_LOOKS.includes( obj.look as Look ) &&
-		'tone' in obj &&
-		VALID_TONES.includes( obj.tone as Tone )
-	);
-};
-
-export const parseLookAndToneCompletionResponse = (
-	obj: MaybeLookAndToneCompletionResponse
-): LookAndToneCompletionResponse => {
-	try {
-		const o = JSON.parse( obj.completion );
-		if ( isLookAndToneCompletionResponse( o ) ) {
-			return o;
-		}
-	} catch {
-		recordEvent(
-			'customize_your_store_look_and_tone_ai_completion_response_error',
-			{ error_type: 'json_parse_error', response: JSON.stringify( obj ) }
-		);
-	}
-	recordEvent(
-		'customize_your_store_look_and_tone_ai_completion_response_error',
-		{
-			error_type: 'valid_json_invalid_values',
-			response: JSON.stringify( obj ),
-		}
-	);
-	throw new Error( 'Could not parse Look and Tone completion response.' );
-};
-
-export const getLookAndTone = async (
-	context: designWithAiStateMachineContext
-) => {
-	const prompt = [
-		'You are a WordPress theme expert.',
-		'Analyze the following store description and determine the look and tone of the theme.',
-		`For look, you can choose between ${ VALID_LOOKS.join( ',' ) }.`,
-		`For tone of the description, you can choose between ${ VALID_TONES.join(
-			','
-		) }.`,
-		'Your response should be in json with look and tone values.',
-		'\n',
-		context.businessInfoDescription.descriptionText,
-	];
-
-	const { token } = await requestJetpackToken();
-
-	const url = new URL(
-		'https://public-api.wordpress.com/wpcom/v2/text-completion'
-	);
-
-	url.searchParams.append( 'feature', 'woo_cys' );
-
-	const data: {
-		completion: string;
-	} = await apiFetch( {
-		url: url.toString(),
-		method: 'POST',
-		data: {
-			token,
-			prompt: prompt.join( '\n' ),
-			_fields: 'completion',
-		},
-	} );
-
-	return parseLookAndToneCompletionResponse( data );
-};
+import { designWithAiStateMachineContext } from './types';
+import { lookAndTone } from './prompts';
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -113,7 +23,177 @@ const browserPopstateHandler =
 		};
 	};
 
+export const getCompletion = async < ValidResponseObject >( {
+	queryId,
+	prompt,
+	version,
+	responseValidation,
+	retryCount,
+}: {
+	queryId: string;
+	prompt: string;
+	version: string;
+	responseValidation: ( arg0: string ) => ValidResponseObject;
+	retryCount: number;
+} ) => {
+	const { token } = await requestJetpackToken();
+	let data: {
+		completion: string;
+	};
+	let parsedCompletionJson;
+	try {
+		const url = new URL(
+			'https://public-api.wordpress.com/wpcom/v2/text-completion'
+		);
+
+		url.searchParams.append( 'feature', 'woo_cys' );
+
+		data = await apiFetch( {
+			url: url.toString(),
+			method: 'POST',
+			data: {
+				token,
+				prompt,
+				_fields: 'completion',
+			},
+		} );
+	} catch ( error ) {
+		recordEvent( 'customize_your_store_ai_completion_api_error', {
+			query_id: queryId,
+			version,
+			retry_count: retryCount,
+			error_type: 'api_request_error',
+		} );
+		throw error;
+	}
+
+	try {
+		parsedCompletionJson = JSON.parse( data.completion );
+	} catch {
+		recordEvent( 'customize_your_store_ai_completion_response_error', {
+			query_id: queryId,
+			version,
+			retry_count: retryCount,
+			error_type: 'json_parse_error',
+			response: data.completion,
+		} );
+		throw new Error(
+			`Error validating Jetpack AI text completions response for ${ queryId }`
+		);
+	}
+
+	try {
+		const validatedResponse = responseValidation( parsedCompletionJson );
+		recordEvent( 'customize_your_store_ai_completion_success', {
+			query_id: queryId,
+			version,
+			retry_count: retryCount,
+		} );
+		return validatedResponse;
+	} catch ( error ) {
+		recordEvent( 'customize_your_store_ai_completion_response_error', {
+			query_id: queryId,
+			version,
+			retry_count: retryCount,
+			error_type: 'valid_json_invalid_values',
+			response: data.completion,
+		} );
+		throw error;
+	}
+};
+
+export const getLookAndTone = async (
+	context: designWithAiStateMachineContext
+) => {
+	return getCompletion( {
+		...lookAndTone,
+		prompt: lookAndTone.prompt(
+			context.businessInfoDescription.descriptionText
+		),
+		retryCount: 0,
+	} );
+};
+
+export const queryAiEndpoint = createMachine(
+	{
+		id: 'query-ai-endpoint',
+		predictableActionArguments: true,
+		initial: 'init',
+		context: {
+			// these values are all overwritten by incoming parameters
+			prompt: '',
+			queryId: '',
+			version: '',
+			responseValidation: () => true,
+			retryCount: 0,
+			validatedResponse: {} as unknown,
+		},
+		states: {
+			init: {
+				always: 'querying',
+				entry: [ 'setRetryCount' ],
+			},
+			querying: {
+				invoke: {
+					src: 'getCompletion',
+					onDone: {
+						target: 'success',
+						actions: [ 'handleAiResponse' ],
+					},
+					onError: {
+						target: 'error',
+					},
+				},
+			},
+			error: {
+				always: [
+					{
+						cond: ( context ) => context.retryCount >= 3,
+						target: 'failed',
+					},
+					{
+						target: 'querying',
+						actions: assign( {
+							retryCount: ( context ) => context.retryCount + 1,
+						} ),
+					},
+				],
+			},
+			failed: {
+				type: 'final',
+				data: {
+					result: 'failed',
+				},
+			},
+			success: {
+				type: 'final',
+				data: ( context ) => {
+					return {
+						result: 'success',
+						response: context.validatedResponse,
+					};
+				},
+			},
+		},
+	},
+	{
+		actions: {
+			handleAiResponse: assign( {
+				validatedResponse: ( _context, event: unknown ) =>
+					( event as { data: unknown } ).data,
+			} ),
+			setRetryCount: assign( {
+				retryCount: 0,
+			} ),
+		},
+		services: {
+			getCompletion,
+		},
+	}
+);
+
 export const services = {
 	getLookAndTone,
 	browserPopstateHandler,
+	queryAiEndpoint,
 };

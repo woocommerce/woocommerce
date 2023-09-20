@@ -10,6 +10,8 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	FontPairing,
+	ColorPaletteResponse,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -19,6 +21,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -60,12 +63,15 @@ export const designWithAiStateMachineDefinition = createMachine(
 			businessInfoDescription: {
 				descriptionText: '',
 			},
-
 			lookAndFeel: {
 				choice: '',
 			},
 			toneOfVoice: {
 				choice: '',
+			},
+			aiSuggestions: {
+				defaultColorPalette: {} as ColorPaletteResponse,
+				fontPairing: '' as FontPairing[ 'pair_name' ],
 			},
 		},
 		initial: 'navigate',
@@ -264,6 +270,49 @@ export const designWithAiStateMachineDefinition = createMachine(
 								step: 'api-call-loader',
 							},
 						],
+						type: 'parallel',
+						states: {
+							chooseColorPairing: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...defaultColorPalette,
+											prompt: defaultColorPalette.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [
+											'assignDefaultColorPalette',
+										],
+									},
+								},
+							},
+							chooseFontPairing: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...fontPairings,
+											prompt: fontPairings.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [ 'assignFontPairing' ],
+									},
+								},
+							},
+						},
 					},
 					postApiCallLoader: {},
 				},

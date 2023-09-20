@@ -1,9 +1,49 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const variableProductName = 'Variable Product Updates';
-const productPrice = '11.16';
-const variations = [
+const productPrice = '18.16';
+const variableProductName = 'Variable single product';
+const cartDialogMessage =
+	'Please select some product options before adding this product to your cart.';
+const variations1 = [
+	{
+		regular_price: productPrice,
+		attributes: [
+			{
+				name: 'Size',
+				option: 'Small',
+			},
+		],
+	},
+	{
+		regular_price: ( +productPrice * 2 ).toString(),
+		attributes: [
+			{
+				name: 'Size',
+				option: 'Medium',
+			},
+		],
+	},
+	{
+		regular_price: ( +productPrice * 3 ).toString(),
+		attributes: [
+			{
+				name: 'Size',
+				option: 'Large',
+			},
+		],
+	},
+	{
+		regular_price: ( +productPrice * 4 ).toString(),
+		attributes: [
+			{
+				name: 'Size',
+				option: 'XLarge',
+			},
+		],
+	},
+];
+const variations2 = [
 	{
 		attributes: [
 			{
@@ -90,8 +130,99 @@ const variations = [
 	},
 ];
 
-const cartDialogMessage =
-	'Please select some product options before adding this product to your cart.';
+let variableProductId;
+
+test.describe( 'Variable Product Page', () => {
+	const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
+
+	test.beforeAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// add product
+		await api
+			.post( 'products', {
+				name: variableProductName,
+				type: 'variable',
+				attributes: [
+					{
+						name: 'Size',
+						options: [ 'Small', 'Medium', 'Large', 'XLarge' ],
+						visible: true,
+						variation: true,
+					},
+				],
+			} )
+			.then( async ( response ) => {
+				variableProductId = response.data.id;
+				for ( const key in variations1 ) {
+					await api.post(
+						`products/${ variableProductId }/variations`,
+						variations1[ key ]
+					);
+				}
+			} );
+	} );
+
+	test.beforeEach( async ( { context } ) => {
+		// Shopping cart is very sensitive to cookies, so be explicit
+		await context.clearCookies();
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.delete( `products/${ variableProductId }`, {
+			force: true,
+		} );
+	} );
+
+	test( 'should be able to add variation products to the cart', async ( {
+		page,
+	} ) => {
+		await page.goto( `product/${ slug }` );
+
+		for ( const attr of variations1 ) {
+			await page
+				.locator( '#size' )
+				.selectOption( attr.attributes[ 0 ].option );
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await expect(
+				page.locator( '.woocommerce-message' )
+			).toContainText( 'has been added to your cart.' );
+		}
+
+		await page.goto( 'cart/' );
+		await expect(
+			page.locator( 'td.product-name >> nth=0' )
+		).toContainText( variableProductName );
+		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
+			( +productPrice * 10 ).toString()
+		);
+	} );
+
+	test( 'should be able to remove variation products from the cart', async ( {
+		page,
+	} ) => {
+		await page.goto( `product/${ slug }` );
+		await page.locator( '#size' ).selectOption( 'Large' );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+
+		await page.goto( 'cart/' );
+		await page.locator( 'a.remove' ).click();
+
+		await expect( page.locator( '.cart-empty' ) ).toContainText(
+			'Your cart is currently empty.'
+		);
+	} );
+} );
 
 test.describe( 'Shopper > Update variable product', () => {
 	let variableProductId;
@@ -125,10 +256,10 @@ test.describe( 'Shopper > Update variable product', () => {
 			} )
 			.then( async ( response ) => {
 				variableProductId = response.data.id;
-				for ( const key in variations ) {
+				for ( const key in variations2 ) {
 					await api.post(
 						`products/${ variableProductId }/variations`,
-						variations[ key ]
+						variations2[ key ]
 					);
 				}
 			} );

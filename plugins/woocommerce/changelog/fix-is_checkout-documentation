@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve documentation for the `is_checkout()` function.

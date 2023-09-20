@@ -89,7 +89,9 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
 					>
-						<HiddenWithHelpIcon />
+						<div>
+							<HiddenWithHelpIcon />
+						</div>
 					</Tooltip>
 				) }
 				{ typeof onEditClick === 'function' && (

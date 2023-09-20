@@ -49,7 +49,7 @@ export const ProductFormActions: React.FC = () => {
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm() );
 
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',
