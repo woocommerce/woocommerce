@@ -60,13 +60,4 @@ class Appearance extends Task {
 	public function get_action_label() {
 		return __( 'Choose theme', 'woocommerce' );
 	}
-
-	/**
-	 * Task completion.
-	 *
-	 * @return bool
-	 */
-	public function is_complete() {
-		return 'twentytwentythree' !== get_stylesheet();
-	}
 }
