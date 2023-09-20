@@ -92,26 +92,19 @@ test.describe( 'Test editing the checkout template', async () => {
 
 	test( 'Template can be modified', async ( {
 		admin,
-		editor,
 		editorUtils,
 		frontendUtils,
-		page,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editor.insertBlock( {
+		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: 'Hello World in the template' },
 		} );
-		await Promise.all( [
-			editor.saveSiteEditorEntities(),
-			page.waitForResponse( ( response ) =>
-				response.url().includes( 'templates' )
-			),
-		] );
+		await editorUtils.saveTemplate();
 		await frontendUtils.goToShop();
 		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart();

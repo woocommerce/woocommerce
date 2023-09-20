@@ -8,7 +8,8 @@
 	"textdomain": "woo-gutenberg-products-block",
 	"supports": {
 		"html": false,
-		"multiple": false
+		"multiple": false,
+		"inserter": false
 	},
 	"attributes": {
 		"page": {

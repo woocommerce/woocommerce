@@ -1,0 +1,29 @@
+{
+	"name": "woocommerce/order-confirmation-billing-wrapper",
+	"version": "1.0.0",
+	"title": "Billing Address Section",
+	"description": "Display the order confirmation billing section.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"attributes": {
+		"heading": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"multiple": false,
+		"align": [ "wide", "full" ],
+		"html": false,
+		"spacing": {
+			"padding": true,
+			"margin": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false
+			}
+		}
+	},
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

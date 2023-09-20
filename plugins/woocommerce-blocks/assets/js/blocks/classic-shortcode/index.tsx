@@ -271,7 +271,7 @@ registerBlockType( 'woocommerce/classic-shortcode', {
 		html: false,
 		multiple: false,
 		reusable: false,
-		inserter: true,
+		inserter: false,
 	},
 	attributes: {
 		/**
