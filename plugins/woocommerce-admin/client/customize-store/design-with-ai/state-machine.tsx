@@ -10,7 +10,8 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	ColorPalette,
+	FontPairing,
+	ColorPaletteResponse,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -20,7 +21,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette } from './prompts';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -69,7 +70,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
-				defaultColorPalette: {} as ColorPalette,
+				defaultColorPalette: {} as ColorPaletteResponse,
+				fontPairing: '' as FontPairing[ 'pair_name' ],
 			},
 		},
 		initial: 'navigate',
@@ -288,6 +290,25 @@ export const designWithAiStateMachineDefinition = createMachine(
 										actions: [
 											'assignDefaultColorPalette',
 										],
+									},
+								},
+							},
+							chooseFontPairing: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...fontPairings,
+											prompt: fontPairings.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [ 'assignFontPairing' ],
 									},
 								},
 							},

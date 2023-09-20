@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc5c4172d1078ecf041bdf3240a8c4e1",
+    "content-hash": "e5800331e1c25cd08ad877b665da724f",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1004,16 +1004,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "11.1.0",
+            "version": "11.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "9a9749f72c16bbb9cd75e23061f6b19dec01c262"
+                "reference": "81bff865d7fdd7de40a4da8fc49539a124ac1863"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/9a9749f72c16bbb9cd75e23061f6b19dec01c262",
-                "reference": "9a9749f72c16bbb9cd75e23061f6b19dec01c262",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/81bff865d7fdd7de40a4da8fc49539a124ac1863",
+                "reference": "81bff865d7fdd7de40a4da8fc49539a124ac1863",
                 "shasum": ""
             },
             "require": {
@@ -1062,9 +1062,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.1.0"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.1.1"
             },
-            "time": "2023-09-12T13:56:36+00:00"
+            "time": "2023-09-20T10:14:34+00:00"
         }
     ],
     "packages-dev": [

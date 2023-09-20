@@ -5,7 +5,11 @@ import { z } from 'zod';
 /**
  * Internal dependencies
  */
-import { colorPaletteValidator } from './prompts';
+import {
+	colorPaletteValidator,
+	colorPaletteResponseValidator,
+	fontChoiceValidator,
+} from './prompts';
 
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
@@ -18,7 +22,8 @@ export type designWithAiStateMachineContext = {
 		choice: Tone | '';
 	};
 	aiSuggestions: {
-		defaultColorPalette: ColorPalette;
+		defaultColorPalette: ColorPaletteResponse;
+		fontPairing: FontPairing[ 'pair_name' ];
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
@@ -50,3 +55,8 @@ export interface LookAndToneCompletionResponse {
 }
 
 export type ColorPalette = z.infer< typeof colorPaletteValidator >;
+export type ColorPaletteResponse = z.infer<
+	typeof colorPaletteResponseValidator
+>;
+
+export type FontPairing = z.infer< typeof fontChoiceValidator >;

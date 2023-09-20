@@ -9,9 +9,10 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import {
-	ColorPalette,
+	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	FontPairing,
 	LookAndToneCompletionResponse,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
@@ -83,10 +84,28 @@ const assignDefaultColorPalette = assign<
 			defaultColorPalette: (
 				event as {
 					data: {
-						response: ColorPalette;
+						response: ColorPaletteResponse;
 					};
 				}
 			 ).data.response,
+		};
+	},
+} );
+
+const assignFontPairing = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			fontPairing: (
+				event as {
+					data: {
+						response: FontPairing;
+					};
+				}
+			 ).data.response.pair_name,
 		};
 	},
 } );
@@ -158,6 +177,7 @@ export const actions = {
 	assignToneOfVoice,
 	assignLookAndTone,
 	assignDefaultColorPalette,
+	assignFontPairing,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
