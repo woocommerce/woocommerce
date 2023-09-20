@@ -20,7 +20,6 @@ export const RegionPicker = ( { options, initialValues } ) => {
 			options={ options }
 			placeholder="Start typing to filter zones"
 			selectAllLabel="Select all countries"
-			includeParent
 			individuallySelectParent
 		/>
 	);
