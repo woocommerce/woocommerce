@@ -132,9 +132,17 @@
 			}
 			.woocommerce-marketplace__product-card__image {
 				grid-column-start: span 2;
+				overflow: hidden;
+				padding-top: 75%;
+				position: relative;
 			}
 			.woocommerce-marketplace__product-card__image-inner {
 				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				bottom: 0;
+				right: 0;
 			}
 			.woocommerce-marketplace__product-card__header {
 				padding-left: $medium-gap;
