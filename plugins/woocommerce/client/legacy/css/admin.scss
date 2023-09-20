@@ -18,6 +18,9 @@
 	@include loader();
 }
 
+$font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
+"Helvetica Neue", sans-serif;
+
 .wc-addons-wrap {
 	.marketplace-header {
 		background-image: url(../images/marketplace-header-bg@2x.png);
@@ -214,9 +217,6 @@
 	/**
 	 * Marketplace related variables
  	 */
-	$font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
-		"Helvetica Neue", sans-serif;
-
 	$font-sf-pro-display: sans-serif;
 
 	h1.search-form-title {
@@ -3841,11 +3841,6 @@ table.wc_shipping {
 		}
 	}
 
-	.wc-shipping-zone-help-text {
-		color: #777;
-		font-size: 12px;
-	}
-
 	.wc-shipping-zone-postcodes-toggle {
 		margin: 0.5em 0 0;
 		font-size: 0.9em;
@@ -3898,6 +3893,16 @@ table {
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
+}
+
+.wc-shipping-zone-help-text, 
+.wc-shipping-zone-heading-help-text {
+	font-family: $font-sf-pro-text;
+	color: #3C434A;
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 18px;
 }
 
 table.wc-shipping-zones,
