@@ -362,7 +362,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has variation options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				],
@@ -521,7 +521,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has variation options, such as size or color. You can now manage each variation\'s stock and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				],
@@ -735,7 +735,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has variation options, such as size or color. You can now manage each variation\'s shipping dimensions and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				],
