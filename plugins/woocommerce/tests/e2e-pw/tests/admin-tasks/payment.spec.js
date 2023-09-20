@@ -6,25 +6,14 @@ test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page, baseURL } ) => {
-		// Skip skipping the setup wizard if the core profiler is enabled.
-		// When the core-profiler is enabled, the following code won't work, causing the tests to fail.
-		if ( ! features.is_enabled( 'core-profiler' ) ) {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-			);
-			await page.locator( 'text=Skip setup store details' ).click();
-			await page.locator( 'button >> text=No thanks' ).click();
-			await page.waitForLoadState( 'networkidle' );
-		} else {
-			await new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc-admin',
-			} ).post( 'onboarding/profile', {
-				skipped: true,
-			} );
-		}
+		await new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc-admin',
+		} ).post( 'onboarding/profile', {
+			skipped: true,
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

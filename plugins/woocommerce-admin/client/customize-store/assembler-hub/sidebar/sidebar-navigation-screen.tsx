@@ -40,6 +40,7 @@ export const SidebarNavigationScreen = ( {
 	footer,
 	description,
 	backPath: backPathProp,
+	onNavigateBackClick,
 }: {
 	isRoot?: boolean;
 	title: string;
@@ -49,6 +50,7 @@ export const SidebarNavigationScreen = ( {
 	footer?: React.ReactNode;
 	description?: React.ReactNode;
 	backPath?: string;
+	onNavigateBackClick?: () => void;
 } ) => {
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const location = useLocation();
@@ -75,6 +77,7 @@ export const SidebarNavigationScreen = ( {
 					{ ! isRoot && (
 						<SidebarButton
 							onClick={ () => {
+								onNavigateBackClick?.();
 								const backPath =
 									backPathProp ?? location.state?.backPath;
 								if ( backPath ) {
@@ -93,6 +96,7 @@ export const SidebarNavigationScreen = ( {
 					{ isRoot && (
 						<SidebarButton
 							onClick={ () => {
+								onNavigateBackClick?.();
 								sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
 							} }
 							icon={ icon }

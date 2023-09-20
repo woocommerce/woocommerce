@@ -44,6 +44,7 @@ jest.mock( '@woocommerce/product-editor', () => {
 		__experimentalUseFeedbackBar: () => ( {
 			maybeShowFeedbackBar: jest.fn().mockResolvedValue( {} ),
 		} ),
+		preventLeavingProductForm: () => () => false,
 	};
 } );
 jest.mock( '@woocommerce/navigation', () => ( {

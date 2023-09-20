@@ -5,6 +5,8 @@ import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,6 +20,11 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
+import {
+	Transitional,
+	events as transitionalEvents,
+	services as transitionalServices,
+} from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -31,6 +38,7 @@ export type customizeStoreStateMachineEvents =
 	| introEvents
 	| designWithAiEvents
 	| assemblerHubEvents
+	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' };
 
@@ -49,6 +57,12 @@ const updateQueryStep = (
 			updateQueryString( {}, `/customize-store/${ step }` );
 		}
 	}
+};
+
+const markTaskComplete = async () => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_admin_customize_store_completed: 'yes',
+	} );
 };
 
 const browserPopstateHandler =
@@ -73,7 +87,9 @@ export const customizeStoreStateMachineActions = {
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
+	...transitionalServices,
 	browserPopstateHandler,
+	markTaskComplete,
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
@@ -127,6 +143,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					cond: {
 						type: 'hasStepInUrl',
 						step: 'assembler-hub',
+					},
+				},
+				{
+					target: 'transitionalScreen',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'transitional',
 					},
 				},
 				{
@@ -205,13 +228,42 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						component: AssemblerHub,
 					},
 				},
+				postAssemblerHub: {
+					invoke: {
+						src: 'markTaskComplete',
+						onDone: {
+							target: 'waitForSitePreview',
+						},
+					},
+				},
+				waitForSitePreview: {
+					after: {
+						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
+						5000: {
+							target: '#customizeStore.transitionalScreen',
+						},
+					},
+				},
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
-					target: 'backToHomescreen',
+					// Pre-fetch the site preview image for the site for transitional page.
+					actions: [ 'prefetchSitePreview' ],
+					target: '.postAssemblerHub',
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
+				},
+			},
+		},
+		transitionalScreen: {
+			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
+			meta: {
+				component: Transitional,
+			},
+			on: {
+				GO_BACK_TO_HOME: {
+					target: 'backToHomescreen',
 				},
 			},
 		},
@@ -255,7 +307,6 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
-
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< CustomizeStoreComponentMeta >(

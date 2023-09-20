@@ -31,7 +31,7 @@ export const ProductVariationFormActions: React.FC = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isSaving, setIsSaving ] = useState( false );
 
-	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm() );
 
 	const onSave = async () => {
 		setIsSaving( true );

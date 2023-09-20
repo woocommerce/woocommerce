@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add redirection to product edit page if variations are added before it being saved.

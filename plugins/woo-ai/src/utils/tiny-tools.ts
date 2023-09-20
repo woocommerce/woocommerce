@@ -1,5 +1,5 @@
 export type TinyContent = {
-	getContent: () => string;
+	getContent: ( args?: object ) => string;
 	setContent: ( str: string ) => void;
 	id: string;
 	on: ( event: string, callback: ( event: Event ) => void ) => void;
@@ -39,6 +39,6 @@ export const setTinyContent = ( str: string, editorId?: string ) => {
 	}
 };
 
-export const getTinyContent = ( editorId?: string ) => {
-	return getTinyContentObject( editorId )?.getContent() ?? '';
+export const getTinyContent = ( editorId?: string, args?: object ) => {
+	return getTinyContentObject( editorId )?.getContent( args ) ?? '';
 };

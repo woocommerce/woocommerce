@@ -1,4 +1,5 @@
 @import "./variations-actions-menu/styles.scss";
+@import "../../icons/hidden-with-help-icon.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -12,6 +13,21 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		border-bottom: 1px solid $gray-200;
+	}
+
+	&__notice {
+		border-left: 0px;
+		margin: 0 0 $gap-large 0;
+		&.is-error {
+			background-color: #fcf0f1;
+		}
+
+		.components-notice__actions {
+			margin-top: $gap-small;
+			.components-button:first-child {
+				margin-left: 0px;
+			}
+		}
 	}
 
 	&__table {
@@ -82,6 +98,7 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+		gap: $gap-smaller;
 
 		&--delete {
 			&.components-button.components-menu-item__button.is-link {

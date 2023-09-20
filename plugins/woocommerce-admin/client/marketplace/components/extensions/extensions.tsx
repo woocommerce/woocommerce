@@ -16,6 +16,7 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, SearchAPIProductType } from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export default function Extensions(): JSX.Element {
 	const [ productList, setProductList ] = useState< Product[] >( [] );
@@ -36,6 +37,11 @@ export default function Extensions(): JSX.Element {
 
 		if ( query.category ) {
 			params.append( 'category', query.category );
+		}
+
+		const wccomSettings = getAdminSetting( 'wccomHelper', false );
+		if ( wccomSettings.storeCountry ) {
+			params.append( 'country', wccomSettings.storeCountry );
 		}
 
 		const wccomSearchEndpoint =
@@ -106,7 +112,12 @@ export default function Extensions(): JSX.Element {
 			return <NoResults />;
 		}
 
-		return <ProductListContent products={ products } />;
+		return (
+			<>
+				<CategorySelector />
+				<ProductListContent products={ products } />
+			</>
+		);
 	}
 
 	return (
@@ -114,7 +125,6 @@ export default function Extensions(): JSX.Element {
 			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--extensions">
 				{ title }
 			</h2>
-			<CategorySelector />
 			{ content() }
 		</div>
 	);

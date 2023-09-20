@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
@@ -83,8 +84,15 @@ export const OnboardingTour = ( {
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
 						if ( source === 'done-btn' ) {
+							// Click on "Take a tour" button
+							recordEvent(
+								'customize_your_store_assembler_hub_tour_start'
+							);
 							setShowWelcomeTour( false );
 						} else {
+							recordEvent(
+								'customize_your_store_assembler_hub_tour_skip'
+							);
 							onClose();
 						}
 					},
@@ -196,7 +204,19 @@ export const OnboardingTour = ( {
 						},
 					},
 				],
-				closeHandler: onClose,
+				closeHandler: ( _steps, _currentStepIndex, source ) => {
+					if ( source === 'done-btn' ) {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_complete'
+						);
+					} else {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_close'
+						);
+					}
+
+					onClose();
+				},
 			} }
 		></TourKit>
 	);

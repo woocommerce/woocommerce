@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
  */
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
+import { ProductCategorySuggestions } from './product-category';
 import { WriteShortDescriptionButtonContainer } from './product-short-description';
 import setPreferencesPersistence from './utils/preferencesPersistence';
 
@@ -37,6 +38,16 @@ const renderComponent = ( Component, rootElement ) => {
 	}
 };
 
+const renderProductCategorySuggestions = () => {
+	const root = document.createElement( 'div' );
+	root.id = 'woocommerce-ai-app-product-category-suggestions';
+
+	renderComponent( ProductCategorySuggestions, root );
+
+	// Insert the category suggestions node in the product category meta box.
+	document.getElementById( 'taxonomy-product_cat' ).append( root );
+};
+
 const descriptionButtonRoot = document.getElementById(
 	'woocommerce-ai-app-product-gpt-button'
 );
@@ -51,6 +62,7 @@ const shortDescriptionButtonRoot = document.getElementById(
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+	renderProductCategorySuggestions();
 	renderComponent(
 		WriteShortDescriptionButtonContainer,
 		shortDescriptionButtonRoot

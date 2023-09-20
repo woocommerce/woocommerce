@@ -24,6 +24,10 @@
 		cursor: default;
 	}
 
+	&__content {
+		white-space: pre-line;
+	}
+
 	.components-snackbar__content-with-icon {
 		margin-left: 32px;
 	}

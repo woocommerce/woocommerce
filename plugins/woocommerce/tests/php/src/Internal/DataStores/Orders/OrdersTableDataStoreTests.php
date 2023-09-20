@@ -2915,4 +2915,95 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$this->assertEquals( $value, $order_data[ $order->get_id() ]->{$key}, "Unable to match $key for {$order_data[ $order->get_id() ]->{$key}}. Expected $value" );
 		}
 	}
+
+	/**
+	 * @testDox Test that duplicate key, value pairs are also synced properly.
+	 */
+	public function test_duplicate_meta_is_synced_properly() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// Force an earlier modified date to trigger the `should_save_after_meta_change` to be true later in the test.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		assert( $order->get_date_modified() < $current_date_time ); // Meta check, to make sure our test stay effective if we run testsuite in a different timezone.
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 1, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 2, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+		$this->assertEquals( 'test_value', $post_meta[1] );
+
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 3, $post_meta );
+		$this->assertTrue( in_array( 'test_value2', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) );
+		$order->save();
+		$order->update_meta_data( 'test_key', 'test_value3' );
+		$order->save_meta_data();
+
+		/**
+		 * Note that WC_Data has a bug where if we update a duplicate key, it will delete rest of other keys. But since this bug has been there for 5 years as of writing this code, we will not assert whether postmeta is exactly the same as order_meta but only test that out value was saved.
+		 */
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertTrue( in_array( 'test_value3', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'test_key2', 'test_value5' );
+		$order->add_meta_data( 'test_key2', 'test_value4' );
+		$order->save();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
+		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
+		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
+	}
+
+	/**
+	 * @testDox Test that date queries correctly handle timezones.
+	 */
+	public function test_timezone_date_query_support() {
+		$order = new WC_Order();
+		$order->set_date_created( '2023-09-01T00:30:00' ); // This would be 2023-08-31T18:00:00 UTC given the current timezone.
+		$this->sut->create( $order );
+
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) ); // Should not return anything as the order was created on 2023-08-31 UTC.
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-08-31' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '<=2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-08-31' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '>2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '<2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+	}
+
 }
