@@ -17,29 +17,38 @@ import {
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
-import { useScrollOpacity } from './hooks/use-scroll-opacity';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
 	additionalStyles,
+	previewOpacity = 0.5,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
 	useSubRegistry?: boolean;
+	previewOpacity?: number;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
-	const renderedBlocks = useMemo(
-		() => ( Array.isArray( blocks ) ? blocks : [ blocks ] ),
-		[ blocks ]
-	);
-
 	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const previewOpacity = useScrollOpacity(
-		'.interface-navigable-region.interface-interface-skeleton__content',
-		'topDown'
-	);
+	const renderedBlocks = useMemo( () => {
+		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
+
+		return _blocks.map( ( block, i ) => {
+			if ( i === highlightedBlockIndex ) {
+				return block;
+			}
+
+			return {
+				...block,
+				attributes: {
+					...block.attributes,
+					className: block.attributes.className + ' preview-opacity',
+				},
+			};
+		} );
+	}, [ blocks, highlightedBlockIndex ] );
 
 	const opacityStyles =
 		highlightedBlockIndex === -1
@@ -52,20 +61,7 @@ export const BlockPreview = ( {
 
 	return (
 		<BlockEditorProvider
-			value={ renderedBlocks.map( ( block, i ) => {
-				if ( i === highlightedBlockIndex ) {
-					return block;
-				}
-
-				return {
-					...block,
-					attributes: {
-						...block.attributes,
-						className:
-							block.attributes.className + ' preview-opacity',
-					},
-				};
-			} ) }
+			value={ renderedBlocks }
 			settings={ settings }
 			useSubRegistry={ useSubRegistry }
 		>

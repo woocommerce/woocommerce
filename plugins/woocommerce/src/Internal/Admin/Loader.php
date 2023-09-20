@@ -93,6 +93,8 @@ class Loader {
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 
 		add_action( 'admin_init', array( __CLASS__, 'deactivate_wc_admin_plugin' ) );
+
+		add_action( 'load-themes.php', array( __CLASS__, 'add_appearance_theme_view_tracks_event' ) );
 	}
 
 	/**
@@ -175,7 +177,7 @@ class Loader {
 		}
 
 		$classes   = explode( ' ', trim( $admin_body_class ) );
-		$classes[] = 'woocommerce-page';
+		$classes[] = 'woocommerce-admin-page';
 		if ( PageController::is_embed_page() ) {
 			$classes[] = 'woocommerce-embed-page';
 		}
@@ -570,5 +572,12 @@ class Loader {
 		if ( $homepage_id === $post_id ) {
 			delete_option( 'woocommerce_onboarding_homepage_post_id' );
 		}
+	}
+
+	/**
+	 * Adds the appearance_theme_view Tracks event.
+	 */
+	public static function add_appearance_theme_view_tracks_event() {
+		wc_admin_record_tracks_event( 'appearance_theme_view', array() );
 	}
 }

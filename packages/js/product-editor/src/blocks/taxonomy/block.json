@@ -23,6 +23,14 @@
 		"createTitle": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"dialogNameHelpText": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"parentTaxonomyText": {
+			"type": "string",
+			"__experimentalRole": "content"
 		}
 	},
 	"supports": {

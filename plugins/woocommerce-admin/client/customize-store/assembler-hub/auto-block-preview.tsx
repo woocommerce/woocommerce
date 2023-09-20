@@ -29,7 +29,6 @@ import {
 } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 
-const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
 
@@ -231,9 +230,6 @@ function ScaledBlockPreview( {
 				style={ {
 					width: viewportWidth,
 					height: contentHeight,
-					// This is a catch-all max-height for patterns.
-					// Reference: https://github.com/WordPress/gutenberg/pull/38175.
-					maxHeight: MAX_HEIGHT,
 					minHeight:
 						scale !== 0 && scale < 1 && minHeight
 							? minHeight / scale
@@ -262,6 +258,7 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 						}
 
+						.wp-block-navigation-item .wp-block-navigation-item__content,
 						.wp-block-navigation .wp-block-pages-list__item__link {
 							pointer-events: all !important;
 							cursor: pointer !important;
