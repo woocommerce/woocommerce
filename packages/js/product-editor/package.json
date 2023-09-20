@@ -32,6 +32,7 @@
 		"@types/prop-types": "^15.7.4",
 		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/admin-layout": "workspace:*",
+		"@woocommerce/block-templates": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/customer-effort-score": "workspace:*",
