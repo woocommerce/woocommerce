@@ -7,4 +7,3 @@ export type ThemeCard = {
 	isActive: boolean;
 	styleVariations: string[];
 };
-
