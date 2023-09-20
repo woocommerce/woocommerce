@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 
 /**
- * ProductGalleryLargeImage class.
+ * ProductGalleryThumbnails class.
  */
 class ProductGalleryThumbnails extends AbstractBlock {
 	/**
@@ -49,15 +49,14 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
-			$post_id           = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-			$product           = wc_get_product( $post_id );
-			$post_thumbnail_id = $product->get_image_id();
-			$html              = '';
+			$post_id = $block->context['postId'] ?? '';
+			$product = wc_get_product( $post_id );
 
 			if ( $product ) {
 				$post_thumbnail_id      = $product->get_image_id();
 				$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array() );
 				if ( $product_gallery_images && $post_thumbnail_id ) {
+					$html                 = '';
 					$number_of_thumbnails = isset( $block->context['thumbnailsNumberOfThumbnails'] ) ? $block->context['thumbnailsNumberOfThumbnails'] : 3;
 					$thumbnails_count     = 1;
 
@@ -83,17 +82,18 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 						$thumbnails_count++;
 					}
-				}
 
-				return sprintf(
-					'<div class="wc-block-components-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s">
-						%3$s
-					</div>',
-					esc_attr( $classes_and_styles['classes'] ),
-					esc_attr( $classes_and_styles['styles'] ),
-					$html
-				);
+					return sprintf(
+						'<div class="wc-block-components-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s">
+							%3$s
+						</div>',
+						esc_attr( $classes_and_styles['classes'] ),
+						esc_attr( $classes_and_styles['styles'] ),
+						$html
+					);
+				}
 			}
+			return;
 		}
 	}
 }
