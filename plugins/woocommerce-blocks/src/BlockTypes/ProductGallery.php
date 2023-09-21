@@ -16,6 +16,15 @@ class ProductGallery extends AbstractBlock {
 	protected $block_name = 'product-gallery';
 
 	/**
+	 *  Register the context
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'postId' ];
+	}
+
+	/**
 	 * Return the dialog content.
 	 *
 	 * @return string
@@ -87,7 +96,9 @@ class ProductGallery extends AbstractBlock {
 			$gallery
 		);
 
-		$p = new \WP_HTML_Tag_Processor( $html );
+		$post_id = $block->context['postId'] ?? '';
+		$product = wc_get_product( $post_id );
+		$p       = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', true );
@@ -106,20 +117,5 @@ class ProductGallery extends AbstractBlock {
 		}
 
 		return $html;
-	}
-
-	/**
-	 * Get the Interactivity API's view script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 */
-	protected function get_block_type_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-frontend',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [ 'wc-interactivity' ],
-		];
-
-		return $key ? $script[ $key ] : $script;
 	}
 }

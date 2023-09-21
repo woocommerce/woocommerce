@@ -145,16 +145,21 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	justify-content: center;
 	list-style: none;
 	gap: $gap-small;
+	padding: 0;
 }
 
 .wc-block-product-gallery-pager__item {
 	@include font-size(regular);
 	color: $gray-600;
+	cursor: pointer;
+}
 
-	&.is-active {
-		font-weight: bold;
-		color: $black;
-	}
+// Despite the guideline suggests that the state class should be named like "...--is-active"
+// this is not possible due to limitations in the Interactivity API that does not allow
+// to use the "--" (double dash) in the class name.
+.wc-block-woocommerce-product-gallery-pager-item-is-active {
+	font-weight: bold;
+	color: $black;
 }
 
 // Thumbnails
