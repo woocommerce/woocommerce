@@ -13,9 +13,9 @@ import { useState } from '@wordpress/element';
 import { Tabs } from '../';
 import { Edit as Tab } from '../../../blocks/tab/edit';
 
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	useBlockProps: jest.fn(),
+jest.mock( '@woocommerce/block-templates', () => ( {
+	...jest.requireActual( '@woocommerce/block-templates' ),
+	useWooBlockProps: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/navigation', () => ( {
