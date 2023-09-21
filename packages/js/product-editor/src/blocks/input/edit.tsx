@@ -20,15 +20,24 @@ import {
  */
 import { useValidation } from '../../contexts/validation-context';
 
+interface Metadata {
+	id?: number;
+	key: string;
+	value: string;
+}
+
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
 	const { property, label, placeholder, required, validationRegex } =
 		attributes;
-	const [ value, setValue ] = useEntityProp< string >(
+	const [ metadata, setMetadata ] = useEntityProp< Metadata[] >(
 		'postType',
 		'product',
-		property
+		'meta_data'
 	);
+
+	const value =
+		metadata.find( ( item ) => item.key === property )?.value || '';
 
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
@@ -72,7 +81,23 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 					id={ nameControlId }
 					placeholder={ placeholder }
 					value={ value }
-					onChange={ setValue }
+					onChange={ ( newValue: string ) => {
+						const existingEntry = metadata.find(
+							( item ) => item.key === property
+						);
+						const entry = existingEntry
+							? { ...existingEntry, value: newValue }
+							: {
+									key: property,
+									value: newValue,
+							  };
+						setMetadata( [
+							...metadata.filter(
+								( item ) => item.key !== property
+							),
+							entry,
+						] );
+					} }
 					onBlur={ validate }
 				></InputControl>
 			</BaseControl>
