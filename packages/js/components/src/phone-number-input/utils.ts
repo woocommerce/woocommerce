@@ -8,15 +8,32 @@ import { keyBy, mapValues, sortBy } from 'lodash';
  */
 import { DataType } from './data';
 
+/**
+ * Removes any non-digit character.
+ */
 export const sanitizeNumber = ( number: string ): string =>
 	number.replace( /\D/g, '' );
 
+/**
+ * Removes any non-digit character, except space and hyphen.
+ */
 export const sanitizeInput = ( number: string ): string =>
-	number.replace( /[^\d- ]/g, '' );
+	number.replace( /[^\d -]/g, '' );
 
+/**
+ * Converts a valid phone number to E.164 format.
+ */
 export const numberToE164 = ( number: string ): string =>
 	`+${ sanitizeNumber( number ) }`;
 
+/**
+ * Guesses the country code from a phone number.
+ * If no match is found, it will fallback to US.
+ *
+ * @param number       Phone number including country code.
+ * @param countryCodes List of country codes.
+ * @return Country code in ISO 3166-1 alpha-2 format. e.g. US
+ */
 export const guessCountryKey = (
 	number: string,
 	countryCodes: Record< string, string[] >
@@ -37,6 +54,9 @@ const entityTable: Record< string, string > = {
 	iacute: 'í',
 };
 
+/**
+ * Replaces HTML entities from a predefined table.
+ */
 export const decodeHtmlEntities = ( str: string ): string =>
 	str.replace( /&(\S+?);/g, ( match, p1 ) => entityTable[ p1 ] || match );
 
@@ -49,6 +69,12 @@ const countryNames: Record< string, string > = mapValues(
 	( name ) => decodeHtmlEntities( name )
 );
 
+/**
+ * Converts a country code to a flag twemoji URL from `s.w.org`.
+ *
+ * @param alpha2 Country code in ISO 3166-1 alpha-2 format. e.g. US
+ * @return Country flag emoji URL.
+ */
 export const countryToFlag = ( alpha2: string ): string => {
 	const name = alpha2
 		.split( '' )
@@ -72,6 +98,9 @@ const pushOrAdd = (
 	}
 };
 
+/**
+ * Parses the data from `data.ts` into a more usable format.
+ */
 export const parseData = ( data: DataType ) => {
 	const countries = keyBy( data, 'alpha2' );
 	return {
