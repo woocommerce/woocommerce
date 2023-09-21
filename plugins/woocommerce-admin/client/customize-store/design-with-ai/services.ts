@@ -1,16 +1,32 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { Sender, assign, createMachine } from 'xstate';
+import { dispatch, resolveSelect } from '@wordpress/data';
+// @ts-ignore No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
+// @ts-ignore No types for this exist yet.
+import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 
 /**
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from './types';
 import { lookAndTone } from './prompts';
+import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
+import {
+	patternsToNameMap,
+	getTemplatePatterns,
+	LARGE_BUSINESS_TEMPLATES,
+	SMALL_MEDIUM_BUSINESS_TEMPLATES,
+} from '../assembler-hub/hooks/use-home-templates';
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -192,8 +208,185 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+export const updateStorePatterns = async (
+	context: designWithAiStateMachineContext
+) => {
+	try {
+		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
+		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_blocks_allow_ai_connection: true,
+		} );
+
+		await apiFetch( {
+			path: '/wc/store/patterns',
+			method: 'POST',
+			data: {
+				business_description:
+					context.businessInfoDescription.descriptionText,
+			},
+		} );
+	} catch ( error ) {
+		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
+			error: error instanceof Error ? error.message : 'unknown',
+		} );
+		throw error;
+	}
+};
+
+// Update the current global styles of theme
+const updateGlobalStyles = async ( {
+	colorPaletteName = COLOR_PALETTES[ 0 ].title,
+	fontPairingName = FONT_PAIRINGS[ 0 ].title,
+}: {
+	colorPaletteName: string;
+	fontPairingName: string;
+} ) => {
+	const colorPalette = COLOR_PALETTES.find(
+		( palette ) => palette.title === colorPaletteName
+	);
+	const fontPairing = FONT_PAIRINGS.find(
+		( pairing ) => pairing.title === fontPairingName
+	);
+
+	const globalStylesId = await resolveSelect(
+		coreStore
+		// @ts-ignore No types for this exist yet.
+	).__experimentalGetCurrentGlobalStylesId();
+
+	// @ts-ignore No types for this exist yet.
+	const { saveEntityRecord } = dispatch( coreStore );
+
+	await saveEntityRecord(
+		'root',
+		'globalStyles',
+		{
+			id: globalStylesId,
+			styles: mergeBaseAndUserConfigs(
+				colorPalette?.styles || {},
+				fontPairing?.styles || {}
+			),
+			settings: mergeBaseAndUserConfigs(
+				colorPalette?.settings || {},
+				fontPairing?.settings || {}
+			),
+		},
+		{
+			throwOnError: true,
+		}
+	);
+};
+
+// Update the current theme template
+const updateTemplate = async ( {
+	headerSlug,
+	businessSize,
+	homepageTemplateId,
+	footerSlug,
+}: {
+	headerSlug: string;
+	businessSize: 'SMB' | 'LB';
+	homepageTemplateId:
+		| keyof typeof SMALL_MEDIUM_BUSINESS_TEMPLATES
+		| keyof typeof LARGE_BUSINESS_TEMPLATES;
+	footerSlug: string;
+} ) => {
+	const patterns = ( await resolveSelect(
+		coreStore
+		// @ts-ignore No types for this exist yet.
+	).getBlockPatterns() ) as Pattern[];
+
+	const patternsByName = patternsToNameMap( patterns );
+
+	const headerPattern = patternsByName[ headerSlug ];
+	const footerPattern = patternsByName[ footerSlug ];
+
+	const homepageTemplate = getTemplatePatterns(
+		businessSize === 'SMB'
+			? SMALL_MEDIUM_BUSINESS_TEMPLATES[ homepageTemplateId ]
+			: LARGE_BUSINESS_TEMPLATES[ homepageTemplateId ],
+		patternsByName
+	);
+
+	const content = [ headerPattern, ...homepageTemplate, footerPattern ]
+		.filter( Boolean )
+		.map( ( pattern ) => pattern.content )
+		.join( '\n\n' );
+
+	const currentTemplate = await resolveSelect(
+		coreStore
+		// @ts-ignore No types for this exist yet.
+	).__experimentalGetTemplateForLink( '/' );
+
+	// @ts-ignore No types for this exist yet.
+	const { saveEntityRecord } = dispatch( coreStore );
+
+	await saveEntityRecord(
+		'postType',
+		currentTemplate.type,
+		{
+			id: currentTemplate.id,
+			content,
+		},
+		{
+			throwOnError: true,
+		}
+	);
+};
+
+export const assembleSite = async (
+	context: designWithAiStateMachineContext
+) => {
+	try {
+		await updateGlobalStyles( {
+			colorPaletteName: context.aiSuggestions.defaultColorPalette.default,
+			fontPairingName: context.aiSuggestions.fontPairing,
+		} );
+		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
+	} catch ( error ) {
+		// TODO handle error
+		// eslint-disable-next-line no-console
+		console.error( error );
+		recordEvent(
+			'customize_your_store_ai_update_global_styles_response_error',
+			{
+				error: error instanceof Error ? error.message : 'unknown',
+			}
+		);
+	}
+
+	try {
+		await updateTemplate( {
+			headerSlug: context.aiSuggestions.header,
+			// TODO: Get from context
+			businessSize: 'SMB',
+			homepageTemplateId: 'template1',
+			footerSlug: context.aiSuggestions.footer,
+		} );
+		recordEvent( 'customize_your_store_ai_update_template_success' );
+	} catch ( error ) {
+		// TODO handle error
+		// eslint-disable-next-line no-console
+		console.error( error );
+		recordEvent( 'customize_your_store_ai_update_template_response_error', {
+			error: error instanceof Error ? error.message : 'unknown',
+		} );
+	}
+
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+
+	// Invalid the selectors so that the new template/style are used in assembler hub.
+	invalidateResolutionForStoreSelector( 'getEntityRecord' );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
+	);
+	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
+};
+
 export const services = {
 	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
+	assembleSite,
+	updateStorePatterns,
 };
