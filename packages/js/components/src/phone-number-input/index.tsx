@@ -2,8 +2,7 @@
  * External dependencies
  */
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import { createElement, Fragment } from '@wordpress/element';
-import { Icon, chevronDown } from '@wordpress/icons';
+import { createElement } from '@wordpress/element';
 import { useSelect } from 'downshift';
 import classNames from 'classnames';
 
@@ -18,17 +17,11 @@ import {
 	guessCountryKey,
 	numberToE164,
 } from './utils';
-
-const Flag: React.FC< { alpha2: string; src: string } > = ( {
-	alpha2,
-	src,
-} ) => (
-	<img
-		alt={ `${ alpha2 } flag` }
-		src={ src }
-		className="wcpay-component-phone-number-input__flag"
-	/>
-);
+import {
+	defaultSelectedRender,
+	defaultItemRender,
+	defaultArrowRender,
+} from './defaults';
 
 interface Props {
 	value: string;
@@ -39,22 +32,6 @@ interface Props {
 	itemRender?: ( country: Country ) => React.ReactNode;
 	arrowRender?: () => React.ReactNode;
 }
-
-const defaultSelectedRender = ( { alpha2, code, flag }: Country ) => (
-	<>
-		<Flag alpha2={ alpha2 } src={ flag } />
-		{ ` +${ code }` }
-	</>
-);
-
-const defaultItemRender = ( { alpha2, name, code, flag }: Country ) => (
-	<>
-		<Flag alpha2={ alpha2 } src={ flag } />
-		{ `${ name } +${ code }` }
-	</>
-);
-
-const defaultArrowRender = () => <Icon icon={ chevronDown } size={ 18 } />;
 
 const { countries, countryCodes } = parseData( data );
 
