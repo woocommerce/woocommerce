@@ -675,6 +675,10 @@
 				// Order screen.
 				this.$lock_dialog = $( '.woocommerce_page_wc-orders #post-lock-dialog.order-lock-dialog' );
 				if ( 0 !== this.$lock_dialog.length && 'undefined' !== typeof woocommerce_admin_meta_boxes ) {
+					// We do not want WP's lock to interfere.
+					$( document ).off( 'heartbeat-send.refresh-lock' );
+					$( document ).off( 'heartbeat-tick.refresh-lock' );
+
 					$( document ).on( 'heartbeat-send', this.refresh_order_lock );
 					$( document ).on( 'heartbeat-tick', this.check_order_lock );
 				}
@@ -688,6 +692,7 @@
 			},
 
 			refresh_order_lock: function( e, data ) {
+				delete data['wp-refresh-post-lock'];
 				data['wc-refresh-order-lock'] = woocommerce_admin_meta_boxes.post_id;
 			},
 
