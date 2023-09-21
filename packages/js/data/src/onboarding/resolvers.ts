@@ -167,14 +167,14 @@ export function* getJetpackAuthUrl( query: {
 
 export function* getActiveThemeModsCount() {
 	try {
-		const results: number = yield apiFetch( {
+		const results: { mods_count: number } = yield apiFetch( {
 			path:
 				WC_ADMIN_NAMESPACE +
 				'/onboarding/themes/count-active-theme-mods',
 			method: 'GET',
 		} );
 
-		yield setJetpackAuthUrl( results, query.redirectUrl, query.from ?? '' );
+		yield setActiveThemeModsCount( results.mods_count );
 	} catch ( error ) {
 		yield setError( 'getActiveThemeModsCount', error );
 	}
