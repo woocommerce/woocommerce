@@ -19,6 +19,13 @@ jest.mock( '@woocommerce/ai', () => ( {
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
+jest.mock(
+	'@wordpress/edit-site/build-module/components/global-styles/global-styles-provider',
+	() => ( {
+		mergeBaseAndUserConfigs: jest.fn(),
+	} )
+);
+
 describe( 'getCompletion', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();

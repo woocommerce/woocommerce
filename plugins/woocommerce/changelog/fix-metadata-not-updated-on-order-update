@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix changes in order custom fields made from admin not being applied when using the order Update button with HPOS active.

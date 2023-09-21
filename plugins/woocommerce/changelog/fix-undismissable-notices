@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix undismissable notice when using localization for certain messages like "Coupon management has moved"
