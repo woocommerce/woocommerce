@@ -28,7 +28,7 @@ export * as services from './services';
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeCards, activeThemeHasMods },
+		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
 
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
@@ -132,7 +132,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							</p>
 							<button
 								onClick={ () => {
-									if ( activeThemeHasMods ) {
+									if (
+										activeThemeHasMods &&
+										! customizeStoreTaskCompleted
+									) {
 										setOpenDesignChangeWarningModal( true );
 									} else {
 										sendEvent( { type: 'DESIGN_WITH_AI' } );
