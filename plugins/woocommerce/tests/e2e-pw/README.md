@@ -219,10 +219,10 @@ If you're on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) however,
 Starting web server...
 2022-12-09 18:52:01.323:INFO::main: Logging initialized @286ms to org.eclipse.jetty.util.log.StdErrLog
 Can not open browser because this capability is not supported on your platform. You can use the link below to open the report manually.
-Server started at <url:38917/>. Press <Ctrl+C> to exit
+Server started at <http://127.0.1.1:38917/>. Press <Ctrl+C> to exit
 ```
 
-In this case, take note of the port number (38917 in the example above) and then use it to navigate to `http://localhost`. Taking the example above, you should be able to view the Allure report on http://localhost:38917.
+In this case, take note of the port number (38917 in the example above) and then use it to navigate to localhost. Taking the example above, you should be able to view the Allure report on localhost:38917 in your browser.
 
 To know more about the allure-playwright integration, see their [GitHub documentation](https://github.com/allure-framework/allure-js/tree/master/packages/allure-playwright).
 
