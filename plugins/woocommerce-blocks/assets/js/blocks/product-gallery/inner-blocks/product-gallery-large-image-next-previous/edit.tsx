@@ -9,10 +9,11 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import { NextButton, PrevButton } from './icons';
+
 import './editor.scss';
 import { ProductGalleryNextPreviousBlockSettings } from './settings';
 import { ProductGalleryContext } from '../../types';
+import { getNextPreviousImagesWithClassName } from './utils';
 
 const getAlignmentStyle = ( alignment: string ): string => {
 	switch ( alignment ) {
@@ -41,19 +42,16 @@ export const Edit = ( {
 				attributes.layout?.verticalAlignment
 			),
 		},
+		className: classNames(
+			'wc-block-editor-product-gallery-large-image-next-previous',
+			'wc-block-product-gallery-large-image-next-previous'
+		),
 	} );
 
-	const suffixClass = useMemo( () => {
-		switch ( context.nextPreviousButtonsPosition ) {
-			case 'insideTheImage':
-				return 'inside-image';
-			case 'outsideTheImage':
-				return 'outside-image';
-			case 'off':
-				return 'off';
-			default:
-				return 'off';
-		}
+	const previousNextImage = useMemo( () => {
+		return getNextPreviousImagesWithClassName(
+			context.nextPreviousButtonsPosition
+		);
 	}, [ context.nextPreviousButtonsPosition ] );
 
 	return (
@@ -64,11 +62,15 @@ export const Edit = ( {
 			<div
 				className={ classNames(
 					'wc-block-product-gallery-large-image-next-previous-container',
-					`wc-block-product-gallery-large-image-next-previous--${ suffixClass }`
+					`wc-block-product-gallery-large-image-next-previous--${ previousNextImage?.classname }`
 				) }
 			>
-				<PrevButton suffixClass={ suffixClass } />
-				<NextButton suffixClass={ suffixClass } />
+				{ previousNextImage?.PrevButtonImage && (
+					<previousNextImage.PrevButtonImage />
+				) }
+				{ previousNextImage?.NextButtonImage && (
+					<previousNextImage.NextButtonImage />
+				) }
 			</div>
 		</div>
 	);

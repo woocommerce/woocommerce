@@ -1,7 +1,18 @@
-.wc-block-editor-product-gallery-large-image img {
-	max-width: 500px;
+.wc-block-editor-product-gallery-large-image {
+	img {
+		max-width: 100%;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	.wc-block-editor-product-gallery-large-image-next-previous--outside-image & img {
+		max-width: calc(100% - 60px);
+	}
 }
 
 .wc-block-product-gallery-large-image__inner-blocks {
-	max-width: 500px;
+	.wc-block-editor-product-gallery-large-image-next-previous--outside-image & > * {
+		margin-left: 30px;
+		margin-right: 30px;
+	}
 }

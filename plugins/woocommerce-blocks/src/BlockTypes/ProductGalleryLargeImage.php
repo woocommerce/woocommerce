@@ -14,6 +14,16 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	protected $block_name = 'product-gallery-large-image';
 
+
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
 	/**
 	 *  Register the context
 	 *
@@ -76,7 +86,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$directives = $this->get_directives( $block->context );
 
 		return strtr(
-			'<div class="wp-block-woocommerce-product-gallery-large-image" {directives}>
+			'<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image" {directives}>
 				{visible_main_image}
 				{main_images}
 				<div class="wc-block-woocommerce-product-gallery-large-image__content">

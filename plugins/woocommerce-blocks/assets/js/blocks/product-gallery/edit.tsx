@@ -17,6 +17,7 @@ import { useSelect } from '@wordpress/data';
 import {
 	moveInnerBlocksToPosition,
 	getInnerBlocksLockAttributes,
+	getClassNameByNextPreviousButtonsPosition,
 } from './utils';
 import { ProductGalleryThumbnailsBlockSettings } from './inner-blocks/product-gallery-thumbnails/block-settings';
 import { ProductGalleryPagerBlockSettings } from './inner-blocks/product-gallery-pager/settings';
@@ -107,7 +108,11 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< ProductGalleryAttributes > ) => {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: getClassNameByNextPreviousButtonsPosition(
+			attributes.nextPreviousButtonsPosition
+		),
+	} );
 
 	const { currentTemplateId, templateType } = useSelect(
 		( select ) => ( {

@@ -1,4 +1,16 @@
-.wp-block-woocommerce-product-gallery {
+$gallery: ".wc-block-product-gallery";
+$large-image: "#{$gallery}-large-image";
+$thumbnails: "#{$gallery}-thumbnails";
+$next-previous: "#{$large-image}-next-previous";
+$next-previous-left-off: "#{$next-previous}-left--off";
+$next-previous-right-off: "#{$next-previous}-right--off";
+$gallery-next-previous-outside-image: "#{$gallery}[data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image)";
+
+$outside-image-offset: 30px;
+$outside-image-max-width: calc(100% - (2 * $outside-image-offset));
+
+// Product Gallery
+#{$gallery} {
 	dialog {
 		position: fixed;
 		width: 90vw;
@@ -8,3 +20,159 @@
 		z-index: 9999;
 	}
 }
+
+// Large Image
+#{$large-image} {
+	width: 100%;
+	height: fit-content;
+	position: relative;
+	overflow: hidden;
+
+	img {
+		display: block;
+		margin: 0 auto;
+		transition: all 0.1s linear;
+
+		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
+			cursor: zoom-in;
+		}
+
+		&[hidden] {
+			display: none;
+		}
+
+		// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
+		#{$gallery-next-previous-outside-image} & {
+			max-width: $outside-image-max-width;
+		}
+	}
+
+	.wc-block-product-gallery-large-image__inner-blocks {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		pointer-events: none;
+		z-index: 1;
+		width: 100%;
+		height: 100%;
+		top: 0;
+
+		// Reset the margin of the inner blocks when the Next/Previous buttons are outside the image.
+		#{$gallery-next-previous-outside-image} & > * {
+			margin-left: $outside-image-offset;
+			margin-right: $outside-image-offset;
+		}
+	}
+}
+
+// Next/Previous Buttons
+#{$next-previous} {
+	display: flex;
+	position: absolute;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+
+	.is-vertically-aligned-top {
+		align-items: flex-start;
+	}
+
+	.is-vertically-aligned-center {
+		align-items: center;
+	}
+
+	.is-vertically-aligned-bottom {
+		align-items: flex-end;
+	}
+}
+
+// Next/Previous Buttons Settings
+.wc-block-product-gallery-large-image-next-previous-settings {
+	width: 100%;
+}
+
+// Next/Previous Buttons Off Setting
+#{$next-previous-left-off},
+#{$next-previous-right-off} {
+	display: none;
+}
+
+//  Next/Previous Buttons Inside the Image Settings
+.wc-block-product-gallery-large-image-next-previous-left--inside-image {
+	margin-left: 15px;
+}
+
+.wc-block-product-gallery-large-image-next-previous-right--inside-image {
+	margin-right: 15px;
+}
+
+// Next/Previous Buttons Outside the Image Settings
+#{$gallery-next-previous-outside-image} .wc-block-product-gallery-large-image-next-previous-left--outside-image {
+	bottom: 0;
+	left: 0;
+	position: absolute;
+}
+
+#{$gallery-next-previous-outside-image} .wc-block-product-gallery-large-image-next-previous-right--outside-image {
+	bottom: 0;
+	right: 0;
+	position: absolute;
+}
+
+#{$gallery-next-previous-outside-image} #{$large-image} #{$next-previous} {
+	margin-right: 0;
+	margin-left: 0;
+}
+
+.wc-block-product-gallery-large-image-next-previous-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	position: absolute;
+	height: 50px;
+	width: 100%;
+
+	&.wc-block-product-gallery-large-image-next-previous--inside-image {
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+}
+
+// Pager
+.wc-block-product-gallery-pager__pager {
+	display: flex;
+	justify-content: center;
+	list-style: none;
+	gap: $gap-small;
+}
+
+.wc-block-product-gallery-pager__item {
+	@include font-size(regular);
+	color: $gray-600;
+
+	&.is-active {
+		font-weight: bold;
+		color: $black;
+	}
+}
+
+// Thumbnails
+#{$thumbnails} {
+	img {
+		cursor: pointer;
+	}
+
+	.is-vertical & {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.wc-block-product-gallery-thumbnails__thumbnail {
+		width: 100px;
+		height: 100px;
+		margin: 5px;
+
+	}
+}
+

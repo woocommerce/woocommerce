@@ -20,6 +20,15 @@ class ProductGalleryPager extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 *  Register the context
 	 *
 	 * @return string[]
@@ -39,7 +48,7 @@ class ProductGalleryPager extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$pager_display_mode = $block->context['pagerDisplayMode'] ?? '';
 		$classname          = $attributes['className'] ?? '';
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( sprintf( 'woocommerce %1$s', $classname ) ) ) );
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( $classname ) ) );
 		$html               = $this->render_pager( $pager_display_mode );
 
 		return sprintf(
@@ -78,11 +87,11 @@ class ProductGalleryPager extends AbstractBlock {
 	 */
 	private function render_digits_pager() {
 		return sprintf(
-			'<ul class="wp-block-woocommerce-product-gallery-pager__pager">
-				<li class="wp-block-woocommerce-product-gallery__pager-item is-active">1</li>
-				<li class="wp-block-woocommerce-product-gallery__pager-item">2</li>
-				<li class="wp-block-woocommerce-product-gallery__pager-item">3</li>
-				<li class="wp-block-woocommerce-product-gallery__pager-item">4</li>
+			'<ul class="wc-block-product-gallery-pager__pager">
+				<li class="wc-block-product-gallery-pager__item is-active">1</li>
+				<li class="wc-block-product-gallery-pager__item">2</li>
+				<li class="wc-block-product-gallery-pager__item">3</li>
+				<li class="wc-block-product-gallery-pager__item">4</li>
 			</ul>'
 		);
 	}
@@ -94,10 +103,10 @@ class ProductGalleryPager extends AbstractBlock {
 	 */
 	private function render_dots_pager() {
 		return sprintf(
-			'<ul class="wp-block-woocommerce-product-gallery-pager__pager">
-				<li class="wp-block-woocommerce-product-gallery__pager-item is-active">%1$s</li>
-				<li class="wp-block-woocommerce-product-gallery__pager-item">%2$s</li>
-				<li class="wp-block-woocommerce-product-gallery__pager-item">%2$s</li>
+			'<ul class="wc-block-product-gallery-pager__pager">
+				<li class="wc-block-product-gallery-pager__item is-active">%1$s</li>
+				<li class="wc-block-product-gallery-pager__item">%2$s</li>
+				<li class="wc-block-product-gallery-pager__item">%2$s</li>
 			</ul>',
 			$this->get_selected_dot_icon(),
 			$this->get_dot_icon()

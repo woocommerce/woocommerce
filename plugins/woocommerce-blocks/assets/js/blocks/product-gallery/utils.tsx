@@ -8,6 +8,8 @@ import { select, dispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { ThumbnailsPosition } from './inner-blocks/product-gallery-thumbnails/constants';
+import { getNextPreviousImagesWithClassName } from './inner-blocks/product-gallery-large-image-next-previous/utils';
+import { NextPreviousButtonSettingValues } from './inner-blocks/product-gallery-large-image-next-previous/types';
 
 /**
  * Generates layout attributes based on the position of thumbnails.
@@ -20,6 +22,9 @@ export const getGroupLayoutAttributes = (
 ): { type: string; orientation?: string; flexWrap?: string } => {
 	switch ( thumbnailsPosition ) {
 		case 'bottom':
+			// Stack
+			return { type: 'flex', orientation: 'vertical' };
+		case 'off':
 			// Stack
 			return { type: 'flex', orientation: 'vertical' };
 		default:
@@ -230,4 +235,13 @@ export const moveInnerBlocksToPosition = (
 			} );
 		}
 	}
+};
+
+export const getClassNameByNextPreviousButtonsPosition = (
+	nextPreviousButtonsPosition: NextPreviousButtonSettingValues
+) => {
+	return `wc-block-product-gallery--has-next-previous-buttons-${
+		getNextPreviousImagesWithClassName( nextPreviousButtonsPosition )
+			?.classname
+	}`;
 };

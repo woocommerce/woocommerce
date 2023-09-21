@@ -10,7 +10,6 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
 import { ProductGalleryPagerBlockIcon } from './icons';
 import { Edit } from './edit';
 import metadata from './block.json';
-import './style.scss';
 import './editor.scss';
 
 if ( isExperimentalBuild() ) {
