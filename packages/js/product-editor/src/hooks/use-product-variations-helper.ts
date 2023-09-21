@@ -16,6 +16,7 @@ import {
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from './use-product-attributes';
+import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../constants';
 
 async function getDefaultVariationValues(
 	productId: number
@@ -34,17 +35,22 @@ async function getDefaultVariationValues(
 		return {};
 	}
 	try {
-		const productsWithPrice = await resolveSelect(
+		const products = await resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-		).getProductVariations< Pick< ProductVariation, 'regular_price' >[] >( {
+		).getProductVariations< ProductVariation[] >( {
 			product_id: productId,
-			per_page: 1,
-			has_price: true,
-			_fields: [ 'regular_price' ],
+			page: 1,
+			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
+			order: 'asc',
+			orderby: 'menu_order',
 		} );
-		if ( productsWithPrice && productsWithPrice.length > 0 ) {
+		if ( products && products.length > 0 && products[ 0 ].regular_price ) {
 			return {
-				regular_price: productsWithPrice[ 0 ].regular_price,
+				regular_price: products[ 0 ].regular_price,
+				stock_quantity: products[ 0 ].stock_quantity,
+				stock_status: products[ 0 ].stock_status,
+				manage_stock: products[ 0 ].manage_stock,
+				low_stock_amount: products[ 0 ].low_stock_amount,
 			};
 		}
 	} catch {
