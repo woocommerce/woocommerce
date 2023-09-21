@@ -502,6 +502,13 @@ export function setJetpackAuthUrl(
 	};
 }
 
+export function setActiveThemeModsCount( count: number ) {
+	return {
+		type: TYPES.SET_ACTIVE_THEME_MODS_COUNT,
+		count,
+	};
+}
+
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
@@ -539,4 +546,5 @@ export type Action = ReturnType<
 	| typeof getProductTypesError
 	| typeof getProductTypesSuccess
 	| typeof setJetpackAuthUrl
+	| typeof setActiveThemeModsCount
 >;

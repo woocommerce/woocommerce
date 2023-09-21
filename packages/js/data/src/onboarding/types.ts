@@ -82,6 +82,7 @@ export type OnboardingState = {
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
 	jetpackAuthUrls: Record< string, GetJetpackAuthUrlResponse >;
+	activeThemeModsCount: number;
 };
 
 export type Industry = {
