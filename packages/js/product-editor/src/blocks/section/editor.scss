@@ -58,4 +58,10 @@
 			border-bottom: none;
 		}
 	}
+	.is-disabled-section {
+		opacity: 0.4;
+		a, button, input, label, select, textarea {
+			pointer-events: none;
+		}
+	}
 }
