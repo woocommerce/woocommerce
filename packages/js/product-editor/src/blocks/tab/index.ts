@@ -7,7 +7,6 @@ import { registerWooBlockType } from '@woocommerce/block-templates';
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-block';
 import blockConfiguration from './block.json';
 import { Edit, TabBlockAttributes } from './edit';
 
