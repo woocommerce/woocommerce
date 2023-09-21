@@ -1,4 +1,4 @@
-Significance: major
+Significance: minor
 Type: update
 
-Remove installation of Jetpack alongside WooCommerce Shipping & Tax
+Remove dependency on Jetpack from WooCommerce Shipping & Tax onboarding tasks
