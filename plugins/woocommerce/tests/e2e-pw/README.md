@@ -80,7 +80,7 @@ For more information how to configure the test environment for `wp-env`, please 
 
 If you'd like to run the test suite against an alternate environment (external host for example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
 
-```text
+```bash
 BASE_URL='https://www.example.com'
 ADMIN_USER='admin.username'
 ADMIN_PASSWORD='admin.password'
@@ -112,11 +112,11 @@ The test environment uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
 
-**Modiify the port wp-env**
+#### Modify the port wp-env
 
 Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js).
 
-**Modify port for e2e-environment**
+#### Modify port for e2e-environment
 
 Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/config/default.json).\*\*\*\*
 
@@ -215,10 +215,11 @@ A browser window should open the Allure report.
 
 If you're on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) however, you might get this message right after running the `allure open` command:
 
-```
+```bash
 Starting web server...
 2022-12-09 18:52:01.323:INFO::main: Logging initialized @286ms to org.eclipse.jetty.util.log.StdErrLog
 Can not open browser because this capability is not supported on your platform. You can use the link below to open the report manually.
+// MD034/no-bare-urls is ignored in the next line
 Server started at <http://127.0.1.1:38917/>. Press <Ctrl+C> to exit
 ```
 
