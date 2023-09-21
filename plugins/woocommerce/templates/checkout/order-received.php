@@ -32,10 +32,10 @@ defined( 'ABSPATH' ) || exit;
 	 */
 	$message = apply_filters(
 		'woocommerce_thankyou_order_received_text',
-		__( 'Thank you. Your order has been received.', 'woocommerce' ),
+		esc_html( __( 'Thank you. Your order has been received.', 'woocommerce' ) ),
 		$order
 	);
 
-	echo esc_html( $message );
+	echo $message;
 	?>
 </p>
