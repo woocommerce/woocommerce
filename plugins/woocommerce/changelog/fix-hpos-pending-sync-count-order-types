@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Address missing order type handling in HPOS compatibility mode sync.

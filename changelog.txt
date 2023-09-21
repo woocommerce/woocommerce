@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 8.1.1 2023-09-18 =
+
+**WooCommerce**
+
+* Fix - Do not send user meta data back in `woocommerce_get_customer_details` response. [#40221](https://github.com/woocommerce/woocommerce/pull/40221)
+* Fix - Fix possible metadata duplication when HPOS is enabled. [#40148](https://github.com/woocommerce/woocommerce/pull/40148)
+
 = 8.1.0 2023-09-12 =
 
 **WooCommerce**

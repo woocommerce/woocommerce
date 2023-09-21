@@ -11,6 +11,8 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 	FontPairing,
+	Header,
+	Footer,
 	ColorPaletteResponse,
 } from './types';
 import {
@@ -21,7 +23,12 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette, fontPairings } from './prompts';
+import {
+	defaultColorPalette,
+	fontPairings,
+	defaultHeader,
+	defaultFooter,
+} from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -72,6 +79,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 			aiSuggestions: {
 				defaultColorPalette: {} as ColorPaletteResponse,
 				fontPairing: '' as FontPairing[ 'pair_name' ],
+				header: '' as Header[ 'slug' ],
+				footer: '' as Footer[ 'slug' ],
 			},
 		},
 		initial: 'navigate',
@@ -273,48 +282,158 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...defaultColorPalette,
-											prompt: defaultColorPalette.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultColorPalette,
+													prompt: defaultColorPalette.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignDefaultColorPalette',
+												],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [
-											'assignDefaultColorPalette',
-										],
-									},
+									success: { type: 'final' },
 								},
 							},
 							chooseFontPairing: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...fontPairings,
-											prompt: fontPairings.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...fontPairings,
+													prompt: fontPairings.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignFontPairing',
+												],
+												target: 'success',
+											},
+										},
 									},
-									onDone: {
-										actions: [ 'assignFontPairing' ],
+									success: { type: 'final' },
+								},
+							},
+							chooseHeader: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultHeader,
+													prompt: defaultHeader.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [ 'assignHeader' ],
+												target: 'success',
+											},
+										},
 									},
+									success: { type: 'final' },
+								},
+							},
+							chooseFooter: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultFooter,
+													prompt: defaultFooter.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [ 'assignFooter' ],
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							updateStorePatterns: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												// TODO: handle error
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
 								},
 							},
 						},
+						onDone: 'postApiCallLoader',
 					},
-					postApiCallLoader: {},
+					postApiCallLoader: {
+						invoke: {
+							src: 'assembleSite',
+							onDone: {
+								actions: [
+									sendParent( () => ( {
+										type: 'THEME_SUGGESTED',
+									} ) ),
+								],
+							},
+						},
+					},
 				},
 			},
 		},
