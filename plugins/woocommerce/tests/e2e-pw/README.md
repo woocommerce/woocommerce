@@ -54,6 +54,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 -   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
 -   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
 -   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) by setting the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
+
     ```bash
     # Increase test timeout to 3 minutes
     export DEFAULT_TIMEOUT_OVERRIDE=180000
@@ -79,7 +80,7 @@ For more information how to configure the test environment for `wp-env`, please 
 
 If you'd like to run the test suite against an alternate environment (external host for example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
 
-```
+```text
 BASE_URL='https://www.example.com'
 ADMIN_USER='admin.username'
 ADMIN_PASSWORD='admin.password'
@@ -129,6 +130,8 @@ After you run a test, it's best to restart the environment to start from a fresh
 -   `pnpm env:restart` to stop/destroy and then start the environment (useful for re-testing)
 
 ## Guide for writing e2e tests
+
+### Tools for writing tests
 
 ### Creating test structure
 
