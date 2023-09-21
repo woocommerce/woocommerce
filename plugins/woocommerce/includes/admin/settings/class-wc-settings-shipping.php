@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -248,6 +249,50 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
+	 * Get all available regions.
+	 *
+	 * @param int $allowed_countries Zone ID.
+	 * @param int $shipping_continents Zone ID.
+	 */
+	protected function get_region_options( $allowed_countries, $shipping_continents ) {
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true );
+
+		$options = array();
+		foreach ( $shipping_continents as $continent_code => $continent ) {
+			$continent_data = array(
+				'value'    => 'continent:' . esc_attr( $continent_code ),
+				'label'    => esc_html( $continent['name'] ),
+				'children' => array(),
+			);
+
+			$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+
+			foreach ( $countries as $country_code ) {
+				$country_data = array(
+					'value'    => 'country:' . esc_attr( $country_code ),
+					'label'    => esc_html( $allowed_countries[ $country_code ] ),
+					'children' => array(),
+				);
+
+				$states = WC()->countries->get_states( $country_code );
+
+				if ( $states ) {
+					foreach ( $states as $state_code => $state_name ) {
+						$country_data['children'][] = array(
+							'value' => 'state:' . esc_attr( $country_code . ':' . $state_code ),
+							'label' => esc_html( $state_name . ', ' . $allowed_countries[ $country_code ] ),
+						);
+					}
+				}
+				$continent_data['children'][] = $country_data;
+			}
+			$options[] = $continent_data;
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Show method for a zone
 	 *
 	 * @param int $zone_id Zone ID.
@@ -265,6 +310,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		$allowed_countries   = WC()->countries->get_shipping_countries();
 		$shipping_continents = WC()->countries->get_shipping_continents();
+
+		if ( 0 !== $zone->get_id() ) {
+			$region_options = $this->get_region_options( $allowed_countries, $shipping_continents );
+		}
 
 		// Prepare locations.
 		$locations = array();
