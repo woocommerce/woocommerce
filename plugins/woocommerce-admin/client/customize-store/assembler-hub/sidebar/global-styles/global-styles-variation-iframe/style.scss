@@ -73,10 +73,9 @@
 			}
 		}
 	}
+}
 
-	.block-editor-color-gradient-control__panel {
-		> .components-flex > .components-h-stack.components-v-stack {
-			display: none;
-		}
-	}
+// Hide "theme" and "default" sections
+.block-editor-color-gradient-control__panel > .components-flex > .components-h-stack.components-v-stack {
+	display: none;
 }
