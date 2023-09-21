@@ -66,14 +66,28 @@ To see all options, make sure you are in the `plugins/woocommerce` folder and ru
 
 The default values are:
 
-- Latest stable WordPress version
-- PHP 7.4
-- Latest stable WordPress version
-- MariaDB
-- URL: `http://localhost:8086/`
-- Admin credentials: `admin/password`
+-   Latest stable WordPress version
+-   PHP 7.4
+-   Latest stable WordPress version
+-   MariaDB
+-   URL: `http://localhost:8086/`
+-   Admin credentials: `admin/password`
 
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
+
+#### Alternate environments
+
+If you'd like to run the test suite against an alternate environment (external host for example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
+
+```
+BASE_URL='https://www.example.com'
+ADMIN_USER='admin.username'
+ADMIN_PASSWORD='admin.password'
+CUSTOMER_USER='customer.username'
+CUSTOMER_PASSWORD='customer.password'
+DEFAULT_TIMEOUT_OVERRIDE=100000
+
+```
 
 ### Test Variables
 
