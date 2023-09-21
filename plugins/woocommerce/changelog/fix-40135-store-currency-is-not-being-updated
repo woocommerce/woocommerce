@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug where updating store location doesn't update store currency.
