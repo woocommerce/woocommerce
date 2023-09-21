@@ -156,7 +156,11 @@ const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
 	} );
 };
 
-const spawnSaveDescriptionToOption = assign( {
+const spawnSaveDescriptionToOption = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents,
+	designWithAiStateMachineEvents
+>( {
 	spawnSaveDescriptionToOptionRef: (
 		context: designWithAiStateMachineContext
 	) =>
