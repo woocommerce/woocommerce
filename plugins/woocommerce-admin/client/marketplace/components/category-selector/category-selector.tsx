@@ -17,7 +17,10 @@ import { fetchCategories } from '../../utils/functions';
 import './category-selector.scss';
 import { ProductType } from '../product-list/types';
 
-const ALL_CATEGORIES_SLUG = '_all';
+const ALL_CATEGORIES_SLUGS = {
+	[ ProductType.extension ]: '_all',
+	[ ProductType.theme ]: 'themes',
+};
 
 interface CategorySelectorProps {
 	type: ProductType;
@@ -35,7 +38,7 @@ export default function CategorySelector(
 
 	useEffect( () => {
 		// If no category is selected, show All as selected
-		let categoryToSearch = ALL_CATEGORIES_SLUG;
+		let categoryToSearch = ALL_CATEGORIES_SLUGS[ props.type ];
 
 		if ( query.category ) {
 			categoryToSearch = query.category;
@@ -50,7 +53,7 @@ export default function CategorySelector(
 		if ( selectedCategory ) {
 			setSelected( selectedCategory );
 		}
-	}, [ query, visibleItems, dropdownItems ] );
+	}, [ query.category, props.type, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
 		setIsLoading( true );
