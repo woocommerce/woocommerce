@@ -401,6 +401,24 @@ export const designWithAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
+							updateStorePatterns: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												// TODO: handle error
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
 						},
 						onDone: 'postApiCallLoader',
 					},
