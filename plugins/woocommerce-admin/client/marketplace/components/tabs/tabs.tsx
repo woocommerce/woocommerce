@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
@@ -73,21 +73,23 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const activeTabs = ( selectedTab: string ) => {
+const getActiveTabs = ( selectedTab: string ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
 	const currentActiveTabs = { ...tabs };
-	if ( selectedTab === 'search' ) {
-		currentActiveTabs.search.hide = false;
-	}
+	currentActiveTabs.search.hide = selectedTab !== 'search';
+
 	return currentActiveTabs;
 };
 
-const renderTabs = ( contextValue: MarketplaceContextType ) => {
+const renderTabs = (
+	contextValue: MarketplaceContextType,
+	activeTabs: Tabs
+) => {
 	const { selectedTab, setSelectedTab } = contextValue;
 	const tabContent = [];
-	for ( const tabKey in activeTabs( selectedTab ) ) {
+	for ( const tabKey in activeTabs ) {
 		if ( tabs[ tabKey ]?.hide === true ) {
 			continue;
 		}
@@ -130,7 +132,8 @@ const renderTabs = ( contextValue: MarketplaceContextType ) => {
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { setSelectedTab } = marketplaceContextValue;
+	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const [ activeTabs, setActiveTabs ] = useState( getActiveTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
 	const queryLoaded = Object.keys( query ).length > 0;
@@ -143,6 +146,9 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		}
 	}, [ query, queryLoaded, setSelectedTab ] );
 
+	useEffect( () => {
+		setActiveTabs( getActiveTabs( selectedTab ) );
+	}, [ selectedTab ] );
 	return (
 		<nav
 			className={ classNames(
@@ -150,7 +156,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue ) }
+			{ renderTabs( marketplaceContextValue, activeTabs ) }
 		</nav>
 	);
 };

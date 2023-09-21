@@ -24,9 +24,7 @@ function Search(): JSX.Element {
 	const query = useQuery();
 
 	useEffect( () => {
-		if ( query.term ) {
-			setSearchTerm( query.term );
-		}
+		setSearchTerm( query.term ?? '' );
 	}, [ query.term ] );
 
 	const runSearch = () => {
