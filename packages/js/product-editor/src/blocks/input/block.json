@@ -23,6 +23,9 @@
 		},
 		"validationRegex": {
 			"type": "string"
+		},
+		"validationErrorMessage": {
+			"type": "string"
 		}
 	},
 	"supports": {

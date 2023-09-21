@@ -28,8 +28,14 @@ interface Metadata {
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
-	const { property, label, placeholder, required, validationRegex } =
-		attributes;
+	const {
+		property,
+		label,
+		placeholder,
+		required,
+		validationRegex,
+		validationErrorMessage,
+	} = attributes;
 	const [ metadata, setMetadata ] = useEntityProp< Metadata[] >(
 		'postType',
 		'product',
@@ -50,7 +56,10 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 			if ( validationRegex ) {
 				const regExp = new RegExp( validationRegex );
 				if ( ! regExp.test( value ) ) {
-					return __( 'Invalid value for the field.', 'woocommerce' );
+					return (
+						validationErrorMessage ||
+						__( 'Invalid value for the field.', 'woocommerce' )
+					);
 				}
 			}
 		},
