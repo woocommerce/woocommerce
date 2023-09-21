@@ -23,7 +23,7 @@ Anything that **requires** action should go in the task list.
     - Informational notices such as feature announcements or tips for using the plugin should appear in the Inbox as they are not critical and do not require action.
     - Notifications from user activity should result in regular feedback notices (success, info, error, warning).
 
-**Examples**
+#### Examples
 
 ![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](_media/task-list-example.png)
 
