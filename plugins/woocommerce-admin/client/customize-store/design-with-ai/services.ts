@@ -383,10 +383,17 @@ export const assembleSite = async (
 	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 };
 
+const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_customize_store_ai_suggestions: context.aiSuggestions,
+	} );
+};
+
 export const services = {
 	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,
 	updateStorePatterns,
+	saveAiResponseToOption,
 };

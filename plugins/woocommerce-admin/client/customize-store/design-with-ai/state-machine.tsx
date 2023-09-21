@@ -142,7 +142,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 						],
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
-								actions: [ 'assignBusinessInfoDescription' ],
+								actions: [
+									'assignBusinessInfoDescription',
+									'spawnSaveDescriptionToOption',
+								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
@@ -423,15 +426,59 @@ export const designWithAiStateMachineDefinition = createMachine(
 						onDone: 'postApiCallLoader',
 					},
 					postApiCallLoader: {
-						invoke: {
-							src: 'assembleSite',
-							onDone: {
-								actions: [
-									sendParent( () => ( {
-										type: 'THEME_SUGGESTED',
-									} ) ),
-								],
+						type: 'parallel',
+						states: {
+							assembleSite: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'assembleSite',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												target: 'failed',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+									failed: {
+										type: 'final', // If there's an error we should not block the user from proceeding. They'll just not see the AI suggestions, but that's better than being stuck
+									},
+								},
 							},
+							saveAiResponse: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'saveAiResponseToOption',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												target: 'failed',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+									failed: {
+										type: 'final',
+									},
+								},
+							},
+						},
+						onDone: {
+							actions: [
+								sendParent( () => ( {
+									type: 'THEME_SUGGESTED',
+								} ) ),
+							],
 						},
 					},
 				},
