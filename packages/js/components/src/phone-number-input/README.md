@@ -21,9 +21,9 @@ Includes mobile phone numbers validation.
 | `onChange`       | Function | `undefined`             | (Required) Callback function when the value changes                                                     |
 | `id`             | String   | `undefined`             | ID for the input element, to bind a `<label>`                                                           |
 | `className`      | String   | `undefined`             | Additional class name applied to parent `<div>`                                                         |
-| `selectedRender` | Function | `defaultSelectedRender` | Render function for the selected country. Displays the country flag and code by default.                |
-| `itemRender`     | Function | `itemRender`            | Render function for each country in the dropdown. Displays the country flag, name, and code by default. |
-| `arrowRender`    | Function | `defaultArrowRender`    | Render function for the dropdown arrow. Displays a chevron down icon by default.                        |
+| `selectedRender` | Function | `defaultSelectedRender` | Render function for the selected country, displays the country flag and code by default.                |
+| `itemRender`     | Function | `itemRender`            | Render function for each country in the dropdown, displays the country flag, name, and code by default. |
+| `arrowRender`    | Function | `defaultArrowRender`    | Render function for the dropdown arrow, displays a chevron down icon by default.                        |
 
 ### `onChange` params
 
