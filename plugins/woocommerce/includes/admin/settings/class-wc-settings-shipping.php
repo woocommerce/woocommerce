@@ -255,8 +255,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * @param int $shipping_continents Zone ID.
 	 */
 	protected function get_region_options( $allowed_countries, $shipping_continents ) {
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true, array( 'wc-shipping-zone-methods' ) );
-
 		$options = array();
 		foreach ( $shipping_continents as $continent_code => $continent ) {
 			$continent_data = array(
@@ -311,10 +309,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$allowed_countries   = WC()->countries->get_shipping_countries();
 		$shipping_continents = WC()->countries->get_shipping_continents();
 
-		if ( 0 !== $zone->get_id() ) {
-			$region_options = $this->get_region_options( $allowed_countries, $shipping_continents );
-		}
-
 		// Prepare locations.
 		$locations = array();
 		$postcodes = array();
@@ -347,6 +341,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 
 		if ( 0 !== $zone->get_id() ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true, array( 'wc-shipping-zone-methods' ) );
 			$localized_object['region_options'] = $this->get_region_options( $allowed_countries, $shipping_continents );
 		}
 
