@@ -6,7 +6,7 @@ import { keyBy, mapValues, sortBy } from 'lodash';
 /**
  * Internal dependencies
  */
-import { DataType } from './data';
+import type { DataType } from './types';
 
 /**
  * Removes any non-digit character.
