@@ -3017,12 +3017,20 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			wc_get_order( $order_id );
 		} );
 		$order = OrderHelper::create_order();
-		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
 
 		$this->assertEquals( 1, $order->get_customer_id() );
 
 		$r_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 1, $r_order->get_customer_id() );
+
+		$this->reset_order_data_store_state( wc_get_container()->get( OrdersTableDataStore::class ) );
+		$order->set_customer_id( 2 );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 2, $r_order->get_customer_id() );
+
+		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
 	}
 
 	/**
