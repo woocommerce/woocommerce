@@ -11,7 +11,7 @@ export const customer_username =
 export const customer_password = __ENV.C_PW || 'password';
 export const customer_user_id = __ENV.C_UID || '2';
 
-export const cot_status = __ENV.COT || false;
+export const cot_status = __ENV.COT || true;
 
 export const admin_orders_base_url = 'edit.php?post_type=shop_order';
 export const cot_admin_orders_base_url = 'admin.php?page=wc-orders';

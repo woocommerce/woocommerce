@@ -58,7 +58,7 @@ let admin_update_order_assert;
 if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-	admin_new_order_assert = 'post_status" type="hidden" value="pending';
+	admin_new_order_assert = 'Add new order';
 	admin_open_order_assert = 'post_status" type="hidden" value="pending';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'changed from Pending payment to Completed';
@@ -113,6 +113,9 @@ export function addOrder( includeTests = {} ) {
 				tags: { name: 'Merchant - New Order Page' },
 			}
 		);
+		console.log('nige response=',response.body);
+		console.log('admin_new_order_assert=',admin_new_order_assert);
+
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Add new order' header": ( response ) =>
