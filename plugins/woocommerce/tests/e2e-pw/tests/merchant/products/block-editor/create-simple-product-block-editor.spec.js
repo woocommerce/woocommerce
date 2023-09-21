@@ -53,8 +53,7 @@ test.describe( 'General tab', () => {
 			await clickOnTab( 'General', page );
 			await page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' ).isVisible();
 
-			const blockWarnings = await page.locator( '.block-editor-warning' );
-			expect( blockWarnings ).toBeEmpty();
+			expect( page.locator( '.block-editor-warning' ) ).toHaveCount( 0 );
 		} );
 	} );
 
