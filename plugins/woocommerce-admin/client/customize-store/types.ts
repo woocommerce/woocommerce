@@ -20,9 +20,11 @@ export type CustomizeStoreComponentMeta = {
 };
 
 export type customizeStoreStateMachineContext = {
+	customizeStoreTaskCompleted: boolean;
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
 		themeCards: ThemeCard[];
 		activeTheme: string;
+		activeThemeHasMods: boolean;
 	};
 };

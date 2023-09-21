@@ -113,9 +113,11 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 	},
 	context: {
+		customizeStoreTaskCompleted: false,
 		intro: {
 			themeCards: [] as ThemeCard[],
 			activeTheme: '',
+			activeThemeHasMods: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
