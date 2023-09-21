@@ -28,13 +28,14 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@wordpress/blocks": "^12.3.0",
-		"@wordpress/block-editor": "^9.8.0"
+		"@wordpress/block-editor": "^9.8.0",
+		"@wordpress/blocks": "^12.3.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
 		"@babel/runtime": "^7.17.2",
 		"@testing-library/jest-dom": "^5.16.2",
+		"@testing-library/react-hooks": "^8.0.1",
 		"@types/jest": "^27.4.1",
 		"@types/testing-library__jest-dom": "^5.14.3",
 		"@types/wordpress__block-editor": "^7.0.0",
