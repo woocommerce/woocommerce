@@ -1,5 +1,10 @@
-// placeholder xstate async service that returns a set of theme cards
+/**
+ * External dependencies
+ */
+import { resolveSelect } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
+// placeholder xstate async service that returns a set of theme cards
 export const fetchThemeCards = async () => {
 	return [
 		{
@@ -55,4 +60,21 @@ export const fetchThemeCards = async () => {
 			],
 		},
 	];
+};
+
+export const fetchIntroData = async () => {
+	const { getActiveThemeModsCount, getTask } = resolveSelect(
+		ONBOARDING_STORE_NAME
+	);
+
+	const activeThemeHasMods = ( await getActiveThemeModsCount() ) > 0;
+	const customizeStoreTaskCompleted = ( await getTask( 'customize-store' ) )
+		?.isComplete;
+	const themeCards = await fetchThemeCards();
+
+	return {
+		activeThemeHasMods,
+		customizeStoreTaskCompleted,
+		themeCards,
+	};
 };
