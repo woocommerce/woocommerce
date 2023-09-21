@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect, useContext } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';
 import { useQuery } from '@woocommerce/navigation';
@@ -14,18 +14,22 @@ import CategoryLink from './category-link';
 import CategoryDropdown from './category-dropdown';
 import { Category, CategoryAPIItem } from './types';
 import { fetchCategories } from '../../utils/functions';
-import { MarketplaceContext } from '../../contexts/marketplace-context';
 import './category-selector.scss';
+import { ProductType } from '../product-list/types';
 
 const ALL_CATEGORIES_SLUG = '_all';
 
-export default function CategorySelector(): JSX.Element {
+interface CategorySelectorProps {
+	type: ProductType;
+}
+
+export default function CategorySelector(
+	props: CategorySelectorProps
+): JSX.Element {
 	const [ visibleItems, setVisibleItems ] = useState< Category[] >( [] );
 	const [ dropdownItems, setDropdownItems ] = useState< Category[] >( [] );
 	const [ selected, setSelected ] = useState< Category >();
 	const [ isLoading, setIsLoading ] = useState( false );
-	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab } = marketplaceContextValue;
 
 	const query = useQuery();
 
@@ -49,12 +53,9 @@ export default function CategorySelector(): JSX.Element {
 	}, [ query, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
-		if ( selectedTab === '' ) {
-			return;
-		}
 		setIsLoading( true );
 
-		fetchCategories( selectedTab )
+		fetchCategories( props.type )
 			.then( ( categoriesFromAPI: CategoryAPIItem[] ) => {
 				const categories: Category[] = categoriesFromAPI
 					.map( ( categoryAPIItem: CategoryAPIItem ): Category => {
@@ -82,7 +83,7 @@ export default function CategorySelector(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [ selectedTab ] );
+	}, [ props.type ] );
 
 	function mobileCategoryDropdownLabel() {
 		const allCategoriesText = __( 'All Categories', 'woocommerce' );
