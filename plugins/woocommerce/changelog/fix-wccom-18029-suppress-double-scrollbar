@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fixed a bug that caused redundant extra scrollbars to appear on WooCommerce > Extensions pages for some browser/OS/configuration combinations.
-
-
