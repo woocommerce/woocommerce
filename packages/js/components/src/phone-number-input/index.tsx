@@ -106,7 +106,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 	const handleChange = ( code: string, number: string ) => {
 		// Return value, phone number in E.164 format, and country alpha2 code.
 		number = `+${ countries[ code ].code } ${ number }`;
-		onChange( number, numberToE164( number ), countryKey );
+		onChange( number, numberToE164( number ), code );
 	};
 
 	const handleSelect = ( code: string ) => {
