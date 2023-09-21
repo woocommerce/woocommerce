@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
+import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -29,6 +30,12 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 		( product ) => product.type === ProductType.theme
 	);
 
+	const query = useQuery();
+	const [ isCategorySearch, setIsCategorySearch ] = useState( false );
+	useEffect( () => {
+		setIsCategorySearch( !! query?.category );
+	}, [ query?.category ] );
+
 	function content() {
 		if ( isLoading ) {
 			return <ProductLoader />;
@@ -38,15 +45,18 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 			return <NoResults />;
 		}
 
+		const hasExtensions = ! isCategorySearch || !! extensions?.length;
+		const hasThemes = ! isCategorySearch || !! themes?.length;
+
 		return (
 			<>
-				{ !! extensions?.length && (
+				{ hasExtensions && (
 					<Extensions
 						products={ extensions }
 						perPage={ MARKETPLACE_SEARCH_RESULTS_PER_PAGE }
 					/>
 				) }
-				{ !! themes?.length && (
+				{ hasThemes && (
 					<Themes
 						products={ themes }
 						perPage={ MARKETPLACE_SEARCH_RESULTS_PER_PAGE }
