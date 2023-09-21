@@ -2924,17 +2924,18 @@ CREATE TABLE $meta_table (
 	 */
 	protected function after_meta_change( &$order, $meta ) {
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
-		$order_saved = false;
 
 		// Prevent this happening multiple time in same request.
 		if ( $this->should_save_after_meta_change( $order ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
-			$order_saved = true;
+			return true;
+		} else {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $order->get_id() );
 		}
 
-		$this->clear_caches( $order );
-		return $order_saved;
+		return false;
 	}
 
 	/**
