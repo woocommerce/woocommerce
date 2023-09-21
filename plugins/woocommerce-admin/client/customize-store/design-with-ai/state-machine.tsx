@@ -11,6 +11,8 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 	FontPairing,
+	Header,
+	Footer,
 	ColorPaletteResponse,
 } from './types';
 import {
@@ -21,7 +23,12 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette, fontPairings } from './prompts';
+import {
+	defaultColorPalette,
+	fontPairings,
+	defaultHeader,
+	defaultFooter,
+} from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -72,6 +79,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 			aiSuggestions: {
 				defaultColorPalette: {} as ColorPaletteResponse,
 				fontPairing: '' as FontPairing[ 'pair_name' ],
+				header: '' as Header[ 'slug' ],
+				footer: '' as Footer[ 'slug' ],
 			},
 		},
 		initial: 'navigate',
@@ -309,6 +318,44 @@ export const designWithAiStateMachineDefinition = createMachine(
 									},
 									onDone: {
 										actions: [ 'assignFontPairing' ],
+									},
+								},
+							},
+							chooseHeader: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...defaultHeader,
+											prompt: defaultHeader.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [ 'assignHeader' ],
+									},
+								},
+							},
+							chooseFooter: {
+								invoke: {
+									src: 'queryAiEndpoint',
+									data: ( context ) => {
+										return {
+											...defaultFooter,
+											prompt: defaultFooter.prompt(
+												context.businessInfoDescription
+													.descriptionText,
+												context.lookAndFeel.choice,
+												context.toneOfVoice.choice
+											),
+										};
+									},
+									onDone: {
+										actions: [ 'assignFooter' ],
 									},
 								},
 							},
