@@ -21,20 +21,18 @@ import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../constants';
 async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
-	const attributes = (
-		( await resolveSelect( 'core' ).getEntityRecord(
+	try {
+		const { attributes } = ( await resolveSelect( 'core' ).getEntityRecord(
 			'postType',
 			'product',
 			productId
-		) ) as Product
-	 ).attributes;
-	const alreadyHasVariableAttribute = attributes.some(
-		( attr ) => attr.variation
-	);
-	if ( ! alreadyHasVariableAttribute ) {
-		return {};
-	}
-	try {
+		) ) as Product;
+		const alreadyHasVariableAttribute = attributes.some(
+			( attr ) => attr.variation
+		);
+		if ( ! alreadyHasVariableAttribute ) {
+			return {};
+		}
 		const products = await resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).getProductVariations< ProductVariation[] >( {
@@ -53,10 +51,10 @@ async function getDefaultVariationValues(
 				low_stock_amount: products[ 0 ].low_stock_amount,
 			};
 		}
+		return {};
 	} catch {
 		return {};
 	}
-	return {};
 }
 
 export function useProductVariationsHelper() {
@@ -79,13 +77,13 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
-			const lastStatus = (
-				( await resolveSelect( 'core' ).getEditedEntityRecord(
-					'postType',
-					'product',
-					productId
-				) ) as Product
-			 ).status;
+			const { status: lastStatus } = ( await resolveSelect(
+				'core'
+			).getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
+			) ) as Product;
 			const hasVariableAttribute = attributes.some(
 				( attr ) => attr.variation
 			);
