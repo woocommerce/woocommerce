@@ -15,8 +15,23 @@ import { Subscription } from './types';
 import './my-subscriptions.scss';
 
 export default function MySubscriptions(): JSX.Element {
-	const updateConnectionUrl = getNewPath( { page: 'wc-addons', section: 'helper', filter: 'all', 'wc-helper-refresh': 1, 'wc-helper-nonce': getAdminSetting( 'wc_helper_nonces' ).refresh }, '' );
-	const updateConnectionHTML = sprintf( __( "If you don't see your subscription, try <a href=\"%s\">updating</a> your connection.", 'woocommerce' ), updateConnectionUrl );
+	const updateConnectionUrl = getNewPath(
+		{
+			page: 'wc-addons',
+			section: 'helper',
+			filter: 'all',
+			'wc-helper-refresh': 1,
+			'wc-helper-nonce': getAdminSetting( 'wc_helper_nonces' ).refresh,
+		},
+		''
+	);
+	const updateConnectionHTML = sprintf(
+		__(
+			'If you don\'t see your subscription, try <a href="%s">updating</a> your connection.',
+			'woocommerce'
+		),
+		updateConnectionUrl
+	);
 
 	const tableHeadersInstalled = [
 		{
@@ -49,7 +64,7 @@ export default function MySubscriptions(): JSX.Element {
 			label: __( 'Actions', 'woocommerce' ),
 		},
 	];
-	const subscriptionsInstalled:Array<Subscription> = [];
+	const subscriptionsInstalled: Array< Subscription > = [];
 
 	const tableHeadersAvailable = [
 		{
@@ -82,25 +97,35 @@ export default function MySubscriptions(): JSX.Element {
 			label: __( 'Actions', 'woocommerce' ),
 		},
 	];
-	const subscriptionsAvailable:Array<Subscription> = [];
+	const subscriptionsAvailable: Array< Subscription > = [];
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
 			<section>
-				<h2>
-					{ __( 'Installed on this store', 'woocommerce' ) }
-				</h2>
+				<h2>{ __( 'Installed on this store', 'woocommerce' ) }</h2>
 				<p>
-					<span dangerouslySetInnerHTML={{ __html: updateConnectionHTML }} />
+					<span
+						dangerouslySetInnerHTML={ {
+							__html: updateConnectionHTML,
+						} }
+					/>
 					<Tooltip
 						text={
 							<>
 								<h3>Still don't see your subscriptions?</h3>
-								<p>To see all your subscriptions go to your account on WooCommerce.com.</p>
+								<p>
+									To see all your subscriptions go to your
+									account on WooCommerce.com.
+								</p>
 							</>
 						}
 					>
-						<Button	icon={help}	iconSize={20}	isSmall={true} label={ __( 'Help', 'woocommerce' )} />
+						<Button
+							icon={ help }
+							iconSize={ 20 }
+							isSmall={ true }
+							label={ __( 'Help', 'woocommerce' ) }
+						/>
 					</Tooltip>
 				</p>
 				<Table
@@ -120,14 +145,15 @@ export default function MySubscriptions(): JSX.Element {
 			</section>
 
 			<section>
-				<h2>
-					{ __( 'Available', 'woocommerce' ) }
-				</h2>
+				<h2>{ __( 'Available', 'woocommerce' ) }</h2>
 				<p>
-					{ __( 'Your unused and free WooCommerce.com subscriptions.', 'woocommerce' ) }
+					{ __(
+						'Your unused and free WooCommerce.com subscriptions.',
+						'woocommerce'
+					) }
 				</p>
 				<Table
-					headers={ tableHeadersInstalled }
+					headers={ tableHeadersAvailable }
 					rows={ subscriptionsAvailable.map( ( item ) => {
 						return [
 							{ display: item.name },
