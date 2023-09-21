@@ -8,7 +8,7 @@ A collection of utility functions for use with WooCommerce admin block templates
 
 Registers a WooCommerce block type.
 
-_Usage_
+#### Usage
 
 ```js
 import { registerWooBlockType } from '@woocommerce/block-templates';
@@ -25,11 +25,11 @@ registerWooBlockType( {
 } );
 ```
 
-_Parameters_
+#### Parameters
 
 - _blockMetadata_ `Object`: Block metadata.
 
-_Returns_
+#### Returns
 
 - `WPBlockType | undefined`: The block type if it was registered successfully, otherwise `undefined`.
 
@@ -39,7 +39,7 @@ This hook is used to lightly mark an element as a WooCommerce block template blo
 
 If you define a ref for the element, it is important to pass the ref to this hook, which the hook in turn will pass to the component through the props it returns. Optionally, you can also pass any other props through this hook, and they will be merged and returned.
 
-_Usage_
+#### Usage
 
 ```js
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -60,10 +60,11 @@ export function Edit( { attributes } ) {
 }
 ```
 
-_Parameters_
+#### Parameters
+
 - _attributes_: `Object`: Block attributes.
 - _props_: `Object`: Optional. Props to pass to the element.
 
-_Returns_
+#### Returns
 
 - `Object`: Props to pass to the element to mark as a WooCommerce block.
