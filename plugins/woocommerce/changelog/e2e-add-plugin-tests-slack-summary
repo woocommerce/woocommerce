@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add job to post Slack summary of plugin test results in "Smoke test daily" workflow.

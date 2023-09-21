@@ -1,4 +1,0 @@
-Significance: major
-Type: fix
-
-Remove use of woocommerce-page class within WooCommerce Admin pages, replaced with woocommerce-admin-page.

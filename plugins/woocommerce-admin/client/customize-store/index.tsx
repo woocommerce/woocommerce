@@ -4,7 +4,11 @@
 import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	getNewPath,
+	getQuery,
+	updateQueryString,
+} from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 
@@ -59,6 +63,10 @@ const updateQueryStep = (
 	}
 };
 
+const redirectToWooHome = () => {
+	window.location.href = getNewPath( {}, '/', {} );
+};
+
 const markTaskComplete = async () => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
@@ -78,6 +86,7 @@ const browserPopstateHandler =
 
 export const machineActions = {
 	updateQueryStep,
+	redirectToWooHome,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -184,7 +193,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'assemblerHub',
 				},
 				CLICKED_ON_BREADCRUMB: {
-					target: 'backToHomescreen',
+					actions: 'redirectToWooHome',
 				},
 				SELECTED_NEW_THEME: {
 					target: 'appearanceTask',
@@ -263,11 +272,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				GO_BACK_TO_HOME: {
-					target: 'backToHomescreen',
+					actions: 'redirectToWooHome',
 				},
 			},
 		},
-		backToHomescreen: {},
 		appearanceTask: {},
 	},
 } );

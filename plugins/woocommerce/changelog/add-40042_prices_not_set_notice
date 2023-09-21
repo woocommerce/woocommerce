@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add has_price param to the variations REST API query.
