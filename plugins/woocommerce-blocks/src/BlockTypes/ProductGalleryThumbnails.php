@@ -23,6 +23,15 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 *  Register the context
 	 *
 	 * @return string[]
@@ -65,7 +74,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							break;
 						}
 
-						$html .= '<div class="wp-block-woocommerce-product-gallery-thumbnails__thumbnail">';
+						$html .= '<div class="wc-block-product-gallery-thumbnails__thumbnail">';
 
 						$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
 
@@ -84,7 +93,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 					}
 
 					return sprintf(
-						'<div class="wc-block-components-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s">
+						'<div class="wc-block-product-gallery-thumbnails wp-block-woocommerce-product-gallery-thumbnails %1$s" style="%2$s">
 							%3$s
 						</div>',
 						esc_attr( $classes_and_styles['classes'] ),

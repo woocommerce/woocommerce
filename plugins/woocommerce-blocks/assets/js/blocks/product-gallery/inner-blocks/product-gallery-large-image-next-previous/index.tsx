@@ -9,7 +9,6 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
  */
 import { Edit } from './edit';
 import metadata from './block.json';
-import './style.scss';
 import { Save } from './save';
 import { Icon } from './icons';
 
