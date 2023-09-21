@@ -725,7 +725,7 @@
 			},
 
 			send_orders_in_list: function( e, data ) {
-				data['wc-check-locked-orders'] = wc_order_lock.$list_table.find( 'tr input[name="order"]' ).map(
+				data['wc-check-locked-orders'] = wc_order_lock.$list_table.find( 'tr input[name="id[]"]' ).map(
 					function() { return this.value; }
 				).get();
 			},
@@ -735,7 +735,7 @@
 
 				wc_order_lock.$list_table.find( 'tr' ).each( function( i, tr ) {
 					var $tr      = $( tr );
-					var order_id = $tr.find( 'input[name="order"]' ).val();
+					var order_id = $tr.find( 'input[name="id[]"]' ).val();
 
 					if ( locked_orders[ order_id ] ) {
 						if ( ! $tr.hasClass( 'wp-locked' ) ) {
