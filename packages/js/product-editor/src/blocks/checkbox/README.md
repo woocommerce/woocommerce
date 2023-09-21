@@ -1,13 +1,20 @@
 # woocommerce/product-checkbox-field
 
-This block is used to render a checkbox field in the product editor.
+A reusable checkbox for the product editor.
 
 _Please note that to persist a custom field in the product it also needs to be added to the WooCommerce REST API._
+
+| **attribute** | **type** | **required** | **description**                                                            |
+|--------------:|----------|--------------|----------------------------------------------------------------------------|
+| title         | string   | no           | Header that appears above the checkbox                                     |
+| label         | string   | no           | Label that appears at the side of the checkbox                             |
+| property      | string   | yes          | Property in which the checkbox value is stored                             |
+| tooltip       | string   | no           | Tooltip text that is shown when hovering the icon at the side of the label |
 
 Here's an example on how it is used for the 'sold_individually' field in the Inventory section:
 
 ```php
-$product_inventory_advanced_wrapper->add_block(
+$parent_container->add_block(
 			[
 				'id'         => 'product-limit-purchase',
 				'blockName'  => 'woocommerce/product-checkbox-field',

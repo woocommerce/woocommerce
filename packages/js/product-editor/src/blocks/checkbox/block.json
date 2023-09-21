@@ -10,20 +10,16 @@
 	"attributes": {
 		"title": {
 			"type": "string",
-			"description": "Header that appears above the checkbox",
 			"__experimentalRole": "content"
 		},
 		"label": {
-			"type": "string",
-			"description": "Label that appears at the side of the checkbox"
+			"type": "string"
 		},
 		"property": {
-			"type": "string",
-			"description": "Property in which the checkbox value is stored"
+			"type": "string"
 		},
 		"tooltip": {
-			"type": "string",
-			"description": "Tooltip text that is shown when hovering the icon at the side of the label"
+			"type": "string"
 		}
 	},
 	"supports": {
