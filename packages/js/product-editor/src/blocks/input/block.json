@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-input-field",
-	"title": "Product input control",
+	"name": "woocommerce/product-text-field",
+	"title": "Product text control",
 	"category": "woocommerce",
-	"description": "A input control for use in the product editor.",
-	"keywords": [ "products", "input" ],
+	"description": "A text control for use in the product editor.",
+	"keywords": [ "products", "text" ],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -14,6 +14,10 @@
 		},
 		"property": {
 			"type": "string"
+		},
+		"isMeta": {
+			"type": "boolean",
+			"default": true
 		},
 		"placeholder": {
 			"type": "string"

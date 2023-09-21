@@ -47,7 +47,7 @@ class BlockRegistry {
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
 		'woocommerce/product-taxonomy-field',
-		'woocommerce/product-input-field',
+		'woocommerce/product-text-field',
 	];
 
 	/**
