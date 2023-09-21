@@ -495,8 +495,8 @@ class WC_Install {
 				'data_sync' => get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ),
 			),
 			array(
-				'cot'       => FILTER_VALIDATE_BOOL,
-				'data_sync' => FILTER_VALIDATE_BOOL,
+				'cot'       => FILTER_VALIDATE_BOOLEAN,
+				'data_sync' => FILTER_VALIDATE_BOOLEAN,
 			)
 		);
 		if ( in_array( true, $hpos_settings, true ) ) {
