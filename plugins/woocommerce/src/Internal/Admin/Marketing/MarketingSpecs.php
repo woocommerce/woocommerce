@@ -140,10 +140,8 @@ class MarketingSpecs {
 	 * @return array
 	 */
 	public function get_knowledge_base_posts( ?string $topic ): array {
-		$available_topics = array( 'marketing', 'coupons' );
-
 		// Default to the marketing topic (if no topic is set on the kb component).
-		if ( empty( $topic ) || ! in_array( $topic, $available_topics, true ) ) {
+		if ( empty( $topic ) ) {
 			$topic = 'marketing';
 		}
 
