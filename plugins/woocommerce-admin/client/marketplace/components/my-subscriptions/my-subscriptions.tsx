@@ -112,7 +112,7 @@ export default function MySubscriptions(): JSX.Element {
 					<Tooltip
 						text={
 							<>
-								<h3>Still don't see your subscriptions?</h3>
+								<h3>Still don&apos;t see your subscriptions?</h3>
 								<p>
 									To see all your subscriptions go to your
 									account on WooCommerce.com.
