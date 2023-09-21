@@ -16,6 +16,7 @@ import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
 import SearchResults from '../search-results/search-results';
 import Themes from '../themes/themes';
+import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function Content(): JSX.Element {
@@ -108,6 +109,8 @@ export default function Content(): JSX.Element {
 				return <SearchResults products={ products } />;
 			case 'discover':
 				return <Discover />;
+			case 'my-subscriptions':
+				return <MySubscriptions />;
 			default:
 				return <></>;
 		}
