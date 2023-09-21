@@ -53,7 +53,7 @@ export default function Content(): JSX.Element {
 		} else if ( selectedTab === 'themes' ) {
 			params.append( 'category', 'themes' );
 		} else if ( selectedTab === 'search' ) {
-			params.append( 'category', 'extensions+themes' );
+			params.append( 'category', 'extensions-themes' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
