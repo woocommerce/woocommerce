@@ -155,3 +155,29 @@
 		padding: 0.5rem 0.75rem;
 	}
 }
+
+.woocommerce-customize-store__design-change-warning-modal {
+	width: 480px;
+	max-width: 480px;
+	.components-modal__header {
+		padding-top: 32px;
+	} 
+	p{
+		padding: 16px 0 16px 0;
+		margin: 0;
+	}
+	a, button {
+		text-decoration: none !important;
+	}
+	h1 {
+		width: 320px;
+		line-height: 28px;
+		font-size: 20px;
+		color: #1e1e1e;
+	}
+	.woocommerce-customize-store__design-change-warning-modal-footer {
+		display: flex;
+		gap: 15px;
+		justify-content: flex-end;
+	}
+}
