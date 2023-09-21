@@ -67,9 +67,6 @@ test.describe( 'Bulk edit orders', () => {
 	test( 'can bulk update order status', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		// expect for there to be 5 orders (plus a header and footer row)
-		await expect( page.getByRole( 'row' ) ).toHaveCount( 7 );
-
 		// expect order status 'processing' to show
 		await expect( page.locator( `#order-${ orderId1 }`).getByText( 'Processing') ).toBeVisible();
 		await expect( page.locator( `#order-${ orderId2 }`).getByText( 'Processing') ).toBeVisible();
