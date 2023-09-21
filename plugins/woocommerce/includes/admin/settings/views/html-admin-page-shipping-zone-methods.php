@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</th>
 				<td>
 					<div>
-						<div id="wc-shipping-zone-region-picker-root" data-options='<?php echo wp_json_encode( $region_options ); ?>' data-values='<?php echo wp_json_encode( $locations ); ?>'/>
+						<div id="wc-shipping-zone-region-picker-root" data-values='<?php echo wp_json_encode( $locations ); ?>'/>
 					</div>
 					<?php if ( empty( $postcodes ) ) : ?>
 						<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php esc_html_e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
