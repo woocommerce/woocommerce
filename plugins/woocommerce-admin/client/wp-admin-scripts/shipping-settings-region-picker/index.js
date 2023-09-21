@@ -13,7 +13,7 @@ const shippingZoneRegionPickerRoot = document.getElementById(
 );
 
 const options = window.shippingZoneMethodsLocalizeScript?.region_options ?? [];
-const initialValues = JSON.parse( shippingZoneRegionPickerRoot.dataset.values );
+const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 
 if ( shippingZoneRegionPickerRoot ) {
 	if ( createRoot ) {

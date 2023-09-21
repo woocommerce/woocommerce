@@ -331,6 +331,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'methods'                 => $zone->get_shipping_methods( false, 'json' ),
 			'zone_name'               => $zone->get_zone_name(),
 			'zone_id'                 => $zone->get_id(),
+			'locations'               => $locations,
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg'             => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
