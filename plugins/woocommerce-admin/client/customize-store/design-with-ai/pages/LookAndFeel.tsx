@@ -33,7 +33,7 @@ export const LookAndFeel = ( {
 			title: __( 'Contemporary', 'woocommerce' ),
 			key: 'Contemporary' as const,
 			subtitle: __(
-				'Clean lines, neutral colors, sleek and modern look',
+				'Clean lines, neutral colors, sleek and modern look.',
 				'woocommerce'
 			),
 		},

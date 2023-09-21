@@ -4,15 +4,19 @@
  */
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { useContext } from '@wordpress/element';
+import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 
 const {
 	useGlobalStyle,
 	useGlobalSetting,
 	useSettingsForBlockElement,
 	ColorPanel: StylesColorPanel,
+	GlobalStylesContext,
 } = unlock( blockEditorPrivateApis );
 
 export const ColorPanel = () => {
+	const { setUserConfig } = useContext( GlobalStylesContext );
 	const [ style ] = useGlobalStyle( '', undefined, 'user', {
 		shouldDecodeEncode: false,
 	} );
@@ -22,11 +26,25 @@ export const ColorPanel = () => {
 	const [ rawSettings ] = useGlobalSetting( '' );
 	const settings = useSettingsForBlockElement( rawSettings );
 
+	const onChange = ( ...props ) => {
+		setStyle( ...props );
+		setUserConfig( ( currentConfig ) => ( {
+			...currentConfig,
+			settings: mergeBaseAndUserConfigs( currentConfig.settings, {
+				color: {
+					palette: {
+						hasCreatedOwnColors: true,
+					},
+				},
+			} ),
+		} ) );
+	};
+
 	return (
 		<StylesColorPanel
 			inheritedValue={ inheritedStyle }
 			value={ style }
-			onChange={ setStyle }
+			onChange={ onChange }
 			settings={ settings }
 		/>
 	);

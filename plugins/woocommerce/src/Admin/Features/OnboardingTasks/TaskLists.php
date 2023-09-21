@@ -44,7 +44,6 @@ class TaskLists {
 	 */
 	const DEFAULT_TASKS = array(
 		'StoreDetails',
-		'Purchase',
 		'Products',
 		'WooCommercePayments',
 		'Payments',
@@ -112,14 +111,13 @@ class TaskLists {
 		$tasks = array(
 			'CustomizeStore',
 			'StoreDetails',
-			'Purchase',
 			'Products',
+			'Appearance',
 			'WooCommercePayments',
 			'Payments',
 			'Tax',
 			'Shipping',
 			'Marketing',
-			'Appearance',
 		);
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {

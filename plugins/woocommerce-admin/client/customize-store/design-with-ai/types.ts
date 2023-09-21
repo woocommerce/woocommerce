@@ -1,3 +1,18 @@
+/**
+ * External dependencies
+ */
+import { z } from 'zod';
+/**
+ * Internal dependencies
+ */
+import {
+	colorPaletteValidator,
+	fontChoiceValidator,
+	headerValidator,
+	footerValidator,
+	colorPaletteResponseValidator,
+} from './prompts';
+
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
@@ -7,6 +22,12 @@ export type designWithAiStateMachineContext = {
 	};
 	toneOfVoice: {
 		choice: Tone | '';
+	};
+	aiSuggestions: {
+		defaultColorPalette: ColorPaletteResponse;
+		fontPairing: FontPairing[ 'pair_name' ];
+		header: Header[ 'slug' ];
+		footer: Footer[ 'slug' ];
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
@@ -31,3 +52,19 @@ export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
 export const VALID_TONES = [ 'Informal', 'Neutral', 'Formal' ] as const;
 export type Look = ( typeof VALID_LOOKS )[ number ];
 export type Tone = ( typeof VALID_TONES )[ number ];
+
+export interface LookAndToneCompletionResponse {
+	look: Look;
+	tone: Tone;
+}
+
+export type ColorPalette = z.infer< typeof colorPaletteValidator >;
+export type ColorPaletteResponse = z.infer<
+	typeof colorPaletteResponseValidator
+>;
+
+export type FontPairing = z.infer< typeof fontChoiceValidator >;
+
+export type Header = z.infer< typeof headerValidator >;
+
+export type Footer = z.infer< typeof footerValidator >;
