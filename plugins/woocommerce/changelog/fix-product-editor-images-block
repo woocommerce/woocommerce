@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Enqueue media scripts for Images block within the product editor, as is required for Images block.
