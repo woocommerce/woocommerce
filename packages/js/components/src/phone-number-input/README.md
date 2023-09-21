@@ -15,17 +15,17 @@ Includes mobile phone numbers validation.
 
 ### Props
 
-| Name             | Type     | Default                 | Description                                                                                                  |
-| ---------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `value`          | String   | `undefined`             | (Required) Phone number with spaces and hyphens                                                              |
-| `onChange`       | Function | `undefined`             | (Required) Callback function when the value changes                                                          |
-| `id`             | String   | `undefined`             | ID for the input element, to bind a `<label>`                                                                |
-| `className`      | String   | `undefined`             | Additional class name applied to parent `<div>`                                                              |
-| `selectedRender` | Function | `defaultSelectedRender` | Render function for the selected country.<br />Displays the country flag and code by default.                |
-| `itemRender`     | Function | `itemRender`            | Render function for each country in the dropdown.<br />Displays the country flag, name, and code by default. |
-| `arrowRender`    | Function | `defaultArrowRender`    | Render function for the dropdown arrow.<br />Displays a chevron down icon by default.                        |
+| Name             | Type     | Default                 | Description                                                                                             |
+| ---------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `value`          | String   | `undefined`             | (Required) Phone number with spaces and hyphens                                                         |
+| `onChange`       | Function | `undefined`             | (Required) Callback function when the value changes                                                     |
+| `id`             | String   | `undefined`             | ID for the input element, to bind a `<label>`                                                           |
+| `className`      | String   | `undefined`             | Additional class name applied to parent `<div>`                                                         |
+| `selectedRender` | Function | `defaultSelectedRender` | Render function for the selected country. Displays the country flag and code by default.                |
+| `itemRender`     | Function | `itemRender`            | Render function for each country in the dropdown. Displays the country flag, name, and code by default. |
+| `arrowRender`    | Function | `defaultArrowRender`    | Render function for the dropdown arrow. Displays a chevron down icon by default.                        |
 
-### `onChange` params:
+### `onChange` params
 
 -   `value`: Phone number with spaces and hyphens. e.g. `+1 234-567-8901`
 -   `e164`: Phone number in E.164 format. e.g. `+12345678901`
