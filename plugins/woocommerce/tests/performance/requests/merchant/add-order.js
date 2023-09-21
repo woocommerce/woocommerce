@@ -113,8 +113,6 @@ export function addOrder( includeTests = {} ) {
 				tags: { name: 'Merchant - New Order Page' },
 			}
 		);
-		console.log('nige response=',response.body);
-		console.log('admin_new_order_assert=',admin_new_order_assert);
 
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
