@@ -9,5 +9,5 @@
     "keywords": [ "WooCommerce" ],
     "textdomain": "woo-gutenberg-products-block",
 	"ancestor": [ "woocommerce/product-gallery" ],
-	"usesContext": [ "pagerDisplayMode", "productGalleryClientId" ]
+	"usesContext": [ "pagerDisplayMode", "productGalleryClientId", "thumbnailsNumberOfThumbnails", "postId" ]
 }
