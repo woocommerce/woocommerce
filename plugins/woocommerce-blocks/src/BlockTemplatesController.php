@@ -433,8 +433,7 @@ class BlockTemplatesController {
 						if ( post_password_required() ) {
 							$template->content = SingleProductTemplate::add_password_form( $template->content );
 						} else {
-							$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
-							$template->content = $new_content;
+							$template->content = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
 						}
 					}
 				}
