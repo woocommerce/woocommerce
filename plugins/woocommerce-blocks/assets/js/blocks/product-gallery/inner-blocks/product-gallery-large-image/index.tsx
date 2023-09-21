@@ -11,7 +11,6 @@ import icon from './icon';
 import { Edit } from './edit';
 import { Save } from './save';
 import metadata from './block.json';
-import './style.scss';
 
 if ( isExperimentalBuild() ) {
 	// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core

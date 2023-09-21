@@ -20,14 +20,14 @@ export const Icon = () => (
 	</svg>
 );
 
-export const NextButton = ( { suffixClass }: { suffixClass: string } ) => (
+export const NextButtonInsideImage = () => (
 	<SVG
 		xmlns="http://www.w3.org/2000/svg"
 		width="49"
 		height="48"
 		viewBox="0 0 49 48"
 		fill="none"
-		className={ `wc-block-product-gallery-large-image-next-previous-right--${ suffixClass }` }
+		className={ `wc-block-product-gallery-large-image-next-previous-right--inside-image` }
 	>
 		<g filter="url(#filter0_b_397_11354)">
 			<rect
@@ -71,14 +71,14 @@ export const NextButton = ( { suffixClass }: { suffixClass: string } ) => (
 	</SVG>
 );
 
-export const PrevButton = ( { suffixClass }: { suffixClass: string } ) => (
+export const PrevButtonInsideImage = () => (
 	<SVG
 		xmlns="http://www.w3.org/2000/svg"
 		width="49"
 		height="48"
 		viewBox="0 0 49 48"
 		fill="none"
-		className={ `wc-block-product-gallery-large-image-next-previous-left--${ suffixClass }` }
+		className={ `wc-block-product-gallery-large-image-next-previous-left--inside-image` }
 	>
 		<g filter="url(#filter0_b_397_11356)">
 			<rect
@@ -119,6 +119,38 @@ export const PrevButton = ( { suffixClass }: { suffixClass: string } ) => (
 				/>
 			</filter>
 		</defs>
+	</SVG>
+);
+
+export const NextButtonOutsideImage = () => (
+	<SVG
+		width="22"
+		height="38"
+		viewBox="0 0 22 38"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+		className={ `wc-block-product-gallery-large-image-next-previous-right--outside-image` }
+	>
+		<path
+			d="M4.56666 0L0.766663 3.16667L15.3333 19L0.766663 34.8333L4.56666 38L21.6667 19L4.56666 0Z"
+			fill="black"
+		/>
+	</SVG>
+);
+
+export const PrevButtonOutsideImage = () => (
+	<SVG
+		width="22"
+		height="38"
+		viewBox="0 0 22 38"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+		className={ `wc-block-product-gallery-large-image-next-previous-left--outside-image` }
+	>
+		<path
+			d="M17.7 0L21.5 3.16667L6.93334 19L21.5 34.8333L17.7 38L0.600002 19L17.7 0Z"
+			fill="black"
+		/>
 	</SVG>
 );
 
