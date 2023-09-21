@@ -307,64 +307,31 @@ jobs:
                   env-slug: wp-latest
                   release-version: ${{ needs.get-tag.outputs.tag }}
 
-    get-wp-versions:
-        name: Get WP L-1 & L-2 version numbers
-        needs: [get-tag]
+    test-wp-latest-1:
+        name: Test against WP Latest-1
         runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        outputs:
-            matrix: ${{ steps.get-versions.outputs.versions }}
-            tag: ${{ needs.get-tag.outputs.tag }}
-            created: ${{ needs.get-tag.outputs.created }}
-        steps:
-            - name: Create dirs
-              run: |
-                  mkdir script
-                  mkdir repo
-
-            - name: Checkout
-              uses: actions/checkout@v3
-              with:
-                  path: repo
-
-            - name: Copy script to get previous WP versions
-              run: cp repo/plugins/woocommerce/tests/e2e-pw/utils/wordpress.js script
-
-            - name: Install axios
-              working-directory: script
-              run: npm install axios
-
-            - name: Get version numbers
-              id: get-versions
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const { getPreviousTwoVersions } = require('./script/wordpress');
-                      const versions = await getPreviousTwoVersions();
-                      console.log(versions);
-                      core.setOutput('versions', versions);
-
-    test-wp-versions:
-        name: Test against ${{ matrix.version.description }} (${{ matrix.version.number }})
-        runs-on: ubuntu-20.04
-        needs: [get-wp-versions]
-        strategy:
-            fail-fast: false
-            matrix: ${{ fromJSON(needs.get-wp-versions.outputs.matrix) }}
+        needs: [ get-tag ]
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/api/allure-report
             API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/api/allure-results
-            API_WP_LATEST_X_ARTIFACT: API test on wp-env with WordPress ${{ matrix.version.number }} (run ${{ github.run_number }})
+            API_WP_LATEST_X_ARTIFACT: API test on wp-env with WordPress L-1 (run ${{ github.run_number }})
             E2E_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/e2e/allure-report
             E2E_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/e2e/allure-results
-            E2E_WP_LATEST_X_ARTIFACT: E2E test on wp-env with WordPress ${{ matrix.version.number }} (run ${{ github.run_number }})
+            E2E_WP_LATEST_X_ARTIFACT: E2E test on wp-env with WordPress L-1 (run ${{ github.run_number }})
         permissions:
             contents: read
         steps:
             - name: Checkout WooCommerce repo
               uses: actions/checkout@v3
 
+            - name: Get WP Latest-1 version number
+              id: get-wp-latest-1
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const { getVersionWPLatestMinusOne } = require( './plugins/woocommerce/tests/e2e-pw/utils/wordpress' );
+                      await getVersionWPLatestMinusOne( { core, github } );
+                      
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -373,28 +340,16 @@ jobs:
             - name: Launch WP Env
               working-directory: plugins/woocommerce
               run: pnpm run env:test
+              env:
+                WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
             - name: Download release zip
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: gh release download ${{ needs.get-wp-versions.outputs.tag }} --dir tmp
+              run: gh release download ${{ steps.get-wp-latest-1.outputs.version }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
-
-            - name: Downgrade WordPress version to ${{ matrix.version.number }}
-              working-directory: plugins/woocommerce
-              run: |
-                  pnpm exec wp-env run tests-cli -- wp core update --version=${{ matrix.version.number }} --force
-                  pnpm exec wp-env run tests-cli wp core update-db
-
-            - name: Verify environment details
-              working-directory: plugins/woocommerce
-              run: |
-                  pnpm exec wp-env run tests-cli wp core version
-                  pnpm exec wp-env run tests-cli wp plugin list
-                  pnpm exec wp-env run tests-cli wp theme list
-                  pnpm exec wp-env run tests-cli wp user list
 
             - name: Run API tests
               id: run-api-composite-action
@@ -423,13 +378,13 @@ jobs:
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+                  ENV_DESCRIPTION: wp-latest-1
               run: |
                   gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
-                    -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
                     -f artifact="${{ env.API_WP_LATEST_X_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
@@ -464,13 +419,13 @@ jobs:
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+                  ENV_DESCRIPTION: wp-latest-1
               run: |
                   gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
-                    -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
                     -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
@@ -486,11 +441,11 @@ jobs:
                   )
               uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
               with:
-                  test-name: ${{ matrix.version.description }} (${{ matrix.version.number }})
+                  test-name: WP Latest-1 (${{ steps.get-wp-latest-1.outputs.version }})
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
                   e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: ${{ matrix.version.env_description }}
-                  release-version: ${{ needs.get-wp-versions.outputs.tag }}
+                  env-slug: wp-latest-1
+                  release-version: ${{ needs.get-tag.outputs.tag }}
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
@@ -759,7 +714,7 @@ jobs:
             - get-tag
             - test-php-versions
             - test-plugins
-            - test-wp-versions
+            - test-wp-latest-1
         steps:
             - uses: actions/checkout@v3
 

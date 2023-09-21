@@ -12,6 +12,9 @@ wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 echo -e 'Activate Filter Setter utility plugin \n'
 wp-env run tests-cli wp plugin activate filter-setter
 
+echo -e 'Activate Test Helper APIs utility plugin \n'
+wp-env run tests-cli wp plugin activate test-helper-apis
+
 echo -e 'Add Customer user \n'
 wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
 	--user_pass=password \

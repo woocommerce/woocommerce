@@ -16,6 +16,7 @@ import {
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	DESCRIPTION_MAX_LENGTH,
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { InfoModal, StopCompletionBtn, WriteItForMeBtn } from '../components';
@@ -31,8 +32,6 @@ import {
 import { Attribute } from '../utils/types';
 import { translateApiErrors as getApiError } from '../utils/apiErrors';
 import { buildShortDescriptionPrompt } from '../product-short-description/product-short-description-button-container';
-
-const DESCRIPTION_MAX_LENGTH = 300;
 
 const recordDescriptionTracks = recordTracksFactory(
 	'description_completion',

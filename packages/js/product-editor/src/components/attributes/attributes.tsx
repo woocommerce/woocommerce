@@ -68,6 +68,7 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				)
 			}
 			termsAutoSelection="first"
+			defaultVisibility={ true }
 		/>
 	);
 };

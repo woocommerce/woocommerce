@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Refactored core profiler loader to be more generalizable and moved to @woocommerce/onboarding

@@ -11,6 +11,7 @@ import { TaskType } from '@woocommerce/data';
 const task: TaskType = {
 	id: 'optional',
 	title: 'Test',
+	badge: 'Optional badge',
 	isComplete: false,
 	time: '1 minute',
 	isDismissable: true,

@@ -12,9 +12,9 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import HiddenIcon from '../variations-table/hidden-icon';
-import HelpIcon from './help-icon';
+import HelpIcon from '../../icons/help-icon';
 import NotFilterableIcon from './not-filterable-icon';
+import HiddenWithHelpIcon from '../../icons/hidden-with-help-icon';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;
@@ -89,9 +89,8 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
 					>
-						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
-							<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
-							<HelpIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-help-icon" />
+						<div>
+							<HiddenWithHelpIcon />
 						</div>
 					</Tooltip>
 				) }

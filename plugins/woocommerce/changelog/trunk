@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes PHP error when WooCommerce menus are created without a position and when users view the WordPress admin dashboard without having WooCommerce admin permissions.

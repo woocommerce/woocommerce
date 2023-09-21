@@ -28,6 +28,8 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 	slug: string;
 	property: string;
 	createTitle: string;
+	dialogNameHelpText?: string;
+	parentTaxonomyText?: string;
 }
 
 export function Edit( {
@@ -42,7 +44,14 @@ export function Edit( {
 				hierarchical: false,
 			}
 	);
-	const { label, slug, property, createTitle } = attributes;
+	const {
+		label,
+		slug,
+		property,
+		createTitle,
+		dialogNameHelpText,
+		parentTaxonomyText,
+	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
 
@@ -162,6 +171,8 @@ export function Edit( {
 						slug={ slug }
 						hierarchical={ hierarchical }
 						title={ createTitle }
+						dialogNameHelpText={ dialogNameHelpText }
+						parentTaxonomyText={ parentTaxonomyText }
 						onCancel={ () => setShowCreateNewModal( false ) }
 						onCreate={ ( taxonomy ) => {
 							setShowCreateNewModal( false );
