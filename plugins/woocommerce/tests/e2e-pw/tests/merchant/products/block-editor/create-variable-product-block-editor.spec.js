@@ -1,11 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
-
+const { test, expect, request } = require( '@playwright/test' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
 const {
-	clickOnTab,
-	isBlockProductEditorEnabled,
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
-const { toggleBlockProductTour } = require( '../../../../utils/tours' );
+	setFeatureFlag,
+	resetFeatureFlags,
+} = require( '../../../../utils/features' );
+const { setOption } = require( '../../../../utils/options' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -33,27 +32,48 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test.beforeEach( async ( { browser, request } ) => {
-			await toggleBlockProductTour( request, false );
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
+		test.beforeAll( async ( { baseURL } ) => {
+			// Disable product editor tour modal.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_block_product_tour_shown',
+				'yes'
 			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
+
+			// Enable block editor.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_feature_product_block_editor_enabled',
+				'yes'
+			);
+
+			// Enable the "product-variation-management" feature flag.
+			await setFeatureFlag(
+				request,
+				baseURL,
+				'product-variation-management',
+				true
+			);
 		} );
 
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
+		test.afterAll( async ( { baseURL } ) => {
+			// Reset feature flags that were set via setFeatureFlag
+			await resetFeatureFlags( request, baseURL );
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_feature_product_block_editor_enabled',
+				'no'
 			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_block_product_tour_shown',
+				'no'
+			);
 		} );
 
 		test( 'can create a variable product', async ( { page } ) => {
