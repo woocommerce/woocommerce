@@ -101,7 +101,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 
 	const phoneNumber = sanitizeInput( value )
 		.replace( countries[ countryKey ].code, '' )
-		.trim();
+		.trimStart();
 
 	const handleChange = ( code: string, number: string ) => {
 		// Return value, phone number in E.164 format, and country alpha2 code.
