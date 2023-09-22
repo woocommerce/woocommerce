@@ -4,7 +4,6 @@
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
-import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { Product } from '@woocommerce/data';
@@ -19,12 +18,7 @@ import {
  * Internal dependencies
  */
 import { useValidation } from '../../contexts/validation-context';
-
-interface Metadata {
-	id?: number;
-	key: string;
-	value: string;
-}
+import useMetaEntityProp from '../../hooks/use-meta-entity-prop';
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
@@ -37,22 +31,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 		validationErrorMessage,
 		isMeta,
 	} = attributes;
-	const [ metadata, setMetadata ] = useEntityProp< Metadata[] >(
-		'postType',
-		'product',
-		'meta_data'
-	);
-
-	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
-		'postType',
-		'product',
-		property
-	);
-
-	const value = isMeta
-		? metadata.find( ( item ) => item.key === property )?.value || ''
-		: entityPropValue;
-
+	const [ value, setValue ] = useMetaEntityProp( isMeta, property );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
 	const { error, validate } = useValidation< Product >(
@@ -98,27 +77,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 					id={ nameControlId }
 					placeholder={ placeholder }
 					value={ value }
-					onChange={ ( newValue: string ) => {
-						if ( isMeta ) {
-							const existingEntry = metadata.find(
-								( item ) => item.key === property
-							);
-							const entry = existingEntry
-								? { ...existingEntry, value: newValue }
-								: {
-										key: property,
-										value: newValue,
-								  };
-							setMetadata( [
-								...metadata.filter(
-									( item ) => item.key !== property
-								),
-								entry,
-							] );
-						} else {
-							setEntityPropValue( newValue );
-						}
-					} }
+					onChange={ setValue }
 					onBlur={ validate }
 				></InputControl>
 			</BaseControl>
