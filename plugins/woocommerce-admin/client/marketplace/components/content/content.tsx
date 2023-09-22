@@ -104,21 +104,23 @@ export default function Content(): JSX.Element {
 			} );
 	}, [ query.term, query.category, selectedTab, setIsLoading ] );
 
-	let ContentComponent: ContentComponentType | undefined;
-	if ( selectedTab === 'extensions' ) {
-		ContentComponent = Extensions;
-	} else if ( selectedTab === 'themes' ) {
-		ContentComponent = Themes;
-	} else if ( selectedTab === 'search' ) {
-		ContentComponent = SearchResults;
-	} else if ( selectedTab === 'discover' ) {
-		ContentComponent = Discover;
-	}
+	const renderContent = ( tab: string, products: Product[] ): JSX.Element => {
+		switch ( tab ) {
+			case 'extensions':
+				return <Extensions products={ products } />;
+			case 'themes':
+				return <Themes products={ products } />;
+			case 'search':
+				return <SearchResults products={ products } />;
+			case 'discover':
+				return <Discover />;
+			default:
+				return <></>;
+		}
+	};
 	return (
 		<div className="woocommerce-marketplace__content">
-			{ ContentComponent && (
-				<ContentComponent products={ productList } />
-			) }
+			{ renderContent( selectedTab, productList ) }
 		</div>
 	);
 }
