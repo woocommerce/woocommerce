@@ -112,11 +112,20 @@ export default function MySubscriptions(): JSX.Element {
 					<Tooltip
 						text={
 							<>
-								<h3>Still don&apos;t see your subscriptions?</h3>
-								<p>
-									To see all your subscriptions go to your
-									account on WooCommerce.com.
-								</p>
+								<h3>
+									{ __(
+										"Still don't see your subscription?",
+										'woocommerce'
+									) }
+								</h3>
+								<p
+									dangerouslySetInnerHTML={ {
+										__html: __(
+											'To see all your subscriptions go to <a href="https://woocommerce.com/my-account/" target="_blank" class="woocommerce-marketplace__my-subscriptions__tooltip-external-link">your account</a> on WooCommerce.com.',
+											'woocommerce'
+										),
+									} }
+								/>
 							</>
 						}
 					>
