@@ -25,6 +25,7 @@ export const defaultHomepageTemplate = {
 		return `
             You are a WordPress theme expert and a business analyst. Analyse the following store description, merchant's chosen look and tone, template metadata, and determine the most appropriate template.
             Consider the business size based on business description, where some templates are more suited for small and medium businesses, and some for large businesses.
+						Use metadata with the key "businessType" to determine the business size and type.
             This is important, respond only with ONE template identifier (e.g., { "homepage_template": "template1" }). Do not explain or add any other information since it will fail the validation.
 
             Chosen look and tone: ${ look } look, ${ tone } tone.
