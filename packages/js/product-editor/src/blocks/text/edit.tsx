@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, createInterpolateElement } from '@wordpress/element';
-import type { BlockAttributes } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
@@ -19,18 +18,7 @@ import {
  */
 import { useValidation } from '../../contexts/validation-context';
 import useMetaEntityProp from '../../hooks/use-meta-entity-prop';
-
-interface TextBlockAttributes extends BlockAttributes {
-	property: string;
-	label?: string;
-	placeholder?: string;
-	required: boolean;
-	validationRegex?: string;
-	validationErrorMessage?: string;
-	isMeta: boolean;
-	minLength?: number;
-	maxLength?: number;
-}
+import { TextBlockAttributes } from './types';
 
 export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 	const blockProps = useBlockProps();

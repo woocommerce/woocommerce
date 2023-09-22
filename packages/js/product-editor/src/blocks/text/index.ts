@@ -9,8 +9,10 @@ import { BlockConfiguration } from '@wordpress/blocks';
 import { initBlock } from '../../utils/init-block';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
+import { TextBlockAttributes } from './types';
 
-const { name, ...metadata } = blockConfiguration as BlockConfiguration;
+const { name, ...metadata } =
+	blockConfiguration as BlockConfiguration< TextBlockAttributes >;
 
 export { metadata, name };
 
