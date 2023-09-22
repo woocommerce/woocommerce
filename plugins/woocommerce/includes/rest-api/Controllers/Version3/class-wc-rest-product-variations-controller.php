@@ -866,6 +866,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
 		}
 
+		// Price filter.
+		if ( is_bool( $request['has_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_price',
+					'compare' => $request['has_price'] ? 'EXISTS' : 'NOT EXISTS',
+				)
+			);
+		}
+
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
@@ -924,6 +935,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'type'              => 'string',
 			'enum'              => array_keys( wc_get_product_stock_status_options() ),
 			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['has_price'] = array(
+			'description'       => __( 'Limit result set to products with or without price.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

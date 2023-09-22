@@ -21,7 +21,8 @@ export const ColorPalette = () => {
 			gap={ 4 }
 			className="woocommerce-customize-store_color-palette-container"
 		>
-			{ COLOR_PALETTES.map( ( variation, index ) => (
+			{ /* TODO: Show 9 colors based on the AI recommendation */ }
+			{ COLOR_PALETTES.slice( 0, 9 ).map( ( variation, index ) => (
 				<VariationContainer key={ index } variation={ variation }>
 					<ColorPaletteVariationPreview title={ variation?.title } />
 				</VariationContainer>

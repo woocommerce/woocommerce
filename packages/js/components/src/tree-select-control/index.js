@@ -234,7 +234,10 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
-					if ( includeParent && this.value !== ROOT_VALUE ) {
+					if (
+						( includeParent || individuallySelectParent ) &&
+						this.value !== ROOT_VALUE
+					) {
 						return cache.selectedValues.includes( this.value );
 					}
 					if ( this.hasChildren ) {
@@ -427,7 +430,7 @@ const TreeSelectControl = ( {
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
 		const changedValues = individuallySelectParent
-			? []
+			? [ option.value ]
 			: option.leaves
 					.filter( ( opt ) => opt.checked !== checked )
 					.map( ( opt ) => opt.value );

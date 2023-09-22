@@ -1492,11 +1492,15 @@ export const CoreProfilerController = ( {
 				hasJetpackSelected: ( context ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) => plugin === 'jetpack'
+							( plugin ) =>
+								plugin === 'jetpack' ||
+								plugin === 'jetpack-boost'
 						) !== undefined ||
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								plugin.key === 'jetpack' && plugin.is_activated
+								( plugin.key === 'jetpack' ||
+									plugin.key === 'jetpack-boost' ) &&
+								plugin.is_activated
 						) !== undefined
 					);
 				},

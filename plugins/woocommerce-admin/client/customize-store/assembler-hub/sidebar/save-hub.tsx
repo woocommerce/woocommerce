@@ -10,6 +10,8 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
+	// @ts-ignore No types for this exist yet.
+	__experimentalUseNavigator as useNavigator,
 	Button,
 	Spinner,
 } from '@wordpress/components';
@@ -22,6 +24,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -40,13 +43,13 @@ export const SaveHub = () => {
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
+	const navigator = useNavigator();
 
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createSuccessNotice, createErrorNotice, removeNotice } =
-		useDispatch( noticesStore );
+	const { createErrorNotice, removeNotice } = useDispatch( noticesStore );
 
 	const {
 		dirtyEntityRecords,
@@ -142,6 +145,13 @@ export const SaveHub = () => {
 	}, [ urlParams.path ] );
 
 	const save = async () => {
+		const source = `${ urlParams.path.replace(
+			'/customize-store/assembler-hub/',
+			''
+		) }`;
+		recordEvent( 'customize_your_store_assembler_hub_save_click', {
+			source,
+		} );
 		removeNotice( saveNoticeId );
 
 		try {
@@ -168,10 +178,7 @@ export const SaveHub = () => {
 				}
 			}
 
-			createSuccessNotice( __( 'Site updated.', 'woocommerce' ), {
-				type: 'snackbar',
-				id: saveNoticeId,
-			} );
+			navigator.goToParent();
 		} catch ( error ) {
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
@@ -185,6 +192,10 @@ export const SaveHub = () => {
 				<Button
 					variant="primary"
 					onClick={ () => {
+						recordEvent(
+							'customize_your_store_assembler_hub_done_click'
+						);
+
 						setIsResolving( true );
 						sendEvent( 'FINISH_CUSTOMIZATION' );
 					} }

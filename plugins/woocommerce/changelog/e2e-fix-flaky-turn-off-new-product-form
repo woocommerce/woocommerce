@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flakiness around the `Turn off the new product form` menu item.

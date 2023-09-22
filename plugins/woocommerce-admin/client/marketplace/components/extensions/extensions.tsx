@@ -56,10 +56,13 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 		}
 
 		return (
-			<ProductListContent
-				products={ products }
-				type={ ProductType.extension }
-			/>
+			<>
+				<CategorySelector />
+				<ProductListContent
+					products={ products }
+					type={ ProductType.extension }
+				/>
+			</>
 		);
 	}
 
@@ -68,7 +71,6 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--extensions">
 				{ title }
 			</h2>
-			<CategorySelector />
 			{ content() }
 		</div>
 	);

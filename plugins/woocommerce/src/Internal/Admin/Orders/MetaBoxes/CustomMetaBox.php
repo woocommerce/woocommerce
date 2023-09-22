@@ -242,7 +242,7 @@ class CustomMetaBox {
 	 * @return void
 	 */
 	private function handle_add_meta( WC_Order $order, string $meta_key, string $meta_value ) {
-		$count            = 0;
+		$count = 0;
 		if ( is_protected_meta( $meta_key ) ) {
 			wp_send_json_error( 'protected_meta' );
 			wp_die();
@@ -408,5 +408,53 @@ class CustomMetaBox {
 			wp_die( 1 );
 		}
 		wp_die( 0 );
+	}
+
+	/**
+	 * Handle the possible changes in order metadata coming from an order edit page in admin
+	 * (labeled "custom fields" in the UI).
+	 *
+	 * This method expects the $_POST array to contain a 'meta' key that is an associative
+	 * array of [meta item id => [ 'key' => meta item name, 'value' => meta item value ];
+	 * and also to contain (possibly empty) 'metakeyinput' and 'metavalue' keys.
+	 *
+	 * @param WC_Order $order The order to handle.
+	 */
+	public function handle_metadata_changes( $order ) {
+		$has_meta_changes = false;
+
+		$order_meta = $order->get_meta_data();
+
+		$order_meta =
+			array_combine(
+				array_map( fn( $meta ) => $meta->id, $order_meta ),
+				$order_meta
+			);
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+
+		foreach ( ( $_POST['meta'] ?? array() ) as $request_meta_id => $request_meta_data ) {
+			$request_meta_id    = wp_unslash( $request_meta_id );
+			$request_meta_key   = wp_unslash( $request_meta_data['key'] );
+			$request_meta_value = wp_unslash( $request_meta_data['value'] );
+			if ( array_key_exists( $request_meta_id, $order_meta ) &&
+				( $order_meta[ $request_meta_id ]->key !== $request_meta_key || $order_meta[ $request_meta_id ]->value !== $request_meta_value ) ) {
+				$order->update_meta_data( $request_meta_key, $request_meta_value, $request_meta_id );
+				$has_meta_changes = true;
+			}
+		}
+
+		$request_new_key   = wp_unslash( $_POST['metakeyinput'] ?? '' );
+		$request_new_value = wp_unslash( $_POST['metavalue'] ?? '' );
+		if ( '' !== $request_new_key ) {
+			$order->add_meta_data( $request_new_key, $request_new_value );
+			$has_meta_changes = true;
+		}
+
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+
+		if ( $has_meta_changes ) {
+			$order->save();
+		}
 	}
 }

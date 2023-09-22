@@ -28,6 +28,15 @@ export const VariationContainer = ( { variation, children } ) => {
 	}, [ variation, base ] );
 
 	const selectVariation = () => {
+		// Remove the hasCreatedOwnColors flag if the user is switching to a color palette
+		if (
+			variation.settings.color &&
+			user.settings.color &&
+			user.settings.color.hasCreatedOwnColors
+		) {
+			delete user.settings.color.palette.hasCreatedOwnColors;
+		}
+
 		setUserConfig( () => {
 			return {
 				settings: mergeBaseAndUserConfigs(
@@ -48,7 +57,6 @@ export const VariationContainer = ( { variation, children } ) => {
 			selectVariation();
 		}
 	};
-
 	const isActive = useMemo( () => {
 		if ( variation.settings.color ) {
 			return isEqual( variation.settings.color, user.settings.color );

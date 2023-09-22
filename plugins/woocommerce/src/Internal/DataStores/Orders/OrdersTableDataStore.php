@@ -537,7 +537,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Helper function to get alias for address table, this is used in select query.
 	 *
-	 * @param string $type Address type.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 *
 	 * @return string Alias.
 	 */
@@ -1665,7 +1665,7 @@ FROM $order_meta_table
 	/**
 	 * Helper method to generate join and select query for address table.
 	 *
-	 * @param string $address_type Type of address. Typically will be `billing` or `shipping`.
+	 * @param string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param string $order_table_alias Alias of order table to use.
 	 * @param string $address_table_alias Alias for address table to use.
 	 *
@@ -2580,8 +2580,10 @@ FROM $order_meta_table
 	private function update_address_index_meta( $order, $changes ) {
 		// If address changed, store concatenated version to make searches faster.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			if ( isset( $changes[ $address_type ] ) ) {
-				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
+			$index_meta_key = "_{$address_type}_address_index";
+
+			if ( isset( $changes[ $address_type ] ) || ( is_a( $order, 'WC_Order' ) && empty( $order->get_meta( $index_meta_key ) ) ) ) {
+				$order->update_meta_data( $index_meta_key, implode( ' ', $order->get_address( $address_type ) ) );
 			}
 		}
 	}
