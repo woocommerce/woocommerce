@@ -52,7 +52,7 @@ class ProductGalleryPager extends AbstractBlock {
 		$pager_display_mode   = $block->context['pagerDisplayMode'] ?? '';
 		$classname            = $attributes['className'] ?? '';
 		$wrapper_attributes   = get_block_wrapper_attributes( array( 'class' => trim( $classname ) ) );
-		$post_id              = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$post_id              = $block->context['postId'] ?? '';
 		$product              = wc_get_product( $post_id );
 
 		if ( $product ) {
@@ -60,15 +60,18 @@ class ProductGalleryPager extends AbstractBlock {
 			$number_of_available_images = count( $product_gallery_images_ids );
 			$number_of_thumbnails       = $number_of_thumbnails < $number_of_available_images ? $number_of_thumbnails : $number_of_available_images;
 
-			$html = $this->render_pager( $product_gallery_images_ids, $pager_display_mode, $number_of_thumbnails );
+			if ( $number_of_thumbnails > 1 ) {
+				$html = $this->render_pager( $product_gallery_images_ids, $pager_display_mode, $number_of_thumbnails );
 
-			return sprintf(
-				'<div %1$s>
-					%2$s
-				</div>',
-				$wrapper_attributes,
-				$html
-			);
+				return sprintf(
+					'<div %1$s>
+						%2$s
+					</div>',
+					$wrapper_attributes,
+					$html
+				);
+			}
+			return '';
 		}
 	}
 
