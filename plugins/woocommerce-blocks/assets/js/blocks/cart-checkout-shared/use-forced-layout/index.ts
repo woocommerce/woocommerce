@@ -46,6 +46,15 @@ export const useForcedLayout = ( {
 		const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
 
 		return registry.subscribe( () => {
+			const currentBlock = registry
+				.select( 'core/block-editor' )
+				.getBlock( clientId );
+
+			// If the block is removed we shouldn't reinsert its inner blocks.
+			if ( ! currentBlock ) {
+				return;
+			}
+
 			const innerBlocks = registry
 				.select( 'core/block-editor' )
 				.getBlocks( clientId );
