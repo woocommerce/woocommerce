@@ -27,7 +27,8 @@ if ( ! function_exists( 'YOUR_PREFIX_add_block_after_categories' ) ) {
       ]
     );
 	}
-	add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-categories', 'YOUR_PREFIX_add_block_after_categories' );
+}
+add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-categories', 'YOUR_PREFIX_add_block_after_categories' );
 ```
 
 Result:
