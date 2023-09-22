@@ -16,7 +16,7 @@ const config = {
 	outputDir: './test-results/report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
-	testDir: 'tests',
+	// testDir: 'tests',
 	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
@@ -53,8 +53,15 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'chrome/main',
 			use: { ...devices[ 'Desktop Chrome' ] },
+			testDir: 'tests',
+			testIgnore: '**/block-editor/**', // Ignore 'block-editor' tests.
+		},
+		{
+			name: 'chrome/block-editor',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testDir: 'tests/merchant/products/block-editor',
 		},
 	],
 };
