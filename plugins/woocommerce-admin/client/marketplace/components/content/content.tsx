@@ -18,12 +18,6 @@ import SearchResults from '../search-results/search-results';
 import Themes from '../themes/themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
-type ContentComponentType =
-	| typeof Discover
-	| typeof Extensions
-	| typeof SearchResults
-	| typeof Themes;
-
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 
