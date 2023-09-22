@@ -16,8 +16,6 @@ Depending on the complexity of the extension's UI, the implementation might be a
 ## Index
 
 - [Common tasks](common-tasks.md)
-- [Migrating from the legacy editor](migrating-from-the-legacy-editor.md)
-- [FAQ](faq.md)
 
 ## Related documentation
 
