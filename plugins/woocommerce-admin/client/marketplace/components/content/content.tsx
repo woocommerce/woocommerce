@@ -15,7 +15,6 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
 import SearchResults from '../search-results/search-results';
-import Themes from '../themes/themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function Content(): JSX.Element {
@@ -104,9 +103,21 @@ export default function Content(): JSX.Element {
 	const renderContent = ( tab: string, products: Product[] ): JSX.Element => {
 		switch ( tab ) {
 			case 'extensions':
-				return <Extensions products={ products } />;
+				return (
+					<Extensions
+						products={ products }
+						label={ 'extension' }
+						labelPlural={ 'extensions' }
+					/>
+				);
 			case 'themes':
-				return <Themes products={ products } />;
+				return (
+					<Extensions
+						products={ products }
+						label={ 'theme' }
+						labelPlural={ 'themes' }
+					/>
+				);
 			case 'search':
 				return <SearchResults products={ products } />;
 			case 'discover':

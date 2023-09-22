@@ -4,7 +4,6 @@
 import './search-results.scss';
 import { Product, ProductType } from '../product-list/types';
 import Extensions from '../extensions/extensions';
-import Themes from '../themes/themes';
 import { MARKETPLACE_SEARCH_RESULTS_PER_PAGE } from '../constants';
 
 export interface SearchResultProps {
@@ -24,10 +23,14 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 			<Extensions
 				products={ extensions }
 				perPage={ MARKETPLACE_SEARCH_RESULTS_PER_PAGE }
+				label={ 'extension' }
+				labelPlural={ 'extensions' }
 			/>
-			<Themes
+			<Extensions
 				products={ themes }
 				perPage={ MARKETPLACE_SEARCH_RESULTS_PER_PAGE }
+				label={ 'theme' }
+				labelPlural={ 'themes' }
 			/>
 		</div>
 	);
