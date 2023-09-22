@@ -59,9 +59,10 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 				id={ nameControlId }
 				label={
 					required
-						? createInterpolateElement( `${ label } <required />`, {
+						? createInterpolateElement( `${ label } <required/>`, {
 								required: (
 									<span className="woocommerce-product-form__required-input">
+										{ /* translators: field 'required' indicator */ }
 										{ __( '*', 'woocommerce' ) }
 									</span>
 								),
