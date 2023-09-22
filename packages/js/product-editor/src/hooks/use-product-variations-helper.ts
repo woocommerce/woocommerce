@@ -22,11 +22,9 @@ async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
 	try {
-		const { attributes } = ( await resolveSelect( 'core' ).getEntityRecord(
-			'postType',
-			'product',
-			productId
-		) ) as Product;
+		const { attributes } = await resolveSelect(
+			'core'
+		).getEntityRecord< Product >( 'postType', 'product', productId );
 		const alreadyHasVariableAttribute = attributes.some(
 			( attr ) => attr.variation
 		);
@@ -77,13 +75,13 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
-			const { status: lastStatus } = ( await resolveSelect(
+			const { status: lastStatus } = await resolveSelect(
 				'core'
-			).getEditedEntityRecord(
+			).getEditedEntityRecord< Product >(
 				'postType',
 				'product',
 				productId
-			) ) as Product;
+			);
 			const hasVariableAttribute = attributes.some(
 				( attr ) => attr.variation
 			);
