@@ -73,7 +73,7 @@ export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 					minLength
 				);
 			}
-			if ( typeof minLength === 'number' && value.length > maxLength ) {
+			if ( typeof maxLength === 'number' && value.length > maxLength ) {
 				return sprintf(
 					/* translators: %d: maximum length */
 					__(
