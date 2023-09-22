@@ -62,4 +62,14 @@ describe( 'PhoneNumberInput', () => {
 
 		expect( onChange ).toHaveBeenCalledWith( '+34 0 0', '+3400', 'ES' );
 	} );
+
+	it( 'prevents consecutive spaces and hyphens', () => {
+		const onChange = jest.fn();
+		render( <PhoneNumberInput value="0-" onChange={ onChange } /> );
+
+		const input = screen.getByRole( 'textbox' );
+		userEvent.type( input, '-' );
+
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
 } );

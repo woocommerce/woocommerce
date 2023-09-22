@@ -21,12 +21,8 @@ describe( 'PhoneNumberInput Utils', () => {
 
 	describe( 'sanitizeInput', () => {
 		it( 'removes non-digit characters except space and hyphen', () => {
-			const result = sanitizeInput( '+1 23-45 67 abc' );
-			expect( result ).toBe( '1 23-45 67 ' );
-		} );
-		it( 'removes consecutive spaces or hyphens', () => {
-			const result = sanitizeInput( '+1 2  3-4--5     abc' );
-			expect( result ).toBe( '1 2 3-4-5 ' );
+			const result = sanitizeInput( '+1 23--45 67 abc' );
+			expect( result ).toBe( '1 23--45 67 ' );
 		} );
 	} );
 

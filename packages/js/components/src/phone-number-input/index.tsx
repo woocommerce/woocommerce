@@ -118,6 +118,17 @@ const PhoneNumberInput: React.FC< Props > = ( {
 		handleChange( countryKey, sanitizeInput( event.target.value ) );
 	};
 
+	const handleKeyDown = (
+		event: React.KeyboardEvent< HTMLInputElement >
+	) => {
+		const pos = inputRef.current?.selectionStart || 0;
+		const newValue =
+			phoneNumber.slice( 0, pos ) + event.key + phoneNumber.slice( pos );
+		if ( /[- ]{2,}/.test( newValue ) ) {
+			event.preventDefault();
+		}
+	};
+
 	const {
 		isOpen,
 		getToggleButtonProps,
@@ -172,6 +183,7 @@ const PhoneNumberInput: React.FC< Props > = ( {
 				ref={ inputRef }
 				type="text"
 				value={ phoneNumber }
+				onKeyDown={ handleKeyDown }
 				onChange={ handleInput }
 				className="wcpay-component-phone-number-input__input"
 				style={ { paddingLeft: `${ menuWidth }px` } }
