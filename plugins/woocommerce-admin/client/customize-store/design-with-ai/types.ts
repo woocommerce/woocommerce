@@ -11,6 +11,7 @@ import {
 	headerValidator,
 	footerValidator,
 	colorPaletteResponseValidator,
+	homepageTemplateValidator,
 } from './prompts';
 
 export type designWithAiStateMachineContext = {
@@ -26,8 +27,7 @@ export type designWithAiStateMachineContext = {
 	aiSuggestions: {
 		defaultColorPalette: ColorPaletteResponse;
 		fontPairing: FontPairing[ 'pair_name' ];
-		header: Header[ 'slug' ];
-		footer: Footer[ 'slug' ];
+		homepageTemplate: HomepageTemplate[ 'homepage_template' ];
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
@@ -68,3 +68,5 @@ export type FontPairing = z.infer< typeof fontChoiceValidator >;
 export type Header = z.infer< typeof headerValidator >;
 
 export type Footer = z.infer< typeof footerValidator >;
+
+export type HomepageTemplate = z.infer< typeof homepageTemplateValidator >;

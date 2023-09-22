@@ -16,6 +16,7 @@ import {
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
+	HomepageTemplate,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -148,6 +149,24 @@ const assignFooter = assign<
 	},
 } );
 
+const assignHomepageTemplate = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			homepageTemplate: (
+				event as {
+					data: {
+						response: HomepageTemplate;
+					};
+				}
+			 ).data.response.homepage_template,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -218,6 +237,7 @@ export const actions = {
 	assignFontPairing,
 	assignHeader,
 	assignFooter,
+	assignHomepageTemplate,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
