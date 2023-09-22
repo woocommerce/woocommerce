@@ -40,6 +40,6 @@ $parent_container->add_block(
 
 Here's how it looks on the product editor:
 
-![Product checkbox field screenshot](checkbox.png)
+![Product checkbox field screenshot](https://woocommerce.files.wordpress.com/2023/09/checkbox.png)
 
 
