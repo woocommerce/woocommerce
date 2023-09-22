@@ -144,8 +144,27 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 	return (
 		<>
 			<div { ...blockProps }>
-				<BaseControl
+				<InputControl
 					id={ nameControlId }
+					className={ classNames( {
+						'has-error': nameValidationError,
+					} ) }
+					__next36pxDefaultSize
+					ref={ nameRef }
+					name="name"
+					// eslint-disable-next-line jsx-a11y/no-autofocus
+					autoFocus={ attributes.autoFocus }
+					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+					onChange={ setName }
+					value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
+					autoComplete="off"
+					data-1p-ignore
+					onBlur={ () => {
+						if ( hasEdit( 'name' ) ) {
+							setSkuIfEmpty();
+							validateName();
+						}
+					} }
 					label={ createInterpolateElement(
 						__( 'Name <required />', 'woocommerce' ),
 						{
@@ -156,33 +175,8 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 							),
 						}
 					) }
-					className={ classNames( {
-						'has-error': nameValidationError,
-					} ) }
 					help={ help }
-				>
-					<InputControl
-						id={ nameControlId }
-						ref={ nameRef }
-						name="name"
-						// eslint-disable-next-line jsx-a11y/no-autofocus
-						autoFocus={ attributes.autoFocus }
-						placeholder={ __(
-							'e.g. 12 oz Coffee Mug',
-							'woocommerce'
-						) }
-						onChange={ setName }
-						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
-						autoComplete="off"
-						data-1p-ignore
-						onBlur={ () => {
-							if ( hasEdit( 'name' ) ) {
-								setSkuIfEmpty();
-								validateName();
-							}
-						} }
-					/>
-				</BaseControl>
+				/>
 
 				{ showProductLinkEditModal && (
 					<EditProductLinkModal
