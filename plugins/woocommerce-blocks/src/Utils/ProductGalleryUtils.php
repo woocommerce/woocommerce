@@ -17,9 +17,10 @@ class ProductGalleryUtils {
 	 * @param int    $post_id Post ID.
 	 * @param string $size Image size.
 	 * @param array  $attributes Attributes.
+	 * @param string $wrapper_class Wrapper class.
 	 * @return array
 	 */
-	public static function get_product_gallery_images( $post_id, $size = 'full', $attributes = array() ) {
+	public static function get_product_gallery_images( $post_id, $size = 'full', $attributes = array(), $wrapper_class = '' ) {
 		$product_gallery_images = array();
 		$product                = wc_get_product( $post_id );
 
@@ -35,7 +36,10 @@ class ProductGalleryUtils {
 						$attributes
 					);
 
-					$product_image_html           = '<div class="wc-block-woocommerce-product-gallery-large-image__container">' . $product_image_html . '</div>';
+					if ( $wrapper_class ) {
+						$product_image_html = '<div class="' . $wrapper_class . '">' . $product_image_html . '</div>';
+					}
+
 					$product_image_html_processor = new \WP_HTML_Tag_Processor( $product_image_html );
 					$product_image_html_processor->next_tag( 'img' );
 					$product_image_html_processor->set_attribute(
