@@ -11,28 +11,23 @@ _TODO: Describe how to add a new field, including adding it to the REST API._
 Here's a snippet that adds a new block to the catalog section for simple products, between the first and second fields (order 15):
 
 ```php
-if ( ! function_exists( 'YOUR_PREFIX_on_block_template_register' ) ) {
+if ( ! function_exists( 'YOUR_PREFIX_add_block_after_categories' ) ) {
 	/**
 	 * Add a new block to the template.
 	 */
-	function YOUR_PREFIX_on_block_template_register( BlockTemplateInterface $template ) {
-		if ( $template instanceof ProductFormTemplateInterface && 'simple-product' === $template->get_id() ) {
-			$section = $template->get_section_by_id( 'product-catalog-section' );
-			if ( $section !== null ) {
-				$section->add_block(
-					[
-						'id'         => 'your-prefix-id',
-						'blockName'  => 'your-block-name',
-						'order'      => 15,
-						'attributes' => [
-							'key'   => 'value',
-						],
-					]
-				);
-			}
-		}
+	function YOUR_PREFIX_add_block_after_categories( BlockInterface $product_categories_field ) {
+    $product_categories_field->get_parent()->add_block(
+      [
+        'id'         => 'your-prefix-id',
+        'blockName'  => 'your-block-name',
+        'order'      => $product_categories_field->get_order() + 5,
+        'attributes' => [
+          'key'   => 'value',
+        ],
+      ]
+    );
 	}
-	add_action( 'woocommerce_block_template_register', 'YOUR_PREFIX_on_block_template_register' );
+	add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-categories', 'YOUR_PREFIX_add_block_after_categories' );
 ```
 
 Result:
