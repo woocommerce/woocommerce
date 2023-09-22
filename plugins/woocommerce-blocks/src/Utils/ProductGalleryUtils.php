@@ -35,8 +35,9 @@ class ProductGalleryUtils {
 						$attributes
 					);
 
+					$product_image_html           = '<div class="wc-block-woocommerce-product-gallery-large-image__container">' . $product_image_html . '</div>';
 					$product_image_html_processor = new \WP_HTML_Tag_Processor( $product_image_html );
-					$product_image_html_processor->next_tag();
+					$product_image_html_processor->next_tag( 'img' );
 					$product_image_html_processor->set_attribute(
 						'data-wc-context',
 						wp_json_encode(
