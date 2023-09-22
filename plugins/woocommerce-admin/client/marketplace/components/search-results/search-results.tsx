@@ -12,14 +12,14 @@ import Themes from '../themes/themes';
 import { MARKETPLACE_SEARCH_RESULTS_PER_PAGE } from '../constants';
 
 export interface SearchResultProps {
-	products?: Product[];
+	products: Product[];
 }
 
 export default function SearchResults( props: SearchResultProps ): JSX.Element {
-	const extensions = props.products?.filter(
+	const extensions = props.products.filter(
 		( product ) => product.type === ProductType.extension
 	);
-	const themes = props.products?.filter(
+	const themes = props.products.filter(
 		( product ) => product.type === ProductType.theme
 	);
 
