@@ -18,7 +18,7 @@ export const sanitizeNumber = ( number: string ): string =>
  * Removes any non-digit character, except space and hyphen.
  */
 export const sanitizeInput = ( number: string ): string =>
-	number.replace( /[^\d -]/g, '' );
+	number.replace( /[^\d -]/g, '' ).replace( /(-| )+/g, '$1' );
 
 /**
  * Converts a valid phone number to E.164 format.
