@@ -16,11 +16,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_filter( 'woocommerce_thankyou_order_received_text', function( $message, $order ) {
-    $message .= '<h1><a href="https://woocommerce.com/">Thank you</a>. Can also include HTML.</h1>';
-    return $message;
-}, 10, 2 );
-
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
