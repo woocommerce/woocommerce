@@ -11,9 +11,11 @@ import { HOMEPAGE_TEMPLATES } from '~/customize-store/data/homepageTemplates';
 const allowedTemplates: string[] = Object.keys( HOMEPAGE_TEMPLATES );
 
 export const homepageTemplateValidator = z.object( {
-	homepage_template: z.string().refine( ( template ) => allowedTemplates.includes( template ), {
-		message: 'Template not part of allowed list',
-	} ),
+	homepage_template: z
+		.string()
+		.refine( ( template ) => allowedTemplates.includes( template ), {
+			message: 'Template not part of allowed list',
+		} ),
 } );
 
 export const defaultHomepageTemplate = {

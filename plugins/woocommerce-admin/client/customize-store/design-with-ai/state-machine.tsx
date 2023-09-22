@@ -11,8 +11,6 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 	FontPairing,
-	Header,
-	Footer,
 	ColorPaletteResponse,
 	HomepageTemplate,
 } from './types';
@@ -27,8 +25,6 @@ import { services } from './services';
 import {
 	defaultColorPalette,
 	fontPairings,
-	defaultHeader,
-	defaultFooter,
 	defaultHomepageTemplate,
 } from './prompts';
 
@@ -365,7 +361,9 @@ export const designWithAiStateMachineDefinition = createMachine(
 												};
 											},
 											onDone: {
-												actions: [ 'assignHomepageTemplate' ],
+												actions: [
+													'assignHomepageTemplate',
+												],
 												target: 'success',
 											},
 										},

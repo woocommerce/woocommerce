@@ -17,7 +17,7 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
 /**
  * Internal dependencies
  */
-import { HomepageTemplate, designWithAiStateMachineContext } from './types';
+import { designWithAiStateMachineContext } from './types';
 import { lookAndTone } from './prompts';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
@@ -341,7 +341,8 @@ export const assembleSite = async (
 	try {
 		await updateTemplate( {
 			// TODO: Get from context
-			homepageTemplateId: context.aiSuggestions.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
+			homepageTemplateId: context.aiSuggestions
+				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
