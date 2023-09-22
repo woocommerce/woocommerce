@@ -13,7 +13,6 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
-
 /**
  * Internal dependencies
  */
@@ -217,7 +216,10 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		await apiFetch( {
+		const response: {
+			ai_content_generated: boolean;
+			additional_errors?: unknown[];
+		} = await apiFetch( {
 			path: '/wc/store/patterns',
 			method: 'POST',
 			data: {
@@ -225,6 +227,14 @@ export const updateStorePatterns = async (
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		if ( ! response.ai_content_generated ) {
+			throw new Error(
+				'AI content not generated: ' + response.additional_errors
+					? JSON.stringify( response.additional_errors )
+					: ''
+			);
+		}
 	} catch ( error ) {
 		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
 			error: error instanceof Error ? error.message : 'unknown',
@@ -290,6 +300,12 @@ const updateTemplate = async ( {
 		| keyof typeof LARGE_BUSINESS_TEMPLATES;
 	footerSlug: string;
 } ) => {
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+
+	// Ensure that the patterns are up to date because we populate images and content in previous step.
+	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
+
 	const patterns = ( await resolveSelect(
 		coreStore
 		// @ts-ignore No types for this exist yet.
@@ -371,16 +387,6 @@ export const assembleSite = async (
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 	}
-
-	// @ts-ignore No types for this exist yet.
-	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
-
-	// Invalid the selectors so that the new template/style are used in assembler hub.
-	invalidateResolutionForStoreSelector( 'getEntityRecord' );
-	invalidateResolutionForStoreSelector(
-		'__experimentalGetCurrentGlobalStylesId'
-	);
-	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 };
 
 const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
