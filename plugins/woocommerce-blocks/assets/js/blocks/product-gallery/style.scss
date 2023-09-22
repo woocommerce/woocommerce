@@ -28,6 +28,13 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	position: relative;
 	overflow: hidden;
 
+	// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
+	#{$gallery-next-previous-outside-image} & .wc-block-woocommerce-product-gallery-large-image__container {
+		overflow: hidden;
+		max-width: $outside-image-max-width;
+		margin: 0 auto;
+	}
+
 	img {
 		display: block;
 		margin: 0 auto;
@@ -39,11 +46,6 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 
 		&[hidden] {
 			display: none;
-		}
-
-		// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
-		#{$gallery-next-previous-outside-image} & {
-			max-width: $outside-image-max-width;
 		}
 	}
 
