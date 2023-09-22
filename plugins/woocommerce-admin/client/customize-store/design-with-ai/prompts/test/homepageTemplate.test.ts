@@ -6,7 +6,9 @@ import { homepageTemplateValidator } from '..';
 describe( 'homepageTemplateValidator', () => {
 	it( 'should validate when template is part of the allowed list', () => {
 		const validTemplate = { homepage_template: 'template1' };
-		expect( () => homepageTemplateValidator.parse( validTemplate ) ).not.toThrow();
+		expect( () =>
+			homepageTemplateValidator.parse( validTemplate )
+		).not.toThrow();
 	} );
 
 	it( 'should not validate when template is not part of the allowed list', () => {
