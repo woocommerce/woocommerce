@@ -17,16 +17,16 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import ProductLoader from '../product-loader/product-loader';
 
 export interface SearchResultProps {
-	products?: Product[];
+	products: Product[];
 }
 
 export default function SearchResults( props: SearchResultProps ): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading } = marketplaceContextValue;
-	const extensions = props.products?.filter(
+	const extensions = props.products.filter(
 		( product ) => product.type === ProductType.extension
 	);
-	const themes = props.products?.filter(
+	const themes = props.products.filter(
 		( product ) => product.type === ProductType.theme
 	);
 

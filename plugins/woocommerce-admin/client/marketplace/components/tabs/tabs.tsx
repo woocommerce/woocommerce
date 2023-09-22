@@ -23,7 +23,6 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
-	hide?: boolean;
 }
 
 interface Tabs {
@@ -34,7 +33,6 @@ const tabs: Tabs = {
 	search: {
 		name: 'search',
 		title: __( 'Search results', 'woocommerce' ),
-		hide: true,
 	},
 	discover: {
 		name: 'discover',
@@ -73,26 +71,25 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getActiveTabs = ( selectedTab: string ) => {
+const getVisibleTabs = ( selectedTab: string ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
-	const currentActiveTabs = { ...tabs };
-	currentActiveTabs.search.hide = selectedTab !== 'search';
+	const currentVisibleTabs = { ...tabs };
+	if ( selectedTab !== 'search' ) {
+		delete currentVisibleTabs.search;
+	}
 
-	return currentActiveTabs;
+	return currentVisibleTabs;
 };
 
 const renderTabs = (
 	contextValue: MarketplaceContextType,
-	activeTabs: Tabs
+	visibleTabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = contextValue;
 	const tabContent = [];
-	for ( const tabKey in activeTabs ) {
-		if ( tabs[ tabKey ]?.hide === true ) {
-			continue;
-		}
+	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
@@ -133,7 +130,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
-	const [ activeTabs, setActiveTabs ] = useState( getActiveTabs( '' ) );
+	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
 	const queryLoaded = Object.keys( query ).length > 0;
@@ -147,7 +144,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, queryLoaded, setSelectedTab ] );
 
 	useEffect( () => {
-		setActiveTabs( getActiveTabs( selectedTab ) );
+		setVisibleTabs( getVisibleTabs( selectedTab ) );
 	}, [ selectedTab ] );
 	return (
 		<nav
@@ -156,7 +153,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue, activeTabs ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs ) }
 		</nav>
 	);
 };
