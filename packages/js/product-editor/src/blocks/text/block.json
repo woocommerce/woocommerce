@@ -5,7 +5,10 @@
 	"title": "Product text control",
 	"category": "woocommerce",
 	"description": "A text control for use in the product editor.",
-	"keywords": [ "products", "text" ],
+	"keywords": [
+		"products",
+		"text"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -23,13 +26,20 @@
 			"type": "string"
 		},
 		"required": {
-			"type": "boolean"
+			"type": "boolean",
+			"default": false
 		},
 		"validationRegex": {
 			"type": "string"
 		},
 		"validationErrorMessage": {
 			"type": "string"
+		},
+		"minLength": {
+			"type": "number"
+		},
+		"maxLength": {
+			"type": "number"
 		}
 	},
 	"supports": {

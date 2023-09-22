@@ -5,7 +5,7 @@ import { createElement, createInterpolateElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Product } from '@woocommerce/data';
 import classNames from 'classnames';
 import {
@@ -20,7 +20,19 @@ import {
 import { useValidation } from '../../contexts/validation-context';
 import useMetaEntityProp from '../../hooks/use-meta-entity-prop';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+interface TextBlockAttributes extends BlockAttributes {
+	property: string;
+	label?: string;
+	placeholder?: string;
+	required: boolean;
+	validationRegex?: string;
+	validationErrorMessage?: string;
+	isMeta: boolean;
+	minLength?: number;
+	maxLength?: number;
+}
+
+export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 	const blockProps = useBlockProps();
 	const {
 		property,
@@ -30,6 +42,8 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 		validationRegex,
 		validationErrorMessage,
 		isMeta,
+		minLength,
+		maxLength,
 	} = attributes;
 	const [ value, setValue ] = useMetaEntityProp( isMeta, property );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
@@ -48,6 +62,26 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 						__( 'Invalid value for the field.', 'woocommerce' )
 					);
 				}
+			}
+			if ( typeof minLength === 'number' && value.length < minLength ) {
+				return sprintf(
+					/* translators: %d: minimum length */
+					__(
+						'The minimum length of the field is %d',
+						'woocommerce'
+					),
+					minLength
+				);
+			}
+			if ( typeof minLength === 'number' && value.length > maxLength ) {
+				return sprintf(
+					/* translators: %d: maximum length */
+					__(
+						'The maximum length of the field is %d',
+						'woocommerce'
+					),
+					maxLength
+				);
 			}
 		},
 		[ value ]
