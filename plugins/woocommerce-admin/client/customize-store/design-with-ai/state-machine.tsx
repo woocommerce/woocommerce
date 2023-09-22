@@ -475,9 +475,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						onDone: {
 							actions: [
-								sendParent( () => ( {
-									type: 'THEME_SUGGESTED',
-								} ) ),
+								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
+								'redirectToAssemblerHub',
 							],
 						},
 					},

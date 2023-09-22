@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { assign, spawn } from 'xstate';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	getQuery,
+	updateQueryString,
+	getNewPath,
+} from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -234,6 +238,14 @@ const recordTracksStepCompleted = (
 	} );
 };
 
+const redirectToAssemblerHub = () => {
+	window.location.href = getNewPath(
+		{},
+		'/customize-store/assembler-hub',
+		{}
+	);
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -249,4 +261,5 @@ export const actions = {
 	recordTracksStepClosed,
 	recordTracksStepCompleted,
 	spawnSaveDescriptionToOption,
+	redirectToAssemblerHub,
 };
