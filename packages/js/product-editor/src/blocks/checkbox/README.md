@@ -9,24 +9,28 @@ _Please note that to persist a custom field in the product it also needs to be a
 ## Attributes
 
 ### title
+
 - **Type:** `String`
 - **Required:** `No`
 
 Header that appears above the checkbox.
 
 ### label
+
 - **Type:** `String`
 - **Required:** `No`
 
 Label that appears at the side of the checkbox.
 
 ### property
+
 - **Type:** `String`
 - **Required:** `Yes`
 
 Property in which the checkbox value is stored.
 
 ### tooltip
+
 - **Type:** `String`
 - **Required:** `No`
 
