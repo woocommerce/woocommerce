@@ -52,7 +52,7 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 		}
 
 		if ( products.length === 0 ) {
-			return <NoResults />;
+			return <NoResults type={ ProductType.extension } />;
 		}
 
 		return (
