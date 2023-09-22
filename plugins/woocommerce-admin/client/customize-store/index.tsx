@@ -4,7 +4,13 @@
 import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	getNewPath,
+	getQuery,
+	updateQueryString,
+} from '@woocommerce/navigation';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -57,6 +63,16 @@ const updateQueryStep = (
 	}
 };
 
+const redirectToWooHome = () => {
+	window.location.href = getNewPath( {}, '/', {} );
+};
+
+const markTaskComplete = async () => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_admin_customize_store_completed: 'yes',
+	} );
+};
+
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
 		const popstateHandler = () => {
@@ -70,6 +86,7 @@ const browserPopstateHandler =
 
 export const machineActions = {
 	updateQueryStep,
+	redirectToWooHome,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -81,6 +98,7 @@ export const customizeStoreStateMachineServices = {
 	...introServices,
 	...transitionalServices,
 	browserPopstateHandler,
+	markTaskComplete,
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
@@ -175,7 +193,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'assemblerHub',
 				},
 				CLICKED_ON_BREADCRUMB: {
-					target: 'backToHomescreen',
+					actions: 'redirectToWooHome',
 				},
 				SELECTED_NEW_THEME: {
 					target: 'appearanceTask',
@@ -220,6 +238,14 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				postAssemblerHub: {
+					invoke: {
+						src: 'markTaskComplete',
+						onDone: {
+							target: 'waitForSitePreview',
+						},
+					},
+				},
+				waitForSitePreview: {
 					after: {
 						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
 						5000: {
@@ -246,11 +272,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				GO_BACK_TO_HOME: {
-					target: 'backToHomescreen',
+					actions: 'redirectToWooHome',
 				},
 			},
 		},
-		backToHomescreen: {},
 		appearanceTask: {},
 	},
 } );

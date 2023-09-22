@@ -9,7 +9,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { useMemo } from '@wordpress/element';
 import { BlockInstance, parse } from '@wordpress/blocks';
 
-type Pattern = {
+export type Pattern = {
 	blockTypes: string[];
 	categories: string[];
 	content: string;
@@ -18,15 +18,17 @@ type Pattern = {
 	title: string;
 };
 
-type PatternWithBlocks = Pattern & {
+export type PatternWithBlocks = Pattern & {
 	blocks: BlockInstance[];
 };
 
-export const usePatternsByCategory = ( category: string ) => {
+export const usePatterns = () => {
 	const { blockPatterns, isLoading } = useSelect(
 		( select ) => ( {
-			// @ts-ignore - This is valid.
-			blockPatterns: select( coreStore ).getBlockPatterns(),
+			blockPatterns: select(
+				coreStore
+				// @ts-ignore - This is valid.
+			).getBlockPatterns() as Pattern[],
 			isLoading:
 				// @ts-ignore - This is valid.
 				! select( coreStore ).hasFinishedResolution(
@@ -35,6 +37,15 @@ export const usePatternsByCategory = ( category: string ) => {
 		} ),
 		[]
 	);
+
+	return {
+		blockPatterns,
+		isLoading,
+	};
+};
+
+export const usePatternsByCategory = ( category: string ) => {
+	const { blockPatterns, isLoading } = usePatterns();
 
 	const patternsByCategory: PatternWithBlocks[] = useMemo( () => {
 		return ( blockPatterns || [] )

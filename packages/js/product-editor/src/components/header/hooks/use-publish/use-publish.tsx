@@ -26,7 +26,7 @@ export function usePublish( {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
-	const { isValidating, validate } = useValidations();
+	const { isValidating, validate } = useValidations< Product >();
 
 	const [ productId ] = useEntityProp< number >(
 		'postType',
@@ -61,7 +61,9 @@ export function usePublish( {
 		}
 
 		try {
-			await validate();
+			await validate( {
+				status: 'publish',
+			} );
 
 			// The publish button click not only change the status of the product
 			// but also save all the pending changes. So even if the status is
@@ -93,6 +95,12 @@ export function usePublish( {
 							? 'product_publish_error'
 							: 'product_create_error',
 					} as WPError;
+					if ( ( error as Record< string, string > ).variations ) {
+						wpError.code = 'variable_product_no_variation_prices';
+						wpError.message = (
+							error as Record< string, string >
+						 ).variations;
+					}
 				}
 				onPublishError( wpError );
 			}

@@ -19,6 +19,8 @@ import {
 } from './pages';
 import { customizeStoreStateMachineEvents } from '..';
 
+import './style.scss';
+
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
 	| typeof BusinessInfoDescription

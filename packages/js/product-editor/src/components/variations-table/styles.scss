@@ -15,6 +15,21 @@ $table-row-height: calc($grid-unit * 9);
 		border-bottom: 1px solid $gray-200;
 	}
 
+	&__notice {
+		border-left: 0px;
+		margin: 0 0 $gap-large 0;
+		&.is-error {
+			background-color: #fcf0f1;
+		}
+
+		.components-notice__actions {
+			margin-top: $gap-small;
+			.components-button:first-child {
+				margin-left: 0px;
+			}
+		}
+	}
+
 	&__table {
 		height: $table-row-height * 5;
 		overflow: auto;
@@ -26,6 +41,7 @@ $table-row-height: calc($grid-unit * 9);
 				border-color: $gray-600;
 			}
 		}
+		margin-left: $gap-smallest;
 	}
 
 	&__filters {
@@ -84,6 +100,7 @@ $table-row-height: calc($grid-unit * 9);
 		align-items: center;
 		justify-content: flex-end;
 		gap: $gap-smaller;
+		margin-right: $gap-smallest;
 
 		&--delete {
 			&.components-button.components-menu-item__button.is-link {
