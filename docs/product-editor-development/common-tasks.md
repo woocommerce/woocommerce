@@ -36,7 +36,7 @@ if ( ! function_exists( 'YOUR_PREFIX_on_block_template_register' ) ) {
 ```
 
 Result:
-![Adding field next to other field](_media/adding-field-next-to-other-field.png)
+![Adding field next to other field](https://woocommerce.files.wordpress.com/2023/09/adding-field-next-to-other-field.png)
 
 ## Hiding a group/section/field
 
