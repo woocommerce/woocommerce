@@ -912,7 +912,7 @@ class WC_Install {
 			return false;
 		}
 
-		$plugin_compat_info = $feature_controller->get_compatible_plugins_for_feature( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, true );
+		$plugin_compat_info = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		if ( ! empty( $plugin_compat_info['incompatible'] ) || ! empty( $plugin_compat_info['uncertain'] ) ) {
 			return false;
 		}
