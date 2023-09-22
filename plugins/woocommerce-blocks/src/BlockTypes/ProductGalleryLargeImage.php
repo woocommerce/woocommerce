@@ -132,7 +132,8 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$main_images = ProductGalleryUtils::get_product_gallery_images(
 			$product_id,
 			'full',
-			$attributes
+			$attributes,
+			'wc-block-woocommerce-product-gallery-large-image__container'
 		);
 
 		$visible_main_image           = array_shift( $main_images );

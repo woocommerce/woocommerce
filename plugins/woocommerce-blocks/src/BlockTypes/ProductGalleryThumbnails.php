@@ -63,7 +63,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 			if ( $product ) {
 				$post_thumbnail_id      = $product->get_image_id();
-				$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array() );
+				$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array(), 'wc-block-product-gallery-thumbnails__thumbnail' );
 				if ( $product_gallery_images && $post_thumbnail_id ) {
 					$html                 = '';
 					$number_of_thumbnails = isset( $block->context['thumbnailsNumberOfThumbnails'] ) ? $block->context['thumbnailsNumberOfThumbnails'] : 3;
@@ -74,11 +74,9 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							break;
 						}
 
-						$html .= '<div class="wc-block-product-gallery-thumbnails__thumbnail">';
-
 						$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
 
-						if ( $processor->next_tag() ) {
+						if ( $processor->next_tag( 'img' ) ) {
 							$processor->set_attribute(
 								'data-wc-on--click',
 								'actions.woocommerce.thumbnails.handleClick'
@@ -86,8 +84,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 							$html .= $processor->get_updated_html();
 						}
-
-						$html .= '</div>';
 
 						$thumbnails_count++;
 					}
