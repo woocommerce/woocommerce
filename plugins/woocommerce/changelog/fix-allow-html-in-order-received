@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the order-received template can be augmented with a message that contains HTML.
