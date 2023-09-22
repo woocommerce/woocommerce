@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param string         $message The message.
+	 * @param string         $message The message. May include HTML.
 	 * @param WC_Order|false $order   The order created during checkout, or false if order data is not available.
 	 */
 	$message = apply_filters(
@@ -36,6 +36,7 @@ defined( 'ABSPATH' ) || exit;
 		$order
 	);
 
-	echo esc_html( $message );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo $message;
 	?>
 </p>
