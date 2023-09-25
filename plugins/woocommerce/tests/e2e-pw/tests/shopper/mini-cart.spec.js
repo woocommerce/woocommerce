@@ -135,7 +135,7 @@ test.describe( 'Mini Cart block page', () => {
 		await page.goto( '/mini-cart' );
 		await expect(
 			page.locator( '.wc-block-mini-cart__button' )
-		).toContainText( `$${ singleProductSalePrice }(incl. tax)` );
+		).toContainText( `$${ singleProductSalePrice }` );
 		await page.locator( miniCartButton ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
@@ -152,8 +152,11 @@ test.describe( 'Mini Cart block page', () => {
 			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
 		).toBeVisible();
 		await expect(
+			page.locator( '.wc-block-mini-cart__button' )
+		).toContainText( `$${ singleProductSalePrice * 2 }` );
+		await expect(
 			page.locator( '.wc-block-components-totals-item__value' )
-		).toContainText( `$${ singleProductPrice }` );
+		).toContainText( `$${ singleProductSalePrice * 2 }` );
 		await page
 			.getByRole( 'button' )
 			.filter( { hasText: 'Remove item' } )
