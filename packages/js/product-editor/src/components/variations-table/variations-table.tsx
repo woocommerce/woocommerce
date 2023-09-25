@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
 	CheckboxControl,
+	Notice,
 	Spinner,
 	Tooltip,
 } from '@wordpress/components';
@@ -27,6 +28,8 @@ import {
 	createElement,
 	useRef,
 	useMemo,
+	Fragment,
+	forwardRef,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
@@ -40,8 +43,6 @@ import { useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import HiddenIcon from './hidden-icon';
-import VisibleIcon from './visible-icon';
 import { getProductStockStatus, getProductStockStatusClass } from '../../utils';
 import {
 	DEFAULT_VARIATION_PER_PAGE_OPTION,
@@ -51,12 +52,42 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
+import HiddenWithHelpIcon from '../../icons/hidden-with-help-icon';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
-const VISIBLE_TEXT = __( 'Visible to customers', 'woocommerce' );
-const UPDATING_TEXT = __( 'Updating product variation', 'woocommerce' );
 
-export function VariationsTable() {
+type VariationsTableProps = {
+	noticeText?: string;
+	noticeStatus?: 'error' | 'warning' | 'success' | 'info';
+	onNoticeDismiss?: () => void;
+	noticeActions?: {
+		label: string;
+		onClick: (
+			handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void,
+			handleDeleteAll: ( update: Partial< ProductVariation >[] ) => void
+		) => void;
+		className?: string;
+		variant?: string;
+	}[];
+	onVariationTableChange?: (
+		type: 'update' | 'delete',
+		updates?: Partial< ProductVariation >[]
+	) => void;
+};
+
+export const VariationsTable = forwardRef<
+	HTMLDivElement,
+	VariationsTableProps
+>( function Table(
+	{
+		noticeText,
+		noticeActions = [],
+		noticeStatus = 'error',
+		onNoticeDismiss = () => {},
+		onVariationTableChange = () => {},
+	}: VariationsTableProps,
+	ref
+) {
 	const [ currentPage, setCurrentPage ] = useState( 1 );
 	const lastVariations = useRef< ProductVariation[] | null >( null );
 	const [ perPage, setPerPage ] = useState(
@@ -85,30 +116,9 @@ export function VariationsTable() {
 		} ),
 		[ productId, currentPage, perPage ]
 	);
-	const totalCountRequestParams = useMemo(
-		() => ( {
-			product_id: productId,
-			order: 'asc',
-			orderby: 'menu_order',
-		} ),
-		[ productId ]
-	);
+
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
-	const { totalCount } = useSelect(
-		( select ) => {
-			const { getProductVariationsTotalCount } = select(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-			);
-
-			return {
-				totalCount: getProductVariationsTotalCount< number >(
-					totalCountRequestParams
-				),
-			};
-		},
-		[ productId ]
-	);
 	const { isLoading, latestVariations, isGeneratingVariations } = useSelect(
 		( select ) => {
 			const {
@@ -128,6 +138,20 @@ export function VariationsTable() {
 			};
 		},
 		[ currentPage, perPage, productId ]
+	);
+
+	const { totalCount } = useSelect(
+		( select ) => {
+			const { getProductVariationsTotalCount } = select(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
+
+			return {
+				totalCount:
+					getProductVariationsTotalCount< number >( requestParams ),
+			};
+		},
+		[ productId ]
 	);
 
 	const paginationProps = usePagination( {
@@ -182,13 +206,17 @@ export function VariationsTable() {
 				recordEvent( 'product_variations_delete', {
 					source: TRACKS_SOURCE,
 				} );
+				invalidateResolution( 'getProductVariations', [
+					requestParams,
+				] );
 			} )
-			.finally( () =>
+			.finally( () => {
 				setIsUpdating( ( prevState ) => ( {
 					...prevState,
 					[ variationId ]: false,
-				} ) )
-			);
+				} ) );
+				onVariationTableChange( 'delete' );
+			} );
 	}
 
 	function handleVariationChange(
@@ -215,12 +243,13 @@ export function VariationsTable() {
 					__( 'Failed to save variation.', 'woocommerce' )
 				);
 			} )
-			.finally( () =>
+			.finally( () => {
 				setIsUpdating( ( prevState ) => ( {
 					...prevState,
 					[ variationId ]: false,
-				} ) )
-			);
+				} ) );
+				onVariationTableChange( 'update', [ variation ] );
+			} );
 	}
 
 	function handleUpdateAll( update: Partial< ProductVariation >[] ) {
@@ -241,6 +270,7 @@ export function VariationsTable() {
 						response.update.length
 					)
 				);
+				onVariationTableChange( 'update', update );
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -269,6 +299,7 @@ export function VariationsTable() {
 						response.delete.length
 					)
 				);
+				onVariationTableChange( 'delete' );
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -278,7 +309,7 @@ export function VariationsTable() {
 	}
 
 	return (
-		<div className="woocommerce-product-variations">
+		<div className="woocommerce-product-variations" ref={ ref }>
 			{ ( isLoading || isGeneratingVariations ) && (
 				<div className="woocommerce-product-variations__loading">
 					<Spinner />
@@ -288,6 +319,21 @@ export function VariationsTable() {
 						</span>
 					) }
 				</div>
+			) }
+			{ noticeText && (
+				<Notice
+					status={ noticeStatus }
+					className="woocommerce-product-variations__notice"
+					onRemove={ onNoticeDismiss }
+					actions={ noticeActions.map( ( action ) => ( {
+						...action,
+						onClick: () => {
+							action?.onClick( handleUpdateAll, handleDeleteAll );
+						},
+					} ) ) }
+				>
+					{ noticeText }
+				</Notice>
 			) }
 			<div className="woocommerce-product-variations__header">
 				<div className="woocommerce-product-variations__selection">
@@ -378,7 +424,22 @@ export function VariationsTable() {
 								}
 							) }
 						>
-							{ formatAmount( variation.price ) }
+							{ variation.on_sale && (
+								<span className="woocommerce-product-variations__sale-price">
+									{ formatAmount( variation.sale_price ) }
+								</span>
+							) }
+							<span
+								className={ classnames(
+									'woocommerce-product-variations__regular-price',
+									{
+										'woocommerce-product-variations__regular-price--on-sale':
+											variation.on_sale,
+									}
+								) }
+							>
+								{ formatAmount( variation.regular_price ) }
+							</span>
 						</div>
 						<div
 							className={ classnames(
@@ -389,76 +450,34 @@ export function VariationsTable() {
 								}
 							) }
 						>
-							<span
-								className={ classnames(
-									'woocommerce-product-variations__status-dot',
-									getProductStockStatusClass( variation )
-								) }
-							>
-								●
-							</span>
-							{ getProductStockStatus( variation ) }
+							{ variation.regular_price && (
+								<>
+									<span
+										className={ classnames(
+											'woocommerce-product-variations__status-dot',
+											getProductStockStatusClass(
+												variation
+											)
+										) }
+									>
+										●
+									</span>
+									{ getProductStockStatus( variation ) }
+								</>
+							) }
 						</div>
 						<div className="woocommerce-product-variations__actions">
-							{ variation.status === 'private' && (
+							{ ( variation.status === 'private' ||
+								! variation.regular_price ) && (
 								<Tooltip
+									// @ts-expect-error className is missing in TS, should remove this when it is included.
+									className="woocommerce-attribute-list-item__actions-tooltip"
 									position="top center"
 									text={ NOT_VISIBLE_TEXT }
 								>
-									<Button
-										className="components-button--hidden"
-										aria-label={
-											isUpdating[ variation.id ]
-												? UPDATING_TEXT
-												: NOT_VISIBLE_TEXT
-										}
-										aria-disabled={
-											isUpdating[ variation.id ]
-										}
-										onClick={ () =>
-											handleVariationChange(
-												variation.id,
-												{ status: 'publish' }
-											)
-										}
-									>
-										{ isUpdating[ variation.id ] ? (
-											<Spinner />
-										) : (
-											<HiddenIcon />
-										) }
-									</Button>
-								</Tooltip>
-							) }
-
-							{ variation.status === 'publish' && (
-								<Tooltip
-									position="top center"
-									text={ VISIBLE_TEXT }
-								>
-									<Button
-										className="components-button--visible"
-										aria-label={
-											isUpdating[ variation.id ]
-												? UPDATING_TEXT
-												: VISIBLE_TEXT
-										}
-										aria-disabled={
-											isUpdating[ variation.id ]
-										}
-										onClick={ () =>
-											handleVariationChange(
-												variation.id,
-												{ status: 'private' }
-											)
-										}
-									>
-										{ isUpdating[ variation.id ] ? (
-											<Spinner />
-										) : (
-											<VisibleIcon />
-										) }
-									</Button>
+									<div>
+										<HiddenWithHelpIcon />
+									</div>
 								</Tooltip>
 							) }
 							<VariationActionsMenu
@@ -496,4 +515,4 @@ export function VariationsTable() {
 			) }
 		</div>
 	);
-}
+} );

@@ -1,16 +1,38 @@
+/**
+ * External dependencies
+ */
+import { z } from 'zod';
+import { spawn } from 'xstate';
+/**
+ * Internal dependencies
+ */
+import {
+	colorPaletteValidator,
+	fontChoiceValidator,
+	headerValidator,
+	footerValidator,
+	colorPaletteResponseValidator,
+	homepageTemplateValidator,
+} from './prompts';
+
 export type designWithAiStateMachineContext = {
 	businessInfoDescription: {
 		descriptionText: string;
-		isMakignRequest?: boolean;
 	};
 	lookAndFeel: {
-		choice: string;
+		choice: Look | '';
 	};
 	toneOfVoice: {
-		choice: string;
+		choice: Tone | '';
+	};
+	aiSuggestions: {
+		defaultColorPalette: ColorPaletteResponse;
+		fontPairing: FontPairing[ 'pair_name' ];
+		homepageTemplate: HomepageTemplate[ 'homepage_template' ];
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
+	spawnSaveDescriptionToOptionRef?: ReturnType< typeof spawn >;
 };
 export type designWithAiStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
@@ -25,13 +47,28 @@ export type designWithAiStateMachineEvents =
 			type: 'TONE_OF_VOICE_COMPLETE';
 	  }
 	| {
-			type: 'API_CALL_TO_AI_SUCCCESSFUL';
-	  }
-	| {
-			type: 'API_CALL_TO_AI_FAILED';
+			type: 'EXTERNAL_URL_UPDATE';
 	  };
 
-export type completionAPIResponse = {
-	look: string;
-	tone: string;
-};
+export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
+export const VALID_TONES = [ 'Informal', 'Neutral', 'Formal' ] as const;
+export type Look = ( typeof VALID_LOOKS )[ number ];
+export type Tone = ( typeof VALID_TONES )[ number ];
+
+export interface LookAndToneCompletionResponse {
+	look: Look;
+	tone: Tone;
+}
+
+export type ColorPalette = z.infer< typeof colorPaletteValidator >;
+export type ColorPaletteResponse = z.infer<
+	typeof colorPaletteResponseValidator
+>;
+
+export type FontPairing = z.infer< typeof fontChoiceValidator >;
+
+export type Header = z.infer< typeof headerValidator >;
+
+export type Footer = z.infer< typeof footerValidator >;
+
+export type HomepageTemplate = z.infer< typeof homepageTemplateValidator >;

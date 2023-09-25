@@ -226,6 +226,10 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
+		if ( ! getenv( 'HPOS' ) ) {
+			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
+
 		WC_Install::install();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.

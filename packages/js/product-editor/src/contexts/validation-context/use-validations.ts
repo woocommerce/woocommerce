@@ -13,17 +13,17 @@ function isInvalid( errors: ValidationErrors ) {
 	return Object.values( errors ).some( Boolean );
 }
 
-export function useValidations() {
+export function useValidations< T = unknown >() {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
 
 	return {
 		isValidating,
-		async validate() {
+		async validate( newData?: Partial< T > ) {
 			setIsValidating( true );
 			return new Promise< void >( ( resolve, reject ) => {
 				context
-					.validateAll()
+					.validateAll( newData )
 					.then( ( errors ) => {
 						if ( isInvalid( errors ) ) {
 							reject( errors );

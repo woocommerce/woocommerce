@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchro
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -256,6 +257,7 @@ class WC_Install {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -879,6 +881,51 @@ class WC_Install {
 	}
 
 	/**
+	 * Enable HPOS by default for new shops.
+	 *
+	 * @since 8.2.0
+	 */
+	public static function maybe_enable_hpos() {
+		if ( self::should_enable_hpos_for_new_shop() ) {
+			$feature_controller = wc_get_container()->get( FeaturesController::class );
+			$feature_controller->change_feature_enable( 'custom_order_tables', true );
+		}
+	}
+
+	/**
+	 * Checks whether HPOS should be enabled for new shops.
+	 *
+	 * @return bool
+	 */
+	private static function should_enable_hpos_for_new_shop() {
+		if ( ! did_action( 'woocommerce_init' ) && ! doing_action( 'woocommerce_init' ) ) {
+			return false;
+		}
+
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return true;
+		}
+
+		if ( ! empty( wc_get_orders( array( 'limit' => 1 ) ) ) ) {
+			return false;
+		}
+
+		$plugin_compat_info = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
+		if ( ! empty( $plugin_compat_info['incompatible'] ) || ! empty( $plugin_compat_info['uncertain'] ) ) {
+			return false;
+		}
+
+		/**
+		 * Filter to enable HPOS by default for new shops.
+		 *
+		 * @since 8.2.0
+		 */
+		return apply_filters( 'woocommerce_enable_hpos_by_default_for_new_shops', true );
+	}
+
+	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
@@ -1167,7 +1214,9 @@ class WC_Install {
 
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		$hpos_enabled =
-			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ) || $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ) || $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ||
+			self::should_enable_hpos_for_new_shop()
+		;
 		$hpos_table_schema = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
 
 		$tables = "

@@ -180,13 +180,12 @@ function ResizableFrame( {
 			left: 0,
 		},
 		visible: {
-			opacity: 1,
+			opacity: 0.6,
 			left: -10,
 		},
 		active: {
 			opacity: 1,
 			left: -10,
-			scaleY: 1.3,
 		},
 	};
 	const currentResizeHandleVariant = ( () => {

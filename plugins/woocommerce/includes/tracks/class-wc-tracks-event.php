@@ -55,7 +55,7 @@ class WC_Tracks_Event {
 	 * @return bool Always returns true.
 	 */
 	public function record() {
-		if ( wp_doing_ajax() || Constants::is_true( 'REST_REQUEST' ) ) {
+		if ( wp_doing_ajax() || Constants::is_true( 'REST_REQUEST' ) || Constants::is_true( 'WP_CLI' ) || wp_doing_cron() ) {
 			return WC_Tracks_Client::record_event( $this );
 		}
 

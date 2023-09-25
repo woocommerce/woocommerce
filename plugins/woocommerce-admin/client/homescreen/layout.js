@@ -112,7 +112,7 @@ export const Layout = ( {
 						/>
 					) }
 					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
-					{ <ActivityPanel /> }
+					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
 				</Column>

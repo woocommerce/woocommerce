@@ -65,9 +65,9 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 		'Check to allow customers to search and filter by this option in your store.',
 		'woocommerce'
 	),
-	visibleLabel = __( 'Visible to customers', 'woocommerce' ),
+	visibleLabel = __( 'Show in product details', 'woocommerce' ),
 	visibleTooltip = __(
-		'Show or hide this attribute on the product page',
+		'Check to show this option and its values in the product details section on the product page.',
 		'woocommerce'
 	),
 	cancelAccessibleLabel = __( 'Cancel', 'woocommerce' ),

@@ -178,6 +178,45 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( '#billing_email' ) ).toBeEditable();
 	} );
 
+	test( 'warn when customer is missing required details', async ( { page } ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, { waitUntil: 'networkidle' } );
+
+		await page.goto( '/checkout/' );
+
+		// first try submitting the form with no fields complete
+		await page.getByRole('button', { name: 'Place order' }).click();
+		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing First name is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing Last name is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing Street address is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing Town / City is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing ZIP Code is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing Phone is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Billing Email address is a required field.' ) ).toBeVisible();
+
+		// toggle ship to different address, fill out billing info and confirm error shown
+		await page.getByText('Ship to a different address?').click();
+		await page.locator( '#billing_first_name' ).fill( 'Homer' );
+		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( '123 Evergreen Terrace' );
+		await page.locator( '#billing_city' ).fill( 'Springfield' );
+		await page.locator( '#billing_country' ).selectOption( 'US' );
+		await page.locator( '#billing_state' ).selectOption( 'OR' );
+		await page.locator( '#billing_postcode' ).fill( '97403' );
+		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
+		await page.locator( '#billing_email' ).fill( customer.email );
+		await page.getByRole('button', { name: 'Place order' }).click();
+
+		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
+		await expect( page.getByText( 'Shipping First name is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Shipping Last name is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Shipping Street address is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Shipping Town / City is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( 'Shipping ZIP Code is a required field.' ) ).toBeVisible();
+	} );
+
 	test( 'allows customer to fill shipping details', async ( { page } ) => {
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );

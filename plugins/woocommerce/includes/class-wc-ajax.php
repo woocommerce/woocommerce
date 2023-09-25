@@ -209,7 +209,7 @@ class WC_AJAX {
 				function( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
-				10,
+				11,
 				2
 			);
 		}
@@ -970,6 +970,8 @@ class WC_AJAX {
 		$data                  = $customer->get_data();
 		$data['date_created']  = $data['date_created'] ? $data['date_created']->getTimestamp() : null;
 		$data['date_modified'] = $data['date_modified'] ? $data['date_modified']->getTimestamp() : null;
+
+		unset( $data['meta_data'] );
 
 		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $data, $customer, $user_id );
 		wp_send_json( $customer_data );

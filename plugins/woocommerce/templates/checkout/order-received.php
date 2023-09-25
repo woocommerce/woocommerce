@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.1.0
+ * @version 8.3.0
  *
  * @var WC_Order|false $order
  */
@@ -32,10 +32,11 @@ defined( 'ABSPATH' ) || exit;
 	 */
 	$message = apply_filters(
 		'woocommerce_thankyou_order_received_text',
-		__( 'Thank you. Your order has been received.', 'woocommerce' ),
+		esc_html( __( 'Thank you. Your order has been received.', 'woocommerce' ) ),
 		$order
 	);
 
-	echo esc_html( $message );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo $message;
 	?>
 </p>

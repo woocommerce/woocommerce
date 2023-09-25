@@ -7,7 +7,13 @@ import { WithCustomizeYourStoreLayout } from './WithCustomizeYourStoreLayout';
 
 export const ToneOfVoicePage = () => (
 	<ToneOfVoice
-		context={ {} as designWithAiStateMachineContext }
+		context={
+			{
+				toneOfVoice: {
+					choice: '',
+				},
+			} as designWithAiStateMachineContext
+		}
 		sendEvent={ () => {} }
 	/>
 );

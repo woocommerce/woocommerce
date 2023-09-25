@@ -48,6 +48,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
 						'type'        => 'boolean',
 					),
+					'default_values' => array(
+						'description' => __( 'Default values for generated variations.', 'woocommerce' ),
+						'type' 		 => 'object',
+						'properties' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					)
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -866,6 +871,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
 		}
 
+		// Price filter.
+		if ( is_bool( $request['has_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_price',
+					'compare' => $request['has_price'] ? 'EXISTS' : 'NOT EXISTS',
+				)
+			);
+		}
+
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
@@ -927,6 +943,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['has_price'] = array(
+			'description'       => __( 'Limit result set to products with or without price.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
@@ -982,8 +1005,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		$response          = array();
 		$product           = wc_get_product( $product_id );
+		$default_values	   = isset( $request['default_values'] ) ? $request['default_values'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
 
 		if ( isset( $request['delete'] ) && $request['delete'] ) {
 			$deleted_count = $this->delete_unmatched_product_variations( $product );

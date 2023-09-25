@@ -3,6 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
+import { escapeHTML } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
@@ -61,7 +62,7 @@ const useTaxonomySearch = (
 				Taxonomy[]
 			>( 'taxonomy', taxonomyName, {
 				per_page: PAGINATION_SIZE,
-				search,
+				search: escapeHTML( search ),
 			} );
 			if ( options?.fetchParents ) {
 				taxonomies = await getTaxonomiesMissingParents(
@@ -69,7 +70,7 @@ const useTaxonomySearch = (
 					taxonomyName
 				);
 			}
-		} catch ( e ) {
+		} finally {
 			setIsSearching( false );
 		}
 		return taxonomies;

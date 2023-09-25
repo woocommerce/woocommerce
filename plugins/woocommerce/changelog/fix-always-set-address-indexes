@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Always generate address metadata indexes for HPOS orders.

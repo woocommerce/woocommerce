@@ -1,40 +1,38 @@
 {
-    "phpVersion": "7.4",
-    "plugins": [
-        "."
-    ],
-    "config": {
-        "JETPACK_AUTOLOAD_DEV": true,
-        "WP_DEBUG_LOG": true,
-        "WP_DEBUG_DISPLAY": true,
-        "ALTERNATE_WP_CRON": true
-    },
-    "mappings": {
-        "wp-cli.yml": "./tests/wp-cli.yml",
-        "wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
-        "wp-content/plugins/enable-experimental-features.php": "./tests/e2e-pw/bin/enable-experimental-features.php"
-    },
-    "lifecycleScripts": {
-        "afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
-        "afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
-    },
-    "env": {
-        "development": {},
-        "tests": {
-            "port": 8086,
-            "plugins": [
-                ".",
-                "https://downloads.wordpress.org/plugin/akismet.zip",
-                "https://github.com/WP-API/Basic-Auth/archive/master.zip",
-                "https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
-            ],
-            "themes": [
-                "https://downloads.wordpress.org/theme/twentynineteen.zip"
-            ],
-            "config": {
-                "WP_TESTS_DOMAIN": "localhost",
-                "ALTERNATE_WP_CRON": false
-            }
-        }
-    }
+	"phpVersion": "7.4",
+	"plugins": [ "." ],
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"ALTERNATE_WP_CRON": true
+	},
+	"mappings": {
+		"wp-cli.yml": "./tests/wp-cli.yml",
+		"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
+		"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php"
+	},
+	"lifecycleScripts": {
+		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
+		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
+	},
+	"env": {
+		"development": {},
+		"tests": {
+			"port": 8086,
+			"plugins": [
+				".",
+				"https://downloads.wordpress.org/plugin/akismet.zip",
+				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
+				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
+			],
+			"themes": [
+				"https://downloads.wordpress.org/theme/twentynineteen.zip"
+			],
+			"config": {
+				"WP_TESTS_DOMAIN": "localhost",
+				"ALTERNATE_WP_CRON": false
+			}
+		}
+	}
 }

@@ -39,6 +39,7 @@ class BlockRegistry {
 		'woocommerce/product-shipping-dimensions-fields',
 		'woocommerce/product-summary-field',
 		'woocommerce/product-tab',
+		'woocommerce/product-tag-field',
 		'woocommerce/product-inventory-quantity-field',
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-variation-items-field',

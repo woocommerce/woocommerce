@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Admin\PageController;
  * @package Automattic\WooCommerce\Admin\Features
  */
 class WcPayWelcomePage {
-	const CACHE_TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
+	const CACHE_TRANSIENT_NAME  = 'wcpay_welcome_page_incentive';
 	const HAD_WCPAY_OPTION_NAME = 'wcpay_was_in_use';
 
 	/**
@@ -45,6 +45,7 @@ class WcPayWelcomePage {
 		add_action( 'admin_menu', [ $this, 'register_payments_welcome_page' ] );
 		add_filter( 'woocommerce_admin_shared_settings', [ $this, 'shared_settings' ] );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', [ $this, 'onboarding_task_badge' ] );
 	}
 
 	/**
@@ -187,6 +188,22 @@ class WcPayWelcomePage {
 		$promo_notes[] = $this->get_incentive()['id'];
 
 		return $promo_notes;
+	}
+
+	/**
+	 * Adds the WooPayments incentive badge to the onboarding task.
+	 *
+	 * @param string $badge Current badge.
+	 *
+	 * @return string
+	 */
+	public function onboarding_task_badge( string $badge ): string {
+		// Return early if the incentive must not be visible.
+		if ( ! $this->must_be_visible() ) {
+			return $badge;
+		}
+
+		return $this->get_incentive()['task_badge'] ?? $badge;
 	}
 
 	/**
