@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Enqueue media scripts for Images block within the product editor, as is required for Images block. [#40356](https://github.com/woocommerce/woocommerce/pull/40356)
 * Fix - Addressed visual tweaks for CYS in response to feedback from 12th Sept [#40155](https://github.com/woocommerce/woocommerce/pull/40155)
 * Fix - Address missing order type handling in HPOS compatibility mode sync. [#40279](https://github.com/woocommerce/woocommerce/pull/40279)
 * Fix - Add Variation options section back to the product blocks template [#39914](https://github.com/woocommerce/woocommerce/pull/39914)
