@@ -802,7 +802,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-section',
 				'order'      => 10,
 				'attributes' => [
-					'title' => __( 'Variation options', 'woocommerce' ),
+					'title'       => __( 'Variation options', 'woocommerce' ),
+					'description' => __( 'Add and manage attributes used for product options, such as size and color.', 'woocommerce' ),
 				],
 			]
 		);
@@ -818,7 +819,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-section',
 				'order'      => 20,
 				'attributes' => [
-					'title' => __( 'Variations', 'woocommerce' ),
+					'title'       => __( 'Variations', 'woocommerce' ),
+					'description' => __( 'Manage individual product combinations created from options.', 'woocommerce' ),
 				],
 			]
 		);
