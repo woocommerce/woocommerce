@@ -3,6 +3,8 @@
  */
 import '@wordpress/core-data';
 
+// Arbitrary change!
+
 // Export store names
 export { SETTINGS_STORE_NAME } from './settings';
 export { PLUGINS_STORE_NAME } from './plugins';
