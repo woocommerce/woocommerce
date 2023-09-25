@@ -40,14 +40,7 @@ const tabs: Tabs = {
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
-		title: __( 'My Subscriptions', 'woocommerce' ),
-		href: getNewPath(
-			{
-				page: 'wc-addons',
-				section: 'helper',
-			},
-			''
-		),
+		title: __( 'My subscriptions', 'woocommerce' ),
 	},
 };
 
