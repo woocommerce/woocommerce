@@ -158,10 +158,10 @@ const program = new Command( 'changefile' )
 						`Running changelog command for ${ project }`
 					);
 					const messageExpression = message
-						? `-e "${ message }"`
+						? `-e '${ message.replace( /'/g, "'\\''" ) }'`
 						: '--entry=""';
 					const commentExpression = comment
-						? `-c "${ comment }"`
+						? `-c '${ comment.replace( /'/g, "'\\''" ) }'`
 						: '';
 					const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
 					execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
