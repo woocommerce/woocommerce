@@ -46,6 +46,8 @@ class RoutesController {
 				Routes\V1\CartUpdateItem::IDENTIFIER     => Routes\V1\CartUpdateItem::class,
 				Routes\V1\CartUpdateCustomer::IDENTIFIER => Routes\V1\CartUpdateCustomer::class,
 				Routes\V1\Checkout::IDENTIFIER           => Routes\V1\Checkout::class,
+				Routes\V1\CheckoutOrder::IDENTIFIER      => Routes\V1\CheckoutOrder::class,
+				Routes\V1\Order::IDENTIFIER              => Routes\V1\Order::class,
 				Routes\V1\Patterns::IDENTIFIER           => Routes\V1\Patterns::class,
 				Routes\V1\ProductAttributes::IDENTIFIER  => Routes\V1\ProductAttributes::class,
 				Routes\V1\ProductAttributesById::IDENTIFIER => Routes\V1\ProductAttributesById::class,
@@ -60,11 +62,6 @@ class RoutesController {
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
 		];
-
-		if ( Package::is_experimental_build() ) {
-			$this->routes['v1'][ Routes\V1\Order::IDENTIFIER ]         = Routes\V1\Order::class;
-			$this->routes['v1'][ Routes\V1\CheckoutOrder::IDENTIFIER ] = Routes\V1\CheckoutOrder::class;
-		}
 	}
 
 	/**
