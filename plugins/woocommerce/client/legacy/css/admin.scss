@@ -3895,14 +3895,22 @@ table {
 	max-width: 800px;
 }
 
-.wc-shipping-zone-help-text, 
 .wc-shipping-zone-heading-help-text {
 	font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 13px;
 	font-style: normal;
 	font-weight: 400;
-	line-height: 18px;
+	line-height: 19px;
+}
+
+.wc-shipping-zone-help-text {
+	font-family: $font-sf-pro-text;
+	color: #3C434A;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 17px;
 }
 
 table.wc-shipping-zones,
