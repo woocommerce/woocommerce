@@ -112,6 +112,7 @@ export default function Content(): JSX.Element {
 				return <></>;
 		}
 	};
+	
 	return (
 		<div className="woocommerce-marketplace__content">
 			{ renderContent( selectedTab, productList ) }
