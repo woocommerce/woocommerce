@@ -4,6 +4,9 @@
  * Slug: woocommerce-blocks/testimonials-3-columns
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/testimonials-3-columns' );
 ?>
 
 <!-- wp:columns {"align":"full"} -->
@@ -11,11 +14,11 @@
 	<!-- wp:column -->
 	<div class="wp-block-column">
 		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Great experience', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][0]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'In the end the couch wasn\'t exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the…', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
@@ -28,11 +31,11 @@
 	<div class="wp-block-column">
 		<!-- wp:paragraph -->
 
-		<p><strong><?php esc_attr_e( 'LOVE IT', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][1]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'Great couch. color as advertise. seat is nice and firm. Easy to put together. Versatile. Bought one for my mother in law as well. And she loves hers!', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
@@ -44,11 +47,11 @@
 	<!-- wp:column -->
 	<div class="wp-block-column">
 		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Awesome couch and great buying experience', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][2]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'I got the kind sofa. The look and feel is high quality, and I enjoy that it is a medium level of firmness. Assembly took a little longer than I expected, and it came in 4 boxes. I am excited about the time / st…', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][2]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->

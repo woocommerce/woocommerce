@@ -5,11 +5,12 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-chessboard' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/hero-product-chessboard' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-chessboard' );
 
-$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-restaurant-celebration-food-chocolate-cupcake.png' );
-$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/dish-meal-food-breakfast-dessert-eat.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-restaurant-celebration-food-chocolate-cupcake.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/dish-meal-food-breakfast-dessert-eat.png' );
 ?>
 
 <!-- wp:group {"align":"full","layout":{"type":"constrained"}} -->
@@ -33,11 +34,11 @@ $image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders
 			<!-- wp:group {"style":{"spacing":{"padding":{"top":"50px","right":"50px","bottom":"50px","left":"50px"}}},"layout":{"type":"flex","orientation":"vertical","verticalAlignment":"center","justifyContent":"stretch"}} -->
 			<div class="wp-block-group" style="padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px">
 				<!-- wp:heading {"textAlign":"left","level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"large"} -->
-				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600">The Fall Collection</h3>
+				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}},"typography":{"fontSize":"14px"}}} -->
-				<p style="margin-bottom:var(--wp--preset--spacing--40);font-size:14px">With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.</p>
+				<p style="margin-bottom:var(--wp--preset--spacing--40);font-size:14px"><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
 				<!-- /wp:paragraph -->
 
 				<!-- wp:buttons -->
@@ -67,11 +68,11 @@ $image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders
 					<!-- wp:column -->
 					<div class="wp-block-column">
 						<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize","fontSize":"14px"}}} -->
-						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize">Quality Materials</h5>
+						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize"><?php echo esc_html( $content['titles'][1]['default'] ); ?></h5>
 						<!-- /wp:heading -->
 
 						<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"},"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"margin":{"top":"var:preset|spacing|20","right":"0","bottom":"0","left":"0"}}}} -->
-						<p style="margin-top:var(--wp--preset--spacing--20);margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;font-size:12px">We use only the highest-quality materials in our products, ensuring that they look great and last for years to come. </p>
+						<p style="margin-top:var(--wp--preset--spacing--20);margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;font-size:12px"><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:column -->
@@ -79,11 +80,11 @@ $image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders
 					<!-- wp:column -->
 					<div class="wp-block-column">
 						<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize","fontSize":"14px"}}} -->
-						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize">Expert Craftsmanship</h5>
+						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize"><?php echo esc_html( $content['titles'][2]['default'] ); ?></h5>
 						<!-- /wp:heading -->
 
 						<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"},"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
-						<p style="margin-top:var(--wp--preset--spacing--20);font-size:12px">Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.</p>
+						<p style="margin-top:var(--wp--preset--spacing--20);font-size:12px"><?php echo esc_html( $content['descriptions'][2]['default'] ); ?></p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:column -->
@@ -95,11 +96,11 @@ $image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders
 					<!-- wp:column -->
 					<div class="wp-block-column">
 						<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize","fontSize":"14px"}}} -->
-						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize">Unique Design</h5>
+						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize"><?php echo esc_html( $content['titles'][3]['default'] ); ?></h5>
 						<!-- /wp:heading -->
 
 						<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"},"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
-						<p style="margin-top:var(--wp--preset--spacing--20);font-size:12px">From bold prints and colors to intricate details and textures, our products are a perfect combination of style and function.</p>
+						<p style="margin-top:var(--wp--preset--spacing--20);font-size:12px"><?php echo esc_html( $content['descriptions'][3]['default'] ); ?></p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:column -->
@@ -107,11 +108,11 @@ $image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders
 					<!-- wp:column -->
 					<div class="wp-block-column">
 						<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize","fontSize":"14px"}}} -->
-						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize">Customer Satisfaction</h5>
+						<h5 class="wp-block-heading" style="font-size:14px;text-transform:capitalize"><?php echo esc_html( $content['titles'][4]['default'] ); ?></h5>
 						<!-- /wp:heading -->
 
 						<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"},"spacing":{"margin":{"top":"var:preset|spacing|20","right":"0","bottom":"0","left":"0"}}}} -->
-						<p style="margin-top:var(--wp--preset--spacing--20);margin-right:0;margin-bottom:0;margin-left:0;font-size:12px">Our top priority is customer satisfaction, and we stand behind our products 100%. </p>
+						<p style="margin-top:var(--wp--preset--spacing--20);margin-right:0;margin-bottom:0;margin-left:0;font-size:12px"><?php echo esc_html( $content['descriptions'][4]['default'] ); ?></p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:column -->

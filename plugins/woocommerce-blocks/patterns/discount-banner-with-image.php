@@ -5,8 +5,9 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/discount-banner-with-image' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/discount-banner-with-image' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/discount-banner-with-image' );
 ?>
 
 <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"color":{"background":"#254094"},"spacing":{"padding":{"top":"30px","right":"30px","bottom":"30px","left":"30px"}}}} -->
@@ -24,7 +25,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/discount-banner
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","fontSize":"35px","lineHeight":"0"},"color":{"text":"#ffffff"},"spacing":{"margin":{"bottom":"40px"}}}} -->
-			<p class="has-text-color" style="color:#ffffff;margin-bottom:40px;font-size:35px;font-style:normal;font-weight:300;line-height:0">Select products</p>
+			<p class="has-text-color" style="color:#ffffff;margin-bottom:40px;font-size:35px;font-style:normal;font-weight:300;line-height:0"><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:buttons -->
@@ -43,7 +44,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/discount-banner
 	<div class="wp-block-column is-vertically-aligned-center">
 		<!-- wp:image {"align":"center","sizeSlug":"full","linkDestination":"none","style":{"border":{"radius":{"topLeft":"100px","topRight":"10px","bottomLeft":"10px","bottomRight":"100px"}}}} -->
 		<figure class="wp-block-image aligncenter size-full has-custom-border">
-			<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" style="border-top-left-radius:100px;border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:100px"/>
+			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" style="border-top-left-radius:100px;border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:100px"/>
 		</figure>
 		<!-- /wp:image -->
 	</div>

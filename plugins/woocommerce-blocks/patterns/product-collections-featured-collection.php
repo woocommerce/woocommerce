@@ -5,6 +5,9 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collections-featured-collection' );
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"color":{"background":"#333333"},"spacing":{"padding":{"top":"1.3rem","right":"1.3rem","bottom":"1.3rem","left":"1.3rem"}}},"textColor":"white"} -->
@@ -13,7 +16,7 @@
 	<div class="wp-block-column is-vertically-aligned-center" style="padding-right:var(--wp--preset--spacing--40);padding-left:var(--wp--preset--spacing--40);flex-basis:33.33%">
 		<!-- wp:heading {"textAlign":"center","style":{"typography":{"fontStyle":"normal","fontWeight":"700"},"color":{"text":"#ffffff"}},"fontSize":"x-large"} -->
 		<h2 class="wp-block-heading has-text-align-center has-text-color has-x-large-font-size" style="color:#ffffff;font-style:normal;font-weight:700">
-			<?php echo wp_kses( __( 'This week\'s popular products', 'woo-gutenberg-products-block' ), array() ); ?>
+			<?php echo esc_html( $content['titles'][0]['default'] ); ?>
 		</h2>
 		<!-- /wp:heading -->
 	</div>

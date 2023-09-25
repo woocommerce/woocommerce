@@ -5,6 +5,9 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collections-newest-arrivals' );
 ?>
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
@@ -15,7 +18,7 @@
 		<div class="wp-block-column">
 			<!-- wp:heading {"level":3} -->
 
-			<h3 class="wp-block-heading"><?php esc_attr_e( 'Our newest arrivals', 'woo-gutenberg-products-block' ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:column -->
@@ -27,7 +30,7 @@
 				<!-- wp:button -->
 				<div class="wp-block-button">
 					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
-						<?php esc_attr_e( 'More new products', 'woo-gutenberg-products-block' ); ?>
+						<?php echo esc_html( $content['buttons'][0]['default'] ); ?>
 					</a>
 				</div>
 				<!-- /wp:button -->

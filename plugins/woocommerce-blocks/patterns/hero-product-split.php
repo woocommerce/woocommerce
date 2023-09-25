@@ -5,15 +5,16 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-split' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/hero-product-split' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-split' );
 ?>
 
 <!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false} -->
 <div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile">
 	<div class="wp-block-media-text__content">
 		<!-- wp:heading -->
-		<h2 class="wp-block-heading"><?php esc_html_e( 'Get cozy this fall with knit sweaters', 'woo-gutenberg-products-block' ); ?></h2>
+		<h2 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
@@ -28,7 +29,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-sp
 	</div>
 
 	<figure class="wp-block-media-text__media">
-		<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" />
+		<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" />
 	</figure>
 </div>
 <!-- /wp:media-text -->

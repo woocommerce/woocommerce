@@ -5,13 +5,14 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/product-collections-featured-collections' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collections-featured-collections' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/product-collections-featured-collections' );
 
-$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
-$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
-$image3 = PatternImages::get_image_url( $images, 2, 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
-$image4 = PatternImages::get_image_url( $images, 3, 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
+$image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
+$image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":{"top":"0","left":"0"}}}} -->
@@ -19,14 +20,14 @@ $image4 = PatternImages::get_image_url( $images, 3, 'images/pattern-placeholders
 	<!-- wp:column {"width":"50%","style":{"spacing":{"padding":{"top":"30px","right":"30px","bottom":"30px","left":"30px"}},"color":{"background":"#f3edd8"}},"layout":{"type":"constrained"}} -->
 	<div class="wp-block-column has-background" style="background-color:#f3edd8;padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px;flex-basis:50%">
 		<!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"},"color":{"text":"#000000"}},"fontSize":"x-large"} -->
-		<h2 class="wp-block-heading has-text-color has-x-large-font-size" style="color:#000000;font-style:normal;font-weight:700">Tech gifts under $100</h2>
+		<h2 class="wp-block-heading has-text-color has-x-large-font-size" style="color:#000000;font-style:normal;font-weight:700"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons -->
 		<div class="wp-block-buttons">
 			<!-- wp:button {"style":{"spacing":{"padding":{"left":"18px","right":"18px","top":"9px","bottom":"9px"}},"typography":{"fontSize":"16px"},"color":{"background":"#000000","text":"#ffffff"}}} -->
 			<div class="wp-block-button has-custom-font-size" style="font-size:16px">
-				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop tech</a>
+				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px"><?php echo esc_html( $content['buttons'][0]['default'] ); ?></a>
 			</div>
 			<!-- /wp:button -->
 		</div>
@@ -53,14 +54,14 @@ $image4 = PatternImages::get_image_url( $images, 3, 'images/pattern-placeholders
 	<!-- wp:column {"width":"50%","style":{"spacing":{"padding":{"top":"30px","right":"30px","bottom":"30px","left":"30px"}},"color":{"background":"#d8f2f3"}}} -->
 	<div class="wp-block-column has-background" style="background-color:#d8f2f3;padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px;flex-basis:50%">
 		<!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"},"color":{"text":"#000000"}},"fontSize":"x-large"} -->
-		<h2 class="wp-block-heading has-text-color has-x-large-font-size" style="color:#000000;font-style:normal;font-weight:700">For the gamers</h2>
+		<h2 class="wp-block-heading has-text-color has-x-large-font-size" style="color:#000000;font-style:normal;font-weight:700"><?php echo esc_html( $content['titles'][1]['default'] ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons -->
 		<div class="wp-block-buttons">
 			<!-- wp:button {"style":{"spacing":{"padding":{"left":"18px","right":"18px","top":"9px","bottom":"9px"}},"typography":{"fontSize":"16px"},"color":{"background":"#000000","text":"#ffffff"}}} -->
 			<div class="wp-block-button has-custom-font-size" style="font-size:16px">
-				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop games</a>
+				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px"><?php echo esc_html( $content['buttons'][1]['default'] ); ?></a>
 			</div>
 			<!-- /wp:button -->
 		</div>

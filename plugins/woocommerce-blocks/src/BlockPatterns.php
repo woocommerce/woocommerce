@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
 use Automattic\WooCommerce\Blocks\Verticals\Client;
 use Automattic\WooCommerce\Blocks\Verticals\VerticalsSelector;
 
@@ -249,6 +249,6 @@ class BlockPatterns {
 			return $vertical_id;
 		}
 
-		return ( new PatternImages() )->create_patterns_content( $vertical_id, new Client() );
+		return ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client() );
 	}
 }
