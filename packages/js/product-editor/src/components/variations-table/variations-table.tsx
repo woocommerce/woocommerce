@@ -475,7 +475,9 @@ export const VariationsTable = forwardRef<
 									position="top center"
 									text={ NOT_VISIBLE_TEXT }
 								>
-									<HiddenIcon />
+									<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
+										<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
+									</div>
 								</Tooltip>
 							) }
 							<VariationActionsMenu

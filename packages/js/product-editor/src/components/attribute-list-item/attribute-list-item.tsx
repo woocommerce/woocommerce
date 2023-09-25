@@ -12,7 +12,6 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import HelpIcon from '../../icons/help-icon';
 import NotFilterableIcon from './not-filterable-icon';
 import HiddenIcon from '../../icons/hidden-icon';
 
@@ -78,7 +77,6 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
 							<NotFilterableIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
-							<HelpIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-help-icon" />
 						</div>
 					</Tooltip>
 				) }
@@ -89,7 +87,9 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
 					>
-						<HiddenIcon />
+						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
+							<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
+						</div>
 					</Tooltip>
 				) }
 				{ typeof onEditClick === 'function' && (
