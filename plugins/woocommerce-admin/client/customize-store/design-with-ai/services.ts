@@ -24,9 +24,8 @@ import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-pal
 import {
 	patternsToNameMap,
 	getTemplatePatterns,
-	LARGE_BUSINESS_TEMPLATES,
-	SMALL_MEDIUM_BUSINESS_TEMPLATES,
 } from '../assembler-hub/hooks/use-home-templates';
+import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -278,36 +277,21 @@ const updateGlobalStyles = async ( {
 
 // Update the current theme template
 const updateTemplate = async ( {
-	headerSlug,
-	businessSize,
 	homepageTemplateId,
-	footerSlug,
 }: {
-	headerSlug: string;
-	businessSize: 'SMB' | 'LB';
-	homepageTemplateId:
-		| keyof typeof SMALL_MEDIUM_BUSINESS_TEMPLATES
-		| keyof typeof LARGE_BUSINESS_TEMPLATES;
-	footerSlug: string;
+	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
 } ) => {
 	const patterns = ( await resolveSelect(
 		coreStore
 		// @ts-ignore No types for this exist yet.
 	).getBlockPatterns() ) as Pattern[];
-
 	const patternsByName = patternsToNameMap( patterns );
-
-	const headerPattern = patternsByName[ headerSlug ];
-	const footerPattern = patternsByName[ footerSlug ];
-
 	const homepageTemplate = getTemplatePatterns(
-		businessSize === 'SMB'
-			? SMALL_MEDIUM_BUSINESS_TEMPLATES[ homepageTemplateId ]
-			: LARGE_BUSINESS_TEMPLATES[ homepageTemplateId ],
+		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
 		patternsByName
 	);
 
-	const content = [ headerPattern, ...homepageTemplate, footerPattern ]
+	const content = [ ...homepageTemplate ]
 		.filter( Boolean )
 		.map( ( pattern ) => pattern.content )
 		.join( '\n\n' );
@@ -356,11 +340,9 @@ export const assembleSite = async (
 
 	try {
 		await updateTemplate( {
-			headerSlug: context.aiSuggestions.header,
 			// TODO: Get from context
-			businessSize: 'SMB',
-			homepageTemplateId: 'template1',
-			footerSlug: context.aiSuggestions.footer,
+			homepageTemplateId: context.aiSuggestions
+				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {

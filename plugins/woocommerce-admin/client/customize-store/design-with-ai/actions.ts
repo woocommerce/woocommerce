@@ -18,6 +18,7 @@ import {
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
+	HomepageTemplate,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -150,6 +151,24 @@ const assignFooter = assign<
 	},
 } );
 
+const assignHomepageTemplate = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			homepageTemplate: (
+				event as {
+					data: {
+						response: HomepageTemplate;
+					};
+				}
+			 ).data.response.homepage_template,
+		};
+	},
+} );
+
 const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woo_ai_describe_store_description: descriptionText,
@@ -243,6 +262,7 @@ export const actions = {
 	assignFontPairing,
 	assignHeader,
 	assignFooter,
+	assignHomepageTemplate,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
