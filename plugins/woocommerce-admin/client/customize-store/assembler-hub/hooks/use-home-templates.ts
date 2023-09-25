@@ -41,6 +41,7 @@ export const patternsToNameMap = ( blockPatterns: Pattern[] ) =>
 		{}
 	);
 
+// Returns home template patterns excluding header and footer.
 export const useHomeTemplates = () => {
 	const { blockPatterns, isLoading } = usePatterns();
 
@@ -60,7 +61,7 @@ export const useHomeTemplates = () => {
 			) => {
 				if ( templateName in recommendedTemplates ) {
 					acc[ templateName ] = getTemplatePatterns(
-						template.blocks,
+						template.blocks.slice( 1, -1 ),
 						patternsByName
 					);
 				}

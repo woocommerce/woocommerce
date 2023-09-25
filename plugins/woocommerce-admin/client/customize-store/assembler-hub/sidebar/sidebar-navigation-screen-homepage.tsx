@@ -31,7 +31,10 @@ export const SidebarNavigationScreenHomepage = () => {
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const onClickPattern = useCallback(
 		( _pattern, selectedBlocks ) => {
-			onChange( selectedBlocks, { selection: {} } );
+			onChange(
+				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
+				{ selection: {} }
+			);
 		},
 		[ blocks, onChange ]
 	);
@@ -94,7 +97,7 @@ export const SidebarNavigationScreenHomepage = () => {
 								shownPatterns={ homePatterns }
 								blockPatterns={ homePatterns }
 								onClickPattern={ onClickPattern }
-								label={ 'Hompeage' }
+								label={ 'Homepage' }
 								orientation="vertical"
 								category={ 'homepage' }
 								isDraggable={ false }
