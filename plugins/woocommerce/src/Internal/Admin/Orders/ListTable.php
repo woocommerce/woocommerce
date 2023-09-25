@@ -412,7 +412,19 @@ class ListTable extends WP_List_Table {
 		// We must ensure the 'paginate' argument is set.
 		$order_query_args['paginate'] = true;
 
-		$orders      = wc_get_orders( $order_query_args );
+		$orders = wc_get_orders( $order_query_args );
+
+		/**
+		 * Filters the actual orders that will be displayed in the orders list table (HPOS only).
+		 *
+		 * @param array $orders An array with the WC_Order objects that are intended to be displayed.
+		 * @param array $query_args The arguments that were used for the order query.
+		 * @returns array An array with the WC_Order objects that will actually be displayed.
+		 *
+		 * @since 8.3.0
+		 */
+		$orders->orders = apply_filters( 'woocommerce_order_list_table_items', $orders->orders, $order_query_args );
+
 		$this->items = $orders->orders;
 
 		$max_num_pages = $orders->max_num_pages;
@@ -723,7 +735,7 @@ class ListTable extends WP_List_Table {
 		global $wpdb;
 
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset = wc_timezone_offset();
+		$utc_offset   = wc_timezone_offset();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
@@ -1347,7 +1359,7 @@ class ListTable extends WP_List_Table {
 	 * @return int Number of orders that were trashed.
 	 */
 	private function do_delete( array $ids, bool $force_delete = false ): int {
-		$changed      = 0;
+		$changed = 0;
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
