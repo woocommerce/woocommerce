@@ -14,7 +14,7 @@ import { createElement } from '@wordpress/element';
  */
 import HelpIcon from '../../icons/help-icon';
 import NotFilterableIcon from './not-filterable-icon';
-import HiddenWithHelpIcon from '../../icons/hidden-with-help-icon';
+import HiddenIcon from '../../icons/hidden-icon';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;
@@ -89,9 +89,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
 					>
-						<div>
-							<HiddenWithHelpIcon />
-						</div>
+						<HiddenIcon />
 					</Tooltip>
 				) }
 				{ typeof onEditClick === 'function' && (
