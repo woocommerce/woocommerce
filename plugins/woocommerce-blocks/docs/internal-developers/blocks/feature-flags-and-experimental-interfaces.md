@@ -40,8 +40,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 -   Product Gallery Pager ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L237) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L64-L67)).
 -   Product Gallery Thumbnails ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L238) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L68-L71)).
 -   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
--   Order Route ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/b4a9dc9334f82c09f533b0f88c947b5c34e4e546/src/StoreApi/RoutesController.php#L65-L67))
--   Checkout Order Route ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/b4ba06a6242cbb6a64d2ec554a263ebe60d8d3af/src/StoreApi/RoutesController.php#L67))
 
 ## Features behind flags
 
