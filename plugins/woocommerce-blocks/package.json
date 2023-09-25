@@ -119,7 +119,7 @@
 		"@bartekbp/typescript-checkstyle": "5.0.0",
 		"@octokit/action": "5.0.2",
 		"@octokit/graphql": "5.0.5",
-		"@playwright/test": "1.32.3",
+		"@playwright/test": "1.38.1",
 		"@storybook/addon-a11y": "6.5.16",
 		"@storybook/addon-essentials": "6.5.15",
 		"@storybook/addon-links": "6.5.15",
