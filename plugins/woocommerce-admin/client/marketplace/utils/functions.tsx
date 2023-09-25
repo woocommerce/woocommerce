@@ -19,6 +19,7 @@ interface ProductGroup {
 	title: string;
 	items: Product[];
 	url: string;
+	itemType: ProductType;
 }
 
 // Fetch data for the discover page from the WooCommerce.com API
