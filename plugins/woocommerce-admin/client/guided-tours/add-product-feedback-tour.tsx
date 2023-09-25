@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 const FEEDBACK_TOUR_OPTION = 'woocommerce_ces_product_feedback_shown';
-const FEEDBACK_TIMEOUT_MS = 7 * 60 * 1000;
+const FEEDBACK_TIMEOUT_MS = 5 * 1000;
 
 const useShowProductFeedbackTour = (): undefined | boolean => {
 	const { hasShownTour } = useSelect( ( select ) => {
