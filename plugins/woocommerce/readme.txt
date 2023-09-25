@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Disable WP's post lock on HPOS order edit screen. [#40355](https://github.com/woocommerce/woocommerce/pull/40355)
 * Fix - Enqueue media scripts for Images block within the product editor, as is required for Images block. [#40356](https://github.com/woocommerce/woocommerce/pull/40356)
 * Fix - Addressed visual tweaks for CYS in response to feedback from 12th Sept [#40155](https://github.com/woocommerce/woocommerce/pull/40155)
 * Fix - Address missing order type handling in HPOS compatibility mode sync. [#40279](https://github.com/woocommerce/woocommerce/pull/40279)

@@ -99,6 +99,8 @@ class EditLock {
 			return $response;
 		}
 
+		unset( $response['wp-refresh-post-lock'] );
+
 		$order = wc_get_order( $order_id );
 		if ( ! $order || ( ! current_user_can( get_post_type_object( $order->get_type() )->cap->edit_post, $order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) ) {
 			return $response;
