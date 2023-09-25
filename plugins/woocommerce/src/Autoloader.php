@@ -34,6 +34,8 @@ class Autoloader {
 			return false;
 		}
 
+		// Arbitrary Change!
+
 		$autoloader_result = require $autoloader;
 		if ( ! $autoloader_result ) {
 			return false;
