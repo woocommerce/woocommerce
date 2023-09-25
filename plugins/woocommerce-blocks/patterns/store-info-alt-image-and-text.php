@@ -5,11 +5,11 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/alt-image-and-text' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$images = PatternsHelper::get_pattern_images( 'woocommerce-blocks/alt-image-and-text' );
 
-$image1 = PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/crafting-pots.png' );
-$image2 = PatternImages::get_image_url( $images, 1, 'images/pattern-placeholders/hand-made-pots.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/crafting-pots.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/hand-made-pots.png' );
 ?>
 
 <!-- wp:group {"align":"wide"} -->

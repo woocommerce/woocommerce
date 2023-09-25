@@ -4,6 +4,10 @@
  * Slug: woocommerce-blocks/discount-banner
  * Categories: WooCommerce
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/discount-banner' );
 ?>
 
 <!-- wp:columns {"verticalAlignment":"center"} -->
@@ -19,7 +23,7 @@
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","fontSize":"35px"},"color":{"text":"#ffffff"}}} -->
-		<p class="has-text-color" style="color:#ffffff;font-size:35px;font-style:normal;font-weight:300">Select products</p>
+		<p class="has-text-color" style="color:#ffffff;font-size:35px;font-style:normal;font-weight:300"><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:buttons -->

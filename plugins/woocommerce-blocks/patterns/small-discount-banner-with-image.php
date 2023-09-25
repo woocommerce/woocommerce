@@ -5,8 +5,9 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/small-discount-banner-with-image' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/small-discount-banner-with-image' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/small-discount-banner-with-image' );
 ?>
 
 <!-- wp:columns {"style":{"color":{"background":"#fcf8e1"},"spacing":{"padding":{"top":"20px","right":"20px","bottom":"20px","left":"20px"}}}} -->
@@ -16,7 +17,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/small-discount-
 		<!-- wp:group {"style":{"spacing":{"margin":{"top":"0"},"padding":{"left":"25px","top":"25px"}}},"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group" style="margin-top:0;padding-top:25px;padding-left:25px">
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","lineHeight":"1","fontSize":"30px"}}} -->
-			<p style="font-size:30px;font-style:normal;font-weight:300;line-height:1"><em>Chairs</em></p>
+			<p style="font-size:30px;font-style:normal;font-weight:300;line-height:1"><em><?php echo esc_html( $content['titles'][0]['default'] ); ?></em></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","lineHeight":"0","fontSize":"30px"},"color":{"text":"#74227b"},"elements":{"link":{"color":{"text":"#74227b"}}}}} -->
@@ -35,7 +36,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/small-discount-
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"center","id":1,"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image aligncenter size-full">
-			<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" class="wp-image-1" />
+			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" class="wp-image-1" />
 		</figure>
 		<!-- /wp:image -->
 	</div>
