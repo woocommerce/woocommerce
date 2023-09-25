@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { z } from 'zod';
+import { spawn } from 'xstate';
 /**
  * Internal dependencies
  */
@@ -31,6 +32,7 @@ export type designWithAiStateMachineContext = {
 	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
+	spawnSaveDescriptionToOptionRef?: ReturnType< typeof spawn >;
 };
 export type designWithAiStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }

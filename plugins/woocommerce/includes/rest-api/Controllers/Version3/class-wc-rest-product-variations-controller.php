@@ -48,6 +48,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
 						'type'        => 'boolean',
 					),
+					'default_values' => array(
+						'description' => __( 'Default values for generated variations.', 'woocommerce' ),
+						'type' 		 => 'object',
+						'properties' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					)
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -1000,8 +1005,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		$response          = array();
 		$product           = wc_get_product( $product_id );
+		$default_values	   = isset( $request['default_values'] ) ? $request['default_values'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
 
 		if ( isset( $request['delete'] ) && $request['delete'] ) {
 			$deleted_count = $this->delete_unmatched_product_variations( $product );

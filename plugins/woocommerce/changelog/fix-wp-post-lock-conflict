@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Disable WP's post lock on HPOS order edit screen.

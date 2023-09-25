@@ -116,14 +116,6 @@ export const VariationsTable = forwardRef<
 		} ),
 		[ productId, currentPage, perPage ]
 	);
-	const totalCountRequestParams = useMemo(
-		() => ( {
-			product_id: productId,
-			order: 'asc',
-			orderby: 'menu_order',
-		} ),
-		[ productId ]
-	);
 
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
@@ -155,9 +147,8 @@ export const VariationsTable = forwardRef<
 			);
 
 			return {
-				totalCount: getProductVariationsTotalCount< number >(
-					totalCountRequestParams
-				),
+				totalCount:
+					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},
 		[ productId ]

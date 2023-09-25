@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
-import { assign } from 'xstate';
+import { assign, spawn } from 'xstate';
 import { getQuery, updateQueryString } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { dispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -167,6 +169,29 @@ const assignHomepageTemplate = assign<
 	},
 } );
 
+const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woo_ai_describe_store_description: descriptionText,
+	} );
+};
+
+const spawnSaveDescriptionToOption = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents,
+	designWithAiStateMachineEvents
+>( {
+	spawnSaveDescriptionToOptionRef: (
+		context: designWithAiStateMachineContext
+	) =>
+		spawn(
+			() =>
+				updateWooAiStoreDescriptionOption(
+					context.businessInfoDescription.descriptionText
+				),
+			'update-woo-ai-business-description-option'
+		),
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -243,4 +268,5 @@ export const actions = {
 	recordTracksStepViewed,
 	recordTracksStepClosed,
 	recordTracksStepCompleted,
+	spawnSaveDescriptionToOption,
 };

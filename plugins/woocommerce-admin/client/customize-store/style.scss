@@ -24,6 +24,10 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	& > div.tour-kit.woocommerce-tour-kit > div > div.tour-kit-spotlight.is-visible {
 		outline: 99999px solid rgba(0, 0, 0, 0.15);
 	}
+
+	#screen-meta-links {
+		display: none;
+	}
 }
 
 .woocommerce-cys-layout {
