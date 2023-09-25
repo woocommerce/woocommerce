@@ -5,8 +5,9 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
-$images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-split' );
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/hero-product-3-split' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-3-split' );
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
@@ -19,11 +20,11 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-
 				<!-- wp:group {"style":{"spacing":{"margin":{"top":"20px","bottom":"20px"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group" style="margin-top:20px;margin-bottom:20px;">
 					<!-- wp:heading -->
-					<h2 class="wp-block-heading"><?php esc_attr_e( "Endless Tee's", 'woo-gutenberg-products-block' ); ?></h2>
+					<h2 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h2>
 					<!-- /wp:heading -->
 
 					<!-- wp:paragraph -->
-					<p><?php esc_attr_e( 'With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.', 'woo-gutenberg-products-block' ); ?></p>
+					<p><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
 					<!-- /wp:paragraph -->
 
 					<!-- wp:buttons -->
@@ -39,7 +40,7 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-
 				<!-- /wp:group -->
 			</div>
 			<figure class="wp-block-media-text__media">
-				<img src="<?php echo esc_url( PatternImages::get_image_url( $images, 0, 'images/pattern-placeholders/hand-guitar-finger-tshirt-clothing-rack.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
+				<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/hand-guitar-finger-tshirt-clothing-rack.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
 			</figure>
 		</div>
 		<!-- /wp:media-text -->
@@ -49,23 +50,11 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-
 	<!-- wp:column {"verticalAlignment":"center","width":"33.33%"} -->
 	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:33.33%">
 		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Waterproof Membrane', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][1]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'Never worry about the weather again. Keep yourself dry, warm, and looking stylish.', 'woo-gutenberg-products-block' ); ?></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:separator {"className":"is-style-wide"} -->
-		<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" />
-		<!-- /wp:separator -->
-
-		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Expert Craftsmanship', 'woo-gutenberg-products-block' ); ?></strong></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:separator {"className":"is-style-wide"} -->
@@ -73,11 +62,11 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-
 		<!-- /wp:separator -->
 
 		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Durable Fabric', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][2]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][2]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:separator {"className":"is-style-wide"} -->
@@ -85,11 +74,23 @@ $images = PatternImages::get_pattern_images( 'woocommerce-blocks/hero-product-3-
 		<!-- /wp:separator -->
 
 		<!-- wp:paragraph -->
-		<p><strong><?php esc_attr_e( 'Sustainable Dyes', 'woo-gutenberg-products-block' ); ?></strong></p>
+		<p><strong><?php echo esc_html( $content['titles'][3]['default'] ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php esc_attr_e( 'From bold prints and colors to intricate details and textures, our products are a perfect combination of style and function.', 'woo-gutenberg-products-block' ); ?></p>
+		<p><?php echo esc_html( $content['descriptions'][3]['default'] ); ?></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:separator {"className":"is-style-wide"} -->
+		<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" />
+		<!-- /wp:separator -->
+
+		<!-- wp:paragraph -->
+		<p><strong><?php echo esc_html( $content['titles'][4]['default'] ); ?></strong></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph -->
+		<p><?php echo esc_html( $content['descriptions'][4]['default'] ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:column -->

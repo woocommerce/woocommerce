@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternImages;
+use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
 use Automattic\WooCommerce\Blocks\Verticals\Client;
 use Automattic\WooCommerce\Blocks\Verticals\VerticalsSelector;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -107,7 +107,7 @@ class Patterns extends AbstractRoute {
 		if ( is_wp_error( $vertical_id ) ) {
 			$response = $this->error_to_response( $vertical_id );
 		} else {
-			$populate_images = ( new PatternImages() )->create_patterns_content( $vertical_id, new Client() );
+			$populate_images = ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client() );
 
 			if ( is_wp_error( $populate_images ) ) {
 				$response = $this->error_to_response( $populate_images );
@@ -115,11 +115,14 @@ class Patterns extends AbstractRoute {
 		}
 
 		if ( ! isset( $response ) ) {
-			$response = (object) [
-				'ai_content_generated' => true,
-			];
+			$response = $this->prepare_item_for_response(
+				(object) [
+					'ai_content_generated' => true,
+				],
+				$request
+			);
 		}
 
-		return rest_ensure_response( $this->prepare_item_for_response( $response, $request ) );
+		return rest_ensure_response( $response );
 	}
 }

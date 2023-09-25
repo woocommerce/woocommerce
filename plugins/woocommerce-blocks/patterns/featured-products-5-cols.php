@@ -5,10 +5,13 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
+
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-products-5-item-grid' );
 ?>
 <!-- wp:heading {"textAlign":"center","level":3} -->
 <h3 class="wp-block-heading has-text-align-center">
-	<?php esc_html_e( 'Shop new arrivals', 'woo-gutenberg-products-block' ); ?>
+	<?php echo esc_html( $content['titles'][0]['default'] ); ?>
 </h3>
 <!-- /wp:heading -->
 
