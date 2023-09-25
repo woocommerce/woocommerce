@@ -200,7 +200,7 @@
 		"deep-freeze": "0.0.1",
 		"eslint-import-resolver-typescript": "3.2.4",
 		"eslint-import-resolver-webpack": "0.13.2",
-		"eslint-plugin-import": "2.26.0",
+		"eslint-plugin-import": "2.28.1",
 		"eslint-plugin-playwright": "0.15.3",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
