@@ -4,7 +4,7 @@ Deciding if a Pull Request should be declared High-Impact is a complex task. To 
 
 On this page, we will share some guidelines to help you assess the impact degree of a Pull Request.
 
-## You should mark a Pull Request as High-Impact if:
+## You should mark a Pull Request as High-Impact if
 
 - It adds a **new feature** to WooCommerce, except if it's behind a feature flag.
 - Modifies **critical functionality** (see the [critical flows list](https://github.com/woocommerce/woocommerce/wiki/Critical-Flows)).
@@ -19,7 +19,7 @@ On this page, we will share some guidelines to help you assess the impact degree
 - It's a **big PR** (i.e. adds several changes in many files).
 - It has **i18n changes** (for example, any file from `woocommerce/i18n` is modified).
 
-## You should not mark a Pull Request as High-Impact if:
+## You should not mark a Pull Request as High-Impact if
 
 - It only updates automated tests, things related to infrastructure not included in the WooCommerce release package, or other projects in the monorepo not included in the release package.
 - It only contains readme or changelog changes.
