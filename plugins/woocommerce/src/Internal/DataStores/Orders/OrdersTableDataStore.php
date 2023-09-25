@@ -2523,9 +2523,9 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
-			$this->clear_caches( $order );
 			self::$backfilling_order_ids[] = $order->get_id();
-			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->clear_caches( $order );
+			$r_order = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
@@ -2924,14 +2924,17 @@ CREATE TABLE $meta_table (
 	 */
 	protected function after_meta_change( &$order, $meta ) {
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
-		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
 		if ( $this->should_save_after_meta_change( $order ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
 			return true;
+		} else {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $order->get_id() );
 		}
+
 		return false;
 	}
 

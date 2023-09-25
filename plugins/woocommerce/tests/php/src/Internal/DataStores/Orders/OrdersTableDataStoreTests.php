@@ -3006,4 +3006,49 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 0, count( $query->orders ) );
 	}
 
+	/**
+	 * @testDox Hooking into woocommerce_delete_shop_order_transients does not cause data loss.
+	 */
+	public function test_data_retained_when_hooked_in_cache_filter() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		add_action( 'woocommerce_delete_shop_order_transients', function ( $order_id ) {
+			wc_get_order( $order_id );
+		} );
+		$order = OrderHelper::create_order();
+
+		$this->assertEquals( 1, $order->get_customer_id() );
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+
+		$this->reset_order_data_store_state( wc_get_container()->get( OrdersTableDataStore::class ) );
+		$order->set_customer_id( 2 );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 2, $r_order->get_customer_id() );
+
+		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
+	}
+
+	/**
+	 * @testDox Cache is cleared when order meta is saved.
+	 */
+	public function test_order_cache_is_cleared_on_meta_save() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+
+		// set the cache
+		wc_get_order( $order->get_id() );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key' ) );
+	}
 }
