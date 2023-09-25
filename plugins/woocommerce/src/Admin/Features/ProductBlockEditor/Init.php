@@ -100,6 +100,7 @@ class Init {
 			'before'
 		);
 		wp_tinymce_inline_scripts();
+		wp_enqueue_media();
 	}
 
 	/**
