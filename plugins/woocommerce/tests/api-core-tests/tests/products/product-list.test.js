@@ -3195,8 +3195,6 @@ test.describe( 'Products API tests: List All Products', () => {
 				} );
 			} );
 
-			// This case will remain skipped until orderby include is fixed.
-			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
 			test( 'include', async ( { request } ) => {
 				const includeIds = [
 					sampleData.groupedProducts[ 0 ].id,

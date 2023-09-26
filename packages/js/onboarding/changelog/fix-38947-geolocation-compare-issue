@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove accent from country labels when comparing against geo detected country

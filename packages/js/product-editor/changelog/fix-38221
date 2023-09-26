@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+List price gets reset on blur when error is shown#38221

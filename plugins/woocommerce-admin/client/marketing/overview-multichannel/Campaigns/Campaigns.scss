@@ -1,0 +1,59 @@
+.woocommerce-marketing-campaigns-card {
+	&__content {
+		width: 50%;
+		margin: auto;
+		text-align: center;
+	}
+
+	&__content-icon {
+		background-color: $studio-gray-0;
+		border-radius: 28px;
+		margin-bottom: $gap-smallest;
+
+		&--error {
+			fill: $alert-red;
+		}
+
+		&--empty {
+			fill: $studio-woocommerce-purple-50;
+		}
+	}
+
+	&__content-title {
+		@include font-size( 13 );
+		font-weight: 600;
+		line-height: 16px;
+		color: $gray-900;
+		margin-bottom: $gap-smallest;
+	}
+
+	&__content-description {
+		color: $gray-700;
+		margin-bottom: $gap-smallest;
+	}
+
+	&__campaign-logo {
+		img {
+			display: block;
+		}
+	}
+
+	&__campaign-title {
+		a {
+			color: #007cba;
+			font-weight: 600;
+			text-decoration: none;
+		}
+	}
+
+	&__campaign-description {
+		color: $gray-700;
+	}
+
+	&__footer {
+		justify-content: center;
+
+		// Remove the border-top because the table cells already has a border-bottom.
+		border-top: none;
+	}
+}

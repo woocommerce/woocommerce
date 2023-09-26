@@ -33,7 +33,20 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	 */
 	public static function get_instance() {
 		if ( ! self::$instance ) {
-			self::$instance = new self( self::ID, self::DATA_SOURCES );
+			// Add country query param to data sources.
+			$base_location = wc_get_base_location();
+			$data_sources  = array_map(
+				function( $url ) use ( $base_location ) {
+					return add_query_arg(
+						'country',
+						$base_location['country'],
+						$url
+					);
+				},
+				self::DATA_SOURCES
+			);
+
+			self::$instance = new self( self::ID, $data_sources );
 		}
 		return self::$instance;
 	}

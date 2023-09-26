@@ -28,6 +28,16 @@ class WC_Countries {
 	public $address_formats = array();
 
 	/**
+	 * Cache of geographical regions.
+	 *
+	 * Only to be used by the get_* and load_* methods, as other methods may expect the regions to be
+	 * loaded on demand.
+	 *
+	 * @var array
+	 */
+	private $geo_cache = array();
+
+	/**
 	 * Auto-load in-accessible properties on demand.
 	 *
 	 * @param  mixed $key Key.
@@ -38,6 +48,8 @@ class WC_Countries {
 			return $this->get_countries();
 		} elseif ( 'states' === $key ) {
 			return $this->get_states();
+		} elseif ( 'continents' === $key ) {
+			return $this->get_continents();
 		}
 	}
 
@@ -47,14 +59,21 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_countries() {
-		if ( empty( $this->countries ) ) {
-			$this->countries = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
+		if ( empty( $this->geo_cache['countries'] ) ) {
+			/**
+			 * Allows filtering of the list of countries in WC.
+			 *
+			 * @since 1.5.3
+			 *
+			 * @param array $countries
+			 */
+			$this->geo_cache['countries'] = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
 			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
-				wc_asort_by_locale( $this->countries );
+				wc_asort_by_locale( $this->geo_cache['countries'] );
 			}
 		}
 
-		return $this->countries;
+		return $this->geo_cache['countries'];
 	}
 
 	/**
@@ -74,11 +93,18 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_continents() {
-		if ( empty( $this->continents ) ) {
-			$this->continents = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
+		if ( empty( $this->geo_cache['continents'] ) ) {
+			/**
+			 * Allows filtering of continents in WC.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @param array[array] $continents
+			 */
+			$this->geo_cache['continents'] = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
 		}
 
-		return $this->continents;
+		return $this->geo_cache['continents'];
 	}
 
 	/**
@@ -154,8 +180,16 @@ class WC_Countries {
 	public function load_country_states() {
 		global $states;
 
-		$states       = include WC()->plugin_path() . '/i18n/states.php';
-		$this->states = apply_filters( 'woocommerce_states', $states );
+		$states = include WC()->plugin_path() . '/i18n/states.php';
+
+		/**
+		 * Allows filtering of country states in WC.
+		 *
+		 * @since 1.5.3
+		 *
+		 * @param array $states
+		 */
+		$this->geo_cache['states'] = apply_filters( 'woocommerce_states', $states );
 	}
 
 	/**
@@ -165,14 +199,21 @@ class WC_Countries {
 	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
-		if ( ! isset( $this->states ) ) {
-			$this->states = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
+		if ( ! isset( $this->geo_cache['states'] ) ) {
+			/**
+			 * Allows filtering of country states in WC.
+			 *
+			 * @since 1.5.3
+			 *
+			 * @param array $states
+			 */
+			$this->geo_cache['states'] = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
 		}
 
 		if ( ! is_null( $cc ) ) {
-			return isset( $this->states[ $cc ] ) ? $this->states[ $cc ] : false;
+			return isset( $this->geo_cache['states'][ $cc ] ) ? $this->geo_cache['states'][ $cc ] : false;
 		} else {
-			return $this->states;
+			return $this->geo_cache['states'];
 		}
 	}
 
@@ -474,6 +515,11 @@ class WC_Countries {
 			foreach ( $this->countries as $key => $value ) {
 				$states = $this->get_states( $key );
 				if ( $states ) {
+					// Maybe default the selected state as the first one.
+					if ( $selected_country === $key && '*' === $selected_state ) {
+						$selected_state = key( $states ) ?? '*';
+					}
+
 					echo '<optgroup label="' . esc_attr( $value ) . '">';
 					foreach ( $states as $state_key => $state_value ) {
 						echo '<option value="' . esc_attr( $key ) . ':' . esc_attr( $state_key ) . '"';
@@ -546,7 +592,7 @@ class WC_Countries {
 					'TW'      => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
 					'UG'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}, {country}",
 					'US'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state_code} {postcode}\n{country}",
-					'VN'      => "{name}\n{company}\n{address_1}\n{city}\n{country}",
+					'VN'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 				)
 			);
 		}
@@ -1024,6 +1070,12 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'ET' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'FI' => array(
 						'postcode' => array(
 							'priority' => 65,
@@ -1234,6 +1286,16 @@ class WC_Countries {
 							'priority' => 69,
 						),
 					),
+					'KN' => array(
+						'postcode' => array(
+							'required' => false,
+							'label'    => __( 'Postal code', 'woocommerce' ),
+						),
+						'state'    => array(
+							'required' => true,
+							'label'    => __( 'Parish', 'woocommerce' ),
+						),
+					),
 					'KR' => array(
 						'state' => array(
 							'required' => false,
@@ -1391,6 +1453,12 @@ class WC_Countries {
 						'state'    => array(
 							'label'    => __( 'District', 'woocommerce' ),
 							'required' => false,
+						),
+					),
+					'RW' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SG' => array(
@@ -1573,7 +1641,7 @@ class WC_Countries {
 			// Default Locale Can be filtered to override fields in get_address_fields(). Countries with no specific locale will use default.
 			$this->locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
 
-			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout.
+			// Filter default AND shop base locales to allow overrides via a single function. These will be used when changing countries on the checkout.
 			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) {
 				$this->locale[ $this->get_base_country() ] = $this->locale['default'];
 			}

@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
  * WooCommerce_Payments
@@ -105,7 +105,7 @@ class WooCommercePayments {
 		$note = new Note();
 		$note->set_title( __( 'Try the new way to get paid', 'woocommerce' ) );
 		$note->set_content(
-			__( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with <strong>WooCommerce Payments</strong>.', 'woocommerce' ) .
+			__( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with <strong>WooPayments</strong>.', 'woocommerce' ) .
 			'<br><br>' .
 			sprintf(
 				/* translators: 1: opening link tag, 2: closing tag */

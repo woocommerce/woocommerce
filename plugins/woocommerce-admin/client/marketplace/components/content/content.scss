@@ -1,0 +1,14 @@
+@import '../../stylesheets/_variables.scss';
+
+.woocommerce-marketplace__content {
+	box-sizing: content-box;
+	margin: auto;
+	max-width: $content-max-width;
+	padding: 0 $content-spacing-small $content-spacing-small;
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__content {
+		padding: 0 $content-spacing-large $content-spacing-large;
+	}
+}

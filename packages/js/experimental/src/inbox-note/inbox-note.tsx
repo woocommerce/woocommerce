@@ -143,7 +143,6 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 
 	const {
 		content,
-		date_created: dateCreated,
 		date_created_gmt: dateCreatedGmt,
 		image,
 		is_deleted: isDeleted,

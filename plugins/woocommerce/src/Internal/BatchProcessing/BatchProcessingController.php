@@ -138,18 +138,17 @@ class BatchProcessingController {
 			return;
 		}
 
-		$batch_processor      = $this->get_processor_instance( $processor_class_name );
-		$pending_count_before = $batch_processor->get_total_pending_count();
-		$error                = $this->process_next_batch_for_single_processor_core( $batch_processor );
-		$pending_count_after  = $batch_processor->get_total_pending_count();
-		if ( ( $error instanceof \Exception ) && $pending_count_before === $pending_count_after ) {
+		$batch_processor = $this->get_processor_instance( $processor_class_name );
+		$error           = $this->process_next_batch_for_single_processor_core( $batch_processor );
+		$still_pending   = count( $batch_processor->get_next_batch_to_process( 1 ) ) > 0;
+		if ( ( $error instanceof \Exception ) ) {
 			// The batch processing failed and no items were processed:
 			// reschedule the processing with a delay, and also throw the error
 			// so Action Scheduler will ignore the rescheduling if this happens repeatedly.
 			$this->schedule_batch_processing( $processor_class_name, true );
 			throw $error;
 		}
-		if ( $pending_count_after > 0 ) {
+		if ( $still_pending ) {
 			$this->schedule_batch_processing( $processor_class_name );
 		} else {
 			$this->dequeue_processor( $processor_class_name );
@@ -369,13 +368,12 @@ class BatchProcessingController {
 		$batch_detail_string = '';
 		// Log only first and last, as the entire batch may be too big.
 		if ( count( $batch ) > 0 ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Logging is for debugging.
-			$batch_detail_string = '\n' . print_r(
+			$batch_detail_string = "\n" . wp_json_encode(
 				array(
 					'batch_start' => $batch[0],
 					'batch_end'   => end( $batch ),
 				),
-				true
+				JSON_PRETTY_PRINT
 			);
 		}
 		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}" . $batch_detail_string;

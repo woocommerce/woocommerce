@@ -13,6 +13,7 @@ import {
 import interpolateComponents from '@automattic/interpolate-components';
 import { recordEvent } from '@woocommerce/tracks';
 import { SelectControl } from '@wordpress/components';
+import { AddNewShippingClassModal } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -22,7 +23,6 @@ import {
 	UNCATEGORIZED_CATEGORY_SLUG,
 } from '../../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { AddNewShippingClassModal } from '../../shared/add-new-shipping-class-modal';
 import { ProductShippingSectionPropsType } from './index';
 
 export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [

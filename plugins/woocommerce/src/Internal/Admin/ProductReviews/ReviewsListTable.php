@@ -1043,7 +1043,7 @@ class ReviewsListTable extends WP_List_Table {
 			if ( ! empty( $item->comment_author_email ) && is_email( $item->comment_author_email ) ) :
 
 				?>
-				<a href="mailto:<?php echo esc_attr( $item->comment_author_email ); ?>"><?php echo esc_html( $item->comment_author_email ); ?></a>
+				<a href="mailto:<?php echo esc_attr( $item->comment_author_email ); ?>"><?php echo esc_html( $item->comment_author_email ); ?></a><br>
 				<?php
 
 			endif;

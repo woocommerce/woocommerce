@@ -6,7 +6,6 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import qs from 'qs';
 
 /**
  * Internal dependencies
@@ -17,7 +16,7 @@ import { scrollPopperToVisibleAreaIfNeeded } from './utils';
 import { getSteps } from './get-steps';
 
 const WCAddonsTour = () => {
-	const [ showTour, setShowTour ] = useState( false );
+	const [ showTour, setShowTour ] = useState( true );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
@@ -25,8 +24,8 @@ const WCAddonsTour = () => {
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';
 
 	useEffect( () => {
-		const query = qs.parse( window.location.search.slice( 1 ) );
-		if ( query?.tutorial === 'true' ) {
+		const query = new URLSearchParams( location.search );
+		if ( query.get( 'tutorial' ) === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				steps[ 0 ].referenceElements?.desktop || '',
 				() => {
@@ -63,7 +62,7 @@ const WCAddonsTour = () => {
 			const timeoutId = setTimeout( showPopper, 500 );
 
 			const intervalId = observePositionChange(
-				'.wc-addons-wrap',
+				'.woocommerce-marketplace',
 				showPopper,
 				150
 			);

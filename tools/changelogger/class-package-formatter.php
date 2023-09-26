@@ -48,8 +48,8 @@ class Package_Formatter extends Formatter implements FormatterPlugin {
 	 * @return string Link to the version's release.
 	 */
 	public function getReleaseLink( $version ) {
-		// Catpure anything past /woocommerce in the current working directory.
-		preg_match( '/\/woocommerce\/packages\/js\/(.+)/', getcwd(), $path );
+		// Capture anything past /woocommerce in the current working directory.
+		preg_match( '/\/packages\/js\/(.+)/', getcwd(), $path );
 
 		if ( ! count( $path ) ) {
 			throw new \InvalidArgumentException( 'Invalid directory.' );

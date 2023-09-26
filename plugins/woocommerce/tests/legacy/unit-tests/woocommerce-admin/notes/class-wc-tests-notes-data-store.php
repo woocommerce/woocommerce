@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\DataStore;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\DataStore;
 
 /**
  * Class WC_Admin_Tests_Notes_Data_Store

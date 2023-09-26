@@ -22,6 +22,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { get, isNull } from 'lodash';
 import { REVIEWS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -32,7 +33,6 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import CheckmarkCircleIcon from './checkmark-circle-icon';
-import { CurrencyContext } from '../../../lib/currency-context';
 import sanitizeHTML from '../../../lib/sanitize-html';
 import { REVIEW_PAGE_LIMIT, unapprovedReviewsQuery } from './utils';
 

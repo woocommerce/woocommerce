@@ -1,0 +1,47 @@
+#postdivrich.woocommerce-product-description {
+	// hacks to fix visuals with "write it for me" button present
+	.wp-editor-tools {
+		top: -1px !important;
+		border-bottom: 0 !important;
+	}
+
+	.wp-switch-editor {
+		position: relative;
+		z-index: 1;
+	}
+}
+
+#wpcontent {
+
+	.woo-ai-feedback-snackbar-action {
+		font-size: 1.4em;
+	}
+
+	.woo-ai-feedback-snackbar-action + .woo-ai-feedback-snackbar-action {
+		margin-left: 10px;
+	}
+
+	.components-snackbar__action:has(.woo-ai-feedback-snackbar-action) {
+		text-decoration: none;
+	}
+}
+
+.wp-media-buttons {
+
+	.woo-ai-write-it-for-me-btn {
+		min-width: 126px;
+
+		&[disabled] {
+
+			img {
+				opacity: 0.2;
+			}
+		}
+
+		img {
+			filter: invert(32%) sepia(36%) saturate(2913%) hue-rotate(161deg) brightness(87%) contrast(91%);
+			padding: 0;
+		}
+	}
+}
+

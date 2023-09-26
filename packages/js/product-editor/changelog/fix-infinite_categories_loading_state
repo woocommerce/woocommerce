@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix infinite category loading state

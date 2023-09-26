@@ -121,7 +121,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test inventory count after order status transtions which restores stock to another status which reduces stock.
+	 * Test inventory count after order status transitions which restores stock to another status which reduces stock.
 	 * Stock should not have reduced, but will reduce after transition.
 	 */
 	public function test_status_transition_stock_restore_to_stock_reduce() {

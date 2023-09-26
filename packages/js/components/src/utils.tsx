@@ -64,7 +64,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	order: number,
 	props: T,
 	injectProps?: S
-) {
+): React.ReactElement {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
 	return cloneElement( childrenToRender, propsToRender );
@@ -84,4 +84,11 @@ export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
 	} );
 
 	return <Fragment>{ sortedFills }</Fragment>;
+};
+
+export const escapeHTML = ( string: string ) => {
+	return string
+		.replace( /&/g, '&amp;' )
+		.replace( />/g, '&gt;' )
+		.replace( /</g, '&lt;' );
 };

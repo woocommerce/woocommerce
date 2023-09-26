@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Proxies;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
-use \Psr\Container\ContainerInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 
 /**
  * Proxy class to access legacy WooCommerce functionality.

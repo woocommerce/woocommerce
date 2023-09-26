@@ -3,7 +3,7 @@ const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
-test.describe( 'Store owner can complete onboarding wizard', () => {
+test.skip( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -24,9 +24,9 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 		await expect( page ).toHaveURL( /.*step=product-types/ );
 		await expect(
 			page.locator( '.product-types button >> text=Continue' )
@@ -40,17 +40,16 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries2,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.locator( 'button >> text=Store Details' ).click();
 		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
 		await page.locator( 'text="Welcome to WooCommerce"' ).waitFor();
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
-		await page.textContent( '.components-checkbox-control__input' );
+		await page.locator( 'button >> text=Industry' ).click();
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
 		}
@@ -60,20 +59,43 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	test( 'can discard industry changes when navigating back to "Store Details"', async ( {
 		page,
 	} ) => {
+		// set up pre-condition to ensure Industries stored in
+		// storeDetails.us.industries2 have been set
+		await onboarding.completeIndustrySection(
+			page,
+			storeDetails.us.industries2,
+			storeDetails.us.expectedNumberOfIndustries
+		);
+
+		// Navigate to "Store Details" section to show Save Changes modal prompt
+		await page.locator( 'button >> text=Store Details' ).click();
+
+		// handle save changes modal if displayed
+		const saveChangesModalVisible = await page
+			.locator( '.components-modal__header-heading' )
+			.isVisible();
+		if ( saveChangesModalVisible ) {
+			// Save the changes to ensure the test is now in the correct state
+			// independent of the previous test results
+			await onboarding.handleSaveChangesModal( page, {
+				saveChanges: true,
+			} );
+		}
+
+		// test proper begins
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.locator( 'button >> text=Store Details' ).click();
 
 		await onboarding.handleSaveChangesModal( page, { saveChanges: false } );
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
-		await page.textContent( '.components-checkbox-control__input' );
+		await page.locator( 'button >> text=Industry' ).click();
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
 		}
@@ -85,7 +107,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -94,18 +116,18 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 
 		await onboarding.completeProductTypesSection(
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 
 		await onboarding.completeBusinessDetailsSection( page );
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -116,7 +138,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		// Check to see if WC Payments is present
 		const wcPay = await page.locator(
@@ -129,161 +151,150 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		await onboarding.unselectBusinessFeatures( page );
-		await page.click( 'button >> text=Continue' );
-	} );
-
-	test( 'can complete the theme selection section', async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect( pageHeading ).toContain( 'Choose a theme' );
-		// Just continue with the current theme
-		await page.click( 'button >> text=Continue with my active theme' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 } );
 
-// !Changed from Japanese to Malta store, as Japanese Yen does not use decimals
-test.describe(
-	'A Malta store can complete the selective bundle install but does not include WCPay.',
-	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+// Skipping Onboarding tests as we're replacing StoreDetails with Core Profiler
+// !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
+test.skip( 'A Liberian store can complete the selective bundle install but does not include WCPay.', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeEach( async () => {
-			// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
-			await api.update.storeDetails( storeDetails.malta.store );
-		} );
+	test.beforeEach( async () => {
+		// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
+		await api.update.storeDetails( storeDetails.liberia.store );
+	} );
 
-		// eslint-disable-next-line jest/expect-expect
-		test( 'can choose the "Other" industry', async ( { page } ) => {
-			await onboarding.completeIndustrySection(
-				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
-			);
-			await page.click( 'button >> text=Continue' );
-		} );
-
-		// eslint-disable-next-line jest/expect-expect
-		test( 'can choose not to install any extensions', async ( {
+	// eslint-disable-next-line jest/expect-expect
+	test( 'can choose the "Other" industry', async ( { page } ) => {
+		await onboarding.completeIndustrySection(
 			page,
-		} ) => {
-			const expect_wp_pay = false;
+			storeDetails.liberia.industries,
+			storeDetails.liberia.expectedNumberOfIndustries
+		);
+		await page.locator( 'button >> text=Continue' ).click();
+	} );
 
-			await onboarding.completeIndustrySection(
-				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
-			);
-			await page.click( 'button >> text=Continue' );
+	// eslint-disable-next-line jest/expect-expect
+	test( 'can choose not to install any extensions', async ( { page } ) => {
+		const expect_wp_pay = false;
 
-			await onboarding.completeProductTypesSection(
-				page,
-				storeDetails.malta.products
-			);
-			// Make sure WC Payments is NOT present
-			await expect(
-				page.locator(
-					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
-				)
-			).toHaveCount( 0 );
-
-			await page.click( 'button >> text=Continue' );
-
-			await onboarding.completeBusinessDetailsSection( page );
-			await page.click( 'button >> text=Continue' );
-
-			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
-
-			await page.click( 'button >> text=Continue' );
-		} );
-
-		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
-		// changes when a task is completed.
-		// eslint-disable-next-line jest/no-disabled-tests
-		test.skip( 'should display the choose payments task, and not the WC Pay task', async ( {
+		await onboarding.completeIndustrySection(
 			page,
-		} ) => {
-			// If payment has previously been setup, the setup checklist will show something different
-			// This step resets it
-			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=checkout'
-			);
-			// Ensure that all payment methods are disabled
-			await expect(
-				page.locator( '.woocommerce-input-toggle--disabled' )
-			).toHaveCount( 3 );
-			// Checklist shows when completing setup wizard
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-			);
-			await page.click( 'button >> text=Continue with my active theme' );
-			// Start test
-			await page.waitForLoadState( 'networkidle' );
-			await expect(
-				page.locator(
-					':nth-match(.woocommerce-task-list__item-title, 3)'
-				)
-			).toContainText( 'Set up payments' );
-			await expect(
-				page.locator(
-					':nth-match(.woocommerce-task-list__item-title, 3)'
-				)
-			).not.toContainText( 'Set up WooCommerce Payments' );
-		} );
-	}
-);
+			storeDetails.liberia.industries,
+			storeDetails.liberia.expectedNumberOfIndustries
+		);
+		await page.locator( 'button >> text=Continue' ).click();
+
+		await onboarding.completeProductTypesSection(
+			page,
+			storeDetails.liberia.products
+		);
+		// Make sure WC Payments is NOT present
+		await expect(
+			page.locator(
+				'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
+			)
+		).not.toBeVisible();
+
+		await page.locator( 'button >> text=Continue' ).click();
+
+		await onboarding.completeBusinessDetailsSection( page );
+		await page.locator( 'button >> text=Continue' ).click();
+
+		await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+
+		await page.locator( 'button >> text=Continue' ).click();
+
+		await expect( page ).not.toHaveURL( /.*step=business-details/ );
+	} );
+
+	// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
+	// changes when a task is completed.
+	// eslint-disable-next-line jest/no-disabled-tests
+	test.skip( 'should display the choose payments task, and not the WC Pay task', async ( {
+		page,
+	} ) => {
+		// If payment has previously been setup, the setup checklist will show something different
+		// This step resets it
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
+		// Ensure that all payment methods are disabled
+		await expect(
+			page.locator( '.woocommerce-input-toggle--disabled' )
+		).toHaveCount( 3 );
+		// Checklist shows when completing setup wizard
+		await onboarding.completeBusinessDetailsSection( page );
+		await page.locator( 'button >> text=Continue' ).click();
+
+		await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+		await page.locator( 'button >> text=Continue' ).click();
+
+		// Start test
+		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.locator( ':nth-match(.woocommerce-task-list__item-title, 3)' )
+		).toContainText( 'Set up payments' );
+		await expect(
+			page.locator( ':nth-match(.woocommerce-task-list__item-title, 3)' )
+		).not.toContainText( 'Set up WooPayments' );
+	} );
+} );
 
 // Skipping this test because it's very flaky.
-test.describe.skip( 'Store owner can go through setup Task List', () => {
+test.skip( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( '#woocommerce-select-control-0__control-input' );
-		await page.fill(
-			'#woocommerce-select-control-0__control-input',
-			'United States (US) — California'
-		);
-		await page.click( 'button >> text=United States (US) — California' );
-		await page.fill( '#inspector-text-control-0', 'addr 1' );
-		await page.fill( '#inspector-text-control-1', '94107' );
-		await page.fill( '#inspector-text-control-2', 'San Francisco' );
-		await page.fill(
-			'#inspector-text-control-3',
-			storeDetails.us.store.email
-		);
-		await page.check( '#inspector-checkbox-control-0' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=No thanks' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.click();
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.fill( 'United States (US) — California' );
+		await page
+			.locator( 'button >> text=United States (US) — California' )
+			.click();
+		await page.locator( '#inspector-text-control-0' ).fill( 'addr 1' );
+		await page.locator( '#inspector-text-control-1' ).fill( '94107' );
+		await page
+			.locator( '#inspector-text-control-2' )
+			.fill( 'San Francisco' );
+		await page
+			.locator( '#inspector-text-control-3' )
+			.fill( storeDetails.us.store.email );
+		await page.locator( '#inspector-checkbox-control-0' ).check();
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=No thanks' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
 		// Uncheck all business features
-		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
-			await page.click( '.components-checkbox-control__input' );
+		if (
+			page.locator( '.components-checkbox-control__input' ).isChecked()
+		) {
+			await page.locator( '.components-checkbox-control__input' ).click();
 		}
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue with my active theme' );
+		await page.locator( 'button >> text=Continue' ).click();
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'div >> text=Review Shipping Options' );
+		await page.locator( 'div >> text=Review Shipping Options' ).click();
 
 		// dismiss tourkit if visible
 		const tourkitVisible = await page
 			.locator( 'button.woocommerce-tour-kit-step-controls__close-btn' )
 			.isVisible();
 		if ( tourkitVisible ) {
-			await page.click(
-				'button.woocommerce-tour-kit-step-controls__close-btn'
-			);
+			await page
+				.locator(
+					'button.woocommerce-tour-kit-step-controls__close-btn'
+				)
+				.click();
 		}
 
 		// check for automatically added shipping zone

@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**

@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Orders
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats

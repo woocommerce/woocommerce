@@ -3,14 +3,17 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const AUTO_DRAFT_NAME = 'AUTO-DRAFT';
+/**
+ * Internal dependencies
+ */
+import { AUTO_DRAFT_NAME } from './constants';
 
 /**
  * Get the product title for use in the header.
  *
- * @param  name          Name value entered for the product.
- * @param  type          Product type.
- * @param  persistedName Name already persisted to the database.
+ * @param name          Name value entered for the product.
+ * @param type          Product type.
+ * @param persistedName Name already persisted to the database.
  * @return string
  */
 export const getProductTitle = (

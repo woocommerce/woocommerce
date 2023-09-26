@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -241,6 +240,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['placeholder'] ) ) {
 					$value['placeholder'] = '';
 				}
+				if ( ! isset( $value['row_class'] ) ) {
+					$value['row_class'] = '';
+				}
+				if ( ! empty( $value['row_class'] ) && substr( $value['row_class'], 0, 16 ) !== 'wc-settings-row-' ) {
+					$value['row_class'] = 'wc-settings-row-' . $value['row_class'];
+				}
 				if ( ! isset( $value['suffix'] ) ) {
 					$value['suffix'] = '';
 				}
@@ -282,7 +287,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 
 					case 'info':
-						echo '<tr><th scope="row" class="titledesc"/><td style="' . esc_attr( $value['css'] ) . '">';
+						?><tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
+							<th scope="row" class="titledesc"/><td style="<?php echo esc_attr( $value['css'] ); ?>">;
+						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
 						break;
@@ -313,7 +320,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'tel':
 						$option_value = $value['value'];
 
-						?><tr valign="top">
+						?><tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -338,7 +345,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -366,7 +373,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -392,7 +399,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -430,17 +437,22 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Radio inputs.
 					case 'radio':
-						$option_value = $value['value'];
-						$disabled_values = ArrayUtil::get_value_or_default($value, 'disabled', array());
+						$option_value     = $value['value'];
+						$disabled_values  = $value['disabled'] ?? array();
+						$show_desc_at_end = $value['desc_at_end'] ?? false;
 
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<fieldset>
-									<?php echo $description; // WPCS: XSS ok. ?>
+									<?php
+									if ( ! $show_desc_at_end ) {
+										echo wp_kses_post( $description );
+									}
+									?>
 									<ul>
 									<?php
 									foreach ( $value['options'] as $key => $val ) {
@@ -458,6 +470,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												/> <?php echo esc_html( $val ); ?></label>
 										</li>
 										<?php
+									}
+									if ( $show_desc_at_end ) {
+										echo wp_kses_post( "<p class='description description-thin'>{$description}</p>" );
 									}
 									?>
 									</ul>
@@ -487,8 +502,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						if ( 'option' === $value['show_if_checked'] ) {
 							$visibility_class[] = 'show_options_if_checked';
 						}
+						if ( $value['row_class'] ) {
+							$visibility_class[] = $value['row_class'];
+						}
 
-						$must_disable = ArrayUtil::get_value_or_default( $value, 'disabled', false );
+						$must_disable = $value['disabled'] ?? false;
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
 							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
@@ -559,7 +577,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
 						</th>
@@ -593,7 +611,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr valign="top" class="single_select_page">
+						<tr valign="top" class="single_select_page"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -618,7 +636,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							);
 						}
 						?>
-						<tr valign="top" class="single_select_page">
+						<tr valign="top" class="single_select_page"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 							</th>
@@ -658,7 +676,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$state   = '*';
 						}
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -682,7 +700,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						asort( $countries );
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -711,7 +729,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						);
 						$option_value = wc_parse_relative_date_option( $value['value'] );
 						?>
-						<tr valign="top">
+						<tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>

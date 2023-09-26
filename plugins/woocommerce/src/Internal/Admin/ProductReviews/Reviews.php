@@ -168,6 +168,11 @@ class Reviews {
 	 * @return void
 	 */
 	private function handle_edit_review(): void {
+		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
+			return;
+		}
+
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_id = isset( $_POST['comment_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_ID'] ) ) : 0;
@@ -235,6 +240,11 @@ class Reviews {
 	 * @return void
 	 */
 	private function handle_reply_to_review() : void {
+		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
+			return;
+		}
+
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_post_ID = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase

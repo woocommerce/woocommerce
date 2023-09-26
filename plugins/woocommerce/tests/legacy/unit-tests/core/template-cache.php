@@ -43,7 +43,9 @@ class WC_Template_Cache extends WC_Unit_Test_Case {
 
 		// Check individual templates.
 		foreach ( $templates as $cache_key => $template ) {
-			$this->assertEquals( $template, wp_cache_get( $cache_key, 'woocommerce' ) );
+			// The cache contents may be tokenized and we need to untokenize it for the assertion.
+			$from_cache = wc_untokenize_path( wp_cache_get( $cache_key, 'woocommerce' ), wc_get_path_define_tokens() );
+			$this->assertEquals( $template, $from_cache );
 		}
 
 		// Clear cache.

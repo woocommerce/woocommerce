@@ -24,7 +24,7 @@ exports[`ProductTypes should render product types 1`] = `
       </p>
     </div>
     <div
-      class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
       data-wp-c16t="true"
       data-wp-component="Card"
     >
@@ -32,15 +32,15 @@ exports[`ProductTypes should render product types 1`] = `
         class="css-mgwsf4-View-Content em57xhy0"
       >
         <div
-          class="components-card__body components-card-body css-1sfrl79-View-Body-borderRadius em57xhy0"
+          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
           data-wp-c16t="true"
           data-wp-component="CardBody"
         >
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <span
                 class="components-checkbox-control__input-container"
@@ -98,10 +98,10 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <span
                 class="components-checkbox-control__input-container"
@@ -123,7 +123,7 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-flex components-card__footer components-card-footer css-r62jpu-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
+          class="components-flex components-card__footer components-card-footer css-16c019y-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
           data-wp-c16t="true"
           data-wp-component="CardFooter"
         >
@@ -220,7 +220,7 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
       </p>
     </div>
     <div
-      class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+      class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
       data-wp-c16t="true"
       data-wp-component="Card"
     >
@@ -228,15 +228,15 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
         class="css-mgwsf4-View-Content em57xhy0"
       >
         <div
-          class="components-card__body components-card-body css-1sfrl79-View-Body-borderRadius em57xhy0"
+          class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
           data-wp-c16t="true"
           data-wp-component="CardBody"
         >
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <span
                 class="components-checkbox-control__input-container"
@@ -294,10 +294,10 @@ you can purchase and install it later.
             </div>
           </div>
           <div
-            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper e1puf3u4"
+            class="components-base-control components-checkbox-control woocommerce-profile-wizard__checkbox css-wdf2ti-Wrapper ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <span
                 class="components-checkbox-control__input-container"
@@ -319,7 +319,7 @@ you can purchase and install it later.
           </div>
         </div>
         <div
-          class="components-flex components-card__footer components-card-footer css-r62jpu-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
+          class="components-flex components-card__footer components-card-footer css-16c019y-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium-borderless em57xhy0"
           data-wp-c16t="true"
           data-wp-component="CardFooter"
         >

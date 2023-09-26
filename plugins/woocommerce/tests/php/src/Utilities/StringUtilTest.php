@@ -74,4 +74,76 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 		$expected  = 'foobar/fizzbuzz.php';
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * @testDox 'is_null_or_empty' should return true only if the value is null or an empty string.
+	 *
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           ["  ", false]
+	 *           ["0", false]
+	 *           ["foo", false]
+	 *           ["  foo  ", false]
+	 *
+	 * @param string $value Value to test.
+	 * @param bool   $expected Expected result from the method.
+	 */
+	public function test_is_null_or_empty( $value, $expected ) {
+		$result = StringUtil::is_null_or_empty( $value );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testDox 'is_null_or_empty' should return true only if the value is null, an empty string, or consists of only whitespace characters.
+	 *
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           [" \n\r\t\f ", true]
+	 *           ["0", false]
+	 *           ["foo", false]
+	 *           ["  foo  ", false]
+	 *
+	 * @param string $value Value to test.
+	 * @param bool   $expected Expected result from the method.
+	 */
+	public function test_is_null_or_whitespace( $value, $expected ) {
+		$result = StringUtil::is_null_or_whitespace( $value );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testDox 'to_sql_list' generates a parenthesized and comma-separated list of the passed values.
+	 */
+	public function test_to_sql_list() {
+		$result = StringUtil::to_sql_list( array( 34 ) );
+		$this->assertEquals( '(34)', $result );
+
+		$result = StringUtil::to_sql_list( array( 34, 'foo', true ) );
+		$this->assertEquals( '(34,foo,1)', $result );
+	}
+
+	/**
+	 * @testDox 'to_sql_list' throws an exception if an empty array is passed.
+	 */
+	public function test_to_sql_list_with_empty_input() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'StringUtil::to_sql_list: the values array is empty' );
+
+		StringUtil::to_sql_list( array() );
+	}
+
+	/**
+	 * @testDox 'class_name_without_namespace' returns what its name says.
+	 *
+	 * @testWith ["foo\\bar\\fizz", "fizz"]
+	 *           ["foo", "foo"]
+	 *           ["", ""]
+	 *
+	 * @param string $input The string to test.
+	 * @param string $expected_output The expected output.
+	 */
+	public function test_class_name_without_namespace( string $input, string $expected_output ) {
+		$actual_output = StringUtil::class_name_without_namespace( $input );
+		$this->assertEquals( $expected_output, $actual_output );
+	}
 }

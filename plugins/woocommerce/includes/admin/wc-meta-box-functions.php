@@ -285,3 +285,23 @@ function woocommerce_wp_radio( $field, WC_Data $data = null ) {
 
 	echo '</fieldset>';
 }
+
+/**
+ * Output a note.
+ *
+ * @param array $field Field data.
+ */
+function woocommerce_wp_note( $field ) {
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+
+	echo '<p class="form-field ' . esc_attr( $field['wrapper_class'] ) . '">';
+	echo '<label for="' . esc_attr( $field['id'] ) . '" ';
+
+	if ( ! empty( $field['label-aria-label'] ) ) {
+		echo 'aria-label="' . esc_attr( $field['label-aria-label'] ) . '"';
+	}
+
+	echo '>' . esc_attr( $field['label'] ) . '</label>';
+	echo '<output name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" aria-live="off">' . wp_kses_post( $field['message'] ) . '</output>';
+	echo '</p>';
+}

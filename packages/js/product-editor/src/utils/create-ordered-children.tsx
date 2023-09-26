@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
-import { Slot, Fill } from '@wordpress/components';
+import { isValidElement } from 'react';
+import { Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
 type ChildrenProps = {
@@ -64,7 +64,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 	order: number,
 	props: T,
 	injectProps?: S
-) {
+): React.ReactElement {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
 	return cloneElement( childrenToRender, propsToRender );

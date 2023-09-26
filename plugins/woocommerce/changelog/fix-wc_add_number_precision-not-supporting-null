@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add support for null inputs to pnpm wc_add_number_precision

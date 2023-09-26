@@ -12,6 +12,18 @@
 		border-color: var( --wp-admin-theme-color );
 	}
 
+	&.is-read-only.is-multiple.has-selected-items {
+		.woocommerce-experimental-select-control__combo-box-wrapper {
+			cursor: default;
+		}
+
+		.woocommerce-experimental-select-control__input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+	}
+
 	&__label {
 		display: inline-block;
 		margin-bottom: $gap-smaller;

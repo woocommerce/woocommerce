@@ -61,33 +61,77 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	}
 
 	/**
+	 * Return data to be migrated for a batch of entities.
+	 *
+	 * @param array $entity_ids Ids of entities to migrate.
+	 *
+	 * @return array[] Data to be migrated. Would be of the form: array( 'data' => array( ... ), 'errors' => array( ... ) ).
+	 */
+	public function fetch_sanitized_migration_data( $entity_ids ) {
+		$this->clear_errors();
+		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
+		if ( empty( $to_migrate ) ) {
+			return array(
+				'data'   => array(),
+				'errors' => array(),
+			);
+		}
+
+		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate ) );
+
+		return array(
+			'data'   => $this->classify_update_insert_records( $to_migrate, $already_migrated ),
+			'errors' => $this->get_errors(),
+		);
+	}
+
+	/**
 	 * Migrate a batch of entities from the posts table to the corresponding table.
 	 *
 	 * @param array $entity_ids Ids of entities ro migrate.
 	 */
 	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
-		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
-		if ( empty( $to_migrate ) ) {
-			return;
+		$sanitized_data = $this->fetch_sanitized_migration_data( $entity_ids );
+		$this->process_migration_data( $sanitized_data );
+	}
+
+	/**
+	 * Process migration data for a batch of entities.
+	 *
+	 * @param array $data Data to be migrated. Should be of the form: array( 'data' => array( ... ) ) as returned by the `fetch_sanitized_migration_data` method.
+	 *
+	 * @return array Array of errors and exception if any.
+	 */
+	public function process_migration_data( array $data ) {
+		if ( isset( $data['data'] ) ) {
+			$data = $data['data'];
 		}
+		$this->clear_errors();
+		$exception = null;
 
-		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate ) );
-
-		$data      = $this->classify_update_insert_records( $to_migrate, $already_migrated );
 		$to_insert = $data[0];
 		$to_update = $data[1];
 
-		if ( ! empty( $to_insert ) ) {
-			$insert_queries       = $this->generate_insert_sql_for_batch( $to_insert );
-			$processed_rows_count = $this->db_query( $insert_queries );
-			$this->maybe_add_insert_or_update_error( 'insert', $processed_rows_count );
+		try {
+			if ( ! empty( $to_insert ) ) {
+				$insert_queries       = $this->generate_insert_sql_for_batch( $to_insert );
+				$processed_rows_count = $this->db_query( $insert_queries );
+				$this->maybe_add_insert_or_update_error( 'insert', $processed_rows_count );
+			}
+
+			if ( ! empty( $to_update ) ) {
+				$update_queries       = $this->generate_update_sql_for_batch( $to_update );
+				$processed_rows_count = $this->db_query( $update_queries );
+				$this->maybe_add_insert_or_update_error( 'update', $processed_rows_count );
+			}
+		} catch ( \Exception $e ) {
+			$exception = $e;
 		}
 
-		if ( ! empty( $to_update ) ) {
-			$update_queries       = $this->generate_update_sql_for_batch( $to_update );
-			$processed_rows_count = $this->db_query( $update_queries );
-			$this->maybe_add_insert_or_update_error( 'update', $processed_rows_count );
-		}
+		return array(
+			'errors'    => $this->get_errors(),
+			'exception' => $exception,
+		);
 	}
 
 	/**
@@ -179,7 +223,7 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	 *   ...,
 	 * )
 	 */
-	private function fetch_data_for_migration_for_ids( array $entity_ids ): array {
+	public function fetch_data_for_migration_for_ids( array $entity_ids ): array {
 		if ( empty( $entity_ids ) ) {
 			return array();
 		}

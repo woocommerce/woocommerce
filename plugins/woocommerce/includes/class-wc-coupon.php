@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -106,7 +107,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		// Try to load coupon using ID or code.
 		if ( is_int( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->set_id( $data );
-		} elseif ( ! empty( $data ) ) {
+		} elseif ( is_string( $data ) && ! StringUtil::is_null_or_whitespace( $data ) ) {
 			$id = wc_get_coupon_id_by_code( $data );
 			// Need to support numeric strings for backwards compatibility.
 			if ( ! $id && 'shop_coupon' === get_post_type( $data ) ) {
@@ -697,7 +698,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the minimum spend amount.
 	 *
 	 * @since 3.0.0
-	 * @param float $amount Minium amount.
+	 * @param float $amount Minimum amount.
 	 */
 	public function set_minimum_amount( $amount ) {
 		$this->set_prop( 'minimum_amount', wc_format_decimal( $amount ) );

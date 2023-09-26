@@ -18,6 +18,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { ORDERS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import {
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getCountryCode } from '~/dashboard/utils';
-import { CurrencyContext } from '~/lib/currency-context';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {

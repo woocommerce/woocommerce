@@ -5,17 +5,13 @@ import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, PartialProduct } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { useProductHelper } from '../../use-product-helper';
 
 export const ShippingDimensionsWeightField = () => {
 	const { getInputProps } = useFormContext< PartialProduct >();

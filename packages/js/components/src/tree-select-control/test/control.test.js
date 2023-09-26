@@ -110,4 +110,36 @@ describe( 'TreeSelectControl - Control Component', () => {
 		placeholder = input.getAttribute( 'placeholder' );
 		expect( placeholder ).toBeFalsy();
 	} );
+
+	it( 'Renders placeholder when alwaysShowPlaceholder is true with tags or expanded', () => {
+		const { rerender } = render(
+			<Control placeholder="Select" alwaysShowPlaceholder={ true } />
+		);
+		let input = screen.queryByRole( 'combobox' );
+		let placeholder = input.getAttribute( 'placeholder' );
+		expect( placeholder ).toBe( 'Select' );
+
+		rerender(
+			<Control
+				placeholder="Select"
+				alwaysShowPlaceholder={ true }
+				tags={ [ { id: 'es', label: 'Spain' } ] }
+			/>
+		);
+
+		input = screen.queryByRole( 'combobox' );
+		placeholder = input.getAttribute( 'placeholder' );
+		expect( placeholder ).toBeTruthy();
+
+		rerender(
+			<Control
+				placeholder="Select"
+				isExpanded={ true }
+				alwaysShowPlaceholder={ true }
+			/>
+		);
+		input = screen.queryByRole( 'combobox' );
+		placeholder = input.getAttribute( 'placeholder' );
+		expect( placeholder ).toBeTruthy();
+	} );
 } );

@@ -14,7 +14,7 @@ import { flatMapDeep, uniqBy } from 'lodash';
  * Internal dependencies
  */
 import { CardDivider, PluginCardBody } from '~/marketing/components';
-import { useInstalledPlugins } from '~/marketing/hooks';
+import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 import { RecommendedPlugin } from '~/marketing/types';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
@@ -60,7 +60,8 @@ export const PluginsTabPanel = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
 	/**
 	 * Install and activate a plugin.
@@ -70,7 +71,7 @@ export const PluginsTabPanel = ( {
 	 *
 	 * When the process is not successful, an error notice will be displayed.
 	 *
-	 * @param  plugin Plugin to be installed and activated.
+	 * @param plugin Plugin to be installed and activated.
 	 */
 	const installAndActivate = async ( plugin: RecommendedPlugin ) => {
 		setCurrentPlugin( plugin.product );
@@ -116,7 +117,7 @@ export const PluginsTabPanel = ( {
 									installAndActivate( plugin );
 								} }
 							>
-								{ __( 'Install plugin', 'woocommerce' ) }
+								{ __( 'Install extension', 'woocommerce' ) }
 							</Button>
 						);
 					}

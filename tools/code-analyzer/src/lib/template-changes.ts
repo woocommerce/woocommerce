@@ -7,8 +7,8 @@ import {
 	getPullRequestNumberFromHash,
 	getPatches,
 	getLineCommitHash,
-} from 'cli-core/src/git';
-import { Logger } from 'cli-core/src/logger';
+} from '@woocommerce/monorepo-utils/src/core/git';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 export type TemplateChangeDescription = {
 	filePath: string;
@@ -79,7 +79,7 @@ export const scanForTemplateChanges = async (
 							repositoryPath,
 							commitHash
 						);
-						if ( -1 === pullRequests.indexOf( prNumber ) ) {
+						if ( pullRequests.indexOf( prNumber ) === -1 ) {
 							pullRequests.push( prNumber );
 						}
 					} catch ( e: unknown ) {

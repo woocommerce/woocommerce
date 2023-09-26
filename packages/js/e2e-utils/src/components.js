@@ -203,9 +203,6 @@ const completeOnboardingWizard = async () => {
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 	await waitAndClickPrimary();
 
-	// Theme section
-	await waitAndClickPrimary();
-
 	// End of onboarding wizard
 	if ( IS_RETEST_MODE ) {
 		// Home screen modal can't be reset via the rest api.

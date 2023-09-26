@@ -2,7 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
-import 'moment-timezone';
+import momentTz from 'moment-timezone';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -181,7 +181,7 @@ export function getStoreTimeZoneMoment() {
 		return moment().utcOffset( window.wcSettings.timeZone );
 	}
 
-	return moment().tz( window.wcSettings.timeZone );
+	return ( moment() as momentTz.Moment ).tz( window.wcSettings.timeZone );
 }
 
 /**
@@ -189,7 +189,7 @@ export function getStoreTimeZoneMoment() {
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getLastPeriod(
 	period: moment.DurationInputArg2,
@@ -241,7 +241,7 @@ export function getLastPeriod(
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getCurrentPeriod(
 	period: moment.DurationInputArg2,

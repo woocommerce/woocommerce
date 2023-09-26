@@ -6,6 +6,9 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductSectionLayout as ProductSectionLayout,
+	__experimentalUseProductHelper as useProductHelper,
+	__experimentalShippingDimensionsImage as ShippingDimensionsImage,
+	ShippingDimensionsImageProps,
 } from '@woocommerce/product-editor';
 import { PartialProduct, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
@@ -26,11 +29,6 @@ import {
 	ShippingDimensionsPropsType,
 } from './index';
 import { PLUGIN_ID } from '../constants';
-import {
-	ShippingDimensionsImage,
-	ShippingDimensionsImageProps,
-} from '../../fields/shipping-dimensions-image';
-import { useProductHelper } from '../../use-product-helper';
 
 import './shipping-section.scss';
 

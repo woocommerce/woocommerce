@@ -4,6 +4,8 @@ module.exports = {
 		npmDevDependencies: [
 			'@woocommerce/dependency-extraction-webpack-plugin',
 			'@woocommerce/eslint-plugin',
+			'@wordpress/prettier-config',
+			'@wordpress/scripts',
 		],
 	},
 };

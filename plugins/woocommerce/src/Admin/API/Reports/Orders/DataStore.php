@@ -7,11 +7,11 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
-use \Automattic\WooCommerce\Admin\API\Reports\Cache;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 
 /**
@@ -23,7 +23,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Dynamically sets the date column name based on configuration
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_created' );
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
 		parent::__construct();
 	}
 
@@ -191,7 +191,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = "{$order_tax_lookup_table}.tax_rate_id NOT IN ({$excluded_tax_rates}) OR {$order_tax_lookup_table}.tax_rate_id IS NULL";
 		}
 
-		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $order_stats_lookup_table );
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
 

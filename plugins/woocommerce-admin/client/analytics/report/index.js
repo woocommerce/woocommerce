@@ -8,6 +8,10 @@ import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
 import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
+import {
+	CurrencyContext,
+	getFilteredCurrencyInstance,
+} from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -15,10 +19,6 @@ import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
 import './style.scss';
 import { NoMatch } from '~/layout/NoMatch';
 import ReportError from '../components/report-error';
-import {
-	CurrencyContext,
-	getFilteredCurrencyInstance,
-} from '../../lib/currency-context';
 import getReports from './get-reports';
 
 /**

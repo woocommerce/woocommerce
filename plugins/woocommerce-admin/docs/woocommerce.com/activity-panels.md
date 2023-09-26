@@ -2,7 +2,7 @@
 
 The Activity Panel aims to be a "one stop shop" for managing your store - fulfill new orders, manage product inventory, moderate reviews, and get information about running your store.
 
-Activity Panels can be accessed wherever the WooCommerce Admin nagivation bar is shown.
+Activity Panels can be accessed wherever the WooCommerce Admin navigation bar is shown.
 
 ![Activity Panels Tabs Overview](images/activity-panels-tabs.png)
 

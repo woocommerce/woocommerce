@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix no enforcing of min/max limits in quantity selector of variable products.

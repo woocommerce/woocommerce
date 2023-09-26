@@ -18,12 +18,6 @@ use Automattic\WooCommerce\Admin\ReportsSync;
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

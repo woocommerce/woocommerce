@@ -83,4 +83,54 @@ final class StringUtil {
 	public static function plugin_name_from_plugin_file( string $plugin_file_path ): string {
 		return basename( dirname( $plugin_file_path ) ) . DIRECTORY_SEPARATOR . basename( $plugin_file_path );
 	}
+
+	/**
+	 * Check if a string is null or is empty.
+	 *
+	 * @param string|null $value The string to check.
+	 * @return bool True if the string is null or is empty.
+	 */
+	public static function is_null_or_empty( ?string $value ) {
+		return is_null( $value ) || '' === $value;
+	}
+
+	/**
+	 * Check if a string is null, is empty, or has only whitespace characters
+	 * (space, tab, vertical tab, form feed, carriage return, new line)
+	 *
+	 * @param string|null $value The string to check.
+	 * @return bool True if the string is null, is empty, or contains only whitespace characters.
+	 */
+	public static function is_null_or_whitespace( ?string $value ) {
+		return is_null( $value ) || '' === $value || ctype_space( $value );
+	}
+
+	/**
+	 * Convert an array of values to a list suitable for a SQL "IN" statement
+	 * (so comma separated and delimited by parenthesis).
+	 * e.g.: [1,2,3] --> (1,2,3)
+	 *
+	 * @param array $values The values to convert.
+	 * @return string A parenthesized and comma-separated string generated from the values.
+	 * @throws \InvalidArgumentException Empty values array passed.
+	 */
+	public static function to_sql_list( array $values ) {
+		if ( empty( $values ) ) {
+			throw new \InvalidArgumentException( self::class_name_without_namespace( __CLASS__ ) . '::' . __FUNCTION__ . ': the values array is empty' );
+		}
+
+		return '(' . implode( ',', $values ) . ')';
+	}
+
+	/**
+	 * Get the name of a class without the namespace.
+	 *
+	 * @param string $class_name The full class name.
+	 * @return string The class name without the namespace.
+	 */
+	public static function class_name_without_namespace( string $class_name ) {
+		// A '?:' would convert this to a one-liner, but WP coding standards disallow these :shrug:.
+		$result = substr( strrchr( $class_name, '\\' ), 1 );
+		return $result ? $result : $class_name;
+	}
 }

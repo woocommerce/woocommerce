@@ -12,7 +12,8 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
-import { WPDataSelectors } from '../types';
+import { WPDataActions, WPDataSelectors } from '../types';
+import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
@@ -29,8 +30,11 @@ declare module '@wordpress/data' {
 	// TODO: convert action.js to TS
 	function dispatch(
 		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions >;
+	): DispatchFromMap< typeof actions & WPDataActions >;
 	function select(
 		key: typeof STORE_NAME
 	): SelectFromMap< typeof selectors > & WPDataSelectors;
+	function resolveSelect(
+		key: typeof STORE_NAME
+	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
 }

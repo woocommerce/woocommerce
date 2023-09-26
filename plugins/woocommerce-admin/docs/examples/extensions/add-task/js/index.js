@@ -1,13 +1,17 @@
+/* eslint-disable @wordpress/i18n-text-domain */
 /**
  * External dependencies
  */
-
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody } from '@wordpress/components';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
-import { WooOnboardingTask } from '@woocommerce/onboarding';
+import {
+	WooOnboardingTask,
+	WooOnboardingTaskListItem,
+} from '@woocommerce/onboarding';
 
 const Task = ( { onComplete, task } ) => {
 	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
@@ -46,10 +50,32 @@ const Task = ( { onComplete, task } ) => {
 registerPlugin( 'add-task-content', {
 	render: () => (
 		<WooOnboardingTask id="my-task">
-			{ ( { onComplete, query, task } ) => (
-				<Task onComplete={ onComplete } task={ task } />
-			) }
+			{ ( {
+				onComplete,
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				query,
+				task,
+			} ) => <Task onComplete={ onComplete } task={ task } /> }
 		</WooOnboardingTask>
 	),
 	scope: 'woocommerce-tasks',
+} );
+
+registerPlugin( 'my-task-list-item-plugin', {
+	scope: 'woocommerce-tasks',
+	render: () => (
+		<WooOnboardingTaskListItem id="my-task">
+			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+				// Add a custom wrapper around the default task item.
+				<div
+					className="woocommerce-custom-tasklist-item"
+					style={ {
+						border: '1px solid red',
+					} }
+				>
+					<DefaultTaskItem />
+				</div>
+			) }
+		</WooOnboardingTaskListItem>
+	),
 } );

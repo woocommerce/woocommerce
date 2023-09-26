@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Invert the useValidation hook behavior to return an error instead of a boolean value

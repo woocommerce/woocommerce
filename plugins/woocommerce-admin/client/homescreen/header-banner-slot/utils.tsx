@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '../../utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 export const EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME =
 	'woocommerce_homescreen_experimental_header_banner_item';

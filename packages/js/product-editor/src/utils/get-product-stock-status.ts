@@ -51,7 +51,9 @@ export const getProductStockStatus = (
 	}
 
 	if ( product.stock_status ) {
-		return PRODUCT_STOCK_STATUS_LABELS[ product.stock_status ];
+		return PRODUCT_STOCK_STATUS_LABELS[
+			product.stock_status as PRODUCT_STOCK_STATUS_KEYS
+		];
 	}
 
 	return PRODUCT_STOCK_STATUS_LABELS.instock;
@@ -77,6 +79,8 @@ export const getProductStockStatusClass = (
 		return PRODUCT_STOCK_STATUS_CLASSES.outofstock;
 	}
 	return product.stock_status
-		? PRODUCT_STOCK_STATUS_CLASSES[ product.stock_status ]
+		? PRODUCT_STOCK_STATUS_CLASSES[
+				product.stock_status as PRODUCT_STOCK_STATUS_KEYS
+		  ]
 		: '';
 };

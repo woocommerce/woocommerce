@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Admin\API\Reports\DataStore: Common parent for custom report data stores.
@@ -31,6 +31,13 @@ class DataStore extends SqlQuery {
 	protected $cache_timeout = 3600;
 
 	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = '';
+
+	/**
 	 * Table used as a data store for this report.
 	 *
 	 * @var string
@@ -50,6 +57,13 @@ class DataStore extends SqlQuery {
 	 * @var array
 	 */
 	protected $column_types = array();
+
+	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
+	protected $report_columns = array();
 
 	// @todo This does not really belong here, maybe factor out the comparison as separate class?
 	/**
@@ -129,7 +143,7 @@ class DataStore extends SqlQuery {
 		self::set_db_table_name();
 		$this->assign_report_columns();
 
-		if ( property_exists( $this, 'report_columns' ) ) {
+		if ( $this->report_columns ) {
 			$this->report_columns = apply_filters(
 				'woocommerce_admin_report_columns',
 				$this->report_columns,
@@ -1305,11 +1319,10 @@ class DataStore extends SqlQuery {
 	 * Returns product attribute subquery elements used in JOIN and WHERE clauses,
 	 * based on query arguments from the user.
 	 *
-	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $table_name Database table name.
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
 	 */
-	protected function get_attribute_subqueries( $query_args, $table_name ) {
+	protected function get_attribute_subqueries( $query_args ) {
 		global $wpdb;
 
 		$sql_clauses           = array(
@@ -1363,11 +1376,11 @@ class DataStore extends SqlQuery {
 					$meta_value = esc_sql( $attribute_term[1] );
 				}
 
-				$join_alias = 'orderitemmeta1';
+				$join_alias       = 'orderitemmeta1';
+				$table_to_join_on = "{$wpdb->prefix}wc_order_product_lookup";
 
 				if ( empty( $sql_clauses['join'] ) ) {
-					$table_name            = esc_sql( $table_name );
-					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_name}.order_id";
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_to_join_on}.order_id";
 				}
 
 				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
@@ -1375,7 +1388,7 @@ class DataStore extends SqlQuery {
 				if ( 'AND' === $match_operator || 1 === count( $sql_clauses['join'] ) ) {
 					$join_idx              = count( $sql_clauses['join'] );
 					$join_alias            = 'orderitemmeta' . $join_idx;
-					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = orderitems.order_item_id";
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_to_join_on}.order_item_id";
 				}
 
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared

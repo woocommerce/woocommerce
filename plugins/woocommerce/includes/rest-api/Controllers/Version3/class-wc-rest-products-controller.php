@@ -432,6 +432,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_reviews_allowed( $request['reviews_allowed'] );
 		}
 
+		// Post password.
+		if ( isset( $request['post_password'] ) ) {
+			$product->set_post_password( $request['post_password'] );
+		}
+
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
 			$product->set_virtual( $request['virtual'] );
@@ -1140,6 +1145,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
+				'post_password'         => array(
+					'description' => __( 'Post password.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
 				'average_rating'        => array(
 					'description' => __( 'Reviews average rating.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1494,6 +1504,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			// Add has_options if needed.
 			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
+			}
+
+			if ( in_array( 'post_password', $fields, true ) ) {
+				$data['post_password'] = $product->get_post_password( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

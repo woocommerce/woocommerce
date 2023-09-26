@@ -21,19 +21,20 @@ import {
 import EllipsisMenu from '../ellipsis-menu';
 import MenuItem from '../ellipsis-menu/menu-item';
 import MenuTitle from '../ellipsis-menu/menu-title';
-import Pagination from '../pagination';
+import { Pagination } from '../pagination';
 import Table from './table';
 import TablePlaceholder from './placeholder';
 import TableSummary, { TableSummaryPlaceholder } from './summary';
 import { TableCardProps } from './types';
 
-const defaultOnQueryChange =
-	( param: string ) => ( path?: string, direction?: string ) => {};
+const defaultOnQueryChange: (
+	param: string
+) => ( path?: string, direction?: string ) => void = () => () => {};
 
-const defaultOnColumnsChange = (
+const defaultOnColumnsChange: (
 	showCols: Array< string >,
 	key?: string
-) => {};
+) => void = () => {};
 /**
  * This is an accessible, sortable, and scrollable table for displaying tabular data (like revenue and other analytics data).
  * It accepts `headers` for column headers, and `rows` for the table content.
@@ -104,14 +105,14 @@ const TableCard: React.VFC< TableCardProps > = ( {
 	};
 
 	const onPageChange = (
-		newPage: string,
-		direction?: 'previous' | 'next'
+		newPage: number,
+		direction?: 'previous' | 'next' | 'goto'
 	) => {
 		if ( props.onPageChange ) {
-			props.onPageChange( parseInt( newPage, 10 ), direction );
+			props.onPageChange( newPage, direction );
 		}
 		if ( onQueryChange ) {
-			onQueryChange( 'paged' )( newPage, direction );
+			onQueryChange( 'paged' )( newPage.toString(), direction );
 		}
 	};
 
@@ -147,9 +148,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 						) }
 						renderContent={ () => (
 							<Fragment>
-								{ /* @ts-expect-error: Ignoring the error until we migrate ellipsis-menu to TS*/ }
 								<MenuTitle>
-									{ /* @ts-expect-error: Allow string */ }
 									{ __( 'Columns:', 'woocommerce' ) }
 								</MenuTitle>
 								{ allHeaders.map(
@@ -234,7 +233,11 @@ const TableCard: React.VFC< TableCardProps > = ( {
 							perPage={ rowsPerPage }
 							total={ totalRows }
 							onPageChange={ onPageChange }
-							onPerPageChange={ onQueryChange( 'per_page' ) }
+							onPerPageChange={ ( perPage ) =>
+								onQueryChange( 'per_page' )(
+									perPage.toString()
+								)
+							}
 						/>
 
 						{ summary && <TableSummary data={ summary } /> }

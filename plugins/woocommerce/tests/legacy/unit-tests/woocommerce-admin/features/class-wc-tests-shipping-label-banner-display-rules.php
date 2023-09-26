@@ -20,7 +20,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	private $valid_jetpack_version = '4.4';
 
 	/**
-	 * Stores the default WordPress options stored in teh database.
+	 * Stores the default WordPress options stored in the database.
 	 *
 	 * @var array
 	 */

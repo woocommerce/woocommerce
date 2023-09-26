@@ -52,26 +52,30 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	} );
 
 	test( 'can create simple virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
-		await page.fill( '#title', virtualProductName );
-		await page.fill( '#_regular_price', productPrice );
-		await page.click( '#_virtual' );
-		await page.click( '#publish' );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
+		await page.locator( '#title' ).fill( virtualProductName );
+		await page.locator( '#_regular_price' ).fill( productPrice );
+		await page.locator( '#_virtual' ).click();
+		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
 		if (
-			( await page.innerText( '#post-status-display' ) ).includes(
-				'Draft'
-			)
+			(
+				await page.locator( '#post-status-display' ).innerText()
+			 ).includes( 'Draft' )
 		) {
-			await page.click( '#publish' );
+			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
@@ -81,22 +85,26 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( `/?post_type=product&p=${ virtualProductId }` );
+		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			virtualProductName
 		);
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			virtualProductName
 		);
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).not.toBeVisible();
-		await page.click( `a.remove[data-product_id='${ virtualProductId }']` );
+		await page
+			.locator( `a.remove[data-product_id='${ virtualProductId }']` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
@@ -104,26 +112,30 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	} );
 
 	test( 'can create simple non-virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
-		await page.fill( '#title', nonVirtualProductName );
-		await page.fill( '#_regular_price', productPrice );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
+		await page.locator( '#title' ).fill( nonVirtualProductName );
+		await page.locator( '#_regular_price' ).fill( productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-		await page.click( '#publish' );
+		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
 		if (
-			( await page.innerText( '#post-status-display' ) ).includes(
-				'Draft'
-			)
+			(
+				await page.locator( '#post-status-display' ).innerText()
+			 ).includes( 'Draft' )
 		) {
-			await page.click( '#publish' );
+			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
 		// Save product ID
 		nonVirtualProductId = page.url().match( /(?<=post=)\d+/ );
@@ -133,24 +145,26 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	test( 'can have a shopper add the simple non-virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }` );
+		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			nonVirtualProductName
 		);
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			nonVirtualProductName
 		);
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).toBeVisible();
-		await page.click(
-			`a.remove[data-product_id='${ nonVirtualProductId }']`
-		);
+		await page
+			.locator( `a.remove[data-product_id='${ nonVirtualProductId }']` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator(

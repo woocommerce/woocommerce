@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Products\Stats\DataStore.

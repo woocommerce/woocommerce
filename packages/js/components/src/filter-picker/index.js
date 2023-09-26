@@ -374,11 +374,11 @@ FilterPicker.propTypes = {
 		 */
 		staticParams: PropTypes.array.isRequired,
 		/**
-		 * The url paramter this filter will modify.
+		 * The url parameter this filter will modify.
 		 */
 		param: PropTypes.string.isRequired,
 		/**
-		 * The default paramter value to use instead of 'all'.
+		 * The default parameter value to use instead of 'all'.
 		 */
 		defaultValue: PropTypes.string,
 		/**

@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\PluginHelper
  */
 
-use \Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * WC_Admin_Tests_Plugin_Helper Class

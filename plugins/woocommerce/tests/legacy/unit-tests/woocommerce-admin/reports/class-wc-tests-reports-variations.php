@@ -6,8 +6,8 @@
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuery;
 
 /**
  * Reports order stats tests class.

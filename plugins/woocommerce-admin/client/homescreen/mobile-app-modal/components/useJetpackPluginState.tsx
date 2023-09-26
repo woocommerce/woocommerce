@@ -26,7 +26,7 @@ export const JetpackPluginStates = {
 } as const;
 
 export type JetpackPluginStates =
-	typeof JetpackPluginStates[ keyof typeof JetpackPluginStates ];
+	( typeof JetpackPluginStates )[ keyof typeof JetpackPluginStates ];
 
 /**
  * Utility hook to determine and manipulate the state of the Jetpack plugin on the WordPress installation
@@ -89,8 +89,7 @@ export const useJetpackPluginState = () => {
 						);
 					} else if (
 						jetpackConnectionData &&
-						jetpackConnectionData?.currentUser?.username !==
-							jetpackConnectionData?.connectionOwner
+						! jetpackConnectionData?.currentUser?.isMaster
 					) {
 						setPluginState(
 							JetpackPluginStates.NOT_OWNER_OF_CONNECTION

@@ -4,10 +4,10 @@
 
 namespace WP_CLI\Utils;
 
-use \Composer\Semver\Comparator;
-use \Composer\Semver\Semver;
-use \WP_CLI\Dispatcher;
-use \WP_CLI\Iterators\Transform;
+use Composer\Semver\Comparator;
+use Composer\Semver\Semver;
+use WP_CLI\Dispatcher;
+use WP_CLI\Iterators\Transform;
 
 function inside_phar() {
 	return 0 === strpos( WP_CLI_ROOT, 'phar://' );

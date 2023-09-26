@@ -339,10 +339,10 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 		$attributes = array();
 
 		foreach ( $attr as $name => $value ) {
-			$attribute[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+			$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
 		}
 
-		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attribute ) . '/>';
+		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
 	}
 
 	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
@@ -698,7 +698,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
 			$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
 			$found_parent_attributes[] = $attribute;
 			if ( ! array_key_exists( $attribute, $variation_attributes ) ) {
-				$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed.
+				$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be assumed.
 			}
 		}
 	}
@@ -1001,13 +1001,18 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
-			$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
-			$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
-
-			if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-				$taxes_total = array_sum( $taxes );
+			// If the customer is exempt from VAT, set tax total to 0.
+			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
+				$taxes_total = 0.00;
 			} else {
-				$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+				$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
+				$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
+
+				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$taxes_total = array_sum( $taxes );
+				} else {
+					$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+				}
 			}
 
 			$return_price = NumberUtil::round( $line_price + $taxes_total, wc_get_price_decimals() );
@@ -1016,7 +1021,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 
 			/**
-			 * If the customer is excempt from VAT, remove the taxes here.
+			 * If the customer is exempt from VAT, remove the taxes here.
 			 * Either remove the base or the user taxes depending on woocommerce_adjust_non_base_location_prices setting.
 			 */
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // @codingStandardsIgnoreLine.
@@ -1101,9 +1106,14 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 }
 
 /**
- * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+ * Returns the price including or excluding tax.
+ *
+ * By default it's based on the 'woocommerce_tax_display_shop' setting.
+ * Set `$arg['display_context']` to 'cart' to base on the 'woocommerce_tax_display_cart' setting instead.
  *
  * @since  3.0.0
+ * @since  7.6.0 Added `display_context` argument.
+ *
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
  * @return float
@@ -1112,15 +1122,19 @@ function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'qty'   => 1,
-			'price' => $product->get_price(),
+			'qty'             => 1,
+			'price'           => $product->get_price(),
+			'display_context' => 'shop',
 		)
 	);
 
-	$price = $args['price'];
-	$qty   = $args['qty'];
+	$price       = $args['price'];
+	$qty         = $args['qty'];
+	$tax_display = get_option(
+		'cart' === $args['display_context'] ? 'woocommerce_tax_display_cart' : 'woocommerce_tax_display_shop'
+	);
 
-	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ?
+	return 'incl' === $tax_display ?
 		wc_get_price_including_tax(
 			$product,
 			array(

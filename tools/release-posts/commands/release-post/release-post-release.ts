@@ -6,8 +6,12 @@ import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { cloneRepo, getCommitHash } from 'cli-core/src/git';
-import { Logger } from 'cli-core/src/logger';
+import {
+	cloneRepo,
+	getCommitHash,
+} from '@woocommerce/monorepo-utils/src/core/git';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
+import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
 
@@ -21,7 +25,6 @@ import {
 	editWpComPostContent,
 } from '../../lib/draft-post';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
-import { getEnvVar } from '../../lib/environment';
 import { generateContributors } from '../../lib/contributors';
 import { editPostHTML } from '../../lib/edit-post';
 
@@ -150,7 +153,7 @@ const program = new Command()
 
 		let postContent;
 
-		if ( 'undefined' !== typeof options.editPostId ) {
+		if ( typeof options.editPostId !== 'undefined' ) {
 			try {
 				const prevPost = await fetchWpComPost(
 					siteId,
@@ -168,15 +171,11 @@ const program = new Command()
 		const changes = await scanForChanges(
 			currentVersionRef,
 			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
-			//false,
-			true,
 			SOURCE_REPO,
 			previousVersionRef,
 			'cli',
 			tmpRepoPath
 		);
-
-		const schemaChanges = changes.schema.filter( ( s ) => ! s.areEqual );
 
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
@@ -189,15 +188,12 @@ const program = new Command()
 		const postVariables = {
 			contributors,
 			title,
-			changes: {
-				...changes,
-				schema: schemaChanges,
-			},
+			changes,
 			displayVersion: currentVersion,
 		};
 
 		const html =
-			'undefined' !== typeof options.editPostId
+			typeof options.editPostId !== 'undefined'
 				? editPostHTML( postContent, {
 						hooks: await renderTemplate(
 							'hooks.ejs',
@@ -234,7 +230,7 @@ const program = new Command()
 
 			try {
 				const { URL } =
-					'undefined' !== typeof options.editPostId
+					typeof options.editPostId !== 'undefined'
 						? await editWpComPostContent(
 								siteId,
 								options.editPostId,

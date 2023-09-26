@@ -1,22 +1,26 @@
 /**
+ * External dependencies
+ */
+import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
+
+/**
  * Internal dependencies
  */
 import { ProductTour } from './product-tour';
 import { ProductTourModal } from './product-tour-modal';
-import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 import { useProductTour } from './use-product-tour';
 
 export const ProductTourContainer: React.FC = () => {
 	const { dismissModal, endTour, isModalHidden, isTouring, startTour } =
 		useProductTour();
-	const { showCesFooter } = useProductMVPCESFooter();
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 
 	if ( isTouring ) {
 		return (
 			<ProductTour
 				onClose={ () => {
 					endTour();
-					showCesFooter();
+					maybeShowFeedbackBar();
 				} }
 			/>
 		);
@@ -30,7 +34,7 @@ export const ProductTourContainer: React.FC = () => {
 		<ProductTourModal
 			onClose={ () => {
 				dismissModal();
-				showCesFooter();
+				maybeShowFeedbackBar();
 			} }
 			onStart={ startTour }
 		/>

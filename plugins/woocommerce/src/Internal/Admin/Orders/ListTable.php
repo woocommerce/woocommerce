@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
@@ -110,6 +111,44 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Generates content for a single row of the table.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @param \WC_Order $order The current order.
+	 */
+	public function single_row( $order ) {
+		/**
+		 * Filters the list of CSS class names for a given order row in the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[]  $classes An array of CSS class names.
+		 * @param \WC_Order $order   The order object.
+		 */
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_order_css_classes',
+			array(
+				'order-' . $order->get_id(),
+				'type-' . $order->get_type(),
+				'status-' . $order->get_status(),
+			),
+			$order
+		);
+		$css_classes = array_unique( array_map( 'trim', $css_classes ) );
+
+		// Is locked?
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		if ( $edit_lock->is_locked_by_another_user( $order ) ) {
+			$css_classes[] = 'wp-locked';
+		}
+
+		echo '<tr id="order-' . esc_attr( $order->get_id() ) . '" class="' . esc_attr( implode( ' ', $css_classes ) ) . '">';
+		$this->single_row_columns( $order );
+		echo '</tr>';
+	}
+
+	/**
 	 * Render individual column.
 	 *
 	 * @param string   $column_id Column ID to render.
@@ -191,6 +230,17 @@ class ListTable extends WP_List_Table {
 		$title         = esc_html( $post_type->labels->name );
 		$add_new       = esc_html( $post_type->labels->add_new );
 		$new_page_link = $this->page_controller->get_new_page_url( $this->order_type );
+		$search_label  = '';
+
+		if ( ! empty( $this->order_query_args['s'] ) ) {
+			$search_label  = '<span class="subtitle">';
+			$search_label .= sprintf(
+				/* translators: %s: Search query. */
+				__( 'Search results for: %s', 'woocommerce' ),
+				'<strong>' . esc_html( $this->order_query_args['s'] ) . '</strong>'
+			);
+			$search_label .= '</span>';
+		}
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
@@ -198,6 +248,7 @@ class ListTable extends WP_List_Table {
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
 				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				{$search_label}
 				<hr class='wp-header-end'>"
 		);
 
@@ -274,6 +325,37 @@ class ListTable extends WP_List_Table {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Gets a list of CSS classes for the WP_List_Table table tag.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @return string[] Array of CSS classes for the table tag.
+	 */
+	protected function get_table_classes() {
+		/**
+		 * Filters the list of CSS class names for the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[] $classes    An array of CSS class names.
+		 * @param string   $order_type The order type.
+		 */
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_css_classes',
+			array_merge(
+				parent::get_table_classes(),
+				array(
+					'wc-orders-list-table',
+					'wc-orders-list-table-' . $this->order_type,
+				)
+			),
+			$this->order_type
+		);
+
+		return array_unique( array_map( 'trim', $css_classes ) );
 	}
 
 	/**
@@ -365,7 +447,7 @@ class ListTable extends WP_List_Table {
 		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
 
 		if ( ! in_array( $field, $sortable, true ) ) {
-			$this->order_query_args['orderby'] = 'id';
+			$this->order_query_args['orderby'] = 'date';
 			$this->order_query_args['order']   = 'DESC';
 			return;
 		}
@@ -471,7 +553,7 @@ class ListTable extends WP_List_Table {
 				$view_counts[ $slug ] = $total_in_status;
 			}
 
-			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list ) {
+			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list && 'auto-draft' !== $slug ) {
 				$all_count += $total_in_status;
 			}
 		}
@@ -550,8 +632,9 @@ class ListTable extends WP_List_Table {
 			array_merge(
 				wc_get_order_statuses(),
 				array(
-					'trash' => ( get_post_status_object( 'trash' ) )->label,
-					'draft' => ( get_post_status_object( 'draft' ) )->label,
+					'trash'      => ( get_post_status_object( 'trash' ) )->label,
+					'draft'      => ( get_post_status_object( 'draft' ) )->label,
+					'auto-draft' => ( get_post_status_object( 'auto-draft' ) )->label,
 				)
 			),
 			array_flip( get_post_stati( array( 'show_in_admin_status_list' => true ) ) )
@@ -640,20 +723,15 @@ class ListTable extends WP_List_Table {
 		global $wpdb;
 
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$utc_offset = wc_timezone_offset();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
 			"
-				SELECT DISTINCT YEAR( date_created_gmt ) AS year,
-								MONTH( date_created_gmt ) AS month
-
-				FROM $orders_table
-
-				WHERE status NOT IN (
-					'trash'
-				)
-
-				ORDER BY year DESC, month DESC;
+				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+								MONTH( t.date_created_local ) AS month
+				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
+				ORDER BY year DESC, month DESC
 			"
 		);
 
@@ -794,7 +872,21 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
-		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', esc_attr( $this->_args['singular'] ), esc_attr( $item->get_id() ) );
+		ob_start();
+		?>
+		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+
+		<div class="locked-indicator">
+			<span class="locked-indicator-icon" aria-hidden="true"></span>
+			<span class="screen-reader-text">
+				<?php
+				// translators: %s is an order ID.
+				echo esc_html( sprintf( __( 'Order %s is locked.', 'woocommerce' ), $item->get_id() ) );
+				?>
+			</span>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -916,7 +1008,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		// Gracefully handle legacy statuses.
-		if ( in_array( $order->get_status(), array( 'trash', 'draft' ), true ) ) {
+		if ( in_array( $order->get_status(), array( 'trash', 'draft', 'auto-draft' ), true ) ) {
 			$status_name = ( get_post_status_object( $order->get_status() ) )->label;
 		} else {
 			$status_name = wc_get_order_status_name( $order->get_status() );
@@ -1112,7 +1204,7 @@ class ListTable extends WP_List_Table {
 
 			$action = 'delete';
 		} else {
-			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array();
+			$ids = isset( $_REQUEST['id'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['id'] ) ) : array();
 		}
 
 		/**
@@ -1132,8 +1224,9 @@ class ListTable extends WP_List_Table {
 			exit;
 		}
 
-		$report_action = '';
-		$changed       = 0;
+		$report_action  = '';
+		$changed        = 0;
+		$action_handled = true;
 
 		if ( 'remove_personal_data' === $action ) {
 			$report_action = 'removed_personal_data';
@@ -1154,8 +1247,15 @@ class ListTable extends WP_List_Table {
 
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
 				$changed = $this->do_bulk_action_mark_orders( $ids, $new_status );
+			} else {
+				$action_handled = false;
 			}
 		} else {
+			$action_handled = false;
+		}
+
+		// Custom action.
+		if ( ! $action_handled ) {
 			$screen = get_current_screen()->id;
 
 			/**
@@ -1247,13 +1347,11 @@ class ListTable extends WP_List_Table {
 	 * @return int Number of orders that were trashed.
 	 */
 	private function do_delete( array $ids, bool $force_delete = false ): int {
-		$orders_store = wc_get_container()->get( OrdersTableDataStore::class );
-		$delete_args  = $force_delete ? array( 'force_delete' => true ) : array();
 		$changed      = 0;
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
-			$orders_store->delete( $order, $delete_args );
+			$order->delete( $force_delete );
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {

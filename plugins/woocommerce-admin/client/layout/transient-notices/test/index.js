@@ -7,7 +7,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import TransientNotices from '..';
+import { TransientNotices } from '..';
 
 jest.mock( '@wordpress/data', () => {
 	// Require the original module to not be mocked...
@@ -24,6 +24,18 @@ jest.mock( '@wordpress/data', () => {
 useDispatch.mockReturnValue( {
 	removeNotice: jest.fn(),
 	createNotice: jest.fn(),
+} );
+
+jest.mock( '@woocommerce/admin-layout', () => {
+	const originalModule = jest.requireActual( '@woocommerce/admin-layout' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		WooFooterItem: jest.fn( ( { children } ) => {
+			return <div>{ children }</div>;
+		} ),
+	};
 } );
 
 jest.mock( '../snackbar/list', () =>

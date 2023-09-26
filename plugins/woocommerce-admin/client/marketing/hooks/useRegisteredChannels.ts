@@ -63,7 +63,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getRegisteredChannels' );
+		invalidateResolution( 'getRegisteredChannels', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect( ( select ) => {
@@ -72,7 +72,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 		const state = getRegisteredChannels< RegisteredChannelsState >();
 
 		return {
-			loading: ! hasFinishedResolution( 'getRegisteredChannels' ),
+			loading: ! hasFinishedResolution( 'getRegisteredChannels', [] ),
 			data: state.data?.map( convert ),
 			error: state.error,
 			refetch,

@@ -27,7 +27,9 @@ export type ResourceState = {
 	requesting: Record< string, boolean >;
 };
 
-export const createReducer = () => {
+export const createReducer = (
+	additionalReducer?: Reducer< ResourceState >
+) => {
 	const reducer: Reducer< ResourceState, Actions > = (
 		state = {
 			items: {},
@@ -284,10 +286,10 @@ export const createReducer = () => {
 							) ]: true,
 						},
 					};
-
-				default:
-					return state;
 			}
+		}
+		if ( additionalReducer ) {
+			return additionalReducer( state, payload );
 		}
 		return state;
 	};

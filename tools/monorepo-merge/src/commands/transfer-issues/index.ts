@@ -76,7 +76,7 @@ export default class TransferIssues extends Command {
 
 		if ( numberOfIssues === 0 ) {
 			this.log(
-				'There are no issues to trasnfer that match this query!'
+				'There are no issues to transfer that match this query!'
 			);
 			this.exit( 0 );
 		}

@@ -15,7 +15,7 @@ import {
  */
 import { ProductForm } from './product-form';
 import { ProductTourContainer } from './tour';
-import './product-page.scss';
+import './add-edit-product-page.scss';
 import './fills';
 
 const AddProductPage: React.FC = () => {

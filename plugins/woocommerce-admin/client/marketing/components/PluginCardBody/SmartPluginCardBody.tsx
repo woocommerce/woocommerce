@@ -21,7 +21,7 @@ import './PluginCardBody.scss';
 
 type SmartPluginCardBodyProps = {
 	plugin: RecommendedPlugin;
-	onInstalledAndActivated?: () => void;
+	onInstalledAndActivated?: ( pluginSlug: string ) => void;
 };
 
 /**
@@ -62,7 +62,7 @@ export const SmartPluginCardBody = ( {
 				plugin.product,
 			] );
 
-			onInstalledAndActivated();
+			onInstalledAndActivated( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
@@ -95,7 +95,7 @@ export const SmartPluginCardBody = ( {
 					disabled={ buttonDisabled }
 					onClick={ installAndActivate }
 				>
-					{ __( 'Install plugin', 'woocommerce' ) }
+					{ __( 'Install extension', 'woocommerce' ) }
 				</Button>
 			);
 		}

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { PartialProduct } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { ShippingDimensionsImageProps } from '../../fields/shipping-dimensions-image';
+import { HighlightSides } from '@woocommerce/product-editor';
 
 export type ProductShippingSectionPropsType = {
 	product?: PartialProduct;
@@ -20,7 +16,5 @@ export type DimensionPropsType = {
 
 export type ShippingDimensionsPropsType = {
 	dimensionProps: DimensionPropsType;
-	setHighlightSide: (
-		side: ShippingDimensionsImageProps[ 'highlight' ]
-	) => void;
+	setHighlightSide: ( side: HighlightSides ) => void;
 };

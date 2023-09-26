@@ -50,13 +50,33 @@
 	}
 }
 
-.wca-test-helper-option-editor {
-	width: 100%;
-	height: 300px;
-}
+.wca-test-helper-option-modal-content {
+	display: flex;
+	flex-direction: column;
 
-.wca-test-helper-edit-btn-save {
-	float: right;
+	label {
+		margin-bottom: 5px;
+	}
+
+	output, textarea {
+		margin-bottom: 10px;
+	}
+
+	#wca-test-helper-option-modal-name {
+		font-size: 1.2em;
+		font-weight: bold;
+	}
+
+	#wca-test-helper-option-editor {
+		height: 300px;
+	}
+
+	.wca-test-helper-option-modal-buttons {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 10px;
+		gap: 10px;
+	}
 }
 
 #wc-admin-test-helper-tools,

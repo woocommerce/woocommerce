@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -19,32 +19,34 @@ import { WCUser } from './types';
 export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
-			const userRef = useRef( currentUser );
-
 			// Use currentUser to hydrate calls to @wordpress/core-data's getCurrentUser().
-			// @ts-expect-error // @ts-expect-error registry is not defined in the wp.data typings
-			useSelect( ( select, registry ) => {
-				if ( ! userRef.current ) {
+
+			const shouldHydrate = useSelect( ( select ) => {
+				if ( ! currentUser ) {
 					return;
 				}
-
+				// @ts-expect-error both functions are not defined in the wp.data typings
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
-				const {
-					startResolution,
-					finishResolution,
-					receiveCurrentUser,
-				} = registry.dispatch( STORE_NAME );
-
-				if (
+				return (
 					! isResolving( 'getCurrentUser' ) &&
 					! hasFinishedResolution( 'getCurrentUser' )
-				) {
-					startResolution( 'getCurrentUser', [] );
-					receiveCurrentUser( userRef.current );
-					finishResolution( 'getCurrentUser', [] );
-				}
+				);
 			} );
+
+			const {
+				// @ts-expect-error startResolution is not defined in the wp.data typings
+				startResolution,
+				// @ts-expect-error finishResolution is not defined in the wp.data typings
+				finishResolution,
+				receiveCurrentUser,
+			} = useDispatch( STORE_NAME );
+
+			if ( shouldHydrate ) {
+				startResolution( 'getCurrentUser', [] );
+				receiveCurrentUser( currentUser );
+				finishResolution( 'getCurrentUser', [] );
+			}
 
 			return <OriginalComponent { ...props } />;
 		},
