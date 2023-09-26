@@ -107,7 +107,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 				$filters[] = array(
 					/* translators: %s: rating */
-					'label' => sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), esc_html( $rating ) ),
+					'label' => sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ),
 					'link'  => $link,
 					'class' => 'chosen',
 				);
@@ -132,7 +132,9 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		wc_get_template(
 			'content-widget-layered-nav-filters.php',
 			array(
-				'filters' => $filters,
+				'args'     => $args,
+				'instance' => $instance,
+				'filters'  => $filters,
 			)
 		);
 

@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.5.0
+ * @version 8.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,15 +24,16 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 7.5.0
  *
- * @param array $filters List of all available filters
+ * @param array $args     Arguments.
+ * @param array $instance Widget instance.
  */
-do_action( 'woocommerce_widget_layered_nav_filters_start', $filters );
+do_action( 'woocommerce_widget_layered_nav_filters_start', $args, $instance );
 ?>
 
 <ul>
 	<?php foreach ( $filters as $filter ) : ?>
 		<li class="<?php echo esc_attr( $filter['class'] ); ?>">
-			<a rel="nofollow" aria-label="<?php esc_attr_e( 'Remove filter', 'woocommerce' ); ?>" href="<?php echo esc_url( $filter['link'] ); ?>"><?php echo $filter['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+			<a rel="nofollow" aria-label="<?php esc_attr_e( 'Remove filter', 'woocommerce' ); ?>" href="<?php echo esc_url( $filter['link'] ); ?>"><?php echo esc_html( $filter['label'] ); ?></a>
 		</li>
 	<?php endforeach; ?>
 </ul>
@@ -43,7 +44,8 @@ do_action( 'woocommerce_widget_layered_nav_filters_start', $filters );
  *
  * @since 7.5.0
  *
- * @param array $filters List of all available filters
+ * @param array $args     Arguments.
+ * @param array $instance Widget instance.
  */
-do_action( 'woocommerce_widget_layered_nav_filters_end', $filters );
+do_action( 'woocommerce_widget_layered_nav_filters_end', $args, $instance );
 
