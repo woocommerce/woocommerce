@@ -45,10 +45,12 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const ID_TYPE_DELETED_FROM_ORDERS_TABLE = 3;
 	public const ID_TYPE_DELETED_FROM_POSTS_TABLE  = 4;
 
-	public const BACKGROUND_SYNC_EVENT_HOOK                 = 'woocommerce_custom_orders_table_background_sync';
-	private const BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY = 'woocommerce_custom_orders_table_background_sync_scheduled';
-	public const BACKGROUND_SYNC_MODE_INTERVAL              = 'interval';
-	public const BACKGROUND_SYNC_MODE_CONTINUOUS            = 'continuous';
+	public const BACKGROUND_SYNC_MODE_OPTION     = 'woocommerce_custom_orders_table_background_sync_mode';
+	public const BACKGROUND_SYNC_INTERVAL_OPTION = 'woocommerce_custom_orders_table_background_sync_interval';
+	public const BACKGROUND_SYNC_MODE_INTERVAL   = 'interval';
+	public const BACKGROUND_SYNC_MODE_CONTINUOUS = 'continuous';
+	public const BACKGROUND_SYNC_MODE_OFF        = 'off';
+	public const BACKGROUND_SYNC_EVENT_HOOK      = 'woocommerce_custom_orders_table_background_sync';
 
 	/**
 	 * The data store object to use.
@@ -101,8 +103,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
-		self::add_action( 'shutdown', array( $this, 'handle_background_sync' ) );
-		self::add_action( self::BACKGROUND_SYNC_EVENT_HOOK, array( $this, 'maybe_enqueue_data_sync' ) );
+		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
+		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 2 );
+		self::add_filter( 'deleted_option', array( $this, 'process_deleted_option' ), 999 );
+		self::add_action( self::BACKGROUND_SYNC_EVENT_HOOK, array( $this, 'handle_interval_background_sync' ) );
+		if ( self::BACKGROUND_SYNC_MODE_CONTINUOUS === $this->get_background_sync_mode() ) {
+			self::add_action( 'shutdown', array( $this, 'handle_continuous_background_sync' ) );
+		}
 
 		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
@@ -197,48 +204,137 @@ class DataSynchronizer implements BatchProcessorInterface {
 	}
 
 	/**
+	 * Get the current background data sync mode.
+	 *
+	 * @return string
+	 */
+	public function get_background_sync_mode(): string {
+		$default = $this->data_sync_is_enabled() ? self::BACKGROUND_SYNC_MODE_INTERVAL : self::BACKGROUND_SYNC_MODE_OFF;
+
+		return get_option( self::BACKGROUND_SYNC_MODE_OPTION, $default );
+	}
+
+	/**
 	 * Is the background data sync between old and new tables currently enabled?
 	 *
 	 * @return bool
 	 */
 	public function background_sync_is_enabled(): bool {
-		$enabled = $this->data_sync_is_enabled();
+		$enabled_modes = array( self::BACKGROUND_SYNC_MODE_INTERVAL, self::BACKGROUND_SYNC_MODE_CONTINUOUS );
+		$mode          = $this->get_background_sync_mode();
 
-		/**
-		 * Toggle for background sync.
-		 *
-		 * This allows for background sync to be enabled even when real-time sync is disabled.
-		 *
-		 * @since 8.2.0
-		 *
-		 * @param bool $enabled True to enabled background sync.
-		 */
-		return apply_filters( 'woocommerce_custom_orders_table_background_sync_enabled', $enabled );
+		return in_array( $mode, $enabled_modes, true );
 	}
 
 	/**
-	 * Schedule an event to run background sync when the mode is not set to continuous.
+	 * Process an option change for specific keys.
+	 *
+	 * @param string $option_key The option key.
+	 * @param string $old_value  The previous value.
+	 * @param string $new_value  The new value.
+	 *
+	 * @return void
+	 */
+	private function process_updated_option( $option_key, $old_value, $new_value ) {
+		$sync_option_keys = array( self::ORDERS_DATA_SYNC_ENABLED_OPTION, self::BACKGROUND_SYNC_MODE_OPTION );
+		if ( ! in_array( $option_key, $sync_option_keys, true ) || $new_value === $old_value ) {
+			return;
+		}
+
+		if ( self::BACKGROUND_SYNC_MODE_OPTION === $option_key ) {
+			$mode = $new_value;
+		} else {
+			$mode = $this->get_background_sync_mode();
+		}
+		switch ( $mode ) {
+			case self::BACKGROUND_SYNC_MODE_INTERVAL:
+				$this->schedule_background_sync();
+				break;
+
+			case self::BACKGROUND_SYNC_MODE_CONTINUOUS:
+			case self::BACKGROUND_SYNC_MODE_OFF:
+			default:
+				$this->unschedule_background_sync();
+				break;
+		}
+
+		if ( self::ORDERS_DATA_SYNC_ENABLED_OPTION === $option_key ) {
+			if ( ! $this->check_orders_table_exists() ) {
+				$this->create_database_tables();
+			}
+
+			if ( $this->data_sync_is_enabled() ) {
+				$this->batch_processing_controller->enqueue_processor( self::class );
+			} else {
+				$this->batch_processing_controller->remove_processor( self::class );
+			}
+		}
+	}
+
+	/**
+	 * Process an option change when the key didn't exist before.
+	 *
+	 * @param string $option_key The option key.
+	 * @param string $value      The new value.
+	 *
+	 * @return void
+	 */
+	private function process_added_option( $option_key, $value ) {
+		$this->process_updated_option( $option_key, false, $value );
+	}
+
+	/**
+	 * Process an option deletion for specific keys.
+	 *
+	 * @param string $option_key The option key.
+	 *
+	 * @return void
+	 */
+	private function process_deleted_option( $option_key ) {
+		if ( self::BACKGROUND_SYNC_MODE_OPTION !== $option_key ) {
+			return;
+		}
+
+		$this->unschedule_background_sync();
+		$this->batch_processing_controller->remove_processor( self::class );
+	}
+
+	/**
+	 * Get the time interval, in seconds, between background syncs.
+	 *
+	 * @return int
+	 */
+	public function get_background_sync_interval(): int {
+		$interval = filter_var(
+			get_option( self::BACKGROUND_SYNC_INTERVAL_OPTION, HOUR_IN_SECONDS ),
+			FILTER_VALIDATE_INT,
+			array(
+				'options' => array(
+					'default' => HOUR_IN_SECONDS,
+				),
+			)
+		);
+
+		return $interval;
+	}
+
+	/**
+	 * Schedule an event to run background sync when the mode is set to interval.
 	 *
 	 * @return void
 	 */
 	private function schedule_background_sync() {
-		if ( ! $this->background_sync_is_scheduled() ) {
-			$interval = $this->get_background_sync_interval();
+		$interval = $this->get_background_sync_interval();
 
-			as_schedule_single_action(
-				time() + $interval,
-				self::BACKGROUND_SYNC_EVENT_HOOK,
-				array(),
-				'',
-				true
-			);
-
-			set_transient(
-				self::BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY,
-				'yes',
-				$this->get_background_sync_interval()
-			);
-		}
+		// Calling Action Scheduler directly because WC_Action_Queue doesn't support the unique parameter yet.
+		as_schedule_recurring_action(
+			time() + $interval,
+			$interval,
+			self::BACKGROUND_SYNC_EVENT_HOOK,
+			array(),
+			'',
+			true
+		);
 	}
 
 	/**
@@ -247,109 +343,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @return void
 	 */
 	private function unschedule_background_sync() {
-		if ( $this->background_sync_is_scheduled() ) {
-			WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
-
-			set_transient(
-				self::BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY,
-				'no',
-				0 // No expiration since we're intentionally unscheduling and the cache shouldn't change until we add a schedule.
-			);
-		}
+		WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
 	}
 
 	/**
-	 * Check if there is a current background sync event.
-	 *
-	 * This has a caching layer because the query to find scheduled actions is potentially expensive if it
-	 * gets run on every request, which is currently the case with `handle_background_sync()`.
-	 *
-	 * @return bool
-	 */
-	private function background_sync_is_scheduled() {
-		$is_scheduled = get_transient( self::BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY );
-
-		if ( false === $is_scheduled ) {
-			$scheduled_action = WC()->queue()->search(
-				array(
-					'hook'   => self::BACKGROUND_SYNC_EVENT_HOOK,
-					'status' => array( 'in-progress', 'pending' ),
-				),
-				'ids'
-			);
-
-			$is_scheduled = count( $scheduled_action ) > 0 ? 'yes' : 'no';
-
-			set_transient(
-				self::BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY,
-				$is_scheduled,
-				$this->get_background_sync_interval()
-			);
-		}
-
-		return filter_var( $is_scheduled, FILTER_VALIDATE_BOOLEAN );
-	}
-
-	/**
-	 * Get the time interval, in seconds, between background syncs.
-	 *
-	 * @return int
-	 */
-	private function get_background_sync_interval() {
-		/**
-		 * Modify the time interval between background syncs.
-		 *
-		 * Note that the background sync mode must first be set to 'interval' using the
-		 * 'woocommerce_custom_orders_table_background_sync_mode' filter hook before this will work.
-		 *
-		 * @since 8.2.0
-		 *
-		 * @param int $interval The time interval, in seconds, between background syncs. Defaults to 3600 (1 hour).
-		 */
-		return apply_filters( 'woocommerce_custom_orders_table_background_sync_interval', HOUR_IN_SECONDS );
-	}
-
-	/**
-	 * Keep background sync running, if it's enabled.
+	 * Callback to check for pending syncs and enqueue the background data sync processor when in interval mode.
 	 *
 	 * @return void
 	 */
-	private function handle_background_sync() {
-		if ( ! $this->background_sync_is_enabled() ) {
+	private function handle_interval_background_sync() {
+		if ( self::BACKGROUND_SYNC_MODE_INTERVAL !== $this->get_background_sync_mode() ) {
 			$this->unschedule_background_sync();
-			return;
-		}
-
-		/**
-		 * Modify the background sync mode.
-		 *
-		 * @since 8.2.0
-		 *
-		 * @param string $mode The mode for background sync. 'interval' or 'continuous'. Defaults to 'interval'.
-		 */
-		$mode = apply_filters( 'woocommerce_custom_orders_table_background_sync_mode', self::BACKGROUND_SYNC_MODE_INTERVAL );
-
-		switch ( $mode ) {
-			case self::BACKGROUND_SYNC_MODE_INTERVAL:
-			default:
-				$this->schedule_background_sync();
-				break;
-
-			case self::BACKGROUND_SYNC_MODE_CONTINUOUS:
-				// This method already checks if a processor is enqueued before adding it to avoid duplication.
-				$this->batch_processing_controller->enqueue_processor( self::class );
-				$this->unschedule_background_sync();
-				break;
-		}
-	}
-
-	/**
-	 * Callback to check for pending syncs and enqueue the synchronizer when background sync is in interval mode.
-	 *
-	 * @return void
-	 */
-	private function maybe_enqueue_data_sync() {
-		if ( ! $this->background_sync_is_enabled() ) {
 			return;
 		}
 
@@ -357,8 +361,21 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( $pending_count > 0 ) {
 			$this->batch_processing_controller->enqueue_processor( self::class );
 		}
+	}
 
-		delete_transient( self::BACKGROUND_SYNC_SCHEDULE_STATUS_CACHE_KEY );
+	/**
+	 * Callback to keep the background data sync processor enqueued when in continuous mode.
+	 *
+	 * @return void
+	 */
+	private function handle_continuous_background_sync() {
+		if ( self::BACKGROUND_SYNC_MODE_CONTINUOUS !== $this->get_background_sync_mode() ) {
+			$this->batch_processing_controller->remove_processor( self::class );
+			return;
+		}
+
+		// This method already checks if a processor is enqueued before adding it to avoid duplication.
+		$this->batch_processing_controller->enqueue_processor( self::class );
 	}
 
 	/**

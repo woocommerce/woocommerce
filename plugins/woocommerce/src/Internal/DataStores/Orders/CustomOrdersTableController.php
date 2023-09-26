@@ -119,7 +119,6 @@ class CustomOrdersTableController {
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
-		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_data_sync_option_changed' ), 10, 1 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
@@ -331,33 +330,6 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Handler for the all settings updated hook.
-	 *
-	 * @param string $feature_id Feature ID.
-	 */
-	private function handle_data_sync_option_changed( string $feature_id ) {
-		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION !== $feature_id ) {
-			return;
-		}
-		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
-
-		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			$this->data_synchronizer->create_database_tables();
-		}
-
-		// Enabling/disabling the sync implies starting/stopping it too, if needed.
-		// We do this check here, and not in process_pre_update_option, so that if for some reason
-		// the setting is enabled but no sync is in process, sync will start by just saving the
-		// settings even without modifying them (and the opposite: sync will be stopped if for
-		// some reason it was ongoing while it was disabled).
-		if ( $data_sync_is_enabled ) {
-			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
-		} else {
-			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
-		}
-	}
-
-	/**
 	 * Callback to trigger a sync immediately by clicking a button on the Features screen.
 	 *
 	 * @return void
@@ -546,7 +518,7 @@ class CustomOrdersTableController {
 			);
 		}
 
-		if ( ! $sync_enabled && $this->data_synchronizer->background_sync_is_enabled() ) {
+		if ( $this->data_synchronizer->background_sync_is_enabled() ) {
 			$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
 		}
 
