@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
@@ -59,6 +59,14 @@ export const ToneOfVoice = ( {
 			? choices[ 0 ].key
 			: context.toneOfVoice.choice
 	);
+
+	const onContinue = () => {
+		sendEvent( {
+			type: 'TONE_OF_VOICE_COMPLETE',
+			payload: sound,
+		} );
+	};
+
 	return (
 		<div>
 			<ProgressBar
@@ -82,6 +90,19 @@ export const ToneOfVoice = ( {
 							'woocommerce'
 						) }
 					</h1>
+					{ context.apiCallLoader.hasErrors && (
+						<Notice
+							className="woocommerce-cys-design-with-ai__error-notice"
+							isDismissible={ false }
+							status="error"
+						>
+							Oops! We encountered a problem while generating your
+							store.{ ' ' }
+							<Button onClick={ onContinue } variant="tertiary">
+								Please try again
+							</Button>
+						</Notice>
+					) }
 					<div className="choices">
 						{ choices.map( ( { title, subtitle, key } ) => {
 							return (
@@ -99,16 +120,7 @@ export const ToneOfVoice = ( {
 							);
 						} ) }
 					</div>
-
-					<Button
-						variant="primary"
-						onClick={ () => {
-							sendEvent( {
-								type: 'TONE_OF_VOICE_COMPLETE',
-								payload: sound,
-							} );
-						} }
-					>
+					<Button variant="primary" onClick={ onContinue }>
 						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</div>
