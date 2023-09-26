@@ -48,6 +48,7 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		const Delete_WooCommerce = 'Delete WooCommerce';
 		const WooCommerce_was_successfully_deleted =
 			'WooCommerce was successfully deleted.';
+		const Select_WooCommerce = 'Select WooCommerce';
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.getByLabel( Delete_WooCommerce ).click();
@@ -55,22 +56,27 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 			page.getByText( WooCommerce_was_successfully_deleted )
 		).toBeVisible();
 		await expect(
-			page.getByRole( 'rowheader', { name: 'Select WooCommerce' } )
+			page.getByRole( 'rowheader', { name: Select_WooCommerce } )
 		).not.toBeVisible();
 	} );
 
 	await test.step( `Install WooCommerce version to be tested`, async () => {
+		const Upload_Plugin = 'Upload Plugin';
+		const Plugin_zip_file = 'Plugin zip file';
+		const Install_Now = 'Install Now';
+		const Activate_Plugin = 'Activate Plugin';
+
 		await page.goto( '/wp-admin/plugin-install.php' );
-		await page.getByRole( 'button', { name: 'Upload Plugin' } ).click();
-		await page.getByLabel( 'Plugin zip file' ).setInputFiles( zipPath );
+		await page.getByRole( 'button', { name: Upload_Plugin } ).click();
+		await page.getByLabel( Plugin_zip_file ).setInputFiles( zipPath );
 		const responsePromise = page.waitForResponse(
 			'**/wp-admin/update.php?action=upload-plugin'
 		);
-		await page.getByRole( 'button', { name: 'Install Now' } ).click();
+		await page.getByRole( 'button', { name: Install_Now } ).click();
 		const uploadResponse = await responsePromise;
 		expect( uploadResponse.ok() ).toBeTruthy();
 		await expect(
-			page.getByRole( 'link', { name: 'Activate Plugin' } )
+			page.getByRole( 'link', { name: Activate_Plugin } )
 		).toBeVisible();
 	} );
 
