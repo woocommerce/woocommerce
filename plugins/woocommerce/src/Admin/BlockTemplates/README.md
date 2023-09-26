@@ -4,10 +4,66 @@ The `Automattic\WooCommerce\Admin\BlockTemplates` namespace contains interfaces 
 
 ## Usage
 
-Instances that implement these interfaces are created using more specific APIs,
+Instances that implement the interfaces and fire the hooks in ths namespace are created using more specific APIs,
 such as:
 
--  [TODO](TODO)
+-  [Product Editor Templates](../Features/ProductBlockEditor/ProductTemplates/README.md)
+
+Please see the documentation for those APIs for more information.
+
+## Hooks
+
+### `woocommerce_block_template_area_{template_area}_after_add_block_{block_id}`
+
+Fires after a specific block is added to any template in a specific area.
+
+The dynamic portion of the hook name, `$template_area`, refers to the area of the template the block was added to.
+
+The dynamic portion of the hook name, `$block_id`, refers to the ID of the block that was added.
+
+#### Parameters
+
+##### `BlockInterface $block`
+
+The block that was added.
+
+### `woocommerce_block_template_after_add_block`
+
+Fires after a block is added to a template.
+
+Unless you need to perform an action after any block is added to any template, you should use the more specific `woocommerce_block_template_area_{template_area}_after_add_block_{block_id}` hook instead for better performance.
+
+#### Parameters
+
+##### `BlockInterface $block`
+
+The block that was added.
+
+### `woocommerce_block_template_area_{template_area}_after_remove_block_{block_id}`
+
+Fires after a specific block is removed from any template in a specific area.
+
+The dynamic portion of the hook name, `$template_area`, refers to the area of the template the block was removed from.
+
+The dynamic portion of the hook name, `$block_id`, refers to the ID of the block that was removed.
+
+#### Parameters
+
+##### `BlockInterface $block`
+
+The block that was removed.
+
+### `woocommerce_block_template_after_remove_block`
+
+Fires after a block is removed from a template.
+
+Unless you need to perform an action after any block is removed from any template, you should use the more specific `woocommerce_block_template_area_{template_area}_after_remove_block_{block_id}` hook instead for better performance.
+
+#### Parameters
+
+##### `BlockInterface $block`
+
+The block that was removed.
 
 ## Interfaces
 
