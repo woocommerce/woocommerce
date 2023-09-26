@@ -13,6 +13,7 @@ import {
 } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import { LOCALE } from '../../utils/admin-settings';
+import { Subscription } from '../components/my-subscriptions/types';
 
 interface ProductGroup {
 	id: string;
@@ -59,6 +60,12 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 		} );
 }
 
+async function fetchSubscriptions(): Promise< Array< Subscription > > {
+	const url = '/wc/v3/marketplace/subscriptions';
+
+	return await apiFetch( { path: url.toString() } );
+}
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -77,6 +84,7 @@ const appendURLParams = (
 export {
 	fetchDiscoverPageData,
 	fetchCategories,
+	fetchSubscriptions,
 	ProductGroup,
 	appendURLParams,
 };

@@ -1,8 +1,32 @@
 export type Subscription = {
-	name: string;
-	status: string;
-	expiry: string;
-	autoRenew: boolean;
-	version: string;
-	activated: boolean;
+	product_key: string;
+	product_id: number;
+	product_name: string;
+	product_url: string;
+	key_type: string;
+	key_type_label: string;
+	autorenew: boolean;
+	connections: string[];
+	legacy_connections: string[];
+	shares: SubscriptionShare[];
+	lifetime: boolean;
+	expires: number;
+	expired: boolean;
+	expiring: boolean;
+	sites_max: number;
+	sites_active: number;
+	maxed: boolean;
+	order_id: number;
+	product_keys_all: string[];
+	product_status: string;
+	active: boolean;
 };
+
+export interface SubscriptionShare {
+	share_id: string;
+	product_key: string;
+	user_id: string;
+	subscription_item_id: string;
+	status: string;
+	created: string;
+}
