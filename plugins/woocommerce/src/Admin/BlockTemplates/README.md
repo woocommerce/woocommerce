@@ -107,6 +107,8 @@ Get the formatted template.
 
 ### BlockContainerInterface
 
+#### Methods
+
 ##### `get_block( string $block_id ): ?BlockInterface`
 
 Get a block by ID.
@@ -129,6 +131,8 @@ Get the block configuration as a formatted template.
 
 ### ContainerInterface
 
+#### Methods
+
 ##### `get_block( string $block_id ): ?BlockInterface`
 
 Get a block by ID.
@@ -150,6 +154,8 @@ Get the root template that the container belongs to.
 Get the container as a formatted template.
 
 ### BlockInterface
+
+#### Methods
 
 ##### `get_name(): string`
 
