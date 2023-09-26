@@ -1,4 +1,5 @@
 const defaultConfig = require( './playwright.config' );
+const defaultUse = defaultConfig.use;
 
 // Global setup will be done through the 'Setup' project, not through the `globalSetup` property
 delete defaultConfig[ 'globalSetup' ];
@@ -13,6 +14,10 @@ const config = {
 			name: 'Setup',
 			testDir: './',
 			testMatch: 'ci-release.global-setup.js',
+			use: {
+				...defaultUse,
+				trace: 'on', // todo remove
+			},
 		},
 		{
 			name: 'API tests',

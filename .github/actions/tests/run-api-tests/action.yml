@@ -17,7 +17,7 @@ runs:
     using: composite
     steps:
         - name: Download and install Chromium browser.
-          if: ${{ env.API_BASE_URL && ! contains( env.API_BASE_URL, 'localhost' ) }}
+          if: ${{ env.UPDATE_WC }}
           shell: bash
           working-directory: plugins/woocommerce
           run: pnpm exec playwright install chromium
