@@ -16,6 +16,8 @@ class Woo_AI_Settings {
 
 	/**
 	 * Plugin instance.
+	 * 
+	 * // Unrelated Changede 
 	 *
 	 * @var Woo_AI_Settings
 	 */
