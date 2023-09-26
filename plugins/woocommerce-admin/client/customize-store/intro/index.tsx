@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -17,6 +18,7 @@ import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 
 import './intro.scss';
+import { set } from 'lodash';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -32,6 +34,25 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: { themeCards },
 	} = context;
+
+	const [ networkStatus, setNetworkStatus ] = useState( 'online' );
+
+	const setOfflineBannerIamge = () => {
+		setNetworkStatus( 'offline' );
+	};
+
+	const removeOfflineBannerImage = () => {
+		setNetworkStatus( 'online' );
+	};
+
+	useEffect( () => {
+		window.addEventListener( 'offline', setOfflineBannerIamge );
+		window.addEventListener( 'online', removeOfflineBannerImage );
+		return () => {
+			window.addEventListener( 'offline', setOfflineBannerIamge );
+			window.addEventListener( 'online', removeOfflineBannerImage );
+		};
+	}, [] );
 
 	return (
 		<>
@@ -67,7 +88,14 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</div>
 
 				<div className="woocommerce-customize-store-main">
-					<div className="woocommerce-customize-store-banner">
+					<div
+						className={ classNames(
+							'woocommerce-customize-store-banner',
+							{
+								'offline-banner': networkStatus === 'offline',
+							}
+						) }
+					>
 						<div
 							className={ `woocommerce-customize-store-banner-content` }
 						>
