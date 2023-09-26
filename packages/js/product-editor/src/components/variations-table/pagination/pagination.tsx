@@ -43,6 +43,8 @@ export function Pagination( {
 		>
 			<div className="woocommerce-product-variations-pagination__info">
 				{ sprintf(
+					// eslint-disable-next-line max-len
+					// translators: Viewing 1-5 of 100 items. First two %ds are a range of items that are shown on the screen. The last %d is the total amount of items that exist.
 					__( 'Viewing %d-%d of %d items', 'woocommerce' ),
 					paginationProps.start,
 					paginationProps.end,
