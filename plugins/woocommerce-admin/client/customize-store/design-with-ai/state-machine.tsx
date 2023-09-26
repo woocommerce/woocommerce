@@ -75,6 +75,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
+				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
 				defaultColorPalette: {
 					default: 'Ancient Bronze',
 				} as ColorPaletteResponse,
