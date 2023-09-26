@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -67,6 +68,10 @@ const redirectToWooHome = () => {
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
+const redirectToThemes = () => {
+	window.location.href = addQueryArgs( 'themes.php' );
+};
+
 const markTaskComplete = async () => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
@@ -87,6 +92,7 @@ const browserPopstateHandler =
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
+	redirectToThemes,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -199,7 +205,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
-					target: 'appearanceTask',
+					actions: 'redirectToThemes',
 				},
 			},
 		},
