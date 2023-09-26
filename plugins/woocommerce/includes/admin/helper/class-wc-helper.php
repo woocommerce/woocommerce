@@ -59,6 +59,7 @@ class WC_Helper {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-subscriptions-api.php';
 	}
 
 	/**
@@ -112,14 +113,11 @@ class WC_Helper {
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
-		$site_id                   = absint( $auth['site_id'] );
 		$subscriptions             = self::get_subscriptions();
 		$updates                   = WC_Helper_Updater::get_update_data();
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
 		foreach ( $subscriptions as &$subscription ) {
-			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
-
 			$subscription['activate_url'] = add_query_arg(
 				array(
 					'page'                  => 'wc-addons',
@@ -1302,6 +1300,12 @@ class WC_Helper {
 		$data = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( empty( $data ) || ! is_array( $data ) ) {
 			$data = array();
+		} else {
+			$auth = WC_Helper_Options::get( 'auth' );
+			$site_id = absint( $auth['site_id'] );
+			foreach ( $data as $key => $subscription ) {
+				$data[ $key ]['active'] = in_array( $site_id, $subscription['connections'] );
+			}
 		}
 
 		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
