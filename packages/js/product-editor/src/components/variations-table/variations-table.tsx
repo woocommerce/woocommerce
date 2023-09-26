@@ -14,14 +14,7 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	ListItem,
-	Sortable,
-	Tag,
-	PaginationPageSizePicker,
-	PaginationPageArrowsWithPicker,
-	usePagination,
-} from '@woocommerce/components';
+import { ListItem, Sortable, Tag } from '@woocommerce/components';
 import {
 	useContext,
 	useState,
@@ -53,6 +46,7 @@ import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
 import HiddenIcon from '../../icons/hidden-icon';
+import { Pagination } from './pagination';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -158,13 +152,6 @@ export const VariationsTable = forwardRef<
 		},
 		[ productId ]
 	);
-
-	const paginationProps = usePagination( {
-		totalCount,
-		defaultPerPage: DEFAULT_VARIATION_PER_PAGE_OPTION,
-		onPageChange: setCurrentPage,
-		onPerPageChange: setPerPage,
-	} );
 
 	const {
 		updateProductVariation,
@@ -524,23 +511,12 @@ export const VariationsTable = forwardRef<
 			</Sortable>
 
 			{ totalCount > 5 && (
-				<div className="woocommerce-product-variations__footer woocommerce-pagination">
-					<div>
-						{ sprintf(
-							__( 'Viewing %d-%d of %d items', 'woocommerce' ),
-							paginationProps.start,
-							paginationProps.end,
-							totalCount
-						) }
-					</div>
-					<PaginationPageArrowsWithPicker { ...paginationProps } />
-					<PaginationPageSizePicker
-						{ ...paginationProps }
-						total={ totalCount }
-						perPageOptions={ [ 5, 10, 25 ] }
-						label=""
-					/>
-				</div>
+				<Pagination
+					className="woocommerce-product-variations__footer"
+					totalCount={ totalCount }
+					onPageChange={ setCurrentPage }
+					onPerPageChange={ setPerPage }
+				/>
 			) }
 		</div>
 	);

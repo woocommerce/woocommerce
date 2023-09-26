@@ -1,0 +1,21 @@
+.woocommerce-product-variations-pagination {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: $gap;
+	width: 100%;
+
+	&__info,
+	&__current-page,
+	&__page-size {
+		display: flex;
+		align-items: center;
+	}
+
+	&__current-page {
+		justify-content: center;
+	}
+
+	&__page-size {
+		justify-content: flex-end;
+	}
+}
