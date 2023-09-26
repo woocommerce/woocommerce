@@ -24,9 +24,7 @@ function Search(): JSX.Element {
 	const query = useQuery();
 
 	useEffect( () => {
-		if ( query.term ) {
-			setSearchTerm( query.term );
-		}
+		setSearchTerm( query.term ?? '' );
 	}, [ query.term ] );
 
 	const runSearch = () => {
@@ -34,7 +32,7 @@ function Search(): JSX.Element {
 
 		// When the search term changes, we reset the category on purpose.
 		navigateTo( {
-			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+			url: getNewPath( { term, category: null, tab: 'search' } ),
 		} );
 
 		return [];

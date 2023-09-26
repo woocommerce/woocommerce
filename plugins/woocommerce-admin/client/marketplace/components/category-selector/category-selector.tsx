@@ -49,6 +49,9 @@ export default function CategorySelector(): JSX.Element {
 	}, [ query, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
+		if ( selectedTab === '' ) {
+			return;
+		}
 		setIsLoading( true );
 
 		fetchCategories( selectedTab )
@@ -79,7 +82,7 @@ export default function CategorySelector(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [] );
+	}, [ selectedTab ] );
 
 	function mobileCategoryDropdownLabel() {
 		const allCategoriesText = __( 'All Categories', 'woocommerce' );

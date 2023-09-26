@@ -22,6 +22,7 @@ export default function ProductListContent( props: {
 					product={ {
 						title: product.title,
 						image: product.image,
+						type: product.type,
 						icon: product.icon,
 						vendorName: product.vendorName,
 						vendorUrl: product.vendorUrl
