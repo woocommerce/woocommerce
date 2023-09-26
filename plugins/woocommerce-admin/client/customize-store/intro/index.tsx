@@ -127,14 +127,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							{ __( 'Browse all themes', 'woocommerce' ) }
 						</button>
 					</div>
-
-					<button
-						onClick={ () =>
-							sendEvent( { type: 'SELECTED_ACTIVE_THEME' } )
-						}
-					>
-						Assembler Hub
-					</button>
 				</div>
 			</div>
 		</>
