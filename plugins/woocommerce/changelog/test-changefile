@@ -1,6 +1,5 @@
 Significance: patch
 Type: dev
-Comment: What happens if there's both a comment and a changelog entry?
-
-Can we make this invalid?  Yep!
+Comment: This is a comment
+Type: fix
 
