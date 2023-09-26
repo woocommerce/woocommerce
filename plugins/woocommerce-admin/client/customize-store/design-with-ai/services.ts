@@ -7,7 +7,7 @@ import { __experimentalRequestJetpackToken as requestJetpackToken } from '@wooco
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { Sender, assign, createMachine } from 'xstate';
+import { Sender, assign, createMachine, actions } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
@@ -26,6 +26,8 @@ import {
 	getTemplatePatterns,
 } from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+
+const { escalate } = actions;
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -164,7 +166,13 @@ export const queryAiEndpoint = createMachine(
 				always: [
 					{
 						cond: ( context ) => context.retryCount >= 3,
-						target: 'failed',
+						target: 'querying',
+						actions: [
+							// Throw an error to be caught by the parent machine.
+							escalate( () => ( {
+								data: 'Max retries exceeded',
+							} ) ),
+						],
 					},
 					{
 						target: 'querying',
@@ -173,12 +181,6 @@ export const queryAiEndpoint = createMachine(
 						} ),
 					},
 				],
-			},
-			failed: {
-				type: 'final',
-				data: {
-					result: 'failed',
-				},
 			},
 			success: {
 				type: 'final',
