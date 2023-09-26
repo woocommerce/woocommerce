@@ -1,5 +1,6 @@
-Significance: minor
+Significance: patch
 Type: dev
+Comment: What happens if there's both a comment and a changelog entry?
 
-!What # happens when a message ' is 
-on multiple lines?
+Can we make this invalid?  Yep!
+
