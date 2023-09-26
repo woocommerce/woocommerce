@@ -483,6 +483,10 @@ class CustomOrdersTableController {
 		$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
 		$sync_message     = array();
 
+		if ( ! $sync_enabled && $this->data_synchronizer->background_sync_is_enabled() ) {
+			$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
+		}
+
 		if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
 			$sync_message[] = sprintf(
 				// translators: %d: number of pending orders.
@@ -516,10 +520,6 @@ class CustomOrdersTableController {
 					number_format_i18n( $sync_status['current_pending_count'] )
 				)
 			);
-		}
-
-		if ( $this->data_synchronizer->background_sync_is_enabled() ) {
-			$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
 		}
 
 		return array(
