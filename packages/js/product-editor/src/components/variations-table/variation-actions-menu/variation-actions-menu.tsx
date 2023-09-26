@@ -46,6 +46,7 @@ export function VariationActionsMenu( {
 						<MenuItem
 							href={ selection.permalink }
 							target="_blank"
+							rel="noreferrer"
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
