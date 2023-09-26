@@ -201,7 +201,8 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	private function render_image( $attributes, $item, string $image_url ) {
-		$style = sprintf( 'object-fit: %s;', esc_attr( $attributes['imageFit'] ) );
+		$style   = sprintf( 'object-fit: %s;', esc_attr( $attributes['imageFit'] ) );
+		$img_alt = $attributes['alt'] ?: $this->get_item_title( $item );
 
 		if ( $this->hasFocalPoint( $attributes ) ) {
 			$style .= sprintf(
@@ -214,7 +215,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		if ( ! empty( $image_url ) ) {
 			return sprintf(
 				'<img alt="%1$s" class="wc-block-%2$s__background-image" src="%3$s" style="%4$s" />',
-				wp_kses_post( $attributes['alt'] ?: $this->get_item_title( $item ) ),
+				esc_attr( $img_alt ),
 				$this->block_name,
 				esc_url( $image_url ),
 				esc_attr( $style )
