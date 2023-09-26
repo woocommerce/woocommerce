@@ -1,6 +1,5 @@
 name: Run API tests
 description: Runs the WooCommerce Core API tests and generates Allure report.
-permissions: {}
 
 inputs:
     report-name:
