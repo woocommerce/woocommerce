@@ -1,10 +1,6 @@
 # Common tasks
 
-> ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
-
-## Adding a new field to the product editor (end-to-end)
-
-_TODO: Describe how to add a new field, including adding it to the REST API._
+> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
 ## Adding a group/section/field next to an existing one
 
@@ -33,7 +29,3 @@ add_action( 'woocommerce_block_template_area_product-form_after_add_block_produc
 
 Result:
 ![Adding field next to other field](https://woocommerce.files.wordpress.com/2023/09/adding-field-next-to-other-field.png)
-
-## Hiding a group/section/field
-
-## Reordering groups/sections/fields
