@@ -699,6 +699,7 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( wc_get_container()->get( BatchProcessingController::class )::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) );
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$handler_method->invoke( $this->sut );
