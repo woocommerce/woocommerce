@@ -12,14 +12,28 @@
 	padding: 1rem;
 	width: 100%;
 
-	h1 {
+	.edit-site-site-hub__view-mode-toggle-container {
+		background-color: transparent;
+		height: 32px;
+		width: 32px;
+	}
+	
+	.edit-site-site-icon {
+		line-height: 0; 
+
+		svg {
+			height: 32px;
+			width: 32px;
+		}
+	}
+
+	.edit-site-site-hub__site-title {
 		font-size: 0.8125rem;
 		font-weight: 500;
 		margin: 0;
-		padding: 0;
-		line-height: 1.5rem;
+		padding: 0 0 0 0.75rem;
+		line-height: 2rem;
 	}
-
 }
 
 .woocommerce-customize-store-container {
@@ -74,15 +88,12 @@
 }
 
 .woocommerce-customize-store-banner {
-	background: var(--woo-purple-woo-purple-0, #f2edff);
-	background-image: url(../assets/images/intro-banner-background.svg);
-	background-repeat: no-repeat;
-	background-position: bottom right;
+	background: rbga(242, 237, 255, 0.60) url(../assets/images/intro-banner-background.svg) no-repeat center right;
 	background-size: contain;
 	border-radius: 4px;
 	display: flex;
 	margin: 1.25rem 0 3.375rem;
-	min-height: 343px;
+	min-height: 248px;
 	padding: 70px 0;
 	width: 820px;
 

@@ -4,11 +4,17 @@
 
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableMotion as motion,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreComponent } from '../types';
+import { SiteHub } from '../assembler-hub/site-hub';
 
 import './intro.scss';
 
@@ -30,7 +36,14 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	return (
 		<>
 			<div className="woocommerce-customize-store-header">
-				<h1>{ 'Site title' }</h1>
+				<SiteHub
+					as={ motion.div }
+					variants={ {
+						view: { x: 0 },
+					} }
+					isTransparent={ false }
+					className="woocommerce-customize-store__content"
+				/>
 			</div>
 
 			<div className="woocommerce-customize-store-container">
