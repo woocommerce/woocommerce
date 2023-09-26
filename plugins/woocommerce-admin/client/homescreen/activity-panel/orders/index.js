@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -16,8 +16,9 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ORDERS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -27,6 +28,7 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getCountryCode } from '~/dashboard/utils';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -49,10 +51,7 @@ const renderEmptyCard = () => {
 					🎉
 				</span>
 				<H id="woocommerce-order-empty-message">
-					{ __(
-						'You’ve fulfilled all your orders',
-						'woocommerce-admin'
-					) }
+					{ __( 'You’ve fulfilled all your orders', 'woocommerce' ) }
 				</H>
 			</ActivityCard>
 			<Link
@@ -61,41 +60,43 @@ const renderEmptyCard = () => {
 				className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce-admin' ) }
+				{ __( 'Manage all orders', 'woocommerce' ) }
 			</Link>
 		</>
 	);
 };
 
-function renderOrders( orders ) {
+function renderOrders( orders, customers, getFormattedOrderTotal ) {
 	if ( orders.length === 0 ) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( order ) => {
-		const { first_name: firstName, last_name: lastName } =
-			order.customer || {};
+	const getCustomerString = ( customer ) => {
+		const { name } = customer || {};
 
-		if ( ! firstName && ! lastName ) {
+		if ( ! name ) {
 			return '';
 		}
 
-		const name = [ firstName, lastName ].join( ' ' );
 		return `{{customerLink}}${ name }{{/customerLink}}`;
 	};
 
 	const orderCardTitle = ( order ) => {
-		const { id: orderId, number: orderNumber, customer } = order;
+		const {
+			id: orderId,
+			number: orderNumber,
+			customer_id: customerId,
+		} = order;
+		const customer =
+			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
-		if ( customer && customer.customer_id ) {
+		if ( customer && customer.id ) {
 			customerUrl = window.wcAdminFeatures.analytics
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
-						customers: customer.customer_id,
+						customers: customer.id,
 				  } )
-				: getAdminLink(
-						'user-edit.php?user_id=' + customer.customer_id
-				  );
+				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
 		return (
@@ -104,11 +105,11 @@ function renderOrders( orders ) {
 					mixedString: sprintf(
 						__(
 							'{{orderLink}}Order #%(orderNumber)s{{/orderLink}} %(customerString)s',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						{
 							orderNumber,
-							customerString: getCustomerString( order ),
+							customerString: getCustomerString( customer ),
 						}
 					),
 					components: {
@@ -151,10 +152,10 @@ function renderOrders( orders ) {
 	orders.forEach( ( order ) => {
 		const {
 			date_created_gmt: dateCreatedGmt,
-			products,
+			line_items: lineItems,
 			id: orderId,
 		} = order;
-		const productsCount = products ? products.length : 0;
+		const productsCount = lineItems ? lineItems.length : 0;
 
 		cards.push(
 			<ActivityCard
@@ -178,12 +179,17 @@ function renderOrders( orders ) {
 									'%d product',
 									'%d products',
 									productsCount,
-									'woocommerce-admin'
+									'woocommerce'
 								),
 								productsCount
 							) }
 						</span>
-						<span>{ order.total_formatted }</span>
+						<span>
+							{ getFormattedOrderTotal(
+								order.total,
+								order.currency
+							) }
+						</span>
 					</div>
 				}
 			>
@@ -203,7 +209,7 @@ function renderOrders( orders ) {
 				onClick={ () => recordOrderEvent( 'orders_manage' ) }
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce-admin' ) }
+				{ __( 'Manage all orders', 'woocommerce' ) }
 			</Link>
 		</>
 	);
@@ -218,56 +224,86 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			_fields: [
 				'id',
 				'number',
+				'currency',
 				'status',
-				'total_formatted',
+				'total',
 				'customer',
-				'products',
+				'line_items',
 				'customer_id',
 				'date_created_gmt',
 			],
 		} ),
 		[ orderStatuses ]
 	);
-	const { orders = [], isRequesting, isError } = useSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
+
+	const currencyContext = useContext( CurrencyContext );
+
+	const getFormattedOrderTotal = ( total, countryState ) => {
+		if ( ! countryState ) {
+			return null;
+		}
+
+		const country = getCountryCode( countryState );
+		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+			'onboarding',
+			{}
 		);
+		const currency = currencyContext.getDataForCountry(
+			country,
+			localeInfo,
+			currencySymbols
+		);
+		currencyContext.setCurrency( currency );
+		return currencyContext.formatAmount( total );
+	};
+
+	const {
+		orders = [],
+		isRequesting,
+		isError,
+		customerItems,
+	} = useSelect( ( select ) => {
+		const { getOrders, hasFinishedResolution, getOrdersError } =
+			select( ORDERS_STORE_NAME );
+		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+		const { getItems } = select( ITEMS_STORE_NAME );
 
 		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
 			return { isRequesting: false };
 		}
 
 		/* eslint-disable @wordpress/no-unused-vars-before-return */
-		const orderItems = getItems( 'orders', actionableOrdersQuery, null );
+		const actionableOrders = getOrders( actionableOrdersQuery, null );
 
-		const isRequestingActionable = isResolving( 'getItems', [
-			'orders',
+		const isRequestingActionable = hasFinishedResolution( 'getOrders', [
 			actionableOrdersQuery,
 		] );
 
 		if (
 			isRequestingActionable ||
 			unreadOrdersCount === null ||
-			orderItems === null
+			actionableOrders === null
 		) {
 			return {
-				isError: Boolean(
-					getItemsError( 'orders', actionableOrdersQuery )
-				),
+				isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
 				isRequesting: true,
 				orderStatuses,
 			};
 		}
 
-		const actionableOrders = orderItems
-			? Array.from( orderItems.values() )
-			: orderItems;
+		const customers = getItems( 'customers', {
+			users: actionableOrders
+				.map( ( order ) => order.customer_id )
+				.filter( ( id ) => id !== 0 ),
+			_fields: [ 'id', 'name', 'country', 'user_id' ],
+		} );
 
 		return {
 			orders: actionableOrders,
-			isError: Boolean( getItemsError( 'orders', actionableOrders ) ),
+			isError: Boolean( getOrdersError( actionableOrders ) ),
 			isRequesting: isRequestingActionable,
 			orderStatuses,
+			customerItems: customers,
 		};
 	} );
 
@@ -278,9 +314,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 					title={ __(
 						"You currently don't have any actionable statuses. " +
 							'To display orders here, select orders that require further review in settings.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
-					actionLabel={ __( 'Settings', 'woocommerce-admin' ) }
+					actionLabel={ __( 'Settings', 'woocommerce' ) }
 					actionURL={ getAdminLink(
 						'admin.php?page=wc-admin&path=/analytics/settings'
 					) }
@@ -290,9 +326,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 
 		const title = __(
 			'There was an error getting your orders. Please try again.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
-		const actionLabel = __( 'Reload', 'woocommerce-admin' );
+		const actionLabel = __( 'Reload', 'woocommerce' );
 		const actionCallback = () => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();
@@ -309,6 +345,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			</>
 		);
 	}
+	const customerList = customerItems
+		? Array.from( customerItems, ( [ , value ] ) => value )
+		: [];
 
 	return (
 		<>
@@ -321,7 +360,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 						lines={ 1 }
 					/>
 				) : (
-					renderOrders( orders )
+					renderOrders( orders, customerList, getFormattedOrderTotal )
 				) }
 			</Section>
 		</>

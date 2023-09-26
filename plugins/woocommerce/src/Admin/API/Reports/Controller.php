@@ -9,61 +9,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+
 /**
  * REST API Reports controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'reports';
-
-	/**
-	 * Register the routes for reports.
-	 */
-	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-	}
-
-	/**
-	 * Check whether a given request has permission to read reports.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
+class Controller extends GenericController {
 
 	/**
 	 * Get all reports.
@@ -76,71 +30,71 @@ class Controller extends \WC_REST_Reports_Controller {
 		$reports = array(
 			array(
 				'slug'        => 'performance-indicators',
-				'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'woocommerce-admin' ),
+				'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'revenue/stats',
-				'description' => __( 'Stats about revenue.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about revenue.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'orders/stats',
-				'description' => __( 'Stats about orders.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about orders.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'products',
-				'description' => __( 'Products detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Products detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'products/stats',
-				'description' => __( 'Stats about products.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about products.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'variations',
-				'description' => __( 'Variations detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Variations detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'variations/stats',
-				'description' => __( 'Stats about variations.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about variations.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'categories',
-				'description' => __( 'Product categories detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Product categories detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'categories/stats',
-				'description' => __( 'Stats about product categories.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about product categories.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'coupons',
-				'description' => __( 'Coupons detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Coupons detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'coupons/stats',
-				'description' => __( 'Stats about coupons.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about coupons.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'taxes',
-				'description' => __( 'Taxes detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Taxes detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'taxes/stats',
-				'description' => __( 'Stats about taxes.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about taxes.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'downloads',
-				'description' => __( 'Product downloads detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Product downloads detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'downloads/files',
-				'description' => __( 'Product download files detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Product download files detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'downloads/stats',
-				'description' => __( 'Stats about product downloads.', 'woocommerce-admin' ),
+				'description' => __( 'Stats about product downloads.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'customers',
-				'description' => __( 'Customers detailed reports.', 'woocommerce-admin' ),
+				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
 			),
 		);
 
@@ -285,19 +239,19 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'        => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-admin' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human-readable description of the resource.', 'woocommerce-admin' ),
+					'description' => __( 'A human-readable description of the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'path'        => array(
-					'description' => __( 'API path.', 'woocommerce-admin' ),
+					'description' => __( 'API path.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

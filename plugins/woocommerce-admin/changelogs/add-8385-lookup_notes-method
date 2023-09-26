@@ -1,4 +1,0 @@
-Significance: minor
-Type: Enhancement
-
-Add internal methods to Notes DataStore to retrieve notes without paging or application of woocommerce_note_where_clauses filter. #8387

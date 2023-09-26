@@ -604,7 +604,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
-		if ( strlen( $slug ) >= 28 ) {
+		if ( strlen( $slug ) > 28 ) {
 			/* translators: %s: slug being validated */
 			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {

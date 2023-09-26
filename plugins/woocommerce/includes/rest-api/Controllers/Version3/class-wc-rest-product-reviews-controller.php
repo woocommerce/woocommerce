@@ -682,6 +682,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		if ( in_array( 'product_id', $fields, true ) ) {
 			$data['product_id'] = (int) $review->comment_post_ID;
 		}
+		if ( in_array( 'product_name', $fields, true ) ) {
+			$data['product_name'] = get_the_title( (int) $review->comment_post_ID );
+		}
+		if ( in_array( 'product_permalink', $fields, true ) ) {
+			$data['product_permalink'] = get_permalink( (int) $review->comment_post_ID );
+		}
 		if ( in_array( 'status', $fields, true ) ) {
 			$data['status'] = $this->prepare_status_response( (string) $review->comment_approved );
 		}
@@ -840,6 +846,18 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'product_name'       => array(
+					'description' => __( 'Product name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'product_permalink'       => array(
+					'description' => __( 'Product URL.', 'woocommerce' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'status'           => array(
 					'description' => __( 'Status of the review.', 'woocommerce' ),

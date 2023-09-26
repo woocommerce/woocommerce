@@ -113,7 +113,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @since  3.0.0
 	 * @param  int    $item_id Item ID.
 	 * @param  string $meta_key Meta key.
-	 * @param  string $meta_value (default: '').
+	 * @param  mixed  $meta_value (default: '').
 	 * @param  bool   $delete_all (default: false).
 	 * @return bool
 	 */

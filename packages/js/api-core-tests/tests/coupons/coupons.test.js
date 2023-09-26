@@ -167,6 +167,7 @@ describe( 'Coupons API tests', () => {
 			expect( deletedCouponIds ).toEqual( couponIdsToDelete );
 
 			// Verify that the 2 deleted coupons cannot be retrieved.
+			// eslint-disable-next-line
 			for ( const couponId of couponIdsToDelete ) {
 				const { status } = await couponsApi.retrieve.coupon( couponId );
 
@@ -202,6 +203,7 @@ describe( 'Coupons API tests', () => {
 			const actualCreatedCoupons = response.body.create;
 
 			// Save their coupon ID's
+			// eslint-disable-next-line
 			for ( const coupon of allCoupons ) {
 				const { id } = actualCreatedCoupons.find(
 					( { code } ) => coupon.code === code

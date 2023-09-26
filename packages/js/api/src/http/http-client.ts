@@ -26,9 +26,9 @@ export class HTTPResponse< T = any > {
 	/**
 	 * Creates a new HTTP response instance.
 	 *
-	 * @param {number} statusCode The status code from the HTTP response.
-	 * @param {Object.<string,string|string[]>} headers The headers from the HTTP response.
-	 * @param {Object} data The data from the HTTP response.
+	 * @param {number}                          statusCode The status code from the HTTP response.
+	 * @param {Object.<string,string|string[]>} headers    The headers from the HTTP response.
+	 * @param {Object}                          data       The data from the HTTP response.
 	 */
 	public constructor( statusCode: number, headers: any, data: T ) {
 		this.statusCode = statusCode;
@@ -44,8 +44,8 @@ export interface HTTPClient {
 	/**
 	 * Performs a GET request.
 	 *
-	 * @param {string} path The path we should send the request to.
-	 * @param {*} params Any parameters that should be passed in the request.
+	 * @param {string} path   The path we should send the request to.
+	 * @param {*}      params Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	get< T = any >( path: string, params?: any ): Promise< HTTPResponse< T > >;
@@ -54,7 +54,7 @@ export interface HTTPClient {
 	 * Performs a POST request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	post< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
@@ -63,7 +63,7 @@ export interface HTTPClient {
 	 * Performs a PUT request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	put< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
@@ -72,7 +72,7 @@ export interface HTTPClient {
 	 * Performs a PATCH request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	patch< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;
@@ -81,7 +81,7 @@ export interface HTTPClient {
 	 * Performs a DELETE request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	delete< T = any >( path: string, data?: any ): Promise< HTTPResponse< T > >;

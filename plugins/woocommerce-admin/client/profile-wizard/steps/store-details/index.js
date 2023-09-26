@@ -26,6 +26,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { Icon, info } from '@wordpress/icons';
 import { isEmail } from '@wordpress/url';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -36,7 +37,6 @@ import {
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
 import UsageModal from '../usage-modal';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
@@ -64,7 +64,6 @@ export class StoreDetails extends Component {
 		this.state = {
 			showUsageModal: false,
 			skipping: false,
-			isStoreDetailsPopoverVisible: false,
 			isSkipSetupPopoverVisible: false,
 		};
 
@@ -167,6 +166,9 @@ export class StoreDetails extends Component {
 		const profileItemsToUpdate = {
 			is_agree_marketing: values.isAgreeMarketing,
 			store_email: values.storeEmail,
+			is_store_country_set:
+				typeof values.countryState === 'string' &&
+				values.countryState !== '',
 		};
 
 		const region = getCurrencyRegion( values.countryState );
@@ -179,7 +181,7 @@ export class StoreDetails extends Component {
 		 * `await` and performs an update aysnchronously. This means the following
 		 * screen may not be initialized with correct profile settings.
 		 *
-		 * This comment may be removed when a refactor to wp.data datatores is complete.
+		 * This comment may be removed when a refactor to wp.data datastores is complete.
 		 */
 		if (
 			region !== 'US' &&
@@ -213,10 +215,7 @@ export class StoreDetails extends Component {
 		}
 		createNotice(
 			'error',
-			__(
-				'There was a problem saving your store details',
-				'woocommerce-admin'
-			)
+			__( 'There was a problem saving your store details', 'woocommerce' )
 		);
 
 		errorMessages.forEach( ( message ) =>
@@ -231,9 +230,16 @@ export class StoreDetails extends Component {
 		const errors = validateAddress( values );
 
 		if ( values.storeEmail && ! isEmail( values.storeEmail ) ) {
+			errors.storeEmail = __( 'Invalid email address', 'woocommerce' );
+		}
+
+		if (
+			values.isAgreeMarketing &&
+			( ! values.storeEmail || ! values.storeEmail.trim().length )
+		) {
 			errors.storeEmail = __(
-				'Invalid email address',
-				'woocommerce-admin'
+				'Please enter your email address to subscribe',
+				'woocommerce'
 			);
 		}
 
@@ -241,12 +247,8 @@ export class StoreDetails extends Component {
 	}
 
 	render() {
-		const {
-			showUsageModal,
-			skipping,
-			isStoreDetailsPopoverVisible,
-			isSkipSetupPopoverVisible,
-		} = this.state;
+		const { showUsageModal, skipping, isSkipSetupPopoverVisible } =
+			this.state;
 		const {
 			skipProfiler,
 			isLoading,
@@ -258,12 +260,7 @@ export class StoreDetails extends Component {
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
 			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce-admin'
-		);
-
-		const configureCurrencyText = __(
-			'Your store address will help us configure currency\n options and shipping rules automatically.\n This information will not be publicly visible and can\n easily be changed later.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
@@ -284,42 +281,14 @@ export class StoreDetails extends Component {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
+						{ __( 'Welcome to WooCommerce', 'woocommerce' ) }
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
-							"Tell us about your store and we'll get you set up in no time",
-							'woocommerce-admin'
+							'Tell us where you run your business to help us configure currency, shipping, taxes, and more in a fully automated way.',
+							'woocommerce'
 						) }
-
-						<Button
-							isTertiary
-							label={ __(
-								'Learn more about store details',
-								'woocommerce-admin'
-							) }
-							onClick={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: true,
-								} )
-							}
-						>
-							<Icon icon={ info } />
-						</Button>
 					</Text>
-					{ isStoreDetailsPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: false,
-								} )
-							}
-						>
-							{ configureCurrencyText }
-						</Popover>
-					) }
 				</div>
 
 				<Form
@@ -342,10 +311,8 @@ export class StoreDetails extends Component {
 										if ( skipping ) {
 											skipProfiler();
 										} else {
-											this.onContinue(
-												values
-											).then( () =>
-												this.props.goToNextStep()
+											this.onContinue( values ).then(
+												() => this.props.goToNextStep()
 											);
 										}
 									} }
@@ -368,27 +335,17 @@ export class StoreDetails extends Component {
 										values.isAgreeMarketing
 											? __(
 													'Email address',
-													'woocommerce-admin'
+													'woocommerce'
 											  )
 											: __(
-													'Email address (Optional)',
-													'woocommerce-admin'
+													'Email address',
+													'woocommerce'
 											  )
 									}
 									required={ values.isAgreeMarketing }
 									autoComplete="email"
 									{ ...getInputProps( 'storeEmail' ) }
 								/>
-								{ values.isAgreeMarketing &&
-									( ! values.storeEmail ||
-										! values.storeEmail.trim().length ) && (
-										<div className="woocommerce-profile-wizard__store-details-error">
-											{ __(
-												'Please enter your email address to subscribe',
-												'woocommerce-admin'
-											) }
-										</div>
-									) }
 								<FlexItem>
 									<div className="woocommerce-profile-wizard__newsletter-signup">
 										<CheckboxControl
@@ -396,12 +353,12 @@ export class StoreDetails extends Component {
 												<>
 													{ __(
 														'Get tips, product updates and inspiration straight to your mailbox.',
-														'woocommerce-admin'
+														'woocommerce'
 													) }{ ' ' }
 													<span className="woocommerce-profile-wizard__powered-by-mailchimp">
 														{ __(
 															'Powered by Mailchimp',
-															'woocommerce-admin'
+															'woocommerce'
 														) }
 													</span>
 												</>
@@ -413,15 +370,15 @@ export class StoreDetails extends Component {
 									</div>
 								</FlexItem>
 							</CardBody>
-
 							<CardFooter justify="center">
 								<Button
 									isPrimary
 									onClick={ handleSubmit }
 									isBusy={ isBusy }
 									disabled={ ! isValidForm || isBusy }
+									aria-disabled={ ! isValidForm || isBusy }
 								>
-									{ __( 'Continue', 'woocommerce-admin' ) }
+									{ __( 'Continue', 'woocommerce' ) }
 								</Button>
 							</CardFooter>
 						</Card>
@@ -442,10 +399,7 @@ export class StoreDetails extends Component {
 							return false;
 						} }
 					>
-						{ __(
-							'Skip setup store details',
-							'woocommerce-admin'
-						) }
+						{ __( 'Skip setup store details', 'woocommerce' ) }
 					</Button>
 					<Button
 						isTertiary
@@ -479,11 +433,8 @@ StoreDetails.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getSettings,
-			getSettingsError,
-			isUpdateSettingsRequesting,
-		} = select( SETTINGS_STORE_NAME );
+		const { getSettings, getSettingsError, isUpdateSettingsRequesting } =
+			select( SETTINGS_STORE_NAME );
 		const {
 			getProfileItems,
 			isOnboardingRequesting,
@@ -517,12 +468,12 @@ export default compose(
 		errorsRef.current = {
 			settings: getSettingsError( 'general' ),
 		};
-		// Check if a store address is set so that we don't default
-		// to WooCommerce's default country of the UK.
-		const countryState =
-			( settings.woocommerce_store_address &&
-				settings.woocommerce_default_country ) ||
-			'';
+		// Check if a store country is set so that we don't default
+		// to WooCommerce's default country of the US:CA.
+		const countryState = profileItems.is_store_country_set
+			? settings.woocommerce_default_country
+			: '';
+
 		getCountries();
 		getLocales();
 
@@ -532,10 +483,12 @@ export default compose(
 			city: settings.woocommerce_store_city || '',
 			countryState,
 			postCode: settings.woocommerce_store_postcode || '',
+
+			// By default, the marketing checkbox should be unticked by default to comply with WordPress.org plugin review guidelines.
 			isAgreeMarketing:
 				typeof profileItems.is_agree_marketing === 'boolean'
 					? profileItems.is_agree_marketing
-					: true,
+					: false,
 			storeEmail:
 				typeof profileItems.store_email === 'string'
 					? profileItems.store_email
@@ -554,13 +507,10 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const {
-			invalidateResolutionForStoreSelector,
-			updateProfileItems,
-		} = dispatch( ONBOARDING_STORE_NAME );
-		const { updateAndPersistSettingsForGroup } = dispatch(
-			SETTINGS_STORE_NAME
-		);
+		const { invalidateResolutionForStoreSelector, updateProfileItems } =
+			dispatch( ONBOARDING_STORE_NAME );
+		const { updateAndPersistSettingsForGroup } =
+			dispatch( SETTINGS_STORE_NAME );
 
 		return {
 			createNotice,

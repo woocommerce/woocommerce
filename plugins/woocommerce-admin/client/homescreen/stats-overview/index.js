@@ -16,7 +16,6 @@ import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { Experiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -34,6 +33,12 @@ const { performanceIndicators = [] } = getAdminSetting( 'dataEndpoints', {
 const stats = performanceIndicators.filter( ( indicator ) => {
 	return DEFAULT_STATS.includes( indicator.stat );
 } );
+
+const HeaderText = () => (
+	<Text variant="title.small" size="20" lineHeight="28px">
+		{ __( 'Stats overview', 'woocommerce' ) }
+	</Text>
+);
 
 export const StatsOverview = () => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
@@ -65,33 +70,22 @@ export const StatsOverview = () => {
 		( item ) => ! hiddenStats.includes( item.stat )
 	);
 
-	const HeaderText = (
-		<Text variant="title.small" size="20" lineHeight="28px">
-			{ __( 'Stats overview', 'woocommerce-admin' ) }
-		</Text>
-	);
-
 	return (
 		<Card
 			size="large"
 			className="woocommerce-stats-overview woocommerce-homescreen-card"
 		>
 			<CardHeader size="medium">
-				<Experiment
-					name="woocommerce_test_experiment"
-					defaultExperience={ HeaderText }
-					treatmentExperience={ HeaderText }
-					loadingExperience={ HeaderText }
-				/>
+				<HeaderText />
 				<EllipsisMenu
 					label={ __(
 						'Choose which values to display',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					renderContent={ () => (
 						<Fragment>
 							<MenuTitle>
-								{ __( 'Display stats:', 'woocommerce-admin' ) }
+								{ __( 'Display stats:', 'woocommerce' ) }
 							</MenuTitle>
 							{ stats.map( ( item ) => {
 								const checked = ! hiddenStats.includes(
@@ -125,15 +119,15 @@ export const StatsOverview = () => {
 				} }
 				tabs={ [
 					{
-						title: __( 'Today', 'woocommerce-admin' ),
+						title: __( 'Today', 'woocommerce' ),
 						name: 'today',
 					},
 					{
-						title: __( 'Week to date', 'woocommerce-admin' ),
+						title: __( 'Week to date', 'woocommerce' ),
 						name: 'week',
 					},
 					{
-						title: __( 'Month to date', 'woocommerce-admin' ),
+						title: __( 'Month to date', 'woocommerce' ),
 						name: 'month',
 					},
 				] }
@@ -165,7 +159,7 @@ export const StatsOverview = () => {
 						} );
 					} }
 				>
-					{ __( 'View detailed stats', 'woocommerce-admin' ) }
+					{ __( 'View detailed stats', 'woocommerce' ) }
 				</Link>
 			</CardFooter>
 		</Card>

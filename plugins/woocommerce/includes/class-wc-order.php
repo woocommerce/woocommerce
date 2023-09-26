@@ -30,25 +30,25 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected $data = array(
 		// Abstract order props.
-		'parent_id'            => 0,
-		'status'               => '',
-		'currency'             => '',
-		'version'              => '',
-		'prices_include_tax'   => false,
-		'date_created'         => null,
-		'date_modified'        => null,
-		'discount_total'       => 0,
-		'discount_tax'         => 0,
-		'shipping_total'       => 0,
-		'shipping_tax'         => 0,
-		'cart_tax'             => 0,
-		'total'                => 0,
-		'total_tax'            => 0,
+		'parent_id'                    => 0,
+		'status'                       => '',
+		'currency'                     => '',
+		'version'                      => '',
+		'prices_include_tax'           => false,
+		'date_created'                 => null,
+		'date_modified'                => null,
+		'discount_total'               => 0,
+		'discount_tax'                 => 0,
+		'shipping_total'               => 0,
+		'shipping_tax'                 => 0,
+		'cart_tax'                     => 0,
+		'total'                        => 0,
+		'total_tax'                    => 0,
 
 		// Order props.
-		'customer_id'          => 0,
-		'order_key'            => '',
-		'billing'              => array(
+		'customer_id'                  => 0,
+		'order_key'                    => '',
+		'billing'                      => array(
 			'first_name' => '',
 			'last_name'  => '',
 			'company'    => '',
@@ -61,7 +61,7 @@ class WC_Order extends WC_Abstract_Order {
 			'email'      => '',
 			'phone'      => '',
 		),
-		'shipping'             => array(
+		'shipping'                     => array(
 			'first_name' => '',
 			'last_name'  => '',
 			'company'    => '',
@@ -73,17 +73,48 @@ class WC_Order extends WC_Abstract_Order {
 			'country'    => '',
 			'phone'      => '',
 		),
-		'payment_method'       => '',
-		'payment_method_title' => '',
-		'transaction_id'       => '',
-		'customer_ip_address'  => '',
-		'customer_user_agent'  => '',
-		'created_via'          => '',
-		'customer_note'        => '',
-		'date_completed'       => null,
-		'date_paid'            => null,
-		'cart_hash'            => '',
+		'payment_method'               => '',
+		'payment_method_title'         => '',
+		'transaction_id'               => '',
+		'customer_ip_address'          => '',
+		'customer_user_agent'          => '',
+		'created_via'                  => '',
+		'customer_note'                => '',
+		'date_completed'               => null,
+		'date_paid'                    => null,
+		'cart_hash'                    => '',
+
+		// Operational data.
+		'order_stock_reduced'          => false,
+		'download_permissions_granted' => false,
+		'new_order_email_sent'         => false,
+		'recorded_sales'               => false,
+		'recorded_coupon_usage_counts' => false,
 	);
+
+	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. Otherwise, if you are adding a new property, consider adding it to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_sales',
+		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
+		'_new_order_email_sent',
+	);
+
+	/**
+	 * Refunds for an order. Use {@see get_refunds()} instead.
+	 *
+	 * @deprecated 2.2.0
+	 * @var stdClass|WC_Order[]
+	 */
+	public $refunds;
 
 	/**
 	 * When a payment is complete this function is called.
@@ -103,7 +134,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
+			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );
@@ -119,9 +150,9 @@ class WC_Order extends WC_Abstract_Order {
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
-				do_action( 'woocommerce_payment_complete', $this->get_id() );
+				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
 			} else {
-				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
 			}
 		} catch ( Exception $e ) {
 			/**
@@ -526,18 +557,27 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since  3.0.0
 	 * @param  string $prop Name of prop to get.
-	 * @param  string $address billing or shipping.
+	 * @param  string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
-	protected function get_address_prop( $prop, $address = 'billing', $context = 'view' ) {
+	protected function get_address_prop( $prop, $address_type = 'billing', $context = 'view' ) {
 		$value = null;
 
-		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
-			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
+		if ( array_key_exists( $prop, $this->data[ $address_type ] ) ) {
+			$value = isset( $this->changes[ $address_type ][ $prop ] ) ? $this->changes[ $address_type ][ $prop ] : $this->data[ $address_type ][ $prop ];
 
 			if ( 'view' === $context ) {
-				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
+				/**
+				 * Filter: 'woocommerce_order_get_[billing|shipping]_[prop]'
+				 *
+				 * Allow developers to change the returned value for any order address property.
+				 *
+				 * @since 3.6.0
+				 * @param string   $value The address property value.
+				 * @param WC_Order $order The order object being read.
+				 */
+				$value = apply_filters( $this->get_hook_prefix() . $address_type . '_' . $prop, $value, $this );
 			}
 		}
 		return $value;
@@ -775,7 +815,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get transaction d.
+	 * Get transaction id.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
@@ -865,11 +905,20 @@ class WC_Order extends WC_Abstract_Order {
 	 * Note: Merges raw data with get_prop data so changes are returned too.
 	 *
 	 * @since  2.4.0
-	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
+	 * @param  string $address_type Type of address; 'billing' or 'shipping'.
 	 * @return array The stored address after filter.
 	 */
-	public function get_address( $type = 'billing' ) {
-		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $type ], $this->get_prop( $type, 'view' ) ), $type, $this );
+	public function get_address( $address_type = 'billing' ) {
+		/**
+		 * Filter: 'woocommerce_get_order_address'
+		 *
+		 * Allow developers to change the returned value for an order's billing or shipping address.
+		 *
+		 * @since 2.4.0
+		 * @param array  $address_data The raw address data merged with the data from get_prop.
+		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 */
+		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $address_type ], $this->get_prop( $address_type, 'view' ) ), $address_type, $this );
 	}
 
 	/**
@@ -948,8 +997,8 @@ class WC_Order extends WC_Abstract_Order {
 		 * Filter orders formatted shipping address.
 		 *
 		 * @since 3.8.0
-		 * @param string   $address     Formatted billing address string.
-		 * @param array    $raw_address Raw billing address.
+		 * @param string   $address     Formatted shipping address string.
+		 * @param array    $raw_address Raw shipping address.
 		 * @param WC_Order $order       Order data. @since 3.9.0
 		 */
 		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address, $this );
@@ -975,6 +1024,50 @@ class WC_Order extends WC_Abstract_Order {
 		return $this->get_shipping_address_1() || $this->get_shipping_address_2();
 	}
 
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @since 7.0.0
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return bool
+	 */
+	public function get_order_stock_reduced( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'order_stock_reduced', $context ) );
+	}
+
+	/**
+	 * Gets information about whether permissions were generated yet.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if permissions were generated, false otherwise.
+	 */
+	public function get_download_permissions_granted( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'download_permissions_granted', $context ) );
+	}
+
+	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool
+	 */
+	public function get_new_order_email_sent( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'new_order_email_sent', $context ) );
+	}
+
+	/**
+	 * Gets information about whether sales were recorded.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if sales were recorded, false otherwise.
+	 */
+	public function get_recorded_sales( string $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'recorded_sales', $context ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -992,19 +1085,69 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.
-	 * @param string $address Name of address to set. billing or shipping.
+	 * @param string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param mixed  $value Value of the prop.
 	 */
-	protected function set_address_prop( $prop, $address, $value ) {
-		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
+	protected function set_address_prop( $prop, $address_type, $value ) {
+		if ( array_key_exists( $prop, $this->data[ $address_type ] ) ) {
 			if ( true === $this->object_read ) {
-				if ( $value !== $this->data[ $address ][ $prop ] || ( isset( $this->changes[ $address ] ) && array_key_exists( $prop, $this->changes[ $address ] ) ) ) {
-					$this->changes[ $address ][ $prop ] = $value;
+				if ( $value !== $this->data[ $address_type ][ $prop ] || ( isset( $this->changes[ $address_type ] ) && array_key_exists( $prop, $this->changes[ $address_type ] ) ) ) {
+					$this->changes[ $address_type ][ $prop ] = $value;
 				}
 			} else {
-				$this->data[ $address ][ $prop ] = $value;
+				$this->data[ $address_type ][ $prop ] = $value;
 			}
 		}
+	}
+
+	/**
+	 * Setter for billing address, expects the $address parameter to be key value pairs for individual address props.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_billing_address( array $address ) {
+		foreach ( $address as $key => $value ) {
+			$this->set_address_prop( $key, 'billing', $value );
+		}
+	}
+
+	/**
+	 * Shortcut for calling set_billing_address.
+	 *
+	 * This is useful in scenarios where set_$prop_name is invoked, and since we store the billing address as 'billing' prop in data, it can be called directly.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_billing( array $address ) {
+		$this->set_billing_address( $address );
+	}
+
+	/**
+	 * Setter for shipping address, expects the $address parameter to be key value pairs for individual address props.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_shipping_address( array $address ) {
+		foreach ( $address as $key => $value ) {
+			$this->set_address_prop( $key, 'shipping', $value );
+		}
+	}
+
+	/**
+	 * Shortcut for calling set_shipping_address. This is useful in scenarios where set_$prop_name is invoked, and since we store the shipping address as 'shipping' prop in data, it can be called directly.
+	 *
+	 * @param array $address Address to set.
+	 *
+	 * @return void
+	 */
+	public function set_shipping( array $address ) {
+		$this->set_shipping_address( $address );
 	}
 
 	/**
@@ -1363,6 +1506,50 @@ class WC_Order extends WC_Abstract_Order {
 		$this->set_prop( 'cart_hash', $value );
 	}
 
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param bool|string $value True if stock was reduced, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_order_stock_reduced( $value ) {
+		$this->set_prop( 'order_stock_reduced', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether permissions were generated yet.
+	 *
+	 * @param bool|string $value True if permissions were generated, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_download_permissions_granted( $value ) {
+		$this->set_prop( 'download_permissions_granted', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param bool|string $value True if email was sent, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_new_order_email_sent( $value ) {
+		$this->set_prop( 'new_order_email_sent', wc_string_to_bool( $value ) );
+	}
+
+	/**
+	 * Stores information about whether sales were recorded.
+	 *
+	 * @param bool|string $value True if sales were recorded, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_recorded_sales( $value ) {
+		$this->set_prop( 'recorded_sales', wc_string_to_bool( $value ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Conditionals
@@ -1688,7 +1875,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_edit_order_url() {
-		return apply_filters( 'woocommerce_get_edit_order_url', get_admin_url( null, 'post.php?post=' . $this->get_id() . '&action=edit' ), $this );
+		$edit_url = \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_edit_url( $this->get_id() );
+		/**
+		 * Filter the URL to edit the order in the backend.
+		 *
+		 * @since 3.3.0
+		 */
+		return apply_filters( 'woocommerce_get_edit_order_url', $edit_url, $this );
 	}
 
 	/*
@@ -2053,7 +2246,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $tax_display Tax to display.
 	 */
 	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
-		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method_title() ) {
+		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method() ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $this->get_payment_method_title(),
@@ -2110,5 +2303,14 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function is_created_via( $modus ) {
 		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
+	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash(): bool {
+		return (bool) $this->data_store->untrash_order( $this );
 	}
 }

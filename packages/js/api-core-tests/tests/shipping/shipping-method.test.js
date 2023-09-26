@@ -28,13 +28,11 @@ describe( 'Shipping methods API tests', () => {
 		async ( methodTitle, methodId, cost ) => {
 			const shippingMethod = getShippingMethodExample( methodId, cost );
 
-			const {
-				status,
-				body,
-			} = await shippingMethodsApi.create.shippingMethod(
-				shippingZoneId,
-				shippingMethod
-			);
+			const { status, body } =
+				await shippingMethodsApi.create.shippingMethod(
+					shippingZoneId,
+					shippingMethod
+				);
 
 			expect( status ).toEqual( shippingMethodsApi.create.responseCode );
 			expect( typeof body.id ).toEqual( 'number' );

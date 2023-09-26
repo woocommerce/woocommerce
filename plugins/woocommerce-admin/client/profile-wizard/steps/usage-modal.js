@@ -17,17 +17,13 @@ class UsageModal extends Component {
 		this.state = {
 			isLoadingScripts: false,
 			isRequestStarted: false,
+			selectedAction: null,
 		};
 	}
 
 	async componentDidUpdate( prevProps, prevState ) {
-		const {
-			hasErrors,
-			isRequesting,
-			onClose,
-			onContinue,
-			createNotice,
-		} = this.props;
+		const { hasErrors, isRequesting, onClose, onContinue, createNotice } =
+			this.props;
 		const { isLoadingScripts, isRequestStarted } = this.state;
 
 		// We can't rely on isRequesting props only because option update might be triggered by other component.
@@ -53,7 +49,7 @@ class UsageModal extends Component {
 				'error',
 				__(
 					'There was a problem updating your preferences',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			onClose();
@@ -110,12 +106,12 @@ class UsageModal extends Component {
 
 		const {
 			isRequesting,
-			title = __( 'Build a better WooCommerce', 'woocommerce-admin' ),
+			title = __( 'Build a better WooCommerce', 'woocommerce' ),
 			message = interpolateComponents( {
 				mixedString: __(
 					'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
 						'that shows us how WooCommerce is used. No personal data is tracked or stored.',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				components: {
 					link: (
@@ -127,11 +123,11 @@ class UsageModal extends Component {
 					),
 				},
 			} ),
-			dismissActionText = __( 'No thanks', 'woocommerce-admin' ),
-			acceptActionText = __( 'Yes, count me in!', 'woocommerce-admin' ),
+			dismissActionText = __( 'No thanks', 'woocommerce' ),
+			acceptActionText = __( 'Yes, count me in!', 'woocommerce' ),
 		} = this.props;
 
-		const { isRequestStarted } = this.state;
+		const { isRequestStarted, selectedAction } = this.state;
 		const isBusy = isRequestStarted && isRequesting;
 
 		return (
@@ -148,19 +144,23 @@ class UsageModal extends Component {
 					<div className="woocommerce-usage-modal__actions">
 						<Button
 							isSecondary
-							isBusy={ isBusy }
-							onClick={ () =>
-								this.updateTracking( { allowTracking: false } )
-							}
+							isBusy={ isBusy && selectedAction === 'dismiss' }
+							disabled={ isBusy && selectedAction === 'accept' }
+							onClick={ () => {
+								this.setState( { selectedAction: 'dismiss' } );
+								this.updateTracking( { allowTracking: false } );
+							} }
 						>
 							{ dismissActionText }
 						</Button>
 						<Button
 							isPrimary
-							isBusy={ isBusy }
-							onClick={ () =>
-								this.updateTracking( { allowTracking: true } )
-							}
+							isBusy={ isBusy && selectedAction === 'accept' }
+							disabled={ isBusy && selectedAction === 'dismiss' }
+							onClick={ () => {
+								this.setState( { selectedAction: 'accept' } );
+								this.updateTracking( { allowTracking: true } );
+							} }
 						>
 							{ acceptActionText }
 						</Button>

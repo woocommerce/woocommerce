@@ -8,29 +8,30 @@ import { useUser } from '@woocommerce/data';
  * Internal dependencies
  */
 import './style.scss';
-import RecommendedExtensions from '../components/recommended-extensions';
-import KnowledgeBase from '../components/knowledge-base';
+import RecommendedExtensions from './recommended-extensions';
+import KnowledgeBase from './knowledge-base';
 import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
 const CouponsOverview = () => {
 	const { currentUserCan } = useUser();
 
-	const shouldShowExtensions =
+	const showExtensions = !! (
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
-		currentUserCan( 'install_plugins' );
+		currentUserCan( 'install_plugins' )
+	);
 
 	return (
 		<div className="woocommerce-marketing-coupons">
-			{ shouldShowExtensions && (
+			{ showExtensions && (
 				<RecommendedExtensions
 					title={ __(
 						'Recommended coupon extensions',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					description={ __(
 						'Take your coupon marketing to the next level with our recommended coupon extensions.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					category="coupons"
 				/>
@@ -39,7 +40,7 @@ const CouponsOverview = () => {
 				category="coupons"
 				description={ __(
 					'Learn the ins and outs of successful coupon marketing from the experts at WooCommerce.',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			/>
 		</div>

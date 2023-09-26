@@ -15,7 +15,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 *
 	 * @see WC_Unit_Test_Case::setUp()
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user_id = $this->login_as_role( 'shop_manager' );
 	}
@@ -104,7 +104,6 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting a customers default token, when there no token is expictly set.
 	 * This should be the "first created".
 	 * @see WC_Payment_Token::create()
-	 * @group failing
 	 * @since 2.6.0
 	 */
 	public function test_wc_get_customer_default_token_returns_first_created_when_no_default_token_set() {

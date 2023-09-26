@@ -1,0 +1,13 @@
+.woocommerce-marketing-channels-card {
+	.components-card-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $gap-smallest;
+	}
+
+	.components-button.is-link {
+		@include font-size( 14 );
+		font-weight: 600;
+		text-decoration: none;
+	}
+}

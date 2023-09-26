@@ -14,14 +14,8 @@ import TimelineGroup from './timeline-group';
 import { sortByDateUsing, groupItemsUsing } from './util';
 
 const Timeline = ( props ) => {
-	const {
-		className,
-		items,
-		groupBy,
-		orderBy,
-		dateFormat,
-		clockFormat,
-	} = props;
+	const { className, items, groupBy, orderBy, dateFormat, clockFormat } =
+		props;
 	const timelineClassName = classnames( 'woocommerce-timeline', className );
 
 	// Early return in case no data was passed to the component.
@@ -29,7 +23,7 @@ const Timeline = ( props ) => {
 		return (
 			<div className={ timelineClassName }>
 				<p className={ 'timeline_no_events' }>
-					{ __( 'No data to display', 'woocommerce-admin' ) }
+					{ __( 'No data to display', 'woocommerce' ) }
 				</p>
 			</div>
 		);
@@ -123,9 +117,9 @@ Timeline.defaultProps = {
 	groupBy: 'day',
 	orderBy: 'desc',
 	/* translators: PHP date format string used to display dates, see php.net/date. */
-	dateFormat: __( 'F j, Y', 'woocommerce-admin' ),
+	dateFormat: __( 'F j, Y', 'woocommerce' ),
 	/* translators: PHP clock format string used to display times, see php.net/date. */
-	clockFormat: __( 'g:ia', 'woocommerce-admin' ),
+	clockFormat: __( 'g:ia', 'woocommerce' ),
 };
 
 export { orderByOptions, groupByOptions } from './util';

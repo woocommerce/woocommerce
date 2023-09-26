@@ -1,0 +1,66 @@
+{
+    "code": "AL",
+    "name": "Albania",
+    "states": [
+        {
+            "code": "AL-01",
+            "name": "Berat"
+        },
+        {
+            "code": "AL-09",
+            "name": "Dibër"
+        },
+        {
+            "code": "AL-02",
+            "name": "Durrës"
+        },
+        {
+            "code": "AL-03",
+            "name": "Elbasan"
+        },
+        {
+            "code": "AL-04",
+            "name": "Fier"
+        },
+        {
+            "code": "AL-05",
+            "name": "Gjirokastër"
+        },
+        {
+            "code": "AL-06",
+            "name": "Korçë"
+        },
+        {
+            "code": "AL-07",
+            "name": "Kukës"
+        },
+        {
+            "code": "AL-08",
+            "name": "Lezhë"
+        },
+        {
+            "code": "AL-10",
+            "name": "Shkodër"
+        },
+        {
+            "code": "AL-11",
+            "name": "Tirana"
+        },
+        {
+            "code": "AL-12",
+            "name": "Vlorë"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/al"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -11,6 +11,7 @@ import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -19,9 +20,8 @@ import '../style.scss';
 import DismissModal from '../dismiss-modal';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
-import { getAdminSetting } from '~/utils/admin-settings';
 
-const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
+const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
 const wcsPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
@@ -145,7 +145,7 @@ export class ShippingBanner extends Component {
 	generateMetaBoxHtml( nodeId, title, args ) {
 		const argsJsonString = JSON.stringify( args ).replace( /"/g, '&quot;' ); // JS has no native html_entities so we just replace.
 
-		const togglePanelText = __( 'Toggle panel:', 'woocommerce-admin' );
+		const togglePanelText = __( 'Toggle panel:', 'woocommerce' );
 
 		return `
 <div id="${ nodeId }" class="postbox">
@@ -190,7 +190,7 @@ export class ShippingBanner extends Component {
 
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
 			'woocommerce-order-label',
-			__( 'Shipping Label', 'woocommerce-admin' ),
+			__( 'Shipping Label', 'woocommerce' ),
 			{
 				order: { id: orderId },
 				context: 'shipping_label',
@@ -204,7 +204,7 @@ export class ShippingBanner extends Component {
 
 		const shipmentTrackingHtml = this.generateMetaBoxHtml(
 			'woocommerce-order-shipment-tracking',
-			__( 'Shipment Tracking', 'woocommerce-admin' ),
+			__( 'Shipment Tracking', 'woocommerce' ),
 			{
 				order: { id: orderId },
 				context: 'shipment_tracking',
@@ -264,12 +264,12 @@ export class ShippingBanner extends Component {
 			// If WCS is active, then the only remaining step is to agree to the ToS.
 			return __(
 				'You\'ve already installed WooCommerce Shipping. By clicking "Create shipping label", you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 		return __(
 			'By clicking "Create shipping label", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	};
 
@@ -360,7 +360,7 @@ export class ShippingBanner extends Component {
 										status: 'is-success',
 										text: __(
 											'Plugin installed and activated',
-											'woocommerce-admin'
+											'woocommerce'
 										),
 									},
 								} );
@@ -399,14 +399,14 @@ export class ShippingBanner extends Component {
 				<div className="wc-admin-shipping-banner-container">
 					<img
 						className="wc-admin-shipping-banner-illustration"
-						src={ wcAdminAssetUrl + '/shippingillustration.svg' }
-						alt={ __( 'Shipping ', 'woocommerce-admin' ) }
+						src={ wcAssetUrl + 'images/shippingillustration.svg' }
+						alt={ __( 'Shipping ', 'woocommerce' ) }
 					/>
 					<div className="wc-admin-shipping-banner-blob">
 						<h3>
 							{ __(
 								'Print discounted shipping labels with a click.',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</h3>
 						<p>
@@ -445,7 +445,7 @@ export class ShippingBanner extends Component {
 						isBusy={ isShippingLabelButtonBusy }
 						onClick={ this.createShippingLabelClicked }
 					>
-						{ __( 'Create shipping label', 'woocommerce-admin' ) }
+						{ __( 'Create shipping label', 'woocommerce' ) }
 					</Button>
 
 					<button
@@ -455,10 +455,7 @@ export class ShippingBanner extends Component {
 						disabled={ this.state.isShippingLabelButtonBusy }
 					>
 						<span className="screen-reader-text">
-							{ __(
-								'Close Print Label Banner.',
-								'woocommerce-admin'
-							) }
+							{ __( 'Close Print Label Banner.', 'woocommerce' ) }
 						</span>
 					</button>
 				</div>
@@ -484,11 +481,8 @@ ShippingBanner.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			isPluginsRequesting,
-			isJetpackConnected,
-			getActivePlugins,
-		} = select( PLUGINS_STORE_NAME );
+		const { isPluginsRequesting, isJetpackConnected, getActivePlugins } =
+			select( PLUGINS_STORE_NAME );
 
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||
@@ -501,9 +495,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugins } = dispatch(
-			PLUGINS_STORE_NAME
-		);
+		const { activatePlugins, installPlugins } =
+			dispatch( PLUGINS_STORE_NAME );
 
 		return {
 			activatePlugins,

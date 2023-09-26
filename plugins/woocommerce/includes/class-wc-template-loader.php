@@ -101,6 +101,25 @@ class WC_Template_Loader {
 	}
 
 	/**
+	 * Checks whether a block template for a given taxonomy exists.
+	 *
+	 * **Note:** This checks both the `templates` and `block-templates` directories
+	 * as both conventions should be supported.
+	 *
+	 * @param object $taxonomy Object taxonomy to check.
+	 * @return boolean
+	 */
+	private static function taxonomy_has_block_template( $taxonomy ) : bool {
+		if ( taxonomy_is_product_attribute( $taxonomy->taxonomy ) ) {
+			$template_name = 'taxonomy-product_attribute';
+		} else {
+			$template_name = 'taxonomy-' . $taxonomy->taxonomy;
+		}
+
+		return self::has_block_template( $template_name );
+	}
+
+	/**
 	 * Checks whether a block template with that name exists.
 	 *
 	 * **Note: ** This checks both the `templates` and `block-templates` directories
@@ -171,10 +190,12 @@ class WC_Template_Loader {
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+			if ( self::taxonomy_has_block_template( $object ) ) {
 				$default_file = '';
 			} else {
-				if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
+					$default_file = 'taxonomy-product-attribute.php';
+				} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
 				} elseif ( ! self::has_block_template( 'archive-product' ) ) {
 					$default_file = 'archive-product.php';
@@ -233,6 +254,12 @@ class WC_Template_Loader {
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
 			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+
+			if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
+				$templates[] = 'taxonomy-product_attribute.php';
+				$templates[] = WC()->template_path() . 'taxonomy-product_attribute.php';
+				$templates[] = $default_file;
+			}
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );

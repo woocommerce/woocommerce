@@ -1,0 +1,12 @@
+<!-- wp:column -->      
+<div class="wp-block-column">
+  <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+  <figure class="wp-block-image size-large">
+    <a href="https://github.com/<%= contributor.login %>" target="_blank">
+      <img src="<%= contributor.avatar_url %>" alt=""/>
+    </a>
+    <figcaption><%= contributor.login %></figcaption>
+  </figure>
+  <!-- /wp:image -->
+</div>
+<!-- /wp:column -->

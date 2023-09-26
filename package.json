@@ -1,46 +1,80 @@
 {
-  "name": "woocommerce-monorepo",
-  "title": "WooCommerce Monorepo",
-  "description": "Monorepo for the WooCommerce ecosystem",
-  "homepage": "https://woocommerce.com/",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/woocommerce/woocommerce.git"
-  },
-  "author": "Automattic",
-  "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/woocommerce/woocommerce/issues"
-  },
-  "scripts": {
-    "preinstall": "npx only-allow pnpm"
-  },
-  "devDependencies": {
-    "@automattic/nx-composer": "^0.1.0",
-    "@nrwl/cli": "^13.3.4",
-    "@nrwl/linter": "^13.3.4",
-    "@nrwl/devkit": "^13.1.4",
-    "@nrwl/tao": "13.3.4",
-    "@nrwl/web": "^13.3.4",
-    "@nrwl/workspace": "^13.3.4",
-    "@types/node": "14.14.33",
-    "@woocommerce/eslint-plugin": "^1.3.0",
-    "@wordpress/prettier-config": "^1.1.1",
-    "chalk": "^4.1.2",
-    "glob": "^7.2.0",
-    "jest": "^27.3.1",
-    "mkdirp": "^1.0.4",
-    "node-stream-zip": "^1.15.0",
-    "prettier": "npm:wp-prettier@^2.2.1-beta-1",
-    "request": "^2.88.2",
-    "typescript": "4.2.4"
-  },
-  "dependencies": {
-    "@babel/core": "7.12.9",
-    "@wordpress/babel-plugin-import-jsx-pragma": "^3.1.0",
-    "@wordpress/babel-preset-default": "^6.4.1",
-    "lodash": "^4.17.21",
-    "wp-textdomain": "1.0.1"
-  }
+	"name": "woocommerce-monorepo",
+	"title": "WooCommerce Monorepo",
+	"description": "Monorepo for the WooCommerce ecosystem",
+	"homepage": "https://woocommerce.com/",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"bin": {
+		"utils": "./tools/monorepo-utils/bin/run"
+	},
+	"scripts": {
+		"build": "pnpm exec turbo run turbo:build",
+		"test": "pnpm exec turbo run turbo:test",
+		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
+		"preinstall": "npx only-allow pnpm",
+		"postinstall": "pnpm git:update-hooks",
+		"git:update-hooks": "if test -d .git; then rm -r .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
+		"create-extension": "node ./tools/create-extension/index.js",
+		"cherry-pick": "node ./tools/cherry-pick/bin/run",
+		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
+		"utils": "node ./tools/monorepo-utils/dist/index.js"
+	},
+	"devDependencies": {
+		"@babel/preset-env": "^7.20.2",
+		"@babel/runtime": "^7.21.0",
+		"@types/node": "^16.18.18",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/data": "wp-6.0",
+		"@wordpress/eslint-plugin": "14.7.0",
+		"@wordpress/prettier-config": "2.17.0",
+		"babel-loader": "^8.3.0",
+		"chalk": "^4.1.2",
+		"copy-webpack-plugin": "^10.2.4",
+		"core-js": "^3.29.1",
+		"css-loader": "^6.7.3",
+		"glob": "^7.2.3",
+		"husky": "^7.0.4",
+		"jest": "^27.5.1",
+		"lint-staged": "^12.5.0",
+		"mkdirp": "^1.0.4",
+		"moment": "^2.29.4",
+		"node-stream-zip": "^1.15.0",
+		"postcss-loader": "^4.3.0",
+		"prettier": "npm:wp-prettier@^2.8.5",
+		"regenerator-runtime": "^0.13.11",
+		"request": "^2.88.2",
+		"sass": "^1.59.3",
+		"sass-loader": "^10.4.1",
+		"syncpack": "^10.7.3",
+		"turbo": "^1.10.7",
+		"typescript": "^5.1.6",
+		"url-loader": "^1.1.2",
+		"webpack": "^5.76.2"
+	},
+	"dependencies": {
+		"@babel/core": "7.12.9",
+		"@wordpress/babel-plugin-import-jsx-pragma": "^3.2.0",
+		"@wordpress/babel-preset-default": "^6.17.0",
+		"lodash": "^4.17.21",
+		"wp-textdomain": "1.0.1"
+	},
+	"pnpm": {
+		"overrides": {
+			"@types/react": "^17.0.2",
+			"react": "^17.0.2"
+		}
+	}
 }

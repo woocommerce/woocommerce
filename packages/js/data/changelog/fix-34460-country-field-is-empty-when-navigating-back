@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add is_store_country_set field to profileItems

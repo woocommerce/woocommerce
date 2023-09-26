@@ -26,7 +26,7 @@ trait CustomAttributeTraits {
 		if ( empty( $matching_attributes ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_product_attribute_not_found',
-				__( 'No product attribute with that slug was found.', 'woocommerce-admin' ),
+				__( 'No product attribute with that slug was found.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}

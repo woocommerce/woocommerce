@@ -15,7 +15,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 
 		WC()->session->set( 'wc_notices', null );
 	}
@@ -197,7 +197,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		// No notices.
 		$notices = wc_get_notices();
-		$this->assertInternalType( 'array', $notices );
+		$this->assertIsArray( $notices );
 		$this->assertEmpty( $notices );
 
 		// Default type.
@@ -228,7 +228,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		// Invalid type.
 		$notices = wc_get_notices( 'bogus_type' );
-		$this->assertInternalType( 'array', $notices );
+		$this->assertIsArray( $notices );
 		$this->assertEmpty( $notices );
 	}
 }

@@ -16,12 +16,12 @@ import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportError from '../report-error';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 /**
  * Component to render summary numbers in reports.
@@ -104,8 +104,8 @@ export class ReportSummary extends Component {
 						reverseTrend={ isReverseTrend }
 						prevLabel={
 							compare === 'previous_period'
-								? __( 'Previous period:', 'woocommerce-admin' )
-								: __( 'Previous year:', 'woocommerce-admin' )
+								? __( 'Previous period:', 'woocommerce' )
+								: __( 'Previous year:', 'woocommerce' )
 						}
 						prevValue={ prevValue }
 						selected={ isSelected }

@@ -72,9 +72,7 @@
 		}
 
 		.components-popover__content {
-			> div {
-				padding: $gap $gap-large;
-			}
+			padding: $gap $gap-large;
 		}
 
 		.woocommerce-profile-wizard__footer {
@@ -419,10 +417,10 @@
 		align-items: center;
 		height: 60px;
 		z-index: 10;
-		position: relative;
 		position: sticky;
 		top: 0;
-		margin: 0 -32px 24px;
+		margin: 0 -32px;
+		display: flex;
 	}
 
 	.woocommerce-usage-modal__actions {

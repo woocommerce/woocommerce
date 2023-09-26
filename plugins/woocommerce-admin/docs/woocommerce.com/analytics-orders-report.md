@@ -2,7 +2,7 @@
 
 The Orders Report provides insight about your store's orders.
 
-By default, orders with non-excluded statuses are listed by order date descending. Excluded statuses can be edited on the [Settings page](https://github.com/woocommerce/woocommerce-admin/blob/main/docs/woocommerce.com/analytics-settings.md#excluded-statuses)
+By default, orders with non-excluded statuses are listed by order date descending. Excluded statuses can be edited on the [Settings page](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/docs/woocommerce.com/analytics-settings.md#excluded-statuses)
 
 Refunded orders cannot be excluded from the orders report. Refunded orders have two rows in the report: one for the date of the original order and one for the date of refund.
 

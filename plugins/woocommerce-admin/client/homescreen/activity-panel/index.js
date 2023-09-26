@@ -10,7 +10,11 @@ import {
 	PanelRow,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	ORDERS_STORE_NAME,
+	PRODUCTS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { snakeCase } from 'lodash';
@@ -29,22 +33,46 @@ import { getUnapprovedReviews } from './reviews/utils';
 import { getUrlParams } from '../../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 
+const ORDERS_QUERY_PARAMS = { _fields: [ 'id' ] };
+const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
+	status: 'publish',
+	_fields: [ 'id' ],
+};
+
 export const ActivityPanel = () => {
 	const panelsData = useSelect( ( select ) => {
-		const totalOrderCount = getAdminSetting( 'orderCount', 0 );
+		const {
+			getOrdersTotalCount,
+			hasFinishedResolution: hasFinishedOrdersResolution,
+		} = select( ORDERS_STORE_NAME );
+		const {
+			getProductsTotalCount,
+			hasFinishedResolution: hasFinishedProductsResolution,
+		} = select( PRODUCTS_STORE_NAME );
+		const totalOrderCount = getOrdersTotalCount( ORDERS_QUERY_PARAMS, 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
 		const unreadOrdersCount = getUnreadOrders( select, orderStatuses );
 		const manageStock = getAdminSetting( 'manageStock', 'no' );
 		const lowStockProductsCount = getLowStockCount( select );
 		const unapprovedReviewsCount = getUnapprovedReviews( select );
-		const publishedProductCount = getAdminSetting(
-			'publishedProductCount',
+		const publishedProductCount = getProductsTotalCount(
+			PUBLISHED_PRODUCTS_QUERY_PARAMS,
 			0
 		);
+		const loadingOrderAndProductCount =
+			! hasFinishedOrdersResolution( 'getOrdersTotalCount', [
+				ORDERS_QUERY_PARAMS,
+				0,
+			] ) ||
+			! hasFinishedProductsResolution( 'getProductsTotalCount', [
+				PUBLISHED_PRODUCTS_QUERY_PARAMS,
+				0,
+			] );
 		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList( 'setup' );
 
 		return {
+			loadingOrderAndProductCount,
 			lowStockProductsCount,
 			unapprovedReviewsCount,
 			unreadOrdersCount,
@@ -57,7 +85,9 @@ export const ActivityPanel = () => {
 		};
 	} );
 
-	const panels = getAllPanels( panelsData );
+	const panels = panelsData.loadingOrderAndProductCount
+		? []
+		: getAllPanels( panelsData );
 
 	useEffect( () => {
 		if ( panelsData.isTaskListHidden !== undefined ) {

@@ -51,7 +51,7 @@ class WC_Shortcode_Order_Tracking {
 			} else {
 				$order = wc_get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
-				if ( $order && $order->get_id() && strtolower( $order->get_billing_email() ) === strtolower( $order_email ) ) {
+				if ( $order && $order->get_id() && is_a( $order, 'WC_Order' ) && strtolower( $order->get_billing_email() ) === strtolower( $order_email ) ) {
 					do_action( 'woocommerce_track_order', $order->get_id() );
 					wc_get_template(
 						'order/tracking.php',

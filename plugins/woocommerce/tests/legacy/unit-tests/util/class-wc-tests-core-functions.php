@@ -18,7 +18,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->wc = WC();
 	}
@@ -193,8 +193,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'USD' => 'United States (US) dollar',
 			'UYU' => 'Uruguayan peso',
 			'UZS' => 'Uzbekistani som',
-			'VEF' => 'Venezuelan bol&iacute;var',
-			'VES' => 'Bol&iacute;var soberano',
+			'VEF' => 'Venezuelan bol&iacute;var (2008–2018)',
+			'VES' => 'Venezuelan bol&iacute;var',
 			'VND' => 'Vietnamese &#x111;&#x1ed3;ng',
 			'VUV' => 'Vanuatu vatu',
 			'WST' => 'Samoan t&#x101;l&#x101;',
@@ -229,7 +229,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		// Each case.
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
-			$this->assertInternalType( 'string', get_woocommerce_currency_symbol( $currency_code ) );
+			$this->assertIsString( get_woocommerce_currency_symbol( $currency_code ) );
 		}
 	}
 
@@ -728,14 +728,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		ob_start();
 		wc_print_js();
 		$printed_js = ob_get_clean();
-		$this->assertNotContains( $js, $printed_js );
+		$this->assertStringNotContainsString( $js, $printed_js );
 
 		wc_enqueue_js( $js );
 
 		ob_start();
 		wc_print_js();
 		$printed_js = ob_get_clean();
-		$this->assertContains( $js, $printed_js );
+		$this->assertStringContainsString( $js, $printed_js );
 	}
 
 	/**
@@ -1049,6 +1049,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_load_cart() {
+		$original_cart     = $this->wc->cart;
+		$original_customer = $this->wc->customer;
+		$original_session  = $this->wc->session;
+
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
@@ -1065,6 +1069,12 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 
+		// Restore original cart, customer and session instances. Important since global state (including filters and
+		// actions) is reset between tests, and we want to avoid a scenario in which wc()->cart and cart-related
+		// callbacks are separate instances of the same class - which can lead to strange effects.
+		$this->wc->cart     = $original_cart;
+		$this->wc->customer = $original_customer;
+		$this->wc->session  = $original_session;
 	}
 
 	/**

@@ -14,19 +14,18 @@ export const paymentGatewaysStub: PaymentGateway[] = [
 		method_description: 'method description',
 		method_supports: [ 'products' ],
 		settings: {
-			title: {
-				id: 'title',
-				label: 'Title',
-				description:
-					'This controls the title which the user sees during checkout.',
-				type: 'text',
-				value: 'direct bank',
-				default: 'Direct bank transfer',
-				tip:
-					'This controls the title which the user sees during checkout.',
-				placeholder: '',
-			},
+			id: 'title',
+			label: 'Title',
+			description:
+				'This controls the title which the user sees during checkout.',
+			type: 'text',
+			value: 'direct bank',
+			default: 'Direct bank transfer',
+			tip: 'This controls the title which the user sees during checkout.',
+			placeholder: '',
+			is_dismissed: 'no',
 		},
+		settings_url: '',
 	},
 	{
 		id: 'test',
@@ -38,18 +37,17 @@ export const paymentGatewaysStub: PaymentGateway[] = [
 		method_description: 'method description',
 		method_supports: [ 'products' ],
 		settings: {
-			title: {
-				id: 'title',
-				label: 'Title',
-				description:
-					'This controls the title which the user sees during checkout.',
-				type: 'text',
-				value: 'direct bank',
-				default: 'Direct bank transfer',
-				tip:
-					'This controls the title which the user sees during checkout.',
-				placeholder: '',
-			},
+			id: 'title',
+			label: 'Title',
+			description:
+				'This controls the title which the user sees during checkout.',
+			type: 'text',
+			value: 'direct bank',
+			default: 'Direct bank transfer',
+			tip: 'This controls the title which the user sees during checkout.',
+			placeholder: '',
+			is_dismissed: 'no',
 		},
+		settings_url: '',
 	},
 ];

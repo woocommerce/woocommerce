@@ -8,8 +8,8 @@
 /changelog/
 /node_modules/
 /tests/
+/e2e/
 babel.config.js
-changelog.txt
 composer.*
 contributors.html
 docker-compose.yaml
@@ -27,3 +27,4 @@ README.md
 renovate.json
 tsconfig.*
 webpack.config.js
+client/legacy/

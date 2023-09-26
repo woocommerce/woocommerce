@@ -1,0 +1,342 @@
+{
+    "code": "TR",
+    "name": "Turkey",
+    "states": [
+        {
+            "code": "TR01",
+            "name": "Adana"
+        },
+        {
+            "code": "TR02",
+            "name": "Adıyaman"
+        },
+        {
+            "code": "TR03",
+            "name": "Afyon"
+        },
+        {
+            "code": "TR04",
+            "name": "Ağrı"
+        },
+        {
+            "code": "TR05",
+            "name": "Amasya"
+        },
+        {
+            "code": "TR06",
+            "name": "Ankara"
+        },
+        {
+            "code": "TR07",
+            "name": "Antalya"
+        },
+        {
+            "code": "TR08",
+            "name": "Artvin"
+        },
+        {
+            "code": "TR09",
+            "name": "Aydın"
+        },
+        {
+            "code": "TR10",
+            "name": "Balıkesir"
+        },
+        {
+            "code": "TR11",
+            "name": "Bilecik"
+        },
+        {
+            "code": "TR12",
+            "name": "Bingöl"
+        },
+        {
+            "code": "TR13",
+            "name": "Bitlis"
+        },
+        {
+            "code": "TR14",
+            "name": "Bolu"
+        },
+        {
+            "code": "TR15",
+            "name": "Burdur"
+        },
+        {
+            "code": "TR16",
+            "name": "Bursa"
+        },
+        {
+            "code": "TR17",
+            "name": "Çanakkale"
+        },
+        {
+            "code": "TR18",
+            "name": "Çankırı"
+        },
+        {
+            "code": "TR19",
+            "name": "Çorum"
+        },
+        {
+            "code": "TR20",
+            "name": "Denizli"
+        },
+        {
+            "code": "TR21",
+            "name": "Diyarbakır"
+        },
+        {
+            "code": "TR22",
+            "name": "Edirne"
+        },
+        {
+            "code": "TR23",
+            "name": "Elazığ"
+        },
+        {
+            "code": "TR24",
+            "name": "Erzincan"
+        },
+        {
+            "code": "TR25",
+            "name": "Erzurum"
+        },
+        {
+            "code": "TR26",
+            "name": "Eskişehir"
+        },
+        {
+            "code": "TR27",
+            "name": "Gaziantep"
+        },
+        {
+            "code": "TR28",
+            "name": "Giresun"
+        },
+        {
+            "code": "TR29",
+            "name": "Gümüşhane"
+        },
+        {
+            "code": "TR30",
+            "name": "Hakkari"
+        },
+        {
+            "code": "TR31",
+            "name": "Hatay"
+        },
+        {
+            "code": "TR32",
+            "name": "Isparta"
+        },
+        {
+            "code": "TR33",
+            "name": "İçel"
+        },
+        {
+            "code": "TR34",
+            "name": "İstanbul"
+        },
+        {
+            "code": "TR35",
+            "name": "İzmir"
+        },
+        {
+            "code": "TR36",
+            "name": "Kars"
+        },
+        {
+            "code": "TR37",
+            "name": "Kastamonu"
+        },
+        {
+            "code": "TR38",
+            "name": "Kayseri"
+        },
+        {
+            "code": "TR39",
+            "name": "Kırklareli"
+        },
+        {
+            "code": "TR40",
+            "name": "Kırşehir"
+        },
+        {
+            "code": "TR41",
+            "name": "Kocaeli"
+        },
+        {
+            "code": "TR42",
+            "name": "Konya"
+        },
+        {
+            "code": "TR43",
+            "name": "Kütahya"
+        },
+        {
+            "code": "TR44",
+            "name": "Malatya"
+        },
+        {
+            "code": "TR45",
+            "name": "Manisa"
+        },
+        {
+            "code": "TR46",
+            "name": "Kahramanmaraş"
+        },
+        {
+            "code": "TR47",
+            "name": "Mardin"
+        },
+        {
+            "code": "TR48",
+            "name": "Muğla"
+        },
+        {
+            "code": "TR49",
+            "name": "Muş"
+        },
+        {
+            "code": "TR50",
+            "name": "Nevşehir"
+        },
+        {
+            "code": "TR51",
+            "name": "Niğde"
+        },
+        {
+            "code": "TR52",
+            "name": "Ordu"
+        },
+        {
+            "code": "TR53",
+            "name": "Rize"
+        },
+        {
+            "code": "TR54",
+            "name": "Sakarya"
+        },
+        {
+            "code": "TR55",
+            "name": "Samsun"
+        },
+        {
+            "code": "TR56",
+            "name": "Siirt"
+        },
+        {
+            "code": "TR57",
+            "name": "Sinop"
+        },
+        {
+            "code": "TR58",
+            "name": "Sivas"
+        },
+        {
+            "code": "TR59",
+            "name": "Tekirdağ"
+        },
+        {
+            "code": "TR60",
+            "name": "Tokat"
+        },
+        {
+            "code": "TR61",
+            "name": "Trabzon"
+        },
+        {
+            "code": "TR62",
+            "name": "Tunceli"
+        },
+        {
+            "code": "TR63",
+            "name": "Şanlıurfa"
+        },
+        {
+            "code": "TR64",
+            "name": "Uşak"
+        },
+        {
+            "code": "TR65",
+            "name": "Van"
+        },
+        {
+            "code": "TR66",
+            "name": "Yozgat"
+        },
+        {
+            "code": "TR67",
+            "name": "Zonguldak"
+        },
+        {
+            "code": "TR68",
+            "name": "Aksaray"
+        },
+        {
+            "code": "TR69",
+            "name": "Bayburt"
+        },
+        {
+            "code": "TR70",
+            "name": "Karaman"
+        },
+        {
+            "code": "TR71",
+            "name": "Kırıkkale"
+        },
+        {
+            "code": "TR72",
+            "name": "Batman"
+        },
+        {
+            "code": "TR73",
+            "name": "Şırnak"
+        },
+        {
+            "code": "TR74",
+            "name": "Bartın"
+        },
+        {
+            "code": "TR75",
+            "name": "Ardahan"
+        },
+        {
+            "code": "TR76",
+            "name": "Iğdır"
+        },
+        {
+            "code": "TR77",
+            "name": "Yalova"
+        },
+        {
+            "code": "TR78",
+            "name": "Karabük"
+        },
+        {
+            "code": "TR79",
+            "name": "Kilis"
+        },
+        {
+            "code": "TR80",
+            "name": "Osmaniye"
+        },
+        {
+            "code": "TR81",
+            "name": "Düzce"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/tr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

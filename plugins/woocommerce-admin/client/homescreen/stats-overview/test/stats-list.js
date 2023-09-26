@@ -27,8 +27,7 @@ const data = {
 			_links: {
 				api: [
 					{
-						href:
-							'http://tangaroa.test/wp-json/wc-analytics/reports/revenue/stats',
+						href: 'http://tangaroa.test/wp-json/wc-analytics/reports/revenue/stats',
 					},
 				],
 				report: [ { href: '/analytics/revenue' } ],
@@ -43,8 +42,7 @@ const data = {
 			_links: {
 				api: [
 					{
-						href:
-							'http://tangaroa.test/wp-json/wc-analytics/reports/orders/stats',
+						href: 'http://tangaroa.test/wp-json/wc-analytics/reports/orders/stats',
 					},
 				],
 				report: [ { href: '/analytics/orders' } ],

@@ -1,0 +1,98 @@
+{
+    "code": "HU",
+    "name": "Hungary",
+    "states": [
+        {
+            "code": "BK",
+            "name": "Bács-Kiskun"
+        },
+        {
+            "code": "BE",
+            "name": "Békés"
+        },
+        {
+            "code": "BA",
+            "name": "Baranya"
+        },
+        {
+            "code": "BZ",
+            "name": "Borsod-Abaúj-Zemplén"
+        },
+        {
+            "code": "BU",
+            "name": "Budapest"
+        },
+        {
+            "code": "CS",
+            "name": "Csongrád-Csanád"
+        },
+        {
+            "code": "FE",
+            "name": "Fejér"
+        },
+        {
+            "code": "GS",
+            "name": "Győr-Moson-Sopron"
+        },
+        {
+            "code": "HB",
+            "name": "Hajdú-Bihar"
+        },
+        {
+            "code": "HE",
+            "name": "Heves"
+        },
+        {
+            "code": "JN",
+            "name": "Jász-Nagykun-Szolnok"
+        },
+        {
+            "code": "KE",
+            "name": "Komárom-Esztergom"
+        },
+        {
+            "code": "NO",
+            "name": "Nógrád"
+        },
+        {
+            "code": "PE",
+            "name": "Pest"
+        },
+        {
+            "code": "SO",
+            "name": "Somogy"
+        },
+        {
+            "code": "SZ",
+            "name": "Szabolcs-Szatmár-Bereg"
+        },
+        {
+            "code": "TO",
+            "name": "Tolna"
+        },
+        {
+            "code": "VA",
+            "name": "Vas"
+        },
+        {
+            "code": "VE",
+            "name": "Veszprém"
+        },
+        {
+            "code": "ZA",
+            "name": "Zala"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/hu"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -288,7 +288,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['page']     = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -296,7 +296,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'minimum'           => 1,
 		);
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -307,7 +307,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 		$params['status'] = array(
 			'default'           => 'publish',
-			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
 			'sanitize_callback' => 'sanitize_key',

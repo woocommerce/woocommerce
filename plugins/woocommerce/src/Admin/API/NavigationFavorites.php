@@ -118,7 +118,7 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 			return $this->prepare_error(
 				new \WP_Error(
 					'woocommerce_favorites_invalid_user',
-					__( 'Invalid user_id provided', 'woocommerce-admin' )
+					__( 'Invalid user_id provided', 'woocommerce' )
 				)
 			);
 		}

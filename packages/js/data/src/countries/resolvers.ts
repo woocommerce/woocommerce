@@ -3,10 +3,12 @@
  */
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
+import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
+import * as actions from './actions';
 import {
 	getLocalesSuccess,
 	getLocalesError,
@@ -14,9 +16,8 @@ import {
 	getCountriesError,
 } from './actions';
 import { NAMESPACE } from '../constants';
-import { Locales, Country } from './types';
+import { Locales, Country, GeolocationResponse } from './types';
 import { STORE_NAME } from './constants';
-import { RestApiError } from '../types';
 
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
@@ -35,7 +36,7 @@ export function* getLocales() {
 
 		return getLocalesSuccess( results );
 	} catch ( error ) {
-		return getLocalesError( error as RestApiError );
+		return getLocalesError( error );
 	}
 }
 
@@ -53,6 +54,21 @@ export function* getCountries() {
 
 		return getCountriesSuccess( results );
 	} catch ( error ) {
-		return getCountriesError( error as RestApiError );
+		return getCountriesError( error );
 	}
 }
+
+export const geolocate =
+	() =>
+	async ( { dispatch }: { dispatch: DispatchFromMap< typeof actions > } ) => {
+		try {
+			const url = `https://public-api.wordpress.com/geo/?v=${ new Date().getTime() }`;
+			const response = await fetch( url, {
+				method: 'GET',
+			} );
+			const result: GeolocationResponse = await response.json();
+			dispatch.geolocationSuccess( result );
+		} catch ( error ) {
+			dispatch.geolocationError( error );
+		}
+	};

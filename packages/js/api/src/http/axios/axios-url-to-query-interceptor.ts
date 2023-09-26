@@ -1,5 +1,12 @@
-import { AxiosInterceptor } from './axios-interceptor';
+/**
+ * External dependencies
+ */
 import { AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
+import { AxiosInterceptor } from './axios-interceptor';
 import { buildURL } from './utils';
 
 /**

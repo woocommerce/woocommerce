@@ -4,7 +4,7 @@ Thumbs.db
 
 # IDE files
 .idea
-.vscode/
+.vscode/*
 project.xml
 project.properties
 .project
@@ -22,8 +22,9 @@ none
 # Logs
 logs/
 
-# Eslint Cache
+# Eslint
 .eslintcache
+eslint_report.json
 
 # Environment files
 wp-cli.local.yml
@@ -40,6 +41,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-style.js
 build-types/
 dist/
 
@@ -72,5 +74,28 @@ yarn.lock
 # Editors
 nbproject/private/
 
-# Test Results
-test-results.json
+# E2E and API Test Results
+test-results
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml
+
+#PHP Unit
+.phpunit.result.cache
+
+# Allure directories
+allure-report
+allure-results
+
+# Code analyzer output and env
+changes.json
+.env
+
+# Turborepo
+.turbo
+
+# Support .gitkeep Files
+!.gitkeep

@@ -23,9 +23,8 @@ export const Banner = ( { onInstall, onDismiss } ) => {
 	const isVisible = platform() === ANDROID_PLATFORM && ! isActioned;
 
 	useEffect( () => {
-		const layout = document.getElementsByClassName(
-			'woocommerce-layout'
-		)[ 0 ];
+		const layout =
+			document.getElementsByClassName( 'woocommerce-layout' )[ 0 ];
 
 		if ( isVisible && layout ) {
 			// This is a hack to allow the mobile banner to work in the context of the header which is
@@ -60,16 +59,10 @@ export const Banner = ( { onInstall, onDismiss } ) => {
 			<AppIcon />
 			<div className="woocommerce-mobile-app-banner__description">
 				<p className="woocommerce-mobile-app-banner__description__text">
-					{ __(
-						'Run your store from anywhere',
-						'woocommerce-admin'
-					) }
+					{ __( 'Run your store from anywhere', 'woocommerce' ) }
 				</p>
 				<p className="woocommerce-mobile-app-banner__description__text">
-					{ __(
-						'Download the WooCommerce app',
-						'woocommerce-admin'
-					) }
+					{ __( 'Download the WooCommerce app', 'woocommerce' ) }
 				</p>
 			</div>
 
@@ -84,7 +77,7 @@ export const Banner = ( { onInstall, onDismiss } ) => {
 					} );
 				} }
 			>
-				{ __( 'Install', 'woocommerce-admin' ) }
+				{ __( 'Install', 'woocommerce' ) }
 			</Button>
 		</div>
 	);

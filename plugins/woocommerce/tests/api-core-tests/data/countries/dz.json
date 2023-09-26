@@ -1,0 +1,210 @@
+{
+    "code": "DZ",
+    "name": "Algeria",
+    "states": [
+        {
+            "code": "DZ-01",
+            "name": "Adrar"
+        },
+        {
+            "code": "DZ-02",
+            "name": "Chlef"
+        },
+        {
+            "code": "DZ-03",
+            "name": "Laghouat"
+        },
+        {
+            "code": "DZ-04",
+            "name": "Oum El Bouaghi"
+        },
+        {
+            "code": "DZ-05",
+            "name": "Batna"
+        },
+        {
+            "code": "DZ-06",
+            "name": "Béjaïa"
+        },
+        {
+            "code": "DZ-07",
+            "name": "Biskra"
+        },
+        {
+            "code": "DZ-08",
+            "name": "Béchar"
+        },
+        {
+            "code": "DZ-09",
+            "name": "Blida"
+        },
+        {
+            "code": "DZ-10",
+            "name": "Bouira"
+        },
+        {
+            "code": "DZ-11",
+            "name": "Tamanghasset"
+        },
+        {
+            "code": "DZ-12",
+            "name": "Tébessa"
+        },
+        {
+            "code": "DZ-13",
+            "name": "Tlemcen"
+        },
+        {
+            "code": "DZ-14",
+            "name": "Tiaret"
+        },
+        {
+            "code": "DZ-15",
+            "name": "Tizi Ouzou"
+        },
+        {
+            "code": "DZ-16",
+            "name": "Algiers"
+        },
+        {
+            "code": "DZ-17",
+            "name": "Djelfa"
+        },
+        {
+            "code": "DZ-18",
+            "name": "Jijel"
+        },
+        {
+            "code": "DZ-19",
+            "name": "Sétif"
+        },
+        {
+            "code": "DZ-20",
+            "name": "Saïda"
+        },
+        {
+            "code": "DZ-21",
+            "name": "Skikda"
+        },
+        {
+            "code": "DZ-22",
+            "name": "Sidi Bel Abbès"
+        },
+        {
+            "code": "DZ-23",
+            "name": "Annaba"
+        },
+        {
+            "code": "DZ-24",
+            "name": "Guelma"
+        },
+        {
+            "code": "DZ-25",
+            "name": "Constantine"
+        },
+        {
+            "code": "DZ-26",
+            "name": "Médéa"
+        },
+        {
+            "code": "DZ-27",
+            "name": "Mostaganem"
+        },
+        {
+            "code": "DZ-28",
+            "name": "M’Sila"
+        },
+        {
+            "code": "DZ-29",
+            "name": "Mascara"
+        },
+        {
+            "code": "DZ-30",
+            "name": "Ouargla"
+        },
+        {
+            "code": "DZ-31",
+            "name": "Oran"
+        },
+        {
+            "code": "DZ-32",
+            "name": "El Bayadh"
+        },
+        {
+            "code": "DZ-33",
+            "name": "Illizi"
+        },
+        {
+            "code": "DZ-34",
+            "name": "Bordj Bou Arréridj"
+        },
+        {
+            "code": "DZ-35",
+            "name": "Boumerdès"
+        },
+        {
+            "code": "DZ-36",
+            "name": "El Tarf"
+        },
+        {
+            "code": "DZ-37",
+            "name": "Tindouf"
+        },
+        {
+            "code": "DZ-38",
+            "name": "Tissemsilt"
+        },
+        {
+            "code": "DZ-39",
+            "name": "El Oued"
+        },
+        {
+            "code": "DZ-40",
+            "name": "Khenchela"
+        },
+        {
+            "code": "DZ-41",
+            "name": "Souk Ahras"
+        },
+        {
+            "code": "DZ-42",
+            "name": "Tipasa"
+        },
+        {
+            "code": "DZ-43",
+            "name": "Mila"
+        },
+        {
+            "code": "DZ-44",
+            "name": "Aïn Defla"
+        },
+        {
+            "code": "DZ-45",
+            "name": "Naama"
+        },
+        {
+            "code": "DZ-46",
+            "name": "Aïn Témouchent"
+        },
+        {
+            "code": "DZ-47",
+            "name": "Ghardaïa"
+        },
+        {
+            "code": "DZ-48",
+            "name": "Relizane"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/dz"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

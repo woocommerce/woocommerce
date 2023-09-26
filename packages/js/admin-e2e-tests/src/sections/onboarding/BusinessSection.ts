@@ -1,17 +1,17 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { BasePage } from '../../pages/BasePage';
-import { waitForElementByText } from '../../utils/actions';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
+import {
 	setCheckbox,
 	unsetCheckbox,
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
-} = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
+} from '@woocommerce/e2e-utils';
+/**
+ * Internal dependencies
+ */
+import { BasePage } from '../../pages/BasePage';
+import { waitForElementByText } from '../../utils/actions';
 
 export class BusinessSection extends BasePage {
 	async isDisplayed(): Promise< void > {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove use of head prop with IFrame component as it has been removed.

@@ -7,8 +7,9 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Remote Inbox Notifications engine.
@@ -39,24 +40,27 @@ class RemoteInboxNotificationsEngine {
 
 		// Hook into WCA updated. This is hooked up here rather than in
 		// on_admin_init because that runs too late to hook into the action.
+		add_action( 'woocommerce_run_on_woocommerce_admin_updated', array( __CLASS__, 'run_on_woocommerce_admin_updated' ) );
 		add_action(
-			'woocommerce_admin_updated',
+			'woocommerce_updated',
 			function() {
 				$next_hook = WC()->queue()->get_next(
 					'woocommerce_run_on_woocommerce_admin_updated',
-					array( __CLASS__, 'run_on_woocommerce_admin_updated' ),
+					array(),
 					'woocommerce-remote-inbox-engine'
 				);
 				if ( null === $next_hook ) {
 					WC()->queue()->schedule_single(
 						time(),
 						'woocommerce_run_on_woocommerce_admin_updated',
-						array( __CLASS__, 'run_on_woocommerce_admin_updated' ),
+						array(),
 						'woocommerce-remote-inbox-engine'
 					);
 				}
 			}
 		);
+
+		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 	}
 
 	/**
@@ -108,7 +112,7 @@ class RemoteInboxNotificationsEngine {
 	public static function run() {
 		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
 
-		if ( false === $specs || 0 === count( $specs ) ) {
+		if ( $specs === false || count( $specs ) === 0 ) {
 			return;
 		}
 
@@ -141,7 +145,7 @@ class RemoteInboxNotificationsEngine {
 	public static function get_stored_state() {
 		$stored_state = get_option( self::STORED_STATE_OPTION_NAME );
 
-		if ( false === $stored_state ) {
+		if ( $stored_state === false ) {
 			$stored_state = new \stdClass();
 
 			$stored_state = StoredStateSetupForProducts::init_stored_state(
@@ -179,5 +183,44 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function update_stored_state( $stored_state ) {
 		update_option( self::STORED_STATE_OPTION_NAME, $stored_state, false );
+	}
+
+	/**
+	 * Get the note. This is used to display localized note.
+	 *
+	 * @param Note $note_from_db The note object created from db.
+	 * @return Note The note.
+	 */
+	public static function get_note_from_db( $note_from_db ) {
+		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
+			return $note_from_db;
+		}
+		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
+		foreach ( $specs as $spec ) {
+			if ( $spec->slug !== $note_from_db->get_name() ) {
+				continue;
+			}
+			$locale = SpecRunner::get_locale( $spec->locales, true );
+			if ( $locale === null ) {
+				// No locale found, so don't update the note.
+				break;
+			}
+
+			$localized_actions = SpecRunner::get_actions( $spec );
+
+			// Manually copy the action id from the db to the localized action, since they were not being provided.
+			foreach ( $localized_actions as $localized_action ) {
+				$action = $note_from_db->get_action( $localized_action->name );
+				if ( $action ) {
+					$localized_action->id = $action->id;
+				}
+			}
+
+			$note_from_db->set_title( $locale->title );
+			$note_from_db->set_content( $locale->content );
+			$note_from_db->set_actions( $localized_actions );
+		}
+
+		return $note_from_db;
 	}
 }

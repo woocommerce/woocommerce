@@ -6,7 +6,7 @@ const { createCoupon } = require( '@woocommerce/e2e-utils' );
 const couponsTable = [
 	[ 'fixed cart', { text: '$5.00' }, { text: '$4.99' } ],
 	[ 'percentage', { text: '$4.99' }, { text: '$5.00' } ],
-	[ 'fixed product', { text: '$5.00' }, { text: '$4.99' } ]
+	[ 'fixed product', { text: '$5.00' }, { text: '$4.99' } ],
 ];
 
 let couponFixedCart;
@@ -28,12 +28,18 @@ const getCouponId = async ( couponType ) => {
 			return couponFixedCart;
 		case 'percentage':
 			if ( ! couponPercentage ) {
-				couponPercentage = await createCoupon( '50', 'Percentage discount' );
+				couponPercentage = await createCoupon(
+					'50',
+					'Percentage discount'
+				);
 			}
 			return couponPercentage;
 		case 'fixed product':
 			if ( ! couponFixedProduct ) {
-				couponFixedProduct = await createCoupon( '5', 'Fixed product discount' );
+				couponFixedProduct = await createCoupon(
+					'5',
+					'Fixed product discount'
+				);
 			}
 			return couponFixedProduct;
 	}

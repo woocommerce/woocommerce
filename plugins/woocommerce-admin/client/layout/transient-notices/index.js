@@ -3,6 +3,7 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 import classnames from 'classnames';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 import { OPTIONS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -17,12 +18,10 @@ import './style.scss';
 const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 const QUEUED_NOTICE_FILTER = 'woocommerce_admin_queued_notice_filter';
 
-function TransientNotices( props ) {
+export function TransientNotices( props ) {
 	const { removeNotice: onRemove } = useDispatch( 'core/notices' );
-	const {
-		createNotice: createNotice2,
-		removeNotice: onRemove2,
-	} = useDispatch( 'core/notices2' );
+	const { createNotice: createNotice2, removeNotice: onRemove2 } =
+		useDispatch( 'core/notices2' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		currentUser = {},
@@ -36,9 +35,8 @@ function TransientNotices( props ) {
 			currentUser: select( USER_STORE_NAME ).getCurrentUser(),
 			notices: select( 'core/notices' ).getNotices(),
 			notices2: select( 'core/notices2' ).getNotices(),
-			noticesQueue: select( OPTIONS_STORE_NAME ).getOption(
-				QUEUE_OPTION
-			),
+			noticesQueue:
+				select( OPTIONS_STORE_NAME ).getOption( QUEUE_OPTION ),
 		};
 	} );
 
@@ -92,12 +90,14 @@ function TransientNotices( props ) {
 	const combinedNotices = getNotices();
 
 	return (
-		<SnackbarList
-			notices={ combinedNotices }
-			className={ classes }
-			onRemove={ onRemove }
-			onRemove2={ onRemove2 }
-		/>
+		<WooFooterItem>
+			<SnackbarList
+				notices={ combinedNotices }
+				className={ classes }
+				onRemove={ onRemove }
+				onRemove2={ onRemove2 }
+			/>
+		</WooFooterItem>
 	);
 }
 
@@ -111,5 +111,3 @@ TransientNotices.propTypes = {
 	 */
 	notices: PropTypes.array,
 };
-
-export default TransientNotices;

@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Settings Class.
  */
-class WC_Beta_Tester_Settings {
+class WC_Beta_Tester_Channel {
 
 	/**
 	 * Constructor
@@ -62,9 +62,9 @@ class WC_Beta_Tester_Settings {
 	 * @param array $args Arguments.
 	 */
 	public function update_section_html( $args ) {
-	?>
+		?>
 		<p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e( 'The following settings allow you to choose which WooCommerce updates to receive on this site, including beta and RC versions not quite ready for production deployment.', 'woocommerce-beta-tester' ); ?></p>
-	<?php
+		<?php
 	}
 
 	/**
@@ -134,7 +134,9 @@ class WC_Beta_Tester_Settings {
 			return;
 		}
 
-		if ( isset( $_GET['settings-updated'] ) ) { // WPCS: input var.
+		// This is just for giving a message, the option form itself will have validated the nonce.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['settings-updated'] ) ) {
 			add_settings_error( 'wc-beta-tester-messages', 'wc-beta-tester-message', __( 'Settings Saved', 'woocommerce-beta-tester' ), 'updated' );
 		}
 
@@ -158,4 +160,4 @@ class WC_Beta_Tester_Settings {
 	}
 }
 
-new WC_Beta_Tester_Settings();
+new WC_Beta_Tester_Channel();

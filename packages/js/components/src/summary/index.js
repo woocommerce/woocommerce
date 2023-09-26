@@ -78,7 +78,7 @@ SummaryList.propTypes = {
 };
 
 SummaryList.defaultProps = {
-	label: __( 'Performance Indicators', 'woocommerce-admin' ),
+	label: __( 'Performance Indicators', 'woocommerce' ),
 };
 
 export default withViewportMatch( {

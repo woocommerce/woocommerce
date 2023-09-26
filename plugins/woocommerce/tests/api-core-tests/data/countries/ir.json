@@ -1,0 +1,142 @@
+{
+    "code": "IR",
+    "name": "Iran",
+    "states": [
+        {
+            "code": "KHZ",
+            "name": "Khuzestan (خوزستان)"
+        },
+        {
+            "code": "THR",
+            "name": "Tehran (تهران)"
+        },
+        {
+            "code": "ILM",
+            "name": "Ilaam (ایلام)"
+        },
+        {
+            "code": "BHR",
+            "name": "Bushehr (بوشهر)"
+        },
+        {
+            "code": "ADL",
+            "name": "Ardabil (اردبیل)"
+        },
+        {
+            "code": "ESF",
+            "name": "Isfahan (اصفهان)"
+        },
+        {
+            "code": "YZD",
+            "name": "Yazd (یزد)"
+        },
+        {
+            "code": "KRH",
+            "name": "Kermanshah (کرمانشاه)"
+        },
+        {
+            "code": "KRN",
+            "name": "Kerman (کرمان)"
+        },
+        {
+            "code": "HDN",
+            "name": "Hamadan (همدان)"
+        },
+        {
+            "code": "GZN",
+            "name": "Ghazvin (قزوین)"
+        },
+        {
+            "code": "ZJN",
+            "name": "Zanjan (زنجان)"
+        },
+        {
+            "code": "LRS",
+            "name": "Luristan (لرستان)"
+        },
+        {
+            "code": "ABZ",
+            "name": "Alborz (البرز)"
+        },
+        {
+            "code": "EAZ",
+            "name": "East Azarbaijan (آذربایجان شرقی)"
+        },
+        {
+            "code": "WAZ",
+            "name": "West Azarbaijan (آذربایجان غربی)"
+        },
+        {
+            "code": "CHB",
+            "name": "Chaharmahal and Bakhtiari (چهارمحال و بختیاری)"
+        },
+        {
+            "code": "SKH",
+            "name": "South Khorasan (خراسان جنوبی)"
+        },
+        {
+            "code": "RKH",
+            "name": "Razavi Khorasan (خراسان رضوی)"
+        },
+        {
+            "code": "NKH",
+            "name": "North Khorasan (خراسان شمالی)"
+        },
+        {
+            "code": "SMN",
+            "name": "Semnan (سمنان)"
+        },
+        {
+            "code": "FRS",
+            "name": "Fars (فارس)"
+        },
+        {
+            "code": "QHM",
+            "name": "Qom (قم)"
+        },
+        {
+            "code": "KRD",
+            "name": "Kurdistan / کردستان)"
+        },
+        {
+            "code": "KBD",
+            "name": "Kohgiluyeh and BoyerAhmad (کهگیلوییه و بویراحمد)"
+        },
+        {
+            "code": "GLS",
+            "name": "Golestan (گلستان)"
+        },
+        {
+            "code": "GIL",
+            "name": "Gilan (گیلان)"
+        },
+        {
+            "code": "MZN",
+            "name": "Mazandaran (مازندران)"
+        },
+        {
+            "code": "MKZ",
+            "name": "Markazi (مرکزی)"
+        },
+        {
+            "code": "HRZ",
+            "name": "Hormozgan (هرمزگان)"
+        },
+        {
+            "code": "SBN",
+            "name": "Sistan and Baluchestan (سیستان و بلوچستان)"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ir"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

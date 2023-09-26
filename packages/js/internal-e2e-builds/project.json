@@ -1,0 +1,6 @@
+{
+	"root": "packages/js/internal-e2e-builds",
+	"sourceRoot": "packages/js/internal-e2e-builds",
+	"projectType": "library",
+	"targets": {}
+}

@@ -10,12 +10,12 @@ import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 function CustomersReportTable( {
@@ -26,9 +26,8 @@ function CustomersReportTable( {
 } ) {
 	const context = useContext( CurrencyContext );
 	const { countries, loadingCountries } = useSelect( ( select ) => {
-		const { getCountries, hasFinishedResolution } = select(
-			COUNTRIES_STORE_NAME
-		);
+		const { getCountries, hasFinishedResolution } =
+			select( COUNTRIES_STORE_NAME );
 		return {
 			countries: getCountries(),
 			loadingCountries: ! hasFinishedResolution( 'getCountries' ),
@@ -38,72 +37,69 @@ function CustomersReportTable( {
 	const getHeadersContent = () => {
 		return [
 			{
-				label: __( 'Name', 'woocommerce-admin' ),
+				label: __( 'Name', 'woocommerce' ),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Username', 'woocommerce-admin' ),
+				label: __( 'Username', 'woocommerce' ),
 				key: 'username',
 				hiddenByDefault: true,
 			},
 			{
-				label: __( 'Last active', 'woocommerce-admin' ),
+				label: __( 'Last active', 'woocommerce' ),
 				key: 'date_last_active',
 				defaultSort: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Date registered', 'woocommerce-admin' ),
+				label: __( 'Date registered', 'woocommerce' ),
 				key: 'date_registered',
 				isSortable: true,
 			},
 			{
-				label: __( 'Email', 'woocommerce-admin' ),
+				label: __( 'Email', 'woocommerce' ),
 				key: 'email',
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total spend', 'woocommerce-admin' ),
+				label: __( 'Total spend', 'woocommerce' ),
 				key: 'total_spend',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'AOV', 'woocommerce-admin' ),
-				screenReaderLabel: __(
-					'Average order value',
-					'woocommerce-admin'
-				),
+				label: __( 'AOV', 'woocommerce' ),
+				screenReaderLabel: __( 'Average order value', 'woocommerce' ),
 				key: 'avg_order_value',
 				isNumeric: true,
 			},
 			{
-				label: __( 'Country / Region', 'woocommerce-admin' ),
+				label: __( 'Country / Region', 'woocommerce' ),
 				key: 'country',
 				isSortable: true,
 			},
 			{
-				label: __( 'City', 'woocommerce-admin' ),
+				label: __( 'City', 'woocommerce' ),
 				key: 'city',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Region', 'woocommerce-admin' ),
+				label: __( 'Region', 'woocommerce' ),
 				key: 'state',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Postal code', 'woocommerce-admin' ),
+				label: __( 'Postal code', 'woocommerce' ),
 				key: 'postcode',
 				hiddenByDefault: true,
 				isSortable: true,
@@ -250,7 +246,7 @@ function CustomersReportTable( {
 					'customer',
 					'customers',
 					customersCount,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', customersCount ),
 			},
@@ -259,16 +255,16 @@ function CustomersReportTable( {
 					'Average order',
 					'Average orders',
 					avgOrdersCount,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', avgOrdersCount ),
 			},
 			{
-				label: __( 'Average lifetime spend', 'woocommerce-admin' ),
+				label: __( 'Average lifetime spend', 'woocommerce' ),
 				value: formatAmount( avgTotalSpend ),
 			},
 			{
-				label: __( 'Average order value', 'woocommerce-admin' ),
+				label: __( 'Average order value', 'woocommerce' ),
 				value: formatAmount( avgAvgOrderValue ),
 			},
 		];
@@ -290,13 +286,10 @@ function CustomersReportTable( {
 			itemIdField="id"
 			query={ query }
 			labels={ {
-				placeholder: __(
-					'Search by customer name',
-					'woocommerce-admin'
-				),
+				placeholder: __( 'Search by customer name', 'woocommerce' ),
 			} }
 			searchBy="customers"
-			title={ __( 'Customers', 'woocommerce-admin' ) }
+			title={ __( 'Customers', 'woocommerce' ) }
 			columnPrefsKey="customers_report_columns"
 			filters={ filters }
 			advancedFilters={ advancedFilters }

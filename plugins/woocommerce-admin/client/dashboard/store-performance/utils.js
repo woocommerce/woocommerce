@@ -74,9 +74,8 @@ export const getIndicatorValues = ( {
 };
 
 export const getIndicatorData = ( select, indicators, query, filters ) => {
-	const { getReportItems, getReportItemsError, isResolving } = select(
-		REPORTS_STORE_NAME
-	);
+	const { getReportItems, getReportItemsError, isResolving } =
+		select( REPORTS_STORE_NAME );
 	const { woocommerce_default_date_range: defaultDateRange } = select(
 		SETTINGS_STORE_NAME
 	).getSetting( 'wc_admin', 'wcAdminSettings' );

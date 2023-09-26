@@ -15,7 +15,6 @@ import { createElement, Component, createRef } from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
-import interpolateComponents from '@automattic/interpolate-components';
 import {
 	getActiveFiltersFromQuery,
 	getDefaultOptionValue,
@@ -30,10 +29,11 @@ import {
 import Link from '../link';
 import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
+import { backwardsCompatibleCreateInterpolateElement as createInterpolateElement } from './utils';
 
 const matches = [
-	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
-	{ value: 'any', label: __( 'Any', 'woocommerce-admin' ) },
+	{ value: 'all', label: __( 'All', 'woocommerce' ) },
+	{ value: 'any', label: __( 'Any', 'woocommerce' ) },
 ];
 
 /**
@@ -143,22 +143,20 @@ class AdvancedFilters extends Component {
 	getTitle() {
 		const { match } = this.state;
 		const { config } = this.props;
-		return interpolateComponents( {
-			mixedString: config.title,
-			components: {
-				select: (
-					<SelectControl
-						className="woocommerce-filters-advanced__title-select"
-						options={ matches }
-						value={ match }
-						onChange={ this.onMatchChange }
-						aria-label={ __(
-							'Choose to apply any or all filters',
-							'woocommerce-admin'
-						) }
-					/>
-				),
-			},
+
+		return createInterpolateElement( config.title, {
+			select: (
+				<SelectControl
+					className="woocommerce-filters-advanced__title-select"
+					options={ matches }
+					value={ match }
+					onChange={ this.onMatchChange }
+					aria-label={ __(
+						'Choose to apply any or all filters',
+						'woocommerce'
+					) }
+				/>
+			),
 		} );
 	}
 
@@ -330,10 +328,7 @@ class AdvancedFilters extends Component {
 										aria-expanded={ isOpen }
 									>
 										<AddOutlineIcon />
-										{ __(
-											'Add a Filter',
-											'woocommerce-admin'
-										) }
+										{ __( 'Add a Filter', 'woocommerce' ) }
 									</Button>
 								) }
 								renderContent={ ( { onClose } ) => (
@@ -364,7 +359,7 @@ class AdvancedFilters extends Component {
 					<div className="woocommerce-filters-advanced__controls">
 						{ updateDisabled && (
 							<Button isPrimary disabled>
-								{ __( 'Filter', 'woocommerce-admin' ) }
+								{ __( 'Filter', 'woocommerce' ) }
 							</Button>
 						) }
 						{ ! updateDisabled && (
@@ -374,7 +369,7 @@ class AdvancedFilters extends Component {
 								href={ updateHref }
 								onClick={ this.onFilter }
 							>
-								{ __( 'Filter', 'woocommerce-admin' ) }
+								{ __( 'Filter', 'woocommerce' ) }
 							</Link>
 						) }
 						{ activeFilters.length > 0 && (
@@ -383,10 +378,7 @@ class AdvancedFilters extends Component {
 								href={ this.getUpdateHref( [] ) }
 								onClick={ this.clearFilters }
 							>
-								{ __(
-									'Clear all filters',
-									'woocommerce-admin'
-								) }
+								{ __( 'Clear all filters', 'woocommerce' ) }
 							</Link>
 						) }
 					</div>

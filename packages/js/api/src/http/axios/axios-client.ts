@@ -1,5 +1,12 @@
-import { HTTPClient, HTTPResponse } from '../http-client';
+/**
+ * External dependencies
+ */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+
+/**
+ * Internal dependencies
+ */
+import { HTTPClient, HTTPResponse } from '../http-client';
 import { AxiosInterceptor } from './axios-interceptor';
 import { AxiosResponseInterceptor } from './axios-response-interceptor';
 
@@ -26,10 +33,13 @@ export class AxiosClient implements HTTPClient {
 	/**
 	 * Creates a new axios client.
 	 *
-	 * @param {AxiosRequestConfig} config The request configuration.
+	 * @param {AxiosRequestConfig} config            The request configuration.
 	 * @param {AxiosInterceptor[]} extraInterceptors An array of additional interceptors to apply to the client.
 	 */
-	public constructor( config: AxiosRequestConfig, extraInterceptors: AxiosInterceptor[] = [] ) {
+	public constructor(
+		config: AxiosRequestConfig,
+		extraInterceptors: AxiosInterceptor[] = []
+	) {
 		this.client = axios.create( config );
 
 		this.interceptors = extraInterceptors;
@@ -46,14 +56,14 @@ export class AxiosClient implements HTTPClient {
 	/**
 	 * Performs a GET request.
 	 *
-	 * @param {string} path The path we should send the request to.
+	 * @param {string} path   The path we should send the request to.
 	 * @param {Object} params Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public get< T = any >(
 		path: string,
-		params?: object,
-	): Promise< HTTPResponse< T >> {
+		params?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.get( path, { params } );
 	}
 
@@ -66,8 +76,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public post< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.post( path, data );
 	}
 
@@ -80,8 +90,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public put< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.put( path, data );
 	}
 
@@ -89,13 +99,13 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a PATCH request.
 	 *
 	 * @param {string} path The path we should query.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public patch< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.patch( path, data );
 	}
 
@@ -103,13 +113,13 @@ export class AxiosClient implements HTTPClient {
 	 * Performs a DELETE request.
 	 *
 	 * @param {string} path The path we should send the request to.
-	 * @param {*} data Any parameters that should be passed in the request.
+	 * @param {*}      data Any parameters that should be passed in the request.
 	 * @return {Promise.<HTTPResponse>} The response from the API.
 	 */
 	public delete< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.delete( path, { data } );
 	}
 }

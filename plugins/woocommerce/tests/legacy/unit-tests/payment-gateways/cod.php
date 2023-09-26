@@ -15,7 +15,7 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	/**
 	 * Clean up after each test.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		Constants::clear_constants();

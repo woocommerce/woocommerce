@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\WC_Template_Loader.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 
 /**
  * Class WC_Template_Loader
@@ -31,6 +33,10 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 		$this->load_tax_in_query( 'product_tag' );
 		$this->assertDefaultTemplateFileName( 'taxonomy-product-tag' );
+
+		// Check Woo Taxonomy Product Attribute.
+		$this->load_product_attribute_tax_in_query();
+		$this->assertDefaultTemplateFileName( 'taxonomy-product-attribute' );
 
 		// Check Custom Product Taxonomies
 		$wp_taxonomies['product_tax'] = new WP_Taxonomy( 'product_tax', 'product' );
@@ -61,6 +67,10 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->assertDefaultTemplateFileName();
 
 		$this->load_tax_in_query( 'product_tag' );
+		$this->assertDefaultTemplateFileName();
+
+		// Check Woo Taxonomy Product Attribute.
+		$this->load_product_attribute_tax_in_query();
 		$this->assertDefaultTemplateFileName();
 
 		// Check Custom Product Taxonomies
@@ -114,6 +124,13 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Loads a test taxonomy with the given name.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 *
+	 * @return void
+	 */
 	private function load_tax_in_query( $taxonomy ) {
 		global $wp_query;
 
@@ -124,6 +141,16 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 			'taxonomy' => $taxonomy,
 			'slug'     => 'test',
 		);
+	}
+
+	/**
+	 * Loads a test product attribute taxonomy.
+	 *
+	 * @return void
+	 */
+	private function load_product_attribute_tax_in_query() {
+		$attr = ProductHelper::create_attribute( 'color', array( 'red', 'blue' ) );
+		$this->load_tax_in_query( $attr['attribute_taxonomy'] );
 	}
 
 	private function assertDefaultTemplateFileName( $expected = '' ) {

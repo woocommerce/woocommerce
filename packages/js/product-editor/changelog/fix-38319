@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product route not updated after save initially failed and succeeded after#38319

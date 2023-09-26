@@ -13,7 +13,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
@@ -61,4 +61,31 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'publish', $variation['status'] );
 	}
 
+	/**
+	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
+	 */
+	public function test_import_completion_issue_36618_lines_remaining() {
+		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$args     = array(
+			'lines' => 200,
+		);
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+
+		$this->assertEquals( 99, $importer->get_percent_complete() );
+	}
+
+	/**
+	 * @testdox Test that the importer calculates the percent complete as 100 when it's at the end of the file.
+	 */
+	public function test_import_completion_issue_36618_end_of_file() {
+		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$args     = array(
+			'lines' => 201,
+		);
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+
+		$this->assertEquals( 100, $importer->get_percent_complete() );
+	}
 }

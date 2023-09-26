@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Variations;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Variations\DataStore.
@@ -119,7 +119,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function get_order_item_by_attribute_subquery( $query_args ) {
 		$order_product_lookup_table = self::get_db_table_name();
-		$attribute_subqueries       = $this->get_attribute_subqueries( $query_args, $order_product_lookup_table );
+		$attribute_subqueries       = $this->get_attribute_subqueries( $query_args );
 
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Perform a subquery for DISTINCT order items that match our attribute filters.
@@ -453,6 +453,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$variations_query = $this->get_query_statement();
 			} else {
+
+				$this->subquery->clear_sql_clause( 'select' );
+				$this->subquery->add_sql_clause( 'select', $selections );
+
+				/**
+				 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
+				 *
+				 * @since 7.4.0
+				 * @param array $query_args Query parameters.
+				 * @param SqlQuery $subquery Variations query class.
+				 */
+				apply_filters( 'experimental_woocommerce_analytics_variations_additional_clauses', $query_args, $this->subquery );
+
 				/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (
@@ -468,8 +481,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					return $data;
 				}
 
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$variations_query = $this->subquery->get_query_statement();

@@ -7,7 +7,9 @@ describe( 'CustomTransformation', () => {
 		const expected = { test: 'Test' };
 
 		expect( transformation.toModel( expected ) ).toMatchObject( expected );
-		expect( transformation.fromModel( expected ) ).toMatchObject( expected );
+		expect( transformation.fromModel( expected ) ).toMatchObject(
+			expected
+		);
 	} );
 
 	it( 'should execute hooks', () => {
@@ -18,9 +20,13 @@ describe( 'CustomTransformation', () => {
 
 		const transformation = new CustomTransformation( 0, toHook, fromHook );
 
-		expect( transformation.toModel( { test: 'Test' } ) ).toMatchObject( { toModel: 'Test' } );
+		expect( transformation.toModel( { test: 'Test' } ) ).toMatchObject( {
+			toModel: 'Test',
+		} );
 		expect( toHook ).toHaveBeenCalledWith( { test: 'Test' } );
-		expect( transformation.fromModel( { test: 'Test' } ) ).toMatchObject( { fromModel: 'Test' } );
+		expect( transformation.fromModel( { test: 'Test' } ) ).toMatchObject( {
+			fromModel: 'Test',
+		} );
 		expect( fromHook ).toHaveBeenCalledWith( { test: 'Test' } );
 	} );
 } );

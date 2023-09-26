@@ -21,6 +21,29 @@
 	.components-navigation__menu-title {
 		overflow: visible;
 	}
+
+	.components-navigation__menu {
+		scrollbar-color: $gray-700 $gray-900;
+		scrollbar-width: thin;
+
+		&::-webkit-scrollbar-thumb {
+			border-radius: 10px;
+			background-color: $gray-700;
+		}
+
+
+		&::-webkit-scrollbar-thumb:hover {
+			background-color: $gray-700;
+			width: 8px;
+			height: 8px;
+		}
+
+
+		&::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+	}
 }
 
 .woocommerce-navigation__wrapper {

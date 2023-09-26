@@ -188,7 +188,7 @@ class Menu {
 			$menu_item['parent']          = 'woocommerce';
 			$menu_item['backButtonLabel'] = __(
 				'WooCommerce Home',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -226,7 +226,7 @@ class Menu {
 			error_log(  // phpcs:ignore
 				sprintf(
 					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce-admin' ),
+					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce' ),
 					'`' . $args['id'] . '`'
 				)
 			);
@@ -371,7 +371,7 @@ class Menu {
 			error_log(  // phpcs:ignore
 				sprintf(
 					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'The item ID %1$s attempted to register using an invalid option. The arguments `menuId` and `parent` are not allowed for add_setting_item()', 'woocommerce-admin' ),
+					esc_html__( 'The item ID %1$s attempted to register using an invalid option. The arguments `menuId` and `parent` are not allowed for add_setting_item()', 'woocommerce' ),
 					'`' . $args['id'] . '`'
 				)
 			);
@@ -463,10 +463,10 @@ class Menu {
 			? "&post_type={$taxonomy_object->object_type[0]}"
 			: '';
 		$match_expression   = 'term.php';                               // Match term.php pages.
-		$match_expression  .= "(?=.*[?|&]taxonomy=${taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
+		$match_expression  .= "(?=.*[?|&]taxonomy={$taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
 		$match_expression  .= '|';                                      // Or.
 		$match_expression  .= 'edit-tags.php';                          // Match edit-tags.php pages.
-		$match_expression  .= "(?=.*[?|&]taxonomy=${taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
+		$match_expression  .= "(?=.*[?|&]taxonomy={$taxonomy}(&|$|#))"; // Lookahead to match a taxonomy URL param.
 
 		return array(
 			'default' => array_merge(

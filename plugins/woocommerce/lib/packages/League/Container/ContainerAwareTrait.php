@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Vendor\League\Container;
 
 use Automattic\WooCommerce\Vendor\League\Container\Exception\ContainerException;
-use Psr\Container\ContainerInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 
 trait ContainerAwareTrait
 {
@@ -22,7 +22,7 @@ trait ContainerAwareTrait
      *
      * @param ContainerInterface $container
      *
-     * @return self
+     * @return ContainerAwareInterface
      */
     public function setContainer(ContainerInterface $container) : ContainerAwareInterface
     {

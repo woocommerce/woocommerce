@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import { utils } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { httpClient } from './http-client';
@@ -47,15 +51,21 @@ async function deactivateAndDeletePlugin( pluginName: string ) {
 }
 export async function deactivateAndDeleteAllPlugins( except: string[] = [] ) {
 	let plugins = await getPlugins();
+	const skippedPlugins = [];
 	const promises = [];
 	for ( const plugin of plugins ) {
 		const splitPluginName = plugin.plugin.split( '/' );
 		const slug = splitPluginName[ 1 ] || splitPluginName[ 0 ];
-		if ( ! except.includes( slug ) ) {
+		const slugFromName = utils.getSlug(
+			plugin.name.replace( ' &amp;', '' )
+		);
+		if ( ! except.includes( slug ) && ! except.includes( slugFromName ) ) {
 			promises.push( deactivateAndDeletePlugin( plugin.plugin ) );
+		} else {
+			skippedPlugins.push( slug );
 		}
 	}
 	await Promise.all( promises );
 	plugins = await getPlugins();
-	expect( plugins.length ).toEqual( except.length );
+	expect( plugins.length ).toEqual( skippedPlugins.length );
 }

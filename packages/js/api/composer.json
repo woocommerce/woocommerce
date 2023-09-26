@@ -5,12 +5,17 @@
 	"license": "GPL-3.0-or-later",
 	"minimum-stability": "dev",
 	"require-dev": {
-		"automattic/jetpack-changelogger": "3.0.2"
+		"automattic/jetpack-changelogger": "3.3.0"
+	},
+	"config": {
+		"platform": {
+			"php": "7.2"
+		}
 	},
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"filename": "../../../tools/changelogger/PackageFormatter.php"
+				"filename": "../../../tools/changelogger/class-package-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",

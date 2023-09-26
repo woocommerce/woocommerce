@@ -77,7 +77,9 @@ export class ProductTypes extends Component {
 			);
 			this.setState(
 				{
-					selected: profileItems.product_types || defaultProductTypes,
+					selected: Array.isArray( profileItems.product_types )
+						? [ ...profileItems.product_types ]
+						: defaultProductTypes,
 				},
 				() => {
 					this.props.trackStepValueChanges(
@@ -94,10 +96,7 @@ export class ProductTypes extends Component {
 	validateField() {
 		const error = this.state.selected.length
 			? null
-			: __(
-					'Please select at least one product type',
-					'woocommerce-admin'
-			  );
+			: __( 'Please select at least one product type', 'woocommerce' );
 		this.setState( { error } );
 		return ! error;
 	}
@@ -172,7 +171,7 @@ export class ProductTypes extends Component {
 					'error',
 					__(
 						'There was a problem updating your product types',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				)
 			);
@@ -201,12 +200,8 @@ export class ProductTypes extends Component {
 
 	render() {
 		const { productTypes = [] } = this.props;
-		const {
-			error,
-			isMonthlyPricing,
-			isWCPayInstalled,
-			selected,
-		} = this.state;
+		const { error, isMonthlyPricing, isWCPayInstalled, selected } =
+			this.state;
 		const {
 			countryCode,
 			isInstallingActivating,
@@ -233,11 +228,11 @@ export class ProductTypes extends Component {
 					>
 						{ __(
 							'What type of products will be listed?',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 					<Text variant="body" as="p">
-						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
+						{ __( 'Choose any that apply', 'woocommerce' ) }
 					</Text>
 				</div>
 
@@ -293,8 +288,13 @@ export class ProductTypes extends Component {
 								isProfileItemsRequesting ||
 								isInstallingActivating
 							}
+							aria-disabled={
+								! selected.length ||
+								isProfileItemsRequesting ||
+								isInstallingActivating
+							}
 						>
-							{ __( 'Continue', 'woocommerce-admin' ) }
+							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
 					</CardFooter>
 				</Card>
@@ -304,7 +304,7 @@ export class ProductTypes extends Component {
 							<Text variant="body" as="p">
 								{ __(
 									'Display monthly prices',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							</Text>
 							<FormToggle
@@ -321,7 +321,7 @@ export class ProductTypes extends Component {
 					<Text variant="caption" size="12" lineHeight="16px">
 						{ __(
 							'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 					{ window.wcAdminFeatures &&
@@ -338,8 +338,8 @@ export class ProductTypes extends Component {
 								as="p"
 							>
 								{ __(
-									'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
-									'woocommerce-admin'
+									'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.',
+									'woocommerce'
 								) }
 							</Text>
 						) }
@@ -359,26 +359,23 @@ export default compose(
 			isOnboardingRequesting,
 		} = select( ONBOARDING_STORE_NAME );
 		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { getInstalledPlugins, isPluginsRequesting } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getInstalledPlugins, isPluginsRequesting } =
+			select( PLUGINS_STORE_NAME );
 		const { general: settings = {} } = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
-			isProfileItemsRequesting: isOnboardingRequesting(
-				'updateProfileItems'
-			),
+			isProfileItemsRequesting:
+				isOnboardingRequesting( 'updateProfileItems' ),
 			installedPlugins: getInstalledPlugins(),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ),
 			countryCode: getCountryCode( settings.woocommerce_default_country ),
 			productTypes: getProductTypes(),
-			isProductTypesRequesting: ! hasFinishedResolution(
-				'getProductTypes'
-			),
+			isProductTypesRequesting:
+				! hasFinishedResolution( 'getProductTypes' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

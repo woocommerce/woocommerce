@@ -70,22 +70,19 @@ const onboardingHomepageNotice = () => {
 
 		dispatch( 'core/notices' ).removeNotice( 'SAVE_POST_NOTICE_ID' );
 		dispatch( 'core/notices' ).createSuccessNotice(
-			__(
-				"🏠 Nice work creating your store's homepage!",
-				'woocommerce-admin'
-			),
+			__( "🏠 Nice work creating your store's homepage!", 'woocommerce' ),
 			{
 				id: 'WOOCOMMERCE_ONBOARDING_HOME_PAGE_NOTICE',
 				type: notificationType,
 				actions: [
 					{
-						label: __( 'Continue setup.', 'woocommerce-admin' ),
+						label: __( 'Continue setup.', 'woocommerce' ),
 						onClick: () => {
 							queueRecordEvent(
 								'tasklist_appearance_continue_setup',
 								{}
 							);
-							window.location = getAdminLink(
+							window.location.href = getAdminLink(
 								'admin.php?page=wc-admin&task=appearance'
 							);
 						},

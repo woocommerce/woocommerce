@@ -1,6 +1,6 @@
 <?php
 /**
- * Deprecated notice: This class is deprecated as of version 4.5.0. WooCommerce API is now part of core and not packaged seperately.
+ * Deprecated notice: This class is deprecated as of version 4.5.0. WooCommerce API is now part of core and not packaged separately.
  *
  * Returns information about the package and handles init.
  *

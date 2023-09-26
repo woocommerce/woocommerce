@@ -7,7 +7,7 @@ import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { updateQueryString } from '@woocommerce/navigation';
 import { getDateParamsFromQuery, getCurrentDates } from '@woocommerce/date';
-import CurrencyFactory from '@woocommerce/currency';
+import { CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -90,13 +90,10 @@ class ReportFilters extends Component {
 	}
 
 	getDateQuery( query ) {
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query
-		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query );
+		const { period, compare, before, after } =
+			getDateParamsFromQuery( query );
+		const { primary: primaryDate, secondary: secondaryDate } =
+			getCurrentDates( query );
 		return {
 			period,
 			compare,
@@ -121,7 +118,7 @@ class ReportFilters extends Component {
 		return (
 			<Fragment>
 				<H className="screen-reader-text">
-					{ __( 'Filters', 'woocommerce-admin' ) }
+					{ __( 'Filters', 'woocommerce' ) }
 				</H>
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">

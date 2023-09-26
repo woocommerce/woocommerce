@@ -81,15 +81,15 @@ class OnlineClothingStore {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Start your online clothing store', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Starting a fashion website is exciting but it may seem overwhelming as well. In this article, we\'ll walk you through the setup process, teach you to create successful product listings, and show you how to market to your ideal audience.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Start your online clothing store', 'woocommerce' ) );
+		$note->set_content( __( 'Starting a fashion website is exciting but it may seem overwhelming as well. In this article, we\'ll walk you through the setup process, teach you to create successful product listings, and show you how to market to your ideal audience.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'online-clothing-store',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/posts/starting-an-online-clothing-store/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

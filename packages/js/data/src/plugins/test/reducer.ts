@@ -21,7 +21,7 @@ const defaultState: PluginsState = {
 
 describe( 'plugins reducer', () => {
 	it( 'should return a default state', () => {
-		const state = reducer( undefined );
+		const state = reducer( undefined, {} as Actions );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
 	} );
@@ -145,10 +145,12 @@ describe( 'plugins reducer', () => {
 		/* eslint-disable dot-notation */
 
 		expect(
-			( state.errors[ 'getInstalledPlugins' ] as Record<
-				string,
-				string[]
-			> ).jetpack[ 0 ]
+			(
+				state.errors[ 'getInstalledPlugins' ] as Record<
+					string,
+					string[]
+				>
+			 ).jetpack[ 0 ]
 		).toBe( 'error' );
 		expect( state.requesting[ 'getInstalledPlugins' ] ).toBe( false );
 		/* eslint-enable dot-notation */

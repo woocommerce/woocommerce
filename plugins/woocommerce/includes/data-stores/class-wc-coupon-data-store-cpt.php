@@ -532,16 +532,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		);
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query( $coupon->get_id() );
-		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
 
 		$coupon_usage_key = '_coupon_held_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 
 		$insert_statement = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
-			SELECT %d, %s, %s FROM DUAL
+			SELECT %d, %s, %s FROM $wpdb->posts
 			WHERE ( $query_for_usages ) + ( $query_for_tentative_usages ) < %d
-			",
+			LIMIT 1",
 			$coupon->get_id(),
 			$coupon_usage_key,
 			'',
@@ -555,6 +555,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		for ( $count = 0; $count < 3; $count++ ) {
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
+				// Clear meta cache.
+				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
 				break;
 			}
 		}
@@ -627,15 +629,15 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		); // WPCS: unprepared SQL ok.
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
-		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
 
 		$coupon_used_by_meta_key    = '_maybe_used_by_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 		$insert_statement           = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
-			SELECT %d, %s, %s FROM DUAL
+			SELECT %d, %s, %s FROM $wpdb->posts
 			WHERE ( $query_for_usages ) + ( $query_for_tentative_usages ) < %d
-			",
+			LIMIT 1",
 			$coupon->get_id(),
 			$coupon_used_by_meta_key,
 			$user_alias,
@@ -648,6 +650,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		for ( $count = 0; $count < 3; $count++ ) {
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
+				// Clear meta cache.
+				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
 				break;
 			}
 		}

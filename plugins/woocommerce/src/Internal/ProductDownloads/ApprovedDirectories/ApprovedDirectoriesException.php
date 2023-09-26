@@ -9,6 +9,6 @@ use Exception;
  * was performed.
  */
 class ApprovedDirectoriesException extends Exception {
-	const INVALID_URL = 1;
-	const DB_ERROR    = 2;
+	public const INVALID_URL = 1;
+	public const DB_ERROR    = 2;
 }

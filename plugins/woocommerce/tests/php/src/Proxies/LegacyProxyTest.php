@@ -23,7 +23,7 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->sut = new LegacyProxy();
 	}
 
@@ -32,7 +32,7 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_instance_of_throws_when_trying_to_get_a_namespaced_class() {
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' . Definition::INJECTION_METHOD . ' method injection or the instance of Psr\Container\ContainerInterface for that.' );
+		$this->expectExceptionMessage( 'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' . Definition::INJECTION_METHOD . ' method injection or the instance of Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface for that.' );
 
 		$this->sut->get_instance_of( DependencyClass::class );
 	}
@@ -94,5 +94,15 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	public function test_call_static_can_be_used_to_invoke_public_static_methods() {
 		$result = $this->sut->call_static( DependencyClass::class, 'concat', 'foo', 'bar', 'fizz' );
 		$this->assertEquals( 'Parts: foo, bar, fizz', $result );
+	}
+
+	/**
+	 * @testdox 'get_global' can be used to get the value of a global.
+	 */
+	public function get_global_can_be_used_to_get_the_value_of_a_global() {
+		global $wpdb;
+
+		$result = $this->sut->get_global( 'wpdb' );
+		$this->assertEquals( $result, $wpdb );
 	}
 }

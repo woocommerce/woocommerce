@@ -9,7 +9,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
 	 * Runs before any test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user = $this->factory->user->create(
 			array(

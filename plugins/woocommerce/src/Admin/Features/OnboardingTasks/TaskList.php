@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
+
 
 /**
  * Task List class.
@@ -27,6 +29,11 @@ class TaskList {
 	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
 
 	/**
+	 * Option name of hidden reminder bar.
+	 */
+	const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
+
+	/**
 	 * ID.
 	 *
 	 * @var string
@@ -39,6 +46,13 @@ class TaskList {
 	 * @var string
 	 */
 	public $hidden_id = '';
+
+	/**
+	 * ID.
+	 *
+	 * @var boolean
+	 */
+	public $display_progress_header = false;
 
 	/**
 	 * Title.
@@ -83,37 +97,59 @@ class TaskList {
 	public $options = array();
 
 	/**
+	 * Array of TaskListSection.
+	 *
+	 * @deprecated 7.2.0
+	 *
+	 * @var array
+	 */
+	private $sections = array();
+
+	/**
+	 * Key value map of task class and id used for sections.
+	 *
+	 * @deprecated 7.2.0
+	 *
+	 * @var array
+	 */
+	public $task_class_id_map = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @param array $data Task list data.
 	 */
 	public function __construct( $data = array() ) {
 		$defaults = array(
-			'id'           => null,
-			'hidden_id'    => null,
-			'title'        => '',
-			'tasks'        => array(),
-			'sort_by'      => array(),
-			'event_prefix' => null,
-			'options'      => array(),
-			'visible'      => true,
+			'id'                      => null,
+			'hidden_id'               => null,
+			'title'                   => '',
+			'tasks'                   => array(),
+			'sort_by'                 => array(),
+			'event_prefix'            => null,
+			'options'                 => array(),
+			'visible'                 => true,
+			'display_progress_header' => false,
 		);
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$this->id           = $data['id'];
-		$this->hidden_id    = $data['hidden_id'];
-		$this->title        = $data['title'];
-		$this->sort_by      = $data['sort_by'];
-		$this->event_prefix = $data['event_prefix'];
-		$this->options      = $data['options'];
-		$this->visible      = $data['visible'];
+		$this->id                      = $data['id'];
+		$this->hidden_id               = $data['hidden_id'];
+		$this->title                   = $data['title'];
+		$this->sort_by                 = $data['sort_by'];
+		$this->event_prefix            = $data['event_prefix'];
+		$this->options                 = $data['options'];
+		$this->visible                 = $data['visible'];
+		$this->display_progress_header = $data['display_progress_header'];
 
 		foreach ( $data['tasks'] as $task_name ) {
 			$class = 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\\' . $task_name;
 			$task  = new $class( $this );
 			$this->add_task( $task );
 		}
+
+		$this->possibly_remove_reminder_bar();
 	}
 
 	/**
@@ -132,7 +168,7 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_visible() {
-		if ( ! $this->visible ) {
+		if ( ! $this->visible || ! count( $this->get_viewable_tasks() ) > 0 ) {
 			return false;
 		}
 		return ! $this->is_hidden();
@@ -168,7 +204,19 @@ class TaskList {
 
 		$hidden   = get_option( self::HIDDEN_OPTION, array() );
 		$hidden[] = $this->hidden_id ? $this->hidden_id : $this->id;
+		$this->maybe_set_default_layout( $hidden );
 		return update_option( self::HIDDEN_OPTION, array_unique( $hidden ) );
+	}
+
+	/**
+	 * Sets the default homepage layout to two_columns if "setup" tasklist is completed or hidden.
+	 *
+	 * @param array $completed_or_hidden_tasklist_ids Array of tasklist ids.
+	 */
+	public function maybe_set_default_layout( $completed_or_hidden_tasklist_ids ) {
+		if ( in_array( 'setup', $completed_or_hidden_tasklist_ids, true ) ) {
+			update_option( 'woocommerce_default_homepage_layout', 'two_columns' );
+		}
 	}
 
 	/**
@@ -188,15 +236,13 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$viewable_tasks = $this->get_viewable_tasks();
+		foreach ( $this->get_viewable_tasks() as $viewable_task ) {
+			if ( $viewable_task->is_complete() === false ) {
+				return false;
+			}
+		}
 
-		return array_reduce(
-			$viewable_tasks,
-			function( $is_complete, $task ) {
-				return ! $task->is_complete() ? false : $is_complete;
-			},
-			true
-		);
+		return true;
 	}
 
 	/**
@@ -218,7 +264,7 @@ class TaskList {
 		if ( ! is_subclass_of( $task, 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task' ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_invalid_task',
-				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
+				__( 'Task is not a subclass of `Task`', 'woocommerce' )
 			);
 		}
 		if ( array_search( $task, $this->tasks, true ) ) {
@@ -262,6 +308,19 @@ class TaskList {
 	}
 
 	/**
+	 * Get task list sections.
+	 *
+	 * @deprecated 7.2.0
+	 *
+	 * @return array
+	 */
+	public function get_sections() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.2.0' );
+
+		return $this->sections;
+	}
+
+	/**
 	 * Track list completion of viewable tasks.
 	 */
 	public function possibly_track_completion() {
@@ -276,6 +335,7 @@ class TaskList {
 		$completed_lists   = get_option( self::COMPLETED_OPTION, array() );
 		$completed_lists[] = $this->get_list_id();
 		update_option( self::COMPLETED_OPTION, $completed_lists );
+		$this->maybe_set_default_layout( $completed_lists );
 		$this->record_tracks_event( 'tasks_completed' );
 	}
 
@@ -312,25 +372,53 @@ class TaskList {
 	}
 
 	/**
+	 * Returns option to keep completed task list.
+	 *
+	 * @return string
+	 */
+	public function get_keep_completed_task_list() {
+		return get_option( 'woocommerce_task_list_keep_completed', 'no' );
+	}
+
+	/**
+	 * Remove reminder bar four weeks after store creation.
+	 */
+	public static function possibly_remove_reminder_bar() {
+		$bar_hidden            = get_option( self::REMINDER_BAR_HIDDEN_OPTION, 'no' );
+		$active_for_four_weeks = WCAdminHelper::is_wc_admin_active_for( WEEK_IN_SECONDS * 4 );
+
+		if ( 'yes' === $bar_hidden || ! $active_for_four_weeks ) {
+			return;
+		}
+
+		update_option( self::REMINDER_BAR_HIDDEN_OPTION, 'yes' );
+	}
+
+	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
+		$tasks_json = array();
+		foreach ( $this->tasks as $task ) {
+			$json = $task->get_json();
+			if ( $json['canView'] ) {
+				$tasks_json[] = $json;
+			}
+		}
+
 		return array(
-			'id'          => $this->get_list_id(),
-			'title'       => $this->title,
-			'isHidden'    => $this->is_hidden(),
-			'isVisible'   => $this->is_visible(),
-			'isComplete'  => $this->is_complete(),
-			'tasks'       => array_map(
-				function( $task ) {
-					return $task->get_json();
-				},
-				$this->get_viewable_tasks()
-			),
-			'eventPrefix' => $this->prefix_event( '' ),
+			'id'                    => $this->get_list_id(),
+			'title'                 => $this->title,
+			'isHidden'              => $this->is_hidden(),
+			'isVisible'             => $this->is_visible(),
+			'isComplete'            => $this->is_complete(),
+			'tasks'                 => $tasks_json,
+			'eventPrefix'           => $this->prefix_event( '' ),
+			'displayProgressHeader' => $this->display_progress_header,
+			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 		);
 	}
 }

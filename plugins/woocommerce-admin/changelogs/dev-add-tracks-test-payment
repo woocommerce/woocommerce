@@ -1,4 +1,0 @@
-Significance: patch
-Type: Dev
-
-Added a test for tracks event recording for PaymentGatewaySuggestions #8306

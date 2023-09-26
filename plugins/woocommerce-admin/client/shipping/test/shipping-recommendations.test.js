@@ -46,7 +46,7 @@ describe( 'ShippingRecommendations', () => {
 		render( <ShippingRecommendations /> );
 
 		expect(
-			screen.queryByText( 'Woocommerce Shipping' )
+			screen.queryByText( 'WooCommerce Shipping' )
 		).not.toBeInTheDocument();
 	} );
 
@@ -54,7 +54,7 @@ describe( 'ShippingRecommendations', () => {
 		render( <ShippingRecommendations /> );
 
 		expect(
-			screen.queryByText( 'Woocommerce Shipping' )
+			screen.queryByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
 	} );
 

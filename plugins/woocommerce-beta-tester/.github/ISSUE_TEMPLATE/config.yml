@@ -1,5 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: 🔒 Security issue
-    url: https://hackerone.com/automattic/
-    about: For security reasons, please report all security issues via HackerOne. Also, if the issue is valid, a bug bounty will be paid out to you. Please disclose responsibly and not via GitHub (which allows for exploiting issues in the wild before the patch is released).

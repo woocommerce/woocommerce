@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use PHPUnit\Framework\Constraint\IsType;
 
 /**
@@ -18,6 +19,8 @@ use PHPUnit\Framework\Constraint\IsType;
  * @since 2.2
  */
 class WC_Unit_Test_Case extends WP_HTTP_TestCase {
+
+	public const DEFAULT_FLOAT_COMPARISON_DELTA = 1e-10;
 
 	/**
 	 * Holds the WC_Unit_Test_Factory instance.
@@ -62,7 +65,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 2.2
 	 */
-	public function setUp() {
+	public function setUp(): void {
 
 		parent::setUp();
 
@@ -90,7 +93,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 3.5.0
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
@@ -215,6 +218,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Reset all the class registration replacements in the dependency injection container,
+	 * so any further "get" will return an instance of the class originally registered.
+	 * For this to work with shared definitions 'reset_container_resolutions' is required too.
+	 */
+	public function reset_container_replacements() {
+		wc_get_container()->reset_all_replacements();
+	}
+
+	/**
 	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
 	 */
 	public function reset_legacy_proxy_mocks() {
@@ -252,6 +264,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function register_legacy_proxy_class_mocks( array $mocks ) {
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
+	}
+
+	/**
+	 * Register the global mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are global names and values are the replacements for each global.
+	 */
+	public function register_legacy_proxy_global_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_global_mocks( $mocks );
 	}
 
 	/**
@@ -328,6 +349,78 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return bool mixed True if the value is of integer type, false otherwise.
 	 */
 	public static function assertIsInteger( $actual, $message = '' ) {
-		return self::assertInternalType( 'int', $actual, $message );
+		return self::assertIsInt( $actual, $message );
+	}
+
+	/**
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
+	}
+
+	/**
+	 * Get recorded tracks event by name.
+	 *
+	 * @param string $event_name Event name.
+	 * @return WC_Tracks_Event|null
+	 */
+	public function get_tracks_events( $event_name ) {
+		$events  = WC_Tracks_Footer_Pixel::get_events();
+		$matches = array();
+
+		foreach ( $events as $event ) {
+			if ( $event->_en === $event_name ) {
+				$matches[] = $event;
+			}
+		}
+
+		return $matches;
+	}
+
+	/**
+	 * Assert that a valid tracks event has been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertNotEmpty( $events );
+	}
+
+	/**
+	 * Assert that a tracks event has not been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertNotRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertEmpty( $events );
+	}
+
+	/**
+	 * Assert that the difference between two floats is smaller than a given delta.
+	 *
+	 * @param float      $expected The expected value.
+	 * @param float      $actual The actual value.
+	 * @param float|null $delta The maximum allowed difference, defaults to DEFAULT_FLOAT_COMPARISON_DELTA.
+	 * @param string     $message An optional error message to use if the assertion fails.
+	 */
+	public function assertFloatEquals( $expected, $actual, ?float $delta = null, string $message = '' ) {
+		$this->assertEqualsWithDelta( $expected, $actual, $delta ?? self::DEFAULT_FLOAT_COMPARISON_DELTA, $message );
+	}
+
+	/**
+	 * Mark test skipped when HPOS is enabled.
+	 *
+	 * @param string $message Message to display when test is skipped.
+	 */
+	protected function skip_if_hpos_enabled( $message ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( $message );
+		}
 	}
 }

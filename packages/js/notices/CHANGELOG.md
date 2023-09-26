@@ -2,6 +2,10 @@
 
 # Unreleased
 
+-   Update dependency `@wordpress/a11y` to ^3.5.0
+
+# 4.0.1
+
 -   Update all js packages with minor/patch version changes. #8392
 
 # 4.0.0

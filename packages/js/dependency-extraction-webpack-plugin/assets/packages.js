@@ -1,5 +1,6 @@
 module.exports = [
 	// wc-admin packages
+	'@woocommerce/admin-layout',
 	'@woocommerce/components',
 	'@woocommerce/csv-export',
 	'@woocommerce/currency',
@@ -10,9 +11,11 @@ module.exports = [
 	'@woocommerce/eslint-plugin',
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
+	'@woocommerce/extend-cart-checkout-block',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
+	'@woocommerce/product-editor',
 	'@woocommerce/tracks',
 	// wc-blocks packages
 	'@woocommerce/blocks-checkout',

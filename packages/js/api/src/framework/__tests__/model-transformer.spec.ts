@@ -35,15 +35,15 @@ describe( 'ModelTransformer', () => {
 		const fn2 = jest.fn();
 		fn2.mockReturnValue( { name: 'fn2' } );
 
-		const transformer = new ModelTransformer< DummyModel >(
-			[
-				// Ensure the orders are backwards so sorting is tested.
-				new DummyTransformation( 1, fn2 ),
-				new DummyTransformation( 0, fn1 ),
-			],
-		);
+		const transformer = new ModelTransformer< DummyModel >( [
+			// Ensure the orders are backwards so sorting is tested.
+			new DummyTransformation( 1, fn2 ),
+			new DummyTransformation( 0, fn1 ),
+		] );
 
-		let transformed = transformer.fromModel( new DummyModel( { name: 'fn0' } ) );
+		let transformed = transformer.fromModel(
+			new DummyModel( { name: 'fn0' } )
+		);
 
 		expect( fn1 ).toHaveBeenCalledWith( { name: 'fn0' } );
 		expect( fn2 ).toHaveBeenCalledWith( { name: 'fn1' } );
@@ -61,17 +61,12 @@ describe( 'ModelTransformer', () => {
 	} );
 
 	it( 'should transform to model', () => {
-		const transformer = new ModelTransformer< DummyModel >(
-			[
-				new DummyTransformation(
-					0,
-					( p: any ) => {
-						p.name = 'Transformed-' + p.name;
-						return p;
-					},
-				),
-			],
-		);
+		const transformer = new ModelTransformer< DummyModel >( [
+			new DummyTransformation( 0, ( p: any ) => {
+				p.name = 'Transformed-' + p.name;
+				return p;
+			} ),
+		] );
 
 		const model = transformer.toModel( DummyModel, { name: 'Test' } );
 
@@ -80,19 +75,16 @@ describe( 'ModelTransformer', () => {
 	} );
 
 	it( 'should transform from model', () => {
-		const transformer = new ModelTransformer< DummyModel >(
-			[
-				new DummyTransformation(
-					0,
-					( p: any ) => {
-						p.name = 'Transformed-' + p.name;
-						return p;
-					},
-				),
-			],
-		);
+		const transformer = new ModelTransformer< DummyModel >( [
+			new DummyTransformation( 0, ( p: any ) => {
+				p.name = 'Transformed-' + p.name;
+				return p;
+			} ),
+		] );
 
-		const transformed = transformer.fromModel( new DummyModel( { name: 'Test' } ) );
+		const transformed = transformer.fromModel(
+			new DummyModel( { name: 'Test' } )
+		);
 
 		expect( transformed ).not.toBeInstanceOf( DummyModel );
 		expect( transformed.name ).toEqual( 'Transformed-Test' );

@@ -125,7 +125,7 @@ class PageController {
 		}
 
 		$current_query = wp_parse_url( $current_url, PHP_URL_QUERY );
-		parse_str( $current_query, $current_pieces );
+		parse_str( (string) $current_query, $current_pieces );
 		$current_path  = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
 		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 
@@ -198,7 +198,7 @@ class PageController {
 			}
 		}
 
-		$woocommerce_breadcrumb = array( 'admin.php?page=' . self::PAGE_ROOT, __( 'WooCommerce', 'woocommerce-admin' ) );
+		$woocommerce_breadcrumb = array( 'admin.php?page=' . self::PAGE_ROOT, __( 'WooCommerce', 'woocommerce' ) );
 
 		array_unshift( $breadcrumbs, $woocommerce_breadcrumb );
 
@@ -220,7 +220,7 @@ class PageController {
 		// If 'current_screen' hasn't fired yet, the current page calculation
 		// will fail which causes `false` to be returned for all subsquent calls.
 		if ( ! did_action( 'current_screen' ) ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce-admin' ), '0.16.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce' ), '0.16.0' );
 		}
 
 		if ( is_null( $this->current_page ) ) {
@@ -450,6 +450,10 @@ class PageController {
 			$options['path'] = self::PAGE_ROOT . '&path=' . $options['path'];
 		}
 
+		if ( null !== $options['position'] ) {
+			$options['position'] = intval( round( $options['position'] ) );
+		}
+
 		if ( is_null( $options['parent'] ) ) {
 			add_menu_page(
 				$options['title'],
@@ -458,7 +462,7 @@ class PageController {
 				$options['path'],
 				array( __CLASS__, 'page_wrapper' ),
 				$options['icon'],
-				intval( round( $options['position'] ) )
+				$options['position']
 			);
 		} else {
 			$parent_path = $this->get_path_from_id( $options['parent'] );
@@ -507,7 +511,7 @@ class PageController {
 	public function register_store_details_page() {
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Setup Wizard', 'woocommerce-admin' ),
+				'title'  => __( 'Setup Wizard', 'woocommerce' ),
 				'parent' => '',
 				'path'   => '/setup-wizard',
 			)

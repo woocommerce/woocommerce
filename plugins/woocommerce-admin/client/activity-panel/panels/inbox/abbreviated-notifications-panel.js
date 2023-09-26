@@ -9,6 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { box, comment, page } from '@wordpress/icons';
 import { createSlotFill } from '@wordpress/components';
+import { isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import {
 	getUnreadOrders,
 } from '~/homescreen/activity-panel/orders/utils';
 import { getUnapprovedReviews } from '~/homescreen/activity-panel/reviews/utils';
-import { isWCAdmin } from '~/dashboard/utils';
 import { Bell } from './icons/bell';
 
 const EXTENDED_TASK_LIST_ID = 'extended_task_list';
@@ -56,7 +56,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	};
 
 	const { Slot } = createSlotFill( ABBREVIATED_NOTIFICATION_SLOT_NAME );
-	const isWCAdminPage = isWCAdmin( window.location.href );
+	const isWCAdminPage = isWCAdmin();
 
 	return (
 		<div className="woocommerce-abbreviated-notifications">
@@ -71,7 +71,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
 				>
 					<Text as="h3">
-						{ __( 'Things to do next', 'woocommerce-admin' ) }
+						{ __( 'Things to do next', 'woocommerce' ) }
 					</Text>
 					<Text as="p">
 						{ sprintf(
@@ -80,7 +80,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 								'You have %d new thing to do',
 								'You have %d new things to do',
 								thingsToDoNextCount,
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							thingsToDoNextCount
 						) }
@@ -98,7 +98,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
 				>
 					<Text as="h3">
-						{ __( 'Orders to fulfill', 'woocommerce-admin' ) }
+						{ __( 'Orders to fulfill', 'woocommerce' ) }
 					</Text>
 					<Text>
 						{ sprintf(
@@ -107,7 +107,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 								'You have %d order to fulfill',
 								'You have %d orders to fulfill',
 								ordersToProcessCount,
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							ordersToProcessCount
 						) }
@@ -125,7 +125,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
 				>
 					<Text as="h3">
-						{ __( 'Reviews to moderate', 'woocommerce-admin' ) }
+						{ __( 'Reviews to moderate', 'woocommerce' ) }
 					</Text>
 					<Text>
 						{ sprintf(
@@ -134,7 +134,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 								'You have %d review to moderate',
 								'You have %d reviews to moderate',
 								reviewsToModerateCount,
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							reviewsToModerateCount
 						) }
@@ -152,12 +152,12 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
 				>
 					<Text as="h3">
-						{ __( 'Inventory to review', 'woocommerce-admin' ) }
+						{ __( 'Inventory to review', 'woocommerce' ) }
 					</Text>
 					<Text>
 						{ __(
 							'You have inventory to review and update',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</AbbreviatedCard>

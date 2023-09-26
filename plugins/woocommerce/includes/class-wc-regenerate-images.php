@@ -51,7 +51,7 @@ class WC_Regenerate_Images {
 			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
 			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
 
-			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultanious jobs.
+			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultaneous jobs.
 			if ( ! is_multisite() ) {
 				add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
 				add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
@@ -68,7 +68,7 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function filter_image_get_intermediate_size( $data, $attachment_id, $size ) {
-		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
 			return $data;
 		}
 
@@ -204,7 +204,7 @@ class WC_Regenerate_Images {
 		}
 
 		// List of sizes we want to resize. Ignore others.
-		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
 			return $image;
 		}
 

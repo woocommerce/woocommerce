@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { waitForElementByText, getElementByText } from '../utils/actions';
+import { waitForElementByText } from '../utils/actions';
 import { BasePage } from './BasePage';
 
 type PaymentMethodWithSetupButton =
@@ -12,7 +12,7 @@ type PaymentMethodWithSetupButton =
 	| 'mollie'
 	| 'bacs';
 
-type PaymentMethod = PaymentMethodWithSetupButton | 'cod';
+//  type PaymentMethod = PaymentMethodWithSetupButton | 'cod';
 
 export class PaymentsSetup extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&task=payments';
@@ -21,8 +21,17 @@ export class PaymentsSetup extends BasePage {
 		await waitForElementByText( 'h1', 'Set up payments' );
 	}
 
-	async closeHelpModal(): Promise< void > {
-		await this.clickButtonWithText( 'Got it' );
+	async possiblyCloseHelpModal(): Promise< void > {
+		try {
+			await waitForElementByText( 'div', "We're here for help", {
+				timeout: 2000,
+			} );
+			await this.clickButtonWithText( 'Got it' );
+		} catch ( e ) {}
+	}
+
+	async showOtherPaymentMethods(): Promise< void > {
+		await waitForElementByText( 'h2', 'Offline payment methods' );
 	}
 
 	async goToPaymentMethodSetup(
@@ -39,14 +48,6 @@ export class PaymentsSetup extends BasePage {
 		} else {
 			await button.click();
 		}
-	}
-
-	async methodHasBeenSetup( method: PaymentMethod ): Promise< void > {
-		const selector = `.woocommerce-task-payment-${ method }`;
-		await this.page.waitForSelector( selector );
-		expect(
-			await getElementByText( '*', 'Manage', selector )
-		).toBeDefined();
 	}
 
 	async enableCashOnDelivery(): Promise< void > {

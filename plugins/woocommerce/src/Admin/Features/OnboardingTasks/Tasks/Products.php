@@ -19,6 +19,7 @@ class Products extends Task {
 		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
 	}
 
 	/**
@@ -36,13 +37,13 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added products', 'woocommerce-admin' );
+				return __( 'You added products', 'woocommerce' );
 			}
-			return __( 'Add products', 'woocommerce-admin' );
+			return __( 'Add products', 'woocommerce' );
 		}
-		return __( 'Add my products', 'woocommerce-admin' );
+		return __( 'Add my products', 'woocommerce' );
 	}
 
 	/**
@@ -53,7 +54,7 @@ class Products extends Task {
 	public function get_content() {
 		return __(
 			'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -63,7 +64,7 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute per product', 'woocommerce-admin' );
+		return __( '1 minute per product', 'woocommerce' );
 	}
 
 	/**
@@ -94,24 +95,18 @@ class Products extends Task {
 	 */
 	public function possibly_add_manual_return_notice_script( $hook ) {
 		global $post;
-		if ( 'post.php' !== $hook || 'product' !== $post->post_type ) {
+		if ( $hook !== 'post.php' || $post->post_type !== 'product' ) {
 			return;
 		}
 
-		if ( ! $this->is_active() || $this->is_complete() ) {
+		if ( ! $this->is_active() || ! $this->is_complete() ) {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-notice', true );
 
-		wp_enqueue_script(
-			'onboarding-product-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		// Clear the active task transient to only show notice once per active session.
+		delete_transient( self::ACTIVE_TASK_TRANSIENT );
 	}
 
 	/**
@@ -122,7 +117,7 @@ class Products extends Task {
 	public function possibly_add_import_return_notice_script( $hook ) {
 		$step = isset( $_GET['step'] ) ? $_GET['step'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( 'product_page_product_importer' !== $hook || 'done' !== $step ) {
+		if ( $hook !== 'product_page_product_importer' || $step !== 'done' ) {
 			return;
 		}
 
@@ -130,16 +125,34 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-import-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-import-notice', true );
+	}
 
-		wp_enqueue_script(
-			'onboarding-product-import-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+	/**
+	 * Adds a return to task list notice when completing the loading sample products action.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_load_sample_return_notice_script( $hook ) {
+		if ( $hook !== 'edit.php' || get_query_var( 'post_type' ) !== 'product' ) {
+			return;
+		}
+
+		$referer = wp_get_referer();
+		if ( ! $referer || strpos( $referer, wc_admin_url() ) !== 0 ) {
+			return;
+		}
+
+		if ( ! isset( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) ) {
+			return;
+		}
+
+		$task_id = sanitize_title_with_dashes( wp_unslash( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) );
+		if ( $task_id !== $this->get_id() || ! $this->is_complete() ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-load-sample-products-notice', true );
 	}
 
 	/**
@@ -148,15 +161,7 @@ class Products extends Task {
 	 * @return bool
 	 */
 	public static function has_products() {
-		$product_query = new \WC_Product_Query(
-			array(
-				'limit'  => 1,
-				'return' => 'ids',
-				'status' => array( 'publish' ),
-			)
-		);
-		$products      = $product_query->get_products();
-
-		return 0 !== count( $products );
+		$counts = wp_count_posts('product');
+		return isset( $counts->publish ) && $counts->publish > 0;
 	}
 }

@@ -32,7 +32,7 @@ class EmailNotification extends \WC_Email {
 		$this->id            = 'merchant_notification';
 		$this->template_base = WC_ADMIN_ABSPATH . 'includes/react-admin/emails/';
 		$this->placeholders  = array(
-			'{greetings}' => __( 'Hi there,', 'woocommerce-admin' ),
+			'{greetings}' => __( 'Hi there,', 'woocommerce' ),
 		);
 
 		// Call parent constructor.
@@ -206,7 +206,7 @@ class EmailNotification extends \WC_Email {
 
 		if ( $user_name ) {
 			/* translators: %s = merchant name */
-			$this->placeholders['{greetings}'] = sprintf( __( 'Hi %s,', 'woocommerce-admin' ), $user_name );
+			$this->placeholders['{greetings}'] = sprintf( __( 'Hi %s,', 'woocommerce' ), $user_name );
 		}
 
 		$this->send(

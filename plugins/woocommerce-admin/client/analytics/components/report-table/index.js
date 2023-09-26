@@ -10,6 +10,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
 import {
 	getIdsFromQuery,
@@ -39,7 +40,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
 import { extendTableData } from './utils';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -138,7 +138,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const filterShownHeaders = ( headers, hiddenKeys ) => {
-		// If no user preferences, set visibilty based on column default.
+		// If no user preferences, set visibility based on column default.
 		if ( ! hiddenKeys ) {
 			return headers.map( ( header ) => ( {
 				...header,
@@ -146,7 +146,7 @@ const ReportTable = ( props ) => {
 			} ) );
 		}
 
-		// Set visibilty based on user preferences.
+		// Set visibility based on user preferences.
 		return headers.map( ( header ) => ( {
 			...header,
 			visible: header.required || ! hiddenKeys.includes( header.key ),
@@ -209,7 +209,7 @@ const ReportTable = ( props ) => {
 							/* translators: %s = type of report */
 							__(
 								'Your %s Report will be emailed to you.',
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							title
 						)
@@ -223,7 +223,7 @@ const ReportTable = ( props ) => {
 								/* translators: %s = type of report */
 								__(
 									'There was a problem exporting your %s Report. Please try again.',
-									'woocommerce-admin'
+									'woocommerce'
 								),
 								title
 							)
@@ -317,7 +317,7 @@ const ReportTable = ( props ) => {
 			label: (
 				<CheckboxControl
 					onChange={ selectAllRows }
-					aria-label={ __( 'Select All' ) }
+					aria-label={ __( 'Select All', 'woocommerce' ) }
 					checked={ isAllChecked }
 					disabled={ ! hasData }
 				/>
@@ -401,14 +401,14 @@ const ReportTable = ( props ) => {
 								labels.helpText ||
 								__(
 									'Check at least two items below to compare',
-									'woocommerce-admin'
+									'woocommerce'
 								)
 							}
 							onClick={ onCompare }
 							disabled={ ! downloadable }
 						>
 							{ labels.compareButton ||
-								__( 'Compare', 'woocommerce-admin' ) }
+								__( 'Compare', 'woocommerce' ) }
 						</CompareButton>
 					),
 					searchBy && (
@@ -419,7 +419,7 @@ const ReportTable = ( props ) => {
 							onChange={ onSearchChange }
 							placeholder={
 								labels.placeholder ||
-								__( 'Search by item name', 'woocommerce-admin' )
+								__( 'Search by item name', 'woocommerce' )
 							}
 							selected={ searchedLabels }
 							showClearButton={ true }
@@ -437,7 +437,7 @@ const ReportTable = ( props ) => {
 							<DownloadIcon />
 							<span className="woocommerce-table__download-button__label">
 								{ labels.downloadButton ||
-									__( 'Download', 'woocommerce-admin' ) }
+									__( 'Download', 'woocommerce' ) }
 							</span>
 						</Button>
 					),

@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -49,13 +48,13 @@ class WC_Admin_Status {
 				$response = $tools_controller->execute_tool( $action );
 
 				$tool                  = $tools[ $action ];
-				$tool_requires_refresh = ArrayUtil::get_value_or_default( $tool, 'requires_refresh', false );
+				$tool_requires_refresh = $tool['requires_refresh'] ?? false;
 				$tool                  = array(
 					'id'          => $action,
 					'name'        => $tool['name'],
 					'action'      => $tool['button'],
 					'description' => $tool['desc'],
-					'disabled'    => ArrayUtil::get_value_or_default( $tool, 'disabled', false ),
+					'disabled'    => $tool['disabled'] ?? false,
 				);
 				$tool                  = array_merge( $tool, $response );
 
@@ -259,7 +258,7 @@ class WC_Admin_Status {
 		$update_theme_version = 0;
 
 		// Check .org for updates.
-		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
+		if ( is_object( $api ) && ! is_wp_error( $api ) && isset( $api->version ) ) {
 			$update_theme_version = $api->version;
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) { // Check WooThemes Theme Version.
 			$theme_dir          = substr( strtolower( str_replace( ' ', '', $theme->Name ) ), 0, 45 ); // @codingStandardsIgnoreLine.
@@ -363,7 +362,7 @@ class WC_Admin_Status {
 			<?php
 				echo esc_html(
 					sprintf(
-					// translators: Comma seperated list of missing tables.
+					// translators: Comma separated list of missing tables.
 						__( 'Missing base tables: %s. Some WooCommerce functionality may not work as expected.', 'woocommerce' ),
 						implode( ', ', $missing_tables )
 					)

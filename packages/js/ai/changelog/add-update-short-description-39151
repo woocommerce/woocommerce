@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Returning promise from requestCompletion instead of event source.

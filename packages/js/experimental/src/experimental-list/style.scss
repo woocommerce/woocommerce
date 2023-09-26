@@ -117,6 +117,10 @@ a.woocommerce-experimental-list__item {
 			color: $foreground-color-hover;
 		}
 
+		.woocommerce-task-list__item-badge {
+			background-color: $white;
+		}
+
 		.woocommerce-list__item-before > svg {
 			fill: $foreground-color-hover;
 		}
@@ -134,7 +138,7 @@ a.woocommerce-experimental-list__item {
 		fill: $chevron-color;
 	}
 
-	&.is-complete {
+	&.complete {
 		.woocommerce-task__icon {
 			background-color: var(--wp-admin-theme-color);
 		}

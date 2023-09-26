@@ -10,6 +10,9 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -590,9 +593,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Update address.
 	 *
-	 * @param WC_Order $order
-	 * @param array $posted
-	 * @param string $type
+	 * @param WC_Order $order  Order object.
+	 * @param array    $posted Request data.
+	 * @param string   $type   Type of address; 'billing' or 'shipping'.
 	 */
 	protected function update_address( $order, $posted, $type = 'billing' ) {
 		foreach ( $posted as $key => $value ) {
@@ -737,7 +740,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
 
 		if ( 'create' === $action ) {
-			if ( empty( $posted['code'] ) ) {
+			$coupon_code = ArrayUtil::get_value_or_default( $posted, 'code' );
+			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}
@@ -1004,7 +1008,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'version' => array(
 					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
-					'type'        => 'integer',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

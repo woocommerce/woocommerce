@@ -35,14 +35,8 @@ class ChartBlock extends Component {
 	}
 
 	render() {
-		const {
-			charts,
-			endpoint,
-			path,
-			query,
-			selectedChart,
-			filters,
-		} = this.props;
+		const { charts, endpoint, path, query, selectedChart, filters } =
+			this.props;
 
 		if ( ! selectedChart ) {
 			return null;
@@ -75,7 +69,7 @@ class ChartBlock extends Component {
 							{
 								/* translators: %s is the chart type */
 								sprintf(
-									__( '%s Report', 'woocommerce-admin' ),
+									__( '%s Report', 'woocommerce' ),
 									selectedChart.label
 								)
 							}

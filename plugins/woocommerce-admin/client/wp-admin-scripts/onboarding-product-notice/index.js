@@ -11,13 +11,13 @@ import { getAdminLink } from '@woocommerce/settings';
  */
 const showProductCompletionNotice = () => {
 	dispatch( 'core/notices' ).createSuccessNotice(
-		__( '🎉 Congrats on adding your first product!', 'woocommerce-admin' ),
+		__( '🎉 Congrats on adding your first product!', 'woocommerce' ),
 		{
 			id: 'WOOCOMMERCE_ONBOARDING_PRODUCT_NOTICE',
 			actions: [
 				{
 					url: getAdminLink( 'admin.php?page=wc-admin' ),
-					label: __( 'Continue setup.', 'woocommerce-admin' ),
+					label: __( 'Continue setup.', 'woocommerce' ),
 				},
 			],
 		}

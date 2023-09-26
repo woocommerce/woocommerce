@@ -5,15 +5,12 @@ import { __, sprintf } from '@wordpress/i18n';
 import { isNil } from 'lodash';
 
 function HistoricalDataProgress( { label, progress, total } ) {
-	const labelText = sprintf(
-		__( 'Imported %(label)s', 'woocommerce-admin' ),
-		{
-			label,
-		}
-	);
+	const labelText = sprintf( __( 'Imported %(label)s', 'woocommerce' ), {
+		label,
+	} );
 
 	const labelCounters = ! isNil( total )
-		? sprintf( __( '%(progress)s of %(total)s', 'woocommerce-admin' ), {
+		? sprintf( __( '%(progress)s of %(total)s', 'woocommerce' ), {
 				progress: progress || 0,
 				total,
 		  } )

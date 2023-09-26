@@ -10,13 +10,11 @@ const woocommerceAdminConfig = require( path.resolve(
 ) );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
-const extArg = process.argv.find( ( arg ) => arg.startsWith( '--ext=' ) );
-
-if ( ! extArg ) {
+if ( ! process.env.WC_EXT ) {
 	throw new Error( 'Please provide an extension.' );
 }
 
-const extension = extArg.slice( 6 );
+const extension = process.env.WC_EXT;
 const extensionPath = path.join( __dirname, `${ extension }/js/index.js` );
 
 if ( ! fs.existsSync( extensionPath ) ) {
@@ -33,7 +31,7 @@ const webpackConfig = {
 	output: {
 		filename: '[name]/dist/index.js',
 		path: path.resolve( __dirname ),
-		libraryTarget: 'this',
+		libraryTarget: 'window',
 	},
 	externals: woocommerceAdminConfig.externals,
 	module: {
@@ -89,12 +87,17 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
-		new CopyWebpackPlugin( [
-			{
-				from: path.join( __dirname, `${ extension }/` ),
-				to: path.resolve( __dirname, `../../../../${ extension }/` ),
-			},
-		] ),
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: path.join( __dirname, `${ extension }/` ),
+					to: path.resolve(
+						__dirname,
+						`../../../../${ extension }/`
+					),
+				},
+			],
+		} ),
 		new MiniCssExtractPlugin( {
 			filename: '[name]/dist/style.css',
 		} ),

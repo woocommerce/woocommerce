@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Categories;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
  * REST API Reports categories controller class.
@@ -19,13 +19,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
@@ -41,18 +34,19 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                      = array();
-		$args['before']            = $request['before'];
-		$args['after']             = $request['after'];
-		$args['interval']          = $request['interval'];
-		$args['page']              = $request['page'];
-		$args['per_page']          = $request['per_page'];
-		$args['orderby']           = $request['orderby'];
-		$args['order']             = $request['order'];
-		$args['extended_info']     = $request['extended_info'];
-		$args['category_includes'] = (array) $request['categories'];
-		$args['status_is']         = (array) $request['status_is'];
-		$args['status_is_not']     = (array) $request['status_is_not'];
+		$args                        = array();
+		$args['before']              = $request['before'];
+		$args['after']               = $request['after'];
+		$args['interval']            = $request['interval'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['orderby']             = $request['orderby'];
+		$args['order']               = $request['order'];
+		$args['extended_info']       = $request['extended_info'];
+		$args['category_includes']   = (array) $request['categories'];
+		$args['status_is']           = (array) $request['status_is'];
+		$args['status_is_not']       = (array) $request['status_is_not'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
 	}
@@ -73,7 +67,7 @@ class Controller extends ReportsController implements ExportableInterface {
 		}
 
 		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new \WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce-admin' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$out_data = array();
@@ -83,28 +77,13 @@ class Controller extends ReportsController implements ExportableInterface {
 			$out_data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		$response = rest_ensure_response( $out_data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
-
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$out_data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
 	}
 
 	/**
@@ -165,31 +144,31 @@ class Controller extends ReportsController implements ExportableInterface {
 			'type'       => 'object',
 			'properties' => array(
 				'category_id'    => array(
-					'description' => __( 'Category ID.', 'woocommerce-admin' ),
+					'description' => __( 'Category ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'items_sold'     => array(
-					'description' => __( 'Amount of items sold.', 'woocommerce-admin' ),
+					'description' => __( 'Amount of items sold.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'net_revenue'    => array(
-					'description' => __( 'Total sales.', 'woocommerce-admin' ),
+					'description' => __( 'Total sales.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count'   => array(
-					'description' => __( 'Number of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'products_count' => array(
-					'description' => __( 'Amount of products.', 'woocommerce-admin' ),
+					'description' => __( 'Amount of products.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -199,7 +178,7 @@ class Controller extends ReportsController implements ExportableInterface {
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Category name.', 'woocommerce-admin' ),
+						'description' => __( 'Category name.', 'woocommerce' ),
 					),
 				),
 			),
@@ -214,18 +193,18 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                  = array();
-		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+		$params                        = array();
+		$params['context']             = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']                = array(
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+		$params['per_page']            = array(
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -233,27 +212,27 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+		$params['after']               = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+		$params['before']              = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+		$params['order']               = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+		$params['orderby']             = array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'category_id',
 			'enum'              => array(
@@ -266,8 +245,8 @@ class Controller extends ReportsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']      = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
+		$params['interval']            = array(
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -280,8 +259,8 @@ class Controller extends ReportsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']     = array(
-			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce-admin' ),
+		$params['status_is']           = array(
+			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -290,8 +269,8 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not'] = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce-admin' ),
+		$params['status_is_not']       = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -300,8 +279,8 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['categories']    = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce-admin' ),
+		$params['categories']          = array(
+			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -309,11 +288,17 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce-admin' ),
+		$params['extended_info']       = array(
+			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -327,11 +312,11 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'category'       => __( 'Category', 'woocommerce-admin' ),
-			'items_sold'     => __( 'Items sold', 'woocommerce-admin' ),
-			'net_revenue'    => __( 'Net Revenue', 'woocommerce-admin' ),
-			'products_count' => __( 'Products', 'woocommerce-admin' ),
-			'orders_count'   => __( 'Orders', 'woocommerce-admin' ),
+			'category'       => __( 'Category', 'woocommerce' ),
+			'items_sold'     => __( 'Items sold', 'woocommerce' ),
+			'net_revenue'    => __( 'Net Revenue', 'woocommerce' ),
+			'products_count' => __( 'Products', 'woocommerce' ),
+			'orders_count'   => __( 'Orders', 'woocommerce' ),
 		);
 
 		/**

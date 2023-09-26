@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
@@ -39,29 +42,52 @@ import {
  * 	DeletesExternalProducts
  * } The created repository.
  */
-export function externalProductRESTRepository( httpClient: HTTPClient ): ListsExternalProducts
-	& CreatesExternalProducts
-	& ReadsExternalProducts
-	& UpdatesExternalProducts
-	& DeletesExternalProducts {
+export function externalProductRESTRepository(
+	httpClient: HTTPClient
+): ListsExternalProducts &
+	CreatesExternalProducts &
+	ReadsExternalProducts &
+	UpdatesExternalProducts &
+	DeletesExternalProducts {
 	const external = createProductExternalTransformation();
 	const price = createProductPriceTransformation();
 	const salesTax = createProductSalesTaxTransformation();
 	const upsells = createProductUpSellsTransformation();
-	const transformations = [
-		...external,
-		...price,
-		...salesTax,
-		...upsells,
-	];
+	const transformations = [ ...external, ...price, ...salesTax, ...upsells ];
 
-	const transformer = createProductTransformer<ExternalProduct>( 'external', transformations );
+	const transformer = createProductTransformer< ExternalProduct >(
+		'external',
+		transformations
+	);
 
 	return new ModelRepository(
-		restList< ExternalProductRepositoryParams >( baseProductURL, ExternalProduct, httpClient, transformer ),
-		restCreate< ExternalProductRepositoryParams >( baseProductURL, ExternalProduct, httpClient, transformer ),
-		restRead< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
-		restUpdate< ExternalProductRepositoryParams >( buildProductURL, ExternalProduct, httpClient, transformer ),
-		restDelete< ExternalProductRepositoryParams >( deleteProductURL, httpClient ),
+		restList< ExternalProductRepositoryParams >(
+			baseProductURL,
+			ExternalProduct,
+			httpClient,
+			transformer
+		),
+		restCreate< ExternalProductRepositoryParams >(
+			baseProductURL,
+			ExternalProduct,
+			httpClient,
+			transformer
+		),
+		restRead< ExternalProductRepositoryParams >(
+			buildProductURL,
+			ExternalProduct,
+			httpClient,
+			transformer
+		),
+		restUpdate< ExternalProductRepositoryParams >(
+			buildProductURL,
+			ExternalProduct,
+			httpClient,
+			transformer
+		),
+		restDelete< ExternalProductRepositoryParams >(
+			deleteProductURL,
+			httpClient
+		)
 	);
 }

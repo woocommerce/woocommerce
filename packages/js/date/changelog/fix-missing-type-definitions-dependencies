@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added in missing TS definitions in package.json

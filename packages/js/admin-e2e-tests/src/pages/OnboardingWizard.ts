@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import config from 'config';
 import { Page } from 'puppeteer';
 
 /**
@@ -13,12 +14,7 @@ import {
 	StoreDetails,
 	StoreDetailsSection,
 } from '../sections/onboarding/StoreDetailsSection';
-import { ThemeSection } from '../sections/onboarding/ThemeSection';
 import { BasePage } from './BasePage';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { expect } = require( '@jest/globals' );
-const config = require( 'config' );
 
 export class OnboardingWizard extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
@@ -27,7 +23,6 @@ export class OnboardingWizard extends BasePage {
 	industry: IndustrySection;
 	productTypes: ProductTypeSection;
 	business: BusinessSection;
-	themes: ThemeSection;
 
 	constructor( page: Page ) {
 		super( page );
@@ -35,7 +30,6 @@ export class OnboardingWizard extends BasePage {
 		this.industry = new IndustrySection( page );
 		this.productTypes = new ProductTypeSection( page );
 		this.business = new BusinessSection( page );
-		this.themes = new ThemeSection( page );
 	}
 
 	async skipStoreSetup(): Promise< void > {
@@ -93,7 +87,6 @@ export class OnboardingWizard extends BasePage {
 				productNumber: string;
 				currentlySelling: string;
 			};
-			themeTitle?: string;
 		} = {}
 	): Promise< void > {
 		await this.navigate();
@@ -145,13 +138,5 @@ export class OnboardingWizard extends BasePage {
 		await this.business.uncheckAllRecommendedBusinessFeatures();
 
 		await this.continue();
-		await this.themes.isDisplayed();
-
-		//  This navigates to the home screen
-		if ( options.themeTitle ) {
-			await this.themes.continueWithTheme( options.themeTitle );
-		} else {
-			await this.themes.continueWithActiveTheme();
-		}
 	}
 }

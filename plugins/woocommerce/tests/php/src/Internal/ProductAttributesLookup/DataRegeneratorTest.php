@@ -40,7 +40,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		global $wpdb;
 
 		parent::setUp();
@@ -81,7 +81,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *
 	 * @param bool $previously_existing True to create a lookup table beforehand.
 	 */
-	public function test_initiate_regeneration_creates_looukp_table( $previously_existing ) {
+	public function test_initiate_regeneration_creates_lookup_table( $previously_existing ) {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -96,7 +96,11 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		// Try to insert a row to verify that the table exists.
 		// We can't use the regular table existence detection mechanisms because PHPUnit creates all tables as temporary.
-		$wpdb->query( 'INSERT INTO ' . $this->lookup_table_name . " VALUES (1, 1, 'taxonomy', 1, 1, 1 )" );
+		$wpdb->query(
+			'INSERT INTO ' . $this->lookup_table_name .
+			'( product_id, product_or_parent_id, taxonomy, term_id, is_variation_attribute, in_stock)' .
+			" VALUES (1, 1, 'taxonomy', 1, 1, 1 )"
+		);
 		$value = $wpdb->get_var( 'SELECT product_id FROM ' . $this->lookup_table_name . ' LIMIT 1' );
 		$this->assertEquals( 1, $value );
 
@@ -188,6 +192,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_attribute_lookup_processed_count', 7 );
 
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
@@ -241,6 +246,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
@@ -274,6 +280,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
@@ -281,5 +288,29 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
+	}
+
+	/**
+	 * @testdox After WooCommerce is installed the table usage is enabled only if it hadn't been explicitly disabled by an admin.
+	 *
+	 * @testWith [null, "yes"]
+	 *           ["yes", "yes"]
+	 *           ["no", "no"]
+	 *
+	 * @param string|null $previous_option_value Initial value of the attribute usage option.
+	 * @param string      $expected_final_option_value Expected final value of the attribute usage option.
+	 */
+	public function test_after_install_table_usage_is_enabled_if_it_wasnt_disabled( ?string $previous_option_value, string $expected_final_option_value ) {
+		if ( null === $previous_option_value ) {
+			delete_option( 'woocommerce_attribute_lookup_enabled' );
+		} else {
+			update_option( 'woocommerce_attribute_lookup_enabled', $previous_option_value );
+		}
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_installed' );
+
+		$actual_final_option_value = get_option( 'woocommerce_attribute_lookup_enabled' );
+		$this->assertEquals( $expected_final_option_value, $actual_final_option_value );
 	}
 }

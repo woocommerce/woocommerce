@@ -52,14 +52,14 @@ const useInstallPlugin = () => {
 	return [ pluginsBeingSetup, handleSetup ] as const;
 };
 
-const ShippingRecommendationsList: React.FC = ( { children } ) => (
+export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 	<DismissableList
 		className="woocommerce-recommended-shipping-extensions"
 		dismissOptionName="woocommerce_settings_shipping_recommendations_hidden"
 	>
 		<DismissableListHeading>
 			<Text variant="title.small" as="p" size="20" lineHeight="28px">
-				{ __( 'Recommended shipping solutions', 'woocommerce-admin' ) }
+				{ __( 'Recommended shipping solutions', 'woocommerce' ) }
 			</Text>
 			<Text
 				className="woocommerce-recommended-shipping__header-heading"
@@ -70,7 +70,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 			>
 				{ __(
 					'We recommend adding one of the following shipping extensions to your store. The extension will be installed and activated for you when you click "Get started".',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			</Text>
 		</DismissableListHeading>
@@ -86,9 +86,9 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 				target="_blank"
 				isTertiary
 			>
-				{ __( 'See more options', 'woocommerce-admin' ) }
+				{ __( 'See more options', 'woocommerce' ) }
 				<VisuallyHidden>
-					{ __( '(opens in a new tab)', 'woocommerce-admin' ) }
+					{ __( '(opens in a new tab)', 'woocommerce' ) }
 				</VisuallyHidden>
 				<ExternalIcon size={ 18 } />
 			</Button>
@@ -99,7 +99,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
-	const activePlugins = useSelect< string[] >( ( select ) =>
+	const activePlugins = useSelect( ( select ) =>
 		select( PLUGINS_STORE_NAME ).getActivePlugins()
 	);
 

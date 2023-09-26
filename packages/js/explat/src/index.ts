@@ -18,6 +18,7 @@ declare global {
 	interface Window {
 		wcTracks: {
 			isEnabled: boolean;
+			enable?: ( cb: () => void ) => void;
 		};
 	}
 }
@@ -37,16 +38,11 @@ const exPlatClient = createExPlatClient( {
 	isDevelopmentMode,
 } );
 
-export const {
-	loadExperimentAssignment,
-	dangerouslyGetExperimentAssignment,
-} = exPlatClient;
+export const { loadExperimentAssignment, dangerouslyGetExperimentAssignment } =
+	exPlatClient;
 
-export const {
-	useExperiment,
-	Experiment,
-	ProvideExperimentData,
-} = createExPlatClientReactHelpers( exPlatClient );
+export const { useExperiment, Experiment, ProvideExperimentData } =
+	createExPlatClientReactHelpers( exPlatClient );
 
 // Create another auth client that send request to wpcom as auth user.
 const exPlatClientWithAuth = createExPlatClient( {
@@ -58,7 +54,8 @@ const exPlatClientWithAuth = createExPlatClient( {
 
 export const {
 	loadExperimentAssignment: loadExperimentAssignmentWithAuth,
-	dangerouslyGetExperimentAssignment: dangerouslyGetExperimentAssignmentWithAuth,
+	dangerouslyGetExperimentAssignment:
+		dangerouslyGetExperimentAssignmentWithAuth,
 } = exPlatClientWithAuth;
 
 export const {

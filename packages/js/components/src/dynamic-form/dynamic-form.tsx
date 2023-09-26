@@ -24,8 +24,8 @@ type DynamicFormProps = {
 	isBusy?: boolean;
 	onSubmit?: ( values: Record< string, string > ) => void;
 	onChange?: (
-		value: Record< string, string >,
-		values: Record< string, string >[],
+		value: { name: string; value: unknown },
+		values: Record< string, string >,
 		result: boolean
 	) => void;
 	submitLabel?: string;
@@ -55,18 +55,20 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	onSubmit = () => {},
 	onChange = () => {},
 	validate = () => ( {} ),
-	submitLabel = __( 'Proceed', 'woocommerce-admin' ),
+	submitLabel = __( 'Proceed', 'woocommerce' ),
 } ) => {
 	// Support accepting fields in the format provided by the API (object), but transform to Array
 	const fields =
 		baseFields instanceof Array ? baseFields : Object.values( baseFields );
 
-	const initialValues = useMemo( () => getInitialConfigValues( fields ), [
-		fields,
-	] );
+	const initialValues = useMemo(
+		() => getInitialConfigValues( fields ),
+		[ fields ]
+	);
 
 	return (
-		<Form
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		<Form< Record< string, any > >
 			initialValues={ initialValues }
 			onChange={ onChange }
 			onSubmit={ onSubmit }

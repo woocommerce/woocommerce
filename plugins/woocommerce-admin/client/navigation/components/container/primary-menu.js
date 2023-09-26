@@ -29,7 +29,7 @@ export const PrimaryMenu = ( {
 	 */
 	const rootBackLabel = applyFilters(
 		'woocommerce_navigation_root_back_label',
-		__( 'WordPress Dashboard', 'woocommerce-admin' )
+		__( 'WordPress Dashboard', 'woocommerce' )
 	);
 
 	/**
@@ -75,7 +75,7 @@ export const PrimaryMenu = ( {
 				<NavigationGroup
 					title={
 						category.id === 'woocommerce'
-							? __( 'Extensions', 'woocommerce-admin' )
+							? __( 'Extensions', 'woocommerce' )
 							: null
 					}
 				>

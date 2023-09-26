@@ -14,7 +14,7 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 	/**
 	 * Setup tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Load email classes.
@@ -51,7 +51,7 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that we remove elemets with style display none from html mails.
+	 * Test that we remove elements with style display none from html mails.
 	 */
 	public function test_remove_display_none_elements() {
 		$email = new WC_Email();

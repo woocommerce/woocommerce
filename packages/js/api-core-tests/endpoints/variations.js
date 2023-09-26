@@ -47,9 +47,11 @@ const variationsApi = {
 		path: 'products/<product_id>/variations/<id>',
 		responseCode: 200,
 		payload: getVariationExample(),
+		// eslint-disable-next-line
 		variation: async ( productId, variationId, variationDetails ) =>
 			putRequest(
 				`products/${ productId }/variations/${ variationId }`,
+				// eslint-disable-next-line
 				taxRateDetails
 			),
 	},
@@ -75,6 +77,7 @@ const variationsApi = {
 		payload: shared.getBatchPayloadExample( getVariationExample() ),
 		variations: async ( batchUpdatePayload ) =>
 			postRequest(
+				// eslint-disable-next-line
 				`products/${ productId }/variations/${ variationId }`,
 				batchUpdatePayload
 			),

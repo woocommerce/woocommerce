@@ -3,14 +3,14 @@
  */
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { identity } from 'lodash';
+import { useEffect } from '@wordpress/element';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
-import type { History } from 'history';
+import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
+
 /**
  * Internal dependencies
  */
@@ -19,7 +19,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 type HomescreenProps = ReturnType< typeof withSelectHandler > & {
 	hasFinishedResolution: boolean;
-	query: Record< string, string >;
 };
 
 const Homescreen = ( {
@@ -28,14 +27,19 @@ const Homescreen = ( {
 		skipped: profilerSkipped,
 	} = {},
 	hasFinishedResolution,
-	query,
 }: HomescreenProps ) => {
-	if ( hasFinishedResolution && ! profilerCompleted && ! profilerSkipped ) {
-		( getHistory() as History ).push(
-			getNewPath( {}, '/setup-wizard', {} )
-		);
-	}
+	useEffect( () => {
+		if (
+			hasFinishedResolution &&
+			! profilerCompleted &&
+			! profilerSkipped
+		) {
+			getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
+		}
+	}, [ hasFinishedResolution, profilerCompleted, profilerSkipped ] );
 
+	const query = useQuery();
+	// @ts-expect-error Layout is a pure JS component
 	return <Layout query={ query } />;
 };
 
@@ -53,10 +57,8 @@ const withSelectHandler = ( select: WCDataSelector ) => {
 };
 
 export default compose(
-	onboardingData.profile
-		? withOnboardingHydration( {
-				profileItems: onboardingData.profile,
-		  } )
-		: identity,
+	withOnboardingHydration( {
+		profileItems: onboardingData.profile,
+	} ),
 	withSelect( withSelectHandler )
 )( Homescreen );

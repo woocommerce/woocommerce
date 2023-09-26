@@ -29,6 +29,8 @@ class Server {
 	 */
 	public function init() {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
+
+		\WC_REST_System_Status_V2_Controller::register_cache_clean();
 	}
 
 	/**

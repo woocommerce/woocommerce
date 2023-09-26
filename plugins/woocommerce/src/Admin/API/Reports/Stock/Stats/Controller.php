@@ -68,11 +68,13 @@ class Controller extends \WC_REST_Reports_Controller {
 		 *
 		 * Allows modification of the report data right before it is returned.
 		 *
+		 * @since 6.5.0
+		 *
 		 * @param WP_REST_Response $response The response object.
-		 * @param WC_Product       $product   The original bject.
+		 * @param WC_Product       $report   The original object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_stock_stats', $response, $product, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_stock_stats', $response, $report, $request );
 	}
 
 	/**
@@ -83,13 +85,13 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_item_schema() {
 		$totals = array(
 			'products' => array(
-				'description' => __( 'Number of products.', 'woocommerce-admin' ),
+				'description' => __( 'Number of products.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'lowstock' => array(
-				'description' => __( 'Number of low stock products.', 'woocommerce-admin' ),
+				'description' => __( 'Number of low stock products.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -100,7 +102,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		foreach ( $status_options as $status => $label ) {
 			$totals[ $status ] = array(
 				/* translators: Stock status. Example: "Number of low stock products */
-				'description' => sprintf( __( 'Number of %s products.', 'woocommerce-admin' ), $label ),
+				'description' => sprintf( __( 'Number of %s products.', 'woocommerce' ), $label ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -113,7 +115,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'totals' => array(
-					'description' => __( 'Totals data.', 'woocommerce-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

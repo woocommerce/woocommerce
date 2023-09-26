@@ -13,7 +13,13 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
+# Dependencies
 vendor/
 node_modules/
+
+# Built assets
 build/
 woocommerce-beta-tester.zip
+build
+build-module
+build-style

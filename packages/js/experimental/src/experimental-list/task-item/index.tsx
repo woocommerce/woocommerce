@@ -39,12 +39,13 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
-	onClick: () => void;
+	onClick: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
 	onDismiss?: () => void;
 	onSnooze?: () => void;
 	onExpand?: () => void;
+	badge?: string;
 	additionalInfo?: string;
 	time?: string;
 	content: string;
@@ -69,12 +70,12 @@ const OptionalTaskTooltip: React.FC< {
 	if ( level === 1 && ! completed ) {
 		tooltip = __(
 			'This task is required to keep your store running',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	} else if ( level === 2 && ! completed ) {
 		tooltip = __(
 			'This task is required to set up your extension',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 	if ( tooltip === '' ) {
@@ -107,6 +108,7 @@ const OptionalExpansionWrapper: React.FC< {
 export const TaskItem: React.FC< TaskItemProps > = ( {
 	completed,
 	title,
+	badge,
 	onDelete,
 	onCollapse,
 	onDismiss,
@@ -185,6 +187,11 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 				>
 					<span className="woocommerce-task-list__item-title">
 						{ title }
+						{ badge && (
+							<span className="woocommerce-task-list__item-badge">
+								{ badge }
+							</span>
+						) }
 					</span>
 					<OptionalExpansionWrapper
 						expandable={ expandable }
@@ -236,7 +243,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 			</div>
 			{ showEllipsisMenu && (
 				<EllipsisMenu
-					label={ __( 'Task Options', 'woocommerce-admin' ) }
+					label={ __( 'Task Options', 'woocommerce' ) }
 					className="woocommerce-task-list__item-after"
 					onToggle={ ( e: React.MouseEvent | React.KeyboardEvent ) =>
 						e.stopPropagation()
@@ -254,7 +261,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onDismiss();
 									} }
 								>
-									{ __( 'Dismiss', 'woocommerce-admin' ) }
+									{ __( 'Dismiss', 'woocommerce' ) }
 								</Button>
 							) }
 							{ onSnooze && ! completed && (
@@ -264,10 +271,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onSnooze();
 									} }
 								>
-									{ __(
-										'Remind me later',
-										'woocommerce-admin'
-									) }
+									{ __( 'Remind me later', 'woocommerce' ) }
 								</Button>
 							) }
 							{ onDelete && completed && (
@@ -281,7 +285,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onDelete();
 									} }
 								>
-									{ __( 'Delete', 'woocommerce-admin' ) }
+									{ __( 'Delete', 'woocommerce' ) }
 								</Button>
 							) }
 						</div>

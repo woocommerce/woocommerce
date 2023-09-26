@@ -95,7 +95,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 				className="woocommerce-admin-dismiss-notification"
 				onClick={ () => onDismiss && onDismiss( note ) }
 			>
-				{ __( 'Dismiss', 'woocommerce-admin' ) }
+				{ __( 'Dismiss', 'woocommerce' ) }
 			</Button>
 		);
 	};
@@ -143,7 +143,6 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 
 	const {
 		content,
-		date_created: dateCreated,
 		date_created_gmt: dateCreatedGmt,
 		image,
 		is_deleted: isDeleted,
@@ -171,7 +170,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	const actionWrapperClassName = classnames(
 		'woocommerce-inbox-message__actions',
 		{
-			'has-multiple-actions': note.actions.length > 1,
+			'has-multiple-actions': note.actions?.length > 1,
 		}
 	);
 

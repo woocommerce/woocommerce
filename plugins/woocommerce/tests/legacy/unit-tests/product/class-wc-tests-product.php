@@ -20,7 +20,7 @@ class WC_Tests_Product extends WC_Unit_Test_Case {
 	/**
 	 * Runs before every test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->product = new WC_Product();
@@ -66,7 +66,7 @@ class WC_Tests_Product extends WC_Unit_Test_Case {
 	 *           [3, 4, false, "outofstock"]
 	 *
 	 * @param int    $stock_quantity Current stock quantity for the product.
-	 * @param bool   $notify_no_stock_amount Value for the woocommerce_notify_no_stock_amount option.
+	 * @param int    $notify_no_stock_amount Value for the woocommerce_notify_no_stock_amount option.
 	 * @param bool   $accepts_backorders Whether the product accepts backorders or not.
 	 * @param string $expected_stock_status The expected stock status of the product after being saved.
 	 */

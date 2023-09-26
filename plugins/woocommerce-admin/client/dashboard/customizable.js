@@ -18,6 +18,10 @@ import {
 	isoDateFormat,
 } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import {
+	CurrencyContext,
+	getFilteredCurrencyInstance,
+} from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -26,10 +30,6 @@ import './style.scss';
 import defaultSections from './default-sections';
 import Section from './section';
 import ReportFilters from '../analytics/components/report-filters';
-import {
-	CurrencyContext,
-	getFilteredCurrencyInstance,
-} from '../lib/currency-context';
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 
@@ -190,7 +190,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<Button
 						onClick={ onToggle }
-						title={ __( 'Add more sections', 'woocommerce-admin' ) }
+						title={ __( 'Add more sections', 'woocommerce' ) }
 						aria-expanded={ isOpen }
 					>
 						<Icon icon={ plusCircleFilled } />
@@ -198,9 +198,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<>
-						<H>
-							{ __( 'Dashboard Sections', 'woocommerce-admin' ) }
-						</H>
+						<H>{ __( 'Dashboard Sections', 'woocommerce' ) }</H>
 						<div className="woocommerce-dashboard-section__add-more-choices">
 							{ hiddenSections.map( ( section ) => {
 								return (
@@ -214,7 +212,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 										title={ sprintf(
 											__(
 												'Add %s section',
-												'woocommerce-admin'
+												'woocommerce'
 											),
 											section.title
 										) }
@@ -242,10 +240,8 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 			query,
 			defaultDateRange
 		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query, defaultDateRange );
+		const { primary: primaryDate, secondary: secondaryDate } =
+			getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,

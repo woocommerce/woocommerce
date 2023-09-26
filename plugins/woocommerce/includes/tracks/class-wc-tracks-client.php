@@ -41,7 +41,7 @@ class WC_Tracks_Client {
 	}
 
 	/**
-	 * Check if identiy cookie is set, if not set it.
+	 * Check if identity cookie is set, if not set it.
 	 *
 	 * @return void
 	 */
@@ -125,7 +125,7 @@ class WC_Tracks_Client {
 	}
 
 	/**
-	 * Create a timestap representing milliseconds since 1970-01-01
+	 * Create a timestamp representing milliseconds since 1970-01-01
 	 *
 	 * @return string A string representing a timestamp.
 	 */

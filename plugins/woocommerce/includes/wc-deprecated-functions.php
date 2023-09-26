@@ -1098,7 +1098,7 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  * @deprecated 3.6.0
  * @param int    $term_id    Term ID.
  * @param string $meta_key   Meta key.
- * @param string $meta_value Meta value (default: '').
+ * @param mixed  $meta_value Meta value (default: '').
  * @param bool   $deprecated Deprecated param (default: false).
  * @return bool
  */

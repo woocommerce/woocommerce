@@ -44,7 +44,7 @@ class SectionControls extends Component {
 			<Fragment>
 				<div className="woocommerce-ellipsis-menu__item">
 					<TextControl
-						label={ __( 'Section title', 'woocommerce-admin' ) }
+						label={ __( 'Section title', 'woocommerce' ) }
 						onBlur={ onTitleBlur }
 						onChange={ onTitleChange }
 						required
@@ -56,11 +56,11 @@ class SectionControls extends Component {
 						<MenuItem isClickable onInvoke={ this.onMoveUp }>
 							<Icon
 								icon={ <ChevronUpIcon /> }
-								label={ __( 'Move up' ) }
+								label={ __( 'Move up', 'woocommerce' ) }
 								size={ 20 }
 								className="icon-control"
 							/>
-							{ __( 'Move up', 'woocommerce-admin' ) }
+							{ __( 'Move up', 'woocommerce' ) }
 						</MenuItem>
 					) }
 					{ ! isLast && (
@@ -68,20 +68,20 @@ class SectionControls extends Component {
 							<Icon
 								icon={ <ChevronDownIcon /> }
 								size={ 20 }
-								label={ __( 'Move down' ) }
+								label={ __( 'Move down', 'woocommerce' ) }
 								className="icon-control"
 							/>
-							{ __( 'Move down', 'woocommerce-admin' ) }
+							{ __( 'Move down', 'woocommerce' ) }
 						</MenuItem>
 					) }
 					<MenuItem isClickable onInvoke={ onRemove }>
 						<Icon
 							icon={ trash }
 							size={ 20 }
-							label={ __( 'Remove block' ) }
+							label={ __( 'Remove block', 'woocommerce' ) }
 							className="icon-control"
 						/>
-						{ __( 'Remove section', 'woocommerce-admin' ) }
+						{ __( 'Remove section', 'woocommerce' ) }
 					</MenuItem>
 				</div>
 			</Fragment>

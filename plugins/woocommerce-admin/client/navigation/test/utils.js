@@ -43,14 +43,12 @@ const sampleMenuItems = [
 	{
 		id: 'multiple-args-plus-one',
 		title: 'Page with same multiple arguments plus an additional one',
-		url:
-			'admin.php?page=wc-admin&path=/test-path&section=section-name&version=22',
+		url: 'admin.php?page=wc-admin&path=/test-path&section=section-name&version=22',
 	},
 	{
 		id: 'hash-and-multiple-args',
 		title: 'Page with multiple arguments and a hash',
-		url:
-			'admin.php?page=wc-admin&path=/test-path&section=section-name#anchor',
+		url: 'admin.php?page=wc-admin&path=/test-path&section=section-name#anchor',
 	},
 ];
 

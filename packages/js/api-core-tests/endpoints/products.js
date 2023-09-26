@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require( '../utils/request' );
 
 /**
  * WooCommerce Products endpoints.
@@ -15,28 +20,31 @@ const productsApi = {
 		method: 'POST',
 		path: 'products',
 		responseCode: 201,
-		product: async ( productDetails ) => postRequest( 'products', productDetails ),
+		product: async ( productDetails ) =>
+			postRequest( 'products', productDetails ),
 	},
 	retrieve: {
 		name: 'Retrieve a product',
 		method: 'GET',
 		path: 'products/<id>',
 		responseCode: 200,
-		product: async ( productId ) => getRequest( `products/${productId}` ),
+		product: async ( productId ) => getRequest( `products/${ productId }` ),
 	},
 	listAll: {
 		name: 'List all products',
 		method: 'GET',
 		path: 'products',
 		responseCode: 200,
-		products: async ( productsQuery = {} ) => getRequest( 'products', productsQuery ),
+		products: async ( productsQuery = {} ) =>
+			getRequest( 'products', productsQuery ),
 	},
 	update: {
 		name: 'Update a product',
 		method: 'PUT',
 		path: 'products/<id>',
 		responseCode: 200,
-		product: async ( productId, productDetails ) => putRequest( `products/${productId}`, productDetails ),
+		product: async ( productId, productDetails ) =>
+			putRequest( `products/${ productId }`, productDetails ),
 	},
 	delete: {
 		name: 'Delete a product',
@@ -44,16 +52,18 @@ const productsApi = {
 		path: 'products/<id>',
 		responseCode: 200,
 		payload: {
-			force: false
+			force: false,
 		},
-		product: async ( productId, deletePermanently ) => deleteRequest( `products/${productId}`, deletePermanently ),
+		product: async ( productId, deletePermanently ) =>
+			deleteRequest( `products/${ productId }`, deletePermanently ),
 	},
 	batch: {
 		name: 'Batch update products',
 		method: 'POST',
 		path: 'products/batch',
 		responseCode: 200,
-		products: async ( batchUpdatePayload ) => postRequest( `products/batch`, batchUpdatePayload ),
+		products: async ( batchUpdatePayload ) =>
+			postRequest( `products/batch`, batchUpdatePayload ),
 	},
 };
 

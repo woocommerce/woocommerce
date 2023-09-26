@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
+use Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
 
 /**
  * REST API Admin Note Action controller class.
@@ -30,11 +30,11 @@ class NoteActions extends Notes {
 			array(
 				'args'   => array(
 					'note_id'   => array(
-						'description' => __( 'Unique ID for the Note.', 'woocommerce-admin' ),
+						'description' => __( 'Unique ID for the Note.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 					'action_id' => array(
-						'description' => __( 'Unique ID for the Note Action.', 'woocommerce-admin' ),
+						'description' => __( 'Unique ID for the Note Action.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -61,7 +61,7 @@ class NoteActions extends Notes {
 		if ( ! $note ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_id',
-				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -74,7 +74,7 @@ class NoteActions extends Notes {
 		if ( ! $triggered_action ) {
 			return new \WP_Error(
 				'woocommerce_note_action_invalid_id',
-				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}

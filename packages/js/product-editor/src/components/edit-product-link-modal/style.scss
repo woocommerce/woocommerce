@@ -1,0 +1,16 @@
+.woocommerce-product-link-edit-modal {
+	max-width: 650px;
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+
+	.woocommerce-product-link-edit-modal__description {
+		margin-top: 0;
+		margin-bottom: $gap-large;
+	}
+}

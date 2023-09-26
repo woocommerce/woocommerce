@@ -20,9 +20,27 @@ namespace WooCommerce\Admin;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_client;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * This class provides an interface to the Explat A/B tests.
+ *
+ * Usage:
+ *
+ * $anon_id = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+ * $allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+ * $abtest = new \WooCommerce\Admin\Experimental_Abtest(
+ *      $anon_id,
+ *      'woocommerce',
+ *      $allow_tracking
+ * );
+ *
+ * OR use the helper function:
+ *
+ * WooCommerce\Admin\Experimental_Abtest::in_treatment('experiment_name');
+ *
+ *
+ * $isTreatment = $abtest->get_variation('your-experiment-name') === 'treatment';
  *
  * @internal This class is experimental and should not be used externally due to planned breaking changes.
  */
@@ -79,6 +97,26 @@ final class Experimental_Abtest {
 	}
 
 	/**
+	 * Returns true if the current user is in the treatment group of the given experiment.
+	 *
+	 * @param string $experiment_name Name of the experiment.
+	 * @param bool   $as_auth_wpcom_user Request variation as a auth wp user or not.
+	 * @return bool
+	 */
+	public static function in_treatment( string $experiment_name, bool $as_auth_wpcom_user = false ) {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new self(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking,
+			$as_auth_wpcom_user
+		);
+
+		return $abtest->get_variation( $experiment_name ) === 'treatment';
+	}
+
+	/**
 	 * Retrieve the test variation for a provided A/B test.
 	 *
 	 * @param string $test_name Name of the A/B test.
@@ -122,6 +160,10 @@ final class Experimental_Abtest {
 
 		// Request as anonymous user.
 		if ( ! isset( $response ) ) {
+			if ( ! isset( $args['anon_id'] ) || empty( $args['anon_id'] ) ) {
+				return new \WP_Error( 'invalid_anon_id', 'anon_id must be an none empty string.' );
+			}
+
 			$url      = add_query_arg(
 				$args,
 				sprintf(
@@ -167,11 +209,18 @@ final class Experimental_Abtest {
 		}
 
 		// Make the request to the WP.com API.
-		$args     = array(
-			'experiment_name'  => $test_name,
-			'anon_id'          => rawurlencode( $this->anon_id ),
-			'woo_country_code' => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
+		$args = array(
+			'experiment_name'               => $test_name,
+			'anon_id'                       => rawurlencode( $this->anon_id ),
+			'woo_country_code'              => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
+			'woo_wcadmin_install_timestamp' => rawurlencode( get_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION ) ),
 		);
+
+		/**
+		 * Get additional request args.
+		 *
+		 * @since 6.5.0
+		 */
 		$args     = apply_filters( 'woocommerce_explat_request_args', $args );
 		$response = $this->request_assignment( $args );
 

@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -67,6 +68,9 @@ class WC_Unit_Tests_Bootstrap {
 		// install WC.
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 
+		// Set up WC-Admin config.
+		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
+
 		/*
 		* Load PHPUnit Polyfills for the WP testing suite.
 		* @see https://github.com/WordPress/wordpress-develop/pull/1563/
@@ -76,21 +80,46 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		// Ensure theme install tests use direct filesystem method.
+		if ( ! defined( 'FS_METHOD' ) ) {
+			define( 'FS_METHOD', 'direct' );
+		}
+
 		// load WC testing framework.
 		$this->includes();
 
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
+
+		if ( getenv( 'HPOS' ) ) {
+			$this->initialize_hpos();
+		}
+
+		error_reporting(error_reporting() & ~E_DEPRECATED);
 	}
 
 	/**
 	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
 	 */
 	protected static function register_autoloader_for_testing_tools() {
-		return spl_autoload_register(
+		spl_autoload_register(
 			function ( $class ) {
+				$tests_directory   = dirname( __FILE__, 2 );
+				$helpers_directory = $tests_directory . '/php/helpers';
+
+				// Support loading top-level classes from the `php/helpers` directory.
+				if ( ! str_contains( $class, '\\' ) ) {
+					$helper_path = realpath( "$helpers_directory/$class.php" );
+
+					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
+						require $helper_path;
+						return;
+					}
+				}
+
+				// Otherwise, check if this might relate to an Automattic\WooCommerce\Testing\Tools class.
 				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
-				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$base_dir = $tests_directory . '/Tools/';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
@@ -132,6 +161,17 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Initialize HPOS if tests need to run in HPOS context.
+	 *
+	 * @return void
+	 */
+	private function initialize_hpos() {
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
+	}
+
+	/**
 	 * Re-initialize the dependency injection engine.
 	 *
 	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
@@ -155,7 +195,6 @@ class WC_Unit_Tests_Bootstrap {
 		$inner_container = $inner_container_property->getValue( wc_get_container() );
 
 		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
-		$inner_container->reset_all_resolved();
 
 		$GLOBALS['wc_container'] = $inner_container;
 	}
@@ -168,7 +207,12 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
+
 		require_once $this->plugin_dir . '/woocommerce.php';
+		FeaturePlugin::instance()->init();
 	}
 
 	/**
@@ -177,15 +221,14 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function install_wc() {
-
 		// Clean existing install first.
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		// Initialize the WC API extensions.
-		\Automattic\WooCommerce\Internal\Admin\Install::create_tables();
-		\Automattic\WooCommerce\Internal\Admin\Install::create_events();
+		if ( ! getenv( 'HPOS' ) ) {
+			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
 
 		WC_Install::install();
 
@@ -206,13 +249,13 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function includes() {
-
 		// framework.
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-factory.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-session-handler.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-wc-data.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-wc-object-query.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-payment-gateway.php';
+		require_once $this->tests_dir . '/framework/class-wc-mock-enhanced-payment-gateway.php';
 		require_once $this->tests_dir . '/framework/class-wc-payment-token-stub.php';
 		require_once $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
 
@@ -232,9 +275,28 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-reports.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-admin-notes.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-test-action-queue.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-queue.php';
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
+	}
+
+	/**
+	 * Use the `development` features for testing.
+	 *
+	 * @param array $flags Existing feature flags.
+	 * @return array Filtered feature flags.
+	 */
+	public function add_development_features( $flags ) {
+		$config = json_decode( file_get_contents( $this->plugin_dir . '/client/admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
+		foreach ( $config->features as $feature => $bool ) {
+			$flags[ $feature ] = $bool;
+		}
+		return $flags;
 	}
 
 	/**

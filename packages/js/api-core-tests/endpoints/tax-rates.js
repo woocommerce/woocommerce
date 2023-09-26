@@ -29,6 +29,7 @@ const taxRatesApi = {
 		method: 'GET',
 		path: 'taxes/<id>',
 		responseCode: 200,
+		// eslint-disable-next-line no-undef
 		taxRate: async ( taxRateId ) => taxes( `coupons/${ taxRateId }` ),
 	},
 	listAll: {

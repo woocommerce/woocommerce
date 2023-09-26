@@ -17,6 +17,27 @@ class DeprecatedExtendedTask extends Task {
 	public $id = '';
 
 	/**
+	 * Additional info.
+	 *
+	 * @var string|null
+	 */
+	public $additional_info = '';
+
+	/**
+	 * Content.
+	 *
+	 * @var string
+	 */
+	public $content = '';
+
+	/**
+	 * Whether the task is complete or not.
+	 *
+	 * @var boolean
+	 */
+	public $is_complete = false;
+
+	/**
 	 * Snoozeable.
 	 *
 	 * @var boolean
@@ -29,6 +50,35 @@ class DeprecatedExtendedTask extends Task {
 	 * @var boolean
 	 */
 	public $is_dismissable = false;
+
+	/**
+	 * Whether the store is capable of viewing the task.
+	 *
+	 * @var bool
+	 */
+	public $can_view = true;
+
+	/**
+	 * Level.
+	 *
+	 * @var int
+	 */
+	public $level = 3;
+
+	/**
+	 * Time.
+	 *
+	 * @var string|null
+	 */
+	public $time;
+
+	/**
+	 * Title.
+	 *
+	 * @var string
+	 */
+	public $title = '';
+
 
 	/**
 	 * Constructor.
@@ -76,7 +126,7 @@ class DeprecatedExtendedTask extends Task {
 	}
 
 	/**
-	 * Additonal info.
+	 * Additional info.
 	 *
 	 * @return string
 	 */

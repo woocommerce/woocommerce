@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { PaymentGateway, PluginsState } from './types';
-import { RestApiError, WPDataSelector, WPDataSelectors } from '../types';
+import { WPDataSelector, WPDataSelectors } from '../types';
 
 export function getPaymentGateway(
 	state: PluginsState,
@@ -22,7 +22,7 @@ export function getPaymentGateways(
 export function getPaymentGatewayError(
 	state: PluginsState,
 	selector: string
-): RestApiError | null {
+): unknown | null {
 	return state.errors[ selector ] || null;
 }
 

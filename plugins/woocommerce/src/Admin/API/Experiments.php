@@ -62,7 +62,7 @@ class Experiments extends \WC_REST_Data_Controller {
 		if ( ! isset( $args['experiment_name'] ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_experiment_name_required',
-				__( 'Sorry, experiment_name is required.', 'woocommerce-admin' ),
+				__( 'Sorry, experiment_name is required.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}

@@ -19,7 +19,7 @@ export function* getRecommendedPlugins( category ) {
 	try {
 		const categoryParam = yield category ? `&category=${ category }` : '';
 		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/recommended?per_page=9${ categoryParam }`,
+			path: `${ API_NAMESPACE }/recommended?per_page=50${ categoryParam }`,
 		} );
 
 		if ( response ) {
@@ -32,7 +32,7 @@ export function* getRecommendedPlugins( category ) {
 			error,
 			__(
 				'There was an error loading recommended extensions.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 	}

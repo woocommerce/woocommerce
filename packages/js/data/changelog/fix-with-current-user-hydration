@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rewrite withCurrentUserHydration to work with Gutenberg 15.5+

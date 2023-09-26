@@ -62,7 +62,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	/**
 	 * Setup tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->products       = array();
@@ -74,7 +74,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	/**
 	 * Clean up after each test. DB changes are reverted in parent::tearDown().
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
 

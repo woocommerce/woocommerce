@@ -7,7 +7,11 @@ import { render, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useGetCountryStateAutofill, getStateFilter } from '../store-address';
+import {
+	useGetCountryStateAutofill,
+	getStateFilter,
+	StoreAddress,
+} from '../store-address';
 
 const AutofillWrapper = ( { options, value, onChange } ) => {
 	const [ values, setValues ] = useState( { countryState: value || '' } );
@@ -210,4 +214,46 @@ describe( 'getStateFilter', () => {
 			).toEqual( [ expected ] );
 		}
 	);
+} );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {
+			locale: 'en_US',
+			countries: [],
+			loadingCountries: false,
+			hasFinishedResolution: true,
+		} ),
+	};
+} );
+
+describe( 'StoreAddress', () => {
+	const mockedGetInputProps = jest.fn().mockReturnValue( '' );
+
+	it( 'should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
+		const { container } = render(
+			<StoreAddress
+				getInputProps={ mockedGetInputProps }
+				setValue={ jest.fn() }
+			/>
+		);
+		const labels = container.querySelectorAll( 'label' );
+		const expectedLabelsInOrder = [
+			'Country / Region *',
+			'Address',
+			'Post code',
+			'City',
+			'Email address',
+		];
+
+		[ ...labels ].forEach( ( label, index ) =>
+			expect( label.textContent ).toEqual(
+				expectedLabelsInOrder[ index ]
+			)
+		);
+	} );
 } );

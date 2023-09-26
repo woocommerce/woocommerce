@@ -1,0 +1,14 @@
+{
+	"phpVersion": "7.4",
+	"core": null,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/woocommerce.6.3.1.zip",
+		"."
+	],
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"ALTERNATE_WP_CRON": true
+	}
+}

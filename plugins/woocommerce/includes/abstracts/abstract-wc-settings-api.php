@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+
 /**
  * WC_Settings_API class.
  */
@@ -210,6 +212,21 @@ abstract class WC_Settings_API {
 			if ( 'title' !== $this->get_field_type( $field ) ) {
 				try {
 					$this->settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+					if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
+						/**
+						 * Notify that a non-option setting has been updated.
+						 *
+						 * @since 7.8.0
+						 */
+						do_action(
+							'woocommerce_update_non_option_setting',
+							array(
+								'id'    => $key,
+								'type'  => $field['type'],
+								'value' => $this->settings[ $key ],
+							)
+						);
+					}
 				} catch ( Exception $e ) {
 					$this->add_error( $e->getMessage() );
 				}
@@ -217,8 +234,8 @@ abstract class WC_Settings_API {
 		}
 
 		$option_key = $this->get_option_key();
-        do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
-        return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
+		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
@@ -329,6 +346,22 @@ abstract class WC_Settings_API {
 
 			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
+			} elseif ( has_filter( 'woocommerce_generate_' . $type . '_html' ) ) {
+				/**
+				 * Allow the generation of custom field types on the settings screen.
+				 *
+				 * The dynamic portion of the hook name refers to the slug of the custom field type.
+				 * For instance, to introduce a new field type `fancy_lazy_dropdown` you would use
+				 * the hook `woocommerce_generate_fancy_lazy_dropdown_html`.
+				 *
+				 * @since 6.5.0
+				 *
+				 * @param string $field_html The markup of the field being generated (initiated as an empty string).
+				 * @param string $key The key of the field.
+				 * @param array  $data The attributes of the field as an associative array.
+				 * @param object $wc_settings The current WC_Settings_API object.
+				 */
+				$html .= apply_filters( 'woocommerce_generate_' . $type . '_html', '', $k, $v, $this );
 			} else {
 				$html .= $this->generate_text_html( $k, $v );
 			}
@@ -438,6 +471,20 @@ abstract class WC_Settings_API {
 		<?php
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Generates HTML for the 'safe_text' input type (mostly used for gateway-related settings).
+	 *
+	 * @param string $key Field key.
+	 * @param array  $data Field data.
+	 * @return string
+	 *
+	 * @since 7.6.0
+	 */
+	public function generate_safe_text_html( $key, $data ) {
+		$data['type'] = 'text';
+		return $this->generate_text_html( $key, $data );
 	}
 
 	/**
@@ -697,7 +744,7 @@ abstract class WC_Settings_API {
 			'options'           => array(),
 		);
 
-		$data = wp_parse_args( $data, $defaults );
+		$data  = wp_parse_args( $data, $defaults );
 		$value = $this->get_option( $key );
 
 		ob_start();
@@ -834,6 +881,24 @@ abstract class WC_Settings_API {
 	public function validate_text_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
 		return wp_kses_post( trim( stripslashes( $value ) ) );
+	}
+
+	/**
+	 * Sanitize 'Safe Text' fields.
+	 *
+	 * These fields are similar to regular text fields, but a much  smaller set of HTML tags are allowed. By default,
+	 * this means `<br>`, `<img>`, `<p>` and `<span>` tags.
+	 *
+	 * Note: this is a sanitization method, rather than a validation method (the name is due to some historic naming
+	 * choices).
+	 *
+	 * @param  string $key   Field key (currently unused).
+	 * @param  string $value Posted Value.
+	 *
+	 * @return string
+	 */
+	public function validate_safe_text_field( string $key, ?string $value ): string {
+		return wc_get_container()->get( HtmlSanitizer::class )->sanitize( (string) $value, HtmlSanitizer::LOW_HTML_BALANCED_TAGS_NO_LINKS );
 	}
 
 	/**

@@ -32,12 +32,12 @@ class Taxes extends \WC_REST_Taxes_Controller {
 	public function get_collection_params() {
 		$params            = parent::get_collection_params();
 		$params['search']  = array(
-			'description'       => __( 'Search by similar tax code.', 'woocommerce-admin' ),
+			'description'       => __( 'Search by similar tax code.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to items that have the specified rate ID(s) assigned.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to items that have the specified rate ID(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',

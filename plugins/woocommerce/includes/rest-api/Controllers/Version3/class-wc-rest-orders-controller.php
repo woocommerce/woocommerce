@@ -8,6 +8,10 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -56,11 +60,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_coupon_item_id_readonly', __( 'Coupon item ID is readonly.', 'woocommerce' ), 400 );
 			}
 
-			if ( empty( $item['code'] ) ) {
+			$coupon_code = ArrayUtil::get_value_or_default( $item, 'code' );
+			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$coupon_code = wc_format_coupon_code( wc_clean( $item['code'] ) );
+			$coupon_code = wc_format_coupon_code( wc_clean( $coupon_code ) );
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
@@ -156,6 +161,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
+		 * @since 7.4.0
+		 *
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
@@ -198,6 +205,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->save();
 				$object->calculate_totals();
 			} else {
 				// If items have changed, recalculate order totals.
@@ -242,6 +250,18 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// This is needed to get around an array to string notice in WC_REST_Orders_V2_Controller::prepare_objects_query.
 		$statuses = $request['status'];
 		unset( $request['status'] );
+
+		// Prevents WC_REST_Orders_V2_Controller::prepare_objects_query() from generating a meta_query for 'customer'.
+		// which COT can handle as a native field.
+		$cot_customer =
+			( OrderUtil::custom_orders_table_usage_is_enabled() && isset( $request['customer'] ) )
+			? $request['customer']
+			: null;
+
+		if ( ! is_null( $cot_customer ) ) {
+			unset( $request['customer'] );
+		}
+
 		$args = parent::prepare_objects_query( $request );
 
 		$args['post_status'] = array();
@@ -259,6 +279,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
+
+		// Add back 'customer' to args and request.
+		if ( ! is_null( $cot_customer ) ) {
+			$args['customer']    = $cot_customer;
+			$request['customer'] = $cot_customer;
+		}
 
 		return $args;
 	}

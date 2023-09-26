@@ -141,12 +141,13 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'digital_download_options'                   => array( 'title', 'sectionend' ),
-			'woocommerce_file_download_method'           => 'select',
-			'woocommerce_downloads_redirect_fallback_allowed' => 'checkbox',
-			'woocommerce_downloads_require_login'        => 'checkbox',
+			'digital_download_options'                         => array( 'title', 'sectionend' ),
+			'woocommerce_file_download_method'                 => 'select',
+			'woocommerce_downloads_redirect_fallback_allowed'  => 'checkbox',
+			'woocommerce_downloads_require_login'              => 'checkbox',
 			'woocommerce_downloads_grant_access_after_payment' => 'checkbox',
-			'woocommerce_downloads_add_hash_to_filename' => 'checkbox',
+			'woocommerce_downloads_add_hash_to_filename'       => 'checkbox',
+			'woocommerce_downloads_deliver_inline'             => 'checkbox',
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );

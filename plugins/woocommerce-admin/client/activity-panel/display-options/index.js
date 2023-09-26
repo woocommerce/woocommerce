@@ -35,7 +35,7 @@ const LAYOUTS = [
 		label: (
 			<>
 				<SingleColumnIcon />
-				{ __( 'Single column', 'woocommerce-admin' ) }
+				{ __( 'Single column', 'woocommerce' ) }
 			</>
 		),
 	},
@@ -44,34 +44,29 @@ const LAYOUTS = [
 		label: (
 			<>
 				<TwoColumnsIcon />
-				{ __( 'Two columns', 'woocommerce-admin' ) }
+				{ __( 'Two columns', 'woocommerce' ) }
 			</>
 		),
 	},
 ];
 
 export const DisplayOptions = () => {
-	const {
-		defaultHomescreenLayout,
-		taskListComplete,
-		isTaskListHidden,
-	} = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const { getTaskList } = select( ONBOARDING_STORE_NAME );
-		const taskList = getTaskList( 'setup' );
+	const { defaultHomescreenLayout, taskListComplete, isTaskListHidden } =
+		useSelect( ( select ) => {
+			const { getOption } = select( OPTIONS_STORE_NAME );
+			const { getTaskList } = select( ONBOARDING_STORE_NAME );
+			const taskList = getTaskList( 'setup' );
 
-		return {
-			defaultHomescreenLayout:
-				getOption( 'woocommerce_default_homepage_layout' ) ||
-				'single_column',
-			taskListComplete: taskList?.isComplete,
-			isTaskListHidden: taskList?.isHidden,
-		};
-	} );
-	const {
-		updateUserPreferences,
-		homepage_layout: layout,
-	} = useUserPreferences();
+			return {
+				defaultHomescreenLayout:
+					getOption( 'woocommerce_default_homepage_layout' ) ||
+					'single_column',
+				taskListComplete: taskList?.isComplete,
+				isTaskListHidden: taskList?.isHidden,
+			};
+		} );
+	const { updateUserPreferences, homepage_layout: layout } =
+		useUserPreferences();
 
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
@@ -88,7 +83,7 @@ export const DisplayOptions = () => {
 					<DropdownMenu
 						icon={ <DisplayIcon /> }
 						/* translators: button label text should, if possible, be under 16 characters. */
-						label={ __( 'Display options', 'woocommerce-admin' ) }
+						label={ __( 'Display options', 'woocommerce' ) }
 						toggleProps={ {
 							className:
 								'woocommerce-layout__activity-panel-tab display-options',
@@ -106,10 +101,7 @@ export const DisplayOptions = () => {
 								{ hasTwoColumnContent ? (
 									<MenuGroup
 										className="woocommerce-layout__homescreen-display-options"
-										label={ __(
-											'Layout',
-											'woocommerce-admin'
-										) }
+										label={ __( 'Layout', 'woocommerce' ) }
 									>
 										<MenuItemsChoice
 											choices={ LAYOUTS }
@@ -121,7 +113,8 @@ export const DisplayOptions = () => {
 												recordEvent(
 													'homescreen_display_option',
 													{
-														display_option: newLayout,
+														display_option:
+															newLayout,
 													}
 												);
 											} }

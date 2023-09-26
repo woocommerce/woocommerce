@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
@@ -39,14 +42,19 @@ import {
  * 	DeletesProductVariations
  * } The created repository.
  */
-export function productVariationRESTRepository( httpClient: HTTPClient ): ListsProductVariations
-	& CreatesProductVariations
-	& ReadsProductVariations
-	& UpdatesProductVariations
-	& DeletesProductVariations {
-	const buildURL = ( parent: ModelID ) => buildProductURL( parent ) + '/variations/';
-	const buildChildURL = ( parent: ModelID, id: ModelID ) => buildURL( parent ) + id;
-	const buildDeleteURL = ( parent: ModelID, id: ModelID ) => buildChildURL( parent, id ) + '?force=true';
+export function productVariationRESTRepository(
+	httpClient: HTTPClient
+): ListsProductVariations &
+	CreatesProductVariations &
+	ReadsProductVariations &
+	UpdatesProductVariations &
+	DeletesProductVariations {
+	const buildURL = ( parent: ModelID ) =>
+		buildProductURL( parent ) + '/variations/';
+	const buildChildURL = ( parent: ModelID, id: ModelID ) =>
+		buildURL( parent ) + id;
+	const buildDeleteURL = ( parent: ModelID, id: ModelID ) =>
+		buildChildURL( parent, id ) + '?force=true';
 
 	const delivery = createProductDeliveryTransformation();
 	const inventory = createProductInventoryTransformation();
@@ -61,13 +69,37 @@ export function productVariationRESTRepository( httpClient: HTTPClient ): ListsP
 		...shipping,
 	];
 
-	const transformer = createProductDataTransformer<ProductVariation>( transformations );
+	const transformer =
+		createProductDataTransformer< ProductVariation >( transformations );
 
 	return new ModelRepository(
-		restListChild< ProductVariationRepositoryParams >( buildURL, ProductVariation, httpClient, transformer ),
-		restCreateChild< ProductVariationRepositoryParams >( buildURL, ProductVariation, httpClient, transformer ),
-		restReadChild< ProductVariationRepositoryParams >( buildChildURL, ProductVariation, httpClient, transformer ),
-		restUpdateChild< ProductVariationRepositoryParams >( buildChildURL, ProductVariation, httpClient, transformer ),
-		restDeleteChild< ProductVariationRepositoryParams >( buildDeleteURL, httpClient ),
+		restListChild< ProductVariationRepositoryParams >(
+			buildURL,
+			ProductVariation,
+			httpClient,
+			transformer
+		),
+		restCreateChild< ProductVariationRepositoryParams >(
+			buildURL,
+			ProductVariation,
+			httpClient,
+			transformer
+		),
+		restReadChild< ProductVariationRepositoryParams >(
+			buildChildURL,
+			ProductVariation,
+			httpClient,
+			transformer
+		),
+		restUpdateChild< ProductVariationRepositoryParams >(
+			buildChildURL,
+			ProductVariation,
+			httpClient,
+			transformer
+		),
+		restDeleteChild< ProductVariationRepositoryParams >(
+			buildDeleteURL,
+			httpClient
+		)
 	);
 }

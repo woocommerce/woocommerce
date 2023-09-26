@@ -13,7 +13,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * tearDown.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		WC()->cart->empty_cart();
@@ -94,6 +94,37 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$variable_product->delete( true );
+	}
+
+	/**
+	 * Test cloning cart holds no references in session
+	 */
+	public function test_cloning_cart_session() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Initialize $cart1 and $cart2 as empty carts.
+		$cart1 = WC()->cart;
+		$cart1->empty_cart();
+		$cart2 = clone $cart1;
+
+		// Create a cart in session.
+		$cart1->add_to_cart( $product->get_id(), 1 );
+		$cart1->set_session();
+
+		// Empty the cart without clearing the session.
+		$cart1->set_cart_contents( array() );
+
+		// Both carts are empty at that point.
+		$this->assertTrue( $cart2->is_empty() );
+		$this->assertTrue( $cart1->is_empty() );
+
+		$cart2->get_cart_from_session();
+
+		// We retrieved $cart2 from the previously set session so it should not be empty.
+		$this->assertFalse( $cart2->is_empty() );
+
+		// We didn't touch $cart1 so it should still be empty.
+		$this->assertTrue( $cart1->is_empty() );
 	}
 
 	/**
@@ -187,6 +218,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertCount( 1, $notices['error'] );
-		$this->assertRegExp( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
+		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
 	}
 }

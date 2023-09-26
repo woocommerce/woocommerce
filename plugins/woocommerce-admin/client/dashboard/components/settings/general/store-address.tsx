@@ -21,78 +21,33 @@ const storeAddressFields = [
 	'city',
 	'countryState',
 	'postCode',
-];
+] as const;
 
 type Option = { key: string; label: string };
 
 /**
- * Check if a given address field is required for the locale.
- *
- * @param {string} fieldName Name of the field to check.
- * @param {Object} locale    Locale data.
- * @return {boolean} Field requirement.
- */
-export function isAddressFieldRequired(
-	fieldName: string,
-	locale: unknown = {}
-): boolean {
-	if ( locale[ fieldName ]?.hasOwnProperty( 'required' ) ) {
-		return locale[ fieldName ]?.required as boolean;
-	}
-
-	if ( fieldName === 'address_2' ) {
-		return false;
-	}
-
-	return true;
-}
-
-/**
  * Form validation.
  *
- * @param {Object} locale The store locale.
  * @return {Function} Validator function.
  */
-export function getStoreAddressValidator( locale = {} ) {
+// Note: param was removed because its not used, callers still assume its needed. TODO: Fix this.
+export function getStoreAddressValidator(/* locale: Locale = {} */) {
 	/**
 	 * Form validator.
 	 *
 	 * @param {Object} values Keyed values of all fields in the form.
 	 * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
 	 */
-	return ( values ) => {
+	return (
+		values: Record< ( typeof storeAddressFields )[ number ], string >
+	) => {
 		const errors: {
 			[ key: string ]: string;
 		} = {};
-
-		if (
-			isAddressFieldRequired( 'address_1', locale ) &&
-			! values.addressLine1.trim().length
-		) {
-			errors.addressLine1 = __(
-				'Please add an address',
-				'woocommerce-admin'
-			);
-		}
 		if ( ! values.countryState.trim().length ) {
 			errors.countryState = __(
 				'Please select a country / region',
-				'woocommerce-admin'
-			);
-		}
-		if (
-			isAddressFieldRequired( 'city', locale ) &&
-			! values.city.trim().length
-		) {
-			errors.city = __( 'Please add a city', 'woocommerce-admin' );
-		}
-		if (
-			isAddressFieldRequired( 'postcode', locale ) &&
-			! values.postCode.trim().length
-		) {
-			errors.postCode = __(
-				'Please add a post code',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -106,30 +61,33 @@ export function getStoreAddressValidator( locale = {} ) {
  * @return {Object} Select options, { value: 'US:GA', label: 'United States - Georgia' }
  */
 export function getCountryStateOptions( countries: Country[] ) {
-	const countryStateOptions = countries.reduce( ( acc, country ) => {
-		if ( ! country.states.length ) {
-			acc.push( {
-				key: country.code,
-				label: decodeEntities( country.name ),
+	const countryStateOptions = countries.reduce(
+		( acc: Option[], country ) => {
+			if ( ! country.states.length ) {
+				acc.push( {
+					key: country.code,
+					label: decodeEntities( country.name ),
+				} );
+
+				return acc;
+			}
+
+			const countryStates = country.states.map( ( state ) => {
+				return {
+					key: country.code + ':' + state.code,
+					label:
+						decodeEntities( country.name ) +
+						' — ' +
+						decodeEntities( state.name ),
+				};
 			} );
 
+			acc.push( ...countryStates );
+
 			return acc;
-		}
-
-		const countryStates = country.states.map( ( state ) => {
-			return {
-				key: country.code + ':' + state.code,
-				label:
-					decodeEntities( country.name ) +
-					' — ' +
-					decodeEntities( state.name ),
-			};
-		} );
-
-		acc.push( ...countryStates );
-
-		return acc;
-	}, [] );
+		},
+		[]
+	);
 
 	return countryStateOptions;
 }
@@ -151,40 +109,44 @@ export const normalizeState = ( state: string ): string => {
  * @param {string} normalizedAutofillState The value of the autofillState field.
  * @return {Function} filter function.
  */
-export const getStateFilter = (
-	isStateAbbreviation: boolean,
-	normalizedAutofillState: string
-): ( ( option: Option ) => boolean ) => ( option: Option ) => {
-	const countryStateArray = isStateAbbreviation
-		? option.key.split( ':' )
-		: option.label.split( '—' );
+export const getStateFilter =
+	(
+		isStateAbbreviation: boolean,
+		normalizedAutofillState: string
+	): ( ( option: Option ) => boolean ) =>
+	( option: Option ) => {
+		const countryStateArray = isStateAbbreviation
+			? option.key.split( ':' )
+			: option.label.split( '—' );
 
-	// No region options in the country
-	if ( countryStateArray.length <= 1 ) {
-		return false;
-	}
+		// No region options in the country
+		if ( countryStateArray.length <= 1 ) {
+			return false;
+		}
 
-	const state = countryStateArray[ 1 ];
-	// Handle special case, for example: China — Beijing / 北京
-	if ( state.includes( '/' ) ) {
-		const stateStrList = state.split( '/' );
-		return (
-			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
-			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
-		);
-	}
+		const state = countryStateArray[ 1 ];
+		// Handle special case, for example: China — Beijing / 北京
+		if ( state.includes( '/' ) ) {
+			const stateStrList = state.split( '/' );
+			return (
+				normalizeState( stateStrList[ 0 ] ) ===
+					normalizedAutofillState ||
+				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+			);
+		}
 
-	// Handle special case, for example: Iran — Alborz (البرز)
-	if ( state.includes( '(' ) && state.includes( ')' ) ) {
-		const stateStrList = state.replace( ')', '' ).split( '(' );
-		return (
-			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
-			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
-		);
-	}
+		// Handle special case, for example: Iran — Alborz (البرز)
+		if ( state.includes( '(' ) && state.includes( ')' ) ) {
+			const stateStrList = state.replace( ')', '' ).split( '(' );
+			return (
+				normalizeState( stateStrList[ 0 ] ) ===
+					normalizedAutofillState ||
+				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+			);
+		}
 
-	return normalizeState( state ) === normalizedAutofillState;
-};
+		return normalizeState( state ) === normalizedAutofillState;
+	};
 
 /**
  * Get the autofill countryState fields and set value from filtered options.
@@ -201,9 +163,7 @@ export function useGetCountryStateAutofill(
 ): JSX.Element {
 	const [ autofillCountry, setAutofillCountry ] = useState( '' );
 	const [ autofillState, setAutofillState ] = useState( '' );
-	const isAutofillChange: {
-		current: boolean;
-	} = useRef();
+	const isAutofillChange = useRef< boolean >();
 
 	// Sync the autofill fields on first render and the countryState value changes.
 	useEffect( () => {
@@ -248,7 +208,7 @@ export function useGetCountryStateAutofill(
 		const isCountryAbbreviation = autofillCountry.length < 3;
 		const isStateAbbreviation =
 			autofillState.length < 3 && !! autofillState.match( /^[\w]+$/ );
-		let filteredOptions = [];
+		let filteredOptions: Option[] = [];
 
 		if ( autofillCountry.length && autofillState.length ) {
 			filteredOptions = options.filter( ( option ) =>
@@ -338,24 +298,22 @@ export function StoreAddress( {
 	setValue,
 }: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
-	const {
-		locale,
-		hasFinishedResolution,
-		countries,
-		loadingCountries,
-	} = useSelect( ( select ) => {
-		const {
-			getLocale,
-			getCountries,
-			hasFinishedResolution: hasFinishedCountryResolution,
-		} = select( COUNTRIES_STORE_NAME );
-		return {
-			locale: getLocale( countryState ),
-			countries: getCountries(),
-			loadingCountries: ! hasFinishedCountryResolution( 'getCountries' ),
-			hasFinishedResolution: hasFinishedCountryResolution( 'getLocales' ),
-		};
-	} );
+	const { locale, hasFinishedResolution, countries, loadingCountries } =
+		useSelect( ( select ) => {
+			const {
+				getLocale,
+				getCountries,
+				hasFinishedResolution: hasFinishedCountryResolution,
+			} = select( COUNTRIES_STORE_NAME );
+			return {
+				locale: getLocale( countryState ),
+				countries: getCountries(),
+				loadingCountries:
+					! hasFinishedCountryResolution( 'getCountries' ),
+				hasFinishedResolution:
+					hasFinishedCountryResolution( 'getLocales' ),
+			};
+		} );
 	const countryStateOptions = useMemo(
 		() => getCountryStateOptions( countries ),
 		[ countries ]
@@ -366,6 +324,10 @@ export function StoreAddress( {
 		setValue
 	);
 
+	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
+		return locale.hasOwnProperty( key );
+	};
+
 	useEffect( () => {
 		if ( locale ) {
 			storeAddressFields.forEach( ( field ) => {
@@ -373,7 +335,12 @@ export function StoreAddress( {
 					.replace( /(address)Line([0-9])/, '$1$2' )
 					.toLowerCase();
 				const props = getInputProps( field );
-				if ( locale[ fieldKey ]?.hidden && props.value?.length > 0 ) {
+
+				if (
+					isLocaleKey( fieldKey ) &&
+					locale[ fieldKey ]?.hidden &&
+					props.value?.length > 0
+				) {
 					// Clear hidden field.
 					setValue( field, '' );
 				}
@@ -386,34 +353,16 @@ export function StoreAddress( {
 
 	return (
 		<div className="woocommerce-store-address-fields">
-			{ ! locale?.address_1?.hidden && (
-				<TextControl
-					label={
-						locale?.address_1?.label ||
-						__( 'Address line 1', 'woocommerce-admin' )
-					}
-					required={ isAddressFieldRequired( 'address_1', locale ) }
-					autoComplete="address-line1"
-					{ ...getInputProps( 'addressLine1' ) }
-				/>
-			) }
-
-			{ ! locale?.address_2?.hidden && (
-				<TextControl
-					label={
-						locale?.address_2?.label ||
-						__( 'Address line 2 (optional)', 'woocommerce-admin' )
-					}
-					required={ isAddressFieldRequired( 'address_2', locale ) }
-					autoComplete="address-line2"
-					{ ...getInputProps( 'addressLine2' ) }
-				/>
-			) }
-
 			<SelectControl
-				label={ __( 'Country / Region', 'woocommerce-admin' ) }
+				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
+				getSearchExpression={ ( query: string ) => {
+					return new RegExp(
+						'(^' + query + '| — (' + query + '))',
+						'i'
+					);
+				} }
 				options={ countryStateOptions }
 				excludeSelectedOptions={ false }
 				showAllOnFocus
@@ -424,14 +373,14 @@ export function StoreAddress( {
 				{ countryStateAutofill }
 			</SelectControl>
 
-			{ ! locale?.city?.hidden && (
+			{ ! locale?.address_1?.hidden && (
 				<TextControl
 					label={
-						locale?.city?.label || __( 'City', 'woocommerce-admin' )
+						locale?.address_1?.label ||
+						__( 'Address', 'woocommerce' )
 					}
-					required={ isAddressFieldRequired( 'city', locale ) }
-					{ ...getInputProps( 'city' ) }
-					autoComplete="address-level2"
+					autoComplete="address-line1"
+					{ ...getInputProps( 'addressLine1' ) }
 				/>
 			) }
 
@@ -439,11 +388,18 @@ export function StoreAddress( {
 				<TextControl
 					label={
 						locale?.postcode?.label ||
-						__( 'Post code', 'woocommerce-admin' )
+						__( 'Post code', 'woocommerce' )
 					}
-					required={ isAddressFieldRequired( 'postcode', locale ) }
 					autoComplete="postal-code"
 					{ ...getInputProps( 'postCode' ) }
+				/>
+			) }
+
+			{ ! locale?.city?.hidden && (
+				<TextControl
+					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
+					{ ...getInputProps( 'city' ) }
+					autoComplete="address-level2"
 				/>
 			) }
 		</div>

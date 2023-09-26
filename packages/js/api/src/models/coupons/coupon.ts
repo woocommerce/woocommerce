@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../model';
 import { HTTPClient } from '../../http';
 import { couponRESTRepository } from '../../repositories';
@@ -9,16 +12,19 @@ import {
 	UpdatesModels,
 	DeletesModels,
 } from '../../framework';
-import {
-	CouponUpdateParams,
-} from './shared';
+import { CouponUpdateParams } from './shared';
 import { ObjectLinks } from '../shared-types';
 
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type CouponRepositoryParams = ModelRepositoryParams< Coupon, never, never, CouponUpdateParams >;
+export type CouponRepositoryParams = ModelRepositoryParams<
+	Coupon,
+	never,
+	never,
+	CouponUpdateParams
+>;
 
 /**
  * An interface for creating coupons using the repository.
@@ -123,7 +129,7 @@ export class Coupon extends Model {
 	 *
 	 * @type {number}
 	 */
-	public readonly usageCount: Number = 0;
+	public readonly usageCount: number = 0;
 
 	/**
 	 * Flags if the coupon can only be used on its own and not combined with other coupons.
@@ -137,35 +143,35 @@ export class Coupon extends Model {
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly productIds: Array<number> = [];
+	public readonly productIds: Array< number > = [];
 
 	/**
 	 * List of Product IDs that the coupon cannot be applied to.
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly excludedProductIds: Array<number> = [];
+	public readonly excludedProductIds: Array< number > = [];
 
 	/**
 	 * How many times the coupon can be used.
 	 *
 	 * @type {number}
 	 */
-	public readonly usageLimit: Number = -1;
+	public readonly usageLimit: number = -1;
 
 	/**
 	 * How many times the coupon can be used per customer.
 	 *
 	 * @type {number}
 	 */
-	public readonly usageLimitPerUser: Number = -1;
+	public readonly usageLimitPerUser: number = -1;
 
 	/**
 	 * Max number of items in the cart the coupon can be applied to.
 	 *
 	 * @type {number}
 	 */
-	public readonly limitUsageToXItems: Number = -1;
+	public readonly limitUsageToXItems: number = -1;
 
 	/**
 	 * Flags if the free shipping option requires a coupon. This coupon will enable free shipping.
@@ -179,14 +185,14 @@ export class Coupon extends Model {
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly productCategories: Array<number> = [];
+	public readonly productCategories: Array< number > = [];
 
 	/**
 	 * List of Category IDs the coupon does not apply to.
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly excludedProductCategories: Array<number> = [];
+	public readonly excludedProductCategories: Array< number > = [];
 
 	/**
 	 * Flags if the coupon applies to items on sale.
@@ -214,14 +220,14 @@ export class Coupon extends Model {
 	 *
 	 * @type {ReadonlyArray.<string>}
 	 */
-	public readonly emailRestrictions: Array<string> = [];
+	public readonly emailRestrictions: Array< string > = [];
 
 	/**
 	 * List of user IDs (or guest emails) that have used the coupon.
 	 *
 	 * @type {ReadonlyArray.<string>}
 	 */
-	public readonly usedBy: Array<string> = [];
+	public readonly usedBy: Array< string > = [];
 
 	/**
 	 * The coupon's links.
@@ -248,7 +254,9 @@ export class Coupon extends Model {
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof couponRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof couponRESTRepository > {
 		return couponRESTRepository( httpClient );
 	}
 }

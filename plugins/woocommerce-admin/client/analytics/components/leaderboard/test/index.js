@@ -3,7 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { numberFormat } from '@woocommerce/number';
-import CurrencyFactory from '@woocommerce/currency';
+import { CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies

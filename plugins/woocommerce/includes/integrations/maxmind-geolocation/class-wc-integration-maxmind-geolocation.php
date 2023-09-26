@@ -168,7 +168,10 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	public function update_database( $new_database_path = null ) {
 		// Allow us to easily interact with the filesystem.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
-		WP_Filesystem();
+		if ( ! WP_Filesystem() ) {
+			wc_get_logger()->warning( __( 'Failed to initialise WC_Filesystem API while trying to update the MaxMind Geolocation database.', 'woocommerce' ) );
+			return;
+		}
 		global $wp_filesystem;
 
 		// Remove any existing archives to comply with the MaxMind TOS.

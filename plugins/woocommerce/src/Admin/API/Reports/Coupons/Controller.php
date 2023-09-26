@@ -9,22 +9,18 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports coupons controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends GenericController implements ExportableInterface {
 
 	/**
 	 * Route base.
@@ -40,15 +36,16 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                  = array();
-		$args['before']        = $request['before'];
-		$args['after']         = $request['after'];
-		$args['page']          = $request['page'];
-		$args['per_page']      = $request['per_page'];
-		$args['orderby']       = $request['orderby'];
-		$args['order']         = $request['order'];
-		$args['coupons']       = (array) $request['coupons'];
-		$args['extended_info'] = $request['extended_info'];
+		$args                        = array();
+		$args['before']              = $request['before'];
+		$args['after']               = $request['after'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['orderby']             = $request['orderby'];
+		$args['order']               = $request['order'];
+		$args['coupons']             = (array) $request['coupons'];
+		$args['extended_info']       = $request['extended_info'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		return $args;
 	}
 
@@ -70,46 +67,24 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
-
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
@@ -152,19 +127,19 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'type'       => 'object',
 			'properties' => array(
 				'coupon_id'     => array(
-					'description' => __( 'Coupon ID.', 'woocommerce-admin' ),
+					'description' => __( 'Coupon ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'amount'        => array(
-					'description' => __( 'Net discount amount.', 'woocommerce-admin' ),
+					'description' => __( 'Net discount amount.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count'  => array(
-					'description' => __( 'Number of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -174,38 +149,38 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon code.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon code.', 'woocommerce' ),
 					),
 					'date_created'     => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon creation date.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon creation date.', 'woocommerce' ),
 					),
 					'date_created_gmt' => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon creation date in GMT.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon creation date in GMT.', 'woocommerce' ),
 					),
 					'date_expires'     => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon expiration date.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon expiration date.', 'woocommerce' ),
 					),
 					'date_expires_gmt' => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon expiration date in GMT.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon expiration date in GMT.', 'woocommerce' ),
 					),
 					'discount_type'    => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'enum'        => array_keys( wc_get_coupon_types() ),
-						'description' => __( 'Coupon discount type.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon discount type.', 'woocommerce' ),
 					),
 				),
 			),
@@ -220,58 +195,16 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                  = array();
-		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+		$params                       = parent::get_collection_params();
+		$params['orderby']['default'] = 'coupon_id';
+		$params['orderby']['enum']    = array(
+			'coupon_id',
+			'code',
+			'amount',
+			'orders_count',
 		);
-		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
-			'type'              => 'string',
-			'default'           => 'coupon_id',
-			'enum'              => array(
-				'coupon_id',
-				'code',
-				'amount',
-				'orders_count',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['coupons']       = array(
-			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce-admin' ),
+		$params['coupons']            = array(
+			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -279,8 +212,8 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce-admin' ),
+		$params['extended_info']      = array(
+			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -297,12 +230,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'code'         => __( 'Coupon code', 'woocommerce-admin' ),
-			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
-			'amount'       => __( 'Amount discounted', 'woocommerce-admin' ),
-			'created'      => __( 'Created', 'woocommerce-admin' ),
-			'expires'      => __( 'Expires', 'woocommerce-admin' ),
-			'type'         => __( 'Type', 'woocommerce-admin' ),
+			'code'         => __( 'Coupon code', 'woocommerce' ),
+			'orders_count' => __( 'Orders', 'woocommerce' ),
+			'amount'       => __( 'Amount discounted', 'woocommerce' ),
+			'created'      => __( 'Created', 'woocommerce' ),
+			'expires'      => __( 'Expires', 'woocommerce' ),
+			'type'         => __( 'Type', 'woocommerce' ),
 		);
 
 		/**
@@ -325,7 +258,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function prepare_item_for_export( $item ) {
 		$date_expires = empty( $item['extended_info']['date_expires'] )
-			? __( 'N/A', 'woocommerce-admin' )
+			? __( 'N/A', 'woocommerce' )
 			: $item['extended_info']['date_expires'];
 
 		$export_item = array(

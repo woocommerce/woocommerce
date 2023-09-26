@@ -20,25 +20,47 @@ if ( ! class_exists( 'WC_Email', false ) ) {
  * ReportCSVEmail Class.
  */
 class ReportCSVEmail extends \WC_Email {
+
+	/**
+	 * Report labels.
+	 *
+	 * @var array
+	 */
+	protected $report_labels;
+
+	/**
+	 * Report type (e.g. 'customers').
+	 *
+	 * @var string
+	 */
+	protected $report_type;
+
+	/**
+	 * Download URL.
+	 *
+	 * @var string
+	 */
+	protected $download_url;
+
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id             = 'admin_report_export_download';
-		$this->template_base  = dirname( __DIR__ ) . '/includes/emails/';
+		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
 		$this->template_html  = 'html-admin-report-export-download.php';
 		$this->template_plain = 'plain-admin-report-export-download.php';
 		$this->report_labels  = array(
-			'categories' => __( 'Categories', 'woocommerce-admin' ),
-			'coupons'    => __( 'Coupons', 'woocommerce-admin' ),
-			'customers'  => __( 'Customers', 'woocommerce-admin' ),
-			'downloads'  => __( 'Downloads', 'woocommerce-admin' ),
-			'orders'     => __( 'Orders', 'woocommerce-admin' ),
-			'products'   => __( 'Products', 'woocommerce-admin' ),
-			'revenue'    => __( 'Revenue', 'woocommerce-admin' ),
-			'stock'      => __( 'Stock', 'woocommerce-admin' ),
-			'taxes'      => __( 'Taxes', 'woocommerce-admin' ),
-			'variations' => __( 'Variations', 'woocommerce-admin' ),
+			'categories' => __( 'Categories', 'woocommerce' ),
+			'coupons'    => __( 'Coupons', 'woocommerce' ),
+			'customers'  => __( 'Customers', 'woocommerce' ),
+			'downloads'  => __( 'Downloads', 'woocommerce' ),
+			'orders'     => __( 'Orders', 'woocommerce' ),
+			'products'   => __( 'Products', 'woocommerce' ),
+			'revenue'    => __( 'Revenue', 'woocommerce' ),
+			'stock'      => __( 'Stock', 'woocommerce' ),
+			'taxes'      => __( 'Taxes', 'woocommerce' ),
+			'variations' => __( 'Variations', 'woocommerce' ),
 		);
 
 		// Call parent constructor.
@@ -70,7 +92,7 @@ class ReportCSVEmail extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'Your Report Download', 'woocommerce-admin' );
+		return __( 'Your Report Download', 'woocommerce' );
 	}
 
 	/**
@@ -79,7 +101,7 @@ class ReportCSVEmail extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( '[{site_title}]: Your {report_name} Report download is ready', 'woocommerce-admin' );
+		return __( '[{site_title}]: Your {report_name} Report download is ready', 'woocommerce' );
 	}
 
 	/**

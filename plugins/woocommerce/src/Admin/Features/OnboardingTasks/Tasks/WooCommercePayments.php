@@ -5,11 +5,20 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
+use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
 
 /**
  * WooCommercePayments Task
  */
 class WooCommercePayments extends Task {
+	/**
+	 * Used to cache is_complete() method result.
+	 *
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
 	/**
 	 * ID.
 	 *
@@ -20,21 +29,27 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
-	}
-
-	/**
 	 * Title.
 	 *
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid with WooCommerce Payments', 'woocommerce-admin' );
+		return __( 'Set up WooPayments', 'woocommerce' );
+	}
+
+	/**
+	 * Badge.
+	 *
+	 * @return string
+	 */
+	public function get_badge() {
+		/**
+		 * Filter WooPayments onboarding task badge.
+		 *
+		 * @param string     $badge    Badge content.
+		 * @since 8.2.0
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_badge', '' );
 	}
 
 	/**
@@ -44,8 +59,8 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_content() {
 		return __(
-			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
-			'woocommerce-admin'
+			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
+			'woocommerce'
 		);
 	}
 
@@ -55,7 +70,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**
@@ -64,7 +79,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_action_label() {
-		return __( 'Finish setup', 'woocommerce-admin' );
+		return __( 'Finish setup', 'woocommerce' );
 	}
 
 	/**
@@ -73,9 +88,16 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
+		if ( WCPayPromotionInit::is_woopay_eligible() ) {
+			return __(
+				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+				'woocommerce'
+			);
+		}
+
 		return __(
-			'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
-			'woocommerce-admin'
+			'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+			'woocommerce'
 		);
 	}
 
@@ -85,7 +107,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return self::is_connected();
+		if ( null === $this->is_complete_result ) {
+			$this->is_complete_result = self::is_connected();
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**
@@ -94,10 +120,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return self::is_requested() &&
+		$payments = $this->task_list->get_task( 'payments' );
+
+		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
 			self::is_installed() &&
-			self::is_supported() &&
-			( $this->get_parent_id() !== 'setup_two_column' || ! self::is_connected() );
+			self::is_supported();
 	}
 
 	/**
@@ -146,22 +173,19 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_supported() {
-		return in_array(
-			WC()->countries->get_base_country(),
-			array(
-				'US',
-				'PR',
-				'AU',
-				'CA',
-				'DE',
-				'ES',
-				'FR',
-				'GB',
-				'IE',
-				'IT',
-				'NZ',
-			),
-			true
+		$suggestions              = Suggestions::get_suggestions();
+		$suggestion_plugins       = array_merge(
+			...array_filter(
+				array_column( $suggestions, 'plugins' ),
+				function( $plugins ) {
+					return is_array( $plugins );
+				}
+			)
 		);
+		$woocommerce_payments_ids = array_search( 'woocommerce-payments', $suggestion_plugins, true );
+		if ( false !== $woocommerce_payments_ids ) {
+			return true;
+		}
+		return false;
 	}
 }

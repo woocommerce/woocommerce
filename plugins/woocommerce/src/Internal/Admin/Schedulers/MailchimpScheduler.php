@@ -98,8 +98,9 @@ class MailchimpScheduler {
 		return wp_remote_post(
 			$subscribe_endpoint,
 			array(
-				'method' => 'POST',
-				'body'   => array(
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+				'method'     => 'POST',
+				'body'       => array(
 					'email' => $store_email,
 				),
 			)

@@ -1,18 +1,18 @@
 /**
+ * External dependencies
+ */
+import {
+	clearAndFillInput,
+	verifyCheckboxIsSet,
+	verifyCheckboxIsUnset,
+} from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { DropdownTypeaheadField } from '../../elements/DropdownTypeaheadField';
 import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	clearAndFillInput,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-} = require( '@woocommerce/e2e-utils' );
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export interface StoreDetails {
 	addressLine1?: string;
@@ -44,12 +44,6 @@ export class StoreDetailsSection extends BasePage {
 				config.get( 'addresses.admin.store.addressfirstline' )
 		);
 
-		// Fill store's address - second line
-		await this.fillAddressLineTwo(
-			storeDetails.addressLine2 ||
-				config.get( 'addresses.admin.store.addresssecondline' )
-		);
-
 		// Type the requested country/region substring or 'cali' in the
 		// country/region select, then select the requested country/region
 		// substring or 'US:CA'.
@@ -79,16 +73,12 @@ export class StoreDetailsSection extends BasePage {
 				config.get( 'addresses.admin.store.email' )
 		);
 
-		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
-		await this.checkMarketingCheckbox( true );
+		// Verify that the marketing checkbox is opt-in by default (WordPress.org Plugin Review Team requirement).
+		await this.checkMarketingCheckbox( false );
 	}
 
 	async fillAddress( address: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-0', address );
-	}
-
-	async fillAddressLineTwo( address: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-1', address );
 	}
 
 	async selectCountry( search: string, selector: string ): Promise< void > {
@@ -105,11 +95,11 @@ export class StoreDetailsSection extends BasePage {
 	}
 
 	async fillPostalCode( postalCode: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-3', postalCode );
+		await clearAndFillInput( '#inspector-text-control-1', postalCode );
 	}
 
 	async fillEmailAddress( email: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-4', email );
+		await clearAndFillInput( '#inspector-text-control-3', email );
 	}
 
 	async checkMarketingCheckbox( selected: boolean ): Promise< void > {

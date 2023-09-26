@@ -102,7 +102,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 			} elseif ( 'single_select_country' === $setting['type'] ) {
 				$setting['type']    = 'select';
 				$setting['options'] = $this->get_countries_and_states();
-			} elseif ( 'single_select_page' === $setting['type'] ) {
+			} elseif ( $setting['type'] === 'single_select_page' || $setting['type'] === 'single_select_page_with_search' ) {
 				$pages   = get_pages(
 					array(
 						'sort_column'  => 'menu_order',

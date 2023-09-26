@@ -18,7 +18,7 @@ const {
  *
  * @param {string} buttonSelector
  * @param {string} resultSelector
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
 	await evalAndClick( buttonSelector );
@@ -114,4 +114,5 @@ const runOrderRefundRestockTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runOrderRefundRestockTest;

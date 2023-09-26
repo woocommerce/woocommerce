@@ -10,7 +10,7 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 	/**
 	 * Suppress deprecation notice from WC_Order_Item_Meta constructor.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		wp_insert_term( 'Testing Categories', 'category', array( 'slug' => 'testing' ) );
@@ -86,9 +86,9 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected, $flat );
 
 		$not_flat = $meta->display( false, true );
-		$this->assertContains( 'class="variation-regularkey">regularkey:', $not_flat );
-		$this->assertContains( 'class="variation-regularkey"><p>1</p>', $not_flat );
-		$this->assertContains( 'class="variation-category">category:', $not_flat );
-		$this->assertContains( 'class="variation-category"><p>Testing Categories</p>', $not_flat );
+		$this->assertStringContainsString( 'class="variation-regularkey">regularkey:', $not_flat );
+		$this->assertStringContainsString( 'class="variation-regularkey"><p>1</p>', $not_flat );
+		$this->assertStringContainsString( 'class="variation-category">category:', $not_flat );
+		$this->assertStringContainsString( 'class="variation-category"><p>Testing Categories</p>', $not_flat );
 	}
 }

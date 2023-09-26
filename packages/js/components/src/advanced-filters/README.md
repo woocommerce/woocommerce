@@ -4,32 +4,29 @@ Displays a configurable set of filters which can modify query parameters. Displa
 
 ## Usage
 
-Below is a config example complete with translation strings. Advanced filters makes use of [interpolateComponents](https://github.com/Automattic/interpolate-components#readme) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
+Below is a config example complete with translation strings. Advanced filters makes use of [createInterpolateElement](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-element/#createinterpolateelement) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
 
 ```js
 const config = {
 	title: __(
 		// A sentence describing filters for Orders
 		// See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
-		'Orders Match {{select /}} Filters',
-		'woocommerce-admin'
+		'Orders Match <select/> Filters',
+		'woocommerce'
 	),
 	filters: {
 		status: {
 			labels: {
-				add: __( 'Order Status', 'woocommerce-admin' ),
-				remove: __( 'Remove order status filter', 'woocommerce-admin' ),
+				add: __( 'Order Status', 'woocommerce' ),
+				remove: __( 'Remove order status filter', 'woocommerce' ),
 				rule: __(
 					'Select an order status filter match',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				// A sentence describing an Order Status filter
 				// See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
-				title: __(
-					'Order Status {{rule /}} {{filter /}}',
-					'woocommerce-admin'
-				),
-				filter: __( 'Select an order status', 'woocommerce-admin' ),
+				title: __( 'Order Status <rule/> <filter/>', 'woocommerce' ),
+				filter: __( 'Select an order status', 'woocommerce' ),
 			},
 			rules: [
 				{
@@ -37,14 +34,14 @@ const config = {
 					// Sentence fragment, logical, "Is"
 					// Refers to searching for orders matching a chosen order status
 					// Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
-					label: _x( 'Is', 'order status', 'woocommerce-admin' ),
+					label: _x( 'Is', 'order status', 'woocommerce' ),
 				},
 				{
 					value: 'is_not',
 					// Sentence fragment, logical, "Is Not"
 					// Refers to searching for orders that don't match a chosen order status
 					// Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
-					label: _x( 'Is Not', 'order status', 'woocommerce-admin' ),
+					label: _x( 'Is Not', 'order status', 'woocommerce' ),
 				},
 			],
 			input: {
@@ -124,7 +121,7 @@ const config = {
 };
 ```
 
-`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/components/src/search).
+`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/components/src/search).
 `getLabels`: A function returning a Promise resolving to an array of objects with `id` and `label` properties.
 
 ### Date
@@ -139,15 +136,15 @@ const config = {
 			rules: [
 				{
 					value: 'before',
-					label: __( 'Before', 'woocommerce-admin' ),
+					label: __( 'Before', 'woocommerce' ),
 				},
 				{
 					value: 'after',
-					label: __( 'After', 'woocommerce-admin' ),
+					label: __( 'After', 'woocommerce' ),
 				},
 				{
 					value: 'between',
-					label: __( 'Between', 'woocommerce-admin' ),
+					label: __( 'Between', 'woocommerce' ),
 				},
 			],
 			input: {
@@ -172,15 +169,15 @@ const config = {
 			rules: [
 				{
 					value: 'lessthan',
-					label: __( 'Less Than', 'woocommerce-admin' ),
+					label: __( 'Less Than', 'woocommerce' ),
 				},
 				{
 					value: 'morethan',
-					label: __( 'More Than', 'woocommerce-admin' ),
+					label: __( 'More Than', 'woocommerce' ),
 				},
 				{
 					value: 'between',
-					label: __( 'Between', 'woocommerce-admin' ),
+					label: __( 'Between', 'woocommerce' ),
 				},
 			],
 			input: {

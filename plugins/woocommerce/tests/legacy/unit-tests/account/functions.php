@@ -16,7 +16,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
-		$this->assertEquals( 'http://example.org?lost-password', wc_lostpassword_url() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?lost-password', wc_lostpassword_url() );
 	}
 
 	/**
@@ -25,7 +25,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_customer_edit_account_url() {
-		$this->assertEquals( 'http://example.org?edit-account', wc_customer_edit_account_url() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?edit-account', wc_customer_edit_account_url() );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'downloads'       => 'Downloads',
 				'edit-address'    => 'Addresses',
 				'edit-account'    => 'Account details',
-				'customer-logout' => 'Logout',
+				'customer-logout' => 'Log out',
 			),
 			wc_get_account_menu_items()
 		);
@@ -73,7 +73,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_get_account_endpoint_url() {
-		$this->assertEquals( 'http://example.org?test', wc_get_account_endpoint_url( 'test' ) );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?test', wc_get_account_endpoint_url( 'test' ) );
 	}
 
 	/**

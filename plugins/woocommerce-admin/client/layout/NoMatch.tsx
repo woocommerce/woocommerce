@@ -13,7 +13,7 @@ const NoMatch: React.FC = () => {
 					<Text>
 						{ __(
 							'Sorry, you are not allowed to access this page.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</CardBody>

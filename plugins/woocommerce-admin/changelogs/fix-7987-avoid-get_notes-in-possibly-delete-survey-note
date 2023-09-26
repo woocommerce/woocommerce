@@ -1,4 +1,0 @@
-Significance: minor
-Type: Enhancement
-
-Add get_note_ids_by_type method to Notes DataStore to avoid woocommerce_note_where_clauses filter in possibly_delete_survey_notes() and possibly_delete_marketing_notes() actions. #8206

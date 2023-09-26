@@ -24,6 +24,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_COD extends WC_Payment_Gateway {
 
 	/**
+	 * Gateway instructions that will be added to the thank you page and emails.
+	 *
+	 * @var string
+	 */
+	public $instructions;
+
+	/**
+	 * Enable for shipping methods.
+	 *
+	 * @var array
+	 */
+	public $enable_for_methods;
+
+	/**
+	 * Enable for virtual products.
+	 *
+	 * @var bool
+	 */
+	public $enable_for_virtual;
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
@@ -75,7 +96,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			),
 			'title'              => array(
 				'title'       => __( 'Title', 'woocommerce' ),
-				'type'        => 'text',
+				'type'        => 'safe_text',
 				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
 				'default'     => __( 'Cash on delivery', 'woocommerce' ),
 				'desc_tip'    => true,

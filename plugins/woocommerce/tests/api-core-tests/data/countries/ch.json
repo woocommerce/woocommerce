@@ -1,0 +1,122 @@
+{
+    "code": "CH",
+    "name": "Switzerland",
+    "states": [
+        {
+            "code": "AG",
+            "name": "Aargau"
+        },
+        {
+            "code": "AR",
+            "name": "Appenzell Ausserrhoden"
+        },
+        {
+            "code": "AI",
+            "name": "Appenzell Innerrhoden"
+        },
+        {
+            "code": "BL",
+            "name": "Basel-Landschaft"
+        },
+        {
+            "code": "BS",
+            "name": "Basel-Stadt"
+        },
+        {
+            "code": "BE",
+            "name": "Bern"
+        },
+        {
+            "code": "FR",
+            "name": "Fribourg"
+        },
+        {
+            "code": "GE",
+            "name": "Geneva"
+        },
+        {
+            "code": "GL",
+            "name": "Glarus"
+        },
+        {
+            "code": "GR",
+            "name": "Graubünden"
+        },
+        {
+            "code": "JU",
+            "name": "Jura"
+        },
+        {
+            "code": "LU",
+            "name": "Luzern"
+        },
+        {
+            "code": "NE",
+            "name": "Neuchâtel"
+        },
+        {
+            "code": "NW",
+            "name": "Nidwalden"
+        },
+        {
+            "code": "OW",
+            "name": "Obwalden"
+        },
+        {
+            "code": "SH",
+            "name": "Schaffhausen"
+        },
+        {
+            "code": "SZ",
+            "name": "Schwyz"
+        },
+        {
+            "code": "SO",
+            "name": "Solothurn"
+        },
+        {
+            "code": "SG",
+            "name": "St. Gallen"
+        },
+        {
+            "code": "TG",
+            "name": "Thurgau"
+        },
+        {
+            "code": "TI",
+            "name": "Ticino"
+        },
+        {
+            "code": "UR",
+            "name": "Uri"
+        },
+        {
+            "code": "VS",
+            "name": "Valais"
+        },
+        {
+            "code": "VD",
+            "name": "Vaud"
+        },
+        {
+            "code": "ZG",
+            "name": "Zug"
+        },
+        {
+            "code": "ZH",
+            "name": "Zürich"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ch"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

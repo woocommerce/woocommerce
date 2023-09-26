@@ -57,7 +57,6 @@ echo "The pull request was merged by: $merger_user_name\n";
 
 $comment_body = "Hi @$merger_user_name, thanks for merging this pull request. Please take a look at these follow-up tasks you may need to perform:
 
-- [ ] Add the `release: add changelog` label
 - [ ] Add the `release: add testing instructions` label";
 
 $add_comment_mutation = "

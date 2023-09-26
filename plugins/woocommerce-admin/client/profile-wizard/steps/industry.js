@@ -9,6 +9,7 @@ import {
 	CardBody,
 	CardFooter,
 	CheckboxControl,
+	Spinner,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
@@ -26,11 +27,27 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 const onboarding = getAdminSetting( 'onboarding', {} );
 
+const Loader = ( props ) => {
+	if ( props.isLoading ) {
+		return (
+			<div
+				className="woocommerce-admin__industry__spinner"
+				style={ { textAlign: 'center' } }
+			>
+				<Spinner />
+			</div>
+		);
+	}
+
+	return <Industry { ...props } />;
+};
+
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
-		let selected = profileItems.industry || [];
-
+		let selected = Array.isArray( profileItems.industry )
+			? [ ...profileItems.industry ]
+			: [];
 		/**
 		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
 		 *
@@ -79,6 +96,14 @@ class Industry extends Component {
 		return this.state.selected.map( ( industry ) => industry.slug );
 	}
 
+	componentDidMount() {
+		recordEvent( 'onboarding_site_heuristics', {
+			page_count: onboarding.pageCount,
+			post_count: onboarding.postCount,
+			is_block_theme: onboarding.isBlockTheme,
+		} );
+	}
+
 	componentDidUpdate() {
 		this.props.updateCurrentStepValues(
 			this.props.step.key,
@@ -114,7 +139,7 @@ class Industry extends Component {
 				'error',
 				__(
 					'There was a problem updating your industries',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 
@@ -127,7 +152,7 @@ class Industry extends Component {
 	async validateField() {
 		const error = this.state.selected.length
 			? null
-			: __( 'Please select at least one industry', 'woocommerce-admin' );
+			: __( 'Please select at least one industry', 'woocommerce' );
 		this.setState( { error } );
 	}
 
@@ -225,11 +250,11 @@ class Industry extends Component {
 					>
 						{ __(
 							'In which industry does the store operate?',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 					<Text variant="body" as="p">
-						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
+						{ __( 'Choose any that apply', 'woocommerce' ) }
 					</Text>
 				</div>
 				<Card>
@@ -275,8 +300,11 @@ class Industry extends Component {
 							disabled={
 								! selected.length || isProfileItemsRequesting
 							}
+							aria-disabled={
+								! selected.length || isProfileItemsRequesting
+							}
 						>
-							{ __( 'Continue', 'woocommerce-admin' ) }
+							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
 					</CardFooter>
 				</Card>
@@ -291,17 +319,23 @@ export default compose(
 			getProfileItems,
 			getOnboardingError,
 			isOnboardingRequesting,
+			hasFinishedResolution: hasOnboardingFinishedResolution,
 		} = select( ONBOARDING_STORE_NAME );
-		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const {
+			getSettings,
+			hasFinishedResolution: hasSettingsFinishedResolution,
+		} = select( SETTINGS_STORE_NAME );
 		const { general: locationSettings = {} } = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 			locationSettings,
-			isProfileItemsRequesting: isOnboardingRequesting(
-				'updateProfileItems'
-			),
+			isProfileItemsRequesting:
+				isOnboardingRequesting( 'updateProfileItems' ),
+			isLoading:
+				! hasOnboardingFinishedResolution( 'getProfileItems', [] ) ||
+				! hasSettingsFinishedResolution( 'getSettings', [ 'general' ] ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
@@ -313,4 +347,4 @@ export default compose(
 			updateProfileItems,
 		};
 	} )
-)( Industry );
+)( Loader );

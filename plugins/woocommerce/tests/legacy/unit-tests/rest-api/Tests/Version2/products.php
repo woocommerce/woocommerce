@@ -6,15 +6,19 @@
  * @since 3.0.0
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Products_API_V2 class.
  */
 class Products_API_V2 extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Products_Controller();
 		$this->user     = $this->factory->user->create(
@@ -77,19 +81,20 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_product() {
 		wp_set_current_user( $this->user );
-		$simple   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
+		$simple   = ProductHelper::create_external_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $simple->get_id() ) );
 		$product  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains(
+
+		$this->assertArraySubset(
 			array(
 				'id'            => $simple->get_id(),
 				'name'          => 'Dummy External Product',
-				'type'          => 'simple',
+				'type'          => 'external',
 				'status'        => 'publish',
 				'sku'           => 'DUMMY EXTERNAL SKU',
-				'regular_price' => 10,
+				'regular_price' => '10',
 			),
 			$product
 		);
@@ -188,13 +193,13 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertContains( 'Testing', $data['description'] );
+		$this->assertStringContainsString( 'Testing', $data['description'] );
 		$this->assertEquals( '8', $data['price'] );
 		$this->assertEquals( '8', $data['sale_price'] );
 		$this->assertEquals( '10', $data['regular_price'] );
 		$this->assertEquals( 'FIXED-SKU', $data['sku'] );
-		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
-		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
+		$this->assertStringContainsString( 'Dr1Bczxq4q', $data['images'][0]['src'] );
+		$this->assertStringContainsString( 'test upload image', $data['images'][0]['alt'] );
 		$product->delete( true );
 		wp_delete_attachment( $data['images'][0]['id'], true );
 
@@ -454,7 +459,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertContains( 'Updated description.', $data['update'][0]['description'] );
+		$this->assertStringContainsString( 'Updated description.', $data['update'][0]['description'] );
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 1', $data['create'][0]['sku'] );
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 2', $data['create'][1]['sku'] );
 		$this->assertEquals( 'Test Button', $data['create'][0]['button_text'] );

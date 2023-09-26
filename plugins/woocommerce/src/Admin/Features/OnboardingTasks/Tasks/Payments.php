@@ -3,13 +3,19 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * Payments Task
  */
 class Payments extends Task {
+
+	/**
+	 * Used to cache is_complete() method result.
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
 	/**
 	 * ID.
 	 *
@@ -27,11 +33,11 @@ class Payments extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You set up payments', 'woocommerce-admin' );
+				return __( 'You set up payments', 'woocommerce' );
 			}
-			return __( 'Set up payments', 'woocommerce-admin' );
+			return __( 'Set up payments', 'woocommerce' );
 		}
-		return __( 'Set up payments', 'woocommerce-admin' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
@@ -42,7 +48,7 @@ class Payments extends Task {
 	public function get_content() {
 		return __(
 			'Choose payment providers and enable payment methods at checkout.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -52,7 +58,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**
@@ -61,7 +67,11 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return self::has_gateways();
+		if ( $this->is_complete_result === null ) {
+			$this->is_complete_result = self::has_gateways();
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**

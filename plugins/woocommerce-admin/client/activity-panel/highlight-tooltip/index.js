@@ -169,7 +169,7 @@ function HighlightTooltip( {
 									onClick={ triggerClose }
 								>
 									{ closeButtonText ||
-										__( 'Close', 'woocommerce-admin' ) }
+										__( 'Close', 'woocommerce' ) }
 								</Button>
 							</CardFooter>
 						</Card>

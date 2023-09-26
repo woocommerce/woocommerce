@@ -1,5 +1,5 @@
 // css resets some wp-admin specific rules so that the app fits better in the extension container
-.woocommerce-page {
+.woocommerce-admin-page {
 	.wrap {
 		margin: 0;
 	}
@@ -71,7 +71,7 @@
 	}
 }
 
-// Temporary fix for compability with the Jetpack masterbar
+// Temporary fix for compatibility with the Jetpack masterbar
 // See https://github.com/Automattic/jetpack/issues/9608
 @include breakpoint( '<782px' ) {
 	.jetpack-masterbar {

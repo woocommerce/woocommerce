@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @param  int|WC_Product $product        Product ID or product instance.
  * @param  int|null       $stock_quantity Stock quantity.
- * @param  string         $operation      Type of opertion, allows 'set', 'increase' and 'decrease'.
+ * @param  string         $operation      Type of operation, allows 'set', 'increase' and 'decrease'.
  * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
  * @return bool|int|null
  */
@@ -197,11 +197,22 @@ function wc_reduce_stock_levels( $order_id ) {
 		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
-		$changes[] = array(
+		$change    = array(
 			'product' => $product,
 			'from'    => $new_stock + $qty,
 			'to'      => $new_stock,
 		);
+		$changes[] = $change;
+
+		/**
+		 * Fires when stock reduced to a specific line item
+		 *
+		 * @param WC_Order_Item_Product $item Order item data.
+		 * @param array $change  Change Details.
+		 * @param WC_Order $order  Order data.
+		 * @since 7.6.0
+		 */
+		do_action( 'woocommerce_reduce_order_item_stock', $item, $change, $order );
 	}
 
 	wc_trigger_stock_change_notifications( $order, $changes );

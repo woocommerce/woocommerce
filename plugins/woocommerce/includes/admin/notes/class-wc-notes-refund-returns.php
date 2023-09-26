@@ -9,7 +9,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
@@ -20,6 +19,13 @@ class WC_Notes_Refund_Returns {
 	 * Name of the note for use in the database.
 	 */
 	const NOTE_NAME = 'wc-refund-returns-page';
+
+	/**
+	 * Attach hooks.
+	 */
+	public static function init() {
+		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
+	}
 
 	/**
 	 * Maybe add a note to the inbox.
@@ -68,5 +74,33 @@ class WC_Notes_Refund_Returns {
 		);
 
 		return $note;
+	}
+
+	/**
+	 * Get the note.
+	 *
+	 * @param Note $note_from_db The note object from the database.
+	 * @return Note $note The note object.
+	 */
+	public static function get_note_from_db( $note_from_db ) {
+		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
+			return $note_from_db;
+		}
+
+		if ( self::NOTE_NAME === $note_from_db->get_name() ) {
+			$note = self::get_note( 0 );
+			$note_from_db->set_title( $note->get_title() );
+			$note_from_db->set_content( $note->get_content() );
+
+			$action_from_db    = $note_from_db->get_action( 'notify-refund-returns-page' );
+			$action_from_class = $note->get_action( 'notify-refund-returns-page' );
+
+			if ( $action_from_db && $action_from_class ) {
+				$action_from_db->label = $action_from_class->label;
+				$note_from_db->set_actions( array( $action_from_db ) );
+			}
+		}
+
+		return $note_from_db;
 	}
 }

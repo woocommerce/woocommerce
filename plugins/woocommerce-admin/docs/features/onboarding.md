@@ -1,4 +1,8 @@
-# WooCommerce Onboarding
+# WooCommerce Onboarding (DEPRECATED)
+
+**Refer to the new [Core Profiler](./core-profiler.md) documentation for the latest onboarding experience.**
+
+**Some parts of this documentation are still relevant and will be gradually moved to the new Core Profiler documentation.**
 
 The onboarding feature is a reimagined new user setup experience for WooCommerce core. It contains two sections aimed at getting merchants started with their stores. The merchant begins with the "profile wizard", which helps with initial steps like setting a store address, making extension recommendations, and connecting to Jetpack for additional features. Once the profile wizard is complete, the merchant can purchase & install optional extensions via WooCommerce.com, before continuing to the "task list". From the task list, merchants are walked through a variety of items to help them start selling, such as adding their first product and setting up payment methods.
 
@@ -6,7 +10,7 @@ The onboarding feature is a reimagined new user setup experience for WooCommerce
 
 If you run the development version of WooCommerce Admin from GitHub directly, no further action should be needed to enable Onboarding.
 
-Users of the published WooCommerce Admin plugin need to either opt-in to using the new onboarding experience manually, or become part of the a/b test in core. See https://github.com/woocommerce/woocommerce/pull/24991 for more details on the testing implementation.
+Users of the published WooCommerce Admin plugin need to either opt-in to using the new onboarding experience manually, or become part of the a/b test in core. See [https://github.com/woocommerce/woocommerce/pull/24991](https://github.com/woocommerce/woocommerce/pull/24991) for more details on the testing implementation.
 
 To enable the new onboarding experience manually, log-in to `wp-admin`, and go to `WooCommerce > Settings > Help > Setup Wizard`. Click `Enable` under the `New onboarding experience` heading.
 
@@ -35,7 +39,7 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 * `woocommerce_admin_onboarding_plugins_whitelist` filters the list of plugins that can installed & activated via onboarding. This acts as a whitelist so only certain plugins can be used via the `/wc-admin/onboarding/profile/install` and `/wc-admin/onboarding/profile/activate` endpoints.
 * `woocommerce_admin_onboarding_themes` filters the themes displayed in the profile wizard.
 * `woocommerce_admin_onboarding_jetpack_connect_redirect_url` filters the Jetpack connection redirect URL outlined in the Jetpack connection section below.
-* `woocommerce_admin_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. See [the extension docs](https://github.com/woocommerce/woocommerce-admin/tree/42015d17a919e8f9e54ba75869c50b04b8dc9241/docs/examples/extensions) for an example of how to do this.
+* `woocommerce_admin_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. See [the extension docs](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/docs/examples/extensions) for an example of how to do this.
 * `woocommerce_rest_onboarding_profile_collection_params` filters the collection parameters for requests to  `/wc-admin/onboarding/profile`.
 * `woocommerce_rest_onboarding_profile_object_query` filters the query arguments for requests to `/wc-admin/onboarding/profile`.
 * `woocommerce_rest_onboarding_prepare_onboarding_profile` filters the response for requests to `/wc-admin/onboarding/profile`.
@@ -48,7 +52,7 @@ A few new WordPress options have been introduced to store information and settin
 * `woocommerce_task_list_hidden_lists`. This option houses the task lists that have been hidden from view by the user.
 * `woocommerce_task_list_welcome_modal_dismissed`. This option is used to show a congratulations modal during the transition between the profile wizard and task list.
 
-We also use existing options from WooCommerce Core or extensions like WooCommerce Shipping & Tax or Stripe. The list below may not be complete, as new tasks are introduced, but you can generally find usage of these by searching for the [getOptions selector](https://github.com/woocommerce/woocommerce-admin/search?q=getOptions&unscoped_q=getOptions).
+We also use existing options from WooCommerce Core or extensions like WooCommerce Shipping & Tax or Stripe. The list below may not be complete, as new tasks are introduced, but you can generally find usage of these by searching for the [getOptions selector](https://github.com/woocommerce/woocommerce/search?q=getOptions&unscoped_q=getOptions).
 
 * `woocommerce_setup_jetpack_opted_in` and `wc_connect_options` are both used to control Jetpack's Terms of Service opt-in, which is necessary to set for a user during the connection process, so that they can use services like automated tax rates.
 * `woocommerce_allow_tracking` is used to control Tracks opt-in, allowing us to gather usage data from WooCommerce Admin and WooCommerce core.
@@ -59,25 +63,25 @@ We also use existing options from WooCommerce Core or extensions like WooCommerc
 
 During the profile wizard, merchants can select paid product type extensions (like WooCommerce Memberships) or a paid theme. To make installation easier and to finish purchasing, it is necessary to make a [WooCommerce.com connection](https://woocommerce.com/document/managing-woocommerce-com-subscriptions/). We also prompt users to connect on the task list if they chose extensions in the profile wizard, but did not finish connecting.
 
-To make the connection from the new onboarding experience possible, we build our own connection endpoints [/wc-admin/plugins/request-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L298-L355) and [/wc-admin/plugins/finish-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L357-L417).
+To make the connection from the new onboarding experience possible, we build our own connection endpoints [/wc-admin/plugins/request-wccom-connect](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L419-L476) and [/wc-admin/plugins/finish-wccom-connect](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L478-L538).
 
 Both of these endpoints use WooCommerce Core's `WC_Helper_API` directly. The main difference with our connection (compared to the connection on the subscriptions page) is the addition of two additional query string parameters:
 
-* `wccom-from=onboarding`, which is used to tell WooCommerce.com & WordPress.com that we are connecting from the new onboarding flow. This parameter is passed from the user's site to WooCommerce.com and finally into Calypso, so that the Calypso login and sign-up screens match the rest of the profile wizard (https://github.com/Automattic/wp-calypso/pull/35193). Without this parameter, you would end up on the existing WooCommerce OAuth screen.
+* `wccom-from=onboarding`, which is used to tell WooCommerce.com & WordPress.com that we are connecting from the new onboarding flow. This parameter is passed from the user's site to WooCommerce.com and finally into Calypso, so that the Calypso login and sign-up screens match the rest of the profile wizard [https://github.com/Automattic/wp-calypso/pull/35193](https://github.com/Automattic/wp-calypso/pull/35193). Without this parameter, you would end up on the existing WooCommerce OAuth screen.
 * `calypso_env` allows us to load different versions of Calypso when testing.  See the Calypso section below.
 
 To disconnect from WooCommerce.com, go to `WooCommerce > Extensions > WooCommerce.com Subscriptions > Connected to WooCommerce.com > Disconnect`.
 
 ## Jetpack Connection
 
-Using Jetpack & WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Feld  Guide for additional resources on testing Jetpack with local setups.
+Using Jetpack & WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Field Guide for additional resources on testing Jetpack with local setups.
 
-We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L273-L296).
+We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L395-L417).
 
 We use Jetpack's `build_connect_url` function directly, but add the following two query parameters:
 
 * `calypso_env`, which allows us to load different versions of Calypso when testing. See the Calypso section below.
-* `from=woocommerce-onboarding`, which is used to conditionally show the WooCommerce themed Jetpack authorization process (https://github.com/Automattic/wp-calypso/pull/34380). Without this parameter, you would end up in the normal Jetpack authorization flow.
+* `from=woocommerce-onboarding`, which is used to conditionally show the WooCommerce themed Jetpack authorization process [https://github.com/Automattic/wp-calypso/pull/34380](https://github.com/Automattic/wp-calypso/pull/34380). Without this parameter, you would end up in the normal Jetpack authorization flow.
 
 The user is prompted to install and connect to Jetpack as the first step of the profile wizard. If the user hasn't connected when they arrive at the task list, we also prompt them on certain tasks to make the setup process easier, such as the shipping and tax steps.
 
@@ -89,7 +93,7 @@ To disconnect from Jetpack, go to `Jetpack > Dashboard > Connections > Site conn
 
 Both the WooCommerce.com & Jetpack connection processes (outlined below) send the user to [Calypso](https://github.com/Automattic/wp-calypso), the interface that powers WordPress.com, to sign-up or login.
 
-By default, a merchant will end up on a production version of Calypso (https://wordpress.com). If we make changes to the Calypso part of the flow and want to test them, we can do so with a `calypso_env` query parameter passed by both of our connection methods.
+By default, a merchant will end up on a production version of Calypso [https://wordpress.com](https://wordpress.com). If we make changes to the Calypso part of the flow and want to test them, we can do so with a `calypso_env` query parameter passed by both of our connection methods.
 
 To change the value of `calypso_env`, set `WOOCOMMERCE_CALYPSO_ENVIRONMENT` to one of the following values in your `wp-config.php`:
 
@@ -110,14 +114,3 @@ Logic for the Calypso flows are gated behind two separate [Calypso feature flags
 ### Testing
 
 If you are running the development version of WooCommerce Admin, and have [`WP_DEBUG`](https://codex.wordpress.org/WP_DEBUG) set to `true`, two Calypso connection buttons are displayed under the `WooCommerce > Settings > Help > Setup Wizard` menu, making it easier to access and test the flows.
-
-## Building the onboarding feature plugin
-
-The `onboarding` feature flag is enabled in the main WooCommerce Admin plugin build. That means the published version of the plugin on WordPress.org contains the onboarding feature, but it is visually off by default. See the "enable onboarding" section above.
-
-Sometimes, it may be necessary to generate a separate build of the plugin between public releases for internal testing or debugging. This can be done using the [building custom plugin builds](https://github.com/woocommerce/woocommerce-admin/blob/main/docs/feature-flags.md#building-custom-plugin-builds) feature of our build system.
-
-* Switch to the latest `main` branch and pull down any changes
-* Run `pnpm run build:release -- --slug onboarding --features '{"onboarding":true}'`
-* A special `woocommerce-admin-onboarding.zip` release will be generated, containing the latest onboarding code
-* Make sure to follow the directions in the "enabling onboarding" section above to properly use the build

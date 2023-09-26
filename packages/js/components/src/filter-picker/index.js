@@ -63,10 +63,8 @@ class FilterPicker extends Component {
 				/* eslint-disable react/no-did-update-set-state */
 				this.setState( { nav: selectedFilter.path || [] } );
 				/* eslint-enable react/no-did-update-set-state */
-				const {
-					param: filterParam,
-					getLabels,
-				} = selectedFilter.settings;
+				const { param: filterParam, getLabels } =
+					selectedFilter.settings;
 				getLabels( nextQuery[ filterParam ], nextQuery ).then(
 					this.updateSelectedTag
 				);
@@ -149,13 +147,8 @@ class FilterPicker extends Component {
 	}
 
 	update( value, additionalQueries = {} ) {
-		const {
-			path,
-			query,
-			config,
-			onFilterSelect,
-			advancedFilters,
-		} = this.props;
+		const { path, query, config, onFilterSelect, advancedFilters } =
+			this.props;
 		let update = {
 			[ config.param ]:
 				( config.defaultValue || DEFAULT_FILTER ) === value
@@ -305,7 +298,7 @@ class FilterPicker extends Component {
 					expandOnMobile
 					headerTitle={ __(
 						'filter report to show:',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<DropdownButton
@@ -381,11 +374,11 @@ FilterPicker.propTypes = {
 		 */
 		staticParams: PropTypes.array.isRequired,
 		/**
-		 * The url paramter this filter will modify.
+		 * The url parameter this filter will modify.
 		 */
 		param: PropTypes.string.isRequired,
 		/**
-		 * The default paramter value to use instead of 'all'.
+		 * The default parameter value to use instead of 'all'.
 		 */
 		defaultValue: PropTypes.string,
 		/**

@@ -52,7 +52,7 @@ wp plugin install wp-mail-logging --activate
 The container build script supports an initialization script parameter
 
 ```shell script
-pnpx wc-e2e docker:up plugins/woocommerce/tests/e2e/docker/init-wp-beta.sh
+pnpm exec wc-e2e docker:up plugins/woocommerce/tests/e2e/docker/init-wp-beta.sh
 ```
 
 This script updates WordPress to the latest nightly point release

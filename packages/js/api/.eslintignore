@@ -6,3 +6,4 @@ jest.config.js
 package.json
 package-lock.json
 tsconfig.json
+__tests__

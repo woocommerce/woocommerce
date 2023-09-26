@@ -147,11 +147,13 @@ class WC_Admin_Importers {
 	public function post_importer_compatibility() {
 		global $wpdb;
 
-		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) ) { // PHPCS: input var ok, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) ) {
 			return;
 		}
 
-		$id          = absint( $_POST['import_id'] ); // PHPCS: input var ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$id          = absint( $_POST['import_id'] );
 		$file        = get_attached_file( $id );
 		$parser      = new WXR_Parser();
 		$import_data = $parser->parse( $file );
@@ -216,12 +218,21 @@ class WC_Admin_Importers {
 
 		$file   = wc_clean( wp_unslash( $_POST['file'] ) ); // PHPCS: input var ok.
 		$params = array(
-			'delimiter'       => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
-			'start_pos'       => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
-			'mapping'         => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
-			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
-			'lines'           => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
-			'parse'           => true,
+			'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
+			'start_pos'          => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
+			'mapping'            => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
+			'update_existing'    => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
+			'character_encoding' => isset( $_POST['character_encoding'] ) ? wc_clean( wp_unslash( $_POST['character_encoding'] ) ) : '',
+
+			/**
+			 * Batch size for the product import process.
+			 *
+			 * @param int $size Batch size.
+			 *
+			 * @since
+			 */
+			'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
+			'parse'              => true,
 		);
 
 		// Log failures.
@@ -279,13 +290,14 @@ class WC_Admin_Importers {
 			// Send success.
 			wp_send_json_success(
 				array(
-					'position'   => 'done',
-					'percentage' => 100,
-					'url'        => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-					'imported'   => count( $results['imported'] ),
-					'failed'     => count( $results['failed'] ),
-					'updated'    => count( $results['updated'] ),
-					'skipped'    => count( $results['skipped'] ),
+					'position'            => 'done',
+					'percentage'          => 100,
+					'url'                 => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
+					'imported'            => count( $results['imported'] ),
+					'imported_variations' => count( $results['imported_variations'] ),
+					'failed'              => count( $results['failed'] ),
+					'updated'             => count( $results['updated'] ),
+					'skipped'             => count( $results['skipped'] ),
 				)
 			);
 		} else {

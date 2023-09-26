@@ -65,18 +65,18 @@ const SummaryNumber = ( {
 	let screenReaderLabel =
 		delta > 0
 			? sprintf(
-					__( 'Up %f%% from %s', 'woocommerce-admin' ),
+					__( 'Up %f%% from %s', 'woocommerce' ),
 					delta,
 					prevLabel
 			  )
 			: sprintf(
-					__( 'Down %f%% from %s', 'woocommerce-admin' ),
+					__( 'Down %f%% from %s', 'woocommerce' ),
 					Math.abs( delta ),
 					prevLabel
 			  );
 	if ( ! delta ) {
 		screenReaderLabel = sprintf(
-			__( 'No change from %s', 'woocommerce-admin' ),
+			__( 'No change from %s', 'woocommerce' ),
 			prevLabel
 		);
 	}
@@ -131,7 +131,7 @@ const SummaryNumber = ( {
 						<Text variant="title.small" size="20" lineHeight="28px">
 							{ ! isNil( value )
 								? value
-								: __( 'N/A', 'woocommerce-admin' ) }
+								: __( 'N/A', 'woocommerce' ) }
 						</Text>
 					</div>
 
@@ -139,7 +139,7 @@ const SummaryNumber = ( {
 						text={
 							! isNil( prevValue )
 								? `${ prevLabel } ${ prevValue }`
-								: __( 'N/A', 'woocommerce-admin' )
+								: __( 'N/A', 'woocommerce' )
 						}
 						position="top center"
 					>
@@ -151,10 +151,10 @@ const SummaryNumber = ( {
 							<Text variant="caption" size="12" lineHeight="16px">
 								{ ! isNil( delta )
 									? sprintf(
-											__( '%f%%', 'woocommerce-admin' ),
+											__( '%f%%', 'woocommerce' ),
 											delta
 									  )
-									: __( 'N/A', 'woocommerce-admin' ) }
+									: __( 'N/A', 'woocommerce' ) }
 							</Text>
 						</div>
 					</Tooltip>
@@ -235,7 +235,7 @@ SummaryNumber.defaultProps = {
 	href: '',
 	hrefType: 'wc-admin',
 	isOpen: false,
-	prevLabel: __( 'Previous period:', 'woocommerce-admin' ),
+	prevLabel: __( 'Previous period:', 'woocommerce' ),
 	reverseTrend: false,
 	selected: false,
 	onLinkClickCallback: noop,

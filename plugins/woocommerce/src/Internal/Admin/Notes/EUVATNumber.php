@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
  * EU_VAT_Number
@@ -42,10 +42,10 @@ class EUVATNumber {
 			return;
 		}
 
-		$content = __( "If your store is based in the EU, we recommend using the EU VAT Number extension in addition to automated taxes. It provides your checkout with a field to collect and validate a customer's EU VAT number, if they have one.", 'woocommerce-admin' );
+		$content = __( "If your store is based in the EU, we recommend using the EU VAT Number extension in addition to automated taxes. It provides your checkout with a field to collect and validate a customer's EU VAT number, if they have one.", 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Collect and validate EU VAT numbers at checkout', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Collect and validate EU VAT numbers at checkout', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
@@ -53,7 +53,7 @@ class EUVATNumber {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/products/eu-vat-number/?utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

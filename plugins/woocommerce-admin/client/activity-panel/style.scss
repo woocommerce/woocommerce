@@ -29,11 +29,12 @@
 			}
 		}
 
-		// custom progress icon, requires specific coloring
-		&.setup-progress {
-			path:first-child {
-				stroke: '#DCDCDE';
-			}
+		.setup-progress-slice {
+			stroke: none;
+		}
+
+		.setup-progress-ring {
+			stroke-width: 2px;
 		}
 	}
 
@@ -69,8 +70,6 @@
 		outline: none;
 		cursor: pointer;
 		background-color: $studio-white;
-		max-width: min-content;
-		min-width: 80px;
 		width: 100%;
 		height: $header-height;
 		color: $gray-700;
@@ -204,16 +203,15 @@
 	}
 	transform: translateX(100%);
 	@include activity-panel-slide();
-	position: fixed;
+	position: absolute;
 	right: 0;
-	top: #{$header-height + $adminbar-height-mobile};
+	top: 100%;
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
 	@include breakpoint( '>782px' ) {
 		height: calc(100vh - #{$header-height + $adminbar-height});
-		top: #{$header-height + $adminbar-height};
 	}
 	.has-woocommerce-navigation & {
 		height: calc(100vh - #{$header-height});

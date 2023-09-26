@@ -1,0 +1,164 @@
+<!-- wp:paragraph -->
+<p>
+	Beta <%= betaNumber %> for the <%=
+	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
+	'numeric'}) %> release of WooCommerce is now available for testing! You can
+	either
+	<a
+		href="https://downloads.wordpress.org/plugin/woocommerce.<%= version.version %>.zip"
+		target="_blank"
+		rel="noreferrer noopener"
+		>download it directly from WordPress.org</a
+	>
+	or install our
+	<a
+		rel="noreferrer noopener"
+		href="https://woocommerce.wordpress.com/2018/07/30/woocommerce-beta-tester-2-0-0/"
+		target="_blank"
+		>WooCommerce Beta Tester Plugin</a
+	>.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Highlights</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>
+	Since the release of
+	<a href="<%= lastReleasePostUrl %>"><%= prettyPreviousVersion %></a>, the
+	following changes have been made:
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul>
+	<!-- wp:list-item -->
+	<li>List your changes here.</li>
+	<!-- /wp:list-item -->
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>
+	For the complete list, view the&nbsp;<a
+		href="https://github.com/woocommerce/woocommerce/blob/release/<%= version.major %>.<%= version.minor %>/plugins/woocommerce/readme.txt"
+		>changelog</a
+	>&nbsp;in the readme for this release.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"actions-and-filters"} -->
+<h2 class="wp-block-heading" id="actions-and-filters">Actions and Filters</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Insert action and filter changes here.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"database-changes"} -->
+<h2 class="wp-block-heading" id="database-changes">Database Changes</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Insert db changes here.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"template-changes"} -->
+<h2 class="wp-block-heading" id="template-changes">Template Changes</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Insert template changes here.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"release-schedule"} -->
+<h2 class="wp-block-heading" id="release-schedule">Release Schedule</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>
+	We're still on track for our planned <%=
+	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
+	'numeric'}) %> release.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+	<table>
+		<tbody>
+			<tr>
+				<td><strong>Version</strong></td>
+				<td><strong>Release</strong></td>
+			</tr>
+			<tr>
+				<td>Release Candidate</td>
+				<td>
+					<%= rcReleaseDate.toLocaleDateString('en-US', { month:
+					'long', day: 'numeric', year: 'numeric' }) %>
+				</td>
+			</tr>
+			<tr>
+				<td>Final Release</td>
+				<td>
+					<%= finalReleaseDate.toLocaleDateString('en-US', { month:
+					'long', day: 'numeric', year: 'numeric' }) %>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:heading {"anchor":"testing"} -->
+<h2 class="wp-block-heading" id="testing">Testing</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>
+	If you'd like to dive in and help test this new release, our handy&nbsp;<a
+		href="https://wordpress.org/plugins/woocommerce-beta-tester/"
+		target="_blank"
+		>WooCommerce Beta Tester plugin</a
+	>&nbsp;allows you to switch between beta versions and release candidates.
+	You can also&nbsp;<a
+		href="https://downloads.wordpress.org/plugin/woocommerce.<%= version.version %>.zip"
+		target="_blank"
+		rel="noreferrer noopener"
+		>download the release from WordPress.org</a
+	>.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>
+	A set of testing instructions has been published on&nbsp;our&nbsp;<a
+		href="https://github.com/woocommerce/woocommerce/wiki/Release-Testing-Instructions-WooCommerce-<%= version.major %>.<%= version.minor %>"
+		target="_blank"
+		rel="noreferrer noopener"
+		>Wiki page in GitHub</a
+	>. We've also posted&nbsp;<a
+		href="https://woocommerce.wordpress.com/2015/07/25/how-to-beta-test-woocommerce/"
+		target="_blank"
+		>a helpful writeup on beta testing</a
+	>&nbsp;to help get you started.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>
+	If you discover any bugs during the testing process, please let us know
+	by&nbsp;<a
+		href="https://github.com/woocommerce/woocommerce/issues/new?assignees=&amp;labels=&amp;template=1-bug-report.yml&amp;title=[<%= version.major %>.<%= version.minor %> beta]: Title of the issue"
+		target="_blank"
+		rel="noreferrer noopener"
+		>logging a report in GitHub</a
+	>.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph -->

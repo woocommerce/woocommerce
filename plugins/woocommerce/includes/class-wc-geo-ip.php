@@ -843,7 +843,7 @@ class WC_Geo_IP {
 		'Sao Tome and Principe',
 		'El Salvador',
 		'Syrian Arab Republic',
-		'Swaziland',
+		'Eswatini',
 		'Turks and Caicos Islands',
 		'Chad',
 		'French Southern Territories',

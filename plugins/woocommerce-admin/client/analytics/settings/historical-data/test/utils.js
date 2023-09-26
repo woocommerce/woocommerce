@@ -24,9 +24,9 @@ describe( 'formatParams', () => {
 	} );
 
 	it( 'returns correct days param based on period label', () => {
-		expect(
-			formatParams( 'YYYY-MM-DD', { label: '30' }, false )
-		).toEqual( { days: 30 } );
+		expect( formatParams( 'YYYY-MM-DD', { label: '30' }, false ) ).toEqual(
+			{ days: 30 }
+		);
 	} );
 
 	it( 'returns correct days param based on period date', () => {

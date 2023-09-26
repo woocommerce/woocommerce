@@ -95,7 +95,7 @@ function wc_delete_order_item( $item_id ) {
  *
  * @param int    $item_id    Item ID.
  * @param string $meta_key   Meta key.
- * @param string $meta_value Meta value.
+ * @param mixed  $meta_value Meta value.
  * @param string $prev_value Previous value (default: '').
  *
  * @throws Exception         When `WC_Data_Store::load` validation fails.
@@ -115,7 +115,7 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  *
  * @param int    $item_id    Item ID.
  * @param string $meta_key   Meta key.
- * @param string $meta_value Meta value.
+ * @param mixed  $meta_value Meta value.
  * @param bool   $unique     If meta data should be unique (default: false).
  *
  * @throws Exception         When `WC_Data_Store::load` validation fails.
@@ -137,7 +137,7 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
  *
  * @param int    $item_id    Item ID.
  * @param string $meta_key   Meta key.
- * @param string $meta_value Meta value (default: '').
+ * @param mixed  $meta_value Meta value (default: '').
  * @param bool   $delete_all Delete all meta data, defaults to `false`.
  *
  * @throws Exception         When `WC_Data_Store::load` validation fails.

@@ -118,7 +118,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_backwards_compat() {
 		// Properties.
-		// Accessing properties directly will throw some wanted deprected notices
+		// Accessing properties directly will throw some wanted deprecated notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
 			'id',
@@ -277,8 +277,8 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_get_avatar_url() {
 		$customer = WC_Helper_Customer::create_customer();
-		$this->assertContains( 'gravatar.com/avatar', $customer->get_avatar_url() );
-		$this->assertContains( md5( 'test@woo.local' ), $customer->get_avatar_url() );
+		$this->assertStringContainsString( 'gravatar.com/avatar', $customer->get_avatar_url() );
+		$this->assertStringContainsString( md5( 'test@woo.local' ), $customer->get_avatar_url() );
 	}
 
 	/**

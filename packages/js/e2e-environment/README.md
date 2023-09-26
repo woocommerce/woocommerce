@@ -95,7 +95,7 @@ The E2E environment has the following methods to let us control Jest's overall b
 **NOTE:** The amount of times failed tests are retried can also be set using the `E2E_RETRY_TIMES` environment variable when executing tests. This can be done using the command below: 
 
 ```
-E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 ```
 
 #### Test Screenshots

@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { createElement, Fragment } from '@wordpress/element';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import React from 'react';
 import Spinner from '../spinner';
 import CheckIcon from './check-icon';
 
-interface StepperProps {
+export interface StepperProps {
 	/** Additional class name to style the component. */
 	className?: string;
 	/** The current step's key. */
@@ -32,9 +32,9 @@ interface StepperProps {
 		onClick?: ( key: string ) => void;
 	} >;
 	/** If the stepper is vertical instead of horizontal. */
-	isVertical: boolean;
+	isVertical?: boolean;
 	/**  Optionally mark the current step as pending to show a spinner. */
-	isPending: boolean;
+	isPending?: boolean;
 }
 
 /**
@@ -68,13 +68,8 @@ export const Stepper: React.FC< StepperProps > = ( {
 		<div className={ stepperClassName }>
 			<div className="woocommerce-stepper__steps">
 				{ steps.map( ( step, i ) => {
-					const {
-						key,
-						label,
-						description,
-						isComplete,
-						onClick,
-					} = step;
+					const { key, label, description, isComplete, onClick } =
+						step;
 					const isCurrentStep = key === currentStep;
 					const stepClassName = classnames(
 						'woocommerce-stepper__step',

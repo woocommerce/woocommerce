@@ -4,11 +4,22 @@
 import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component, lazy, Suspense } from '@wordpress/element';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Component, lazy, Suspense, useEffect } from '@wordpress/element';
+import {
+	unstable_HistoryRouter as HistoryRouter,
+	Route,
+	Routes,
+	useLocation,
+	useMatch,
+	useParams,
+} from 'react-router-dom';
+import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
-import { get, isFunction, identity } from 'lodash';
-import { parse } from 'qs';
+import { isFunction, identity } from 'lodash';
+import {
+	CustomerEffortScoreModalContainer,
+	triggerExitPageCesSurvey,
+} from '@woocommerce/customer-effort-score';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
@@ -19,6 +30,10 @@ import {
 import { recordPageView } from '@woocommerce/tracks';
 import '@woocommerce/notices';
 import { PluginArea } from '@wordpress/plugins';
+import {
+	LayoutContextProvider,
+	getLayoutContextValue,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -26,9 +41,11 @@ import { PluginArea } from '@wordpress/plugins';
 import './style.scss';
 import { Controller, getPages } from './controller';
 import { Header } from '../header';
+import { Footer } from './footer';
 import Notices from './notices';
-import TransientNotices from './transient-notices';
+import { TransientNotices } from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
 import './navigation';
@@ -39,7 +56,7 @@ const StoreAlerts = lazy( () =>
 
 const WCPayUsageModal = lazy( () =>
 	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../tasks/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
+		/* webpackChunkName: "wcpay-usage-modal" */ '../task-lists/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
 	)
 );
 
@@ -63,32 +80,57 @@ export class PrimaryLayout extends Component {
 	}
 }
 
-class _Layout extends Component {
-	componentDidMount() {
-		this.recordPageViewTrack();
+/**
+ * Exists for the sole purpose of passing on react-router hooks into
+ * the class based Layout component. Feel free to refactor it by turning _Layout
+ * into a functional component and moving the hooks inside
+ *
+ * @param {Object} root0          root0 React component props
+ * @param {Object} root0.children Children componeents
+ */
+const WithReactRouterProps = ( { children } ) => {
+	const location = useLocation();
+	const match = useMatch( location.pathname );
+	const params = useParams();
+	const matchProp = { params, url: match.pathname };
+	return Children.toArray( children ).map( ( child ) => {
+		return cloneElement( child, {
+			...child.props,
+			location,
+			match: matchProp,
+		} );
+	} );
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
 	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
+};
 
-	componentDidUpdate( prevProps ) {
-		const previousPath = get( prevProps, 'location.pathname' );
-		const currentPath = get( this.props, 'location.pathname' );
+function _Layout( {
+	activePlugins,
+	installedPlugins,
+	isEmbedded,
+	isJetpackConnected,
+	location,
+	match,
+	page,
+} ) {
+	usePageClasses( page );
 
-		if ( ! previousPath || ! currentPath ) {
-			return;
-		}
-
-		if ( previousPath !== currentPath ) {
-			this.recordPageViewTrack();
-		}
-	}
-
-	recordPageViewTrack() {
-		const {
-			activePlugins,
-			installedPlugins,
-			isEmbedded,
-			isJetpackConnected,
-		} = this.props;
-
+	function recordPageViewTrack() {
 		const navigationFlag = {
 			has_navigation: !! window.wcNavigation,
 		};
@@ -102,7 +144,7 @@ class _Layout extends Component {
 			return;
 		}
 
-		const pathname = get( this.props, 'location.pathname' );
+		const { pathname } = location;
 		if ( ! pathname ) {
 			return;
 		}
@@ -123,56 +165,70 @@ class _Layout extends Component {
 		} );
 	}
 
-	getQuery( searchString ) {
-		if ( ! searchString ) {
-			return {};
-		}
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
 
-		const search = searchString.substring( 1 );
-		return parse( search );
-	}
+	useEffect( () => {
+		recordPageViewTrack();
+		setTimeout( () => {
+			triggerExitPageCesSurvey();
+		}, 0 );
+	}, [ location?.pathname ] );
 
-	isWCPaySettingsPage() {
-		const { page, section, tab } = getQuery();
+	function isWCPaySettingsPage() {
+		const { page: queryPage, section, tab } = getQuery();
 		return (
-			page === 'wc-settings' &&
+			queryPage === 'wc-settings' &&
 			tab === 'checkout' &&
 			section === 'woocommerce_payments'
 		);
 	}
 
-	render() {
-		const { isEmbedded, ...restProps } = this.props;
-		const { location, page } = this.props;
-		const { breadcrumbs } = page;
-		const query = this.getQuery( location && location.search );
+	const { breadcrumbs, layout = { header: true, footer: true } } = page;
+	const { header: showHeader = true, footer: showFooter = true } = layout;
 
-		return (
+	const query = getQuery();
+
+	return (
+		<LayoutContextProvider
+			value={ getLayoutContextValue( [
+				page?.navArgs?.id?.toLowerCase() || 'page',
+			] ) }
+		>
 			<SlotFillProvider>
 				<div className="woocommerce-layout">
-					<Header
-						sections={
-							isFunction( breadcrumbs )
-								? breadcrumbs( this.props )
-								: breadcrumbs
-						}
-						isEmbedded={ isEmbedded }
-						query={ query }
-					/>
+					{ showHeader && (
+						<Header
+							sections={
+								isFunction( breadcrumbs )
+									? breadcrumbs( { match } )
+									: breadcrumbs
+							}
+							isEmbedded={ isEmbedded }
+							query={ query }
+						/>
+					) }
 					<TransientNotices />
 					{ ! isEmbedded && (
 						<PrimaryLayout>
 							<div className="woocommerce-layout__main">
-								<Controller { ...restProps } query={ query } />
+								<Controller
+									page={ page }
+									match={ match }
+									query={ query }
+								/>
 							</div>
 						</PrimaryLayout>
 					) }
 
-					{ isEmbedded && this.isWCPaySettingsPage() && (
+					{ isEmbedded && isWCPaySettingsPage() && (
 						<Suspense fallback={ null }>
 							<WCPayUsageModal />
 						</Suspense>
 					) }
+					{ showFooter && <Footer /> }
+					<CustomerEffortScoreModalContainer />
 				</div>
 				<PluginArea scope="woocommerce-admin" />
 				{ window.wcAdminFeatures.navigation && (
@@ -180,8 +236,8 @@ class _Layout extends Component {
 				) }
 				<PluginArea scope="woocommerce-tasks" />
 			</SlotFillProvider>
-		);
-	}
+		</LayoutContextProvider>
+	);
 }
 
 _Layout.propTypes = {
@@ -218,11 +274,8 @@ const Layout = compose(
 			return;
 		}
 
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 
 		return {
 			activePlugins: getActivePlugins(),
@@ -230,14 +283,18 @@ const Layout = compose(
 			installedPlugins: getInstalledPlugins(),
 		};
 	} )
-)( _Layout );
+)( LayoutSwitchWrapper );
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
 
+	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
+	const path = document.location.pathname;
+	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
+
 	return (
-		<Router history={ getHistory() }>
-			<Switch>
+		<HistoryRouter history={ getHistory() }>
+			<Routes basename={ basename }>
 				{ getPages()
 					.filter(
 						( page ) =>
@@ -250,14 +307,12 @@ const _PageLayout = () => {
 								key={ page.path }
 								path={ page.path }
 								exact
-								render={ ( props ) => (
-									<Layout page={ page } { ...props } />
-								) }
+								element={ <Layout page={ page } /> }
 							/>
 						);
 					} ) }
-			</Switch>
-		</Router>
+			</Routes>
+		</HistoryRouter>
 	);
 };
 

@@ -1,0 +1,50 @@
+{
+    "code": "AU",
+    "name": "Australia",
+    "states": [
+        {
+            "code": "ACT",
+            "name": "Australian Capital Territory"
+        },
+        {
+            "code": "NSW",
+            "name": "New South Wales"
+        },
+        {
+            "code": "NT",
+            "name": "Northern Territory"
+        },
+        {
+            "code": "QLD",
+            "name": "Queensland"
+        },
+        {
+            "code": "SA",
+            "name": "South Australia"
+        },
+        {
+            "code": "TAS",
+            "name": "Tasmania"
+        },
+        {
+            "code": "VIC",
+            "name": "Victoria"
+        },
+        {
+            "code": "WA",
+            "name": "Western Australia"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/au"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

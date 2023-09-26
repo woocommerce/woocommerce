@@ -11,11 +11,11 @@ import {
 } from '@woocommerce/components';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../lib/currency-context';
 import {
 	getIndicatorData,
 	getIndicatorValues,
@@ -72,10 +72,7 @@ export const StatsList = ( {
 						hrefType={ reportUrlType }
 						label={ item.label }
 						value={ primaryValue }
-						prevLabel={ __(
-							'Previous period:',
-							'woocommerce-admin'
-						) }
+						prevLabel={ __( 'Previous period:', 'woocommerce' ) }
 						prevValue={ secondaryValue }
 						delta={ delta }
 						onLinkClickCallback={ () => {
@@ -91,8 +88,5 @@ export const StatsList = ( {
 };
 
 export default withSelect( ( select, { stats, query } ) => {
-	if ( stats.length === 0 ) {
-		return;
-	}
 	return getIndicatorData( select, stats, query );
 } )( StatsList );

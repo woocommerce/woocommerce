@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update `@jest/globals` from `^26.4.2` to `^27.5.1`.

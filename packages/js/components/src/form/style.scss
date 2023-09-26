@@ -1,0 +1,7 @@
+.components-base-control {
+  .components-text-control__input,
+  .components-input-control .components-input-control__container .components-input-control__input,
+  .components-select-control .components-input-control__container .components-select-control__input {
+    min-height: 36px;
+  }
+}

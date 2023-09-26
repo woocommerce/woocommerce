@@ -1,5 +1,8 @@
+@import 'components/customer-feedback-simple/customer-feedback-simple.scss';
+@import 'components/feedback-modal/feedback-modal.scss';
+
 .woocommerce-customer-effort-score__selection {
-	margin: 1em 0;
+	margin: 1em 0 1.5em 0;
 
 	.components-base-control__field {
 		display: flex;
@@ -9,6 +12,13 @@
 
 		@include breakpoint( '>600px' ) {
 			flex-direction: row;
+			justify-content: center;
+		}
+
+		.components-h-stack {
+			@include breakpoint( '>600px' ) {
+				flex-direction: row;
+			}
 		}
 	}
 
@@ -68,7 +78,7 @@
 		}
 
 		input[value='3'] + label::before {
-			content: '😐';
+			content: '😑';
 		}
 
 		input[value='4'] + label::before {
@@ -76,16 +86,20 @@
 		}
 
 		input[value='5'] + label::before {
-			content: '😁';
+			content: '😍';
 		}
 	}
 }
 
 .woocommerce-customer-effort-score__comments {
+	margin-bottom: 1.5em;
+
 	label {
 		display: block;
 		color: inherit;
 		font-weight: bold;
+		text-transform: none;
+		font-size: 14px;
 	}
 
 	textarea {
@@ -93,10 +107,27 @@
 	}
 }
 
+.woocommerce-customer-effort-score {
+	.components-modal__content {
+		padding-bottom: 100px;
+	}
+}
+
 .woocommerce-customer-effort-score__buttons {
 	text-align: right;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #fff;
+	padding: calc( 2 * $gap );
 
 	.components-button {
 		margin-left: 1em;
 	}
+}
+
+.woocommerce-customer-effort-score .woocommerce-customer-effort-score__intro {
+	max-width: 550px;
+	margin: 0 0 1.5em 0;
 }

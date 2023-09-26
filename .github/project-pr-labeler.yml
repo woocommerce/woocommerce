@@ -46,14 +46,8 @@
 'package: @woocommerce/explat':
 - packages/js/explat/**/*
 
-'package: @woocommerce/js-tests':
-- packages/js/js-tests/**/*
-
 'package: @woocommerce/navigation':
 - packages/js/navigation/**/*
-
-'package: @woocommerce/notices':
-- packages/js/notices/**/*
 
 'package: @woocommerce/number':
 - packages/js/number/**/*
@@ -61,16 +55,23 @@
 'package: @woocommerce/onboarding':
 - packages/js/onboarding/**/*
 
-'package: @woocommerce/style-build':
-- packages/js/style-build/**/*
-
 'package: @woocommerce/tracks':
 - packages/js/tracks/**/*
 
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
 
-'focus: react admin':
-- plugins/woocommerce/src/Admin/**/*
-- plugins/woocommerce/src/Internal/Admin/**/*
-- plugins/woocommerce-admin/**/*
+'plugin: woocommerce beta tester':
+- plugins/woocommerce-beta-tester/**/*
+
+'plugin: woo-ai':
+- plugins/woo-ai/**/*
+
+'focus: performance tests [team:Solaris]':
+- plugins/woocommerce/tests/performance/**/*
+
+'focus: api tests [team:Solaris]':
+- plugins/woocommerce/tests/api-core-tests/**/*
+
+'focus: e2e tests [team:Solaris]':
+- plugins/woocommerce/tests/e2e-pw/**/*

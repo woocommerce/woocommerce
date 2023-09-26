@@ -25,7 +25,7 @@ export default function ProductTypeLabel( {
 	/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 	const toolTipText = __(
 		"This product type requires a paid extension.\nWe'll add this to a cart so that\nyou can purchase and install it later.",
-		'woocommerce-admin'
+		'woocommerce'
 	);
 	/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
@@ -38,7 +38,7 @@ export default function ProductTypeLabel( {
 				isTertiary
 				label={ __(
 					'Learn more about recommended free business features',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				onClick={ () => {
 					setIsPopoverVisible( true );
@@ -70,7 +70,7 @@ export default function ProductTypeLabel( {
 										)
 									}
 								>
-									{ __( 'Learn more', 'woocommerce-admin' ) }
+									{ __( 'Learn more', 'woocommerce' ) }
 								</Link>
 							) : (
 								''
@@ -85,12 +85,12 @@ export default function ProductTypeLabel( {
 					{ isMonthlyPricing
 						? sprintf(
 								/* translators: Dollar amount (example: $4.08 ) */
-								__( '$%f per month', 'woocommerce-admin' ),
+								__( '$%f per month', 'woocommerce' ),
 								( annualPrice / 12.0 ).toFixed( 2 )
 						  )
 						: sprintf(
 								/* translators: Dollar amount (example: $49.00 ) */
-								__( '$%f per year', 'woocommerce-admin' ),
+								__( '$%f per year', 'woocommerce' ),
 								annualPrice
 						  ) }
 				</Pill>

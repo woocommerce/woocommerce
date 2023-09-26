@@ -14,7 +14,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before all the tests in the class.
 	 */
-	public static function setupBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
@@ -41,7 +41,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs after each test.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		global $wpdb;
 
 		parent::tearDown();
@@ -465,7 +465,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		}
 
 		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
-		$this->assertEquals( $expected, $term_counts );
+		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 
 	/**
@@ -1252,7 +1252,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$filtered_product_ids = $this->do_product_request( array() );
 
-		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+		$this->assertEqualsCanonicalizing( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
 
 		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
 		$this->assert_counters( 'Features', array( 'Ironable' ) );

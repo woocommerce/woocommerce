@@ -1,9 +1,12 @@
+/**
+ * External dependencies
+ */
 import { AxiosRequestConfig } from 'axios';
 
 // @ts-ignore
-import buildFullPath = require( 'axios/lib/core/buildFullPath' );
+import buildFullPath = require('axios/lib/core/buildFullPath');
 // @ts-ignore
-import appendParams = require( 'axios/lib/helpers/buildURL' );
+import appendParams = require('axios/lib/helpers/buildURL');
 
 /**
  * Given an Axios request config this function generates the URL that Axios will
@@ -24,5 +27,9 @@ export function buildURL( request: AxiosRequestConfig ): string {
  * @return {string} The merged URL.
  */
 export function buildURLWithParams( request: AxiosRequestConfig ): string {
-	return appendParams( buildURL( request ), request.params, request.paramsSerializer );
+	return appendParams(
+		buildURL( request ),
+		request.params,
+		request.paramsSerializer
+	);
 }

@@ -6,6 +6,8 @@
  * @version  2.4.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,10 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_screen_ids() {
-
-	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+	$wc_screen_id = 'woocommerce';
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
+		$wc_screen_id . '_page_wc-orders',
 		$wc_screen_id . '_page_wc-reports',
 		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',
@@ -29,6 +31,7 @@ function wc_get_screen_ids() {
 		'product_page_product_attributes',
 		'product_page_product_exporter',
 		'product_page_product_importer',
+		'product_page_product-reviews',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',
@@ -42,6 +45,7 @@ function wc_get_screen_ids() {
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+		$screen_ids[] = wc_get_page_screen_id( $type );
 	}
 
 	$attributes = wc_get_attribute_taxonomies();
@@ -52,7 +56,31 @@ function wc_get_screen_ids() {
 		}
 	}
 
+	/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
+	/* phpcs: enable */
+}
+
+/**
+ * Get page ID for a specific WC resource.
+ *
+ * @param string $for Name of the resource.
+ *
+ * @return string Page ID. Empty string if resource not found.
+ */
+function wc_get_page_screen_id( $for ) {
+	$screen_id = '';
+	$for       = str_replace( '-', '_', $for );
+
+	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+		} else {
+			$screen_id = $for;
+		}
+	}
+
+	return $screen_id;
 }
 
 /**
@@ -82,14 +110,16 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode).
-		$shortcode = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
+		$shortcode        = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$shortcode}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug.
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );
 	}
 
+	/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 	$valid_page_found = apply_filters( 'woocommerce_create_page_id', $valid_page_found, $slug, $page_content );
+	/* phpcs: enable */
 
 	if ( $valid_page_found ) {
 		if ( $option ) {
@@ -127,7 +157,9 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		);
 		$page_id   = wp_insert_post( $page_data );
 
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'woocommerce_page_created', $page_id, $page_data );
+		/* phpcs: enable */
 	}
 
 	if ( $option ) {
@@ -269,7 +301,9 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
  */
 function wc_save_order_items( $order_id, $items ) {
 	// Allow other plugins to check change in order items before they are saved.
+	/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
+	/* phpcs: enable */
 
 	$qty_change_order_notes = array();
 	$order                  = wc_get_order( $order_id );
@@ -343,11 +377,13 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			// Allow other plugins to change item object before it is saved.
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			do_action( 'woocommerce_before_save_order_item', $item );
+			/* phpcs: enable */
 
 			$item->save();
 
-			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ) ) ) {
+			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ), true ) ) {
 				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 				if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 					$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';
@@ -420,7 +456,9 @@ function wc_save_order_items( $order_id, $items ) {
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved.
+	/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
+	/* phpcs: enable */
 }
 
 /**
@@ -454,9 +492,11 @@ function wc_render_invalid_variation_notice( $product_object ) {
 	global $wpdb;
 
 	// Give ability for extensions to hide this notice.
+	/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 	if ( ! apply_filters( 'woocommerce_show_invalid_variations_notice', true, $product_object ) ) {
 		return;
 	}
+	/* phpcs: enable */
 
 	$variation_ids = $product_object ? $product_object->get_children() : array();
 
@@ -468,32 +508,37 @@ function wc_render_invalid_variation_notice( $product_object ) {
 
 	// Check if a variation exists without pricing data.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$invalid_variation_count = $wpdb->get_var(
+	$valid_variation_count = $wpdb->get_var(
 		"
 		SELECT count(post_id) FROM {$wpdb->postmeta}
 		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
-		AND meta_key='_price'
+		AND ( meta_key='_subscription_sign_up_fee' OR meta_key='_price' )
 		AND meta_value >= 0
 		AND meta_value != ''
 		"
 	);
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-	if ( 0 < ( $variation_count - $invalid_variation_count ) ) {
+	$invalid_variation_count = $variation_count - $valid_variation_count;
+
+	if ( 0 < $invalid_variation_count ) {
 		?>
-		<div id="message" class="inline notice woocommerce-message woocommerce-notice-invalid-variation">
+		<div id="message" class="inline notice notice-warning woocommerce-message woocommerce-notice-invalid-variation">
 			<p>
 			<?php
 			echo wp_kses_post(
 				sprintf(
 					/* Translators: %d variation count. */
-					_n( '%d variation does not have a price.', '%d variations do not have prices.', ( $variation_count - $invalid_variation_count ), 'woocommerce' ),
-					( $variation_count - $invalid_variation_count )
+					_n( '%d variation does not have a price.', '%d variations do not have prices.', $invalid_variation_count, 'woocommerce' ),
+					$invalid_variation_count
 				) . '&nbsp;' .
 				__( 'Variations (and their attributes) that do not have prices will not be shown in your store.', 'woocommerce' )
 			);
 			?>
 			</p>
+			<div class="woocommerce-add-variation-price-container">
+				<button type="button" class="button add_price_for_variations"><?php esc_html_e( 'Add price', 'woocommerce' ); ?></button>
+			</div>
 		</div>
 		<?php
 	}
@@ -517,4 +562,30 @@ function wc_get_current_admin_url() {
 	}
 
 	return remove_query_arg( array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ), admin_url( $uri ) );
+}
+
+/**
+ * Get default product type options.
+ *
+ * @internal
+ * @since 7.9.0
+ * @return array
+ */
+function wc_get_default_product_type_options() {
+	return array(
+		'virtual'      => array(
+			'id'            => '_virtual',
+			'wrapper_class' => 'show_if_simple',
+			'label'         => __( 'Virtual', 'woocommerce' ),
+			'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
+			'default'       => 'no',
+		),
+		'downloadable' => array(
+			'id'            => '_downloadable',
+			'wrapper_class' => 'show_if_simple',
+			'label'         => __( 'Downloadable', 'woocommerce' ),
+			'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
+			'default'       => 'no',
+		),
+	);
 }

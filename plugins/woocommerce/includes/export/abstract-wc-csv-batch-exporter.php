@@ -127,10 +127,28 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	protected function write_csv_data( $data ) {
 
 		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
+			wc_get_logger()->error(
+				sprintf(
+					/* translators: %s is file path. */
+					__( 'Unable to create or write to %s during CSV export. Please check file permissions.', 'woocommerce' ),
+					esc_html( $this->get_file_path() )
+				)
+			);
 			return false;
 		}
 
-		$fp = fopen( $this->get_file_path(), 'a+' );
+		/**
+		 * Filters the mode parameter which specifies the type of access you require to the stream (used during file
+		 * writing for CSV exports). Defaults to 'a+' (which supports both reading and writing, and places the file
+		 * pointer at the end of the file).
+		 *
+		 * @see   https://www.php.net/manual/en/function.fopen.php
+		 * @since 6.8.0
+		 *
+		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e)
+		 */
+		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a+' );
+		$fp         = fopen( $this->get_file_path(), $fopen_mode );
 
 		if ( $fp ) {
 			fwrite( $fp, $data );

@@ -33,7 +33,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	private $review_id;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->sut             = new WC_REST_Product_Reviews_Controller();

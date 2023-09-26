@@ -78,6 +78,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label><br/></th>
 					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
+				<tr class="woocommerce-importer-advanced hidden">
+					<th><label><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
+					<td><select id="woocommerce-importer-character-encoding" name="character_encoding">
+							<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
+							<?php
+							$encodings = mb_list_encodings();
+							sort( $encodings, SORT_NATURAL );
+							foreach ( $encodings as $encoding ) {
+								echo '<option>' . esc_html( $encoding ) . '</option>';
+							}
+							?>
+						</select>
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</section>

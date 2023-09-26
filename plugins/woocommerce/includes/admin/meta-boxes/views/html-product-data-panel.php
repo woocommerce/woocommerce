@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="panel-wrap product_data">
 
-	<span class="type_box hidden"> &mdash;
+	<span class="product-data-wrapper type_box hidden"> &mdash;
 		<label for="product-type">
 			<select id="product-type" name="product-type">
 				<optgroup label="<?php esc_attr_e( 'Product Type', 'woocommerce' ); ?>">
@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endforeach; ?>
 				</optgroup>
 			</select>
+			<span class="woocommerce-product-type-tip"></span>
 		</label>
 
 		<?php
@@ -33,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<label for="<?php echo esc_attr( $option['id'] ); ?>" class="<?php echo esc_attr( $option['wrapper_class'] ); ?> tips" data-tip="<?php echo esc_attr( $option['description'] ); ?>">
 				<?php echo esc_html( $option['label'] ); ?>:
-				<input type="checkbox" name="<?php echo esc_attr( $option['id'] ); ?>" id="<?php echo esc_attr( $option['id'] ); ?>" <?php echo checked( $selected_value, true, false ); ?> />
+				<input type="checkbox" name="<?php echo esc_attr( $option['id'] ); ?>" id="<?php echo esc_attr( $option['id'] ); ?>" data-product-type-option-id="<?php echo esc_attr( $option['id'] ); ?>" <?php echo checked( $selected_value, true, false ); ?> />
 			</label>
 		<?php endforeach; ?>
 	</span>

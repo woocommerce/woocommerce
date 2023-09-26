@@ -13,7 +13,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Restore UTC on failure.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
@@ -51,7 +51,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 */
 	public function test_get_data() {
 		$object = new WC_Mock_WC_Data();
-		$this->assertInternalType( 'array', $object->get_data() );
+		$this->assertIsArray( $object->get_data() );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$result      = $object->set_props( $data_to_set );
 		$this->assertTrue( is_wp_error( $result ) );
 		$this->assertEquals( 'I am also a fish', $object->get_content() );
-		$this->assertNotEquals( 'thisisinvalid', $object->get_bool_value() );
+		$this->assertNotSame( 'thisisinvalid', $object->get_bool_value() );
 	}
 
 	/**
@@ -325,6 +325,30 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
 	}
 
+	/**
+	 * Test deleting meta selectively.
+	 */
+	public function test_delete_meta_data_value() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		add_metadata( 'post', $object_id, 'test_meta_key', 'val1' );
+		add_metadata( 'post', $object_id, 'test_meta_key', 'val2' );
+		add_metadata( 'post', $object_id, 'test_meta_key', array( 'foo', 'bar' ) );
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$this->assertCount( 3, $object->get_meta( 'test_meta_key', false ) );
+
+		$object->delete_meta_data_value( 'test_meta_key', 'val1' );
+		$this->assertCount( 2, $object->get_meta( 'test_meta_key', false ) );
+
+		$object->delete_meta_data_value( 'test_meta_key', array( 'bar', 'baz' ) );
+		$this->assertCount( 2, $object->get_meta( 'test_meta_key', false ) );
+
+		$object->delete_meta_data_value( 'test_meta_key', array( 'foo', 'bar' ) );
+		$this->assertCount( 1, $object->get_meta( 'test_meta_key', false ) );
+
+		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key' ) );
+	}
 
 	/**
 	 * Test saving metadata (Actually making sure changes are written to DB).

@@ -37,11 +37,11 @@ export const DismissableListHeading: React.FC< {
 			</div>
 			<div>
 				<EllipsisMenu
-					label={ __( 'Task List Options', 'woocommerce-admin' ) }
+					label={ __( 'Task List Options', 'woocommerce' ) }
 					renderContent={ () => (
 						<div className="woocommerce-dismissable-list__controls">
 							<Button onClick={ handleDismissClick }>
-								{ __( 'Hide this', 'woocommerce-admin' ) }
+								{ __( 'Hide this', 'woocommerce' ) }
 							</Button>
 						</div>
 					) }
@@ -56,9 +56,8 @@ export const DismissableList: React.FC< {
 	className?: string;
 } > = ( { children, className, dismissOptionName } ) => {
 	const isVisible = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
 		const hasFinishedResolving = hasFinishedResolution( 'getOption', [
 			dismissOptionName,

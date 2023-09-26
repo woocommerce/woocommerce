@@ -5,6 +5,9 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -22,6 +25,7 @@ class WC_Orders_Tracking {
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
 		add_filter( 'woocommerce_shop_order_search_results', array( $this, 'track_order_search' ), 10, 3 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
 
 	/**
@@ -92,9 +96,7 @@ class WC_Orders_Tracking {
 	 * @param int $id Order id.
 	 */
 	public function track_created_date_change( $id ) {
-		$post_type = get_post_type( $id );
-
-		if ( 'shop_order' !== $post_type ) {
+		if ( ! OrderUtil::is_order( $id ) ) {
 			return;
 		}
 
@@ -168,11 +170,27 @@ class WC_Orders_Tracking {
 					isset( $referring_args['action'] ) &&
 					'edit' === $referring_args['action'] &&
 					isset( $referring_args['post'] ) &&
-					'shop_order' === get_post_type( $referring_args['post'] )
+					'shop_order' === OrderUtil::get_order_type( $referring_args['post'] )
 				) {
 					WC_Tracks::record_event( 'order_edit_add_order' );
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds the tracking scripts for product setting pages.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_order_tracking_scripts( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) ||
+			( 'post.php' === $hook && isset( $_GET['post'] ) && 'shop_order' === get_post_type( intval( $_GET['post'] ) ) )
+		) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'order-tracking', false );
+		}
+		// phpcs:enable
 	}
 }

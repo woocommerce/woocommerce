@@ -96,8 +96,7 @@ describe( 'X scales', () => {
 				new Date( '2018-06-04T00:00:00' ),
 			] );
 			expect( scaleTime().rangeRound ).toHaveBeenLastCalledWith( [
-				0,
-				100,
+				0, 100,
 			] );
 		} );
 	} );
@@ -149,12 +148,10 @@ describe( 'Y scales', () => {
 			getYScale( 100, 0, 15000000 );
 
 			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [
-				0,
-				15000000,
+				0, 15000000,
 			] );
 			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [
-				100,
-				0,
+				100, 0,
 			] );
 		} );
 
@@ -162,12 +159,10 @@ describe( 'Y scales', () => {
 			getYScale( 100, -15000000, 0 );
 
 			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [
-				-15000000,
-				0,
+				-15000000, 0,
 			] );
 			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [
-				100,
-				0,
+				100, 0,
 			] );
 		} );
 

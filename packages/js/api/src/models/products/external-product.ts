@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -29,17 +32,21 @@ import {
 /**
  * The parameters that external products can update.
  */
-type ExternalProductUpdateParams = ProductCommonUpdateParams
-	& ProductExternalUpdateParams
-	& ProductPriceUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductUpSellUpdateParams;
+type ExternalProductUpdateParams = ProductCommonUpdateParams &
+	ProductExternalUpdateParams &
+	ProductPriceUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type ExternalProductRepositoryParams =
-	ModelRepositoryParams< ExternalProduct, never, ProductSearchParams, ExternalProductUpdateParams >;
+export type ExternalProductRepositoryParams = ModelRepositoryParams<
+	ExternalProduct,
+	never,
+	ProductSearchParams,
+	ExternalProductUpdateParams
+>;
 
 /**
  * An interface for listing external products using the repository.
@@ -47,7 +54,8 @@ export type ExternalProductRepositoryParams =
  * @typedef ListsExternalProducts
  * @alias ListsModels.<ExternalProduct>
  */
-export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams >;
+export type ListsExternalProducts =
+	ListsModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for external simple products using the repository.
@@ -55,7 +63,8 @@ export type ListsExternalProducts = ListsModels< ExternalProductRepositoryParams
  * @typedef CreatesExternalProducts
  * @alias CreatesModels.<ExternalProduct>
  */
-export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryParams >;
+export type CreatesExternalProducts =
+	CreatesModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for reading external products using the repository.
@@ -63,7 +72,8 @@ export type CreatesExternalProducts = CreatesModels< ExternalProductRepositoryPa
  * @typedef ReadsExternalProducts
  * @alias ReadsModels.<ExternalProduct>
  */
-export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams >;
+export type ReadsExternalProducts =
+	ReadsModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for updating external products using the repository.
@@ -71,7 +81,8 @@ export type ReadsExternalProducts = ReadsModels< ExternalProductRepositoryParams
  * @typedef UpdatesExternalProducts
  * @alias UpdatesModels.<ExternalProduct>
  */
-export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryParams >;
+export type UpdatesExternalProducts =
+	UpdatesModels< ExternalProductRepositoryParams >;
 
 /**
  * An interface for deleting external products using the repository.
@@ -79,22 +90,26 @@ export type UpdatesExternalProducts = UpdatesModels< ExternalProductRepositoryPa
  * @typedef DeletesExternalProducts
  * @alias DeletesModels.<ExternalProduct>
  */
-export type DeletesExternalProducts = DeletesModels< ExternalProductRepositoryParams >;
+export type DeletesExternalProducts =
+	DeletesModels< ExternalProductRepositoryParams >;
 
 /**
  * The base for the external product object.
  */
-export class ExternalProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductExternal,
-	IProductPrice,
-	IProductSalesTax,
-	IProductUpSells {
+export class ExternalProduct
+	extends AbstractProduct
+	implements
+		IProductCommon,
+		IProductExternal,
+		IProductPrice,
+		IProductSalesTax,
+		IProductUpSells
+{
 	/**
 	 * @see ./abstracts/external.ts
 	 */
-	public readonly buttonText: string = ''
-	public readonly externalUrl: string = ''
+	public readonly buttonText: string = '';
+	public readonly externalUrl: string = '';
 
 	/**
 	 * @see ./abstracts/price.ts
@@ -110,7 +125,7 @@ export class ExternalProduct extends AbstractProduct implements
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/sales-tax.ts
@@ -133,7 +148,9 @@ export class ExternalProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof externalProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof externalProductRESTRepository > {
 		return externalProductRESTRepository( httpClient );
 	}
 }

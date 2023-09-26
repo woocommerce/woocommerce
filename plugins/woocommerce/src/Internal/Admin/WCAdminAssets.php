@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use \_WP_Dependency;
+use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
@@ -21,6 +21,14 @@ class WCAdminAssets {
 	 * @var WCAdminAssets instance
 	 */
 	protected static $instance = null;
+
+	/**
+	 * An array of dependencies that have been preloaded (to avoid duplicates).
+	 *
+	 * @var array
+	 */
+	protected $preloaded_dependencies;
+
 
 	/**
 	 * Get class instance.
@@ -51,7 +59,7 @@ class WCAdminAssets {
 	 * @return string Folder path of asset.
 	 */
 	public static function get_path( $ext ) {
-		return ( 'css' === $ext ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
 	}
 
 	/**
@@ -81,7 +89,7 @@ class WCAdminAssets {
 		$suffix = '';
 
 		// Potentially enqueue minified JavaScript.
-		if ( 'js' === $ext ) {
+		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
 			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
 		}
@@ -168,9 +176,9 @@ class WCAdminAssets {
 	 * @param array  $allowlist Optional. List of allowed dependency handles.
 	 */
 	private function output_header_preload_tags_for_type( $type, $allowlist = array() ) {
-		if ( 'script' === $type ) {
+		if ( $type === 'script' ) {
 			$dependencies_of_type = wp_scripts();
-		} elseif ( 'style' === $type ) {
+		} elseif ( $type === 'style' ) {
 			$dependencies_of_type = wp_styles();
 		} else {
 			return;
@@ -179,7 +187,7 @@ class WCAdminAssets {
 		foreach ( $dependencies_of_type->queue as $dependency_handle ) {
 			$dependency = $dependencies_of_type->query( $dependency_handle, 'registered' );
 
-			if ( false === $dependency ) {
+			if ( $dependency === false ) {
 				continue;
 			}
 
@@ -238,7 +246,7 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Registers all the neccessary scripts and styles to show the admin experience.
+	 * Registers all the necessary scripts and styles to show the admin experience.
 	 */
 	public function register_scripts() {
 		if ( ! function_exists( 'wp_set_script_translations' ) ) {
@@ -249,6 +257,7 @@ class WCAdminAssets {
 		$css_file_version = self::get_file_version( 'css' );
 
 		$scripts = array(
+			'wc-admin-layout',
 			'wc-explat',
 			'wc-experimental',
 			'wc-customer-effort-score',
@@ -263,6 +272,7 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
+			'wc-product-editor',
 		);
 
 		$scripts_map = array(
@@ -276,6 +286,7 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
+			'wc-experimental',
 			WC_ADMIN_APP,
 		);
 
@@ -286,6 +297,13 @@ class WCAdminAssets {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
+				global $wp_version;
+				if ( 'app' === $script_path_name && version_compare( $wp_version, '6.3', '<' ) ) {
+					// Remove wp-router dependency for WordPress versions < 6.3 because wp-router is not included in those versions. We only use wp-router in customize store pages and the feature is only available in WordPress 6.3+.
+					// We can remove this once our minimum support is WP 6.3.
+					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-router' ) );
+				}
+
 				wp_register_script(
 					$script,
 					self::get_url( $script_path_name . '/index', 'js' ),
@@ -295,7 +313,7 @@ class WCAdminAssets {
 				);
 
 				if ( in_array( $script, $translated_scripts, true ) ) {
-					wp_set_script_translations( $script, 'woocommerce-admin' );
+					wp_set_script_translations( $script, 'woocommerce' );
 				}
 			} catch ( \Exception $e ) {
 				// Avoid crashing WordPress if an asset file could not be loaded.
@@ -304,12 +322,28 @@ class WCAdminAssets {
 		}
 
 		wp_register_style(
+			'wc-admin-layout',
+			self::get_url( 'admin-layout/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-admin-layout', 'rtl', 'replace' );
+
+		wp_register_style(
 			'wc-components',
 			self::get_url( 'components/style', 'css' ),
 			array(),
 			$css_file_version
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
+
+		wp_register_style(
+			'wc-product-editor',
+			self::get_url( 'product-editor/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-product-editor', 'rtl', 'replace' );
 
 		wp_register_style(
 			'wc-customer-effort-score',
@@ -339,7 +373,7 @@ class WCAdminAssets {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+			array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			$css_file_version
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
@@ -359,6 +393,7 @@ class WCAdminAssets {
 	public function inject_wc_settings_dependencies() {
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
 			$handles_for_injection = [
+				'wc-admin-layout',
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
@@ -370,6 +405,7 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
+				'wc-product-editor',
 			];
 			foreach ( $handles_for_injection as $handle ) {
 				$script = wp_scripts()->query( $handle, 'registered' );
@@ -377,6 +413,29 @@ class WCAdminAssets {
 					$script->deps[] = 'wc-settings';
 				}
 			}
+		}
+	}
+
+	/**
+	 * Loads a script
+	 *
+	 * @param string $script_path_name The script path name.
+	 * @param string $script_name Filename of the script to load.
+	 * @param bool   $need_translation Whether the script need translations.
+	 */
+	public static function register_script( $script_path_name, $script_name, $need_translation = false ) {
+		$script_assets_filename = self::get_script_asset_filename( $script_path_name, $script_name );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'wc-admin-' . $script_name,
+			self::get_url( $script_path_name . '/' . $script_name, 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			self::get_file_version( 'js' ),
+			true
+		);
+		if ( $need_translation ) {
+			wp_set_script_translations( 'wc-admin-' . $script_name, 'woocommerce' );
 		}
 	}
 }

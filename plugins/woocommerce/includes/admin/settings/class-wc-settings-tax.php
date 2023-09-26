@@ -27,12 +27,27 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$this->label = __( 'Tax', 'woocommerce' );
 
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-
+		add_action( 'woocommerce_admin_field_conflict_error', array( $this, 'conflict_error' ) );
 		if ( wc_tax_enabled() ) {
 			add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 		}
+	}
+
+	/**
+	 * Creates the React mount point for the embedded banner.
+	 */
+	public function conflict_error() {
+		?>
+		<tr valign="top">
+							<th scope="row" class="titledesc woocommerce_admin_tax_settings_slotfill_th">
+							</th>
+							<td class="forminp forminp-text woocommerce_admin_tax_settings_slotfill_td">
+		<div id="wc_conflict_error_slotfill"> </div>
+	</td>
+	</tr>
+		<?php
 	}
 
 	/**
@@ -309,7 +324,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Missing
 		$posted_countries = wc_clean( wp_unslash( $_POST['tax_rate_country'] ) );
 
-		// get the tax rate id of the first submited row.
+		// get the tax rate id of the first submitted row.
 		$first_tax_rate_id = key( $posted_countries );
 
 		// get the order position of the first tax rate id.

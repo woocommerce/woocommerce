@@ -9,13 +9,15 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
+		<a href="javascript:void(0)" class="edit_variation edit"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
-		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set admin variation order', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?> </strong>
 		<?php
@@ -36,11 +38,15 @@ defined( 'ABSPATH' ) || exit;
 				</option>
 				<?php if ( $attribute->is_taxonomy() ) : ?>
 					<?php foreach ( $attribute->get_terms() as $option ) : ?>
+						<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 						<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
+						<?php /* phpcs:enable */ ?>
 					<?php endforeach; ?>
 				<?php else : ?>
 					<?php foreach ( $attribute->get_options() as $option ) : ?>
+						<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 						<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ) ); ?></option>
+						<?php /* phpcs:enable */ ?>
 					<?php endforeach; ?>
 				<?php endif; ?>
 			</select>
@@ -106,7 +112,9 @@ defined( 'ABSPATH' ) || exit;
 					</label>
 				<?php endif; ?>
 
+				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 				<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
+				<?php /* phpcs:enable */ ?>
 			</p>
 
 			<div class="variable_pricing">
@@ -152,6 +160,7 @@ defined( 'ABSPATH' ) || exit;
 				$sale_price_dates_from = $sale_price_dates_from_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) : '';
 				$sale_price_dates_to   = $sale_price_dates_to_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) : '';
 
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				echo '<div class="form-field sale_price_dates_fields hidden">
 					<p class="form-row form-row-first">
 						<label>' . esc_html__( 'Sale start date', 'woocommerce' ) . '</label>
@@ -162,6 +171,7 @@ defined( 'ABSPATH' ) || exit;
 						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . esc_attr( $loop ) . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_attr_x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 					</p>
 				</div>';
+				/* phpcs: enable */
 
 				/**
 				 * Variation options pricing action.
@@ -236,7 +246,7 @@ defined( 'ABSPATH' ) || exit;
 							'custom_attributes' => array(
 								'step' => 'any',
 							),
-							'wrapper_class' => 'form-row',
+							'wrapper_class'     => 'form-row',
 						)
 					);
 
@@ -271,9 +281,9 @@ defined( 'ABSPATH' ) || exit;
 
 				if ( wc_product_weight_enabled() ) {
 					$label = sprintf(
-						/* translators: %s: weight unit */
+						/* translators: %s: Weight unit */
 						__( 'Weight (%s)', 'woocommerce' ),
-						esc_html( get_option( 'woocommerce_weight_unit' ) )
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
 					);
 
 					woocommerce_wp_text_input(
@@ -302,9 +312,9 @@ defined( 'ABSPATH' ) || exit;
 						<label for="product_length">
 							<?php
 							printf(
-								/* translators: %s: dimension unit */
+								/* translators: %s dimension unit */
 								esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
-								esc_html( get_option( 'woocommerce_dimension_unit' ) )
+								esc_html( I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit' ) ) )
 							);
 							?>
 						</label>
@@ -404,10 +414,13 @@ defined( 'ABSPATH' ) || exit;
 						</thead>
 						<tbody>
 							<?php
-							$downloads = $variation_object->get_downloads( 'edit' );
+							$downloadable_files       = $variation_object->get_downloads( 'edit' );
+							$disabled_downloads_count = 0;
 
-							if ( $downloads ) {
-								foreach ( $downloads as $key => $file ) {
+							if ( $downloadable_files ) {
+								foreach ( $downloadable_files as $key => $file ) {
+									$disabled_download         = isset( $file['enabled'] ) && false === $file['enabled'];
+									$disabled_downloads_count += (int) $disabled_download;
 									include __DIR__ . '/html-product-variation-download.php';
 								}
 							}
@@ -415,19 +428,33 @@ defined( 'ABSPATH' ) || exit;
 						</tbody>
 						<tfoot>
 							<div>
-								<th colspan="4">
+								<th colspan="1">
 									<a href="#" class="button insert" data-row="
 									<?php
-									$key  = '';
-									$file = array(
+									$key               = '';
+									$file              = array(
 										'file' => '',
 										'name' => '',
 									);
+									$disabled_download = false;
 									ob_start();
 									require __DIR__ . '/html-product-variation-download.php';
 									echo esc_attr( ob_get_clean() );
 									?>
 									"><?php esc_html_e( 'Add file', 'woocommerce' ); ?></a>
+								</th>
+								<th colspan="3">
+									<?php if ( $disabled_downloads_count ) : ?>
+										<span class="disabled">*</span>
+										<?php
+										printf(
+											/* translators: 1: opening link tag, 2: closing link tag. */
+											esc_html__( 'The indicated downloads have been disabled (invalid location or filetype&mdash;%1$slearn more%2$s).', 'woocommerce' ),
+											'<a href="https://woocommerce.com/document/approved-download-directories" target="_blank">',
+											'</a>'
+										);
+										?>
+									<?php endif; ?>
 								</th>
 							</div>
 						</tfoot>
@@ -484,7 +511,9 @@ defined( 'ABSPATH' ) || exit;
 				do_action( 'woocommerce_variation_options_download', $loop, $variation_data, $variation );
 				?>
 			</div>
+			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 			<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data, $variation ); ?>
+			<?php /* phpcs:enable */ ?>
 		</div>
 	</div>
 </div>

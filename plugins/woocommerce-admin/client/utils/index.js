@@ -1,4 +1,10 @@
+/**
+ * External dependencies
+ */
+import { useEffect } from '@wordpress/element';
+
 export * from './plugins';
+export * from './slot-fill-ordering';
 
 /**
  * Get the URL params.
@@ -29,9 +35,11 @@ export function getUrlParams( locationSearch ) {
  */
 export function getScreenName() {
 	let screenName = '';
-	const { page, path, post_type: postType } = getUrlParams(
-		window.location.search
-	);
+	const {
+		page,
+		path,
+		post_type: postType,
+	} = getUrlParams( window.location.search );
 	if ( page ) {
 		const currentPage = page === 'wc-admin' ? 'home_screen' : page;
 		screenName = path
@@ -59,3 +67,59 @@ export const sift = ( arr, partitioner ) =>
 		},
 		[ [], [] ]
 	);
+
+const timeFrames = [
+	{ name: '0-2s', max: 2 },
+	{ name: '2-5s', max: 5 },
+	{ name: '5-10s', max: 10 },
+	{ name: '10-15s', max: 15 },
+	{ name: '15-20s', max: 20 },
+	{ name: '20-30s', max: 30 },
+	{ name: '30-60s', max: 60 },
+	{ name: '>60s' },
+];
+
+/**
+ * Returns time frame for a given time in milliseconds.
+ *
+ * @param {number} timeInMs - time in milliseconds
+ *
+ * @return {string} - Time frame.
+ */
+export const getTimeFrame = ( timeInMs ) => {
+	for ( const timeFrame of timeFrames ) {
+		if ( ! timeFrame.max ) {
+			return timeFrame.name;
+		}
+		if ( timeInMs < timeFrame.max * 1000 ) {
+			return timeFrame.name;
+		}
+	}
+};
+
+/**
+ * Goes into fullscreen mode when the component is loaded
+ *
+ * @param {string[]} classes - classes to add to document.body
+ */
+export const useFullScreen = ( classes ) => {
+	useEffect( () => {
+		const hasToolbarClass =
+			document.documentElement.classList.contains( 'wp-toolbar' );
+		document.body.classList.remove( 'woocommerce-admin-is-loading' );
+		document.body.classList.add( classes );
+		document.body.classList.add( 'woocommerce-admin-full-screen' );
+		document.body.classList.add( 'is-wp-toolbar-disabled' );
+		if ( hasToolbarClass ) {
+			document.documentElement.classList.remove( 'wp-toolbar' );
+		}
+		return () => {
+			document.body.classList.remove( classes );
+			document.body.classList.remove( 'woocommerce-admin-full-screen' );
+			document.body.classList.remove( 'is-wp-toolbar-disabled' );
+			if ( hasToolbarClass ) {
+				document.documentElement.classList.add( 'wp-toolbar' );
+			}
+		};
+	} );
+};

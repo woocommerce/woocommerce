@@ -8,21 +8,16 @@ namespace Automattic\WooCommerce\Internal\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API;
-use Automattic\WooCommerce\Internal\Admin\Install;
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SetUpAdditionalPaymentTypes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
-use \Automattic\WooCommerce\Internal\Admin\Notes\NavigationNudge;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
+use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
+use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
+use Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
+use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
+use Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
+use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
@@ -69,6 +64,11 @@ class FeaturePlugin {
 	 * Init the feature plugin, only if we can detect both Gutenberg and WooCommerce.
 	 */
 	public function init() {
+		// Bail if WC isn't initialized (This can be called from WCAdmin's entrypoint).
+		if ( ! defined( 'WC_ABSPATH' ) ) {
+			return;
+		}
+
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/page-controller-functions.php';
@@ -78,8 +78,6 @@ class FeaturePlugin {
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/wc-admin-update-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/class-experimental-abtest.php';
 
-		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
-		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 		if ( did_action( 'plugins_loaded' ) ) {
 			self::on_plugins_loaded();
 		} else {
@@ -92,54 +90,11 @@ class FeaturePlugin {
 	}
 
 	/**
-	 * Install DB and create cron events when activated.
-	 *
-	 * @return void
-	 */
-	public function on_activation() {
-		Install::create_tables();
-		Install::create_events();
-	}
-
-	/**
-	 * Remove WooCommerce Admin scheduled actions on deactivate.
-	 *
-	 * @return void
-	 */
-	public function on_deactivation() {
-		// Don't clean up if the WooCommerce Admin package is in core.
-		// NOTE: Any future divergence from the core package will need to be accounted for here.
-		if ( defined( 'WC_ADMIN_PACKAGE_EXISTS' ) && WC_ADMIN_PACKAGE_EXISTS ) {
-			return;
-		}
-
-		// Check if we are deactivating due to dependencies not being satisfied.
-		// If WooCommerce is disabled we can't include files that depend upon it.
-		if ( ! $this->has_satisfied_dependencies() ) {
-			return;
-		}
-
-		$this->includes();
-		ReportsSync::clear_queued_actions();
-		Notes::clear_queued_actions();
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
-		wp_clear_scheduled_hook( 'generate_category_lookup_table' );
-	}
-
-	/**
 	 * Setup plugin once all other plugins are loaded.
 	 *
 	 * @return void
 	 */
 	public function on_plugins_loaded() {
-		$this->load_plugin_textdomain();
-
-		if ( ! $this->has_satisfied_dependencies() ) {
-			add_action( 'admin_init', array( $this, 'deactivate_self' ) );
-			add_action( 'admin_notices', array( $this, 'render_dependencies_notice' ) );
-			return;
-		}
-
 		$this->hooks();
 		$this->includes();
 	}
@@ -153,18 +108,38 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_PLUGIN_FILE );
-		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
 
-		// WARNING: Do not directly edit this version number constant.
-		// It is updated as part of the prebuild process from the package.json value.
-		$this->define( 'WC_ADMIN_VERSION_NUMBER', '3.4.0-dev' );
-	}
+		/**
+		 * Define the WC Admin Images Folder URL.
+		 *
+		 * @deprecated 6.7.0
+		 * @var string
+		 */
+		if ( ! defined( 'WC_ADMIN_IMAGES_FOLDER_URL' ) ) {
+			/**
+			 * Define the WC Admin Images Folder URL.
+			 *
+			 * @deprecated 6.7.0
+			 * @var string
+			 */
+			define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
+		}
 
-	/**
-	 * Load Localisation files.
-	 */
-	protected function load_plugin_textdomain() {
-		load_plugin_textdomain( 'woocommerce-admin', false, basename( dirname( __DIR__ ) ) . '/languages' );
+		/**
+		 * Define the current WC Admin version.
+		 *
+		 * @deprecated 6.4.0
+		 * @var string
+		 */
+		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+			/**
+			  * Define the current WC Admin version.
+			  *
+			  * @deprecated 6.4.0
+			  * @var string
+			  */
+			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		}
 	}
 
 	/**
@@ -172,7 +147,6 @@ class FeaturePlugin {
 	 */
 	public function includes() {
 		// Initialize Database updates, option migrations, and Notes.
-		Install::init();
 		Events::instance()->init();
 		Notes::init();
 
@@ -203,12 +177,8 @@ class FeaturePlugin {
 		new TrackingOptIn();
 		new WooCommercePayments();
 		new InstallJPAndWCSPlugins();
-		new SetUpAdditionalPaymentTypes();
 		new TestCheckout();
 		new SellingOnlineCourses();
-		new WelcomeToWooCommerceForStoreUsers();
-		new ManageStoreActivityFromHomeScreen();
-		new NavigationNudge();
 		new MagentoMigration();
 
 		// Initialize MerchantEmailNotifications.
@@ -225,65 +195,6 @@ class FeaturePlugin {
 		WCAdminAssets::get_instance();
 	}
 
-	/**
-	 * Get an array of dependency error messages.
-	 *
-	 * @return array
-	 */
-	protected function get_dependency_errors() {
-		$errors                      = array();
-		$wordpress_version           = get_bloginfo( 'version' );
-		$minimum_wordpress_version   = '5.4';
-		$minimum_woocommerce_version = '4.8';
-		$wordpress_minimum_met       = version_compare( $wordpress_version, $minimum_wordpress_version, '>=' );
-		$woocommerce_minimum_met     = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, $minimum_woocommerce_version, '>=' );
-
-		if ( ! $woocommerce_minimum_met ) {
-			$errors[] = sprintf(
-				/* translators: 1: URL of WooCommerce plugin, 2: The minimum WooCommerce version number */
-				__( 'The WooCommerce Admin feature plugin requires <a href="%1$s">WooCommerce</a> %2$s or greater to be installed and active.', 'woocommerce-admin' ),
-				'https://wordpress.org/plugins/woocommerce/',
-				$minimum_woocommerce_version
-			);
-		}
-
-		if ( ! $wordpress_minimum_met ) {
-			$errors[] = sprintf(
-				/* translators: 1: URL of WordPress.org, 2: The minimum WordPress version number */
-				__( 'The WooCommerce Admin feature plugin requires <a href="%1$s">WordPress</a> %2$s or greater to be installed and active.', 'woocommerce-admin' ),
-				'https://wordpress.org/',
-				$minimum_wordpress_version
-			);
-		}
-
-		return $errors;
-	}
-
-	/**
-	 * Returns true if all dependencies for the wc-admin plugin are loaded.
-	 *
-	 * @return bool
-	 */
-	public function has_satisfied_dependencies() {
-		$dependency_errors = $this->get_dependency_errors();
-		return 0 === count( $dependency_errors );
-	}
-
-	/**
-	 * Deactivates this plugin.
-	 */
-	public function deactivate_self() {
-		deactivate_plugins( plugin_basename( WC_ADMIN_PLUGIN_FILE ) );
-		unset( $_GET['activate'] ); // phpcs:ignore CSRF ok.
-	}
-
-	/**
-	 * Notify users of the plugin requirements.
-	 */
-	public function render_dependencies_notice() {
-		$message = $this->get_dependency_errors();
-		printf( '<div class="error"><p>%s</p></div>', implode( ' ', $message ) ); /* phpcs:ignore xss ok. */
-	}
 
 	/**
 	 * Overwrites the allowed features array using a local `feature-config.php` file.
@@ -291,6 +202,11 @@ class FeaturePlugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
+		/**
+		 * Get additional feature config
+		 *
+		 * @since 6.5.0
+		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;

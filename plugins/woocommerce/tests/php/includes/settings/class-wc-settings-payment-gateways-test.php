@@ -71,8 +71,8 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'payment_gateways_options' => array( 'title', 'sectionend' ),
-			''                         => 'payment_gateways',
+			'payment_gateways_options' => 'sectionend',
+			''                         => array( 'title', 'payment_gateways_banner', 'payment_gateways' ),
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );

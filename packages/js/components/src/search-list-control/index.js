@@ -28,22 +28,17 @@ import SearchListItem from './item';
 import Tag from '../tag';
 
 const defaultMessages = {
-	clear: __( 'Clear all selected items', 'woocommerce-admin' ),
-	noItems: __( 'No items found.', 'woocommerce-admin' ),
-	noResults: __( 'No results for %s', 'woocommerce-admin' ),
-	search: __( 'Search for items', 'woocommerce-admin' ),
+	clear: __( 'Clear all selected items', 'woocommerce' ),
+	noItems: __( 'No items found.', 'woocommerce' ),
+	noResults: __( 'No results for %s', 'woocommerce' ),
+	search: __( 'Search for items', 'woocommerce' ),
 	selected: ( n ) =>
 		sprintf(
 			/* translators: Number of items selected from list. */
-			_n(
-				'%d item selected',
-				'%d items selected',
-				n,
-				'woocommerce-admin'
-			),
+			_n( '%d item selected', '%d items selected', n, 'woocommerce' ),
 			n
 		),
-	updated: __( 'Search results updated.', 'woocommerce-admin' ),
+	updated: __( 'Search results updated.', 'woocommerce' ),
 };
 
 /**
@@ -87,20 +82,6 @@ export const SearchListControl = ( props ) => {
 		};
 	};
 
-	const onSelect = ( item ) => {
-		return () => {
-			if ( isSelected( item ) ) {
-				onRemove( item.id )();
-				return;
-			}
-			if ( isSingle ) {
-				onChange( [ item ] );
-			} else {
-				onChange( [ ...selected, item ] );
-			}
-		};
-	};
-
 	const isSelected = ( item ) =>
 		findIndex( selected, { id: item.id } ) !== -1;
 
@@ -117,6 +98,20 @@ export const SearchListControl = ( props ) => {
 		return isHierarchical
 			? buildTermsTree( filteredList, list )
 			: filteredList;
+	};
+
+	const onSelect = ( item ) => {
+		return () => {
+			if ( isSelected( item ) ) {
+				onRemove( item.id )();
+				return;
+			}
+			if ( isSingle ) {
+				onChange( [ item ] );
+			} else {
+				onChange( [ ...selected, item ] );
+			}
+		};
 	};
 
 	const defaultRenderItem = ( args ) => {
@@ -201,7 +196,7 @@ export const SearchListControl = ( props ) => {
 							onClick={ onChange( [] ) }
 							aria-label={ messages.clear }
 						>
-							{ __( 'Clear all', 'woocommerce-admin' ) }
+							{ __( 'Clear all', 'woocommerce' ) }
 						</Button>
 					) : null }
 				</div>

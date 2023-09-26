@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Vendor\League\Container\Exception;
 
-use Psr\Container\ContainerExceptionInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerExceptionInterface;
 use RuntimeException;
 
 class ContainerException extends RuntimeException implements ContainerExceptionInterface

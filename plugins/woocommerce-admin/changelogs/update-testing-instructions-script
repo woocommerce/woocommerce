@@ -1,4 +1,0 @@
-Significance: minor
-Type: Dev
-
-Fix formatting and add filter param for changelog types for the testing instructions script. #8256

@@ -192,7 +192,7 @@ export const compareStrings = (
 ) => {
 	const string1 = s1.split( splitChar );
 	const string2 = s2.split( splitChar );
-	const diff = new Array();
+	const diff = [];
 	const long = s1.length > s2.length ? string1 : string2;
 	for ( let x = 0; x < long.length; x++ ) {
 		// eslint-disable-next-line no-unused-expressions

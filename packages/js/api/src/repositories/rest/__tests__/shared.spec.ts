@@ -1,10 +1,10 @@
-import { mocked } from 'ts-jest/utils';
 import { HTTPClient, HTTPResponse } from '../../../http';
 import { ModelTransformer, ModelRepositoryParams } from '../../../framework';
 import { DummyModel } from '../../../__test_data__/dummy-model';
 import {
 	restCreate,
-	restDelete, restDeleteChild,
+	restDelete,
+	restDeleteChild,
 	restList,
 	restListChild,
 	restRead,
@@ -14,7 +14,12 @@ import {
 } from '../shared';
 import { Model } from '../../../models';
 
-type DummyModelParams = ModelRepositoryParams< DummyModel, never, { search: string }, 'name' >
+type DummyModelParams = ModelRepositoryParams<
+	DummyModel,
+	never,
+	{ search: string },
+	'name'
+>;
 
 class DummyChildModel extends Model {
 	public childName: string = '';
@@ -24,7 +29,12 @@ class DummyChildModel extends Model {
 		Object.assign( this, partial );
 	}
 }
-type DummyChildParams = ModelRepositoryParams< DummyChildModel, { parent: string }, { childSearch: string }, 'childName' >
+type DummyChildParams = ModelRepositoryParams<
+	DummyChildModel,
+	{ parent: string },
+	{ childSearch: string },
+	'childName'
+>;
 
 jest.mock( '../../../framework/model-transformer' );
 
@@ -44,10 +54,8 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restList', async () => {
-		mocked( mockClient.get ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			[
+		jest.mocked( mockClient.get ).mockResolvedValue(
+			new HTTPResponse( 200, {}, [
 				{
 					id: 'Test-1',
 					label: 'Test 1',
@@ -56,27 +64,44 @@ describe( 'Shared REST Functions', () => {
 					id: 'Test-2',
 					label: 'Test 2',
 				},
-			],
-		) );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyModel( { name: 'Test' } ) );
+			] )
+		);
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyModel( { name: 'Test' } )
+		);
 
-		const fn = restList< DummyModelParams >( () => 'test-url', DummyModel, mockClient, mockTransformer );
+		const fn = restList< DummyModelParams >(
+			() => 'test-url',
+			DummyModel,
+			mockClient,
+			mockTransformer
+		);
 
 		const result = await fn( { search: 'Test' } );
 
 		expect( result ).toHaveLength( 2 );
-		expect( result[ 0 ] ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		expect( result[ 1 ] ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url', { search: 'Test' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, { id: 'Test-1', label: 'Test 1' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, { id: 'Test-2', label: 'Test 2' } );
+		expect( result[ 0 ] ).toMatchObject(
+			new DummyModel( { name: 'Test' } )
+		);
+		expect( result[ 1 ] ).toMatchObject(
+			new DummyModel( { name: 'Test' } )
+		);
+		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url', {
+			search: 'Test',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, {
+			id: 'Test-1',
+			label: 'Test 1',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, {
+			id: 'Test-2',
+			label: 'Test 2',
+		} );
 	} );
 
 	it( 'restListChildren', async () => {
-		mocked( mockClient.get ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			[
+		jest.mocked( mockClient.get ).mockResolvedValue(
+			new HTTPResponse( 200, {}, [
 				{
 					id: 'Test-1',
 					label: 'Test 1',
@@ -85,152 +110,238 @@ describe( 'Shared REST Functions', () => {
 					id: 'Test-2',
 					label: 'Test 2',
 				},
-			],
-		) );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyChildModel( { name: 'Test' } ) );
+			] )
+		);
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyChildModel( { name: 'Test' } )
+		);
 
 		const fn = restListChild< DummyChildParams >(
 			( parent ) => 'test-url-' + parent.parent,
 			DummyChildModel,
 			mockClient,
-			mockTransformer,
+			mockTransformer
 		);
 
 		const result = await fn( { parent: '123' }, { childSearch: 'Test' } );
 
 		expect( result ).toHaveLength( 2 );
-		expect( result[ 0 ] ).toMatchObject( new DummyChildModel( { name: 'Test' } ) );
-		expect( result[ 1 ] ).toMatchObject( new DummyChildModel( { name: 'Test' } ) );
-		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url-123', { childSearch: 'Test' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyChildModel, { id: 'Test-1', label: 'Test 1' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyChildModel, { id: 'Test-2', label: 'Test 2' } );
+		expect( result[ 0 ] ).toMatchObject(
+			new DummyChildModel( { name: 'Test' } )
+		);
+		expect( result[ 1 ] ).toMatchObject(
+			new DummyChildModel( { name: 'Test' } )
+		);
+		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url-123', {
+			childSearch: 'Test',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith(
+			DummyChildModel,
+			{ id: 'Test-1', label: 'Test 1' }
+		);
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith(
+			DummyChildModel,
+			{ id: 'Test-2', label: 'Test 2' }
+		);
 	} );
 
 	it( 'restCreate', async () => {
-		mocked( mockClient.post ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			{
-				id: 'Test-1',
-				label: 'Test 1',
-			},
-		) );
-		mocked( mockTransformer.fromModel ).mockReturnValue( { name: 'From-Test' } );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyModel( { name: 'Test' } ) );
+		jest.mocked( mockClient.post ).mockResolvedValue(
+			new HTTPResponse(
+				200,
+				{},
+				{
+					id: 'Test-1',
+					label: 'Test 1',
+				}
+			)
+		);
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
+			name: 'From-Test',
+		} );
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyModel( { name: 'Test' } )
+		);
 
 		const fn = restCreate< DummyModelParams >(
 			( properties ) => 'test-url-' + properties.name,
 			DummyModel,
 			mockClient,
-			mockTransformer,
+			mockTransformer
 		);
 
 		const result = await fn( { name: 'Test' } );
 
 		expect( result ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( { name: 'Test' } );
-		expect( mockClient.post ).toHaveBeenCalledWith( 'test-url-Test', { name: 'From-Test' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, { id: 'Test-1', label: 'Test 1' } );
+		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( {
+			name: 'Test',
+		} );
+		expect( mockClient.post ).toHaveBeenCalledWith( 'test-url-Test', {
+			name: 'From-Test',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, {
+			id: 'Test-1',
+			label: 'Test 1',
+		} );
 	} );
 
 	it( 'restRead', async () => {
-		mocked( mockClient.get ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			{
-				id: 'Test-1',
-				label: 'Test 1',
-			},
-		) );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyModel( { name: 'Test' } ) );
+		jest.mocked( mockClient.get ).mockResolvedValue(
+			new HTTPResponse(
+				200,
+				{},
+				{
+					id: 'Test-1',
+					label: 'Test 1',
+				}
+			)
+		);
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyModel( { name: 'Test' } )
+		);
 
-		const fn = restRead< DummyModelParams >( ( id ) => 'test-url-' + id, DummyModel, mockClient, mockTransformer );
+		const fn = restRead< DummyModelParams >(
+			( id ) => 'test-url-' + id,
+			DummyModel,
+			mockClient,
+			mockTransformer
+		);
 
 		const result = await fn( 123 );
 
 		expect( result ).toMatchObject( new DummyModel( { name: 'Test' } ) );
 		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url-123' );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, { id: 'Test-1', label: 'Test 1' } );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, {
+			id: 'Test-1',
+			label: 'Test 1',
+		} );
 	} );
 
 	it( 'restReadChildren', async () => {
-		mocked( mockClient.get ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			{
-				id: 'Test-1',
-				label: 'Test 1',
-			},
-		) );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyChildModel( { name: 'Test' } ) );
+		jest.mocked( mockClient.get ).mockResolvedValue(
+			new HTTPResponse(
+				200,
+				{},
+				{
+					id: 'Test-1',
+					label: 'Test 1',
+				}
+			)
+		);
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyChildModel( { name: 'Test' } )
+		);
 
 		const fn = restReadChild< DummyChildParams >(
 			( parent, id ) => 'test-url-' + parent.parent + '-' + id,
 			DummyChildModel,
 			mockClient,
-			mockTransformer,
+			mockTransformer
 		);
 
 		const result = await fn( { parent: '123' }, 456 );
 
 		expect( result ).toMatchObject( new DummyModel( { name: 'Test' } ) );
 		expect( mockClient.get ).toHaveBeenCalledWith( 'test-url-123-456' );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyChildModel, { id: 'Test-1', label: 'Test 1' } );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith(
+			DummyChildModel,
+			{ id: 'Test-1', label: 'Test 1' }
+		);
 	} );
 
 	it( 'restUpdate', async () => {
-		mocked( mockClient.patch ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			{
-				id: 'Test-1',
-				label: 'Test 1',
-			},
-		) );
-		mocked( mockTransformer.fromModel ).mockReturnValue( { name: 'From-Test' } );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyModel( { name: 'Test' } ) );
+		jest.mocked( mockClient.patch ).mockResolvedValue(
+			new HTTPResponse(
+				200,
+				{},
+				{
+					id: 'Test-1',
+					label: 'Test 1',
+				}
+			)
+		);
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
+			name: 'From-Test',
+		} );
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyModel( { name: 'Test' } )
+		);
 
-		const fn = restUpdate< DummyModelParams >( ( id ) => 'test-url-' + id, DummyModel, mockClient, mockTransformer );
+		const fn = restUpdate< DummyModelParams >(
+			( id ) => 'test-url-' + id,
+			DummyModel,
+			mockClient,
+			mockTransformer
+		);
 
 		const result = await fn( 123, { name: 'Test' } );
 
 		expect( result ).toMatchObject( new DummyModel( { name: 'Test' } ) );
-		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( { name: 'Test' } );
-		expect( mockClient.patch ).toHaveBeenCalledWith( 'test-url-123', { name: 'From-Test' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, { id: 'Test-1', label: 'Test 1' } );
+		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( {
+			name: 'Test',
+		} );
+		expect( mockClient.patch ).toHaveBeenCalledWith( 'test-url-123', {
+			name: 'From-Test',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyModel, {
+			id: 'Test-1',
+			label: 'Test 1',
+		} );
 	} );
 
 	it( 'restUpdateChildren', async () => {
-		mocked( mockClient.patch ).mockResolvedValue( new HTTPResponse(
-			200,
-			{},
-			{
-				id: 'Test-1',
-				label: 'Test 1',
-			},
-		) );
-		mocked( mockTransformer.fromModel ).mockReturnValue( { name: 'From-Test' } );
-		mocked( mockTransformer.toModel ).mockReturnValue( new DummyChildModel( { name: 'Test' } ) );
+		jest.mocked( mockClient.patch ).mockResolvedValue(
+			new HTTPResponse(
+				200,
+				{},
+				{
+					id: 'Test-1',
+					label: 'Test 1',
+				}
+			)
+		);
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
+			name: 'From-Test',
+		} );
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
+			new DummyChildModel( { name: 'Test' } )
+		);
 
 		const fn = restUpdateChild< DummyChildParams >(
 			( parent, id ) => 'test-url-' + parent.parent + '-' + id,
 			DummyChildModel,
 			mockClient,
-			mockTransformer,
+			mockTransformer
 		);
 
-		const result = await fn( { parent: '123' }, 456, { childName: 'Test' } );
+		const result = await fn( { parent: '123' }, 456, {
+			childName: 'Test',
+		} );
 
-		expect( result ).toMatchObject( new DummyChildModel( { name: 'Test' } ) );
-		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( { childName: 'Test' } );
-		expect( mockClient.patch ).toHaveBeenCalledWith( 'test-url-123-456', { name: 'From-Test' } );
-		expect( mockTransformer.toModel ).toHaveBeenCalledWith( DummyChildModel, { id: 'Test-1', label: 'Test 1' } );
+		expect( result ).toMatchObject(
+			new DummyChildModel( { name: 'Test' } )
+		);
+		expect( mockTransformer.fromModel ).toHaveBeenCalledWith( {
+			childName: 'Test',
+		} );
+		expect( mockClient.patch ).toHaveBeenCalledWith( 'test-url-123-456', {
+			name: 'From-Test',
+		} );
+		expect( mockTransformer.toModel ).toHaveBeenCalledWith(
+			DummyChildModel,
+			{ id: 'Test-1', label: 'Test 1' }
+		);
 	} );
 
 	it( 'restDelete', async () => {
-		mocked( mockClient.delete ).mockResolvedValue( new HTTPResponse( 200, {}, {} ) );
+		jest.mocked( mockClient.delete ).mockResolvedValue(
+			new HTTPResponse( 200, {}, {} )
+		);
 
-		const fn = restDelete< DummyModelParams >( ( id ) => 'test-url-' + id, mockClient );
+		const fn = restDelete< DummyModelParams >(
+			( id ) => 'test-url-' + id,
+			mockClient
+		);
 
 		const result = await fn( 123 );
 
@@ -239,11 +350,13 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restDeleteChildren', async () => {
-		mocked( mockClient.delete ).mockResolvedValue( new HTTPResponse( 200, {}, {} ) );
+		jest.mocked( mockClient.delete ).mockResolvedValue(
+			new HTTPResponse( 200, {}, {} )
+		);
 
 		const fn = restDeleteChild< DummyChildParams >(
 			( parent, id ) => 'test-url-' + parent.parent + '-' + id,
-			mockClient,
+			mockClient
 		);
 
 		const result = await fn( { parent: '123' }, 456 );

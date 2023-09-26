@@ -114,8 +114,10 @@ This package provides support for enabling retries in tests:
 | `updateWordPress` | | Install pending WordPress updates on Dashboard -> Updates|
 | `updatePlugins` | | Install all pending plugin updates on Dashboard -> Updates|
 | `updateThemes` | | Install all pending theme updates on Dashboard -> Updates|
+| `updateVariationDetails` | `variationDetails` | Update the details of a product variation |
 | `verifyCannotDownloadFromBecause` | `page, reason` | Verify that cannot download a product from `page` because of `reason`  |
 | `verifyDownloadableProductPermission` | `productName, expirationDate, downloadsRemaining` | Verify the attributes of a downloadable product permission in order |
+| `verifyVariationDetails` | `expectedVariationDetails` | Verify that the actual variation details match the expected ones |
 | `runDatabaseUpdate` || Runs the database update if needed |
 | `openDownloadLink` | | Open the download link of a product |
 
@@ -237,7 +239,6 @@ There is a general utilities object `utils` with the following functions:
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
-| `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
 | `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms |
 | `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods |
@@ -249,6 +250,8 @@ There is a general utilities object `utils` with the following functions:
 | `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 | `createOrder` | `orderOptions` | Creates an order using the API with the passed in details |
 | `clickAndWaitForSelector` | `buttonSelector`, `resultSelector`, `timeout` | Click a button and wait for response |
+| `click` | `selector` | Clicks an element only if it is enabled. Otherwise, rise an error  |
+| `productPageSaveChanges` |  | Save the current product page |
 
 ### Test Utilities
 

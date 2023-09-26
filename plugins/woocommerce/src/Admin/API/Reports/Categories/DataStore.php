@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Categories;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Categories\DataStore.
@@ -272,7 +272,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 
 			if ( null === $categories_data ) {
-				return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 
 			$record_count = count( $categories_data );
@@ -303,8 +303,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function initialize_queries() {
 		global $wpdb;
 		$this->subquery = new SqlQuery( $this->context . '_subquery' );
-		$this->subquery->add_sql_clause( 'select', "{$wpdb->term_taxonomy}.term_taxonomy_id as category_id," );
+		$this->subquery->add_sql_clause( 'select', "{$wpdb->term_taxonomy}.term_id as category_id," );
 		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->subquery->add_sql_clause( 'group_by', "{$wpdb->term_taxonomy}.term_taxonomy_id" );
+		$this->subquery->add_sql_clause( 'group_by', "{$wpdb->term_taxonomy}.term_id" );
 	}
 }

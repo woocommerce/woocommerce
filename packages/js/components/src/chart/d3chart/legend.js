@@ -122,7 +122,7 @@ class D3Legend extends Component {
 										? sprintf(
 												__(
 													'You may select up to %d items.',
-													'woocommerce-admin'
+													'woocommerce'
 												),
 												selectionLimit
 										  )

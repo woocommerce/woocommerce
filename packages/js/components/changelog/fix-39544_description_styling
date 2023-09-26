@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove unnecessary use of woocommerce-page selector for DropdownButton styling.

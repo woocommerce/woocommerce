@@ -27,7 +27,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'test1@test.com' );
@@ -143,7 +143,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'woocommerce_orders', $response['data'][0]['group_id'] );
 		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
-		$this->assertContains( 'order-', $response['data'][0]['item_id'] );
+		$this->assertStringContainsString( 'order-', $response['data'][0]['item_id'] );
 		$this->assertArrayHasKey( 'data', $response['data'][0] );
 		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 

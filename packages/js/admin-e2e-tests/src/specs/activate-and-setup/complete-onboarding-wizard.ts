@@ -1,4 +1,10 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+import { verifyValueOfInputField } from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
@@ -9,23 +15,10 @@ import { WcSettings } from '../../pages/WcSettings';
 import { ProductsSetup } from '../../pages/ProductsSetup';
 import { resetWooCommerceState } from '../../fixtures/reset';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	afterAll,
-	beforeAll,
-	describe,
-	it,
-	expect,
-} = require( '@jest/globals' );
-const config = require( 'config' );
-
-const { verifyValueOfInputField } = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
 /**
  * This tests a default, happy path for the onboarding wizard.
  */
-const testAdminOnboardingWizard = () => {
+export const testAdminOnboardingWizard = () => {
 	describe( 'Store owner can complete onboarding wizard', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -107,16 +100,11 @@ const testAdminOnboardingWizard = () => {
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-		} );
-
-		it( 'can complete the theme selection section', async () => {
-			await profileWizard.themes.isDisplayed();
-			await profileWizard.themes.continueWithActiveTheme();
 		} );
 
 		it( 'can select the right currency on settings page related to the onboarding country', async () => {
@@ -127,7 +115,7 @@ const testAdminOnboardingWizard = () => {
 	} );
 };
 
-const testSelectiveBundleWCPay = () => {
+export const testSelectiveBundleWCPay = () => {
 	describe( 'A japanese store can complete the selective bundle install but does not include WCPay.', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -192,24 +180,17 @@ const testSelectiveBundleWCPay = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'can choose not to install any extensions', async () => {
+		it( 'can choose not to install any extensions, and finish the rest of the wizard successfully', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			// Add WC Pay check
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).not.toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-		} );
-
-		it( 'can finish the rest of the wizard successfully', async () => {
-			await profileWizard.themes.isDisplayed();
-
-			//  This navigates to the home screen
-			await profileWizard.themes.continueWithActiveTheme();
 		} );
 
 		it( 'should display the choose payments task, and not the woocommerce payments task', async () => {
@@ -229,7 +210,7 @@ const testSelectiveBundleWCPay = () => {
 	} );
 };
 
-const testDifferentStoreCurrenciesWCPay = () => {
+export const testDifferentStoreCurrenciesWCPay = () => {
 	const testCountryCurrencyPairs = [
 		{
 			countryRegionSubstring: 'australia',
@@ -331,20 +312,17 @@ const testDifferentStoreCurrenciesWCPay = () => {
 
 				if ( spec.isWCPaySupported ) {
 					expect( page ).toMatchElement( 'a', {
-						text: 'WooCommerce Payments',
+						text: 'WooPayments',
 					} );
 				} else {
 					expect( page ).not.toMatchElement( 'a', {
-						text: 'WooCommerce Payments',
+						text: 'WooPayments',
 					} );
 				}
 
 				await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
-				await profileWizard.continue();
-				await profileWizard.themes.isDisplayed();
-
 				//  This navigates to the home screen
-				await profileWizard.themes.continueWithActiveTheme();
+				await profileWizard.continue();
 			} );
 
 			it( `can select ${ spec.expectedCurrency } as the currency for ${ spec.countryRegion }`, async () => {
@@ -359,7 +337,7 @@ const testDifferentStoreCurrenciesWCPay = () => {
 	} );
 };
 
-const testSubscriptionsInclusion = () => {
+export const testSubscriptionsInclusion = () => {
 	describe( 'A non-US store will not see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -392,8 +370,7 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).not.toMatchElement( 'p', {
-				text:
-					'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();
@@ -413,12 +390,12 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'should display the WooCommerce Payments extension after it has been installed', async () => {
+		it( 'should display the WooPayments extension after it has been installed', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 		} );
 
@@ -443,14 +420,10 @@ const testSubscriptionsInclusion = () => {
 	} );
 	describe( 'A US store will see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
-		const login = new Login( page );
+		new Login( page );
 
 		beforeAll( async () => {
 			await resetWooCommerceState();
-		} );
-
-		afterAll( async () => {
-			await login.logout();
 		} );
 
 		it( 'can complete the store details section', async () => {
@@ -476,8 +449,7 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).toMatchElement( 'p', {
-				text:
-					'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();
@@ -497,12 +469,12 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'cannot see the WooCommerce Payments extension after it has been installed', async () => {
+		it( 'cannot see the WooPayments extension after it has been installed', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).not.toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 		} );
 
@@ -527,13 +499,12 @@ const testSubscriptionsInclusion = () => {
 	} );
 };
 
-const testBusinessDetailsForm = () => {
+export const testBusinessDetailsForm = () => {
 	describe( 'A store that is selling elsewhere will see the "Number of employees” dropdown menu', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
 
 		beforeAll( async () => {
-			await login.login();
 			await resetWooCommerceState();
 		} );
 
@@ -597,15 +568,32 @@ const testBusinessDetailsForm = () => {
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-			await profileWizard.themes.isDisplayed();
 		} );
 	} );
 };
 
-module.exports = {
-	testAdminOnboardingWizard,
-	testSelectiveBundleWCPay,
-	testDifferentStoreCurrenciesWCPay,
-	testSubscriptionsInclusion,
-	testBusinessDetailsForm,
+export const testAdminHomescreen = () => {
+	describe( 'Homescreen', () => {
+		const profileWizard = new OnboardingWizard( page );
+		const homeScreen = new WcHomescreen( page );
+		const login = new Login( page );
+
+		beforeAll( async () => {
+			await login.login();
+			await resetWooCommerceState();
+			await profileWizard.navigate();
+			await profileWizard.skipStoreSetup();
+		} );
+
+		afterAll( async () => {
+			await login.logout();
+		} );
+
+		it( 'should not show welcome modal', async () => {
+			await homeScreen.isDisplayed();
+			await expect( homeScreen.isWelcomeModalVisible() ).resolves.toBe(
+				false
+			);
+		} );
+	} );
 };

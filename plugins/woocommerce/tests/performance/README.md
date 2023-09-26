@@ -11,7 +11,7 @@ Automated k6 performance tests for WooCommerce. To be used for benchmarking perf
   - [Config Variables](#config-variables)
 - [Scenarios](#scenarios)
 - [Running Tests](#running-tests)
-  - [Running Indvidual Tests](#running-individual-tests)
+  - [Running Individual Tests](#running-individual-tests)
   - [Running Scenarios](#running-scenarios)
   - [Debugging Tests](#debugging-tests)
   - [User Agent](#user-agent)
@@ -54,9 +54,12 @@ Alternatively the k6 docker image can be used to execute tests.
 
 Before using the tests a test environment is needed to run against.
 
-In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
+We first spin up an environment using `wp-env` and configure that environment with the necessary plugins and data using the Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/performance/bin/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
 
-`npx wc-e2e docker:up ./tests/e2e/docker/init-sample-products.sh`
+```sh
+pnpm run env:dev --filter=woocommerce
+pnpm run env:performance-init --filter=woocommerce
+```
 
 If using a different environment the details can be changed in `config.js`.
 
@@ -73,8 +76,13 @@ base_url | base URL of the test environment | yes `__ENV.URL`
 base_host | base host of the test environment (for use in headers) | yes `__ENV.HOST`
 admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
+admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_ACC_LOGIN`
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
+customer_user_id | user id for customer user | yes `__ENV.C_UID`
+cot_status | set to true if site is using order tables | yes `__ENV.COT`
+admin_orders_base_url | url part for order urls when posts table is used | no
+cot_admin_orders_base_url | url part for order urls when orders table is used | no
 addresses_customer_billing_* | billing address details for existing customer user | no
 addresses_guest_billing_* | billing address details for guest customer user | no
 payment_method | payment method (currently only `cod` supported) | no
@@ -94,10 +102,10 @@ think_time_max | maximum sleep time (in seconds) between each request | no
 ---
 ## Running Tests
 
-When refering to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
+When referring to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
 
 ---
-### Running Indvidual Tests
+### Running Individual Tests
 
 To execute an individual test file (for example `requests/shopper/shop-page.js`)  containing requests.
 
@@ -112,7 +120,7 @@ This will run the individual test for 1 iteration.
 
 Included in the `tests` folder are some sample scenarios that can be ran or used as a starting point to be modified to suit the context in which tests are being ran.
 
-`simple-all-shopper-requests.js` and `simple-all-merchant-requests.js` are included scenarios that use the `per-vu-iterations` scenario executor type to run each request sequentially for 1 iteration to make sure they are working.
+`simple-all-requests.js` is an included scenario that uses the `per-vu-iterations` scenario executor type to run each request sequentially for 1 iteration to make sure they are working.
 
 `example-all-requests-ramping-vus.js` and `example-all-requests-arrival-rate.js` are included example scenarios for load testing that use the `ramping-vus` and `ramping-arrival-rate` scenario executor types to run all the requests under load of multiple virtual users. These scenarios can be modified to suit the load profile for the context that the tests will be ran.
 
@@ -121,13 +129,13 @@ Another aspect that affects the traffic pattern of the tests is the amount of �
 To do this a sleep step is included between each request ``sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`))``.
 The amount of think time can be controlled from `config.js`.
 
->**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran aginst the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
+>**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran against the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
 
-To execute a test scenario (for example `tests/simple-all-shopper-requests.js`).
+To execute a test scenario (for example `tests/simple-all-requests.js`).
 
-CLI `k6 run tests/simple-all-shopper-requests.js`
+CLI `k6 run tests/simple-all-requests.js`
 
-Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/simple-all-shopper-requests.js`
+Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/simple-all-requests.js`
 
 ---
 ### Debugging Tests
@@ -194,7 +202,7 @@ Create a custom Grafana dashboard using [these instructions](https://k6.io/docs/
 
 k6 tests rely on HTTP requests in order to test the backend. They can either be constructed from scratch, by using the k6 recorder, or by converting a HAR file.
 
-The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it execuatable.
+The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it executable.
 
 Alternatively any application which captures HTTP requests can be used to figure out the requests to include in a test such as the network section within browser developer tools.
 
@@ -238,17 +246,9 @@ Groups are used to organize common logic in the test scripts and can help with t
 
 Checks are like asserts but they don’t stop the tests if they record a failure (for example in a load test with 1000s of iterations of a request this allows for an isolated flakey iteration to not stop test execution).
 
-All requests have had checks for at least a `200` http status repsonse added and most also have an additional check for a string contained in the response body.
+All requests have had checks for at least a `200` http status response added and most also have an additional check for a string contained in the response body.
 
----
-### Custom Metrics
-
-By default the built-in metrics group the HTTP requests timings so it isn't possible drill down into individual HTTP request timings. To enable seeing these individual timing in the aggregated summary report it is possible to create a custom metric for each request.
-
-The tests name them after the requests which the metric represents.
-
----
 ---
 ## Other Resources
 
-[k6 documention](https://k6.io/docs/) is a very useful resource for test creation and execution.
+[k6 documentation](https://k6.io/docs/) is a very useful resource for test creation and execution.

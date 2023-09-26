@@ -1,32 +1,30 @@
 /**
+ * External dependencies
+ */
+
+import type { Reducer } from 'redux';
+
+/**
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { CountriesState, Locales, Country } from './types';
+import { Action } from './actions';
+import { CountriesState } from './types';
 
-const reducer = (
-	state: CountriesState = {
+const reducer: Reducer< CountriesState, Action > = (
+	state = {
 		errors: {},
 		locales: {},
 		countries: [],
+		geolocation: undefined,
 	},
-	{
-		type,
-		error,
-		locales,
-		countries,
-	}: {
-		type: string;
-		error: string;
-		locales: Locales;
-		countries: Country[];
-	}
-): CountriesState => {
-	switch ( type ) {
+	action
+) => {
+	switch ( action.type ) {
 		case TYPES.GET_LOCALES_SUCCESS:
 			state = {
 				...state,
-				locales,
+				locales: action.locales,
 			};
 			break;
 		case TYPES.GET_LOCALES_ERROR:
@@ -34,14 +32,14 @@ const reducer = (
 				...state,
 				errors: {
 					...state.errors,
-					locales: error,
+					locales: action.error,
 				},
 			};
 			break;
 		case TYPES.GET_COUNTRIES_SUCCESS:
 			state = {
 				...state,
-				countries,
+				countries: action.countries,
 			};
 			break;
 		case TYPES.GET_COUNTRIES_ERROR:
@@ -49,7 +47,22 @@ const reducer = (
 				...state,
 				errors: {
 					...state.errors,
-					countries: error,
+					countries: action.error,
+				},
+			};
+			break;
+		case TYPES.GEOLOCATION_SUCCESS:
+			state = {
+				...state,
+				geolocation: action.geolocation,
+			};
+			break;
+		case TYPES.GEOLOCATION_ERROR:
+			state = {
+				...state,
+				errors: {
+					...state.errors,
+					geolocation: action.error,
 				},
 			};
 			break;
@@ -57,4 +70,5 @@ const reducer = (
 	return state;
 };
 
+export type State = ReturnType< typeof reducer >;
 export default reducer;

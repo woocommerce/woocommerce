@@ -96,7 +96,9 @@ const Header = () => {
 	} );
 
 	if ( siteIconUrl ) {
-		buttonIcon = <img alt={ __( 'Site Icon' ) } src={ siteIconUrl } />;
+		buttonIcon = (
+			<img alt={ __( 'Site Icon', 'woocommerce' ) } src={ siteIconUrl } />
+		);
 	} else if ( isRequestingSiteIcon ) {
 		buttonIcon = null;
 	}

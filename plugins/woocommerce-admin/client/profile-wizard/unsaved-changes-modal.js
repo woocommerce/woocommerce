@@ -5,13 +5,13 @@ import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 const UnsavedChangesModal = ( { onClose, onSave } ) => {
-	const title = __( 'Save changes?', 'woocommerce-admin' );
+	const title = __( 'Save changes?', 'woocommerce' );
 	const message = __(
 		"You're about to go to a different step. Do you want to save the changes you've made here so far?",
-		'woocommerce-admin'
+		'woocommerce'
 	);
-	const discardText = __( 'Discard', 'woocommerce-admin' );
-	const saveText = __( 'Save', 'woocommerce-admin' );
+	const discardText = __( 'Discard', 'woocommerce' );
+	const saveText = __( 'Save', 'woocommerce' );
 	return (
 		<>
 			<Modal

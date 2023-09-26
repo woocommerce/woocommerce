@@ -24,31 +24,31 @@ function HistoricalDataStatus( { importDate, status } ) {
 	 * @param {string} statuses.finished     Message displayed after import.
 	 */
 	const statusLabels = applyFilters( HISTORICAL_DATA_STATUS_FILTER, {
-		nothing: __( 'Nothing To Import', 'woocommerce-admin' ),
-		ready: __( 'Ready To Import', 'woocommerce-admin' ),
+		nothing: __( 'Nothing To Import', 'woocommerce' ),
+		ready: __( 'Ready To Import', 'woocommerce' ),
 		initializing: [
-			__( 'Initializing', 'woocommerce-admin' ),
+			__( 'Initializing', 'woocommerce' ),
 			<Spinner key="spinner" />,
 		],
 		customers: [
-			__( 'Importing Customers', 'woocommerce-admin' ),
+			__( 'Importing Customers', 'woocommerce' ),
 			<Spinner key="spinner" />,
 		],
 		orders: [
-			__( 'Importing Orders', 'woocommerce-admin' ),
+			__( 'Importing Orders', 'woocommerce' ),
 			<Spinner key="spinner" />,
 		],
 		finalizing: [
-			__( 'Finalizing', 'woocommerce-admin' ),
+			__( 'Finalizing', 'woocommerce' ),
 			<Spinner key="spinner" />,
 		],
 		finished:
 			importDate === -1
-				? __( 'All historical data imported', 'woocommerce-admin' )
+				? __( 'All historical data imported', 'woocommerce' )
 				: sprintf(
 						__(
 							'Historical data from %s onward imported',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						// @todo The date formatting should be localized ( 'll' ), but this is currently broken in Gutenberg.
 						// See https://github.com/WordPress/gutenberg/issues/12626 for details.
@@ -58,7 +58,7 @@ function HistoricalDataStatus( { importDate, status } ) {
 
 	return (
 		<span className="woocommerce-settings-historical-data__status">
-			{ __( 'Status:', 'woocommerce-admin' ) + ' ' }
+			{ __( 'Status:', 'woocommerce' ) + ' ' }
 			{ statusLabels[ status ] }
 		</span>
 	);

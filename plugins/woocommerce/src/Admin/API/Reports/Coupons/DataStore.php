@@ -7,11 +7,11 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
-use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 
 /**
  * API\Reports\Coupons\DataStore.
@@ -170,12 +170,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				if ( 0 === $coupon->get_id() ) {
 					// Deleted or otherwise invalid coupon.
 					$extended_info = array(
-						'code'             => __( '(Deleted)', 'woocommerce-admin' ),
+						'code'             => __( '(Deleted)', 'woocommerce' ),
 						'date_created'     => '',
 						'date_created_gmt' => '',
 						'date_expires'     => '',
 						'date_expires_gmt' => '',
-						'discount_type'    => __( 'N/A', 'woocommerce-admin' ),
+						'discount_type'    => __( 'N/A', 'woocommerce' ),
 					);
 				} else {
 					$gmt_timzone = new \DateTimeZone( 'UTC' );

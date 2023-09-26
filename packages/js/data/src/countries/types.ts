@@ -7,6 +7,7 @@ export type SettingProperties = {
 	priority?: number;
 	required?: boolean;
 	type?: string;
+	hidden?: boolean;
 };
 
 export type Locale = {
@@ -35,8 +36,30 @@ export type Locales = {
 
 export type CountriesState = {
 	errors: {
-		[ key: string ]: string;
+		[ key: string ]: unknown;
 	};
 	locales: Locales;
 	countries: Country[];
+	geolocation: GeolocationResponse | undefined;
+};
+
+/**
+ * Geolocation response from the WPCOM API which geolocates using ip2location.
+ * Example response:
+ * {
+ *   "latitude":"-38.23476",
+ *   "longitude":"146.39499",
+ *   "country_short":"AU",
+ *   "country_long":"Australia",
+ *   "region":"Victoria",
+ *   "city":"Morwell"
+ * }
+ */
+export type GeolocationResponse = {
+	latitude: string;
+	longitude: string;
+	country_short: string;
+	country_long: string;
+	region: string;
+	city: string;
 };

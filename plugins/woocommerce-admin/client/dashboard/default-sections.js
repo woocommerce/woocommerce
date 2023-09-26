@@ -48,7 +48,7 @@ const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
  * @property {string}         key          Unique identifying string.
  * @property {Node}           component    React component to render.
  * @property {string}         title        Title.
- * @property {boolean}        isVisible    The default visibilty.
+ * @property {boolean}        isVisible    The default visibility.
  * @property {Node}           icon         Section icon.
  * @property {Array.<string>} hiddenBlocks Blocks that are hidden by default.
  */
@@ -63,7 +63,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'store-performance',
 		component: StorePerformance,
-		title: __( 'Performance', 'woocommerce-admin' ),
+		title: __( 'Performance', 'woocommerce' ),
 		isVisible: true,
 		icon: arrowRight,
 		hiddenBlocks: [
@@ -82,7 +82,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'charts',
 		component: DashboardCharts,
-		title: __( 'Charts', 'woocommerce-admin' ),
+		title: __( 'Charts', 'woocommerce' ),
 		isVisible: true,
 		icon: chartBar,
 		hiddenBlocks: [
@@ -103,7 +103,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'leaderboards',
 		component: Leaderboards,
-		title: __( 'Leaderboards', 'woocommerce-admin' ),
+		title: __( 'Leaderboards', 'woocommerce' ),
 		isVisible: true,
 		icon: <ListOrdered />,
 		hiddenBlocks: [ 'coupons', 'customers' ],

@@ -35,15 +35,6 @@ class Notes extends \WC_REST_CRUD_Controller {
 	protected $rest_base = 'admin/notes';
 
 	/**
-	 * Allowed promo notes for experimental-activate-promo.
-	 *
-	 * @var array
-	 */
-	protected $allowed_promo_notes = array(
-		'wcpay-promo-2022-3-incentive-100-off',
-	);
-
-	/**
 	 * Register the routes for admin notes.
 	 */
 	public function register_routes() {
@@ -67,7 +58,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique ID for the resource.', 'woocommerce-admin' ),
+						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -108,7 +99,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
 					'args'                => array(
 						'status' => array(
-							'description'       => __( 'Status of note.', 'woocommerce-admin' ),
+							'description'       => __( 'Status of note.', 'woocommerce' ),
 							'type'              => 'array',
 							'sanitize_callback' => 'wp_parse_slug_list',
 							'validate_callback' => 'rest_validate_request_arg',
@@ -175,7 +166,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( ! $note ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_id',
-				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -263,14 +254,12 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
 		$args['is_deleted'] = 0;
 
-		if ( 'date' === $args['orderby'] ) {
-			$args['orderby'] = 'date_created';
+		if ( isset( $request['is_read'] ) ) {
+			$args['is_read'] = filter_var( $request['is_read'], FILTER_VALIDATE_BOOLEAN );
 		}
 
-		// Hide selected notes for users not in experiment.
-		$is_tasklist_experiment_assigned_treatment = $this->is_tasklist_experiment_assigned_treatment();
-		if ( false === $is_tasklist_experiment_assigned_treatment ) {
-			$args['excluded_name'] = array( 'wc-admin-complete-store-details', 'wc-admin-update-store-details' );
+		if ( 'date' === $args['orderby'] ) {
+			$args['orderby'] = 'date_created';
 		}
 
 		/**
@@ -281,6 +270,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 * @since 3.9.0
 		 */
 		$args = apply_filters( 'woocommerce_rest_notes_object_query', $args, $request );
 
@@ -295,7 +285,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -309,7 +299,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -327,7 +317,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( ! $note ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_id',
-				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -348,7 +338,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( ! $note ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_id',
-				__( 'Sorry, there is no note with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no note with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -434,7 +424,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( ! isset( $note_ids ) || ! is_array( $note_ids ) ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_ids',
-				__( 'Please provide an array of IDs through the noteIds param.', 'woocommerce-admin' ),
+				__( 'Please provide an array of IDs through the noteIds param.', 'woocommerce' ),
 				array( 'status' => 422 )
 			);
 		}
@@ -459,12 +449,20 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function activate_promo_note( $request ) {
+		/**
+		 * Filter allowed promo notes for experimental-activate-promo.
+		 *
+		 * @param array     $promo_notes    Array of allowed promo notes.
+		 * @since 7.8.0
+		 */
+		$allowed_promo_notes = apply_filters( 'woocommerce_admin_allowed_promo_notes', [] );
+
 		$promo_note_name = $request->get_param( 'promo_note_name' );
 
-		if ( ! in_array( $promo_note_name, $this->allowed_promo_notes, true ) ) {
+		if ( ! in_array( $promo_note_name, $allowed_promo_notes, true ) ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_promo_note_name',
-				__( 'Please provide a valid promo note name.', 'woocommerce-admin' ),
+				__( 'Please provide a valid promo note name.', 'woocommerce' ),
 				array( 'status' => 422 )
 			);
 		}
@@ -505,7 +503,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -606,6 +604,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $data The original note.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since 3.9.0
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_note', $response, $data, $request );
 	}
@@ -634,14 +633,14 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$params             = array();
 		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['order']    = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']  = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -654,7 +653,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['page']     = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -662,7 +661,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			'minimum'           => 1,
 		);
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -671,7 +670,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['type']     = array(
-			'description'       => __( 'Type of note.', 'woocommerce-admin' ),
+			'description'       => __( 'Type of note.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -681,7 +680,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			),
 		);
 		$params['status']   = array(
-			'description'       => __( 'Status of note.', 'woocommerce-admin' ),
+			'description'       => __( 'Status of note.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -691,7 +690,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 			),
 		);
 		$params['source']   = array(
-			'description'       => __( 'Source of note.', 'woocommerce-admin' ),
+			'description'       => __( 'Source of note.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -714,108 +713,114 @@ class Notes extends \WC_REST_CRUD_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id'                => array(
-					'description' => __( 'ID of the note record.', 'woocommerce-admin' ),
+					'description' => __( 'ID of the note record.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'              => array(
-					'description' => __( 'Name of the note.', 'woocommerce-admin' ),
+					'description' => __( 'Name of the note.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'type'              => array(
-					'description' => __( 'The type of the note (e.g. error, warning, etc.).', 'woocommerce-admin' ),
+					'description' => __( 'The type of the note (e.g. error, warning, etc.).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'locale'            => array(
-					'description' => __( 'Locale used for the note title and content.', 'woocommerce-admin' ),
+					'description' => __( 'Locale used for the note title and content.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'title'             => array(
-					'description' => __( 'Title of the note.', 'woocommerce-admin' ),
+					'description' => __( 'Title of the note.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'content'           => array(
-					'description' => __( 'Content of the note.', 'woocommerce-admin' ),
+					'description' => __( 'Content of the note.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'content_data'      => array(
-					'description' => __( 'Content data for the note. JSON string. Available for re-localization.', 'woocommerce-admin' ),
+					'description' => __( 'Content data for the note. JSON string. Available for re-localization.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'status'            => array(
-					'description' => __( 'The status of the note (e.g. unactioned, actioned).', 'woocommerce-admin' ),
+					'description' => __( 'The status of the note (e.g. unactioned, actioned).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'source'            => array(
-					'description' => __( 'Source of the note.', 'woocommerce-admin' ),
+					'description' => __( 'Source of the note.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created'      => array(
-					'description' => __( 'Date the note was created.', 'woocommerce-admin' ),
+					'description' => __( 'Date the note was created.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt'  => array(
-					'description' => __( 'Date the note was created (GMT).', 'woocommerce-admin' ),
+					'description' => __( 'Date the note was created (GMT).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_reminder'     => array(
-					'description' => __( 'Date after which the user should be reminded of the note, if any.', 'woocommerce-admin' ),
+					'description' => __( 'Date after which the user should be reminded of the note, if any.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true, // @todo Allow date_reminder to be updated.
 				),
 				'date_reminder_gmt' => array(
-					'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'woocommerce-admin' ),
+					'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'is_snoozable'      => array(
-					'description' => __( 'Whether or not a user can request to be reminded about the note.', 'woocommerce-admin' ),
+					'description' => __( 'Whether or not a user can request to be reminded about the note.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'actions'           => array(
-					'description' => __( 'An array of actions, if any, for the note.', 'woocommerce-admin' ),
+					'description' => __( 'An array of actions, if any, for the note.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'layout'            => array(
-					'description' => __( 'The layout of the note (e.g. banner, thumbnail, plain).', 'woocommerce-admin' ),
+					'description' => __( 'The layout of the note (e.g. banner, thumbnail, plain).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'image'             => array(
-					'description' => __( 'The image of the note, if any.', 'woocommerce-admin' ),
+					'description' => __( 'The image of the note, if any.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'is_deleted'        => array(
-					'description' => __( 'Registers whether the note is deleted or not', 'woocommerce-admin' ),
+					'description' => __( 'Registers whether the note is deleted or not', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'is_read'           => array(
+					'description' => __( 'Registers whether the note is read or not', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

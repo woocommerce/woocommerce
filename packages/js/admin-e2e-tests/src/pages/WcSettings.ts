@@ -1,12 +1,12 @@
 /**
+ * External dependencies
+ */
+import { setCheckbox } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { getAttribute, hasClass, waitForElementByText } from '../utils/actions';
 import { BasePage } from './BasePage';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { setCheckbox } = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export class WcSettings extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-settings';
@@ -42,9 +42,23 @@ export class WcSettings extends BasePage {
 		);
 	}
 
+	async paymentMethodIsEnabled( method = '' ): Promise< boolean > {
+		await this.navigate( 'checkout' );
+		await waitForElementByText( 'th', 'Method' );
+		const className = await getAttribute(
+			`tr[data-gateway_id=${ method }] .woocommerce-input-toggle`,
+			'className'
+		);
+		return (
+			( className as string ).indexOf(
+				'woocommerce-input-toggle--disabled'
+			) === -1
+		);
+	}
+
 	async cleanPaymentMethods(): Promise< void > {
-		this.navigate( 'checkout' );
-		await waitForElementByText( 'h2', 'Payment methods' );
+		await this.navigate( 'checkout' );
+		await waitForElementByText( 'th', 'Method' );
 		const paymentMethods = await page.$$( 'span.woocommerce-input-toggle' );
 		for ( const method of paymentMethods ) {
 			if (

@@ -1,4 +1,4 @@
-export function getPluginSlug( id: string ): string {
+export function getPluginSlug( id: string | null ): string {
 	return ( id || '' ).split( ':', 1 )[ 0 ];
 }
 

@@ -51,22 +51,22 @@ export class DismissModal extends Component {
 
 		return (
 			<Modal
-				title={ __( 'Are you sure?', 'woocommerce-admin' ) }
+				title={ __( 'Are you sure?', 'woocommerce' ) }
 				onRequestClose={ onClose }
 				className="wc-admin-shipping-banner__dismiss-modal"
 			>
 				<p className="wc-admin-shipping-banner__dismiss-modal-help-text">
 					{ __(
 						'With WooCommerce Shipping you can Print shipping labels from your WooCommerce dashboard at the lowest USPS rates.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<div className="wc-admin-shipping-banner__dismiss-modal-actions">
 					<Button isSecondary onClick={ this.remindMeLaterClicked }>
-						{ __( 'Remind me later', 'woocommerce-admin' ) }
+						{ __( 'Remind me later', 'woocommerce' ) }
 					</Button>
 					<Button isPrimary onClick={ this.closeForeverClicked }>
-						{ __( "I don't need this", 'woocommerce-admin' ) }
+						{ __( "I don't need this", 'woocommerce' ) }
 					</Button>
 				</div>
 			</Modal>

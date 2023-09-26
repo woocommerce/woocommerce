@@ -32,6 +32,7 @@ type CollapsibleListProps = {
 	show?: number;
 	onCollapse?: () => void;
 	onExpand?: () => void;
+	direction?: 'up' | 'down';
 } & ListProps;
 
 const defaultStyle = {
@@ -126,13 +127,12 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	show = 0,
 	onCollapse,
 	onExpand,
+	direction = 'up',
 	...listProps
 } ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
-	const [
-		isTransitionComponentCollapsed,
-		setTransitionComponentCollapsed,
-	] = useState( collapsed );
+	const [ isTransitionComponentCollapsed, setTransitionComponentCollapsed ] =
+		useState( collapsed );
 	const [ footerLabels, setFooterLabels ] = useState( {
 		collapse: collapseLabel,
 		expand: expandLabel,
@@ -227,9 +227,33 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 		'woocommerce-experimental-list-wrapper': ! isCollapsed,
 	} );
 
+	const hiddenChildren =
+		displayedChildren.hidden.length > 0 ? (
+			<ExperimentalListItem
+				key="collapse-item"
+				className="list-item-collapse"
+				onClick={ clickHandler }
+				animation="none"
+				disableGutters
+			>
+				<p>
+					{ isCollapsed
+						? footerLabels.expand
+						: footerLabels.collapse }
+				</p>
+
+				<Icon
+					className="list-item-collapse__icon"
+					size={ 30 }
+					icon={ isCollapsed ? chevronDown : chevronUp }
+				/>
+			</ExperimentalListItem>
+		) : null;
+
 	return (
 		<ExperimentalList { ...listProps } className={ listClasses }>
 			{ [
+				direction === 'down' && hiddenChildren,
 				...displayedChildren.shown,
 				<Transition
 					key="remaining-children"
@@ -277,7 +301,8 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 													classNames="woocommerce-list__item"
 												>
 													{ cloneElement( child, {
-														animation: animationProp,
+														animation:
+															animationProp,
 														...remainingProps,
 													} ) }
 												</CSSTransition>
@@ -289,27 +314,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 						);
 					} }
 				</Transition>,
-				displayedChildren.hidden.length > 0 ? (
-					<ExperimentalListItem
-						key="collapse-item"
-						className="list-item-collapse"
-						onClick={ clickHandler }
-						animation="none"
-						disableGutters
-					>
-						<p>
-							{ isCollapsed
-								? footerLabels.expand
-								: footerLabels.collapse }
-						</p>
-
-						<Icon
-							className="list-item-collapse__icon"
-							size={ 30 }
-							icon={ isCollapsed ? chevronDown : chevronUp }
-						/>
-					</ExperimentalListItem>
-				) : null,
+				direction === 'up' && hiddenChildren,
 			] }
 		</ExperimentalList>
 	);

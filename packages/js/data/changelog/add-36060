@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add batchUpdate to product variations datastore

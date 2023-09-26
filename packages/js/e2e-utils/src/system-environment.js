@@ -9,8 +9,8 @@ export const getEnvironmentContext = async () => {
 		return {
 			wpVersion: environment.wp_version,
 			wcVersion: environment.version,
-		}
+		};
 	} catch ( error ) {
 		// Prevent an error here causing tests to fail.
 	}
-}
+};

@@ -1,0 +1,106 @@
+{
+    "code": "GT",
+    "name": "Guatemala",
+    "states": [
+        {
+            "code": "GT-AV",
+            "name": "Alta Verapaz"
+        },
+        {
+            "code": "GT-BV",
+            "name": "Baja Verapaz"
+        },
+        {
+            "code": "GT-CM",
+            "name": "Chimaltenango"
+        },
+        {
+            "code": "GT-CQ",
+            "name": "Chiquimula"
+        },
+        {
+            "code": "GT-PR",
+            "name": "El Progreso"
+        },
+        {
+            "code": "GT-ES",
+            "name": "Escuintla"
+        },
+        {
+            "code": "GT-GU",
+            "name": "Guatemala"
+        },
+        {
+            "code": "GT-HU",
+            "name": "Huehuetenango"
+        },
+        {
+            "code": "GT-IZ",
+            "name": "Izabal"
+        },
+        {
+            "code": "GT-JA",
+            "name": "Jalapa"
+        },
+        {
+            "code": "GT-JU",
+            "name": "Jutiapa"
+        },
+        {
+            "code": "GT-PE",
+            "name": "Petén"
+        },
+        {
+            "code": "GT-QZ",
+            "name": "Quetzaltenango"
+        },
+        {
+            "code": "GT-QC",
+            "name": "Quiché"
+        },
+        {
+            "code": "GT-RE",
+            "name": "Retalhuleu"
+        },
+        {
+            "code": "GT-SA",
+            "name": "Sacatepéquez"
+        },
+        {
+            "code": "GT-SM",
+            "name": "San Marcos"
+        },
+        {
+            "code": "GT-SR",
+            "name": "Santa Rosa"
+        },
+        {
+            "code": "GT-SO",
+            "name": "Sololá"
+        },
+        {
+            "code": "GT-SU",
+            "name": "Suchitepéquez"
+        },
+        {
+            "code": "GT-TO",
+            "name": "Totonicapán"
+        },
+        {
+            "code": "GT-ZA",
+            "name": "Zacapa"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/gt"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

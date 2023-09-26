@@ -15,8 +15,8 @@
 }
 
 .woocommerce-layout__primary {
-	margin: $gutter-large 0 0 $fallback-gutter-large;
-	margin: $gutter-large 0 0 $gutter-large;
+	margin: $gutter-large 0 128px $fallback-gutter-large;
+	margin: $gutter-large 0 128px $gutter-large;
 
 	@include breakpoint( '<782px' ) {
 		margin-top: 20px;
@@ -29,7 +29,7 @@
 	max-width: 100%;
 }
 
-.woocommerce-page {
+.woocommerce-admin-page {
 	.update-nag {
 		display: none;
 	}
@@ -111,7 +111,7 @@
 
 .woocommerce-task-dashboard__container .components-button.is-button,
 .woocommerce-profile-wizard__body .components-button.is-button,
-.woocommerce-page .components-modal__frame .components-button.is-button {
+.woocommerce-admin-page .components-modal__frame .components-button.is-button {
 	height: 48px;
 	padding-left: 25px;
 	padding-right: 25px;
@@ -136,7 +136,6 @@
 	max-width: 100%;
 
 	.components-modal__header {
-		border-bottom: 0;
 		margin-bottom: 0;
 	}
 

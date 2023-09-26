@@ -20,7 +20,7 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 	/**
 	 * Run setup code for unit tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Override the filesystem method that we're using.

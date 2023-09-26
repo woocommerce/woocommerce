@@ -31,7 +31,6 @@ import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import StoreDetails from './steps/store-details';
-import Theme from './steps/theme';
 import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
@@ -43,20 +42,16 @@ class ProfileWizard extends Component {
 		this.cachedActivePlugins = props.activePlugins;
 		this.goToNextStep = this.goToNextStep.bind( this );
 		this.trackStepValueChanges = this.trackStepValueChanges.bind( this );
-		this.updateCurrentStepValues = this.updateCurrentStepValues.bind(
-			this
-		);
+		this.updateCurrentStepValues =
+			this.updateCurrentStepValues.bind( this );
 		this.stepValueChanges = {};
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { step: prevStep } = prevProps.query;
 		const { step } = this.props.query;
-		const {
-			isError,
-			isGetProfileItemsRequesting,
-			createNotice,
-		} = this.props;
+		const { isError, isGetProfileItemsRequesting, createNotice } =
+			this.props;
 
 		const isRequestError =
 			! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
@@ -65,7 +60,7 @@ class ProfileWizard extends Component {
 				'error',
 				__(
 					'There was a problem finishing the setup wizard',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -135,7 +130,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'store-details',
 			container: StoreDetails,
-			label: __( 'Store Details', 'woocommerce-admin' ),
+			label: __( 'Store Details', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'setup_client' ) &&
 				profileItems.setup_client !== null,
@@ -143,7 +138,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'industry',
 			container: Industry,
-			label: __( 'Industry', 'woocommerce-admin' ),
+			label: __( 'Industry', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'industry' ) &&
 				profileItems.industry !== null,
@@ -151,7 +146,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'product-types',
 			container: ProductTypes,
-			label: __( 'Product Types', 'woocommerce-admin' ),
+			label: __( 'Product Types', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'product_types' ) &&
 				profileItems.product_types !== null,
@@ -159,18 +154,10 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'business-details',
 			container: BusinessDetailsStep,
-			label: __( 'Business Details', 'woocommerce-admin' ),
+			label: __( 'Business Details', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'product_count' ) &&
 				profileItems.product_count !== null,
-		} );
-		steps.push( {
-			key: 'theme',
-			container: Theme,
-			label: __( 'Theme', 'woocommerce-admin' ),
-			isComplete:
-				profileItems.hasOwnProperty( 'theme' ) &&
-				profileItems.theme !== null,
 		} );
 		/**
 		 * Filter for Onboarding steps configuration.
@@ -274,7 +261,7 @@ class ProfileWizard extends Component {
 					'error',
 					__(
 						'There was a problem skipping the setup wizard',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			} );
@@ -318,11 +305,8 @@ export default compose(
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
-		const {
-			getActivePlugins,
-			getPluginsError,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getPluginsError, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 
 		const profileItems = getProfileItems();
 
@@ -345,10 +329,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const {
-			connectToJetpackWithFailureRedirect,
-			createErrorNotice,
-		} = dispatch( PLUGINS_STORE_NAME );
+		const { connectToJetpackWithFailureRedirect, createErrorNotice } =
+			dispatch( PLUGINS_STORE_NAME );
 		const { updateNote } = dispatch( NOTES_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );

@@ -8,13 +8,8 @@ import { range } from 'lodash';
 
 class ActivityCardPlaceholder extends Component {
 	render() {
-		const {
-			className,
-			hasAction,
-			hasDate,
-			hasSubtitle,
-			lines,
-		} = this.props;
+		const { className, hasAction, hasDate, hasSubtitle, lines } =
+			this.props;
 		const cardClassName = classnames(
 			'woocommerce-activity-card is-loading',
 			className

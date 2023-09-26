@@ -80,7 +80,7 @@ export function* activateInstalledPlugin( pluginSlug ) {
 				'success',
 				__(
 					'The extension has been successfully activated.',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			// Deliberately load the new plugin data in a new request.
@@ -93,7 +93,7 @@ export function* activateInstalledPlugin( pluginSlug ) {
 			error,
 			__(
 				'There was an error trying to activate the extension.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 		yield removeActivatingPlugin( pluginSlug );
@@ -119,8 +119,18 @@ export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
 			error,
 			__(
 				'There was an error loading installed extensions.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 	}
+}
+
+export function* installAndActivateRecommendedPlugin(
+	recommendedPluginSlug,
+	category
+) {
+	return {
+		type: TYPES.INSTALL_AND_ACTIVATE_RECOMMENDED_PLUGIN,
+		data: { pluginSlug: recommendedPluginSlug, category },
+	};
 }

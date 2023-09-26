@@ -1,14 +1,16 @@
-const {
-	babelConfig: e2eBabelConfig,
-} = require( '@woocommerce/e2e-environment' );
-
 module.exports = function ( api ) {
 	api.cache( true );
 
 	return {
-		...e2eBabelConfig,
 		presets: [
-			...e2eBabelConfig.presets,
+			[
+				'@babel/preset-env',
+				{
+					targets: {
+						node: 'current',
+					},
+				},
+			],
 			'@babel/preset-typescript',
 			'@wordpress/babel-preset-default',
 		],
@@ -22,38 +24,7 @@ module.exports = function ( api ) {
 		],
 		ignore: [ 'packages/**/node_modules' ],
 		env: {
-			production: {
-				plugins: [
-					[
-						'@wordpress/babel-plugin-makepot',
-						{
-							output: 'languages/woocommerce-admin.po',
-						},
-					],
-				],
-			},
-
-			storybook: {
-				plugins: [
-					/**
-					 * We need to set loose mode here because the storybook's default babel config enables the loose mode.
-					 * The 'loose' mode configuration must be the same for those babel plugins.
-					 *
-					 */
-					[
-						'@babel/plugin-proposal-class-properties',
-						{ loose: true },
-					],
-					[
-						'@babel/plugin-proposal-private-methods',
-						{ loose: true },
-					],
-					[
-						'@babel/plugin-proposal-private-property-in-object',
-						{ loose: true },
-					],
-				],
-			},
+			production: {},
 		},
 	};
 };

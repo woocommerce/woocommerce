@@ -22,7 +22,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	/**
 	 * Create subject under test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( Synchronize::class );
 	}

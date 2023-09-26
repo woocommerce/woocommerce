@@ -71,7 +71,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'switch_themes' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage themes.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage themes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -87,7 +87,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$theme          = sanitize_text_field( $request['theme'] );
 
 		if ( ! in_array( $theme, $allowed_themes, true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
 		}
 
 		$installed_themes = wp_get_themes();
@@ -121,7 +121,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'woocommerce_rest_theme_install',
 				sprintf(
 					/* translators: %s: theme slug (example: woocommerce-services) */
-					__( 'The requested theme `%s` could not be installed. Theme API call failed.', 'woocommerce-admin' ),
+					__( 'The requested theme `%s` could not be installed. Theme API call failed.', 'woocommerce' ),
 					$theme
 				),
 				500
@@ -136,7 +136,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'woocommerce_rest_theme_install',
 				sprintf(
 					/* translators: %s: theme slug (example: woocommerce-services) */
-					__( 'The requested theme `%s` could not be installed.', 'woocommerce-admin' ),
+					__( 'The requested theme `%s` could not be installed.', 'woocommerce' ),
 					$theme
 				),
 				500
@@ -160,7 +160,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$allowed_themes = Themes::get_allowed_themes();
 		$theme          = sanitize_text_field( $request['theme'] );
 		if ( ! in_array( $theme, $allowed_themes, true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/theme.php';
@@ -169,12 +169,12 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 
 		if ( ! in_array( $theme, array_keys( $installed_themes ), true ) ) {
 			/* translators: %s: theme slug (example: woocommerce-services) */
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', sprintf( __( 'Invalid theme %s.', 'woocommerce-admin' ), $theme ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_theme', sprintf( __( 'Invalid theme %s.', 'woocommerce' ), $theme ), 404 );
 		}
 
 		$result = switch_theme( $theme );
 		if ( ! is_null( $result ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', sprintf( __( 'The requested theme could not be activated.', 'woocommerce-admin' ), $theme ), 500 );
+			return new \WP_Error( 'woocommerce_rest_invalid_theme', sprintf( __( 'The requested theme could not be activated.', 'woocommerce' ), $theme ), 500 );
 		}
 
 		return( array(
@@ -196,19 +196,19 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'   => array(
-					'description' => __( 'Theme slug.', 'woocommerce-admin' ),
+					'description' => __( 'Theme slug.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'   => array(
-					'description' => __( 'Theme name.', 'woocommerce-admin' ),
+					'description' => __( 'Theme name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'status' => array(
-					'description' => __( 'Theme status.', 'woocommerce-admin' ),
+					'description' => __( 'Theme status.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasksFeature;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 
@@ -39,7 +39,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Duration to milisecond mapping.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $duration_to_ms = array(
 		'day'  => DAY_IN_SECONDS * 1000,
@@ -91,7 +91,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 							'template_name' => array(
 								'required'    => true,
 								'type'        => 'string',
-								'description' => __( 'Product template name.', 'woocommerce-admin' ),
+								'description' => __( 'Product template name.', 'woocommerce' ),
 							),
 						)
 					),
@@ -110,7 +110,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'permission_callback' => array( $this, 'get_tasks_permission_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description'       => __( 'Optional parameter to get only specific task lists by id.', 'woocommerce-admin' ),
+							'description'       => __( 'Optional parameter to get only specific task lists by id.', 'woocommerce' ),
 							'type'              => 'array',
 							'sanitize_callback' => 'wp_parse_slug_list',
 							'validate_callback' => 'rest_validate_request_arg',
@@ -189,14 +189,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			array(
 				'args'   => array(
 					'duration'     => array(
-						'description'       => __( 'Time period to snooze the task.', 'woocommerce-admin' ),
+						'description'       => __( 'Time period to snooze the task.', 'woocommerce' ),
 						'type'              => 'string',
 						'validate_callback' => function( $param, $request, $key ) {
 							return in_array( $param, array_keys( $this->duration_to_ms ), true );
 						},
 					),
 					'task_list_id' => array(
-						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce-admin' ),
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -244,7 +244,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public function create_products_permission_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -258,7 +258,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public function create_pages_permission_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'page', 'create' ) || ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create new pages.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create new pages.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -272,7 +272,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public function get_tasks_permission_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding tasks.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding tasks.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -286,7 +286,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public function hide_task_list_permission_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you are not allowed to hide task lists.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you are not allowed to hide task lists.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -295,12 +295,16 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to manage woocommerce.
 	 *
+	 * @deprecated 7.8.0 snooze task is deprecated.
+	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function snooze_task_permissions_check( $request ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.8.0' );
+
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to snooze onboarding tasks.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to snooze onboarding tasks.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -329,7 +333,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$import   = $importer->import();
 			return $import;
 		} else {
-			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce' ) );
 		}
 	}
 
@@ -340,12 +344,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
-		$sample_csv_file = WC_ABSPATH . 'sample-data/sample_products.csv';
+		$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
+		WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
 
 		$import = self::import_sample_products_from_csv( $sample_csv_file );
 		return rest_ensure_response( $import );
 	}
-
 
 	/**
 	 * Creates a product from a template name passed in through the template_name param.
@@ -355,7 +359,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public static function create_product_from_template( $request ) {
-		$template_name = $request->get_param( 'template_name' );
+		$template_name = basename( $request->get_param( 'template_name' ) );
 		$template_path = __DIR__ . '/Templates/' . $template_name . '_product.csv';
 		$template_path = apply_filters( 'woocommerce_product_template_csv_file_path', $template_path, $template_name );
 
@@ -365,7 +369,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_product_creation_error',
 				/* translators: %s is template name */
-				__( 'Sorry, creating the product with template failed.', 'woocommerce-admin' ),
+				__( 'Sorry, creating the product with template failed.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -439,32 +443,36 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$shop_url = get_permalink( wc_get_page_id( 'shop' ) );
 		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
 			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) . '","id":' . intval( $image['id'] ) . ',"dimRatio":0} -->
-			<div class="wp-block-cover" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","textColor":"white","fontSize":"large"} -->
-			<p class="has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
+			<div class="wp-block-cover" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce' ) . '","textColor":"white","fontSize":"large"} -->
+			<p class="has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce' ) . '</p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph {"align":"center","textColor":"white"} -->
-			<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
+			<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce' ) . '</p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:button {"align":"center"} -->
-			<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
-			<!-- /wp:button --></div></div>
+			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+			<div class="wp-block-buttons"><!-- wp:button -->
+			<div class="wp-block-button"><a class="wp-block-button__link" href="' . esc_url( $shop_url ) . '">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
+			<!-- /wp:button --></div>
+			<!-- /wp:buttons --></div></div>
 			<!-- /wp:cover -->';
 		}
 
 		return '<!-- wp:cover {"dimRatio":0} -->
-		<div class="wp-block-cover"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","textColor":"white","fontSize":"large"} -->
-		<p class="has-text-color has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
+		<div class="wp-block-cover"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce' ) . '","textColor":"white","fontSize":"large"} -->
+		<p class="has-text-color has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce' ) . '</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"align":"center","textColor":"white"} -->
-		<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
+		<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce' ) . '</p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:button {"align":"center"} -->
-		<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
-		<!-- /wp:button --></div></div>
+		<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+		<div class="wp-block-buttons"><!-- wp:button -->
+		<div class="wp-block-button"><a class="wp-block-button__link" href="' . esc_url( $shop_url ) . '">' . __( 'Go shopping', 'woocommerce' ) . '</a></div>
+		<!-- /wp:button --></div>
+		<!-- /wp:buttons --></div></div>
 		<!-- /wp:cover -->';
 	}
 
@@ -482,14 +490,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
 			return '<!-- wp:media-text {' . $media_position . '"mediaId":' . intval( $image['id'] ) . ',"mediaType":"image"} -->
-			<div class="wp-block-media-text alignwide' . $css_class . '""><figure class="wp-block-media-text__media"><img src="' . esc_url( $image['url'] ) . '" alt="" class="wp-image-' . intval( $image['id'] ) . '"/></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
+			<div class="wp-block-media-text alignwide' . $css_class . '""><figure class="wp-block-media-text__media"><img src="' . esc_url( $image['url'] ) . '" alt="" class="wp-image-' . intval( $image['id'] ) . '"/></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce' ) . '","fontSize":"large"} -->
 			<p class="has-large-font-size"></p>
 			<!-- /wp:paragraph --></div></div>
 			<!-- /wp:media-text -->';
 		}
 
 		return '<!-- wp:media-text {' . $media_position . '} -->
-		<div class="wp-block-media-text alignwide' . $css_class . '"><figure class="wp-block-media-text__media"></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
+		<div class="wp-block-media-text alignwide' . $css_class . '"><figure class="wp-block-media-text__media"></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce' ) . '","fontSize":"large"} -->
 		<p class="has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:media-text -->';
@@ -509,25 +517,25 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
 			$template = self::get_homepage_cover_block( $image_1 ) . '
 				<!-- wp:heading {"align":"center"} -->
-				<h2 style="text-align:center">' . __( 'Shop by Category', 'woocommerce-admin' ) . '</h2>
+				<h2 style="text-align:center">' . __( 'Shop by Category', 'woocommerce' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:shortcode -->
 				[product_categories number="0" parent="0"]
 				<!-- /wp:shortcode -->
 				<!-- wp:heading {"align":"center"} -->
-				<h2 style="text-align:center">' . __( 'New In', 'woocommerce-admin' ) . '</h2>
+				<h2 style="text-align:center">' . __( 'New In', 'woocommerce' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:woocommerce/product-new {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
-				<h2 style="text-align:center">' . __( 'Fan Favorites', 'woocommerce-admin' ) . '</h2>
+				<h2 style="text-align:center">' . __( 'Fan Favorites', 'woocommerce' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:woocommerce/product-top-rated {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
-				<h2 style="text-align:center">' . __( 'On Sale', 'woocommerce-admin' ) . '</h2>
+				<h2 style="text-align:center">' . __( 'On Sale', 'woocommerce' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:woocommerce/product-on-sale {"columns":4} /-->
 				<!-- wp:heading {"align":"center"} -->
-				<h2 style="text-align:center">' . __( 'Best Sellers', 'woocommerce-admin' ) . '</h2>
+				<h2 style="text-align:center">' . __( 'Best Sellers', 'woocommerce' ) . '</h2>
 				<!-- /wp:heading -->
 				<!-- wp:woocommerce/product-best-sellers {"columns":4} /-->
 			';
@@ -546,7 +554,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$image_3  = ! empty( $images[2] ) ? $images[2] : '';
 		$template = self::get_homepage_cover_block( $image_1 ) . '
 		<!-- wp:heading {"align":"center"} -->
-		<h2 style="text-align:center">' . __( 'New Products', 'woocommerce-admin' ) . '</h2>
+		<h2 style="text-align:center">' . __( 'New Products', 'woocommerce' ) . '</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:woocommerce/product-new /--> ' .
@@ -648,7 +656,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public static function create_homepage() {
 		$post_id = wp_insert_post(
 			array(
-				'post_title'   => __( 'Homepage', 'woocommerce-admin' ),
+				'post_title'   => __( 'Homepage', 'woocommerce' ),
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
 				'post_content' => '', // Template content is updated below, so images can be attached to the post.
@@ -676,7 +684,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 			return array(
 				'status'         => 'success',
-				'message'        => __( 'Homepage created', 'woocommerce-admin' ),
+				'message'        => __( 'Homepage created', 'woocommerce' ),
 				'post_id'        => $post_id,
 				'edit_post_link' => htmlspecialchars_decode( get_edit_post_link( $post_id ) ),
 			);
@@ -693,7 +701,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function get_task_list_params() {
 		$params                   = array();
 		$params['ids']            = array(
-			'description'       => __( 'Optional parameter to get only specific task lists by id.', 'woocommerce-admin' ),
+			'description'       => __( 'Optional parameter to get only specific task lists by id.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -703,7 +711,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			),
 		);
 		$params['extended_tasks'] = array(
-			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce-admin' ),
+			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => function( $param, $request, $key ) {
 				$has_valid_keys = true;
@@ -754,6 +762,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
@@ -764,7 +773,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task || ! $task->is_dismissable() ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task',
-				__( 'Sorry, no dismissable task with that ID was found.', 'woocommerce-admin' ),
+				__( 'Sorry, no dismissable task with that ID was found.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -787,6 +796,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
@@ -797,7 +807,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task || ! $task->is_dismissable() ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task',
-				__( 'Sorry, no dismissable task with that ID was found.', 'woocommerce-admin' ),
+				__( 'Sorry, no dismissable task with that ID was found.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -812,11 +822,15 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Snooze an onboarding task.
 	 *
+	 * @deprecated 7.8.0 snooze task is deprecated.
+	 *
 	 * @param WP_REST_Request $request Request data.
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function snooze_task( $request ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.8.0' );
+
 		$task_id      = $request->get_param( 'id' );
 		$task_list_id = $request->get_param( 'task_list_id' );
 		$duration     = $request->get_param( 'duration' );
@@ -825,6 +839,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $task_id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'            => $task_id,
 					'is_snoozeable' => true,
@@ -835,7 +850,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task || ! $task->is_snoozeable() ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task',
-				__( 'Sorry, no snoozeable task with that ID was found.', 'woocommerce-admin' ),
+				__( 'Sorry, no snoozeable task with that ID was found.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -849,15 +864,20 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo snooze of a single task.
 	 *
+	 * @deprecated 7.8.0 undo snooze task is deprecated.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function undo_snooze_task( $request ) {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '7.8.0' );
+
 		$id   = $request->get_param( 'id' );
 		$task = TaskLists::get_task( $id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'            => $id,
 					'is_snoozeable' => true,
@@ -868,7 +888,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task || ! $task->is_snoozeable() ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task',
-				__( 'Sorry, no snoozeable task with that ID was found.', 'woocommerce-admin' ),
+				__( 'Sorry, no snoozeable task with that ID was found.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -893,7 +913,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task_list ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task_list',
-				__( 'Sorry, that task list was not found', 'woocommerce-admin' ),
+				__( 'Sorry, that task list was not found', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -920,7 +940,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task_list ) {
 			return new \WP_Error(
 				'woocommerce_tasks_invalid_task_list',
-				__( 'Sorry, that task list was not found', 'woocommerce-admin' ),
+				__( 'Sorry, that task list was not found', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)
@@ -945,6 +965,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id' => $id,
 				)
@@ -954,7 +975,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_task',
-				__( 'Sorry, no task with that ID was found.', 'woocommerce-admin' ),
+				__( 'Sorry, no task with that ID was found.', 'woocommerce' ),
 				array(
 					'status' => 404,
 				)

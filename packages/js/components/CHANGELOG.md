@@ -1,315 +1,198 @@
-# Unreleased
-
--   Replace deprecated wp.compose.withState with wp.element.useState. #8338
--   Add missing dependencies. #8349
--   Update all js packages with minor/patch version changes. #8392
--   Add moment-timezone to package.json. #6483
-## Breaking changes
-
--   Refactor the `onFilterChange` method in the `AdvancedFilters` component. #8459
-    - change: `onFilterChange( index, property, value, shouldResetValue = false );` to `onFilterChange( index, { property, value, shouldResetValue = false } )`;
-# 9.0.0
-
--   Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
--   Made @woocommerce/components/Stepper a Typescript file. #8286
--   Added Typescript type declarations to build for @woocommerce/components #8282
-## Breaking changes
-
--   Update dependencies to support react 17. #8305
--   Drop support for IE11. #8305
-
-# 8.2.0
-
--   Fix usage of Wordpress DatePicker component in `DatePicker`. #7982
--   Fix select-control component label/value alignment. #8045
--   Fix clicking the error message opens the dropdown. #8094
--   Fix misaligned "Rows per page" dropdown. #8113
--   Add `labelPositionToLeft` prop to the `OrderStatus` component. #8121
--   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
--   Fix incorrect screen reader text generated for data points on charts table. #8181
--   Grow and center buttons in all WooCommerce ellipsis menu popover containers. #8168
--   Added random IDs to SVG checkmarks in stepper component #8222  
-
-# 8.1.1
-
--   Fixed warnings when using AdvancedFilters component. #7704
--   Add `autoComplete` prop to the `SelectControl` component. #7497
--   Fix calendar not being dismissed when clicking outside. #7714
-
-# 8.1.0
-
--   Fix a bug in the deprecated callback handlers of Form component. #7356
--   Fix a bug in the `<DateFilter>` component where values were retained when switching between rules #7423
--   Add `hidden` legend position to `Chart`. #7378
--   Update aligning `Table` fields with the fallback on isNumeric. #7431
-
-# 8.0.0
-
--   Fix commonjs module build, allow package to be built in isolation. #7286
--   Remove deprecated Card, Count and Gravatar components. #7293
--   Add TableSummaryPlaceholder to support skeleton loading. #7294
-
-# 7.1.0
-
--   Add rowKey prop to Table and TableCard component. #7196
--   AdvancedFilters: Create workable defaults for Reports that don't have them #7186
--   Filters: On update respect all other queries, not just persistedQueries #7155
--   Fix non-string query prop warning in SelectControl component. #7046
--   Fix WordPress 5.8 compatibility UI fixes #7255
--   Revert Card component removal #7167.
--   Update DynamicForm, adding initial config memoization. #7256
--   Update package dependencies
-
-# 7.0.0
-
--   Fix style regression with the Chart header. #7002
--   Fix styling of the advanced filter operator selection. #7005
--   Remove the use of Dashicons and replace with @wordpress/icons or gridicons #7020
--   Add tree shaking support to this package. #7034
--   Deprecate the Gravatar component. #7716
--   Remove useFilters from the package. #7117
--   Deprecate SegmentedSelection, it will be removed in the next major release. #7118
--   Deprecate the Count component, with plan to remove in next major version. #7115
--   Remove the long deprecated Card component (use Card from `@wordpress/components` instead). #7114
--   Add `<AbbreviatedCard />` component. #7017
--   Remove support for IE11. #7112
-
-# 6.2.0
-
--   Fix `autocompleter` for custom Search in `CompareFilter` #6911
--   SelectControl: automatically scroll to selected options when list is displayed. #6906
--   SelectControl: no longer auto selects on rendering list. #6906
--   Make `Search` accept synchronous `autocompleter.options`. #6884
--   SelectControl: fix display of multiple selections without inline tags. #6862
--   Add depreciation notice for the current list. #6787
--   Force `<SearchListItem>` form elements id to be unique. #6871
--   Add `controlId` and `name` props to `<SearchListItem>`. #6871
--   Minor styling tweaks and fixes to `<SearchListcontrol>`. #6871
--   Fix `autocompleter` for custom Search in `FilterPicker` #6880
--   Remove `woocommerce/experimental` dependency. #6986
-
-# 6.1.2
-
--   Update dependencies.
-
-# 6.1.1
-
--   Update dependencies.
-
-# 6.1.0
-
--   Make pagination buttons height and width consistent. #6725
--   Add optional `children` prop to `<SummaryNumber>`. #6748
--   Add `@woocommerce/experimental`, `md5` and `dompurify` as dependencies. #6804
-
-# 6.0.0
-
--   Change styling of `<ProductImage />`.
--   Remove the `showCount` prop from `<SearchListItem>`. Count will always be displayed if any of those props is not undefined/null: `countLabel` and `item.count`.
--   Fix alignment of `<SearchListItem>` count bubble in newest versions of `@wordpress/components`.
--   `<SearchListControl>` no longer has different styles when it's used inside a panel. Those styles are available now with the `isCompact` prop.
--   Support custom attributes in `<AttributeFilter />`.
--   Add product attributes support to `<Search />`.
--   Allow single-selection support to `<Search />`.
--   Improve handling of `multiple` and `inlineTags` in `<SelectControl />`.
--   Deprecate use of `<Card>` in favor of the `<Card>` component in `@wordpress/components`.
--   Fixing screen reader text being undefined for report `<Table>`
--   Update `<SearchListControl />` to use checkbox and radio inputs.
--   Fix <SelectControl /> so the onChange value type always matches the selected type. #6594
-
-## Breaking changes
-
--   Move Lodash to a peer dependency.
-
-# 5.1.2
-
--   Update dependencies.
-
-# 5.1.1
-
--   Update dependencies.
-
-# 5.1.0
-
--   Fix default value for `<Table />` component `onQueryChange` prop.
--   Deprecate our bespoke component `useFilters` in favor of using the WordPress variety `withFilters`.
--   Fix screen reader text in `<AdvancedFilters />`.
--   Add `<AttributeFilter />` component to `<AdvancedFilters />`.
--   Fix internal dependencies for `<Plugins />`.
--   Add full response to `<Plugins />` callbacks `onError` and `onComplete`.
-
-# 5.0.0
-
--   Added `<Timeline />` component.
--   Added `<ImageUpload />` component.
--   Style form components for WordPress 5.3.
--   Fix CompareFilter options format (key prop vs. id).
--   Fix styling of `<Search />` component "clear all" button.
--   Add state classes to `<TextControlWithAffixes />` component.
--   Fix `<AnimationSlider />` example code.
--   Add `<Plugins />` component for installation of plugins.
--   Removed use of `IconButton` in favor of `Button` component.
--   Add custom autocompleter support to `<Search />` component.
--   Fix `<SelectControl />` component to allow clicking anywhere on options in list to select.
--   Add support for `<List />` component item tags and link types.
--   Add `<List />` and `<Link />` components to Storybook.
--   Add `<Pill />` component.
--   Add `key` prop to `<List />` component items.
--   Remove unused `ref` from `<DateRangeFilterPicker />`.
-
-## Breaking Changes
-
--   Removed `SplitButton` because its not being used.
-
-# 4.0.0
-
-## Breaking Changes
-
--   Added a new `<ScrollTo />` component.
--   Changed the `<List />` `description` prop to `content` and allowed content nodes to be passed in addition to strings.
--   Removed the `<SimpleSelectControl />` component.
-
-### Decouple wcSettings from published packages (#3001)
-
--   `AdvancedFilters` component now receives `siteLocale` as a prop.
--   `ReportsFilters` component now receives `siteLocale` as a prop.
--   `NumberFilter` component now receives `currencySymbol` and `symbolPosition` as props.
--   `AdvancedFilters` and `ReportsFilters` receive `currency` as a prop, it is required and must be an instance of the new `Currency` object exported by `@woocommerce/currency`
--   `Chart` receives `currency` as a prop.
--   Add `storeDate` prop to `<ReportFilters />` and `<DateRangeFilterPicker />` components.
--   `AdvancedFilters` and `ReportFilters` now receive a required `storeDate` prop as a means to pass down date initialization values from client.
--   The `href` prop in the `<Link>` component must now receive the full url instead of relative.
-
-## Other Changes
-
--   Renamed the `<Autocomplete />` component to `<SelectControl />`.
--   Added `isSearchable` prop to `<SelectControl />` to allow simple select dropdowns.
--   Removed WC-Admin specific actions from `<TableCard />` component.
--   Export the `<CompareButton />` component.
--   Add `<TextControl />` component.
--   Require `currency` prop in `<AdvancedFilters />` component.
--   Remove call to `getAdminLink()` inside the `<Link />` component.
--   Explicitly import component styles from `@wordpress/base-styles` (#3292)
--   Update various dependencies
-
-# 3.2.0
-
--   AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
--   TableCard component: add `onSearch` and `onSort` function props.
--   Add new component `<List />` for displaying interactive list items.
--   Fix z-index issue in `<Chart />` empty message.
--   Added a new `<SimpleSelectControl />` component.
--   Added a new `<WebPreview />` component.
--   SearchListItem component: fix long count values being cut-off in IE11.
--   Add `disabled` prop to CompareButton, Search, and TableCard components.
--   Table component: add empty table display.
-
-# 3.1.0
-
--   Added support for a `countLabel` prop on `SearchListItem` to allow custom counts.
-
-# 3.0.0
-
--   <DateInput> and <DatePicker> got a `disabled` prop.
--   TableCard component: new `onPageChange` prop.
--   TableCard now has a `defaultOrder` parameter to specify default sort column sort order.
--   Pagination no longer considers `0` a valid input and triggers `onPageChange` on the input blur event.
--   Tweaks to SummaryListPlaceholder height in order to better match SummaryNumber.
--   EllipsisMenu component (breaking change): Remove `children` prop in favor of a render prop `renderContent` so that function arguments `isOpen`, `onToggle`, and `onClose` can be passed down.
--   Chart has a new prop named `yBelow1Format` which overrides the `yFormat` for values between -1 and 1 (not included).
--   Add a `totals` prop to Chart component that allows overwriting the total values shown in the legend.
--   Add new component `<Stepper />` for showing a list of steps and progress.
--   Add new `<Spinner />` component.
--   Card component: updated default Muriel design.
--   Card component: new `description` prop.
--   Card component: new `isInactive` prop.
--   DateRangeFilterPicker (breaking change): Introduced `onRangeSelect` prop and remove `path` prop better control.
--   Update license to GPL-3.0-or-later.
-
-# 2.0.0
-
--   Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.
--   Chart component now accepts data with negative values.
--   Chart component: new prop `filterParam` used to detect selected items in the current query. If there are, they will be displayed in the chart even if their values are 0.
--   Expand search results and allow searching when input is refocused in autocompleter.
--   Animation Slider: Remove `focusOnChange` in favor of `onExited` so consumers can pass a function to be executed after a transition has finished.
--   SearchListControl: Add `onSearch` callback prop to let the parent component know about search changes.
--   Calendar: Expose `isInvalidDate` prop to `DatePicker` to indicated invalid days that are not selectable.
--   Calendar: Expose `isInvalidDate` prop to `DateRange` and remove the `invalidDays` prop.
--   Bump dependency versions.
-
-# 1.6.0
-
--   Chart component: new props `emptyMessage` and `baseValue`. When an empty message is provided, it will be displayed on top of the chart if there are no values different than `baseValue`.
--   Chart component: remove d3-array dependency.
--   Chart component: fix display when there is no data.
--   Chart component: change chart type query parameter to `chartType`.
--   Chart component: add `screenReaderFormat` prop that will be used to format dates for screen reader labels.
--   Bug fix for `<StockReportTable />` returning N/A instead of zero.
--   Add new component: SearchListControl for displaying and filtering a selectable list of items.
-
-# 1.5.0
-
--   Improves display of charts where all values are 0.
--   Fix X-axis labels in hourly bar charts.
--   New `<Search>` prop named `showClearButton`, that will display a 'Clear' button when the search box contains one or more tags.
--   Number of selectable chart elements is now limited to 5.
--   Color scale logic for charts with lots of items has been fixed.
--   Update `@woocommerce/navigation` to v2.0.0
--   Bug fix for `<StockReportTable />` returning N/A instead of zero.
--   In `<Search>` use backspace key to remove tags from the search box.
-
-# 1.4.2
-
--   Add emoji-flags dependency
-
-# 1.4.1
-
--   Chart component: format numbers and prices using store currency settings.
--   Make `href`/linking optional in SummaryNumber.
--   Fix SummaryNumber example code.
-
-# 1.4.0
-
--   Add download log ip address autocompleter to search component
--   Add order number autocompleter to search component
--   Add order number, username, and IP address filters to the downloads report.
--   Added `interactive` prop for `d3chart/legend` to signal if legend items are clickable or not.
--   Fix for undefined ref in `d3chart/legend`.
--   Added three news props to `<Chart>`:
-    -   `interactiveLegend`: whether legend items are clickable or not. Defaults to true.
-    -   `legendPosition`: can be `top`, `side` or `bottom`. If not specified, it's calculated based on `mode` and viewport width.
-    -   `showHeaderControls`: whether the header controls must be visible. Defaults to true.
--   `getColor()` method in chart utils now requires `keys` and `colorScheme` to be passed as separate params.
--   Fix to avoid duplicated Y-axis ticks when the Y max value was 0.
--   Remove decimals from Y-axis when displaying currencies.
--   Fix date formatting on charts in Safari.
-
-# 1.3.0
-
--   Update `<Table />` to use header keys to denote which columns are shown
--   Add `onColumnsChange` property to `<Table />` which is called when columns are shown/hidden
--   Add country autocompleter to search component
--   Add customer email autocompleter to search component
--   Add customer username autocompleter to search component
--   Adding new `<Chart />` component.
--   Added new `showDatePicker` prop to `<Filters />` component which allows to use the filters component without the date picker.
--   Added new taxes and customers autocompleters, and added support for using them within `<Filters />`.
--   Bug fix for `<SummaryNumber />` returning N/A instead of zero.
--   Bug fix for screen reader label IDs in `<Table />` header.
--   Added new component `<TextControlWithAffixes />`.
-
-# 1.2.0
-
--   Update `Search` to exclude already-selected items
--   Fix incorrectly loaded `proptype-validator`
--   Update focus style on `SummaryNumber`
--   Remove prefixes from order statuses
-
-# 1.1.0
-
--   Add `interpolate-components` as an explicit dependency, fixes issue with
--   Update `<Popover />` usage to match core component updates
--   Chart component: Add `chartMode` prop to control display mode
--   Add Taxes autocompleter to Search
--   Improve test coverage with new tests
+# Changelog
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [12.1.0](https://www.npmjs.com/package/@woocommerce/components/v/12.1.0) - 2023-07-13
+
+-   Patch - Altering styles to correctly target fields within slot fills on product editor. [#36500]
+-   Patch - Fix collapsible content heading alignment [#38325]
+-   Minor - Fix issue where single item can not be cleared and text can not be selected upon click. [#36869]
+-   Minor - Fix issue where width of select control dropdown was not correctly calculated when rendering was delayed. [#37295]
+-   Patch - Fix SelectControl and TreeControl styles. [#36718]
+-   Minor - Fix SortableItem duplicated id [#36262]
+-   Patch - Include CSS for experimental tree control so it renders properly in Storybook. [#36517]
+-   Minor - Prevent duplicate registration of core blocks in client [#37350]
+-   Minor - Refactor createOrderedChildren [#36707]
+-   Patch - Replace isElevated prop with elevation for tour-kit step component [#38963]
+-   Minor - Wrap selected items in experimental select control [#38284]
+-   Minor - Add 6 basic fields to the product fields registry for use in extensibility within the new Product MVP. [#36392]
+-   Patch - Add ability to focus the first step after opening for tourkit [#38963]
+-   Minor - Add allowDragging option to ImageGallery to support disabling drag and drop of images. [#38045]
+-   Patch - Add an optional "InputProps" to experimental SelectControl component [#36470]
+-   Minor - Add callback for the media uploader component when gallery is opened [#38728]
+-   Minor - Added LearnMore option as well as made it possible to use this button multiple instances on the page [#36873]
+-   Minor - Adding experimental component SlotContext [#36333]
+-   Minor - Adding simple DisplayState wrapper and modifying Collapsible component to allow rendering hidden content. [#37305]
+-   Minor - Adding the WooProductSectionItem slotfill component. [#36331]
+-   Minor - Adding WooProductFieldItem slotfill. [#36315]
+-   Minor - Add minFilterQueryLength, individuallySelectParent, and clearOnSelect props. [#36869]
+-   Minor - Add new WooProductTabItem component for slot filling tab items. [#36551]
+-   Patch - Add onKeyDown and readOnlyWhenClosed options to experimentalSelectControl [#38328]
+-   Minor - Add product field store and helper functions for rendering fields from config. [#36362]
+-   Minor - Add single selection mode to SelectTree [#38140]
+-   Minor - Create SelectTree component that uses TreeControl [#37319]
+-   Minor - Expose registerBlocks as registerRichTextEditorBlocks from the rich text editor package [#38982]
+-   Minor - Fix dependency versions [#37023]
+-   Minor - Make DateTimePickerControl a ForwardedRef component" [#38306]
+-   Minor - TreeControl: Fix a bug where items with children were not selected in single mode and fix a bug where navigation between items with tab was not working properly. [#38079]
+-   Minor - Add deprecated message to packages moved to product-editor package. [#36815]
+-   Minor - Add deprecated message to product slot fill components [#36830]
+-   Minor - Apply wccom experimental select control changes [#36521]
+-   Minor - Export TreeSelectControl component and add additional props: onInputChange, alwaysShowPlaceholder, includeParent. [#36932]
+-   Patch - Opt out of Reset and Help buttons in DateTimePickerControl, as these will be removed in a future @wordpress/components version. [#38480]
+-   Minor - Show comma separated list in ready only mode of select tree control [#38052]
+-   Minor - Updated AdvancedFilter to use createInterpolateElement instead of interpolateComponents. [#37967]
+-   Minor - Update select tree control dropdown menu for custom slot fill support for display within Modals [#37574]
+-   Minor - Updating the product editor fill components to support multiple targets. [#36592]
+-   Minor - Updating WooProductFieldItem to uniquely generate IDs with different sections. [#36646]
+-   Minor - Add a11y support for the Tree component [#36459]
+-   Minor - Add custom rendering logic to the item label [#36476]
+-   Patch - Add instructions on how to run the tests when using @woocommerce/components [#38821]
+-   Minor - Adjust eslintrc for changes to eslint plugin. [#36988]
+-   Minor - Create tree-control component [#36432]
+-   Patch - Lint fixes [#38523]
+-   Patch - Migrate ellipsis-menu component to TS [#36405]
+-   Patch - Migrate Link component to TS [#36285]
+-   Patch - Migrate ProductImage component to TS [#36305]
+-   Patch - Migrate Rating component to TS [#36301]
+-   Patch - Migrate Section component to TS [#36298]
+-   Patch - Migrate select control component to TS [#37751]
+-   Patch - Migrate Table component to TS [#36370]
+-   Patch - Migrate Tag component to TS [#36265]
+-   Minor - Sync @wordpress package versions via syncpack. [#37034]
+-   Patch - Update eslint to 8.32.0 across the monorepo. [#36700]
+-   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
+-   Minor - Update pnpm to version 8. [#37915]
+-   Patch - Update TourKit README to correct primaryButton example and formatting. [#37427]
+-   Patch - Update webpack config to use @woocommerce/internal-style-build's parser config [#37195]
+-   Patch - Correct spelling errors [#37887]
+-   Minor - Improve a11y support to collapsible content component [#37760]
+-   Minor - Small tweak to update reference to currencyContext component. [#36959]
+-   Patch - Update positioning of DateTimePickerControl's dropdown. [#38466]
+-   Minor - Use BaseControl in the SelectTree label [#38261]
+
+## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28
+
+-   Patch - Add name to exported popover slot used to display SelectControl Menu, so it is only used for SelectControl menus. [#36124]
+-   Patch - Close DateTimePickerControl's dropdown when blurring from input. [#36124]
+-   Patch - DateTimePickerControl's onChange now only fires when there is an actual change to the datetime. [#36124]
+-   Patch - Fix DateTimePickerControl's popover styling when slot-fill is used. [#36124]
+-   Patch - Fixed DatePicker to work in WordPress 6.1 when currentDate is set to a moment instance. [#36124]
+-   Patch - Fix pagination label text from uppercase to normal and font styles [#36124]
+-   Patch - Include react-dates styles (no longer in WP 6.1+). [#36124]
+-   Patch - Set initial values prop from reset form function as optional [#36124]
+-   Patch - Add aria-label for simple select dropdown [#36124]
+-   Patch - Add async filtering support to the `__experimentalSelectControl` component [#36124]
+-   Patch - Add experimental open menu when user focus the select control input element [#36124]
+-   Patch - Updating downshift to 6.1.12. [#36124]
+-   Patch - Migrate search component to TS [#36124]
+-   Patch - Updated image gallery toolbar position and tooltips. [#36124]
+-   Patch - Update variable name within useFormContext. [#36124]
+-   Patch - Align the field height across the whole form [#36124]
+-   Patch - Fade the value selection field in the Attributes modal when no attribute is added [#36124]
+-   Patch - Update font size and spacing in the tooltip component [#36124]
+-   Minor - Set editor mode on initialization to prevent initial text editor focus [#36124]
+-   Minor - Add className prop to ListItem. [#36124]
+-   Minor - Add className prop to Sortable [#36124]
+-   Minor - Added ability to force time when DateTimePickerControl is date-only (timeForDateOnly prop). [#36124]
+-   Minor - Add experimental ConditionalWrapper component [#36124]
+-   Minor - Adding isHidden option for primary button in TourKit component. [#36124]
+-   Minor - Add support for custom suffix prop on SelectControl. [#36124]
+-   Minor - Make Table component accept className prop. [#36124]
+-   Minor - Move classname down in SelectControl Menu so it is on the actual Menu element. [#36124]
+-   Minor - Allow the user to select multiple images in the Media Library [#36124]
+-   Minor - Move file picker by clicking card into the MediaUploader component [#36124]
+-   Minor - Fix up initial block selection in RichTextEditor and add media blocks [#36124]
+-   Minor - Add noDataLabel property into table.js component to allow No Data label customization. [#36124]
+-   Major [ **BREAKING CHANGE** ] - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
+
+## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24
+
+-   Minor - Allow passing of additional props to form inputs [#35160]
+
+## [11.0.0](https://www.npmjs.com/package/@woocommerce/components/v/11.0.0) - 2022-10-20
+
+-   Patch - Export StepperProps for external usage [#35140]
+-   Patch - Fixed the initial setting of DateTimePickerControl's input field. [#35140]
+-   Patch - Fix EnrichedLabel Storybook story styles so they don't affect other stories. [#35140]
+-   Patch - Fixes DateTimePickerControl's debounce handling to work even if onChange prop changes. [#35140]
+-   Patch - Fix issue with form onChange handler, passing outdated values. [#35140]
+-   Patch - Update tag component styling [#35140]
+-   Patch - Add missing type definitions and add babel config for tests [#35140]
+-   Patch - Merging trunk with local [#35140]
+-   Patch - Removed unfinished and unused SplitDropdown component. [#35140]
+-   Patch - Assume ambiguous dates passed into DateTimePickerControl are UTC. [#35140]
+-   Patch - Remove default selected sortable item. [#35140]
+-   Minor - Fix Enriched-label styles
+-   Minor - Fix initially selected items in SelectControl component [#35140]
+-   Minor - Add date-only mode to DateTimePickerControl. [#35140]
+-   Minor - Add disabled option to the Select Control input component and alter the onInputChange callback [#35140]
+-   Minor - Add form input name dot notation name="product.dimensions.width" [#35140]
+-   Minor - Add FormSection component [#35140]
+-   Minor - Add ImageGallery component [#35140]
+-   Minor - Adding datetimepicker component. [#35140]
+-   Minor - Adding on-click toolbar to image gallery component items. [#35140]
+-   Minor - Add label prop to rich text editor [#35140]
+-   Minor - Add MediaUploader component [#35140]
+-   Minor - Add rich text editor component [#35140]
+-   Minor - Add SortableList component [#35140]
+-   Minor - Allow external tags in SelectControl component [#35140]
+-   Minor - Export ImportProps type. Add DateTimePickerControl to Form stories and tests. [#35140]
+-   Minor - Images Product management [#35140]
+-   Minor - Remove EnrichedLabel component in favor of Tooltip component [#35140]
+-   Minor - Update resetForm arguments, adding changed fields, touched fields and errors. [#35140]
+-   Minor - [PM Components] Create SplitDropdown component. #34180 [#35140]
+-   Minor - Add label, placeholder, and help props to DateTimePickerControl. [#35140]
+-   Minor - Adds setValues support to FormContext [#35140]
+-   Minor - Add support in SelectControl for using the popover slot for the popover. [#35140]
+-   Minor - Update experimental SelectControl compoment to expose a couple extra combobox functions from Downshift. [#35140]
+-   Minor - Update experimental SelectControl compoment to expose combobox functions from Downshift and provide additional options. [#35140]
+-   Minor - Update text input placement in SelectControl [#35140]
+-   Minor - Add component EnrichedLabel #34214 [#35140]
+-   Minor - Add new shippping class modal to a shipping class section in product page [#35140]
+-   Minor - Adjust build/test scripts to remove -- -- that was required for pnpm 6. [#35140]
+-   Minor - Fix node and pnpm versions via engines [#35140]
+-   Minor - Update Plugin installer component to TS [#35140]
+-   Minor - Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues [#35140]
+-   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
+-   Minor - Improve experimental SelectControl accessibility [#35140]
+-   Minor - Improve Sortable component acessibility [#35140]
+-   -   Create new experimental SelectControl component [#35140]
+
+## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12
+
+-   Patch - Added in missing TS definitions in package.json [#34279]
+-   Patch - fixed button rendering for 1 step tour which was not showing completion button due to bug in logic [#34279]
+-   Minor - Adding basic CollapsibleContent component. [#34279]
+-   Minor - Add the use of a context provider for the Form component. #34082 [#34279]
+-   Minor - Update types for Form component and allow Form state to be reset. [#34279]
+-   Minor - Removed Step 1 of 1 step description for 1 step tours [#34279]
+
+## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19
+
+-   Patch - Fix missing text domain
+
+## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08
+
+-   Minor - Add step name to tour kit step type and export CloseHandler type to be reused elsewhere
+-   Minor - Tree Select Control Component
+-   Minor - Updated @automattic/tour-kit to 1.1.1 which has live resize functionality
+-   Minor - Plugins component skip button is now optional
+-   Minor - Remove PHP and Composer dependencies for packaged JS packages
+-   Patch - Tweak tour kit gap between content and controls
+
+## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09
+
+-   Minor - Add tour kit component
+-   Minor - Update dependency `memoize-one` to ^6.0.0. #32936
+-   Minor - Update dependency `react-dates` to ^21.8.0. #32883
+-   Minor - Add Jetpack Changelogger
+-   Minor - Update dependency `@wordpress/hooks` to ^3.5.0
+-   Minor - Update dependency `@wordpress/icons` to ^8.1.0
+-   Minor - Add `className` prop for Pill component. #32605
+-   Patch - Removed unused react-router-dom dependency #33156
+-   Patch - Standardize lint scripts: add lint:fix
+-   Patch - Fix documentation for `TableCard` component
+-   Patch - Update `StepperProps` prop types. #32712
+
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/components/CHANGELOG.md).

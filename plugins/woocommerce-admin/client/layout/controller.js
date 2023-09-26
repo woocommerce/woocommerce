@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Component, Suspense, lazy } from '@wordpress/element';
+import { Suspense, lazy } from '@wordpress/element';
+import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
@@ -12,6 +13,7 @@ import {
 	getHistory,
 	getQueryExcludedScreens,
 	getScreenFromPath,
+	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
 
@@ -19,10 +21,23 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import getReports from '../analytics/report/get-reports';
-import { isWCAdmin } from '../dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
 
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/add-product-page'
+	)
+);
+const EditProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
+	)
+);
+const ProductPage = lazy( () =>
+	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -34,26 +49,36 @@ const AnalyticsSettings = lazy( () =>
 const Dashboard = lazy( () =>
 	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
-
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
-const MarketingOverview = lazy( () =>
+const MarketingOverviewMultichannel = lazy( () =>
 	import(
-		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
+		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
+);
+const Marketplace = lazy( () =>
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
 );
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
+
+const CoreProfiler = lazy( () =>
+	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
+);
+
 const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
-
 const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
 	)
+);
+
+const CustomizeStore = lazy( () =>
+	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -67,10 +92,7 @@ export const getPages = () => {
 	pages.push( {
 		container: Homescreen,
 		path: '/',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			__( 'Home', 'woocommerce-admin' ),
-		],
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Home', 'woocommerce' ) ],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 		navArgs: {
 			id: 'woocommerce-home',
@@ -84,11 +106,8 @@ export const getPages = () => {
 			path: '/analytics/overview',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[
-					'/analytics/overview',
-					__( 'Analytics', 'woocommerce-admin' ),
-				],
-				__( 'Overview', 'woocommerce-admin' ),
+				[ '/analytics/overview', __( 'Analytics', 'woocommerce' ) ],
+				__( 'Overview', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 			navArgs: {
@@ -101,11 +120,8 @@ export const getPages = () => {
 			path: '/analytics/settings',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[
-					'/analytics/revenue',
-					__( 'Analytics', 'woocommerce-admin' ),
-				],
-				__( 'Settings', 'woocommerce-admin' ),
+				[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
+				__( 'Settings', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 			navArgs: {
@@ -118,7 +134,7 @@ export const getPages = () => {
 			path: '/customers',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Customers', 'woocommerce-admin' ),
+				__( 'Customers', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			navArgs: {
@@ -138,10 +154,7 @@ export const getPages = () => {
 				}
 				return [
 					...initialBreadcrumbs,
-					[
-						'/analytics/revenue',
-						__( 'Analytics', 'woocommerce-admin' ),
-					],
+					[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
 					report.title,
 				];
 			},
@@ -152,12 +165,12 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: MarketingOverview,
+			container: MarketingOverviewMultichannel,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[ '/marketing', __( 'Marketing', 'woocommerce-admin' ) ],
-				__( 'Overview', 'woocommerce-admin' ),
+				[ '/marketing', __( 'Marketing', 'woocommerce' ) ],
+				__( 'Overview', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce-marketing',
 			navArgs: {
@@ -167,13 +180,149 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.onboarding ) {
+	if ( isFeatureEnabled( 'marketplace' ) ) {
 		pages.push( {
-			container: ProfileWizard,
-			path: '/setup-wizard',
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
+			path: '/extensions',
+			breadcrumbs: [
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-marketplace',
+			},
+		} );
+	}
+
+	if ( isFeatureEnabled( 'product_block_editor' ) ) {
+		const productPage = {
+			container: ProductPage,
+			layout: {
+				header: false,
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		};
+
+		pages.push( {
+			...productPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+		} );
+
+		pages.push( {
+			...productPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+		} );
+	} else if (
+		window.wcAdminFeatures[ 'new-product-management-experience' ]
+	) {
+		pages.push( {
+			container: AddProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: EditProductPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
+		pages.push( {
+			container: EditProductPage,
+			path: '/product/:productId/variation/:variationId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product Variation', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'edit_products',
+		} );
+	}
+
+	if ( window.wcAdminFeatures.onboarding ) {
+		if ( ! window.wcAdminFeatures[ 'core-profiler' ] ) {
+			pages.push( {
+				container: ProfileWizard,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Setup Wizard', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		} else {
+			pages.push( {
+				container: CoreProfiler,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Profiler', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		}
+	}
+
+	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
+		pages.push( {
+			container: CoreProfiler,
+			path: '/profiler',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Setup Wizard', 'woocommerce-admin' ),
+				__( 'Profiler', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
+		pages.push( {
+			container: CustomizeStore,
+			path: '/customize-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Customize Your Store', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );
@@ -184,7 +333,7 @@ export const getPages = () => {
 			container: SettingsGroup,
 			path: '/settings/:page',
 			breadcrumbs: ( { match } ) => {
-				// @todo This might need to be refactored to retreive groups via data store.
+				// @todo This might need to be refactored to retrieve groups via data store.
 				const settingsPages = getAdminSetting( 'settingsPages' );
 				const page = settingsPages[ match.params.page ];
 				if ( ! page ) {
@@ -198,7 +347,7 @@ export const getPages = () => {
 							: `/settings/${
 									Object.keys( settingsPages )[ 0 ]
 							  }`,
-						__( 'Settings', 'woocommerce-admin' ),
+						__( 'Settings', 'woocommerce' ),
 					],
 					page,
 				];
@@ -213,11 +362,8 @@ export const getPages = () => {
 			container: WCPaymentsWelcomePage,
 			path: '/wc-pay-welcome-page',
 			breadcrumbs: [
-				[
-					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce-admin' ),
-				],
-				__( 'WooCommerce Payments', 'woocommerce-admin' ),
+				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+				__( 'WooPayments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',
@@ -240,7 +386,7 @@ export const getPages = () => {
 		path: '*',
 		breadcrumbs: [
 			...initialBreadcrumbs,
-			__( 'Not allowed', 'woocommerce-admin' ),
+			__( 'Not allowed', 'woocommerce' ),
 		],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 	} );
@@ -248,56 +394,66 @@ export const getPages = () => {
 	return filteredPages;
 };
 
-export class Controller extends Component {
-	componentDidMount() {
+function usePrevious( value ) {
+	const ref = useRef();
+	useEffect( () => {
+		ref.current = value;
+	}, [ value ] );
+	return ref.current;
+}
+
+export const Controller = ( { ...props } ) => {
+	const prevProps = usePrevious( props );
+
+	useEffect( () => {
 		window.document.documentElement.scrollTop = 0;
 		window.document.body.classList.remove( 'woocommerce-admin-is-loading' );
-	}
+	}, [] );
 
-	componentDidUpdate( prevProps ) {
-		const prevBaseQuery = omit(
-			prevProps.query,
-			'chartType',
-			'filter',
-			'paged'
-		);
-		const baseQuery = omit(
-			this.props.query,
-			'chartType',
-			'filter',
-			'paged'
-		);
+	useEffect( () => {
+		if ( prevProps ) {
+			const prevBaseQuery = omit(
+				prevProps.query,
+				'chartType',
+				'filter',
+				'paged'
+			);
+			const baseQuery = omit(
+				props.query,
+				'chartType',
+				'filter',
+				'paged'
+			);
 
-		if (
-			prevProps.query.paged > 1 &&
-			! isEqual( prevBaseQuery, baseQuery )
-		) {
-			getHistory().replace( getNewPath( { paged: 1 } ) );
+			if (
+				prevProps.query.paged > 1 &&
+				! isEqual( prevBaseQuery, baseQuery )
+			) {
+				getHistory().replace( getNewPath( { paged: 1 } ) );
+			}
+
+			if ( prevProps.match.url !== props.match.url ) {
+				window.document.documentElement.scrollTop = 0;
+			}
 		}
+	}, [ props, prevProps ] );
 
-		if ( prevProps.match.url !== this.props.match.url ) {
-			window.document.documentElement.scrollTop = 0;
-		}
-	}
+	const { page, match, query } = props;
+	const { url, params } = match;
 
-	render() {
-		const { page, match, query } = this.props;
-		const { url, params } = match;
-
-		window.wpNavMenuUrlUpdate( query );
-		window.wpNavMenuClassChange( page, url );
-		return (
-			<Suspense fallback={ <Spinner /> }>
-				<page.container
-					params={ params }
-					path={ url }
-					pathMatch={ page.path }
-					query={ query }
-				/>
-			</Suspense>
-		);
-	}
-}
+	window.wpNavMenuUrlUpdate( query );
+	window.wpNavMenuClassChange( page, url );
+	return (
+		<Suspense fallback={ <Spinner /> }>
+			<page.container
+				params={ params }
+				path={ url }
+				pathMatch={ page.path }
+				query={ query }
+			/>
+		</Suspense>
+	);
+};
 
 /**
  * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
@@ -336,10 +492,11 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
+	const anchors = document.querySelectorAll( '#adminmenu a' );
 
-	Array.from(
-		document.querySelectorAll( '#adminmenu a' )
-	).forEach( ( item ) => updateLinkHref( item, nextQuery, excludedScreens ) );
+	Array.from( anchors ).forEach( ( item ) =>
+		updateLinkHref( item, nextQuery, excludedScreens )
+	);
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
@@ -366,10 +523,21 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
-	const currentItemsSelector =
+	let currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
+
+	const parentPath = page.navArgs?.parentPath;
+	if ( parentPath ) {
+		const parentPageUrl =
+			parentPath === '/'
+				? 'admin.php?page=wc-admin'
+				: 'admin.php?page=wc-admin&path=' +
+				  encodeURIComponent( parentPath );
+		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
+	}
+
 	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {

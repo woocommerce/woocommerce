@@ -195,6 +195,7 @@ const createSampleData = async () => {
 	} );
 
 	// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
+	// eslint-disable-next-line
 	const { body: taxSetting } = await getRequest(
 		'settings/general/woocommerce_calc_taxes'
 	);
@@ -202,6 +203,7 @@ const createSampleData = async () => {
 		value: 'yes',
 	} );
 
+	// eslint-disable-next-line
 	const { body: taxRate } = await postRequest( 'taxes', {
 		country: '*',
 		state: '*',
@@ -209,15 +211,18 @@ const createSampleData = async () => {
 		city: '*',
 		rate: '5.5000',
 		name: 'Tax',
+		// eslint-disable-next-line
 		rate: '5.5',
 		shipping: true,
 	} );
 
+	// eslint-disable-next-line
 	const { body: coupon } = await postRequest( 'coupons', {
 		code: 'save5',
 		amount: '5',
 	} );
 
+	// eslint-disable-next-line
 	const { body: order4 } = await ordersApi.create.order( {
 		...orderBaseData,
 		line_items: [

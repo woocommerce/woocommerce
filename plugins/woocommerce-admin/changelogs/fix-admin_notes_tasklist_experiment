@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix hidden notes in `admin/notes` endpoint when the user is not in the tasklist experiment. #8328

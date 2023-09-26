@@ -13,7 +13,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	/**
 	 * Set up for tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user = $this->factory->user->create(
 			array(
@@ -28,7 +28,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		remove_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10 );
 	}
@@ -37,6 +37,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * Test: get_status_widget
 	 */
 	public function test_status_widget() {
+		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
@@ -48,16 +49,17 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 		$widget_output = $this->getActualOutput();
 
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;path\=\%2Fanalytics\%2Frevenue/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;path\=\%2Fanalytics\%2Frevenue/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
 	}
 
 	/**
 	 * Test: get_status_widget with woo admin disabled.
 	 */
 	public function test_status_widget_with_woo_admin_disabled() {
+		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
@@ -70,10 +72,10 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		( new WC_Admin_Dashboard() )->status_widget();
 
 		$widget_output = $this->getActualOutput();
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
 
 		remove_filter( 'woocommerce_admin_disabled', '__return_true' );
 	}

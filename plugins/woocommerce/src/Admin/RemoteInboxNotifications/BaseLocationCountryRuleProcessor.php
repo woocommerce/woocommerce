@@ -6,6 +6,8 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,6 +26,15 @@ class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 	public function process( $rule, $stored_state ) {
 		$base_location = wc_get_base_location();
 		if ( ! $base_location ) {
+			return false;
+		}
+
+		$onboarding_profile   = get_option( 'woocommerce_onboarding_profile', array() );
+		$is_address_default   = 'US' === $base_location['country'] && 'CA' === $base_location['state'] && empty( get_option( 'woocommerce_store_address', '' ) );
+		$is_store_country_set = isset( $onboarding_profile['is_store_country_set'] ) && $onboarding_profile['is_store_country_set'];
+
+		// Return false if the location is the default country and if onboarding hasn't been finished or the store address not been updated.
+		if ( $is_address_default && OnboardingProfile::needs_completion() && ! $is_store_country_set ) {
 			return false;
 		}
 

@@ -13,6 +13,14 @@ defined( 'ABSPATH' ) || exit;
  * products.
  */
 class ProductCountRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * The product query.
+	 *
+	 * @var WC_Product_Query
+	 */
+	protected $product_query;
+
 	/**
 	 * Constructor.
 	 *

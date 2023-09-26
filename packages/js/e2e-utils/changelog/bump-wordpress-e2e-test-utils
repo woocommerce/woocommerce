@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update `@wordpress/e2e-test-utils` to `wp-5.8: 5.3.2`

@@ -39,7 +39,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->container = new ExtendedContainer();
 
 		$this->sut = new class() extends AbstractServiceProvider {
@@ -67,7 +67,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before all the tests of the class.
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		/**
 		 * Return a new instance of ClassWithDependencies.
 		 *

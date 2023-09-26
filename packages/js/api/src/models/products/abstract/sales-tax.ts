@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 import { Taxability } from '../shared';
 
@@ -20,4 +23,4 @@ abstract class AbstractProductSalesTax extends Model {
 	public readonly taxClass: string = '';
 }
 
-export interface IProductSalesTax extends AbstractProductSalesTax {}
+export type IProductSalesTax = AbstractProductSalesTax;

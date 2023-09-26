@@ -38,7 +38,7 @@ class ProductAttributeTerms extends \WC_REST_Product_Attribute_Terms_Controller 
 			array(
 				'args'   => array(
 					'slug' => array(
-						'description' => __( 'Slug identifier for the resource.', 'woocommerce-admin' ),
+						'description' => __( 'Slug identifier for the resource.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -63,7 +63,7 @@ class ProductAttributeTerms extends \WC_REST_Product_Attribute_Terms_Controller 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you cannot view this resource.', 'woocommerce-admin' ),
+				__( 'Sorry, you cannot view this resource.', 'woocommerce' ),
 				array(
 					'status' => rest_authorization_required_code(),
 				)

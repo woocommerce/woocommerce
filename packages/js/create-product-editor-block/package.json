@@ -1,0 +1,31 @@
+{
+	"name": "@woocommerce/create-product-editor-block",
+	"version": "1.1.0",
+	"description": "A template to be used with `@wordpress/create-block` to create a Product Editor block.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"main": "index.js",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/woocommerce/woocommerce.git"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce"
+	],
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-product-editor-block-extensionv#readme",
+	"publishConfig": {
+		"access": "public"
+	}
+}

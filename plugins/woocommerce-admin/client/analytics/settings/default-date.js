@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { parse, stringify } from 'qs';
 import { DateRangeFilterPicker } from '@woocommerce/components';
 import { useSettings } from '@woocommerce/data';
 import {
@@ -14,18 +13,19 @@ const DefaultDate = ( { value, onChange } ) => {
 	const { wcAdminSettings } = useSettings( 'wc_admin', [
 		'wcAdminSettings',
 	] );
-	const {
-		woocommerce_default_date_range: defaultDateRange,
-	} = wcAdminSettings;
+	const { woocommerce_default_date_range: defaultDateRange } =
+		wcAdminSettings;
 	const change = ( query ) => {
 		onChange( {
 			target: {
 				name: 'woocommerce_default_date_range',
-				value: stringify( query ),
+				value: new URLSearchParams( query ).toString(),
 			},
 		} );
 	};
-	const query = parse( value.replace( /&amp;/g, '&' ) );
+	const query = Object.fromEntries(
+		new URLSearchParams( value.replace( /&amp;/g, '&' ) )
+	);
 	const { period, compare, before, after } = getDateParamsFromQuery(
 		query,
 		defaultDateRange

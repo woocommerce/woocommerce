@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 
 /**
@@ -9,7 +12,7 @@ abstract class AbstractProductUpSells extends Model {
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 }
 
-export interface IProductUpSells extends AbstractProductUpSells {}
+export type IProductUpSells = AbstractProductUpSells;

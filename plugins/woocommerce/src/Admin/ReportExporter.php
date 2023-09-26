@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
+use Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
 
 /**
  * ReportExporter Class.

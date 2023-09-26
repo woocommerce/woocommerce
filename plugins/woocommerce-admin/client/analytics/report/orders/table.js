@@ -8,13 +8,13 @@ import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { defaultTableDateFormat } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 const capitalizeFirstLetter = ( expr ) =>
 	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
@@ -31,7 +31,7 @@ class OrdersReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'woocommerce-admin' ),
+				label: __( 'Date', 'woocommerce' ),
 				key: 'date',
 				required: true,
 				defaultSort: true,
@@ -39,53 +39,53 @@ class OrdersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Order #', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Order Number', 'woocommerce-admin' ),
+				label: __( 'Order #', 'woocommerce' ),
+				screenReaderLabel: __( 'Order Number', 'woocommerce' ),
 				key: 'order_number',
 				required: true,
 			},
 			{
-				label: __( 'Status', 'woocommerce-admin' ),
+				label: __( 'Status', 'woocommerce' ),
 				key: 'status',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer', 'woocommerce-admin' ),
+				label: __( 'Customer', 'woocommerce' ),
 				key: 'customer_id',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer type', 'woocommerce-admin' ),
+				label: __( 'Customer type', 'woocommerce' ),
 				key: 'customer_type',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Product(s)', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Products', 'woocommerce-admin' ),
+				label: __( 'Product(s)', 'woocommerce' ),
+				screenReaderLabel: __( 'Products', 'woocommerce' ),
 				key: 'products',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce' ),
 				key: 'num_items_sold',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Coupon(s)', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Coupons', 'woocommerce-admin' ),
+				label: __( 'Coupon(s)', 'woocommerce' ),
+				screenReaderLabel: __( 'Coupons', 'woocommerce' ),
 				key: 'coupons',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
 				key: 'net_total',
 				required: true,
 				isSortable: true,
@@ -116,7 +116,7 @@ class OrdersReportTable extends Component {
 		return map( tableData, ( row ) => {
 			const {
 				currency,
-				date_created: dateCreated,
+				date,
 				net_total: netTotal,
 				num_items_sold: numItemsSold,
 				order_id: orderId,
@@ -150,12 +150,9 @@ class OrdersReportTable extends Component {
 			return [
 				{
 					display: (
-						<Date
-							date={ dateCreated }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={ date } visibleFormat={ dateFormat } />
 					),
-					value: dateCreated,
+					value: date,
 				},
 				{
 					display: (
@@ -202,7 +199,7 @@ class OrdersReportTable extends Component {
 							: [],
 						formattedProducts.map( ( product ) => ( {
 							label: sprintf(
-								__( '%s× %s', 'woocommerce-admin' ),
+								__( '%s× %s', 'woocommerce' ),
 								product.quantity,
 								product.label
 							),
@@ -212,7 +209,7 @@ class OrdersReportTable extends Component {
 					value: formattedProducts
 						.map( ( { quantity, label } ) =>
 							sprintf(
-								__( '%s× %s', 'woocommerce-admin' ),
+								__( '%s× %s', 'woocommerce' ),
 								quantity,
 								label
 							)
@@ -259,12 +256,7 @@ class OrdersReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'Order',
-					'Orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
@@ -272,17 +264,12 @@ class OrdersReportTable extends Component {
 					' Customer',
 					' Customers',
 					totalCustomers,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', totalCustomers ),
 			},
 			{
-				label: _n(
-					'Product',
-					'Products',
-					products,
-					'woocommerce-admin'
-				),
+				label: _n( 'Product', 'Products', products, 'woocommerce' ),
 				value: formatValue( currency, 'number', products ),
 			},
 			{
@@ -290,21 +277,16 @@ class OrdersReportTable extends Component {
 					'Item sold',
 					'Items sold',
 					numItemsSold,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', numItemsSold ),
 			},
 			{
-				label: _n(
-					'Coupon',
-					'Coupons',
-					couponsCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Coupon', 'Coupons', couponsCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', couponsCount ),
 			},
 			{
-				label: __( 'net sales', 'woocommerce-admin' ),
+				label: __( 'net sales', 'woocommerce' ),
 				value: formatAmount( netRevenue ),
 			},
 		];
@@ -350,7 +332,7 @@ class OrdersReportTable extends Component {
 				tableQuery={ {
 					extended_info: true,
 				} }
-				title={ __( 'Orders', 'woocommerce-admin' ) }
+				title={ __( 'Orders', 'woocommerce' ) }
 				columnPrefsKey="orders_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

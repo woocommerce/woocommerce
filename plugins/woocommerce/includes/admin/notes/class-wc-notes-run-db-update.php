@@ -9,7 +9,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\Jetpack\Constants;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**

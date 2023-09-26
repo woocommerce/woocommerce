@@ -1,0 +1,64 @@
+name: MarkdownLint on PR
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 2
+
+            - name: Get changed files
+              id: changed-files
+              uses: tj-actions/changed-files@v37
+              with:
+                  files: |
+                      **/*.md
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.6.7'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  pnpm i -g markdownlint-cli
+
+            - name: Lint changed markdown files
+              run: |
+                  RED="\e[1;31m"
+                  GREEN="\e[1;32m"
+                  NC="\e[0m"
+                  set -e
+                  rc=0
+                  changed_files="${{ steps.changed-files.outputs.all_changed_files  }}"
+                  if [ -n "$changed_files" ]; then
+                    lint_results=""
+                    for file in $changed_files; do
+                      lint_result=$( { cat "$file" | markdownlint --stdin ; } 2>&1 ) || rc="$?"
+                      if [ $rc -ne 0 ]; then
+                        lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
+                      fi
+                    done
+                    if [ $rc -ne 0 ]; then
+                      echo -e "${RED}Linting failed for one or more files${NC}"
+                      echo -e "$lint_results"
+                      exit 1
+                    else
+                      echo -e "${GREEN}Linting successful for all files.${NC}"
+                    fi
+                  else
+                    echo "No markdown files changed."
+                  fi

@@ -2,29 +2,33 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { lazy, useState, useEffect } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
-import { getAdminLink, getSetting } from '@woocommerce/settings';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	useUser,
 	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory, addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
+import {
+	LayoutContextProvider,
+	useExtendLayout,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { IconFlag } from './icon-flag';
-import { isNotesPanelVisible } from './unread-indicators';
-import { isWCAdmin } from '~/dashboard/utils';
+import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -37,6 +41,12 @@ import {
 } from '../homescreen/activity-panel/orders/utils';
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
+import { getAdminSetting } from '~/utils/admin-settings';
+import { getUrlParams } from '~/utils';
+import { useActiveSetupTasklist } from '~/task-lists';
+import { getSegmentsFromPath } from '~/utils/url-helpers';
+import { FeedbackIcon } from '~/products/images/feedback-icon';
+import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -48,6 +58,12 @@ const InboxPanel = lazy( () =>
 	)
 );
 
+const SetupTasksPanel = lazy( () =>
+	import(
+		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
+	)
+);
+
 export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
@@ -56,6 +72,16 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
+	const activeSetupList = useActiveSetupTasklist();
+
+	useEffect( () => {
+		return addHistoryListener( () => {
+			closePanel();
+			clearPanel();
+		} );
+	}, [] );
+
+	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -95,25 +121,22 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		).length;
 	}
 
-	function isAbbreviatedPanelVisible(
+	function checkIfHasAbbreviatedNotifications(
 		select,
 		setupTaskListHidden,
 		thingsToDoNextCount
 	) {
 		const orderStatuses = getOrderStatuses( select );
 
-		const isOrdersCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getUnreadOrders( select, orderStatuses ) > 0
-				: false;
-		const isReviewsCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getUnapprovedReviews( select )
-				: false;
-		const isLowStockCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getLowStockProducts( select )
-				: false;
+		const isOrdersCardVisible = setupTaskListHidden
+			? getUnreadOrders( select, orderStatuses ) > 0
+			: false;
+		const isReviewsCardVisible = setupTaskListHidden
+			? getUnapprovedReviews( select )
+			: false;
+		const isLowStockCardVisible = setupTaskListHidden
+			? getLowStockProducts( select )
+			: false;
 
 		return (
 			thingsToDoNextCount > 0 ||
@@ -132,6 +155,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
+		setupTasksCompleteCount,
+		setupTasksCount,
 		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -139,24 +164,30 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			ONBOARDING_STORE_NAME
 		);
 
-		const isSetupTaskListHidden = getTaskList( 'setup' )?.isHidden;
+		const setupList = activeSetupList && getTaskList( activeSetupList );
+
+		const isSetupTaskListHidden = setupList?.isHidden ?? false;
+		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
 
 		return {
-			hasUnreadNotes: isNotesPanelVisible( select ),
-			hasAbbreviatedNotifications: isAbbreviatedPanelVisible(
+			hasUnreadNotes: checkIfHasUnreadNotes( select ),
+			hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
 				select,
 				isSetupTaskListHidden,
 				thingsToDoCount
 			),
 			thingsToDoNextCount: thingsToDoCount,
-			requestingTaskListOptions: ! hasFinishedResolution(
-				'getTaskLists'
-			),
-			setupTaskListComplete: getTaskList( 'setup' )?.isComplete,
+			requestingTaskListOptions:
+				! hasFinishedResolution( 'getTaskLists' ),
+			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
+			setupTasksCount: setupVisibleTasks.length,
+			setupTasksCompleteCount: setupVisibleTasks.filter(
+				( task ) => task.isComplete
+			).length,
 			isCompletedTask: Boolean(
 				query.task && getTask( query.task )?.isComplete
 			),
@@ -166,7 +197,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
-	const { unhideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+
+	const { showCesModal } = useDispatch( CES_STORE_KEY );
+
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -202,6 +235,23 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
+	const isProductScreen = () => {
+		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
+		return (
+			firstPathSegment === 'add-product' || firstPathSegment === 'product'
+		);
+	};
+
+	const isAddProductPage = () => {
+		const urlParams = getUrlParams( window.location.search );
+
+		return (
+			isEmbedded &&
+			/post-new\.php$/.test( window.location.pathname ) &&
+			urlParams?.post_type === 'product'
+		);
+	};
+
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
@@ -212,60 +262,84 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
-	const redirectToHomeScreen = () => {
-		if ( isWCAdmin( window.location.href ) ) {
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} else {
-			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
-		}
-	};
-
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
 		const activity = {
 			name: 'activity',
-			title: __( 'Activity', 'woocommerce-admin' ),
+			title: __( 'Activity', 'woocommerce' ),
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
-				( isEmbedded || ! isHomescreen() ) && ! isPerformingSetupTask(),
+				( isEmbedded || ! isHomescreen() ) &&
+				! isPerformingSetupTask() &&
+				! isProductScreen(),
+		};
+
+		const feedback = {
+			name: 'feedback',
+			title: __( 'Feedback', 'woocommerce' ),
+			icon: <FeedbackIcon />,
+			onClick: () => {
+				setCurrentTab( 'feedback' );
+				setIsPanelOpen( true );
+				showCesModal(
+					{
+						action: 'product_feedback',
+						title: __(
+							"How's your experience with the product editor?",
+							'woocommerce'
+						),
+						firstQuestion: __(
+							'The product editing screen is easy to use',
+							'woocommerce'
+						),
+						secondQuestion: __(
+							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+					},
+					{
+						onRecordScore: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+						onCloseModal: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+					},
+					{
+						type: 'snackbar',
+						icon: <span>🌟</span>,
+					}
+				);
+			},
+			visible: isAddProductPage(),
 		};
 
 		const setup = {
 			name: 'setup',
-			title: __( 'Finish setup', 'woocommerce-admin' ),
-			icon: <SetupProgress />,
-			onClick: () => {
-				const currentLocation = window.location.href;
-				const homescreenLocation = getAdminLink(
-					'admin.php?page=wc-admin'
-				);
-
-				// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-				if ( currentLocation !== homescreenLocation ) {
-					// Ensure that if the user is trying to get to the task list they can see it even if
-					// it was dismissed.
-					if ( setupTaskListHidden === 'no' ) {
-						redirectToHomeScreen();
-					} else {
-						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
-					}
-				}
-
-				return null;
-			},
+			title: __( 'Finish setup', 'woocommerce' ),
+			icon: (
+				<SetupProgress
+					setupTasksComplete={ setupTasksCompleteCount }
+					setupCompletePercent={ Math.ceil(
+						( setupTasksCompleteCount / setupTasksCount ) * 100
+					) }
+				/>
+			),
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isPerformingSetupTask() &&
-				( ! isHomescreen() || isEmbedded ),
+				! isHomescreen() &&
+				! isProductScreen(),
 		};
 
 		const help = {
 			name: 'help',
-			title: __( 'Help', 'woocommerce-admin' ),
+			title: __( 'Help', 'woocommerce' ),
 			icon: <Icon icon={ helpIcon } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
@@ -284,11 +358,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const previewSite = {
 			name: 'previewSite',
-			title: __( 'Preview site', 'woocommerce-admin' ),
+			title: __( 'Preview site', 'woocommerce' ),
 			icon: <Icon icon={ external } />,
-			visible: query.page === 'wc-admin' && query.task === 'appearance',
+			visible: isHomescreen() && query.task === 'appearance',
 			onClick: () => {
-				window.open( getSetting( 'siteUrl' ) );
+				window.open( getAdminSetting( 'siteUrl' ) );
 				recordEvent(
 					'wcadmin_tasklist_previewsite',
 					previewSiteBtnTrackData
@@ -298,9 +372,28 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			},
 		};
 
-		return [ activity, setup, previewSite, displayOptions, help ].filter(
-			( tab ) => tab.visible
-		);
+		const previewStore = {
+			name: 'previewStore',
+			title: __( 'Preview store', 'woocommerce' ),
+			icon: <Icon icon={ external } />,
+			visible: isHomescreen() && query.task !== 'appearance',
+			onClick: () => {
+				window.open( getAdminSetting( 'shopUrl' ) );
+				recordEvent( 'wcadmin_previewstore_click' );
+
+				return null;
+			},
+		};
+
+		return [
+			activity,
+			feedback,
+			setup,
+			previewSite,
+			previewStore,
+			displayOptions,
+			help,
+		].filter( ( tab ) => tab.visible );
 	};
 
 	const getPanelContent = ( tab ) => {
@@ -318,6 +411,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
+			case 'setup':
+				return <SetupTasksPanel query={ query } />;
 			default:
 				return null;
 		}
@@ -353,55 +448,60 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<div>
-			<H id={ headerId } className="screen-reader-text">
-				{ __( 'Store Activity', 'woocommerce-admin' ) }
-			</H>
-			<Section
-				component="aside"
-				id="woocommerce-activity-panel"
-				className="woocommerce-layout__activity-panel"
-				aria-labelledby={ headerId }
-			>
-				<Tabs
-					tabs={ tabs }
-					tabOpen={ isPanelOpen }
-					selectedTab={ currentTab }
-					onTabClick={ ( tab, tabOpen ) => {
-						if ( tab.onClick ) {
-							tab.onClick();
-							return;
-						}
+		<LayoutContextProvider value={ updatedLayoutContext }>
+			<div>
+				<H id={ headerId } className="screen-reader-text">
+					{ __( 'Store Activity', 'woocommerce' ) }
+				</H>
+				<Section
+					component="aside"
+					id="woocommerce-activity-panel"
+					className="woocommerce-layout__activity-panel"
+					aria-labelledby={ headerId }
+				>
+					<Tabs
+						tabs={ tabs }
+						tabOpen={ isPanelOpen }
+						selectedTab={ currentTab }
+						onTabClick={ ( tab, tabOpen ) => {
+							if ( tab.onClick ) {
+								tab.onClick();
+								return;
+							}
 
-						togglePanel( tab, tabOpen );
-					} }
-				/>
-				<Panel
-					currentTab
-					isPanelOpen={ isPanelOpen }
-					isPanelSwitching={ isPanelSwitching }
-					tab={ find( getTabs(), { name: currentTab } ) }
-					content={ getPanelContent( currentTab ) }
-					closePanel={ () => closePanel() }
-					clearPanel={ () => clearPanel() }
-				/>
-			</Section>
-			{ showHelpHighlightTooltip ? (
-				<HighlightTooltip
-					delay={ 1000 }
-					useAnchor={ true }
-					title={ __( "We're here for help", 'woocommerce-admin' ) }
-					content={ __(
-						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-						'woocommerce-admin'
-					) }
-					closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
-					id="activity-panel-tab-help"
-					onClose={ () => closedHelpPanelHighlight() }
-					onShow={ () => recordEvent( 'help_tooltip_view' ) }
-				/>
-			) : null }
-		</div>
+							togglePanel( tab, tabOpen );
+						} }
+					/>
+					<Panel
+						currentTab
+						isPanelOpen={ isPanelOpen }
+						isPanelSwitching={ isPanelSwitching }
+						tab={ find( getTabs(), { name: currentTab } ) }
+						content={ getPanelContent( currentTab ) }
+						closePanel={ () => closePanel() }
+						clearPanel={ () => clearPanel() }
+					/>
+				</Section>
+				{ isAddProductPage() && (
+					<ProductFeedbackTour currentTab={ currentTab } />
+				) }
+				{ showHelpHighlightTooltip ? (
+					<HighlightTooltip
+						delay={ 1000 }
+						useAnchor={ true }
+						title={ __( "We're here for help", 'woocommerce' ) }
+						content={ __(
+							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+							'woocommerce'
+						) }
+						closeButtonText={ __( 'Got it', 'woocommerce' ) }
+						id="activity-panel-tab-help"
+						onClose={ () => closedHelpPanelHighlight() }
+						onShow={ () => recordEvent( 'help_tooltip_view' ) }
+					/>
+				) : null }
+			</div>
+		</LayoutContextProvider>
 	);
 };
 

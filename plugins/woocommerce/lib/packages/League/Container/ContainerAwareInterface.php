@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Vendor\League\Container;
 
-use Psr\Container\ContainerInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 
 interface ContainerAwareInterface
 {
@@ -13,7 +13,7 @@ interface ContainerAwareInterface
      *
      * @return self
      */
-    public function setContainer(ContainerInterface $container) : self;
+    public function setContainer(ContainerInterface $container) : ContainerAwareInterface;
 
     /**
      * Get the container

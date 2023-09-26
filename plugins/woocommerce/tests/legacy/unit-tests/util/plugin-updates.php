@@ -23,7 +23,7 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.2.0
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		if ( ! class_exists( 'WC_Plugin_Updates' ) ) {

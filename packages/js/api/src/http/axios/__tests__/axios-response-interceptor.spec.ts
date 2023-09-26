@@ -20,11 +20,13 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should transform responses into an HTTPResponse', async () => {
-		adapter.onGet( 'http://test.test' ).reply(
-			200,
-			{ test: 'value' },
-			{ 'content-type': 'application/json' }
-		);
+		adapter
+			.onGet( 'http://test.test' )
+			.reply(
+				200,
+				{ test: 'value' },
+				{ 'content-type': 'application/json' }
+			);
 
 		const response = await axiosInstance.get( 'http://test.test' );
 
@@ -40,13 +42,17 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should transform error responses into an HTTPResponse', async () => {
-		adapter.onGet( 'http://test.test' ).reply(
-			404,
-			{ code: 'error_code', message: 'value' },
-			{ 'content-type': 'application/json' }
-		);
+		adapter
+			.onGet( 'http://test.test' )
+			.reply(
+				404,
+				{ code: 'error_code', message: 'value' },
+				{ 'content-type': 'application/json' }
+			);
 
-		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject( {
+		await expect(
+			axiosInstance.get( 'http://test.test' )
+		).rejects.toMatchObject( {
 			statusCode: 404,
 			headers: {
 				'content-type': 'application/json',
@@ -61,8 +67,8 @@ describe( 'AxiosResponseInterceptor', () => {
 	it( 'should bubble non-response errors', async () => {
 		adapter.onGet( 'http://test.test' ).timeout();
 
-		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject(
-			new Error( 'timeout of 0ms exceeded' ),
-		);
+		await expect(
+			axiosInstance.get( 'http://test.test' )
+		).rejects.toMatchObject( new Error( 'timeout of 0ms exceeded' ) );
 	} );
 } );

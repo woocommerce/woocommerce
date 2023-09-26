@@ -108,6 +108,16 @@ abstract class WC_Data {
 	protected $meta_data = null;
 
 	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. If you are adding a new property, consider adding it to to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array();
+
+	/**
 	 * Default constructor.
 	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
@@ -185,6 +195,19 @@ abstract class WC_Data {
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
+		/**
+		 * Filters whether an object deletion should take place. Equivalent to `pre_delete_post`.
+		 *
+		 * @param mixed   $check Whether to go ahead with deletion.
+		 * @param WC_Data $this The data object being deleted.
+		 * @param bool    $force_delete Whether to bypass the trash.
+		 *
+		 * @since 8.1.0.
+		 */
+		$check = apply_filters( "woocommerce_pre_delete_$this->object_type", null, $this, $force_delete );
+		if ( null !== $check ) {
+			return $check;
+		}
 		if ( $this->data_store ) {
 			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );
@@ -305,11 +328,16 @@ abstract class WC_Data {
 			return false;
 		}
 
-		$has_setter_or_getter = is_callable( array( $this, 'set_' . $key ) ) || is_callable( array( $this, 'get_' . $key ) );
+		$has_setter_or_getter = is_callable( array( $this, 'set_' . ltrim( $key, '_' ) ) ) || is_callable( array( $this, 'get_' . ltrim( $key, '_' ) ) );
 
 		if ( ! $has_setter_or_getter ) {
 			return false;
 		}
+
+		if ( in_array( $key, $this->legacy_datastore_props, true ) ) {
+			return true; // return without warning because we don't want to break legacy code which was calling add/get/update/delete meta.
+		}
+
 		/* translators: %s: $key Key to check */
 		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
 
@@ -327,7 +355,7 @@ abstract class WC_Data {
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'get_' . $key;
+			$function = 'get_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}();
@@ -403,7 +431,7 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'set_' . $key;
+			$function = 'set_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}( $value );
@@ -433,7 +461,7 @@ abstract class WC_Data {
 	 */
 	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'set_' . $key;
+			$function = 'set_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}( $value );
@@ -487,6 +515,26 @@ abstract class WC_Data {
 		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
 				$this->meta_data[ $array_key ]->value = null;
+			}
+		}
+	}
+
+	/**
+	 * Delete meta data with a matching value.
+	 *
+	 * @since 7.7.0
+	 * @param string $key   Meta key.
+	 * @param mixed  $value Meta value. Entries will only be removed that match the value.
+	 */
+	public function delete_meta_data_value( $key, $value ) {
+		$this->maybe_read_meta_data();
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
+
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				if ( $value === $this->meta_data[ $array_key ]->value ) {
+					$this->meta_data[ $array_key ]->value = null;
+				}
 			}
 		}
 	}
@@ -598,19 +646,28 @@ abstract class WC_Data {
 		$raw_meta_data = $cache_loaded ? $this->data_store->filter_raw_meta_data( $this, $cached_meta ) : $this->data_store->read_meta( $this );
 
 		if ( is_array( $raw_meta_data ) ) {
-			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = new WC_Meta_Data(
-					array(
-						'id'    => (int) $meta->meta_id,
-						'key'   => $meta->meta_key,
-						'value' => maybe_unserialize( $meta->meta_value ),
-					)
-				);
-			}
-
+			$this->init_meta_data( $raw_meta_data );
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
 				wp_cache_set( $cache_key, $raw_meta_data, $this->cache_group );
 			}
+		}
+	}
+
+	/**
+	 * Helper function to initialize metadata entries from filtered raw meta data.
+	 *
+	 * @param array $filtered_meta_data Filtered metadata fetched from DB.
+	 */
+	public function init_meta_data( array $filtered_meta_data = array() ) {
+		$this->meta_data = array();
+		foreach ( $filtered_meta_data as $meta ) {
+			$this->meta_data[] = new WC_Meta_Data(
+				array(
+					'id'    => (int) $meta->meta_id,
+					'key'   => $meta->meta_key,
+					'value' => maybe_unserialize( $meta->meta_value ),
+				)
+			);
 		}
 	}
 
@@ -627,20 +684,50 @@ abstract class WC_Data {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
 					$this->data_store->delete_meta( $this, $meta );
+					/**
+					 * Fires immediately after deleting metadata.
+					 *
+					 * @param int    $meta_id    ID of deleted metadata entry.
+					 * @param int    $object_id  Object ID.
+					 * @param string $meta_key   Metadata key.
+					 * @param mixed  $meta_value Metadata value (will be empty for delete).
+					 */
+					do_action( "deleted_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
 				$meta->id = $this->data_store->add_meta( $this, $meta );
+				/**
+				 * Fires immediately after adding metadata.
+				 *
+				 * @param int    $meta_id    ID of added metadata entry.
+				 * @param int    $object_id  Object ID.
+				 * @param string $meta_key   Metadata key.
+				 * @param mixed  $meta_value Metadata value.
+				 */
+				do_action( "added_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 				$meta->apply_changes();
 			} else {
 				if ( $meta->get_changes() ) {
 					$this->data_store->update_meta( $this, $meta );
+					/**
+					 * Fires immediately after updating metadata.
+					 *
+					 * @param int    $meta_id    ID of updated metadata entry.
+					 * @param int    $object_id  Object ID.
+					 * @param string $meta_key   Metadata key.
+					 * @param mixed  $meta_value Metadata value.
+					 */
+					do_action( "updated_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 					$meta->apply_changes();
 				}
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			$cache_key = self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
 			wp_cache_delete( $cache_key, $this->cache_group );
 		}
 	}
@@ -717,7 +804,7 @@ abstract class WC_Data {
 				if ( ! $errors ) {
 					$errors = new WP_Error();
 				}
-				$errors->add( $e->getErrorCode(), $e->getMessage() );
+				$errors->add( $e->getErrorCode(), $e->getMessage(), array( 'property_name' => $prop ) );
 			}
 		}
 
@@ -810,7 +897,7 @@ abstract class WC_Data {
 	 */
 	protected function set_date_prop( $prop, $value ) {
 		try {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) || '0000-00-00 00:00:00' === $value ) {
 				$this->set_prop( $prop, null );
 				return;
 			}

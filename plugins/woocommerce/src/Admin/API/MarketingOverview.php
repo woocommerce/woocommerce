@@ -84,13 +84,13 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 		$plugin_slug = $request->get_param( 'plugin' );
 
 		if ( ! PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce' ), 404 );
 		}
 
 		$result = activate_plugin( PluginsHelper::get_plugin_path_from_slug( $plugin_slug ) );
 
 		if ( ! is_null( $result ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'The plugin could not be activated.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'The plugin could not be activated.', 'woocommerce' ), 500 );
 		}
 
 		// IMPORTANT - Don't return the active plugins data here.
@@ -111,7 +111,7 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 	 */
 	public function install_plugins_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

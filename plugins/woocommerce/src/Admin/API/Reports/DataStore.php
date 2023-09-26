@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Admin\API\Reports\DataStore: Common parent for custom report data stores.
@@ -31,11 +31,25 @@ class DataStore extends SqlQuery {
 	protected $cache_timeout = 3600;
 
 	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = '';
+
+	/**
 	 * Table used as a data store for this report.
 	 *
 	 * @var string
 	 */
 	protected static $table_name = '';
+
+	/**
+	 * Date field name.
+	 *
+	 * @var string
+	 */
+	protected $date_column_name = 'date_created';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -44,6 +58,13 @@ class DataStore extends SqlQuery {
 	 */
 	protected $column_types = array();
 
+	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
+	protected $report_columns = array();
+
 	// @todo This does not really belong here, maybe factor out the comparison as separate class?
 	/**
 	 * Order by property, used in the cmp function.
@@ -51,18 +72,21 @@ class DataStore extends SqlQuery {
 	 * @var string
 	 */
 	private $order_by = '';
+
 	/**
 	 * Order property, used in the cmp function.
 	 *
 	 * @var string
 	 */
 	private $order = '';
+
 	/**
 	 * Query limit parameters.
 	 *
 	 * @var array
 	 */
 	private $limit_parameters = array();
+
 	/**
 	 * Data store context used to pass to filters.
 	 *
@@ -92,19 +116,47 @@ class DataStore extends SqlQuery {
 	protected $interval_query;
 
 	/**
+	 * Refresh the cache for the current query when true.
+	 *
+	 * @var bool
+	 */
+	protected $force_cache_refresh = false;
+
+	/**
+	 * Include debugging information in the returned data when true.
+	 *
+	 * @var bool
+	 */
+	protected $debug_cache = true;
+
+	/**
+	 * Debugging information to include in the returned data.
+	 *
+	 * @var array
+	 */
+	protected $debug_cache_data = array();
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
 		self::set_db_table_name();
 		$this->assign_report_columns();
 
-		if ( property_exists( $this, 'report_columns' ) ) {
+		if ( $this->report_columns ) {
 			$this->report_columns = apply_filters(
 				'woocommerce_admin_report_columns',
 				$this->report_columns,
 				$this->context,
 				self::get_db_table_name()
 			);
+		}
+
+		// Utilize enveloped responses to include debugging info.
+		// See https://querymonitor.com/blog/2021/05/debugging-wordpress-rest-api-requests/
+		if ( isset( $_GET['_envelope'] ) ) {
+			$this->debug_cache = true;
+			add_filter( 'rest_envelope_response', array( $this, 'add_debug_cache_to_envelope' ), 999, 2 );
 		}
 	}
 
@@ -150,6 +202,19 @@ class DataStore extends SqlQuery {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
+		if ( isset( $params['force_cache_refresh'] ) ) {
+			if ( true === $params['force_cache_refresh'] ) {
+				$this->force_cache_refresh = true;
+			}
+
+			// We don't want this param in the key.
+			unset( $params['force_cache_refresh'] );
+		}
+
+		if ( true === $this->debug_cache ) {
+			$this->debug_cache_data['query_args'] = $params;
+		}
+
 		return implode(
 			'_',
 			array(
@@ -167,9 +232,25 @@ class DataStore extends SqlQuery {
 	 * @return mixed
 	 */
 	protected function get_cached_data( $cache_key ) {
-		if ( $this->should_use_cache() ) {
-			return Cache::get( $cache_key );
+		if ( true === $this->debug_cache ) {
+			$this->debug_cache_data['should_use_cache']    = $this->should_use_cache();
+			$this->debug_cache_data['force_cache_refresh'] = $this->force_cache_refresh;
+			$this->debug_cache_data['cache_hit']           = false;
 		}
+
+		if ( $this->should_use_cache() && false === $this->force_cache_refresh ) {
+			$cached_data = Cache::get( $cache_key );
+
+			$cache_hit = false !== $cached_data;
+			if ( true === $this->debug_cache ) {
+				$this->debug_cache_data['cache_hit'] = $cache_hit;
+			}
+
+			return $cached_data;
+		}
+
+		// Cached item has now functionally been refreshed. Reset the option.
+		$this->force_cache_refresh = false;
 
 		return false;
 	}
@@ -187,6 +268,26 @@ class DataStore extends SqlQuery {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add cache debugging information to an enveloped API response.
+	 *
+	 * @param array             $envelope
+	 * @param \WP_REST_Response $response
+	 *
+	 * @return array
+	 */
+	public function add_debug_cache_to_envelope( $envelope, $response ) {
+		if ( 0 !== strncmp( '/wc-analytics', $response->get_matched_route(), 13 ) ) {
+			return $envelope;
+		}
+
+		if ( ! empty( $this->debug_cache_data ) ) {
+			$envelope['debug_cache'] = $this->debug_cache_data;
+		}
+
+		return $envelope;
 	}
 
 	/**
@@ -499,8 +600,8 @@ class DataStore extends SqlQuery {
 			$adj_after                = $new_start_date->format( TimeInterval::$sql_datetime_format );
 			$adj_before               = $new_end_date->format( TimeInterval::$sql_datetime_format );
 			$this->interval_query->clear_sql_clause( array( 'where_time', 'limit' ) );
-			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$adj_before'" );
-			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$adj_after'" );
+			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$adj_before'" );
+			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$adj_after'" );
 			$this->clear_sql_clause( 'limit' );
 			$this->add_sql_clause( 'limit', 'LIMIT 0,' . $params['per_page'] );
 		} else {
@@ -577,7 +678,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected static function get_excluded_report_order_statuses() {
 		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
 		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 	}
 
@@ -694,9 +795,9 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
-				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$datetime_str'" );
+				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$datetime_str'" );
 			} else {
-				$this->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$datetime_str'" );
+				$this->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$datetime_str'" );
 			}
 		}
 
@@ -707,9 +808,9 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['after']->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
-				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$datetime_str'" );
+				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$datetime_str'" );
 			} else {
-				$this->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$datetime_str'" );
+				$this->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$datetime_str'" );
 			}
 		}
 	}
@@ -840,7 +941,7 @@ class DataStore extends SqlQuery {
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval = $query_args['interval'];
 			$this->clear_sql_clause( 'select' );
-			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name ) );
+			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name, $this->date_column_name ) );
 		}
 	}
 
@@ -1218,11 +1319,10 @@ class DataStore extends SqlQuery {
 	 * Returns product attribute subquery elements used in JOIN and WHERE clauses,
 	 * based on query arguments from the user.
 	 *
-	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $table_name Database table name.
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
 	 */
-	protected function get_attribute_subqueries( $query_args, $table_name ) {
+	protected function get_attribute_subqueries( $query_args ) {
 		global $wpdb;
 
 		$sql_clauses           = array(
@@ -1276,11 +1376,11 @@ class DataStore extends SqlQuery {
 					$meta_value = esc_sql( $attribute_term[1] );
 				}
 
-				$join_alias = 'orderitemmeta1';
+				$join_alias       = 'orderitemmeta1';
+				$table_to_join_on = "{$wpdb->prefix}wc_order_product_lookup";
 
 				if ( empty( $sql_clauses['join'] ) ) {
-					$table_name            = esc_sql( $table_name );
-					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_name}.order_id";
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_to_join_on}.order_id";
 				}
 
 				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
@@ -1288,7 +1388,7 @@ class DataStore extends SqlQuery {
 				if ( 'AND' === $match_operator || 1 === count( $sql_clauses['join'] ) ) {
 					$join_idx              = count( $sql_clauses['join'] );
 					$join_alias            = 'orderitemmeta' . $join_idx;
-					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = orderitems.order_item_id";
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_to_join_on}.order_item_id";
 				}
 
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared

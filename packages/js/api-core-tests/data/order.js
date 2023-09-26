@@ -1,4 +1,4 @@
-const { customerBilling, customerShipping } = require('./shared');
+const { customerBilling, customerShipping } = require( './shared' );
 
 /**
  * A basic order.
@@ -53,10 +53,10 @@ const couponLines = {
 /**
  * Builds an example order request.
  *
- * @returns {Object} Sample Order payload.
+ * @return {Object} Sample Order payload.
  */
 const getOrderExample = () => {
-	let orderExample = {
+	const orderExample = {
 		id: 0,
 		payment_method: 'cod',
 		payment_method_title: 'Cash on Delivery',
@@ -73,7 +73,7 @@ const getOrderExample = () => {
 		coupon_lines: [ couponLines ],
 	};
 	return orderExample;
-}
+};
 
 module.exports = {
 	order,

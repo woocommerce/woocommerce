@@ -2,6 +2,12 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
+import { useEffect } from '@wordpress/element';
+import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
+import {
+	LayoutContextProvider,
+	getLayoutContextValue,
+} from '@woocommerce/admin-layout';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -10,6 +16,7 @@ import QueryString, { parse } from 'qs';
 import { PaymentRecommendations } from '../payments';
 import { ShippingRecommendations } from '../shipping';
 import { EmbeddedBodyProps } from './embedded-body-props';
+import { StoreAddressTour } from '../guided-tours/store-address-tour';
 import './style.scss';
 
 type QueryParams = EmbeddedBodyProps;
@@ -23,6 +30,7 @@ function isWPPage(
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
 	PaymentRecommendations,
 	ShippingRecommendations,
+	StoreAddressTour,
 ];
 
 /**
@@ -32,6 +40,10 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
  * Each Fill component receives QueryParams, consisting of a page, tab, and section string.
  */
 export const EmbeddedBodyLayout = () => {
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
+
 	const query = parse( location.search.substring( 1 ) );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {
@@ -51,13 +63,15 @@ export const EmbeddedBodyLayout = () => {
 	) as React.ElementType< EmbeddedBodyProps >[];
 
 	return (
-		<div
-			className="woocommerce-embedded-layout__primary"
-			id="woocommerce-embedded-layout__primary"
-		>
-			{ componentList.map( ( Comp, index ) => {
-				return <Comp key={ index } { ...queryParams } />;
-			} ) }
-		</div>
+		<LayoutContextProvider value={ getLayoutContextValue( [ 'page' ] ) }>
+			<div
+				className="woocommerce-embedded-layout__primary"
+				id="woocommerce-embedded-layout__primary"
+			>
+				{ componentList.map( ( Comp, index ) => {
+					return <Comp key={ index } { ...queryParams } />;
+				} ) }
+			</div>
+		</LayoutContextProvider>
 	);
 };

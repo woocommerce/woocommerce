@@ -6,40 +6,53 @@ const {
 	postRequest,
 	putRequest,
 	deleteRequest,
-} = require('../utils/request');
+} = require( '../utils/request' );
 
 const getProducts = ( params = {} ) => getRequest( 'products', params );
 
 const createProduct = ( data ) => postRequest( 'products', data );
-const createProductVariations = ( parentId, variations ) => postRequest(
-	`products/${ parentId }/variations/batch`,
-	{
+const createProductVariations = ( parentId, variations ) =>
+	postRequest( `products/${ parentId }/variations/batch`, {
 		create: variations,
-	}
-)
-const createProducts = ( products ) => postRequest( 'products/batch', { create: products } );
-const createProductCategory = ( data ) => postRequest( 'products/categories', data );
-const createProductAttribute = ( name ) => postRequest( 'products/attributes', { name } );
-const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
-	`products/attributes/${ parentId }/terms/batch`,
-	{
-		create: termNames.map( name => ( { name } ) )
-	}
-);
-const createProductReview = ( productId, review ) => postRequest( 'products/reviews', {
-	product_id: productId,
-	...review,
-} );
-const updateProductReview = ( reviewId, data = {} ) => putRequest( `products/reviews/${ reviewId }`, data );
+	} );
+const createProducts = ( products ) =>
+	postRequest( 'products/batch', { create: products } );
+const createProductCategory = ( data ) =>
+	postRequest( 'products/categories', data );
+const createProductAttribute = ( name ) =>
+	postRequest( 'products/attributes', { name } );
+const createProductAttributeTerms = ( parentId, termNames ) =>
+	postRequest( `products/attributes/${ parentId }/terms/batch`, {
+		create: termNames.map( ( name ) => ( { name } ) ),
+	} );
+const createProductReview = ( productId, review ) =>
+	postRequest( 'products/reviews', {
+		product_id: productId,
+		...review,
+	} );
+const updateProductReview = ( reviewId, data = {} ) =>
+	putRequest( `products/reviews/${ reviewId }`, data );
 const createProductTag = ( name ) => postRequest( 'products/tags', { name } );
-const createShippingClass = ( name ) => postRequest( 'products/shipping_classes', { name } );
+const createShippingClass = ( name ) =>
+	postRequest( 'products/shipping_classes', { name } );
 const createTaxClass = ( name ) => postRequest( 'taxes/classes', { name } );
 
 const createSampleCategories = async () => {
-	const { body: clothing } = await createProductCategory( { name: 'Clothing' } );
-	const { body: accessories } = await createProductCategory( { name: 'Accessories', parent: clothing.id } );
-	const { body: hoodies } = await createProductCategory( { name: 'Hoodies', parent: clothing.id } );
-	const { body: tshirts } = await createProductCategory( { name: 'Tshirts', parent: clothing.id } );
+	const { body: clothing } = await createProductCategory( {
+		name: 'Clothing',
+	} );
+	const { body: accessories } = await createProductCategory( {
+		name: 'Accessories',
+		parent: clothing.id,
+	} );
+	const { body: hoodies } = await createProductCategory( {
+		name: 'Hoodies',
+		parent: clothing.id,
+	} );
+	const { body: tshirts } = await createProductCategory( {
+		name: 'Tshirts',
+		parent: clothing.id,
+	} );
 	const { body: decor } = await createProductCategory( { name: 'Decor' } );
 	const { body: music } = await createProductCategory( { name: 'Music' } );
 
@@ -56,8 +69,18 @@ const createSampleCategories = async () => {
 const createSampleAttributes = async () => {
 	const { body: color } = await createProductAttribute( 'Color' );
 	const { body: size } = await createProductAttribute( 'Size' );
-	const { body: colors } = await createProductAttributeTerms( color.id, [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ] );
-	const { body: sizes } = await createProductAttributeTerms( size.id, [ 'Large', 'Medium', 'Small' ] );
+	const { body: colors } = await createProductAttributeTerms( color.id, [
+		'Blue',
+		'Gray',
+		'Green',
+		'Red',
+		'Yellow',
+	] );
+	const { body: sizes } = await createProductAttributeTerms( size.id, [
+		'Large',
+		'Medium',
+		'Small',
+	] );
 
 	return {
 		color,
@@ -73,7 +96,7 @@ const createSampleTags = async () => {
 	return {
 		cool,
 	};
-}
+};
 
 const createSampleShippingClasses = async () => {
 	const { body: freight } = await createShippingClass( 'Freight' );
@@ -81,7 +104,7 @@ const createSampleShippingClasses = async () => {
 	return {
 		freight,
 	};
-}
+};
 
 const createSampleTaxClasses = async () => {
 	const { body: reducedRate } = await createTaxClass( 'Reduced Rate' );
@@ -89,15 +112,16 @@ const createSampleTaxClasses = async () => {
 	return {
 		reducedRate,
 	};
-}
+};
 
 const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
-	const description = '<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
-		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. '
-		+ 'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
+	const description =
+		'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ' +
+		'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
+		'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-	const { body: simpleProducts } = await createProducts( [ 
-		{ 
+	const { body: simpleProducts } = await createProducts( [
+		{
 			name: 'Beanie with Logo',
 			date_created_gmt: '2021-09-01T15:50:20',
 			type: 'simple',
@@ -145,23 +169,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.accessories.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Red' ] 
-				} 
+					options: [ 'Red' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 62, 63, 61, 60 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'T-Shirt with Logo',
 			date_created_gmt: '2021-09-02T15:50:20',
 			type: 'simple',
@@ -209,23 +233,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.tshirts.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Gray' ] 
-				} 
+					options: [ 'Gray' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 59, 67, 66, 56 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Single',
 			date_created_gmt: '2021-09-03T15:50:19',
 			type: 'simple',
@@ -245,12 +269,12 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			total_sales: 0,
 			virtual: true,
 			downloadable: true,
-			downloads: [ 
-				{ 
+			downloads: [
+				{
 					id: '2579cf07-8b08-4c25-888a-b6258dd1f035',
 					name: 'Single',
-					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg' 
-				} 
+					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+				},
 			],
 			download_limit: 1,
 			download_expiry: 1,
@@ -285,9 +309,9 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 68 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Album',
 			date_created_gmt: '2021-09-04T15:50:19',
 			type: 'simple',
@@ -307,17 +331,17 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			total_sales: 0,
 			virtual: true,
 			downloadable: true,
-			downloads: [ 
-				{ 
+			downloads: [
+				{
 					id: 'cc10249f-1de2-44d4-93d3-9f88ae629f76',
 					name: 'Single 1',
-					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg' 
+					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 				},
-				{ 
+				{
 					id: 'aea8ef69-ccdc-4d83-8e21-3c395ebb9411',
 					name: 'Single 2',
-					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/album.jpg' 
-				} 
+					file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/album.jpg',
+				},
 			],
 			download_limit: 1,
 			download_expiry: 1,
@@ -352,9 +376,9 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 69 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Polo',
 			date_created_gmt: '2021-09-05T15:50:19',
 			type: 'simple',
@@ -402,23 +426,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.tshirts.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Blue' ] 
-				} 
+					options: [ 'Blue' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 59, 56, 66, 76 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Long Sleeve Tee',
 			date_created_gmt: '2021-09-06T15:50:19',
 			type: 'simple',
@@ -466,23 +490,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.tshirts.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Green' ] 
-				} 
+					options: [ 'Green' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 59, 56, 76, 67 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Hoodie with Zipper',
 			date_created_gmt: '2021-09-07T15:50:19',
 			type: 'simple',
@@ -536,9 +560,9 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 57, 58 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Hoodie with Pocket',
 			date_created_gmt: '2021-09-08T15:50:19',
 			type: 'simple',
@@ -586,23 +610,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.hoodies.id } ],
 			tags: [ { id: tags.cool.id } ],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Gray' ] 
-				} 
+					options: [ 'Gray' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 65, 57, 58 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Sunglasses',
 			date_created_gmt: '2021-09-09T15:50:19',
 			type: 'simple',
@@ -656,9 +680,9 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 60, 62, 77, 61 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Cap',
 			date_created_gmt: '2021-09-10T15:50:19',
 			type: 'simple',
@@ -706,23 +730,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.accessories.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Yellow' ] 
-				} 
+					options: [ 'Yellow' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 60, 77, 61, 63 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Belt',
 			date_created_gmt: '2021-09-12T15:50:19',
 			type: 'simple',
@@ -776,9 +800,9 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 63, 77, 62, 60 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'Beanie',
 			date_created_gmt: '2021-09-13T15:50:19',
 			type: 'simple',
@@ -826,23 +850,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.accessories.id } ],
 			tags: [ { id: tags.cool.id } ],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Red' ] 
-				} 
+					options: [ 'Red' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 63, 62, 61, 77 ],
-			stock_status: 'instock' 
+			stock_status: 'instock',
 		},
-		{ 
+		{
 			name: 'T-Shirt',
 			date_created_gmt: '2021-09-14T15:50:19',
 			type: 'simple',
@@ -890,23 +914,23 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.tshirts.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Gray' ] 
-				} 
+					options: [ 'Gray' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 67, 76, 56, 66 ],
-			stock_status: 'onbackorder' 
+			stock_status: 'onbackorder',
 		},
-		{ 
+		{
 			name: 'Hoodie with Logo',
 			date_created_gmt: '2021-09-15T15:50:19',
 			type: 'simple',
@@ -954,22 +978,22 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			purchase_note: '',
 			categories: [ { id: categories.hoodies.id } ],
 			tags: [],
-			attributes: [ 
-				{ 
+			attributes: [
+				{
 					id: attributes.color.id,
 					position: 0,
 					visible: true,
 					variation: false,
-					options: [ 'Blue' ] 
-				} 
+					options: [ 'Blue' ],
+				},
 			],
 			default_attributes: [],
 			variations: [],
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 57, 65 ],
-			stock_status: 'instock' 
-		} 
+			stock_status: 'instock',
+		},
 	] );
 
 	return simpleProducts.create;
@@ -985,9 +1009,9 @@ const createSampleExternalProducts = async ( categories ) => {
 			featured: false,
 			catalog_visibility: 'visible',
 			description:
-				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
-				+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
-				+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
+				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ' +
+				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. ' +
+				'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
 			short_description: '<p>This is an external product.</p>\n',
 			sku: 'wp-pennant',
 			price: '11.05',
@@ -1003,7 +1027,8 @@ const createSampleExternalProducts = async ( categories ) => {
 			downloads: [],
 			download_limit: 0,
 			download_expiry: 0,
-			external_url: 'https://mercantile.wordpress.org/product/wordpress-pennant/',
+			external_url:
+				'https://mercantile.wordpress.org/product/wordpress-pennant/',
 			button_text: 'Buy on the WordPress swag store!',
 			tax_status: 'taxable',
 			tax_class: '',
@@ -1034,7 +1059,7 @@ const createSampleExternalProducts = async ( categories ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [],
-			stock_status: 'instock'
+			stock_status: 'instock',
 		},
 	] );
 
@@ -1056,9 +1081,9 @@ const createSampleGroupedProduct = async ( categories ) => {
 			featured: false,
 			catalog_visibility: 'visible',
 			description:
-				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
-				+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
-				+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
+				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ' +
+				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. ' +
+				'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
 			short_description: '<p>This is a grouped product.</p>\n',
 			sku: 'logo-collection',
 			price: '18',
@@ -1102,10 +1127,10 @@ const createSampleGroupedProduct = async ( categories ) => {
 			attributes: [],
 			default_attributes: [],
 			variations: [],
-			grouped_products: logoProducts.map( p => p.id ),
+			grouped_products: logoProducts.map( ( p ) => p.id ),
 			menu_order: 0,
 			related_ids: [],
-			stock_status: 'instock'
+			stock_status: 'instock',
 		},
 	] );
 
@@ -1113,9 +1138,10 @@ const createSampleGroupedProduct = async ( categories ) => {
 };
 
 const createSampleVariableProducts = async ( categories, attributes ) => {
-	const description =	'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
-		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
-		+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
+	const description =
+		'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ' +
+		'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. ' +
+		'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 	const { body: hoodie } = await createProduct( {
 		name: 'Hoodie',
 		date_created_gmt: '2021-09-18T15:50:19',
@@ -1170,7 +1196,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 				position: 0,
 				visible: true,
 				variation: true,
-				options: [ 'Blue', 'Green', 'Red' ]
+				options: [ 'Blue', 'Green', 'Red' ],
 			},
 			{
 				id: 0,
@@ -1178,165 +1204,168 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 				position: 1,
 				visible: true,
 				variation: true,
-				options: [ 'Yes', 'No' ]
-			}
+				options: [ 'Yes', 'No' ],
+			},
 		],
 		default_attributes: [],
 		grouped_products: [],
 		menu_order: 0,
-		stock_status: 'instock'
+		stock_status: 'instock',
 	} );
 
 	const variationDescription =
-		'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. '
-		+ 'Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. '
-		+ 'Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. '
-		+ 'Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. '
-		+ 'Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. '
-		+ 'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
+		'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. ' +
+		'Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. ' +
+		'Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. ' +
+		'Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. ' +
+		'Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. ' +
+		'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
 
-	const { body: hoodieVariations } = await createProductVariations( hoodie.id, [
-		{
-			date_created_gmt: '2021-09-19T15:50:20',
-			description: variationDescription,
-			sku: 'woo-hoodie-blue-logo',
-			price: '45',
-			regular_price: '45',
-			sale_price: '',
-			date_on_sale_from_gmt: null,
-			date_on_sale_to_gmt: null,
-			on_sale: false,
-			status: 'publish',
-			purchasable: true,
-			virtual: false,
-			downloadable: false,
-			downloads: [],
-			download_limit: 0,
-			download_expiry: 0,
-			tax_status: 'taxable',
-			tax_class: '',
-			manage_stock: false,
-			stock_quantity: null,
-			stock_status: 'instock',
-			backorders: 'no',
-			backorders_allowed: false,
-			backordered: false,
-			low_stock_amount: null,
-			weight: '1.5',
-			dimensions: { length: '10', width: '8', height: '3' },
-			shipping_class: '',
-			attributes: [
-				{ id: attributes.color.id, option: 'Blue' },
-				{ id: 0, name: 'Logo', option: 'Yes' }
-			],
-			menu_order: 0
-		},
-		{
-			date_created_gmt: '2021-09-20T15:50:20',
-			description: variationDescription,
-			sku: 'woo-hoodie-blue',
-			price: '45',
-			regular_price: '45',
-			sale_price: '',
-			date_on_sale_from_gmt: null,
-			date_on_sale_to_gmt: null,
-			on_sale: false,
-			status: 'publish',
-			purchasable: true,
-			virtual: false,
-			downloadable: false,
-			downloads: [],
-			download_limit: 0,
-			download_expiry: 0,
-			tax_status: 'taxable',
-			tax_class: '',
-			manage_stock: false,
-			stock_quantity: null,
-			stock_status: 'instock',
-			backorders: 'no',
-			backorders_allowed: false,
-			backordered: false,
-			low_stock_amount: null,
-			weight: '1.5',
-			dimensions: { length: '10', width: '8', height: '3' },
-			shipping_class: '',
-			attributes: [
-				{ id: attributes.color.id, option: 'Blue' },
-				{ id: 0, name: 'Logo', option: 'No' }
-			],
-			menu_order: 3
-		},
-		{
-			date_created_gmt: '2021-09-21T15:50:20',
-			description: variationDescription,
-			sku: 'woo-hoodie-green',
-			price: '45',
-			regular_price: '45',
-			sale_price: '',
-			date_on_sale_from_gmt: null,
-			date_on_sale_to_gmt: null,
-			on_sale: false,
-			status: 'publish',
-			purchasable: true,
-			virtual: false,
-			downloadable: false,
-			downloads: [],
-			download_limit: 0,
-			download_expiry: 0,
-			tax_status: 'taxable',
-			tax_class: '',
-			manage_stock: false,
-			stock_quantity: null,
-			stock_status: 'instock',
-			backorders: 'no',
-			backorders_allowed: false,
-			backordered: false,
-			low_stock_amount: null,
-			weight: '1.5',
-			dimensions: { length: '10', width: '8', height: '3' },
-			shipping_class: '',
-			attributes: [
-				{ id: attributes.color.id, option: 'Green' },
-				{ id: 0, name: 'Logo', option: 'No' }
-			],
-			menu_order: 2
-		},
-		{
-			date_created_gmt: '2021-09-22T15:50:19',
-			description: variationDescription,
-			sku: 'woo-hoodie-red',
-			price: '42',
-			regular_price: '45',
-			sale_price: '42',
-			date_on_sale_from_gmt: null,
-			date_on_sale_to_gmt: null,
-			on_sale: true,
-			status: 'publish',
-			purchasable: true,
-			virtual: false,
-			downloadable: false,
-			downloads: [],
-			download_limit: 0,
-			download_expiry: 0,
-			tax_status: 'taxable',
-			tax_class: '',
-			manage_stock: false,
-			stock_quantity: null,
-			stock_status: 'instock',
-			backorders: 'no',
-			backorders_allowed: false,
-			backordered: false,
-			low_stock_amount: null,
-			weight: '1.5',
-			dimensions: { length: '10', width: '8', height: '3' },
-			shipping_class: '',
-			attributes: [
-				{ id: attributes.color.id, option: 'Red' },
-				{ id: 0, name: 'Logo', option: 'No' }
-			],
-			menu_order: 1
-		}
-	] );
+	const { body: hoodieVariations } = await createProductVariations(
+		hoodie.id,
+		[
+			{
+				date_created_gmt: '2021-09-19T15:50:20',
+				description: variationDescription,
+				sku: 'woo-hoodie-blue-logo',
+				price: '45',
+				regular_price: '45',
+				sale_price: '',
+				date_on_sale_from_gmt: null,
+				date_on_sale_to_gmt: null,
+				on_sale: false,
+				status: 'publish',
+				purchasable: true,
+				virtual: false,
+				downloadable: false,
+				downloads: [],
+				download_limit: 0,
+				download_expiry: 0,
+				tax_status: 'taxable',
+				tax_class: '',
+				manage_stock: false,
+				stock_quantity: null,
+				stock_status: 'instock',
+				backorders: 'no',
+				backorders_allowed: false,
+				backordered: false,
+				low_stock_amount: null,
+				weight: '1.5',
+				dimensions: { length: '10', width: '8', height: '3' },
+				shipping_class: '',
+				attributes: [
+					{ id: attributes.color.id, option: 'Blue' },
+					{ id: 0, name: 'Logo', option: 'Yes' },
+				],
+				menu_order: 0,
+			},
+			{
+				date_created_gmt: '2021-09-20T15:50:20',
+				description: variationDescription,
+				sku: 'woo-hoodie-blue',
+				price: '45',
+				regular_price: '45',
+				sale_price: '',
+				date_on_sale_from_gmt: null,
+				date_on_sale_to_gmt: null,
+				on_sale: false,
+				status: 'publish',
+				purchasable: true,
+				virtual: false,
+				downloadable: false,
+				downloads: [],
+				download_limit: 0,
+				download_expiry: 0,
+				tax_status: 'taxable',
+				tax_class: '',
+				manage_stock: false,
+				stock_quantity: null,
+				stock_status: 'instock',
+				backorders: 'no',
+				backorders_allowed: false,
+				backordered: false,
+				low_stock_amount: null,
+				weight: '1.5',
+				dimensions: { length: '10', width: '8', height: '3' },
+				shipping_class: '',
+				attributes: [
+					{ id: attributes.color.id, option: 'Blue' },
+					{ id: 0, name: 'Logo', option: 'No' },
+				],
+				menu_order: 3,
+			},
+			{
+				date_created_gmt: '2021-09-21T15:50:20',
+				description: variationDescription,
+				sku: 'woo-hoodie-green',
+				price: '45',
+				regular_price: '45',
+				sale_price: '',
+				date_on_sale_from_gmt: null,
+				date_on_sale_to_gmt: null,
+				on_sale: false,
+				status: 'publish',
+				purchasable: true,
+				virtual: false,
+				downloadable: false,
+				downloads: [],
+				download_limit: 0,
+				download_expiry: 0,
+				tax_status: 'taxable',
+				tax_class: '',
+				manage_stock: false,
+				stock_quantity: null,
+				stock_status: 'instock',
+				backorders: 'no',
+				backorders_allowed: false,
+				backordered: false,
+				low_stock_amount: null,
+				weight: '1.5',
+				dimensions: { length: '10', width: '8', height: '3' },
+				shipping_class: '',
+				attributes: [
+					{ id: attributes.color.id, option: 'Green' },
+					{ id: 0, name: 'Logo', option: 'No' },
+				],
+				menu_order: 2,
+			},
+			{
+				date_created_gmt: '2021-09-22T15:50:19',
+				description: variationDescription,
+				sku: 'woo-hoodie-red',
+				price: '42',
+				regular_price: '45',
+				sale_price: '42',
+				date_on_sale_from_gmt: null,
+				date_on_sale_to_gmt: null,
+				on_sale: true,
+				status: 'publish',
+				purchasable: true,
+				virtual: false,
+				downloadable: false,
+				downloads: [],
+				download_limit: 0,
+				download_expiry: 0,
+				tax_status: 'taxable',
+				tax_class: '',
+				manage_stock: false,
+				stock_quantity: null,
+				stock_status: 'instock',
+				backorders: 'no',
+				backorders_allowed: false,
+				backordered: false,
+				low_stock_amount: null,
+				weight: '1.5',
+				dimensions: { length: '10', width: '8', height: '3' },
+				shipping_class: '',
+				attributes: [
+					{ id: attributes.color.id, option: 'Red' },
+					{ id: 0, name: 'Logo', option: 'No' },
+				],
+				menu_order: 1,
+			},
+		]
+	);
 
 	const { body: vneck } = await createProduct( {
 		name: 'V-Neck T-Shirt',
@@ -1392,20 +1421,20 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 				position: 0,
 				visible: true,
 				variation: true,
-				options: [ 'Blue', 'Green', 'Red' ]
+				options: [ 'Blue', 'Green', 'Red' ],
 			},
 			{
 				id: attributes.size.id,
 				position: 1,
 				visible: true,
 				variation: true,
-				options: [ 'Large', 'Medium', 'Small' ]
-			}
+				options: [ 'Large', 'Medium', 'Small' ],
+			},
 		],
 		default_attributes: [],
 		grouped_products: [],
 		menu_order: 0,
-		stock_status: 'instock'
+		stock_status: 'instock',
 	} );
 
 	const { body: vneckVariations } = await createProductVariations( vneck.id, [
@@ -1439,7 +1468,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
 			attributes: [ { id: attributes.color.id, option: 'Blue' } ],
-			menu_order: 0
+			menu_order: 0,
 		},
 		{
 			date_created_gmt: '2021-09-25T15:50:19',
@@ -1471,7 +1500,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
 			attributes: [ { id: attributes.color.id, option: 'Green' } ],
-			menu_order: 0
+			menu_order: 0,
 		},
 		{
 			date_created_gmt: '2021-09-26T15:50:19',
@@ -1503,8 +1532,8 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
 			attributes: [ { id: attributes.color.id, option: 'Red' } ],
-			menu_order: 0
-		}
+			menu_order: 0,
+		},
 	] );
 
 	return {
@@ -1530,15 +1559,15 @@ const createSampleHierarchicalProducts = async () => {
 	return {
 		parent,
 		child,
-	}
+	};
 };
 
 const createSampleProductReviews = async ( simpleProducts ) => {
-	const cap = simpleProducts.find( p => p.name === 'Cap' );
-	const shirt = simpleProducts.find( p => p.name === 'T-Shirt' );
-	const sunglasses = simpleProducts.find( p => p.name === 'Sunglasses' );
+	const cap = simpleProducts.find( ( p ) => p.name === 'Cap' );
+	const shirt = simpleProducts.find( ( p ) => p.name === 'T-Shirt' );
+	const sunglasses = simpleProducts.find( ( p ) => p.name === 'Sunglasses' );
 
-	let { body: review1 } = await createProductReview( cap.id, {
+	const { body: review1 } = await createProductReview( cap.id, {
 		rating: 3,
 		review: 'Decent cap.',
 		reviewer: 'John Doe',
@@ -1549,7 +1578,7 @@ const createSampleProductReviews = async ( simpleProducts ) => {
 	// See: https://github.com/woocommerce/woocommerce/issues/29906.
 	await updateProductReview( review1.id );
 
-	let { body: review2 } = await createProductReview( shirt.id, {
+	const { body: review2 } = await createProductReview( shirt.id, {
 		rating: 5,
 		review: 'The BEST shirt ever!!',
 		reviewer: 'Shannon Smith',
@@ -1557,7 +1586,7 @@ const createSampleProductReviews = async ( simpleProducts ) => {
 	} );
 	await updateProductReview( review2.id );
 
-	let { body: review3 } = await createProductReview( sunglasses.id, {
+	const { body: review3 } = await createProductReview( sunglasses.id, {
 		rating: 1,
 		review: 'These are way too expensive.',
 		reviewer: 'Tim Frugalman',
@@ -1569,9 +1598,11 @@ const createSampleProductReviews = async ( simpleProducts ) => {
 };
 
 const createSampleProductOrders = async ( simpleProducts ) => {
-	const single = simpleProducts.find( p => p.name === 'Single' );
-	const beanie = simpleProducts.find( p => p.name === 'Beanie with Logo' );
-	const shirt = simpleProducts.find( p => p.name === 'T-Shirt' );
+	const single = simpleProducts.find( ( p ) => p.name === 'Single' );
+	const beanie = simpleProducts.find(
+		( p ) => p.name === 'Beanie with Logo'
+	);
+	const shirt = simpleProducts.find( ( p ) => p.name === 'T-Shirt' );
 
 	const { body: order } = await postRequest( 'orders', {
 		set_paid: true,
@@ -1602,10 +1633,17 @@ const createSampleData = async () => {
 	const shippingClasses = await createSampleShippingClasses();
 	const taxClasses = await createSampleTaxClasses();
 
-	const simpleProducts = await createSampleSimpleProducts( categories, attributes, tags );
+	const simpleProducts = await createSampleSimpleProducts(
+		categories,
+		attributes,
+		tags
+	);
 	const externalProducts = await createSampleExternalProducts( categories );
 	const groupedProducts = await createSampleGroupedProduct( categories );
-	const variableProducts = await createSampleVariableProducts( categories, attributes );
+	const variableProducts = await createSampleVariableProducts(
+		categories,
+		attributes
+	);
 	const hierarchicalProducts = await createSampleHierarchicalProducts();
 
 	const reviewIds = await createSampleProductReviews( simpleProducts );
@@ -1642,19 +1680,15 @@ const deleteSampleData = async ( sampleData ) => {
 		orders,
 	} = sampleData;
 
-	const productIds = [].concat(
-		simpleProducts.map( p => p.id )
-	).concat(
-		externalProducts.map( p => p.id )
-	).concat(
-		groupedProducts.map( p => p.id )
-	).concat( [
-		variableProducts.hoodie.id,
-		variableProducts.vneck.id,
-	] ).concat( [
-		hierarchicalProducts.parent.id,
-		hierarchicalProducts.child.id,
-	] );
+	const productIds = []
+		.concat( simpleProducts.map( ( p ) => p.id ) )
+		.concat( externalProducts.map( ( p ) => p.id ) )
+		.concat( groupedProducts.map( ( p ) => p.id ) )
+		.concat( [ variableProducts.hoodie.id, variableProducts.vneck.id ] )
+		.concat( [
+			hierarchicalProducts.parent.id,
+			hierarchicalProducts.child.id,
+		] );
 
 	orders.forEach( async ( { id } ) => {
 		await deleteRequest( `orders/${ id }`, true );

@@ -21,13 +21,8 @@ export class Connect extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const {
-			createNotice,
-			error,
-			isRequesting,
-			onError,
-			setIsPending,
-		} = this.props;
+		const { createNotice, error, isRequesting, onError, setIsPending } =
+			this.props;
 
 		if ( prevProps.isRequesting && ! isRequesting ) {
 			setIsPending( false );
@@ -74,7 +69,7 @@ export class Connect extends Component {
 						isPrimary
 						onClick={ () => window.location.reload() }
 					>
-						{ __( 'Retry', 'woocommerce-admin' ) }
+						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
 				) : (
 					<Button
@@ -83,17 +78,17 @@ export class Connect extends Component {
 						isPrimary
 						onClick={ this.connectJetpack }
 					>
-						{ __( 'Connect', 'woocommerce-admin' ) }
+						{ __( 'Connect', 'woocommerce' ) }
 					</Button>
 				) }
 				{ onSkip && (
 					<Button onClick={ onSkip }>
-						{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
+						{ skipText || __( 'No thanks', 'woocommerce' ) }
 					</Button>
 				) }
 				{ onAbort && (
 					<Button onClick={ onAbort }>
-						{ abortText || __( 'Abort', 'woocommerce-admin' ) }
+						{ abortText || __( 'Abort', 'woocommerce' ) }
 					</Button>
 				) }
 			</Fragment>
@@ -162,11 +157,8 @@ Connect.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const {
-			getJetpackConnectUrl,
-			isPluginsRequesting,
-			getPluginsError,
-		} = select( PLUGINS_STORE_NAME );
+		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
+			select( PLUGINS_STORE_NAME );
 
 		const queryArgs = {
 			redirect_url: props.redirectUrl || window.location.href,

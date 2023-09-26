@@ -23,11 +23,11 @@ import {
 	getChartTypeForQuery,
 	getPreviousDate,
 } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../lib/currency-context';
 import ReportError from '../report-error';
 import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
 
@@ -169,8 +169,8 @@ export class ReportChart extends Component {
 			{ type: 'php' }
 		);
 		const emptyMessage = emptySearchResults
-			? __( 'No data for the current search', 'woocommerce-admin' )
-			: __( 'No data for the selected date range', 'woocommerce-admin' );
+			? __( 'No data for the current search', 'woocommerce' )
+			: __( 'No data for the selected date range', 'woocommerce' );
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return (
 			<Chart

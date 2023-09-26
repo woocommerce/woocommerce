@@ -1,51 +1,40 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards">
-	<!-- See https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
-	<!-- See https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/blob/develop/WordPress-Core/ruleset.xml -->
+<ruleset name="WooCommerce Beta Tester Coding Standards">
+	<description>WooCommerce Beta Tester PHP_CodeSniffer ruleset.</description>
 
-	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
+	<file>./woocommerce-beta-tester.php</file>	
+	<file>./includes/</file>
+	<file>./api/</file>
 
-	<!-- Exclude paths -->
-	<exclude-pattern>*/node_modules/*</exclude-pattern>
-	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
 
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="4.7" />
-	<config name="testVersion" value="5.2-"/>
+	<config name="minimum_supported_wp_version" value="5.2" />
+	<config name="testVersion" value="7.4-" />
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
-	<rule ref="PHPCompatibility">
-		<exclude name="PHPCompatibility.PHP.NewFunctions.hash_equalsFound" />
-		<exclude name="PHPCompatibility.PHP.NewInterfaces.jsonserializableFound" />
-		<exclude name="PHPCompatibility.PHP.NewKeywords.t_namespaceFound" />
-		<exclude-pattern>tests/</exclude-pattern>
-	</rule>
 
-	<rule ref="WordPress">
-		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
-		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
-		<exclude name="WordPress.VIP.DirectDatabaseQuery.SchemaChange" />
-		<exclude name="WordPress.VIP.FileSystemWritesDisallow.file_ops_fwrite" />
-		<exclude name="WordPress.VIP.OrderByRand" />
-		<exclude name="WordPress.VIP.RestrictedFunctions" />
-		<exclude name="WordPress.VIP.RestrictedVariables.user_meta__wpdb__usermeta" />
-		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
-		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___COOKIE" />
-	</rule>
-	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
-		<properties>
-			<property name="customSanitizingFunctions" type="array" value="wc_clean,wc_sanitize_tooltip,wc_format_decimal,wc_stock_amount,wc_sanitize_permalink,wc_sanitize_textarea" />
-		</properties>
-	</rule>
-	<rule ref="WordPress.XSS.EscapeOutput">
-		<properties>
-			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip" />
-		</properties>
-	</rule>
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array" value="woocommerce-beta-tester" />
 		</properties>
+	</rule>
+
+	<rule ref="WooCommerce.Commenting.CommentHooks.MissingHookComment">
+		<exclude-pattern>includes/</exclude-pattern>
+		<exclude-pattern>api/</exclude-pattern>
+	</rule>
+	
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>includes/</exclude-pattern>
+		<exclude-pattern>api/</exclude-pattern>
 	</rule>
 </ruleset>
