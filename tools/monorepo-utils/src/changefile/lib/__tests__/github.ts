@@ -385,13 +385,17 @@ describe( 'getChangelogDetails', () => {
 			'#### Comment ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
-			'I don\'t promise!\r\n' +
+			"I don't promise!\r\n" +
 			'\r\n' +
 			'</details>';
 
 		const details = getChangelogDetails( body );
-		expect( details.message ).toEqual( 'This is a very useful fix. I promise!' );
-		expect( details.comment ).toEqual( 'This is a very useful comment. I don\'t promise!' );
+		expect( details.message ).toEqual(
+			'This is a very useful fix. I promise!'
+		);
+		expect( details.comment ).toEqual(
+			"This is a very useful comment. I don't promise!"
+		);
 	} );
 
 	it( 'should return a comment even when it is entered with a significance other than patch', () => {
