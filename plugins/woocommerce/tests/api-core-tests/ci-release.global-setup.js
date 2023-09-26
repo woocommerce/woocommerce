@@ -4,10 +4,7 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 
 const zipPath = path.resolve( 'tmp', 'woocommerce.zip' );
-const nightlyZipURL =
-	'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
-const releaseZipURL = `https://github.com/woocommerce/woocommerce/releases/download/${ UPDATE_WC }/woocommerce.zip`;
-const downloadURL = UPDATE_WC === 'nightly' ? nightlyZipURL : releaseZipURL;
+const downloadURL = `https://github.com/woocommerce/woocommerce/releases/download/${ UPDATE_WC }/woocommerce.zip`;
 
 test( `Setup remote test site`, async ( { page, request } ) => {
 	await test.step( `Download WooCommerce build zip`, async () => {
@@ -92,19 +89,10 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		);
 		const { status, version } = await response.json();
 		expect( status ).toEqual( 'active' );
-
-		if ( UPDATE_WC === 'nightly' ) {
-			expect( version ).toMatch( /\d+\.\d+\.\d+-dev/ );
-		} else {
-			expect( version ).toEqual( UPDATE_WC );
-		}
+		expect( version ).toEqual( UPDATE_WC );
 	} );
 
 	await test.step( `Verify WooCommerce database version`, async () => {
-		if ( UPDATE_WC === 'nightly' ) {
-			return;
-		}
-
 		const response = await request.get( '/wp-json/wc/v3/system_status' );
 		const { database } = await response.json();
 		const { wc_database_version } = database;
