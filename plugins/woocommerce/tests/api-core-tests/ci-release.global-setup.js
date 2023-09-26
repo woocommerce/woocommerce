@@ -92,7 +92,12 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		);
 		const { status, version } = await response.json();
 		expect( status ).toEqual( 'active' );
-		expect( version ).toEqual( UPDATE_WC );
+
+		if ( UPDATE_WC === 'nightly' ) {
+			expect( version ).toMatch( /\d+\.\d+\.\d+-dev/ );
+		} else {
+			expect( version ).toEqual( UPDATE_WC );
+		}
 	} );
 
 	await test.step( `Delete zip`, async () => {
