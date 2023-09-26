@@ -123,6 +123,7 @@ export const BlockEditor = ( {} ) => {
 					blocks={ blocks }
 					settings={ settings }
 					additionalStyles={ '' }
+					isNavigable={ false }
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
