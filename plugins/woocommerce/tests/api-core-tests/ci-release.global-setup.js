@@ -36,31 +36,25 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 	} );
 
 	await test.step( `Deactivate currently installed WooCommerce version`, async () => {
-		const Deactivate_WooCommerce = 'Deactivate WooCommerce';
-		const Delete_WooCommerce = 'Delete WooCommerce';
-
-		await page.goto( '/wp-admin/plugins.php' );
-		await page.getByLabel( Deactivate_WooCommerce ).click();
-		await expect( page.getByLabel( Delete_WooCommerce ) ).toBeVisible();
+		const response = await request.put(
+			'/wp-json/wp/v2/plugins/woocommerce/woocommerce',
+			{
+				data: {
+					status: 'inactive',
+				},
+			}
+		);
+		expect( response.ok() ).toBeTruthy();
 	} );
 
 	await test.step( `Delete currently installed WooCommerce version`, async () => {
-		const Delete_WooCommerce = 'Delete WooCommerce';
-		const WooCommerce_was_successfully_deleted =
-			'WooCommerce was successfully deleted.';
-		const Select_WooCommerce = 'Select WooCommerce';
-
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.getByLabel( Delete_WooCommerce ).click();
-		await expect(
-			page.getByText( WooCommerce_was_successfully_deleted )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'rowheader', { name: Select_WooCommerce } )
-		).not.toBeVisible();
+		const response = await request.delete(
+			'/wp-json/wp/v2/plugins/woocommerce/woocommerce'
+		);
+		expect( response.ok() ).toBeTruthy();
 	} );
 
-	await test.step( `Install WooCommerce version to be tested`, async () => {
+	await test.step( `Install WooCommerce ${ UPDATE_WC }`, async () => {
 		const Upload_Plugin = 'Upload Plugin';
 		const Plugin_zip_file = 'Plugin zip file';
 		const Install_Now = 'Install Now';
@@ -104,6 +98,20 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		} else {
 			expect( version ).toEqual( UPDATE_WC );
 		}
+	} );
+
+	await test.step( `Verify WooCommerce database version`, async () => {
+		if ( UPDATE_WC === 'nightly' ) {
+			return;
+		}
+
+		const response = await request.get( '/wp-json/wc/v3/system_status' );
+		const { database } = await response.json();
+		const { wc_database_version } = database;
+		const major = UPDATE_WC.split( '.' ).at( 0 );
+		const minor = UPDATE_WC.split( '.' ).at( 1 );
+		const pattern = new RegExp( `^${ major }\.${ minor }` );
+		expect( wc_database_version ).toMatch( pattern );
 	} );
 
 	await test.step( `Delete zip`, async () => {
