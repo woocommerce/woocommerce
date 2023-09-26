@@ -144,7 +144,7 @@ module.exports = async ( config ) => {
 					setupPage.locator( '#pluginzip' ).click(),
 				] );
 				await fileChooser.setFiles( woocommerceZipPath );
-				console.log( 'Uploading nightly build...' );
+				console.log( 'Uploading build...' );
 				await setupPage
 					.locator( '#install-plugin-submit' )
 					.click( { timeout: 60000 } );
