@@ -142,12 +142,6 @@ class FeaturesController {
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
 			),
-			'product_image_sku'    => array(
-				'name'            => __( 'Product image by SKU', 'woocommerce' ),
-				'description'     => __( 'Match uploaded images filenames to product by SKU', 'woocommerce' ),
-				'is_experimental' => true,
-				'disable_ui'      => false,
-			),
 		);
 
 		$this->legacy_feature_ids = array(
@@ -155,7 +149,6 @@ class FeaturesController {
 			'new_navigation',
 			'product_block_editor',
 			'marketplace',
-			'product_image_sku',
 			// Compatibility for COT is determined by `custom_order_tables'.
 			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,

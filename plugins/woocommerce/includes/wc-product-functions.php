@@ -12,7 +12,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1660,24 +1660,20 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
 
 /**
- * Attach product featured image. Use image filename to match a product sku when product ID is not provided.
+ * Attach product featured image. Use image filename to match a product sku when product is not provided.
  *
- * @since 8.2.0
+ * @since 8.3.0
  * @param int $attachment_id Media attachment ID.
  * @param WC_Product $product_id Optional product object.
  * @return void
  */
 function wc_product_attach_featured_image( $attachment_id, $product = null ) {
-	if ( ! FeaturesUtil::feature_is_enabled( 'product_image_sku' ) ) {
-		return;
-	}
-
 	$attachment_post = get_post( $attachment_id );
 	if ( ! $attachment_post ) {
 		return;
 	}
 
-	if ( null === $product ) {
+	if ( null === $product && wc_get_container()->get( MatchImageBySKU::class )->is_enabled() ) {
 		// On upload the attachment post title is the uploaded file's filename.
 		$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
 		if ( ! $file_name ) {
