@@ -1,4 +1,4 @@
-const { GITHUB_TOKEN, UPDATE_WC, USER_KEY, USER_SECRET } = process.env;
+const { UPDATE_WC, USER_KEY, USER_SECRET } = process.env;
 const { test, expect } = require( '@playwright/test' );
 const path = require( 'path' );
 const fs = require( 'fs' );
