@@ -81,40 +81,51 @@
 
 	p {
 		color: #2f2f2f;
-		font-size: 1rem;
+		font-size: 0.813rem;
 		line-height: 1.5;
-		margin-bottom: 1.5rem;
+		margin: 0;
+		padding: 0;
+
+		&.select-theme-text {
+			font-size: 1rem;
+			font-weight: 500;
+			color: #1E1E1E;
+			margin-bottom: 24px;
+		}
 	}
 }
 
 .woocommerce-customize-store-banner {
 	background: rgba(242, 237, 255, .6) url(../assets/images/intro-banner-background.svg) no-repeat center right;
-	background-size: auto 300px;
-	background-position-y: 52px;
+	background-size: auto 218px;
+	background-position-y: 29px;
 	border-radius: 4px;
 	display: flex;
 	margin: 1.25rem 0 3.375rem;
 	min-height: 248px;
-	padding: 70px 0;
 	width: 820px;
+	align-items: center;
 
 	&.offline-banner {
 		background: rgba(242, 237, 255, .6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
-		background-size: auto 300px;
-		background-position-y: 52px;
+		background-size: auto 218px;
+		background-position-y: 29px;
 	}
 
 	.woocommerce-customize-store-banner-content {
-		width: 345px;
+		width: 375px;
 		margin-left: 50px;
 
 		h1 {
-			font-size: 1.5rem;
-			line-height: 1.33;
+			font-size: 1.25rem;
+			line-height: 23.87px;
+			font-weight: 500;
+			color: #000;
 		}
 
 		p {
 			margin: 1rem 0 2rem 0;
+			color: #2F2F2F;
 		}
 
 		button {

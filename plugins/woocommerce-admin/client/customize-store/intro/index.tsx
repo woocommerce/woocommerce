@@ -18,7 +18,6 @@ import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 
 import './intro.scss';
-import { set } from 'lodash';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -53,6 +52,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			window.addEventListener( 'online', removeOfflineBannerImage );
 		};
 	}, [] );
+
+	const bannerText =
+		networkStatus === 'online'
+			? __(
+					'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
+					'woocommerce'
+			  )
+			: __(
+					"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
+					'woocommerce'
+			  );
 
 	return (
 		<>
@@ -105,12 +115,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 									'woocommerce'
 								) }
 							</h1>
-							<p>
-								{ __(
-									'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
-									'woocommerce'
-								) }
-							</p>
+							<p>{ bannerText }</p>
 							<button
 								onClick={ () =>
 									sendEvent( { type: 'DESIGN_WITH_AI' } )
@@ -121,7 +126,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						</div>
 					</div>
 
-					<p>
+					<p className="select-theme-text">
 						{ __(
 							'Or select a professionally designed theme to customize and make your own.',
 							'woocommerce'
