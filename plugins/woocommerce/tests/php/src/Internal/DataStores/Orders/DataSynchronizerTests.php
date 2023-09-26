@@ -606,17 +606,21 @@ class DataSynchronizerTests extends HposTestCase {
 	 */
 	public function test_bg_sync_while_sync_enabled() {
 		$reflection     = new ReflectionClass( get_class( $this->sut ) );
-		$handler_method = $reflection->getMethod( 'handle_background_sync' );
-		$handler_method->setAccessible( true );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
 
 		$this->toggle_cot_authoritative( false );
-		$this->enable_cot_sync();
 
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
-		$this->sut->handle_background_sync();
+		$this->enable_cot_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'yes' );
 		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		wc_get_container()->get( BatchProcessingController::class )->remove_processor( DataSynchronizer::class );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
@@ -631,7 +635,7 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
 		$this->disable_cot_sync();
-		$this->sut->handle_background_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes', 'no' );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 	}
 
@@ -641,17 +645,17 @@ class DataSynchronizerTests extends HposTestCase {
 	 */
 	public function test_bg_sync_while_sync_disabled_interval_mode() {
 		$reflection     = new ReflectionClass( get_class( $this->sut ) );
-		$handler_method = $reflection->getMethod( 'handle_background_sync' );
-		$handler_method->setAccessible( true );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
 
 		$this->toggle_cot_authoritative( false );
 		$this->disable_cot_sync();
-		add_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'no' );
 
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
-		$this->sut->handle_background_sync();
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_INTERVAL );
 		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
@@ -668,8 +672,7 @@ class DataSynchronizerTests extends HposTestCase {
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
-		remove_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
-		$this->sut->handle_background_sync();
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_OFF );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 	}
 
@@ -679,21 +682,26 @@ class DataSynchronizerTests extends HposTestCase {
 	 */
 	public function test_bg_sync_while_sync_disabled_continuous_mode() {
 		$reflection     = new ReflectionClass( get_class( $this->sut ) );
-		$handler_method = $reflection->getMethod( 'handle_background_sync' );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
+		$handler_method = $reflection->getMethod( 'handle_continuous_background_sync' );
 		$handler_method->setAccessible( true );
 
 		$this->toggle_cot_authoritative( false );
 		$this->disable_cot_sync();
-		add_filter( 'woocommerce_custom_orders_table_background_sync_enabled', '__return_true' );
-		add_filter( 'woocommerce_custom_orders_table_background_sync_mode', function() {
-			return $this->sut::BACKGROUND_SYNC_MODE_CONTINUOUS;
-		} );
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'no' );
 
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
-		$this->sut->handle_background_sync();
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_CONTINUOUS );
+		$handler_method->invoke( $this->sut );
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		do_action( wc_get_container()->get( BatchProcessingController::class )::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$handler_method->invoke( $this->sut );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 	}
 }
