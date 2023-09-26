@@ -3,7 +3,7 @@ const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
 
 module.exports = async ( config ) => {
-	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
+	// If API_BASE_URL is configured and doesn't include localhost, running on remote host
 	if (
 		process.env.API_BASE_URL &&
 		! process.env.API_BASE_URL.includes( 'localhost' )
