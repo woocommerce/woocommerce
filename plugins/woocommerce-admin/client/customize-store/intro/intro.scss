@@ -89,13 +89,20 @@
 
 .woocommerce-customize-store-banner {
 	background: rgba(242, 237, 255, .6) url(../assets/images/intro-banner-background.svg) no-repeat center right;
-	background-size: contain;
+	background-size: auto 300px;
+	background-position-y: 52px;
 	border-radius: 4px;
 	display: flex;
 	margin: 1.25rem 0 3.375rem;
 	min-height: 248px;
 	padding: 70px 0;
 	width: 820px;
+
+	&.offline-banner {
+		background: rgba(242, 237, 255, .6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
+		background-size: auto 300px;
+		background-position-y: 52px;
+	}
 
 	.woocommerce-customize-store-banner-content {
 		width: 345px;
