@@ -12,6 +12,8 @@ For more examples and best practices, please see the Product Editor Development 
 ### Adding a new group to product editor templates after an existing group
 
 ```php
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+
 function YOUR_PREFIX_add_group( BlockInterface $general_group ) {
   $parent = $general_group->get_parent();
 
@@ -32,6 +34,8 @@ add_action( 'woocommerce_block_template_area_product-form_after_add_block_genera
 ### Adding a new block to product editor templates after an existing block
 
 ```php
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+
 function YOUR_PREFIX_add_block( BlockInterface $product_name_block ) {
   $parent = $product_name_block->get_parent();
 
@@ -53,6 +57,8 @@ add_action( 'woocommerce_block_template_area_product-form_after_add_block_produc
 ### Removing a block from product editor templates
 
 ```php
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+
 function YOUR_PREFIX_remove_block( BlockInterface $sale_price_block ) {
   $sale_price_block->remove();
 }
