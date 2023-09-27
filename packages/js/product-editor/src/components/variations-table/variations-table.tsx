@@ -197,10 +197,23 @@ export const VariationsTable = forwardRef<
 
 	const variationIds = variations.map( ( { id } ) => id );
 
-	function getSnackbarText( response: VariationResponseProps ) {
-		const { update = [], delete: deleted = [] } = response;
+	function getSnackbarText(
+		response: VariationResponseProps | ProductVariation,
+		type?: string
+	) {
+		const { id, update = [], delete: deleted = [] } = response;
 		const updatedCount = update.length;
 		const deletedCount = deleted.length;
+		const isSingleVariation = typeof id === 'number';
+
+		if ( isSingleVariation ) {
+			const action = type === 'update' ? 'updated' : 'deleted';
+			return sprintf(
+				/* translators: The deleted or updated variations count */
+				__( '1 variation %s.', 'woocommerce' ),
+				action
+			);
+		}
 
 		if ( deletedCount > 0 ) {
 			return sprintf(
@@ -229,10 +242,11 @@ export const VariationsTable = forwardRef<
 			product_id: productId,
 			id: variationId,
 		} )
-			.then( () => {
+			.then( ( response: VariationResponseProps ) => {
 				recordEvent( 'product_variations_delete', {
 					source: TRACKS_SOURCE,
 				} );
+				createSuccessNotice( getSnackbarText( response, 'delete' ) );
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
 				] );
@@ -260,7 +274,7 @@ export const VariationsTable = forwardRef<
 			variation
 		)
 			.then( ( response: VariationResponseProps ) => {
-				createSuccessNotice( getSnackbarText( response ) );
+				createSuccessNotice( getSnackbarText( response, 'update' ) );
 			} )
 			.catch( () => {
 				createErrorNotice(
