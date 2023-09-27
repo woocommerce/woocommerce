@@ -73,3 +73,12 @@ export const assignCustomizeStoreCompleted = assign<
 		return { ...context.intro, customizeStoreCompleted };
 	},
 } );
+
+export const assignFetchIntroDataError = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	intro: ( context ) => {
+		return { ...context.intro, hasErrors: true };
+	},
+} );

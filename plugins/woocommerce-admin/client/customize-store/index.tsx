@@ -114,6 +114,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	},
 	context: {
 		intro: {
+			hasErrors: false,
 			themeCards: [] as ThemeCard[],
 			activeTheme: '',
 			activeThemeHasMods: false,
@@ -175,6 +176,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				preIntro: {
 					invoke: {
 						src: 'fetchIntroData',
+						onError: {
+							actions: 'assignFetchIntroDataError',
+							target: 'intro',
+						},
 						onDone: {
 							target: 'intro',
 							actions: [
