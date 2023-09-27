@@ -17,19 +17,17 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { TagField } from '../../components/tags-field';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	context,
-}: {
-	attributes: BlockAttributes;
-	context?: { postType?: string };
-} ) {
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { name, label, placeholder } = attributes;
 	const [ tags, setTags ] = useEntityProp<
 		Pick< ProductTag, 'id' | 'name' >[]
-	>( 'postType', context?.postType || 'product', name || 'tags' );
+	>( 'postType', context.postType || 'product', name || 'tags' );
 
 	const tagFieldId = useInstanceId( BaseControl, 'tag-field' ) as string;
 
