@@ -27,12 +27,13 @@ import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../constants';
 import { handlePrompt } from '../../utils/handle-prompt';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	context,
-}: BlockEditProps< VariationOptionsBlockAttributes > & {
-	context?: {
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
+	context: {
 		isInSelectedTab?: boolean;
 	};
 } ) {
@@ -198,7 +199,7 @@ export function Edit( {
 					}
 				} }
 			/>
-			{ context?.isInSelectedTab && <VariableProductTour /> }
+			{ context.isInSelectedTab && <VariableProductTour /> }
 		</div>
 	);
 }
