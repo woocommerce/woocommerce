@@ -3,6 +3,12 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
+import classnames from 'classnames';
+
+/**
+ * Internal dependencies
+ */
+import './editor.scss';
 
 const Edit = ( {
 	attributes,
@@ -18,12 +24,13 @@ const Edit = ( {
 		'storeHasDownloadableProducts'
 	);
 
-	if ( ! hasDownloadableProducts ) {
-		return null;
-	}
-
 	return (
-		<div { ...blockProps }>
+		<div
+			{ ...blockProps }
+			className={ classnames( blockProps.className, {
+				'store-has-downloads': hasDownloadableProducts,
+			} ) }
+		>
 			<InnerBlocks
 				allowedBlocks={ [ 'core/heading' ] }
 				template={ [
