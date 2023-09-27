@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
 	Modal,
 	CheckboxControl,
 	TextControl,
 } from '@wordpress/components';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import { useState, createElement, Fragment, useMemo } from '@wordpress/element';
 import {
 	__experimentalTooltip as Tooltip,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -22,6 +22,8 @@ import {
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import { Notice } from '../notice';
+import { getAttributeId } from './utils';
 
 type EditAttributeModalProps = {
 	title?: string;
@@ -43,6 +45,7 @@ type EditAttributeModalProps = {
 	onCancel: () => void;
 	onEdit: ( alteredAttribute: EnhancedProductAttribute ) => void;
 	attribute: EnhancedProductAttribute;
+	attributes: EnhancedProductAttribute[];
 };
 
 export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
@@ -77,12 +80,73 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	onCancel,
 	onEdit,
 	attribute,
+	attributes,
 } ) => {
 	const [ editableAttribute, setEditableAttribute ] = useState<
 		EnhancedProductAttribute | undefined
 	>( { ...attribute } );
 
 	const isCustomAttribute = editableAttribute?.id === 0;
+
+	const { additions, deletions } = useMemo( () => {
+		const variationsSubTotal = attributes
+			.filter(
+				( otherAttribute ) =>
+					getAttributeId( otherAttribute ) !==
+					getAttributeId( attribute )
+			)
+			.reduce(
+				( subTotal, { terms } ) => subTotal * ( terms?.length ?? 1 ),
+				1
+			);
+
+		const currentAttributeTermsCount = attribute.terms?.length ?? 0;
+		const variationsTotal = variationsSubTotal * currentAttributeTermsCount;
+
+		const addedTermsCount =
+			editableAttribute?.terms?.filter(
+				( editedTerm ) =>
+					! attribute.terms?.some(
+						( currentTerm ) => currentTerm.id === editedTerm.id
+					)
+			)?.length ?? 0;
+		const addedTermsTotal =
+			currentAttributeTermsCount + addedTermsCount || 1;
+
+		const remainedTermsCount =
+			attribute.terms?.filter( ( currentTerm ) =>
+				editableAttribute?.terms?.some(
+					( editedTerm ) => currentTerm.id === editedTerm.id
+				)
+			)?.length ?? 0;
+
+		return {
+			additions: Math.abs(
+				variationsTotal - variationsSubTotal * addedTermsTotal
+			),
+			deletions: Math.abs(
+				variationsTotal - variationsSubTotal * remainedTermsCount
+			),
+		};
+	}, [ attributes, attribute, editableAttribute ] );
+
+	function getNoticeMessage() {
+		const additionsMessage = sprintf(
+			__( '%d variations will be added', 'woocommerce' ),
+			additions
+		);
+		const deletionsMessage = sprintf(
+			__( '%d variations will be removed', 'woocommerce' ),
+			deletions
+		);
+		if ( additions && deletions ) {
+			return sprintf( '%s, %s.', additionsMessage, deletionsMessage );
+		} else if ( additions ) {
+			return sprintf( '%s.', additionsMessage );
+		} else {
+			return sprintf( '%s.', deletionsMessage );
+		}
+	}
 
 	return (
 		<>
@@ -186,6 +250,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 							</div>
 						) }
 					</div>
+
+					{ Boolean( additions || deletions ) && (
+						<Notice>{ getNoticeMessage() }</Notice>
+					) }
 				</div>
 				<div className="woocommerce-edit-attribute-modal__buttons">
 					<Button
