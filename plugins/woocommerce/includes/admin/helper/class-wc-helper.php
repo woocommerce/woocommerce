@@ -113,7 +113,13 @@ class WC_Helper {
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
-		$subscriptions             = self::get_subscription_list_data();
+		$subscriptions_list_data   = self::get_subscription_list_data();
+		$subscriptions			   = array_filter(
+			$subscriptions_list_data,
+			function( $subscription ) {
+				return ! empty( $subscription['product_key'] );
+			}
+		);
 		$updates                   = WC_Helper_Updater::get_update_data();
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
