@@ -43,6 +43,15 @@
 	}
 }
 
+@keyframes containerFadeIn {
+	0%, 80% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 .woocommerce-profile-wizard__step-assemblerHub {
 	a {
 		text-decoration: none;
