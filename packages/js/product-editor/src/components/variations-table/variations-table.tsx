@@ -210,8 +210,7 @@ export const VariationsTable = forwardRef<
 			);
 		}
 
-		const { update = [], delete: deleted = [] } =
-			response as VariationResponseProps;
+		const { update = [], delete: deleted = [] } = response;
 		const updatedCount = update.length;
 		const deletedCount = deleted.length;
 
@@ -221,9 +220,7 @@ export const VariationsTable = forwardRef<
 				__( '%s variations deleted.', 'woocommerce' ),
 				deletedCount
 			);
-		}
-
-		if ( updatedCount > 0 ) {
+		} else if ( updatedCount > 0 ) {
 			return sprintf(
 				/* translators: The updated variations count */
 				__( '%s variations updated.', 'woocommerce' ),
