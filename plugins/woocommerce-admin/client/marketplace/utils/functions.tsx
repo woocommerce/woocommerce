@@ -62,7 +62,6 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 
 async function fetchSubscriptions(): Promise< Array< Subscription > > {
 	const url = '/wc/v3/marketplace/subscriptions';
-
 	return await apiFetch( { path: url.toString() } );
 }
 

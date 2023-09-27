@@ -10,10 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * class WC_Helper_Subscriptions_API {
- Class
+ * WC_Helper_Subscriptions_API
  *
- * The main entry-point for all things related to the Subscriptions API.
+ * The main entry-point for all things related to the Marketplace Subscriptions API.
  * The Subscriptions API manages WooCommerce.com Subscriptions.
  */
 class WC_Helper_Subscriptions_API {
@@ -28,9 +27,8 @@ class WC_Helper_Subscriptions_API {
 	}
 
 	/**
-	 * Registers the REST routes for the featured products endpoint.
-	 * This endpoint is used by the WooCommerce > Extensions > Discover
-	 * page.
+	 * Registers the REST routes for the Marketplace Subscriptions API.
+	 * These endpoints are used by the Marketplace Subscriptions React UI.
 	 */
 	public static function register_rest_routes() {
 		register_rest_route(
