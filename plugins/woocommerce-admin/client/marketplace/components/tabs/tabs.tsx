@@ -34,6 +34,14 @@ const tabs: Tabs = {
 		name: 'search',
 		title: __( 'Search results', 'woocommerce' ),
 	},
+	'search-extensions': {
+		name: 'search',
+		title: __( 'Search results', 'woocommerce' ),
+	},
+	'search-themes': {
+		name: 'search',
+		title: __( 'Search results', 'woocommerce' ),
+	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
@@ -76,9 +84,12 @@ const getVisibleTabs = ( selectedTab: string ) => {
 		return tabs;
 	}
 	const currentVisibleTabs = { ...tabs };
-	if ( selectedTab !== 'search' ) {
-		delete currentVisibleTabs.search;
-	}
+	const tabsToHide = [ 'search', 'search-extensions', 'search-themes' ];
+	tabsToHide.forEach( ( tab ) => {
+		if ( selectedTab !== tab ) {
+			delete currentVisibleTabs[ tab ];
+		}
+	} );
 
 	return currentVisibleTabs;
 };

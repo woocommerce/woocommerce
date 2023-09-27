@@ -18,6 +18,7 @@ import { Product, ProductType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 interface ExtensionsProps {
+	categorySelector?: boolean;
 	products?: Product[];
 	perPage?: number;
 	label: string;
@@ -27,10 +28,11 @@ interface ExtensionsProps {
 export default function Extensions( props: ExtensionsProps ): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading } = marketplaceContextValue;
-	// const of ProductType based on the props.label
 	const type =
 		props.label === 'extension' ? ProductType.extension : ProductType.theme;
 
+	// Store the total number of products before we slice it later.
+	const productTotalCount = props.products?.length ?? 0;
 	const products =
 		props.products?.slice(
 			0,
@@ -43,11 +45,11 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 		props.labelPlural
 	);
 
-	if ( products.length > 0 ) {
+	if ( productTotalCount > 0 ) {
 		title = sprintf(
 			// translators: %1$s: number of items, %2$s: singular item label, %3$s: plural item label
-			_n( '%1$s %2$s', '%1$s %3$s', products.length, 'woocommerce' ),
-			products.length,
+			_n( '%1$s %2$s', '%1$s %3$s', productTotalCount, 'woocommerce' ),
+			productTotalCount,
 			props.label,
 			props.labelPlural
 		);
@@ -76,7 +78,7 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 
 		return (
 			<>
-				<CategorySelector type={ type } />
+				{ props.categorySelector && <CategorySelector type={ type } /> }
 				<ProductListContent products={ products } type={ type } />
 			</>
 		);

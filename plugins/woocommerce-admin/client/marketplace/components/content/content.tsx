@@ -15,6 +15,8 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
 import SearchResults from '../search-results/search-results';
+import SearchExtensions from '../search-results/search-extensions';
+import SearchThemes from '../search-results/search-themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function Content(): JSX.Element {
@@ -106,6 +108,7 @@ export default function Content(): JSX.Element {
 				return (
 					<Extensions
 						products={ products }
+						categorySelector={ true }
 						label={ 'extension' }
 						labelPlural={ 'extensions' }
 					/>
@@ -114,12 +117,17 @@ export default function Content(): JSX.Element {
 				return (
 					<Extensions
 						products={ products }
+						categorySelector={ true }
 						label={ 'theme' }
 						labelPlural={ 'themes' }
 					/>
 				);
 			case 'search':
 				return <SearchResults products={ products } />;
+			case 'search-extensions':
+				return <SearchExtensions products={ products } />;
+			case 'search-themes':
+				return <SearchThemes products={ products } />;
 			case 'discover':
 				return <Discover />;
 			default:
