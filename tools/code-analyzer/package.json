@@ -15,7 +15,7 @@
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"commander": "^9.4.0",
 		"dotenv": "^10.0.0",
-		"simple-git": "^3.10.0",
+		"simple-git": "^3.16.0",
 		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
