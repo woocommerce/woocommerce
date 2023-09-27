@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration } from '@wordpress/blocks';
 import { registerWooBlockType } from '@woocommerce/block-templates';
 
 /**
@@ -9,20 +8,20 @@ import { registerWooBlockType } from '@woocommerce/block-templates';
  */
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
-import { VariationOptionsBlockAttributes } from './types';
 
-const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< VariationOptionsBlockAttributes >;
+const { name, ...metadata } = blockConfiguration;
 
 export { metadata, name };
 
-export const settings: Partial<
-	BlockConfiguration< VariationOptionsBlockAttributes >
-> = {
+export const settings = {
 	example: {},
 	edit: Edit,
 };
 
 export function init() {
-	return registerWooBlockType( { name, metadata, settings } );
+	return registerWooBlockType( {
+		name,
+		metadata: metadata as never,
+		settings,
+	} );
 }
