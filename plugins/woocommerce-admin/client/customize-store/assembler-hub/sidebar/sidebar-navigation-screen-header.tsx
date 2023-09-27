@@ -11,6 +11,7 @@ import {
 	useEffect,
 	useMemo,
 } from '@wordpress/element';
+import { isEqual } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
@@ -23,6 +24,7 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../hooks/use-patterns';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
@@ -45,6 +47,9 @@ export const SidebarNavigationScreenHeader = () => {
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern(
+		'.edit-site-sidebar-navigation-screen__content .block-editor-block-patterns-list__item'
+	);
 
 	useEffect( () => {
 		setHighlightedBlockIndex( 0 );
@@ -64,13 +69,28 @@ export const SidebarNavigationScreenHeader = () => {
 		[ patterns ]
 	);
 
+	useEffect( () => {
+		if ( selectedPattern || ! blocks.length || ! headerPatterns.length ) {
+			return;
+		}
+
+		const headerBlock = blocks[ 0 ];
+		const _currentSelectedPattern = headerPatterns.find( ( pattern ) =>
+			isEqual( pattern.blocks[ 0 ].attributes, headerBlock.attributes )
+		);
+
+		setSelectedPattern( _currentSelectedPattern );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, headerPatterns ] );
+
 	const onClickHeaderPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern ]
 	);
 
 	return (

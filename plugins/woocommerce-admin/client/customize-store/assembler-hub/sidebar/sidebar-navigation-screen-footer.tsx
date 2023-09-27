@@ -14,6 +14,8 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
+import { isEqual } from 'lodash';
+
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
@@ -26,6 +28,7 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu-and-cart',
@@ -43,6 +46,9 @@ export const SidebarNavigationScreenFooter = () => {
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
+	);
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern(
+		'.edit-site-sidebar-navigation-screen__content .block-editor-block-patterns-list__item'
 	);
 
 	useEffect( () => {
@@ -65,13 +71,28 @@ export const SidebarNavigationScreenFooter = () => {
 		[ patterns ]
 	);
 
+	useEffect( () => {
+		if ( selectedPattern || ! blocks.length || ! footerPatterns.length ) {
+			return;
+		}
+
+		const footerBlock = blocks[ blocks.length - 1 ];
+		const _currentSelectedPattern = footerPatterns.find( ( pattern ) =>
+			isEqual( pattern.blocks[ 0 ].attributes, footerBlock.attributes )
+		);
+
+		setSelectedPattern( _currentSelectedPattern );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, footerPatterns ] );
+
 	const onClickFooterPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
 			} );
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern ]
 	);
 
 	return (

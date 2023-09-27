@@ -438,6 +438,7 @@
 			border: 1.5px solid transparent;
 		}
 
+		&.is-selected,
 		&:hover,
 		&:focus {
 			.block-editor-block-preview__container {
