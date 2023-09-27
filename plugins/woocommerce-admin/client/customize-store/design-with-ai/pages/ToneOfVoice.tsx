@@ -4,7 +4,7 @@
 import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -96,11 +96,25 @@ export const ToneOfVoice = ( {
 							isDismissible={ false }
 							status="error"
 						>
-							Oops! We encountered a problem while generating your
-							store.{ ' ' }
-							<Button onClick={ onContinue } variant="tertiary">
-								Please try again
-							</Button>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while generating your store. <retryButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ onContinue }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
 						</Notice>
 					) }
 					<div className="choices">
