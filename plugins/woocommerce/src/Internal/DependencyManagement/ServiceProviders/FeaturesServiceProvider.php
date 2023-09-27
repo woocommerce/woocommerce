@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use Automattic\WooCommerce\Utilities\VersionUtil;
 
 /**
  * Service provider for the features enabling/disabling/compatibility engine.
@@ -19,6 +20,7 @@ class FeaturesServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		FeaturesController::class,
+		VersionUtil::class,
 	);
 
 	/**
@@ -27,5 +29,7 @@ class FeaturesServiceProvider extends AbstractServiceProvider {
 	public function register() {
 		$this->share( FeaturesController::class )
 			->addArguments( array( LegacyProxy::class, PluginUtil::class ) );
+		$this->share( VersionUtil::class )
+			->addArguments( array( LegacyProxy::class ) );
 	}
 }
