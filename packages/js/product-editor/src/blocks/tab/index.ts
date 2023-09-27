@@ -19,5 +19,9 @@ export const settings = {
 };
 
 export function init() {
-	registerWooBlockType( { name, metadata: metadata as never, settings } );
+	registerWooBlockType( {
+		name,
+		metadata: metadata as never,
+		settings: settings as never,
+	} );
 }
