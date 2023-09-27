@@ -15,6 +15,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { ShippingMenuItem } from '../shipping-menu-item';
 import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
+import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 
 export function VariationActionsMenu( {
 	selection,
@@ -56,6 +57,11 @@ export function VariationActionsMenu( {
 						>
 							{ __( 'Preview', 'woocommerce' ) }
 						</MenuItem>
+						<ToggleVisibilityMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
