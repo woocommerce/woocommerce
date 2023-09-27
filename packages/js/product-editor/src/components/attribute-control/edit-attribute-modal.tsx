@@ -132,10 +132,12 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 
 	function getNoticeMessage() {
 		const additionsMessage = sprintf(
+			// translators: %d is the amount of variations to be added
 			__( '%d variations will be added', 'woocommerce' ),
 			additions
 		);
 		const deletionsMessage = sprintf(
+			// translators: %d is the amount of variations to be removed
 			__( '%d variations will be removed', 'woocommerce' ),
 			deletions
 		);
@@ -143,9 +145,8 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			return sprintf( '%s, %s.', additionsMessage, deletionsMessage );
 		} else if ( additions ) {
 			return sprintf( '%s.', additionsMessage );
-		} else {
-			return sprintf( '%s.', deletionsMessage );
 		}
+		return sprintf( '%s.', deletionsMessage );
 	}
 
 	return (
