@@ -1,0 +1,15 @@
+#woocommerce-ai-app-remove-background-link {
+	display: flex;
+
+	> button {
+		color: #2271b1;
+		padding: 0;
+		border: 0;
+		background: none;
+		cursor: pointer;
+	}
+
+	> img {
+		height: 16px;
+	}
+}
