@@ -52,7 +52,7 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
-import HiddenWithHelpIcon from '../../icons/hidden-with-help-icon';
+import HiddenIcon from '../../icons/hidden-icon';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -475,8 +475,8 @@ export const VariationsTable = forwardRef<
 									position="top center"
 									text={ NOT_VISIBLE_TEXT }
 								>
-									<div>
-										<HiddenWithHelpIcon />
+									<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
+										<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
 									</div>
 								</Tooltip>
 							) }
