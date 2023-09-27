@@ -29,12 +29,23 @@ export const VariationContainer = ( { variation, children } ) => {
 
 	const selectVariation = () => {
 		// Remove the hasCreatedOwnColors flag if the user is switching to a color palette
+		// hasCreatedOwnColors flag is used for visually deselecting preset color palettes if user has created their own
 		if (
 			variation.settings.color &&
 			user.settings.color &&
-			user.settings.color.hasCreatedOwnColors
+			user.settings.color.palette.hasCreatedOwnColors
 		) {
 			delete user.settings.color.palette.hasCreatedOwnColors;
+			// some color palettes don't define all the possible color options, e.g headings and captions
+			// if the user selects a pre-defined color palette with some own colors defined for these,
+			// we need to delete these user customizations as the below merge will persist them since
+			// the incoming variation won't have these properties defined
+			delete user.styles.color;
+			for ( const elementKey in user.styles.elements ) {
+				if ( user.styles.elements[ elementKey ].color ) {
+					delete user.styles.elements[ elementKey ].color;
+				}
+			}
 		}
 
 		setUserConfig( () => {
