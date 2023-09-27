@@ -106,7 +106,7 @@ export const SidebarNavigationScreenFooter = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-footer">
+					<div className="woocommerce-customize-store__sidebar-footer-content">
 						{ isLoading && (
 							<span className="components-placeholder__preview">
 								<Spinner />

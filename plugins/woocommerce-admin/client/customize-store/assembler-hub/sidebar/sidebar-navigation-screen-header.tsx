@@ -105,7 +105,7 @@ export const SidebarNavigationScreenHeader = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
+					<div className="woocommerce-customize-store__sidebar-header-content">
 						{ isLoading && (
 							<span className="components-placeholder__preview">
 								<Spinner />
