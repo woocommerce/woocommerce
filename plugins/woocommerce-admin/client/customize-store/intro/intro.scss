@@ -154,13 +154,37 @@
 		.theme-card__title {
 			font-size: 1rem;
 			font-weight: 600;
-			margin: 1.5rem 0 0.5rem;
 		}
 		
 		.theme-card__info {
 			margin-bottom: 14px;
+			display: flex;
+			.theme-card__color-variations {
+				margin-left: auto;
+			}
 		}
-
+		.theme-card__color-variations {
+			display: flex;
+			gap: 5px;
+			li {
+				display: flex;
+				div {
+					width: 10px;
+					height: 20px;
+					&.theme-card__color-variation-left {
+						border-top-left-radius: 15px;
+						border-bottom-left-radius: 15px;
+						border-right: none !important;
+					}
+					
+					&.theme-card__color-variation-right {
+						border-top-right-radius: 15px;
+						border-bottom-right-radius: 15px;
+						border-left: none !important;
+					}
+				}
+			}
+		}
 		.theme-card__active {
 			border-radius: 100px;
 			background: rgba(56, 88, 233, 0.20);

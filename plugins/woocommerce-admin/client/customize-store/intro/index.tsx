@@ -178,6 +178,42 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 									<h2 className="theme-card__title">
 										{ themeCard.name }
 									</h2>
+									{ themeCard.styleVariations && (
+										<ul className="theme-card__color-variations">
+											{ themeCard.styleVariations.map(
+												( styleVariation ) => (
+													<li
+														key={
+															styleVariation.title
+														}
+													>
+														<div
+															className="theme-card__color-variation-left"
+															style={ {
+																border: styleVariation?.primary_border
+																	? '1px solid ' +
+																	  styleVariation.primary_border
+																	: 'none',
+																backgroundColor:
+																	styleVariation.primary,
+															} }
+														></div>
+														<div
+															className="theme-card__color-variation-right"
+															style={ {
+																border: styleVariation?.secondary_border
+																	? '1px solid ' +
+																	  styleVariation.secondary_border
+																	: 'none',
+																backgroundColor:
+																	styleVariation.secondary,
+															} }
+														></div>
+													</li>
+												)
+											) }
+										</ul>
+									) }
 								</div>
 								<div>
 									{ themeCard.isActive && (

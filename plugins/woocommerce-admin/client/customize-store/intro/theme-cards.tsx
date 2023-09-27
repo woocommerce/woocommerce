@@ -5,5 +5,13 @@ export type ThemeCard = {
 	description: string;
 	image: string;
 	isActive: boolean;
-	styleVariations: string[];
+	styleVariations: [
+		{
+			title: string;
+			primary: string;
+			primary_border?: string;
+			secondary: string;
+			secondary_border?: string;
+		}
+	];
 };
