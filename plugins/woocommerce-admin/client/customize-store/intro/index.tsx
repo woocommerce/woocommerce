@@ -4,6 +4,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -21,6 +22,7 @@ import './intro.scss';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
+	| { type: 'JETPACK_OFFLINE_HOWTO' }
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME' }
@@ -34,14 +36,15 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		intro: { themeCards },
 	} = context;
 
-	const [ networkStatus, setNetworkStatus ] = useState( 'online' );
+	const [ isNetworkOffline, setIsNetworkOffline ] = useState( false );
+	const isJetpackOffline = false;
 
 	const setOfflineBannerIamge = () => {
-		setNetworkStatus( 'offline' );
+		setIsNetworkOffline( true );
 	};
 
 	const removeOfflineBannerImage = () => {
-		setNetworkStatus( 'online' );
+		setIsNetworkOffline( false );
 	};
 
 	useEffect( () => {
@@ -53,16 +56,40 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		};
 	}, [] );
 
-	const bannerText =
-		networkStatus === 'online'
-			? __(
-					'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
-					'woocommerce'
-			  )
-			: __(
-					"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
-					'woocommerce'
-			  );
+	let bannerText;
+	let bannerTitle;
+	let bannerButtonText;
+	if ( isNetworkOffline ) {
+		bannerText = __(
+			"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
+			'woocommerce'
+		);
+		bannerTitle = __(
+			'Looking to design your store using AI?',
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Retry', 'woocommerce' );
+	} else if ( isJetpackOffline ) {
+		bannerTitle = __(
+			'Looking to design your store using AI?',
+			'woocommerce'
+		);
+		bannerText = __(
+			"It looks like you're using Jetpack's offline mode — switch to online mode to start designing with AI.",
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Find out how', 'woocommerce' );
+	} else {
+		bannerTitle = __(
+			'Use the power of AI to design your store',
+			'woocommerce'
+		);
+		bannerText = __(
+			'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Design with AI', 'woocommerce' );
+	}
 
 	return (
 		<>
@@ -102,27 +129,32 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						className={ classNames(
 							'woocommerce-customize-store-banner',
 							{
-								'offline-banner': networkStatus === 'offline',
+								'offline-banner':
+									isNetworkOffline || isJetpackOffline,
 							}
 						) }
 					>
 						<div
 							className={ `woocommerce-customize-store-banner-content` }
 						>
-							<h1>
-								{ __(
-									'Use the power of AI to design your store',
-									'woocommerce'
-								) }
-							</h1>
+							<h1>{ bannerTitle }</h1>
 							<p>{ bannerText }</p>
-							<button
-								onClick={ () =>
-									sendEvent( { type: 'DESIGN_WITH_AI' } )
+							<Button
+								onClick={ () => {
+									if ( isJetpackOffline ) {
+										sendEvent( {
+											type: 'JETPACK_OFFLINE_HOWTO',
+										} );
+									} else if ( isNetworkOffline === false ) {
+										sendEvent( { type: 'DESIGN_WITH_AI' } );
+									}
+								} }
+								variant={
+									isJetpackOffline ? 'link' : 'primary'
 								}
 							>
-								{ __( 'Design with AI', 'woocommerce' ) }
-							</button>
+								{ bannerButtonText }
+							</Button>
 						</div>
 					</div>
 

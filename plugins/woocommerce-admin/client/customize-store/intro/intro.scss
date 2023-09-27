@@ -116,6 +116,12 @@
 		width: 375px;
 		margin-left: 50px;
 
+		button.is-link {
+			color: #3858E9;
+			text-decoration: none;
+			font-weight: 500;
+		}
+
 		h1 {
 			font-size: 1.25rem;
 			line-height: 23.87px;
@@ -127,21 +133,6 @@
 			margin: 1rem 0 2rem 0;
 			color: #2F2F2F;
 		}
-
-		button {
-			background-color: #3858e9;
-			border: none;
-			border-radius: 2px;
-			color: #fff;
-			display: inline-block;
-			line-height: 1.25rem;
-			padding: 10px 15px;
-
-			&:hover {
-				background-color: #2234e0;
-			}
-		}
-
 	}
 }
 
