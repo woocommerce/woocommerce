@@ -1,3 +1,4 @@
+import { hasCompeAddress } from './../../task-lists/fills/tax/utils';
 /**
  * External dependencies
  */
@@ -75,17 +76,18 @@ export const fetchIntroData = async () => {
 		// @ts-expect-error No types for this exist yet.
 	).getCurrentThemeGlobalStylesRevisions();
 
-	const hasModifiedPages = await resolveSelect( coreStore )
-		// @ts-expect-error No types for this exist yet.
-		.getEntityRecords( 'postType', 'page', {
-			per_page: 100,
-			_fields: [ 'id', '_links.version-history' ],
-			orderby: 'menu_order',
-			order: 'asc',
-		} )
-		?.some( ( page: { _links: { [ key: string ]: string[] } } ) => {
-			return page._links?.[ 'version-history' ]?.length > 1;
-		} );
+	const hasModifiedPages = (
+		await resolveSelect( coreStore )
+			// @ts-expect-error No types for this exist yet.
+			.getEntityRecords( 'postType', 'page', {
+				per_page: 100,
+				_fields: [ 'id', '_links.version-history' ],
+				orderby: 'menu_order',
+				order: 'asc',
+			} )
+	 )?.some( ( page: { _links: { [ key: string ]: string[] } } ) => {
+		return page._links?.[ 'version-history' ]?.length > 1;
+	} );
 
 	const { getTask } = resolveSelect( ONBOARDING_STORE_NAME );
 
