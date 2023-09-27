@@ -18,6 +18,16 @@ trait ScriptDebug {
 	 * @return string
 	 */
 	protected function get_script_suffix(): string {
-		return Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		return $this->is_script_debug_enabled() ? '' : '.min';
+	}
+
+	/**
+	 * Check if SCRIPT_DEBUG is enabled.
+	 *
+	 * @since x.x.x
+	 * @return bool
+	 */
+	protected function is_script_debug_enabled(): bool {
+		return Constants::is_true( 'SCRIPT_DEBUG' );
 	}
 }
