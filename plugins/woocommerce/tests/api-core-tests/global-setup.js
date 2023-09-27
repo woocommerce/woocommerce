@@ -3,7 +3,7 @@ const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
 
 module.exports = async ( config ) => {
-	// If API_BASE_URL is configured and doesn't include localhost, running on remote host
+	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
 		! process.env.API_BASE_URL.includes( 'localhost' )
@@ -144,7 +144,7 @@ module.exports = async ( config ) => {
 					setupPage.locator( '#pluginzip' ).click(),
 				] );
 				await fileChooser.setFiles( woocommerceZipPath );
-				console.log( 'Uploading build...' );
+				console.log( 'Uploading nightly build...' );
 				await setupPage
 					.locator( '#install-plugin-submit' )
 					.click( { timeout: 60000 } );
