@@ -174,9 +174,24 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 										alt={ themeCard.description }
 									/>
 								</div>
-								<h2 className="theme-card__title">
-									{ themeCard.name }
-								</h2>
+								<div className="theme-card__info">
+									<h2 className="theme-card__title">
+										{ themeCard.name }
+									</h2>
+								</div>
+								<div>
+									{ themeCard.isActive && (
+										<span className="theme-card__active">
+											{ __(
+												'Active theme',
+												'woocommerce'
+											) }
+										</span>
+									) }
+									<span className="theme-card__free">
+										Free
+									</span>
+								</div>
 							</div>
 						) ) }
 					</div>

@@ -6,6 +6,7 @@ export const fetchThemeCards = async () => {
 			slug: 'twentytwentyone',
 			name: 'Twenty Twenty One',
 			description: 'The default theme for WordPress.',
+			isActive: true,
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/twentytwentyone/screenshot.png',
 			styleVariations: [],
 		},
