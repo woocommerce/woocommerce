@@ -21,7 +21,8 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		const Log_In = 'Log In';
 		const Dashboard = 'Dashboard';
 
-		await page.goto( '/wp-admin' );
+		// Need to wait until network idle. Otherwise, Password field gets auto-cleared after typing password in.
+		await page.goto( '/wp-admin', { waitUntil: 'networkidle' } );
 		await page.getByLabel( Username ).fill( USER_KEY );
 		await page.getByLabel( Password, { exact: true } ).fill( USER_SECRET );
 		await page.getByRole( 'button', { name: Log_In } ).click();
