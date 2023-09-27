@@ -155,6 +155,10 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
             - name: Run API tests
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
