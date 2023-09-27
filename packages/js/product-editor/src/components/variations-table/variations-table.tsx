@@ -200,13 +200,8 @@ export const VariationsTable = forwardRef<
 	function getSnackbarText(
 		response: VariationResponseProps | ProductVariation,
 		type?: string
-	) {
-		const { id, update = [], delete: deleted = [] } = response;
-		const updatedCount = update.length;
-		const deletedCount = deleted.length;
-		const isSingleVariation = typeof id === 'number';
-
-		if ( isSingleVariation ) {
+	): string {
+		if ( 'id' in response ) {
 			const action = type === 'update' ? 'updated' : 'deleted';
 			return sprintf(
 				/* translators: The deleted or updated variations count */
@@ -214,6 +209,11 @@ export const VariationsTable = forwardRef<
 				action
 			);
 		}
+
+		const { update = [], delete: deleted = [] } =
+			response as VariationResponseProps;
+		const updatedCount = update.length;
+		const deletedCount = deleted.length;
 
 		if ( deletedCount > 0 ) {
 			return sprintf(
@@ -230,6 +230,8 @@ export const VariationsTable = forwardRef<
 				updatedCount
 			);
 		}
+
+		return '';
 	}
 
 	function handleDeleteVariationClick( variationId: number ) {
@@ -242,7 +244,7 @@ export const VariationsTable = forwardRef<
 			product_id: productId,
 			id: variationId,
 		} )
-			.then( ( response: VariationResponseProps ) => {
+			.then( ( response: ProductVariation ) => {
 				recordEvent( 'product_variations_delete', {
 					source: TRACKS_SOURCE,
 				} );
@@ -273,7 +275,7 @@ export const VariationsTable = forwardRef<
 			{ product_id: productId, id: variationId },
 			variation
 		)
-			.then( ( response: VariationResponseProps ) => {
+			.then( ( response: ProductVariation ) => {
 				createSuccessNotice( getSnackbarText( response, 'update' ) );
 			} )
 			.catch( () => {
