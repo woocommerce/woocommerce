@@ -3090,6 +3090,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			}
 		);
 
+		$time = time();
 		$order->add_meta_data( 'key1', 'value' );
 		$order->save_meta_data();
 		$order->add_meta_data( 'key2', 'value' );
@@ -3100,7 +3101,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save_meta_data();
 		$order->delete_meta_data( 'key1' );
 		$order->save_meta_data();
-		$this->assertEquals( 1, $count );
+
+		$expected_saves = 1;
+		if ( $time < time() ) {
+			$expected_saves = 2;
+		}
+		$this->assertEquals( $expected_saves, $count );
 		remove_all_actions( 'woocommerce_before_order_object_save' );
 	}
 
