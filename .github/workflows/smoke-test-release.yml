@@ -165,10 +165,12 @@ jobs:
               with:
                   report-name: ${{ env.API_WP_LATEST_ARTIFACT }}
                   tests: hello
+                  playwright-config: ci-release.playwright.config.js
               env:
                   API_BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
