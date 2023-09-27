@@ -343,37 +343,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							chooseHomepageTemplate: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultHomepageTemplate,
-													prompt: defaultHomepageTemplate.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignHomepageTemplate',
-												],
-												target: 'success',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
+
 							updateStorePatterns: {
 								initial: 'pending',
 								states: {
