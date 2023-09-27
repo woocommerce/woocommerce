@@ -358,6 +358,7 @@ jobs:
         permissions:
             contents: read
         if: |
+            github.ref_name == 'trunk' &&
             success() || (
               failure() && contains( needs.*.result, 'failure' )
             )
