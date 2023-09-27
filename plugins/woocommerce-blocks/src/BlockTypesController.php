@@ -51,6 +51,7 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 	}
 
 	/**
@@ -157,6 +158,13 @@ final class BlockTypesController {
 		);
 
 		return $widget_types;
+	}
+
+	/**
+	 * Delete product transients when a product is deleted.
+	 */
+	public function delete_product_transients() {
+		delete_transient( 'wc_blocks_has_downloadable_product' );
 	}
 
 	/**
