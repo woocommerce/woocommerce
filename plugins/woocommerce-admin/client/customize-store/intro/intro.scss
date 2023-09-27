@@ -153,6 +153,8 @@
 
 		.theme-card__title {
 			font-size: 1rem;
+			margin: 0;
+			padding: 0;
 			font-weight: 600;
 		}
 		
@@ -165,6 +167,8 @@
 		}
 		.theme-card__color-variations {
 			display: flex;
+			margin: 0 0 0 auto;
+			padding: 0;
 			gap: 5px;
 			li {
 				display: flex;
