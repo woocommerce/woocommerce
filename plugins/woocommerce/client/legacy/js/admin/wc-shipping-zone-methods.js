@@ -101,8 +101,18 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'wc_region_picker_update', this.onUpdateZoneRegionPicker );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+				},
+				onUpdateZoneRegionPicker: function( event ) {
+					var value = event.detail,
+						attribute = 'zone_locations',
+						changes   = {};
+
+						changes[ attribute ] = value;
+						shippingMethodView.model.set( attribute, value );
+						shippingMethodView.model.logChanges( changes );
 				},
 				onUpdateZone: function( event ) {
 					var view      = event.data.view,
