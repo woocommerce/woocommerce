@@ -9,10 +9,11 @@ interface Metadata {
 	value: string;
 }
 
-function useMetaEntityProp(
-	isMeta: boolean,
+function useWooEntityProp(
 	property: string
 ): [ string, ( value: string ) => void ] {
+	const isMeta = property.startsWith( 'meta_data.' );
+
 	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -47,4 +48,4 @@ function useMetaEntityProp(
 	return [ value, setValue ];
 }
 
-export default useMetaEntityProp;
+export default useWooEntityProp;

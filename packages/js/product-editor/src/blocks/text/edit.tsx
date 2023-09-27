@@ -17,7 +17,7 @@ import {
  * Internal dependencies
  */
 import { useValidation } from '../../contexts/validation-context';
-import useMetaEntityProp from '../../hooks/use-meta-entity-prop';
+import useWooEntityProp from '../../hooks/use-woo-entity-prop';
 import { TextBlockAttributes } from './types';
 
 export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
@@ -29,11 +29,10 @@ export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 		required,
 		validationRegex,
 		validationErrorMessage,
-		isMeta,
 		minLength,
 		maxLength,
 	} = attributes;
-	const [ value, setValue ] = useMetaEntityProp( isMeta, property );
+	const [ value, setValue ] = useWooEntityProp( property );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
 	const { error, validate } = useValidation< Product >(

@@ -10,7 +10,6 @@ export interface TextBlockAttributes extends BlockAttributes {
 	required: boolean;
 	validationRegex?: string;
 	validationErrorMessage?: string;
-	isMeta: boolean;
 	minLength?: number;
 	maxLength?: number;
 }
