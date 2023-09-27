@@ -88,7 +88,9 @@ export default function MySubscriptions(): JSX.Element {
 		},
 	];
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) => subscription.active
+		( subscription: Subscription ) =>
+			subscription.local.active &&
+			( subscription.active || subscription.product_key === '' )
 	);
 
 	const tableHeadersAvailable = [
@@ -123,8 +125,26 @@ export default function MySubscriptions(): JSX.Element {
 		},
 	];
 	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) => ! subscription.active
+		( subscription: Subscription ) =>
+			! subscriptionsInstalled.includes( subscription )
 	);
+
+	const getStatus = ( subscription: Subscription ): string => {
+		// TODO add statuses for subscriptions
+		if ( subscription.product_key === '' ) {
+			return __( 'Not found', 'woocommerce' );
+		} else if ( subscription.expired ) {
+			return __( 'Expired', 'woocommerce' );
+		}
+		return __( 'Active', 'woocommerce' );
+	};
+
+	const getVersion = ( subscription: Subscription ): string => {
+		if ( subscription.local.version === subscription.version ) {
+			return subscription.local.version;
+		}
+		return subscription.local.version + ' > ' + subscription.version;
+	};
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
@@ -169,10 +189,10 @@ export default function MySubscriptions(): JSX.Element {
 					rows={ subscriptionsInstalled.map( ( item ) => {
 						return [
 							{ display: item.product_name },
-							{ display: item.status },
+							{ display: getStatus( item ) },
 							{ display: item.expires },
 							{ display: item.autorenew ? 'true' : 'false' },
-							{ display: item.version },
+							{ display: getVersion( item ) },
 							{ display: item.active ? 'true' : 'false' },
 							{ display: '...' },
 						];
@@ -193,10 +213,10 @@ export default function MySubscriptions(): JSX.Element {
 					rows={ subscriptionsAvailable.map( ( item ) => {
 						return [
 							{ display: item.product_name },
-							{ display: item.status },
+							{ display: getStatus( item ) },
 							{ display: item.expires },
 							{ display: item.autorenew ? 'true' : 'false' },
-							{ display: item.version },
+							{ display: getVersion( item ) },
 							{ display: '...' },
 							{ display: '...' },
 						];

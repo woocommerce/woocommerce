@@ -20,7 +20,16 @@ export type Subscription = {
 	product_keys_all: string[];
 	product_status: string;
 	active: boolean;
+	local: SubscriptionLocal;
+	has_updates: boolean;
+	version: string;
 };
+
+export interface SubscriptionLocal {
+	installed: boolean;
+	active: boolean;
+	version: string;
+}
 
 export interface SubscriptionShare {
 	share_id: string;
