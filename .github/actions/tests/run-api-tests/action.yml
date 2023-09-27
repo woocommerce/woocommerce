@@ -19,12 +19,6 @@ outputs:
 runs:
     using: composite
     steps:
-        - name: Download and install Chromium browser.
-          if: ${{ env.UPDATE_WC }}
-          shell: bash
-          working-directory: plugins/woocommerce
-          run: pnpm exec playwright install chromium
-
         - name: Run API tests.
           id: run-api-tests
           working-directory: plugins/woocommerce
