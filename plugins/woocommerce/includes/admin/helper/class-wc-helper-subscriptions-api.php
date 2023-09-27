@@ -57,7 +57,7 @@ class WC_Helper_Subscriptions_API {
 	 * as JSON.
 	 */
 	public static function get_subscriptions() {
-		$subscriptions = WC_Helper::get_subscriptions();
+		$subscriptions = WC_Helper::get_subscription_list_data();
 		wp_send_json(
 			array_values(
 				$subscriptions
