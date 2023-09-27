@@ -442,15 +442,16 @@ class WCAdminAssets {
 	 * @param string $script_path_name The script path name.
 	 * @param string $script_name Filename of the script to load.
 	 * @param bool   $need_translation Whether the script need translations.
+	 * @param array  $dependencies Array of any extra dependencies. Note wc-admin and any application JS dependencies are automatically added by Dependency Extraction Webpack Plugin. Use this parameter to designate any extra dependencies.
 	 */
-	public static function register_script( $script_path_name, $script_name, $need_translation = false ) {
+	public static function register_script( $script_path_name, $script_name, $need_translation = false, $dependencies = array() ) {
 		$script_assets_filename = self::get_script_asset_filename( $script_path_name, $script_name );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'wc-admin-' . $script_name,
 			self::get_url( $script_path_name . '/' . $script_name, 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'], $dependencies ),
 			self::get_file_version( 'js' ),
 			true
 		);
