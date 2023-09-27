@@ -10,7 +10,6 @@ import {
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
-import { BlockEditProps } from '@wordpress/blocks';
 import { createElement, useMemo, useRef } from '@wordpress/element';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
