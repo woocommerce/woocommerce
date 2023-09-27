@@ -17,6 +17,7 @@ import {
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
+import { useEditorBlocks } from './hooks/use-editor-blocks';
 
 export const BlockPreview = ( {
 	blocks,
@@ -31,6 +32,8 @@ export const BlockPreview = ( {
 	useSubRegistry?: boolean;
 	previewOpacity?: number;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
+	const [ , , onChange ] = useEditorBlocks();
+
 	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
 	const renderedBlocks = useMemo( () => {
 		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
@@ -63,6 +66,7 @@ export const BlockPreview = ( {
 		<BlockEditorProvider
 			value={ renderedBlocks }
 			settings={ settings }
+			onChange={ onChange }
 			useSubRegistry={ useSubRegistry }
 		>
 			<AutoHeightBlockPreview
