@@ -166,9 +166,6 @@ class BatchProcessingController {
 		$details    = $this->get_process_details( $batch_processor );
 		$time_start = microtime( true );
 		$batch      = $batch_processor->get_next_batch_to_process( $details['current_batch_size'] );
-		if ( empty( $batch ) ) {
-			return null;
-		}
 		try {
 			$batch_processor->process_batch( $batch );
 			$time_taken = microtime( true ) - $time_start;

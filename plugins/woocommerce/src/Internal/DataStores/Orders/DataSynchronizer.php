@@ -458,6 +458,7 @@ ORDER BY orders.id ASC
 	 */
 	public function process_batch( array $batch ) : void {
 		if ( empty( $batch ) ) {
+			$this->cleanup_synchronization_state();
 			return;
 		}
 
