@@ -67,7 +67,7 @@ const setUrlTabParam = ( tabKey: string ) => {
 		return;
 	}
 	navigateTo( {
-		url: getNewPath( { tab: tabKey } ),
+		url: getNewPath( { tab: tabKey }, MARKETPLACE_PATH, {} ),
 	} );
 };
 
