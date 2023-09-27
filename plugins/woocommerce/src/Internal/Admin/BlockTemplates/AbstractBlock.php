@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
  * Block configuration used to specify blocks in BlockTemplate.
  */
 class AbstractBlock implements BlockInterface {
+	use BlockFormattedTemplateTrait;
+
 	/**
 	 * The block name.
 	 *
@@ -190,18 +192,5 @@ class AbstractBlock implements BlockInterface {
 		$is_in_root_template = $this->get_root_template()->get_block( $this->id ) === $this;
 
 		return ! ( $is_in_parent && $is_in_root_template );
-	}
-	/**
-	 * Get the block configuration as a formatted template.
-	 *
-	 * @return array The block configuration as a formatted template.
-	 */
-	public function get_formatted_template(): array {
-		$arr = [
-			$this->get_name(),
-			$this->get_attributes(),
-		];
-
-		return $arr;
 	}
 }

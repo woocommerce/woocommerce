@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
 import { BaseControl } from '@wordpress/components';
@@ -16,7 +17,6 @@ import {
 	BlockControls,
 	RichText,
 	store as blockEditorStore,
-	useBlockProps,
 } from '@wordpress/block-editor';
 
 /**
@@ -31,7 +31,7 @@ export function Edit( {
 	setAttributes,
 }: BlockEditProps< SummaryAttributes > ) {
 	const { align, allowedFormats, direction, label } = attributes;
-	const blockProps = useBlockProps( {
+	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
 	const contentId = useInstanceId(

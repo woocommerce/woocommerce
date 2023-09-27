@@ -8,7 +8,7 @@ import {
 	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { BlockEditProps } from '@wordpress/blocks';
 import { createElement, useMemo, useRef } from '@wordpress/element';
@@ -29,6 +29,7 @@ import { TRACKS_SOURCE } from '../../constants';
 import { handlePrompt } from '../../utils/handle-prompt';
 
 export function Edit( {
+	attributes,
 	context,
 }: BlockEditProps< VariationOptionsBlockAttributes > & {
 	context?: {
@@ -40,7 +41,7 @@ export function Edit( {
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 	const productId = useEntityId( 'postType', 'product' );
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const [ productStatus ] = useEntityProp< string >(
 		'postType',
 		'product',

@@ -3,8 +3,9 @@
  */
 import type { BlockAttributes } from '@wordpress/blocks';
 import { createElement, useMemo } from '@wordpress/element';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DisplayState } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -19,7 +20,7 @@ export function Edit( {
 		mustMatch: Record< string, Array< string > >;
 	};
 } ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
 
 	const productId = useEntityId( 'postType', 'product' );
