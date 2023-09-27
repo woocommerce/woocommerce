@@ -90,7 +90,9 @@ export default function MySubscriptions(): JSX.Element {
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) =>
 			subscription.local.active &&
-			( subscription.active || subscription.product_key === '' )
+			( subscription.active ||
+				subscription.product_key === '' ||
+				subscription.expired )
 	);
 
 	const tableHeadersAvailable = [
