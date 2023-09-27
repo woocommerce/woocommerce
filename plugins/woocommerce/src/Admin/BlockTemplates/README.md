@@ -4,12 +4,18 @@ The `Automattic\WooCommerce\Admin\BlockTemplates` namespace contains interfaces 
 
 ## Usage
 
-Instances that implement the interfaces and fire the hooks in ths namespace are created using more specific APIs,
+Objects that implement the interfaces and fire the hooks in this namespace are instantiated using more specific APIs,
 such as:
 
 -  [Product Editor Templates](../Features/ProductBlockEditor/ProductTemplates/README.md)
 
-Please see the documentation for those APIs for more information.
+Please see the documentation for those APIs for more information on how to do this.
+
+Note: In order to use these interface type definitions, you will need to import them. For example to import the `BlockInterface`:
+
+```php
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+```
 
 ## Hooks
 
