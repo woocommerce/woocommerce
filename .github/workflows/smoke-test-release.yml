@@ -706,43 +706,42 @@ jobs:
                   env-slug: ${{ matrix.env_description }}
                   release-version: ${{ needs.get-tag.outputs.tag }}
 
-    # mytodo: re-enable
-    # post-slack-summary:
-    #     name: Post Slack summary
-    #     runs-on: ubuntu-20.04
-    #     permissions:
-    #         contents: read
-    #     if: |
-    #         success() || (
-    #           failure() && contains( needs.*.result, 'failure' )
-    #         )
-    #     needs:
-    #         - e2e-wp-latest
-    #         - get-tag
-    #         - test-php-versions
-    #         - test-plugins
-    #         - test-wp-latest-1
-    #     steps:
-    #         - uses: actions/checkout@v3
+    post-slack-summary:
+        name: Post Slack summary
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        if: |
+            success() || (
+              failure() && contains( needs.*.result, 'failure' )
+            )
+        needs:
+            - e2e-wp-latest
+            - get-tag
+            - test-php-versions
+            - test-plugins
+            - test-wp-latest-1
+        steps:
+            - uses: actions/checkout@v3
 
-    #         - name: Download all slack blocks
-    #           id: download-slack-blocks
-    #           uses: actions/download-artifact@v3
-    #           with:
-    #               name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
-    #               path: /tmp/slack-payload
+            - name: Download all slack blocks
+              id: download-slack-blocks
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
+                  path: /tmp/slack-payload
 
-    #         - name: Construct payload from all blocks
-    #           id: run-payload-action
-    #           uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
-    #           with:
-    #               release-version: ${{ needs.get-tag.outputs.tag }}
-    #               blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
+            - name: Construct payload from all blocks
+              id: run-payload-action
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
+              with:
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+                  blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
 
-    #         - name: Send Slack message
-    #           uses: slackapi/slack-github-action@v1.23.0
-    #           with:
-    #               channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-    #               payload: ${{ steps.run-payload-action.outputs.payload }}
-    #           env:
-    #               SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+            - name: Send Slack message
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+                  payload: ${{ steps.run-payload-action.outputs.payload }}
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
