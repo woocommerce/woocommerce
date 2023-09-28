@@ -21,6 +21,6 @@ export function init() {
 	return registerWooBlockType( {
 		name,
 		metadata: metadata as never,
-		settings,
+		settings: settings as never,
 	} );
 }
