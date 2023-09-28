@@ -75,6 +75,11 @@ type VariationsTableProps = {
 	) => void;
 };
 
+type VariationResponseProps = {
+	update?: Partial< ProductVariation >[];
+	delete?: Partial< ProductVariation >[];
+};
+
 export const VariationsTable = forwardRef<
 	HTMLDivElement,
 	VariationsTableProps
@@ -192,6 +197,40 @@ export const VariationsTable = forwardRef<
 
 	const variationIds = variations.map( ( { id } ) => id );
 
+	function getSnackbarText(
+		response: VariationResponseProps | ProductVariation,
+		type?: string
+	): string {
+		if ( 'id' in response ) {
+			const action = type === 'update' ? 'updated' : 'deleted';
+			return sprintf(
+				/* translators: The deleted or updated variations count */
+				__( '1 variation %s.', 'woocommerce' ),
+				action
+			);
+		}
+
+		const { update = [], delete: deleted = [] } = response;
+		const updatedCount = update.length;
+		const deletedCount = deleted.length;
+
+		if ( deletedCount > 0 ) {
+			return sprintf(
+				/* translators: The deleted variations count */
+				__( '%s variations deleted.', 'woocommerce' ),
+				deletedCount
+			);
+		} else if ( updatedCount > 0 ) {
+			return sprintf(
+				/* translators: The updated variations count */
+				__( '%s variations updated.', 'woocommerce' ),
+				updatedCount
+			);
+		}
+
+		return '';
+	}
+
 	function handleDeleteVariationClick( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
 		setIsUpdating( ( prevState ) => ( {
@@ -202,10 +241,11 @@ export const VariationsTable = forwardRef<
 			product_id: productId,
 			id: variationId,
 		} )
-			.then( () => {
+			.then( ( response: ProductVariation ) => {
 				recordEvent( 'product_variations_delete', {
 					source: TRACKS_SOURCE,
 				} );
+				createSuccessNotice( getSnackbarText( response, 'delete' ) );
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
 				] );
@@ -232,11 +272,8 @@ export const VariationsTable = forwardRef<
 			{ product_id: productId, id: variationId },
 			variation
 		)
-			.then( () => {
-				createSuccessNotice(
-					/* translators: The updated variations count */
-					sprintf( __( '%s variation/s updated.', 'woocommerce' ), 1 )
-				);
+			.then( ( response: ProductVariation ) => {
+				createSuccessNotice( getSnackbarText( response, 'update' ) );
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -257,19 +294,13 @@ export const VariationsTable = forwardRef<
 			{ product_id: productId },
 			{ update }
 		)
-			.then( ( response ) =>
+			.then( ( response: VariationResponseProps ) =>
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
 				] ).then( () => response )
 			)
-			.then( ( response ) => {
-				createSuccessNotice(
-					sprintf(
-						/* translators: The updated variations count */
-						__( '%s variation/s updated.', 'woocommerce' ),
-						response.update.length
-					)
-				);
+			.then( ( response: VariationResponseProps ) => {
+				createSuccessNotice( getSnackbarText( response ) );
 				onVariationTableChange( 'update', update );
 			} )
 			.catch( () => {
@@ -286,19 +317,13 @@ export const VariationsTable = forwardRef<
 				delete: values.map( ( { id } ) => id ),
 			}
 		)
-			.then( ( response ) =>
+			.then( ( response: VariationResponseProps ) =>
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
 				] ).then( () => response )
 			)
-			.then( ( response ) => {
-				createSuccessNotice(
-					sprintf(
-						/* translators: The updated variations count */
-						__( '%s variation/s updated.', 'woocommerce' ),
-						response.delete.length
-					)
-				);
+			.then( ( response: VariationResponseProps ) => {
+				createSuccessNotice( getSnackbarText( response ) );
 				onVariationTableChange( 'delete' );
 			} )
 			.catch( () => {
