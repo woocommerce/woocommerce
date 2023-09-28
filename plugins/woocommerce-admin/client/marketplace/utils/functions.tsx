@@ -36,6 +36,30 @@ function maybePruneFetchCache() {
 	}
 }
 
+// Wrapper around apiFetch() that caches results in memory
+async function apiFetchWithCache( params: any ): Promise< any > {
+	// Attempt to fetch from cache:
+	const cacheKey = JSON.stringify( params );
+	if ( fetchCache.get( cacheKey ) ) {
+		return new Promise( ( resolve ) => {
+			resolve( fetchCache.get( cacheKey ) );
+		} );
+	}
+
+	// Failing that, fetch using apiCache:
+	return new Promise( ( resolve, reject ) => {
+		apiFetch( params )
+			.then( ( json ) => {
+				fetchCache.set( cacheKey, json );
+				maybePruneFetchCache();
+				resolve( json );
+			} )
+			.catch( () => {
+				reject();
+			} );
+	} );
+}
+
 // Wrapper around fetch() that caches results in memory
 async function fetchJsonWithCache( url: string ): Promise< any > {
 	// Attempt to fetch from cache:
@@ -115,7 +139,7 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 
 	try {
-		return await apiFetch( { path: url.toString() } );
+		return await apiFetchWithCache( { path: url.toString() } );
 	} catch ( error ) {
 		return [];
 	}
