@@ -21,8 +21,7 @@ export default function MySubscriptions(): JSX.Element {
 	const [ subscriptions, setSubscriptions ] = useState<
 		Array< Subscription >
 	>( [] );
-	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { setIsLoading } = marketplaceContextValue;
+	const { setIsLoading } = useContext( MarketplaceContext );
 
 	// Get the content for this screen
 	useEffect( () => {
