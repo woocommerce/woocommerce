@@ -66,7 +66,8 @@ export const BlockPreview = ( {
 		<BlockEditorProvider
 			value={ renderedBlocks }
 			settings={ settings }
-			onChange={ onChange }
+			// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
+			onChange={ opacityStyles ? undefined : onChange }
 			useSubRegistry={ useSubRegistry }
 		>
 			<AutoHeightBlockPreview

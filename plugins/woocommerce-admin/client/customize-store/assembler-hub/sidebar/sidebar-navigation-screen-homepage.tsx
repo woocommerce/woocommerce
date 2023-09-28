@@ -8,6 +8,7 @@ import {
 	createInterpolateElement,
 	useCallback,
 	useMemo,
+	useEffect,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -24,19 +25,23 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { useHomeTemplates } from '../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { isLoading, homeTemplates } = useHomeTemplates();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	const [ blocks, , onChange ] = useEditorBlocks();
 	const onClickPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern ]
 	);
 
 	const homePatterns = useMemo( () => {
@@ -44,6 +49,7 @@ export const SidebarNavigationScreenHomepage = () => {
 			( [ templateName, patterns ] ) => {
 				return {
 					name: templateName,
+					title: templateName,
 					blocks: patterns.reduce(
 						( acc: BlockInstance[], pattern ) => [
 							...acc,
@@ -51,10 +57,33 @@ export const SidebarNavigationScreenHomepage = () => {
 						],
 						[]
 					),
+					blockTypes: [ '' ],
+					categories: [ '' ],
+					content: '',
+					source: '',
 				};
 			}
 		);
 	}, [ homeTemplates ] );
+
+	useEffect( () => {
+		if ( selectedPattern || ! blocks.length || ! homePatterns.length ) {
+			return;
+		}
+
+		const homeBlocks = blocks.slice( 1, -1 );
+		const _currentSelectedPattern = homePatterns.find( ( pattern ) => {
+			if ( homeBlocks.length !== pattern.blocks.length ) {
+				return false;
+			}
+			return homeBlocks.every(
+				( block, index ) => block.name === pattern.blocks[ index ].name
+			);
+		} );
+
+		setSelectedPattern( _currentSelectedPattern );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, homePatterns ] );
 
 	return (
 		<SidebarNavigationScreen
@@ -101,7 +130,7 @@ export const SidebarNavigationScreenHomepage = () => {
 								orientation="vertical"
 								category={ 'homepage' }
 								isDraggable={ false }
-								showTitlesAsTooltip={ false }
+								showTitlesAsTooltip={ true }
 							/>
 						) }
 					</div>

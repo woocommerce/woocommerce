@@ -11,7 +11,6 @@ import {
 	useEffect,
 	useMemo,
 } from '@wordpress/element';
-import { isEqual } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
@@ -28,6 +27,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { findPatternByBlock } from './utils';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
@@ -47,9 +47,8 @@ export const SidebarNavigationScreenHeader = () => {
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
-	const { selectedPattern, setSelectedPattern } = useSelectedPattern(
-		'.edit-site-sidebar-navigation-screen__content .block-editor-block-patterns-list__item'
-	);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
 		setHighlightedBlockIndex( 0 );
@@ -74,12 +73,11 @@ export const SidebarNavigationScreenHeader = () => {
 			return;
 		}
 
-		const headerBlock = blocks[ 0 ];
-		const _currentSelectedPattern = headerPatterns.find( ( pattern ) =>
-			isEqual( pattern.blocks[ 0 ].attributes, headerBlock.attributes )
+		const currentSelectedPattern = findPatternByBlock(
+			headerPatterns,
+			blocks[ 0 ]
 		);
-
-		setSelectedPattern( _currentSelectedPattern );
+		setSelectedPattern( currentSelectedPattern );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
 
