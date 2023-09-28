@@ -1888,7 +1888,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'term_id',
 				'terms'    => $query_vars['tag_id'],
 			);
-			unset( $wp_query_args[ 'tag_id' ] ) ;
+			unset( $wp_query_args['tag_id'] );
 		}
 
 		// Handle shipping classes.
