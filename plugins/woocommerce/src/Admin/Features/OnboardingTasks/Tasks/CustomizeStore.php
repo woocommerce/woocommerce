@@ -18,6 +18,7 @@ class CustomizeStore extends Task {
 		parent::__construct( $task_list );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
+		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we need to remove action when switching theme to TT3 via onboarding theme API. See Automattic\WooCommerce\Admin\API\OnboardingThemes::activate_theme().
 		add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
 	}
 
