@@ -9,7 +9,7 @@ interface Metadata {
 	value: string;
 }
 
-function useWooEntityProp(
+function useProductEntityProp(
 	property: string
 ): [ string, ( value: string ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
@@ -48,4 +48,4 @@ function useWooEntityProp(
 	return [ value, setValue ];
 }
 
-export default useWooEntityProp;
+export default useProductEntityProp;

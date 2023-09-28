@@ -17,7 +17,7 @@ import {
  * Internal dependencies
  */
 import { useValidation } from '../../contexts/validation-context';
-import useWooEntityProp from '../../hooks/use-woo-entity-prop';
+import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { TextBlockAttributes } from './types';
 
 export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
@@ -32,7 +32,7 @@ export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 		minLength,
 		maxLength,
 	} = attributes;
-	const [ value, setValue ] = useWooEntityProp( property );
+	const [ value, setValue ] = useProductEntityProp( property );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
 	const { error, validate } = useValidation< Product >(
