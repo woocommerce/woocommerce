@@ -28,10 +28,10 @@ To execute the following test cases, you will need to toggle the coupon function
 - [ ] An expired coupon, `expiredCoupon`, should generate an error upon application.
 - [ ] Attempting to apply an invalid coupon should generate an error message.
 - [ ] An email-limited coupon, `emailRestrictedCoupon`, should be applicable to your cart.
-   - [ ] If the email is correct, checkout should proceed without errors.
-   - [ ] If the email is incorrect, an error message should appear, and the coupon should be removed from your cart.
+    - [ ] If the email is correct, checkout should proceed without errors.
+    - [ ] If the email is incorrect, an error message should appear, and the coupon should be removed from your cart.
 - [ ] A condition coupon, `thresholdCoupon`, should only be applicable once the stipulated condition is met.
-   - [ ] If a condition coupon is added and subsequently the condition is unmet, it should be removed from your cart with a corresponding error message.
+    - [ ] If a condition coupon is added and subsequently the condition is unmet, it should be removed from your cart with a corresponding error message.
 - [ ] A valid coupon, `generalCoupon`, when followed by an individually used coupon, `individualCoupon`, should override the first one.
 - [ ] An individually used coupon, `individualCoupon`, when followed by an attempt to add another coupon, should generate an error message.
 - [ ] A free shipping coupon, `freeShippingCoupon`, should display the free shipping method you previously configured.
