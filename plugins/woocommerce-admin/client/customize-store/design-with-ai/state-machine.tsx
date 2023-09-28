@@ -287,100 +287,120 @@ export const designWithAiStateMachineDefinition = createMachine(
 						],
 						type: 'parallel',
 						states: {
-							chooseColorPairing: {
+							// chooseColorPairing: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'queryAiEndpoint',
+							// 				data: ( context ) => {
+							// 					return {
+							// 						...defaultColorPalette,
+							// 						prompt: defaultColorPalette.prompt(
+							// 							context
+							// 								.businessInfoDescription
+							// 								.descriptionText,
+							// 							context.lookAndFeel
+							// 								.choice,
+							// 							context.toneOfVoice
+							// 								.choice
+							// 						),
+							// 					};
+							// 				},
+							// 				onDone: {
+							// 					actions: [
+							// 						'assignDefaultColorPalette',
+							// 					],
+							// 					target: 'success',
+							// 				},
+							// 				// If there's an error we don't want to block the user from proceeding.
+							// 				onError: {
+							// 					target: 'success',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
+							// chooseFontPairing: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'queryAiEndpoint',
+							// 				data: ( context ) => {
+							// 					return {
+							// 						...fontPairings,
+							// 						prompt: fontPairings.prompt(
+							// 							context
+							// 								.businessInfoDescription
+							// 								.descriptionText,
+							// 							context.lookAndFeel
+							// 								.choice,
+							// 							context.toneOfVoice
+							// 								.choice
+							// 						),
+							// 					};
+							// 				},
+							// 				onDone: {
+							// 					actions: [
+							// 						'assignFontPairing',
+							// 					],
+							// 					target: 'success',
+							// 				},
+							// 				// If there's an error we don't want to block the user from proceeding.
+							// 				onError: {
+							// 					target: 'success',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
+							// chooseHomepageTemplate: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'queryAiEndpoint',
+							// 				data: ( context ) => {
+							// 					return {
+							// 						...defaultHomepageTemplate,
+							// 						prompt: defaultHomepageTemplate.prompt(
+							// 							context
+							// 								.businessInfoDescription
+							// 								.descriptionText,
+							// 							context.lookAndFeel
+							// 								.choice,
+							// 							context.toneOfVoice
+							// 								.choice
+							// 						),
+							// 					};
+							// 				},
+							// 				onDone: {
+							// 					actions: [
+							// 						'assignHomepageTemplate',
+							// 					],
+							// 					target: 'success',
+							// 				},
+							// 				onError: {
+							// 					actions: [
+							// 						'assignAPICallLoaderError',
+							// 					],
+							// 					target: '#toneOfVoice',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
+							updateStorePatterns: {
 								initial: 'pending',
 								states: {
 									pending: {
 										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultColorPalette,
-													prompt: defaultColorPalette.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
+											src: 'updateStorePatterns',
 											onDone: {
-												actions: [
-													'assignDefaultColorPalette',
-												],
-												target: 'success',
-											},
-											// If there's an error we don't want to block the user from proceeding.
-											onError: {
-												target: 'success',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							chooseFontPairing: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...fontPairings,
-													prompt: fontPairings.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignFontPairing',
-												],
-												target: 'success',
-											},
-											// If there's an error we don't want to block the user from proceeding.
-											onError: {
-												target: 'success',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							chooseHomepageTemplate: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultHomepageTemplate,
-													prompt: defaultHomepageTemplate.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignHomepageTemplate',
-												],
 												target: 'success',
 											},
 											onError: {
@@ -394,12 +414,12 @@ export const designWithAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							updateStorePatterns: {
+							installAndActivateTheme: {
 								initial: 'pending',
 								states: {
 									pending: {
 										invoke: {
-											src: 'updateStorePatterns',
+											src: 'installAndActivateTheme',
 											onDone: {
 												target: 'success',
 											},

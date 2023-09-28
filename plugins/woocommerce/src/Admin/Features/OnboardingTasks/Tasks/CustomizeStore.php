@@ -18,7 +18,7 @@ class CustomizeStore extends Task {
 		parent::__construct( $task_list );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
-		add_action( 'after_switch_theme', array( $this, 'mark_task_as_complete' ) );
+		add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
 	}
 
 	/**
