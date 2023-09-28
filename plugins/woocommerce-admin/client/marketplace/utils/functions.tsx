@@ -27,7 +27,7 @@ interface ProductGroup {
 
 // Wrapper around fetch() that caches results in memory
 const fetchCache: { [ url: string ]: object } = {};
-async function fetchJsonWithCache( url: string ): Promise< any > {
+async function fetchJsonWithCache( url: string ): Promise< object > {
 	// Attempt to fetch from cache:
 	if ( fetchCache[ url ] ) {
 		return new Promise( ( resolve ) => {
