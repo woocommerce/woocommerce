@@ -4,8 +4,8 @@
 import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
-	useBlockProps,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
@@ -20,7 +20,7 @@ export function Edit( {
 	attributes,
 }: BlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
 		{
 			className: classNames(

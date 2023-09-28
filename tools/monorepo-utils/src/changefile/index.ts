@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { execSync } from 'child_process';
 import simpleGit from 'simple-git';
 import nodePath from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -118,60 +117,85 @@ const program = new Command( 'changefile' )
 					'Removing existing changelog files in case a change is reverted and the entry is no longer needed'
 				);
 				allProjectPaths.forEach( ( projectPath ) => {
-					const path = nodePath.join(
+					const composerFilePath = nodePath.join(
 						tmpRepoPath,
 						projectPath,
-						'changelog',
+						'composer.json'
+					);
+					if ( ! existsSync( composerFilePath ) ) {
+						return;
+					}
+
+					// Figure out where the changelog files belong for this project.
+					const composerFile = JSON.parse(
+						readFileSync( composerFilePath, {
+							encoding: 'utf-8',
+						} )
+					);
+					const changelogFilePath = nodePath.join(
+						tmpRepoPath,
+						projectPath,
+						composerFile.extra?.changelogger[ 'changes-dir' ] ??
+							'changelog',
 						fileName
 					);
 
-					if ( existsSync( path ) ) {
-						Logger.notice(
-							`Remove existing changelog file ${ path }`
-						);
-
-						execSync( `rm ${ path }`, {
-							cwd: tmpRepoPath,
-							stdio: 'inherit',
-						} );
+					if ( ! existsSync( changelogFilePath ) ) {
+						return;
 					}
+
+					Logger.notice(
+						`Remove existing changelog file ${ changelogFilePath }`
+					);
+
+					rmSync( changelogFilePath );
 				} );
 
-				if ( touchedProjectsRequiringChangelog.length === 0 ) {
+				if ( ! touchedProjectsRequiringChangelog ) {
 					Logger.notice( 'No projects require a changelog' );
 					process.exit( 0 );
 				}
 
-				// When a devRepoPath is provided, assume that the dependencies are already installed.
-				if ( ! devRepoPath ) {
-					Logger.notice(
-						`Installing dependencies in ${ tmpRepoPath }`
+				for ( const project in touchedProjectsRequiringChangelog ) {
+					const projectPath = nodePath.join(
+						tmpRepoPath,
+						touchedProjectsRequiringChangelog[ project ]
 					);
-					execSync( 'pnpm install', {
-						cwd: tmpRepoPath,
-						stdio: 'inherit',
-					} );
-				}
 
-				touchedProjectsRequiringChangelog.forEach( ( project ) => {
 					Logger.notice(
-						`Running changelog command for ${ project }`
+						`Generating changefile for ${ project } (${ projectPath }))`
 					);
-					const messageExpression = message
-						? `-e "${ message }"`
-						: '--entry=""';
-					const commentExpression = comment
-						? `-c "${ comment }"`
-						: '';
-					const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
-					execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
-				} );
+
+					// Figure out where the changelog file belongs for this project.
+					const composerFile = JSON.parse(
+						readFileSync(
+							nodePath.join( projectPath, 'composer.json' ),
+							{ encoding: 'utf-8' }
+						)
+					);
+					const changelogFilePath = nodePath.join(
+						projectPath,
+						composerFile.extra?.changelogger[ 'changes-dir' ] ??
+							'changelog',
+						fileName
+					);
+
+					// Write the changefile using the correct format.
+					let fileContent = `Significance: ${ significance }\n`;
+					fileContent += `Type: ${ type }\n`;
+					if ( comment ) {
+						fileContent += `Comment: ${ comment }\n`;
+					}
+					fileContent += `\n${ message }`;
+					writeFileSync( changelogFilePath, fileContent );
+				}
 			} catch ( e ) {
 				Logger.error( e );
 			}
 
-			const touchedProjectsString =
-				touchedProjectsRequiringChangelog.join( ', ' );
+			const touchedProjectsString = Object.keys(
+				touchedProjectsRequiringChangelog
+			).join( ', ' );
 
 			Logger.notice(
 				`Changelogs created for ${ touchedProjectsString }`

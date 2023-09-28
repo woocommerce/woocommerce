@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correctly set 'created_via' for HPOS orders created on the admin.

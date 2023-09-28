@@ -3,9 +3,9 @@
  */
 import { createElement } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { ToggleControl } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import { sanitizeHTML } from '../../utils/sanitize-html';
 export function Edit( {
 	attributes,
 }: BlockEditProps< ToggleBlockAttributes > ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const { label, property, disabled, disabledCopy } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(
 		'postType',

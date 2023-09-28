@@ -15,6 +15,7 @@ import { PricingMenuItem } from '../pricing-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 import { InventoryMenuItem } from '../inventory-menu-item';
 import { ShippingMenuItem } from '../shipping-menu-item';
+import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,
@@ -46,6 +47,11 @@ export function VariationsActionsMenu( {
 							onClose={ onClose }
 						/>
 						<SetListPriceMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+						<ToggleVisibilityMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }

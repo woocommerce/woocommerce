@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 import { createElement, createInterpolateElement } from '@wordpress/element';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 
 import {
 	BaseControl,
@@ -19,8 +20,8 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 
-export function Edit() {
-	const blockProps = useBlockProps();
+export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 
 	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
 
