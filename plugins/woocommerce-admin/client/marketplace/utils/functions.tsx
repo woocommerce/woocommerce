@@ -33,7 +33,6 @@ const fetchCache = new Map();
 function maybePruneFetchCache() {
 	console.log(fetchCache.size);
 	while ( fetchCache.size > maxFetchCacheSize ) {
-		console.log('pruning!');
 		fetchCache.delete( fetchCache.keys().next().value );
 	}
 	console.log(fetchCache.size);
