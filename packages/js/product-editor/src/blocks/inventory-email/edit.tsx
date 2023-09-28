@@ -11,7 +11,6 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
@@ -28,11 +27,12 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { useValidation } from '../../contexts/validation-context';
 import { InventoryEmailBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	clientId,
-}: BlockEditProps< InventoryEmailBlockAttributes > ) {
+}: ProductEditorBlockEditProps< InventoryEmailBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 2 );
 
