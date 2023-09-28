@@ -82,6 +82,7 @@ describe( 'plugins reducer', () => {
 				errors: {},
 				requesting: {},
 				jetpackAuthUrls: {},
+				activeThemeModsCount: 0,
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
