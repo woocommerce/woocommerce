@@ -189,18 +189,12 @@ jQuery( function( $ ) {
 			$.each( fragments, function( key ) {
 				$( key )
 					.addClass( 'updating' )
-					.fadeTo( '400', '0.6' )
-					.block({
-						message: null,
-						overlayCSS: {
-							opacity: 0.6
-						}
-					});
+					.fadeTo( '400', '0.6' );
 			});
 
 			$.each( fragments, function( key, value ) {
 				$( key ).replaceWith( value );
-				$( key ).stop( true ).css( 'opacity', '1' ).unblock();
+				$( key ).stop( true ).css( 'opacity', '1' );
 			});
 
 			$( document.body ).trigger( 'wc_fragments_loaded' );
