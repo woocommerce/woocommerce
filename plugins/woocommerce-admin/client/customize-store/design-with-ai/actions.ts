@@ -196,6 +196,17 @@ const spawnSaveDescriptionToOption = assign<
 		),
 } );
 
+const assignAPICallLoaderError = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	apiCallLoader: () => {
+		return {
+			hasErrors: true,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -275,6 +286,7 @@ export const actions = {
 	assignHeader,
 	assignFooter,
 	assignHomepageTemplate,
+	assignAPICallLoaderError,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,

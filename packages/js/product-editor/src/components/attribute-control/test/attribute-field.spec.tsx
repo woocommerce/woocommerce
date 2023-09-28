@@ -79,6 +79,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,
 	__experimentalSelectControlMenuSlot: () => <div></div>,
 	ListItem: ( { children }: { children: JSX.Element } ) => children,
+	Tag: ( { label }: { label: string } ) => <span>{ label }</span>,
 	Sortable: ( {
 		onOrderChange,
 		children,

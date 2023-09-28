@@ -75,10 +75,16 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
-				defaultColorPalette: {} as ColorPaletteResponse,
-				fontPairing: '' as FontPairing[ 'pair_name' ],
-				homepageTemplate:
-					'template1' as HomepageTemplate[ 'homepage_template' ],
+				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
+				defaultColorPalette: {
+					default: 'Ancient Bronze',
+				} as ColorPaletteResponse,
+				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
+				homepageTemplate: 'template1' as HomepageTemplate[ 'homepage_template' ],
+
+			},
+			apiCallLoader: {
+				hasErrors: false,
 			},
 		},
 		initial: 'navigate',
@@ -308,6 +314,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 												],
 												target: 'success',
 											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												target: 'success',
+											},
 										},
 									},
 									success: { type: 'final' },
@@ -339,12 +349,15 @@ export const designWithAiStateMachineDefinition = createMachine(
 												],
 												target: 'success',
 											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												target: 'success',
+											},
 										},
 									},
 									success: { type: 'final' },
 								},
 							},
-
 							updateStorePatterns: {
 								initial: 'pending',
 								states: {
@@ -355,8 +368,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 												target: 'success',
 											},
 											onError: {
-												// TODO: handle error
-												target: 'success',
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
 											},
 										},
 									},
@@ -379,15 +394,15 @@ export const designWithAiStateMachineDefinition = createMachine(
 												target: 'done',
 											},
 											onError: {
-												target: 'failed',
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
 											},
 										},
 									},
 									done: {
 										type: 'final',
-									},
-									failed: {
-										type: 'final', // If there's an error we should not block the user from proceeding. They'll just not see the AI suggestions, but that's better than being stuck
 									},
 								},
 							},
