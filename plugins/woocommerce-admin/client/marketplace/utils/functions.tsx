@@ -31,7 +31,6 @@ const maxFetchCacheSize = 100;
 const fetchCache = new Map();
 
 function maybePruneFetchCache() {
-	console.log(fetchCache.size);
 	while ( fetchCache.size > maxFetchCacheSize ) {
 		fetchCache.delete( fetchCache.keys().next().value );
 	}
