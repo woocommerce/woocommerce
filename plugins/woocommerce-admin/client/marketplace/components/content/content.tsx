@@ -9,14 +9,17 @@ import { useQuery } from '@woocommerce/navigation';
  */
 import './content.scss';
 
-import { Product, SearchAPIProductType } from '../product-list/types';
+import {
+	Product,
+	ProductType,
+	SearchAPIProductType,
+	SearchResultType,
+} from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
-import Extensions from '../extensions/extensions';
+import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
-import SearchExtensions from '../search-results/search-extensions';
-import SearchThemes from '../search-results/search-themes';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function Content(): JSX.Element {
@@ -106,28 +109,27 @@ export default function Content(): JSX.Element {
 		switch ( tab ) {
 			case 'extensions':
 				return (
-					<Extensions
+					<Products
 						products={ products }
 						categorySelector={ true }
-						label={ 'extension' }
-						labelPlural={ 'extensions' }
+						type={ ProductType.extension }
 					/>
 				);
 			case 'themes':
 				return (
-					<Extensions
+					<Products
 						products={ products }
 						categorySelector={ true }
-						label={ 'theme' }
-						labelPlural={ 'themes' }
+						type={ ProductType.theme }
 					/>
 				);
 			case 'search':
-				return <SearchResults products={ products } />;
-			case 'search-extensions':
-				return <SearchExtensions products={ products } />;
-			case 'search-themes':
-				return <SearchThemes products={ products } />;
+				return (
+					<SearchResults
+						products={ products }
+						type={ SearchResultType.all }
+					/>
+				);
 			case 'discover':
 				return <Discover />;
 			default:
