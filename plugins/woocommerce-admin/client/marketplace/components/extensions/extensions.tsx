@@ -14,7 +14,7 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
-import { Product, SearchAPIProductType } from '../product-list/types';
+import { Product } from '../product-list/types';
 import { fetchSearchResults } from '../../utils/functions';
 import { getAdminSetting } from '../../../utils/admin-settings';
 
