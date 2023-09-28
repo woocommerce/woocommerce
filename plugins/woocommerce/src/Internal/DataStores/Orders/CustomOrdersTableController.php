@@ -272,11 +272,8 @@ class CustomOrdersTableController {
 	 * @param mixed  $value New value of the setting.
 	 */
 	private function process_updated_option( $option, $old_value, $value ) {
-		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && $value !== $old_value ) {
-			$this->handle_data_sync_option_changed();
-			if ( 'no' === $value ) {
-				$this->data_synchronizer->cleanup_synchronization_state();
-			}
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
+			$this->data_synchronizer->cleanup_synchronization_state();
 		}
 	}
 
