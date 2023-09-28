@@ -6,10 +6,11 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { Product } from '../components/product-list/types';
+import { Product, SearchAPIProductType } from '../components/product-list/types';
 import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_CATEGORY_API_PATH,
+	MARKETPLACE_SEARCH_API_PATH,
 } from '../components/constants';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import { LOCALE } from '../../utils/admin-settings';
@@ -19,6 +20,71 @@ interface ProductGroup {
 	title: string;
 	items: Product[];
 	url: string;
+}
+
+// Wrapper around fetch() that caches results in memory
+const fetchCache: { [ url: string ]: Object } = {};
+async function fetchJsonWithCache( url: string ): Promise< any > {
+	// Attempt to fetch from cache:
+	if ( fetchCache[ url ] ) {
+		return new Promise( ( resolve ) => { resolve( fetchCache[ url ] ) } );
+	}
+
+	// Failing that, fetch from net:
+	return new Promise( ( resolve, reject ) => {
+		fetch( url ).then( ( response ) => {
+			if ( ! response.ok ) {
+				throw new Error( response.statusText );
+			}
+			return response.json();
+		} )
+		.then( ( json ) => {
+			fetchCache[ url ] = json;
+			resolve( json );
+		} )
+		.catch( () => {
+			reject();
+		} );
+	} );
+}
+
+// Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
+async function fetchSearchResults( params: URLSearchParams ): Promise< Product[] > {
+	const url =
+		MARKETPLACE_HOST +
+		MARKETPLACE_SEARCH_API_PATH +
+		'?' +
+		params.toString();
+
+	// Fetch data from WCCOM API
+	return new Promise( ( resolve, reject ) => {
+		fetchJsonWithCache( url )
+			.then( ( json ) => {
+				/**
+				 * Product card component expects a Product type.
+				 * So we build that object from the API response.
+				 */
+				const products = json.products.map(
+					( product: SearchAPIProductType ): Product => {
+						return {
+							id: product.id,
+							title: product.title,
+							description: product.excerpt,
+							vendorName: product.vendor_name,
+							vendorUrl: product.vendor_url,
+							icon: product.icon,
+							url: product.link,
+							// Due to backwards compatibility, raw_price is from search API, price is from featured API
+							price: product.raw_price ?? product.price,
+							averageRating: product.rating ?? 0,
+							reviewsCount: product.reviews_count ?? 0,
+						};
+					}
+				);
+				resolve( products );
+			} )
+			.catch( () => reject );
+	} );
 }
 
 // Fetch data for the discover page from the WooCommerce.com API
@@ -43,14 +109,7 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 		url = `${ url }?locale=${ LOCALE.userLocale }`;
 	}
 
-	return fetch( url.toString() )
-		.then( ( response ) => {
-			if ( ! response.ok ) {
-				throw new Error( response.statusText );
-			}
-
-			return response.json();
-		} )
+	return fetchJsonWithCache( url.toString() )
 		.then( ( json ) => {
 			return json;
 		} )
@@ -75,6 +134,7 @@ const appendURLParams = (
 };
 
 export {
+	fetchSearchResults,
 	fetchDiscoverPageData,
 	fetchCategories,
 	ProductGroup,
