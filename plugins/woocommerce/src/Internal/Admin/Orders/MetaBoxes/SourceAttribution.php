@@ -40,6 +40,6 @@ class SourceAttribution {
 			return;
 		}
 
-		include dirname( WC_PLUGIN_FILE ) . '/templates/order/source-data-fields.php';
+		wc_get_template( 'order/source-data-fields.php', array( 'meta' => $meta ) );
 	}
 }

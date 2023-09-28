@@ -37,9 +37,13 @@ class CustomerHistory {
 		// Calculate the data needed for the template.
 		$order_count   = wc_get_customer_order_count( $customer_id );
 		$total_spent   = wc_get_customer_total_spent( $customer_id );
-		$average_spent = $order_count ? $total_spent / $order_count : 0;
 
-		// Include the template file.
-		include dirname( WC_PLUGIN_FILE ) . '/templates/order/customer-history.php';
+		$args = array(
+			'order_count'   => $order_count,
+			'total_spent'   => $total_spent,
+			'average_spent' => $order_count ? $total_spent / $order_count : 0,
+		);
+
+		wc_get_template( 'order/customer-history.php', $args );
 	}
 }
