@@ -44,15 +44,16 @@ export default function Extensions(): JSX.Element {
 			params.append( 'country', wccomSettings.storeCountry );
 		}
 
-		fetchSearchResults( params ).then( ( products ) => {
-			setProductList( products );
-		} )
-		.catch( () => {
-			setProductList( [] );
-		} )
-		.finally( () => {
-			setIsLoading( false );
-		} );
+		fetchSearchResults( params )
+			.then( ( products ) => {
+				setProductList( products );
+			} )
+			.catch( () => {
+				setProductList( [] );
+			} )
+			.finally( () => {
+				setIsLoading( false );
+			} );
 	}, [ query ] );
 
 	const products = productList.slice( 0, 60 );
