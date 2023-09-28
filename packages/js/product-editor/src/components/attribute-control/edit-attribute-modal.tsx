@@ -89,6 +89,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	const isCustomAttribute = editableAttribute?.id === 0;
 
 	const { additions, deletions } = useMemo( () => {
+		if ( ! attribute.variation ) {
+			return {};
+		}
+
 		const variationsSubTotal = attributes
 			.filter(
 				( otherAttribute ) =>
