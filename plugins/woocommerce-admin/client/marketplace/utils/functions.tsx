@@ -37,19 +37,20 @@ async function fetchJsonWithCache( url: string ): Promise< any > {
 
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url ).then( ( response ) => {
-			if ( ! response.ok ) {
-				throw new Error( response.statusText );
-			}
-			return response.json();
-		} )
-		.then( ( json ) => {
-			fetchCache[ url ] = json;
-			resolve( json );
-		} )
-		.catch( () => {
-			reject();
-		} );
+		fetch( url )
+			.then( ( response ) => {
+				if ( ! response.ok ) {
+					throw new Error( response.statusText );
+				}
+				return response.json();
+			} )
+			.then( ( json ) => {
+				fetchCache[ url ] = json;
+				resolve( json );
+			} )
+			.catch( () => {
+				reject();
+			} );
 	} );
 }
 
