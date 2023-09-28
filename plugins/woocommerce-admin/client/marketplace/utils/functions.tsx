@@ -9,6 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	Product,
 	SearchAPIProductType,
+	SearchAPIJSONType,
 } from '../components/product-list/types';
 import {
 	MARKETPLACE_HOST,
@@ -25,13 +26,25 @@ interface ProductGroup {
 	url: string;
 }
 
+// The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
+const maxFetchCacheSize = 100;
+const fetchCache = new Map();
+
+function maybePruneFetchCache() {
+	console.log(fetchCache.size);
+	while ( fetchCache.size > maxFetchCacheSize ) {
+		console.log('pruning!');
+		fetchCache.delete( fetchCache.keys().next().value );
+	}
+	console.log(fetchCache.size);
+}
+
 // Wrapper around fetch() that caches results in memory
-const fetchCache: { [ url: string ]: object } = {};
-async function fetchJsonWithCache( url: string ): Promise< object > {
+async function fetchJsonWithCache( url: string ): Promise< any > {
 	// Attempt to fetch from cache:
-	if ( fetchCache[ url ] ) {
+	if ( fetchCache.get( url ) ) {
 		return new Promise( ( resolve ) => {
-			resolve( fetchCache[ url ] );
+			resolve( fetchCache.get( url ) );
 		} );
 	}
 
@@ -45,7 +58,8 @@ async function fetchJsonWithCache( url: string ): Promise< object > {
 				return response.json();
 			} )
 			.then( ( json ) => {
-				fetchCache[ url ] = json;
+				fetchCache.set( url, json );
+				maybePruneFetchCache();
 				resolve( json );
 			} )
 			.catch( () => {
@@ -72,7 +86,7 @@ async function fetchSearchResults(
 				 * Product card component expects a Product type.
 				 * So we build that object from the API response.
 				 */
-				const products = json.products.map(
+				const products = (json as SearchAPIJSONType).products.map(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
