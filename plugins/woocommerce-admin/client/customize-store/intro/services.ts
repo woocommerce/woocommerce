@@ -7,12 +7,14 @@ export const fetchThemeCards = async () => {
 			name: 'Twenty Twenty One',
 			description: 'The default theme for WordPress.',
 			isActive: true,
+			link: 'https://wordpress.com/theme/twentytwentyone/:siteSlug',
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/twentytwentyone/screenshot.png',
 			styleVariations: [],
 		},
 		{
 			slug: 'twentytwenty',
 			name: 'Twenty Twenty',
+			link: 'https://wordpress.com/theme/twentytwenty/:siteSlug',
 			description: 'The previous default theme for WordPress.',
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/twentytwenty/screenshot.png',
 			styleVariations: [],
@@ -20,6 +22,7 @@ export const fetchThemeCards = async () => {
 		{
 			slug: 'tsubaki',
 			name: 'Tsubaki',
+			link: 'https://wordpress.com/theme/tsubaki/:siteSlug',
 			description:
 				'Tsubaki puts the spotlight on your products and your customers. This theme leverages WooCommerce to provide you with intuitive product navigation and the patterns you need to master digital merchandising.',
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tsubaki/screenshot.png',
@@ -28,6 +31,7 @@ export const fetchThemeCards = async () => {
 		{
 			slug: 'winkel',
 			name: 'Winkel',
+			link: 'https://wordpress.com/theme/winkel/:siteSlug',
 			description:
 				'Winkel is a minimal, product-focused theme featuring Payments block. Its clean, cool look combined with a simple layout makes it perfect for showcasing fashion items – clothes, shoes, and accessories.',
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/winkel/screenshot.png',

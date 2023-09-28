@@ -36,7 +36,7 @@ import {
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/theme-cards';
+import { ThemeCard } from './intro/types';
 import './style.scss';
 
 export type customizeStoreStateMachineEvents =

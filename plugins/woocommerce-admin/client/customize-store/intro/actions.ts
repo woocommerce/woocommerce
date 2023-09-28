@@ -12,7 +12,7 @@ import { customizeStoreStateMachineEvents } from '..';
  * Internal dependencies
  */
 import { customizeStoreStateMachineContext } from '../types';
-import { ThemeCard } from './theme-cards';
+import { ThemeCard } from './types';
 
 export const assignThemeCards = assign<
 	customizeStoreStateMachineContext,

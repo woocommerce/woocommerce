@@ -17,7 +17,7 @@ import {
  */
 import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
-
+import { ColorPalettes } from './color-palettes';
 import './intro.scss';
 
 export type events =
@@ -179,40 +179,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 										{ themeCard.name }
 									</h2>
 									{ themeCard.styleVariations && (
-										<ul className="theme-card__color-variations">
-											{ themeCard.styleVariations.map(
-												( styleVariation ) => (
-													<li
-														key={
-															styleVariation.title
-														}
-													>
-														<div
-															className="theme-card__color-variation-left"
-															style={ {
-																border: styleVariation?.primary_border
-																	? '1px solid ' +
-																	  styleVariation.primary_border
-																	: 'none',
-																backgroundColor:
-																	styleVariation.primary,
-															} }
-														></div>
-														<div
-															className="theme-card__color-variation-right"
-															style={ {
-																border: styleVariation?.secondary_border
-																	? '1px solid ' +
-																	  styleVariation.secondary_border
-																	: 'none',
-																backgroundColor:
-																	styleVariation.secondary,
-															} }
-														></div>
-													</li>
-												)
-											) }
-										</ul>
+										<ColorPalettes
+											colorPalettes={
+												themeCard.styleVariations
+											}
+										/>
 									) }
 								</div>
 								<div>

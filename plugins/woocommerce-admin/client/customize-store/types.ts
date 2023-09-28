@@ -7,7 +7,7 @@ import { AnyInterpreter, Sender } from 'xstate';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '.';
-import { ThemeCard } from './intro/theme-cards';
+import { ThemeCard } from './intro/types';
 
 export type CustomizeStoreComponent = ( props: {
 	parentMachine: AnyInterpreter;
