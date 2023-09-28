@@ -5,7 +5,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, createInterpolateElement } from '@wordpress/element';
@@ -21,10 +20,11 @@ import {
  */
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 import { PricingBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< PricingBlockAttributes > ) {
+}: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { name, label, help } = attributes;
 	const [ price, setPrice ] = useEntityProp< string >(
