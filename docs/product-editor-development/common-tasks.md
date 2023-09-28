@@ -4,11 +4,9 @@
 
 ## Adding a group/section/field next to an existing one
 
-Here's a snippet that adds a new block to the catalog section for simple products, between the first and second fields (order 15):
+Here's a snippet that adds a new block to the catalog section, between the first and second fields (order 15):
 
 ```php
-<?php
-
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 
 if ( ! function_exists( 'YOUR_PREFIX_add_block_after_categories' ) ) {
@@ -18,12 +16,12 @@ if ( ! function_exists( 'YOUR_PREFIX_add_block_after_categories' ) ) {
 	function YOUR_PREFIX_add_block_after_categories( BlockInterface $product_categories_field ) {
     $product_categories_field->get_parent()->add_block(
       [
-        'id'         => 'your-checkbox-id',
+        'id'         => 'your-prefix-id',
         'blockName'  => 'woocommerce/product-checkbox-field',
-        'order'      => $product_categories_field->get_order() + 1,
+        'order'      => $product_categories_field->get_order() + 5,
         'attributes' => [
-          'label'   => 'Your Checkbox',
-					'value'   => 'meta_data.your_checkbox',
+          'label'    => 'Your Checkbox',
+				  'property' => 'your_checkbox_bool_property',
         ],
       ]
     );
