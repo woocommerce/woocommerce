@@ -7,7 +7,6 @@ import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, createInterpolateElement } from '@wordpress/element';
@@ -24,11 +23,12 @@ import {
 import { useValidation } from '../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 import { SalePriceBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	clientId,
-}: BlockEditProps< SalePriceBlockAttributes > ) {
+}: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, help } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
