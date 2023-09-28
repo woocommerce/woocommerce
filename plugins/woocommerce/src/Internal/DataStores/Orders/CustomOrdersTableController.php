@@ -382,7 +382,7 @@ class CustomOrdersTableController {
 	 *
 	 * @param FeaturesController $features_controller The instance of FeaturesController.
 	 *
-	 * @return array
+	 * @return void
 	 */
 	private function add_feature_definition( $features_controller ) {
 		$definition = array(
@@ -498,10 +498,12 @@ class CustomOrdersTableController {
 					wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 				);
 
-				$sync_message[] = wp_kses_data( __(
-					'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-					'woocommerce'
-				) );
+				$sync_message[] = wp_kses_data(
+					__(
+						'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+						'woocommerce'
+					)
+				);
 
 				$sync_message[] = sprintf(
 					'<a href="%1$s" class="button button-link">%2$s</a>',
@@ -523,12 +525,12 @@ class CustomOrdersTableController {
 		};
 
 		return array(
-			'id'       => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			'title'    => '',
-			'type'     => 'checkbox',
-			'desc'     => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'    => $get_value,
-			'desc_tip' => $get_sync_message,
+			'id'        => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'title'     => '',
+			'type'      => 'checkbox',
+			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
+			'value'     => $get_value,
+			'desc_tip'  => $get_sync_message,
 			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}

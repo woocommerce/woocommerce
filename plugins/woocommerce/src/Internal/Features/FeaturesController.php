@@ -143,7 +143,7 @@ class FeaturesController {
 			'name'               => $name,
 			'order'              => 10,
 		);
-		$args = wp_parse_args( $args, $defaults );
+		$args     = wp_parse_args( $args, $defaults );
 
 		$this->features[ $slug ] = $args;
 	}

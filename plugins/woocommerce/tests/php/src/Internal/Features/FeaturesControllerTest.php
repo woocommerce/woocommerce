@@ -125,6 +125,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Resets the array of registered features so we can populate it with test features.
 	 *
+	 * @param FeaturesController $sut The instance of the FeaturesController class.
+	 *
 	 * @return void
 	 */
 	private function reset_features_list( $sut ) {
