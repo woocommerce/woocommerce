@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Add refresh, activate, and deactivate endpoints to the Marketplace API.
+
