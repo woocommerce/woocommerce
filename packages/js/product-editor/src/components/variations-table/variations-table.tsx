@@ -349,20 +349,24 @@ export const VariationsTable = forwardRef<
 					/>
 				</div>
 				<div className="woocommerce-product-variations__filters">
-					<Button
-						variant="tertiary"
-						disabled={ areAllSelected( variationIds ) }
-						onClick={ () => onSelectAll( variationIds )( true ) }
-					>
-						{ __( 'Select all', 'woocommerce' ) }
-					</Button>
-					<Button
-						variant="tertiary"
-						disabled={ ! hasSelection( variationIds ) }
-						onClick={ () => onClearSelection() }
-					>
-						{ __( 'Clear selection', 'woocommerce' ) }
-					</Button>
+					{ hasSelection( variationIds ) && (
+						<>
+							<Button
+								variant="tertiary"
+								onClick={ () =>
+									onSelectAll( variationIds )( true )
+								}
+							>
+								{ __( 'Select all', 'woocommerce' ) }
+							</Button>
+							<Button
+								variant="tertiary"
+								onClick={ onClearSelection }
+							>
+								{ __( 'Clear selection', 'woocommerce' ) }
+							</Button>
+						</>
+					) }
 				</div>
 				<div>
 					<VariationsActionsMenu
