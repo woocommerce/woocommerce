@@ -136,43 +136,27 @@ class MarketingSpecs {
 	/**
 	 * Load knowledge base posts from WooCommerce.com
 	 *
-	 * @param string|null $term Term of posts to retrieve.
+	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array
 	 */
-	public function get_knowledge_base_posts( ?string $term ): array {
-		$terms = array(
-			'marketing' => array(
-				'taxonomy' => 'category',
-				'term_id'  => 1744,
-				'argument' => 'categories',
-			),
-			'coupons'   => array(
-				'taxonomy' => 'post_tag',
-				'term_id'  => 1377,
-				'argument' => 'tags',
-			),
-		);
-
-		// Default to the marketing category (if no term is set on the kb component).
-		if ( empty( $term ) || ! array_key_exists( $term, $terms ) ) {
-			$term = 'marketing';
+	public function get_knowledge_base_posts( ?string $topic ): array {
+		// Default to the marketing topic (if no topic is set on the kb component).
+		if ( empty( $topic ) ) {
+			$topic = 'marketing';
 		}
 
-		$term_id      = $terms[ $term ]['term_id'];
-		$argument     = $terms[ $term ]['argument'];
-		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT . '_' . strtolower( $term );
+		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT . '_' . strtolower( $topic );
 
 		$posts = get_transient( $kb_transient );
 
 		if ( false === $posts ) {
 			$request_url = add_query_arg(
 				array(
-					$argument  => $term_id,
 					'page'     => 1,
 					'per_page' => 8,
 					'_embed'   => 1,
 				),
-				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
+				'https://woocommerce.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
 			);
 
 			$request = wp_remote_get(

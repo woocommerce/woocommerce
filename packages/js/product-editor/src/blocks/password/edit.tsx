@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	BaseControl,
 	CheckboxControl,
@@ -23,7 +23,7 @@ import { RequirePasswordBlockAttributes } from './types';
 export function Edit( {
 	attributes,
 }: BlockEditProps< RequirePasswordBlockAttributes > ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const { label } = attributes;
 
 	const [ postPassword, setPostPassword ] = useEntityProp< string >(
