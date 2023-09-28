@@ -6,7 +6,10 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { Product, SearchAPIProductType } from '../components/product-list/types';
+import {
+	Product,
+	SearchAPIProductType,
+} from '../components/product-list/types';
 import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_CATEGORY_API_PATH,
@@ -27,7 +30,9 @@ const fetchCache: { [ url: string ]: Object } = {};
 async function fetchJsonWithCache( url: string ): Promise< any > {
 	// Attempt to fetch from cache:
 	if ( fetchCache[ url ] ) {
-		return new Promise( ( resolve ) => { resolve( fetchCache[ url ] ) } );
+		return new Promise( ( resolve ) => {
+			resolve( fetchCache[ url ] );
+		} );
 	}
 
 	// Failing that, fetch from net:
@@ -49,7 +54,9 @@ async function fetchJsonWithCache( url: string ): Promise< any > {
 }
 
 // Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
-async function fetchSearchResults( params: URLSearchParams ): Promise< Product[] > {
+async function fetchSearchResults(
+	params: URLSearchParams
+): Promise< Product[] > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
