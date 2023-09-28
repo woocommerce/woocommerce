@@ -77,7 +77,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 			aiSuggestions: {
 				defaultColorPalette: {} as ColorPaletteResponse,
 				fontPairing: '' as FontPairing[ 'pair_name' ],
-				homepageTemplate: '' as HomepageTemplate[ 'homepage_template' ],
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
 			},
 		},
 		initial: 'navigate',
