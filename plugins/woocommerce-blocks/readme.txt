@@ -109,6 +109,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Product Gallery: CSS styling tightening up. ([10867](https://github.com/woocommerce/woocommerce-blocks/pull/10867))
 - Checkout Block: Prevent changes in the selected shipping method when new rates are added or removed. ([10457](https://github.com/woocommerce/woocommerce-blocks/pull/10457))
 
+= 11.1.2 - 2023-09-27 =
+
+#### Bug Fixes
+
+- Improved escaping [565cd04](https://github.com/woocommerce/woocommerce-blocks/commit/565cd0461dbcc21fa04f77a736da443fc56a054d)
+
 = 11.1.1 - 2023-09-20 =
 
 #### Bug Fixes

@@ -174,6 +174,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [11.0.0](./1100.md)
 -   [11.1.0](./1110.md)
     -   [11.1.1](./1111.md)
+    -   [11.1.2](./1112.md)
 -   [11.2.0](./1120.md)
 
 
