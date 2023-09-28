@@ -1872,7 +1872,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'term_id',
 				'terms'    => $query_vars['category_id'],
 			);
-			unset( $wp_query_args[ 'category_id' ] ) ;
 		}
 
 		// Handle product tags.
