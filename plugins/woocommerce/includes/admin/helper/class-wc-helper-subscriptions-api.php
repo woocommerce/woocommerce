@@ -40,6 +40,15 @@ class WC_Helper_Subscriptions_API {
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 			)
 		);
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/refresh',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'refresh' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
 	}
 
 	/**
@@ -63,6 +72,14 @@ class WC_Helper_Subscriptions_API {
 		);
 	}
 
+	/**
+	 * Refresh account and subscriptions from WooCommerce.com and serve subscriptions
+	 * as JSON.
+	 */
+	public static function refresh() {
+		WC_Helper::refresh_helper_subscriptions();
+		self::get_subscriptions();
+	}
 }
 
 WC_Helper_Subscriptions_API::load();

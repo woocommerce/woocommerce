@@ -861,10 +861,7 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		/**
-		 * Fires when Helper subscriptions are refreshed.
-		 */
-		do_action( 'woocommerce_helper_subscriptions_refresh' );
+		self::refresh_helper_subscriptions();
 
 		$redirect_uri = add_query_arg(
 			array(
@@ -876,12 +873,22 @@ class WC_Helper {
 			admin_url( 'admin.php' )
 		);
 
+		wp_safe_redirect( $redirect_uri );
+		die();
+	}
+
+	/**
+	 * Flush helper authentication cache.
+	 */
+	public static function refresh_helper_subscriptions() {
+		/**
+		 * Fires when Helper subscriptions are refreshed.
+		 */
+		do_action( 'woocommerce_helper_subscriptions_refresh' );
+
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
-
-		wp_safe_redirect( $redirect_uri );
-		die();
 	}
 
 	/**
