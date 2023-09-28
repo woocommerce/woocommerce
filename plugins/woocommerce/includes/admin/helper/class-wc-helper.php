@@ -1296,6 +1296,23 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get subscription data for a given product key.
+	 * @param string $product_key Subscription product key.
+	 * @return array|bool The array containing sub data or false.
+	 */
+	public static function get_subscription( $product_key ) {
+		$subscriptions = wp_list_filter(
+			self::get_subscriptions(),
+			array( 'product_key' => $product_key )
+		);
+
+		if ( empty( $subscriptions ) ) {
+			return false;
+		}
+		return array_values( $subscriptions )[0];
+	}
+
+	/**
 	 * Get the connected user's subscription list data.
 	 * This is used by the My Subscriptions page.
 	 *
@@ -1338,6 +1355,16 @@ class WC_Helper {
 			);
 		}
 
+		$active_product_ids = array_column(
+			array_filter(
+				$subscriptions,
+				function( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'] );
+				}
+			),
+			'product_id'
+		);
+		
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
 
@@ -1350,7 +1377,8 @@ class WC_Helper {
 			$updates = WC_Helper_Updater::get_update_data();
 			$local   = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
 
-			if ( ! empty( $local ) ) {
+			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
+			if ( ! empty( $local ) && ! $inactive_license ) {
 				$local                              = array_shift( $local );
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
