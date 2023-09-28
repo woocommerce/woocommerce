@@ -85,13 +85,13 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				url: 'https://public-api.wordpress.com/wpcom/v2/ai-background-removal',
 				method: 'POST',
 				body: formData,
-				credentials: 'omit',
 				parse: false,
+				credentials: 'omit',
 			} );
 
-			const blob = new Blob( [ response as ArrayBuffer ], {
-				type: `image/${ imageType }`,
-			} );
+			const blob = await (
+				response as { blob: () => Promise< Blob > }
+			 ).blob();
 			setImageData( blob );
 			return blob;
 		} catch ( err ) {
