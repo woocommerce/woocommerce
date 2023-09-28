@@ -12,5 +12,6 @@ export type ThemeCard = {
 	description: string;
 	image: string;
 	isActive: boolean;
-	styleVariations: ColorPalette[];
+	link?: string;
+	colorPalettes: ColorPalette[];
 };

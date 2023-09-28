@@ -17,7 +17,7 @@ import {
  */
 import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
-import { ColorPalettes } from './color-palettes';
+import { ThemeCard } from './theme-card';
 import './intro.scss';
 
 export type events =
@@ -167,39 +167,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 					<div className="woocommerce-customize-store-theme-cards">
 						{ themeCards?.map( ( themeCard ) => (
-							<div className="theme-card" key={ themeCard.slug }>
-								<div>
-									<img
-										src={ themeCard.image }
-										alt={ themeCard.description }
-									/>
-								</div>
-								<div className="theme-card__info">
-									<h2 className="theme-card__title">
-										{ themeCard.name }
-									</h2>
-									{ themeCard.styleVariations && (
-										<ColorPalettes
-											colorPalettes={
-												themeCard.styleVariations
-											}
-										/>
-									) }
-								</div>
-								<div>
-									{ themeCard.isActive && (
-										<span className="theme-card__active">
-											{ __(
-												'Active theme',
-												'woocommerce'
-											) }
-										</span>
-									) }
-									<span className="theme-card__free">
-										Free
-									</span>
-								</div>
-							</div>
+							<ThemeCard
+								key={ themeCard.slug }
+								slug={ themeCard.slug }
+								description={ themeCard.description }
+								image={ themeCard.image }
+								name={ themeCard.name }
+								colorPalettes={ themeCard.colorPalettes }
+								link={ themeCard?.link }
+								isActive={ themeCard.isActive }
+							/>
 						) ) }
 					</div>
 
