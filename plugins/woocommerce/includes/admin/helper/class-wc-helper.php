@@ -903,6 +903,35 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
+		$activated = self::activate_helper_subscription( $product_key, $product_id );
+
+		$redirect_uri = add_query_arg(
+			array(
+				'page'                 => 'wc-addons',
+				'section'              => 'helper',
+				'filter'               => self::get_current_filter(),
+				'wc-helper-status'     => $activated ? 'activate-success' : 'activate-error',
+				'wc-helper-product-id' => $product_id,
+			),
+			admin_url( 'admin.php' )
+		);
+
+		wp_safe_redirect( $redirect_uri );
+		die();
+	}
+
+	/**
+	 * Activate helper subscription.
+	 * @param string $product_key Subscription product key.
+	 * @return bool True if activated, false otherwise.
+	 */
+	public static function activate_helper_subscription( $product_key ) {
+		$subscription = self::get_subscription( $product_key );
+		if ( ! $subscription ) {
+			return false;
+		}
+		$product_id = $subscription['product_id']; 
+
 		// Activate subscription.
 		$activation_response = WC_Helper_API::post(
 			'activate',
@@ -952,19 +981,7 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 
-		$redirect_uri = add_query_arg(
-			array(
-				'page'                 => 'wc-addons',
-				'section'              => 'helper',
-				'filter'               => self::get_current_filter(),
-				'wc-helper-status'     => $activated ? 'activate-success' : 'activate-error',
-				'wc-helper-product-id' => $product_id,
-			),
-			admin_url( 'admin.php' )
-		);
-
-		wp_safe_redirect( $redirect_uri );
-		die();
+		return $activated;
 	}
 
 	/**
@@ -978,6 +995,33 @@ class WC_Helper {
 			self::log( 'Could not verify nonce in _helper_subscription_deactivate' );
 			wp_die( 'Could not verify nonce' );
 		}
+
+		$deactivated = self::deactivate_helper_subscription( $product_key );
+
+		$redirect_uri = add_query_arg(
+			array(
+				'page'                 => 'wc-addons',
+				'section'              => 'helper',
+				'filter'               => self::get_current_filter(),
+				'wc-helper-status'     => $deactivated ? 'deactivate-success' : 'deactivate-error',
+				'wc-helper-product-id' => $product_id,
+			),
+			admin_url( 'admin.php' )
+		);
+
+		wp_safe_redirect( $redirect_uri );
+		die();
+	}
+
+	/**
+	 * Deactivate a product subscription.
+	 */
+	public static function deactivate_helper_subscription( $product_key ) {
+		$subscription = self::get_subscription( $product_key );
+		if ( ! $subscription ) {
+			return false;
+		}
+		$product_id = $subscription['product_id']; 
 
 		$deactivation_response = WC_Helper_API::post(
 			'deactivate',
@@ -1018,19 +1062,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 
-		$redirect_uri = add_query_arg(
-			array(
-				'page'                 => 'wc-addons',
-				'section'              => 'helper',
-				'filter'               => self::get_current_filter(),
-				'wc-helper-status'     => $deactivated ? 'deactivate-success' : 'deactivate-error',
-				'wc-helper-product-id' => $product_id,
-			),
-			admin_url( 'admin.php' )
-		);
-
-		wp_safe_redirect( $redirect_uri );
-		die();
+		return $deactivated;
 	}
 
 	/**
@@ -1405,7 +1437,6 @@ class WC_Helper {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
 			}
 		}
-
 		// Break the by-ref.
 		unset( $subscription );
 

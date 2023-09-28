@@ -87,11 +87,7 @@ export default function MySubscriptions(): JSX.Element {
 		},
 	];
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) =>
-			subscription.local.active &&
-			( subscription.active ||
-				subscription.product_key === '' ||
-				subscription.expired )
+		( subscription: Subscription ) => subscription.local.installed
 	);
 
 	const tableHeadersAvailable = [
@@ -136,27 +132,29 @@ export default function MySubscriptions(): JSX.Element {
 			return __( 'Not found', 'woocommerce' );
 		} else if ( subscription.expired ) {
 			return __( 'Expired', 'woocommerce' );
+		} else if ( subscription.active ) {
+			return __( 'Active', 'woocommerce' );
 		}
-		return __( 'Active', 'woocommerce' );
+		return __( 'Inactive', 'woocommerce' );
 	};
 
 	const getVersion = ( subscription: Subscription ): string => {
 		if ( subscription.local.version === subscription.version ) {
 			return subscription.local.version;
-		} 
-		
+		}
+
 		if ( subscription.local.version && subscription.version ) {
 			return subscription.local.version + ' > ' + subscription.version;
 		}
-		
+
 		if ( subscription.version ) {
 			return subscription.version;
 		}
-		
-		  if ( subscription.local.version ) {
+
+		if ( subscription.local.version ) {
 			return subscription.local.version;
 		}
-		
+
 		return '';
 	};
 

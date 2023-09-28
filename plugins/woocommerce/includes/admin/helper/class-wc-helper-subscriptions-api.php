@@ -33,6 +33,15 @@ class WC_Helper_Subscriptions_API {
 	public static function register_rest_routes() {
 		register_rest_route(
 			'wc/v3',
+			'/marketplace/refresh',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'refresh' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
+		register_rest_route(
+			'wc/v3',
 			'/marketplace/subscriptions',
 			array(
 				'methods'             => 'GET',
@@ -42,10 +51,19 @@ class WC_Helper_Subscriptions_API {
 		);
 		register_rest_route(
 			'wc/v3',
-			'/marketplace/refresh',
+			'/marketplace/subscriptions/activate',
 			array(
-				'methods'             => 'GET',
-				'callback'            => array( __CLASS__, 'refresh' ),
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'activate' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/subscriptions/deactivate',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'deactivate' ),
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 			)
 		);
@@ -79,6 +97,48 @@ class WC_Helper_Subscriptions_API {
 	public static function refresh() {
 		WC_Helper::refresh_helper_subscriptions();
 		self::get_subscriptions();
+	}
+
+	/**
+	 * Activate a WooCommerce.com subscription.
+	 */
+	public static function activate( $request ) {
+		$product_key = $request->get_param('product_key');
+		$success = WC_Helper::activate_helper_subscription( $product_key );
+		if ( $success ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'Your subscription has been activated.', 'woocommerce' )
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'There was an error activating your subscription. Please try again.', 'woocommerce' )
+				)
+			);
+		}
+	}
+
+	/**
+	 * Deactivate a WooCommerce.com subscription.
+	 */
+	public static function deactivate( $request ) {
+		$product_key = $request->get_param('product_key');
+		$success = WC_Helper::deactivate_helper_subscription( $product_key );
+		if ( $success ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'Your subscription has been deactivated.', 'woocommerce' )
+				)
+			);
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'There was an error deactivating your subscription. Please try again.', 'woocommerce' )
+				)
+			);
+		}
 	}
 }
 
