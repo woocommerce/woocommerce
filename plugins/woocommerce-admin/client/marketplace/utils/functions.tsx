@@ -34,7 +34,6 @@ function maybePruneFetchCache() {
 	while ( fetchCache.size > maxFetchCacheSize ) {
 		fetchCache.delete( fetchCache.keys().next().value );
 	}
-	console.log(fetchCache.size);
 }
 
 // Wrapper around fetch() that caches results in memory
