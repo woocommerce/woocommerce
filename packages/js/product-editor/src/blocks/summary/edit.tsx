@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
-import { BlockEditProps } from '@wordpress/blocks';
 import { BaseControl } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -25,11 +24,12 @@ import {
 import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	setAttributes,
-}: BlockEditProps< SummaryAttributes > ) {
+}: ProductEditorBlockEditProps< SummaryAttributes > ) {
 	const { align, allowedFormats, direction, label } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
