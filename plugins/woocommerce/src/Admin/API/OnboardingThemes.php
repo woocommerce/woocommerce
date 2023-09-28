@@ -61,19 +61,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/count-active-theme-mods',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'count_active_theme_mods' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_count_active_theme_mods_schema' ),
-			)
-		);
 	}
 
 	/**
@@ -133,7 +120,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-					/* translators: %s: theme slug (example: woocommerce-services) */
+				/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed. Theme API call failed.', 'woocommerce' ),
 					$theme
 				),
@@ -148,7 +135,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-					/* translators: %s: theme slug (example: woocommerce-services) */
+				/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed.', 'woocommerce' ),
 					$theme
 				),
@@ -198,17 +185,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the active theme mods count.
-	 *
-	 * @return array
-	 */
-	public function count_active_theme_mods() {
-		return array(
-			'mods_count' => count( get_theme_mods() )
-		);
-	}
-
-	/**
 	 * Get the schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -241,27 +217,5 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the count-active-theme-mods endpoint schema.
-	 *
-	 * @return array
-	 */
-	public function get_count_active_theme_mods_schema() {
-		 return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'onboarding_theme',
-			'type'       => 'object',
-			'properties' => array(
-				'mods_count' => array(
-					'description' => __( 'Theme mods count.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'default'     => 0
-				),
-			),
-		);
 	}
 }

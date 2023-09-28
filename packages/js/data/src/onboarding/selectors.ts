@@ -106,10 +106,6 @@ export const getJetpackAuthUrl = (
 	return state.jetpackAuthUrls[ query.redirectUrl ] || '';
 };
 
-export const getActiveThemeModsCount = ( state: OnboardingState ): number => {
-	return state.activeThemeModsCount || 0;
-};
-
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
 	getPaymentGatewaySuggestions: () => ReturnType<
@@ -123,5 +119,4 @@ export type OnboardingSelectors = {
 	getTaskLists: () => ReturnType< typeof getTaskLists >;
 	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
 	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
-	getActiveThemeModsCount: () => number;
 } & WPDataSelectors;

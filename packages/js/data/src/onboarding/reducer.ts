@@ -39,7 +39,6 @@ export const defaultState: OnboardingState = {
 	requesting: {},
 	taskLists: {},
 	jetpackAuthUrls: {},
-	activeThemeModsCount: 0,
 };
 
 const getUpdatedTaskLists = (
@@ -437,11 +436,6 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.jetpackAuthUrls,
 					[ action.redirectUrl ]: action.results,
 				},
-			};
-		case TYPES.SET_ACTIVE_THEME_MODS_COUNT:
-			return {
-				...state,
-				activeThemeModsCount: action.count,
 			};
 		default:
 			return state;

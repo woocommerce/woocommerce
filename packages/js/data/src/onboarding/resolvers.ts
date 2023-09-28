@@ -21,7 +21,6 @@ import {
 	getProductTypesSuccess,
 	getProductTypesError,
 	setJetpackAuthUrl,
-	setActiveThemeModsCount,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
@@ -162,20 +161,5 @@ export function* getJetpackAuthUrl( query: {
 		yield setJetpackAuthUrl( results, query.redirectUrl, query.from ?? '' );
 	} catch ( error ) {
 		yield setError( 'getJetpackAuthUrl', error );
-	}
-}
-
-export function* getActiveThemeModsCount() {
-	try {
-		const results: { mods_count: number } = yield apiFetch( {
-			path:
-				WC_ADMIN_NAMESPACE +
-				'/onboarding/themes/count-active-theme-mods',
-			method: 'GET',
-		} );
-
-		yield setActiveThemeModsCount( results.mods_count );
-	} catch ( error ) {
-		yield setError( 'getActiveThemeModsCount', error );
 	}
 }
