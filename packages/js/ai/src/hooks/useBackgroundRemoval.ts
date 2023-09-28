@@ -28,7 +28,9 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const [ error, setError ] = useState< Error | null >( null );
 	const [ imageData, setImageData ] = useState< Blob | null >( null );
 
-	const fetchImage = async ( params: BackgroundRemovalParams ) => {
+	const fetchImage = async (
+		params: BackgroundRemovalParams
+	): Promise< Blob | undefined > => {
 		setLoading( true );
 		const { returnedImageType, returnedImageSize, imageFile } = params;
 		const { token } = await requestJetpackToken();
@@ -83,12 +85,15 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				url: 'https://public-api.wordpress.com/wpcom/v2/ai-background-removal',
 				method: 'POST',
 				body: formData,
+				credentials: 'omit',
+				parse: false,
 			} );
 
 			const blob = new Blob( [ response as ArrayBuffer ], {
 				type: `image/${ imageType }`,
 			} );
 			setImageData( blob );
+			return blob;
 		} catch ( err ) {
 			setError( err as Error );
 		} finally {
