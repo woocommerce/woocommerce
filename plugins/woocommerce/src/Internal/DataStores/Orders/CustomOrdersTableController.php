@@ -121,7 +121,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
-		self::add_filter( 'woocommerce_feature_definitions', array( $this, 'add_feature_definition' ) );
+		self::add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 	}
 
 	/**
@@ -383,22 +383,27 @@ class CustomOrdersTableController {
 	/**
 	 * Add the definition for the HPOS feature.
 	 *
-	 * @param array $feature_definitions The array of feature definitions to add to.
+	 * @param FeaturesController $features_controller The instance of FeaturesController.
 	 *
 	 * @return array
 	 */
-	private function add_feature_definition( $feature_definitions ) {
-		$feature_definitions['custom_order_tables'] = array(
-			'name'                => __( 'High-Performance order storage', 'woocommerce' ),
+	private function add_feature_definition( $features_controller ) {
+		$definition = array(
 			'option_key'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'is_experimental'     => false,
 			'enabled_by_default'  => false,
+			'order'               => 50,
 			'setting'             => $this->get_hpos_setting_for_feature(),
 			'additional_settings' => array(
 				$this->get_hpos_setting_for_sync(),
 			),
 		);
 
-		return $feature_definitions;
+		$features_controller->add_feature_definition(
+			'custom_order_tables',
+			__( 'High-Performance order storage', 'woocommerce' ),
+			$definition
+		);
 	}
 
 	/**
