@@ -144,13 +144,20 @@ export default function MySubscriptions(): JSX.Element {
 	const getVersion = ( subscription: Subscription ): string => {
 		if ( subscription.local.version === subscription.version ) {
 			return subscription.local.version;
-		} else if ( subscription.local.version && subscription.version ) {
+		} 
+		
+		if ( subscription.local.version && subscription.version ) {
 			return subscription.local.version + ' > ' + subscription.version;
-		} else if ( subscription.version ) {
+		}
+		
+		if ( subscription.version ) {
 			return subscription.version;
-		} else if ( subscription.local.version ) {
+		}
+		
+		  if ( subscription.local.version ) {
 			return subscription.local.version;
 		}
+		
 		return '';
 	};
 
