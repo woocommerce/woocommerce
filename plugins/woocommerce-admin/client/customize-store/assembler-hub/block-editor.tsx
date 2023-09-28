@@ -4,7 +4,10 @@
  * External dependencies
  */
 // @ts-ignore No types for this exist yet.
+import { store as blockEditorStore } from '@wordpress/block-editor';
+// @ts-ignore No types for this exist yet.
 import { useEntityRecords } from '@wordpress/core-data';
+import { select } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -27,6 +30,31 @@ type Page = {
 	link: string;
 	title: { rendered: string; raw: string };
 	[ key: string ]: unknown;
+};
+
+const findPageIdByLinkOrTitle = ( event: MouseEvent, _pages: Page[] ) => {
+	const target = event.target as HTMLAnchorElement;
+	const clickedPage =
+		_pages.find( ( page ) => page.link === target.href ) ||
+		_pages.find( ( page ) => page.title.rendered === target.innerText );
+	return clickedPage ? clickedPage.id : null;
+};
+
+const findPageIdByBlockClientId = ( event: MouseEvent ) => {
+	const navLink = ( event.target as HTMLAnchorElement ).closest(
+		'.wp-block-navigation-link'
+	);
+	if ( navLink ) {
+		const blockClientId = navLink.getAttribute( 'data-block' );
+		const navLinkBlocks =
+			// @ts-ignore No types for this exist yet.
+			select( blockEditorStore ).getBlocksByClientId( blockClientId );
+
+		if ( navLinkBlocks && navLinkBlocks.length ) {
+			return navLinkBlocks[ 0 ].attributes.id;
+		}
+	}
+	return null;
 };
 
 // We only show the edit option when page count is <= MAX_PAGE_COUNT
@@ -62,31 +90,28 @@ export const BlockEditor = ( {} ) => {
 
 	const onClickNavigationItem = useCallback(
 		( event: MouseEvent ) => {
-			const clickedPage =
-				pages.find(
-					( page: Page ) =>
-						page.link === ( event.target as HTMLAnchorElement ).href
-				) ||
-				// Fallback to page title if the link is not found. This is needed for a bug in the block library
-				// See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817
-				pages.find(
-					( page: Page ) =>
-						page.title.rendered ===
-						( event.target as HTMLAnchorElement ).innerText
-				);
-			if ( clickedPage ) {
+			// If the user clicks on a navigation item, we want to update the URL to reflect the page they are on.
+			// Because of bug in the block library (See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817), we're not able to use href link to find the page ID. Instead, we'll use the link/title first, and if that doesn't work, we'll use the block client ID. It depends on the header block type to determine which one to use.
+			// This is a temporary solution until the block library is fixed.
+
+			const pageId =
+				findPageIdByLinkOrTitle( event, pages ) ||
+				findPageIdByBlockClientId( event );
+
+			if ( pageId ) {
 				history.push( {
 					...urlParams,
-					postId: clickedPage.id,
+					postId: pageId,
 					postType: 'page',
 				} );
-			} else {
-				// Home page
-				const { postId, postType, ...params } = urlParams;
-				history.push( {
-					...params,
-				} );
+				return;
 			}
+
+			// Home page
+			const { postId, postType, ...params } = urlParams;
+			history.push( {
+				...params,
+			} );
 		},
 		[ history, urlParams, pages ]
 	);

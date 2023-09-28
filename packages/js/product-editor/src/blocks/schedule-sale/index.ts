@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import { BlockConfiguration } from '@wordpress/blocks';
+import { registerWooBlockType } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-block';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
 import { ScheduleSalePricingBlockAttributes } from './types';
@@ -25,5 +24,5 @@ export const settings: Partial<
 };
 
 export function init() {
-	return initBlock( { name, metadata, settings } );
+	return registerWooBlockType( { name, metadata, settings } );
 }

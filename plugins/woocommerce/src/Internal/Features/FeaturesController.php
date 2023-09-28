@@ -1053,7 +1053,7 @@ class FeaturesController {
 	 *
 	 * @return string
 	 */
-	private function get_features_page_url(): string {
+	public function get_features_page_url(): string {
 		return admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
 	}
 

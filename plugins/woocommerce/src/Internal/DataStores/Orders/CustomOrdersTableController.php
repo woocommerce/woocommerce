@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use ActionScheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,6 +27,8 @@ defined( 'ABSPATH' ) || exit;
 class CustomOrdersTableController {
 
 	use AccessiblePrivateMethods;
+
+	private const SYNC_QUERY_ARG = 'wc_hpos_sync_now';
 
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
@@ -116,10 +119,11 @@ class CustomOrdersTableController {
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
-		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_data_sync_option_changed' ), 10, 1 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
+		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
+		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 	}
 
 	/**
@@ -326,30 +330,32 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Handler for the all settings updated hook.
+	 * Callback to trigger a sync immediately by clicking a button on the Features screen.
 	 *
-	 * @param string $feature_id Feature ID.
+	 * @return void
 	 */
-	private function handle_data_sync_option_changed( string $feature_id ) {
-		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION !== $feature_id ) {
+	private function sync_now() {
+		$section = filter_input( INPUT_GET, 'section' );
+		if ( 'features' !== $section ) {
 			return;
 		}
-		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
 
-		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			$this->data_synchronizer->create_database_tables();
-		}
-
-		// Enabling/disabling the sync implies starting/stopping it too, if needed.
-		// We do this check here, and not in process_pre_update_option, so that if for some reason
-		// the setting is enabled but no sync is in process, sync will start by just saving the
-		// settings even without modifying them (and the opposite: sync will be stopped if for
-		// some reason it was ongoing while it was disabled).
-		if ( $data_sync_is_enabled ) {
+		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
-		} else {
-			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
 		}
+	}
+
+	/**
+	 * Tell WP Admin to remove the sync query arg from the URL.
+	 *
+	 * @param array $query_args The query args that are removable.
+	 *
+	 * @return array
+	 */
+	private function register_removable_query_arg( $query_args ) {
+		$query_args[] = self::SYNC_QUERY_ARG;
+
+		return $query_args;
 	}
 
 	/**
@@ -474,24 +480,45 @@ class CustomOrdersTableController {
 	 */
 	private function get_hpos_setting_for_sync( $sync_status ) {
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
-		$sync_message     = '';
+		$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
+		$sync_message     = array();
+
+		if ( ! $sync_enabled && $this->data_synchronizer->background_sync_is_enabled() ) {
+			$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
+		}
+
 		if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
-			$sync_message = sprintf(
+			$sync_message[] = sprintf(
 				// translators: %d: number of pending orders.
 				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
 				$sync_status['current_pending_count']
 			);
 		} elseif ( $sync_status['current_pending_count'] > 0 ) {
-			$sync_message = sprintf(
-				// translators: %d: number of pending orders.
-				_n(
-					'%d order pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-					'%d orders pending to be synchronized. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-					$sync_status['current_pending_count'],
-					'woocommerce'
+			$sync_now_url = add_query_arg(
+				array(
+					self::SYNC_QUERY_ARG => true,
 				),
-				$sync_status['current_pending_count'],
+				wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+			);
+
+			$sync_message[] = wp_kses_data( __(
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+				'woocommerce'
+			) );
+
+			$sync_message[] = sprintf(
+				'<a href="%1$s" class="button button-link">%2$s</a>',
+				esc_url( $sync_now_url ),
+				sprintf(
+					// translators: %d: number of pending orders.
+					_n(
+						'Sync %s pending order',
+						'Sync %s pending orders',
+						$sync_status['current_pending_count'],
+						'woocommerce'
+					),
+					number_format_i18n( $sync_status['current_pending_count'] )
+				)
 			);
 		}
 
@@ -500,8 +527,8 @@ class CustomOrdersTableController {
 			'title'     => '',
 			'type'      => 'checkbox',
 			'desc'      => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'     => $sync_enabled,
-			'desc_tip'  => $sync_message,
+			'value'     => $sync_enabled ? 'yes' : 'no',
+			'desc_tip'  => implode( '<br />', $sync_message ),
 			'row_class' => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}

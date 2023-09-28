@@ -4,12 +4,12 @@
 import classNames from 'classnames';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
-	useBlockProps,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
@@ -63,7 +63,7 @@ export function Edit( {
 
 	const hasAttributes = hasAttributesUsedForVariations( productAttributes );
 
-	const blockProps = useBlockProps( {
+	const blockProps = useWooBlockProps( attributes, {
 		className: classNames( {
 			'wp-block-woocommerce-product-variations-fields--has-attributes':
 				hasAttributes,

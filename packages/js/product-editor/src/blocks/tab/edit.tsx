@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
@@ -27,7 +28,7 @@ export function Edit( {
 		selectedTab?: string | null;
 	};
 } ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const { id, title, order, isSelected: contextIsSelected } = attributes;
 	const isSelected = context?.selectedTab === id;
 	if ( isSelected !== contextIsSelected ) {
