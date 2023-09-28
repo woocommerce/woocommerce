@@ -22,6 +22,8 @@ export const RegionPicker = ( { options, initialValues } ) => {
 			placeholder="Start typing to filter zones"
 			selectAllLabel="Select all countries"
 			individuallySelectParent
+			clearOnSelect={ false }
+			maxVisibleTags={ 5 }
 		/>
 	);
 };
