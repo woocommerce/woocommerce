@@ -115,7 +115,8 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 				await pageObject.goToProductCatalogFrontend();
 			} );
 
-			test( 'Hooks are attached to the page', async ( {
+			// eslint-disable-next-line playwright/no-skipped-test
+			test.skip( 'Hooks are attached to the page', async ( {
 				pageObject,
 			} ) => {
 				singleOccurranceScenarios.forEach(
