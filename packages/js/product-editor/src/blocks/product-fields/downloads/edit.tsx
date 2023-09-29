@@ -80,6 +80,10 @@ export function Edit( {
 				[]
 			);
 
+			if ( ! otherDownloads.length ) {
+				setDownloadable( false );
+			}
+
 			setDownloads( otherDownloads );
 		};
 	}
