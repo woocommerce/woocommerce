@@ -103,18 +103,18 @@ Here's a snippet that shows how it is used for the Categories field:
   
 ```php
 $product_catalog_section->add_block(
-			[
-				'id'         => 'product-categories',
-				'blockName'  => 'woocommerce/product-taxonomy-field',
-				'order'      => 10,
-				'attributes' => [
-					'slug'               => 'product_cat',
-					'property'           => 'categories',
-					'label'              => __( 'Categories', 'woocommerce' ),
-					'createTitle'        => __( 'Create new category', 'woocommerce' ),
-					'dialogNameHelpText' => __( 'Shown to customers on the product page.', 'woocommerce' ),
-					'parentTaxonomyText' => __( 'Parent category', 'woocommerce' ),
-				],
-			]
-		);
+  [
+    'id'         => 'product-categories',
+    'blockName'  => 'woocommerce/product-taxonomy-field',
+    'order'      => 10,
+    'attributes' => [
+      'slug'               => 'product_cat',
+      'property'           => 'categories',
+      'label'              => __( 'Categories', 'woocommerce' ),
+      'createTitle'        => __( 'Create new category', 'woocommerce' ),
+      'dialogNameHelpText' => __( 'Shown to customers on the product page.', 'woocommerce' ),
+      'parentTaxonomyText' => __( 'Parent category', 'woocommerce' ),
+    ],
+  ]
+);
 ```

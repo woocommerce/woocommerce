@@ -8,9 +8,8 @@ https://github.com/woocommerce/woocommerce/assets/13437655/ccf6888d-59bd-4f7c-94
 
 ### mustMatch
 
-**Type**: `Record< string, Array< string > >`
-
-**Required**: `Yes`
+- **Type**: `Record< string, Array< string > >`
+- **Required**: `Yes`
 
 A list of requirements that must be met for the inner blocks to be rendered. The keys should reference properties from the product, and the values are possible values for that property so that the inner blocks are rendered.
 

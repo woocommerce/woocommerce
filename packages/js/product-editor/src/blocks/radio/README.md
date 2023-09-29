@@ -33,28 +33,28 @@ Here's an example of the usage on the "Charge sales tax on" field in the Pricing
 
 ```php
 $product_pricing_section->add_block(
-			[
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => [
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => [
-						[
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						],
-						[
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						],
-						[
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						],
-					],
-				],
-			]
-		);
+  [
+    'id'         => 'product-sale-tax',
+    'blockName'  => 'woocommerce/product-radio-field',
+    'order'      => 30,
+    'attributes' => [
+      'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+      'property' => 'tax_status',
+      'options'  => [
+        [
+          'label' => __( 'Product and shipping', 'woocommerce' ),
+          'value' => 'taxable',
+        ],
+        [
+          'label' => __( 'Only shipping', 'woocommerce' ),
+          'value' => 'shipping',
+        ],
+        [
+          'label' => __( "Don't charge tax", 'woocommerce' ),
+          'value' => 'none',
+        ],
+      ],
+    ],
+  ]
+);
 ```

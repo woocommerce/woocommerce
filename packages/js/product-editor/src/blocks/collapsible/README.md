@@ -8,25 +8,22 @@ Container with collapsible inner blocks.
 
 ### toggleText
 
-**Type**: `string`
-
-**Required**: ` Yes`
+- **Type**: `string`
+- **Required**: ` Yes`
 
 The text to display on the toggle button.
 
 ### initialCollapsed
 
-**Type**: `boolean`
-
-**Required**: ` Yes`
+- **Type**: `boolean`
+- **Required**: ` Yes`
 
 Controls if the content is collapsed by default.
 
 ### persistRender
 
-**Type**: `boolean`
-
-**Required**: ` Yes`
+- **Type**: `boolean`
+- **Required**: ` Yes`
 
 Controls if content is rendered to the DOM even when collapsed.
 
@@ -35,7 +32,7 @@ Controls if content is rendered to the DOM even when collapsed.
 Here's the code that was used to create the example in the screenshot above:
 
 ```php
-$product_inventory_advanced         = $product_inventory_section->add_block(
+$product_inventory_advanced = $product_inventory_section->add_block(
   [
     'id'         => 'product-inventory-advanced',
     'blockName'  => 'woocommerce/product-collapsible',
