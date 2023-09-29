@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductAttribute } from '@woocommerce/data';
-import { useBlockProps } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -14,14 +15,14 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { Attributes as AttributesContainer } from '../../components/attributes/attributes';
 
-export function Edit() {
+export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
 		ProductAttribute[]
 	>( 'postType', 'product', 'attributes' );
 
 	const productId = useEntityId( 'postType', 'product' );
 
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 
 	return (
 		<div { ...blockProps }>

@@ -84,10 +84,10 @@ const getVisibleTabs = ( selectedTab: string ) => {
 };
 
 const renderTabs = (
-	contextValue: MarketplaceContextType,
+	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
 ) => {
-	const { selectedTab, setSelectedTab } = contextValue;
+	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 	const tabContent = [];
 	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
@@ -133,15 +133,14 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
-	const queryLoaded = Object.keys( query ).length > 0;
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
-		} else if ( queryLoaded ) {
+		} else if ( Object.keys( query ).length > 0 ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
-	}, [ query, queryLoaded, setSelectedTab ] );
+	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
 		setVisibleTabs( getVisibleTabs( selectedTab ) );

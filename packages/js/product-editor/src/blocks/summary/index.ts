@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { BlockConfiguration } from '@wordpress/blocks';
+import { registerWooBlockType } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
 import { SummaryAttributes } from './types';
@@ -22,7 +22,7 @@ export const settings = {
 };
 
 export function init() {
-	return initBlock< SummaryAttributes >( {
+	return registerWooBlockType< SummaryAttributes >( {
 		name,
 		metadata,
 		settings,

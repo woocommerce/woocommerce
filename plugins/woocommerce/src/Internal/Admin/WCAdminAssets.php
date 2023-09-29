@@ -272,6 +272,7 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
+			'wc-block-templates',
 			'wc-product-editor',
 		);
 
@@ -336,6 +337,14 @@ class WCAdminAssets {
 			$css_file_version
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
+
+		wp_register_style(
+			'wc-block-templates',
+			self::get_url( 'block-templates/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-block-templates', 'rtl', 'replace' );
 
 		wp_register_style(
 			'wc-product-editor',
@@ -405,6 +414,7 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
+				'wc-block-templates',
 				'wc-product-editor',
 			];
 			foreach ( $handles_for_injection as $handle ) {

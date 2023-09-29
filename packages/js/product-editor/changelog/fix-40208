@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add cursor: not-allowed; to the disabled Quick updates button

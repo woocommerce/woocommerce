@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix font sizes difference between chips used in the variations options table and variations list

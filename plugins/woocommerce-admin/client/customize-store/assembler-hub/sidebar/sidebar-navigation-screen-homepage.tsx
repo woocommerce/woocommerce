@@ -97,7 +97,7 @@ export const SidebarNavigationScreenHomepage = () => {
 								shownPatterns={ homePatterns }
 								blockPatterns={ homePatterns }
 								onClickPattern={ onClickPattern }
-								label={ 'Hompeage' }
+								label={ 'Homepage' }
 								orientation="vertical"
 								category={ 'homepage' }
 								isDraggable={ false }
