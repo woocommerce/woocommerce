@@ -7,7 +7,7 @@
 		background: none;
 		border: none;
 		border-bottom: 1px solid $gray-200;
-		padding-left: 0;
+		padding: 0;
         grid-template-columns: 26% auto 90px;
 	}
 
@@ -15,4 +15,9 @@
         display: none;
     }
 
+	.components-button.has-icon {
+		svg {
+			fill: $gray-700;
+		}
+	}
 }
