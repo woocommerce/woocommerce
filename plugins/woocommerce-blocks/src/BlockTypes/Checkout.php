@@ -342,6 +342,31 @@ class Checkout extends AbstractBlock {
 			$this->asset_data_registry->add( 'globalPaymentMethods', $formatted_payment_methods );
 		}
 
+		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
+			if ( ! class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+				return;
+			}
+
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			$declared_extensions     = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( 'cart_checkout_blocks' );
+			$incompatible_extensions = array_reduce(
+				$declared_extensions['incompatible'],
+				function( $acc, $item ) {
+					$plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $item );
+					$acc[]  = [
+						'id'    => $plugin['TextDomain'],
+						'title' => $plugin['Name'],
+					];
+					return $acc;
+				},
+				[]
+			);
+			$this->asset_data_registry->add( 'incompatibleExtensions', $incompatible_extensions );
+		}
+
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
 			$this->asset_data_registry->hydrate_data_from_api_request( 'checkoutData', '/wc/store/v1/checkout' );

@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../../data/payment/constants';
+import { useIncompatiblePaymentGatewaysNotice } from './use-incompatible-payment-gateways-notice';
+import { useIncompatibleExtensionNotice } from './use-incompatible-extensions-notice';
 
-type StoredIncompatibleGateway = { [ k: string ]: string[] };
+type StoredIncompatibleExtension = { [ k: string ]: string[] };
 const initialDismissedNotices: React.SetStateAction<
-	StoredIncompatibleGateway[]
+	StoredIncompatibleExtension[]
 > = [];
 
 const areEqual = ( array1: string[], array2: string[] ) => {
@@ -25,44 +25,68 @@ const areEqual = ( array1: string[], array2: string[] ) => {
 	return uniqueCollectionValues.size === array1.length;
 };
 
-export const useIncompatiblePaymentGatewaysNotice = (
+const sortAlphabetically = ( obj: {
+	[ key: string ]: string;
+} ): { [ key: string ]: string } =>
+	Object.fromEntries(
+		Object.entries( obj ).sort( ( [ , a ], [ , b ] ) =>
+			a.localeCompare( b )
+		)
+	);
+
+export const useCombinedIncompatibilityNotice = (
 	blockName: string
 ): [ boolean, () => void, { [ k: string ]: string }, number ] => {
+	const [
+		incompatibleExtensions,
+		incompatibleExtensionSlugs,
+		incompatibleExtensionCount,
+	] = useIncompatibleExtensionNotice();
+
+	const [
+		incompatiblePaymentMethods,
+		incompatiblePaymentMethodSlugs,
+		incompatiblePaymentMethodCount,
+	] = useIncompatiblePaymentGatewaysNotice();
+
+	const allIncompatibleItems = {
+		...incompatibleExtensions,
+		...incompatiblePaymentMethods,
+	};
+
+	const allIncompatibleItemSlugs = [
+		...incompatibleExtensionSlugs,
+		...incompatiblePaymentMethodSlugs,
+	];
+
+	const allIncompatibleItemCount =
+		incompatibleExtensionCount + incompatiblePaymentMethodCount;
+
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
-		StoredIncompatibleGateway[]
+		StoredIncompatibleExtension[]
 	>(
-		`wc-blocks_dismissed_incompatible_payment_gateways_notices`,
+		`wc-blocks_dismissed_incompatible_extensions_notices`,
 		initialDismissedNotices
 	);
-	const [ isVisible, setIsVisible ] = useState( false );
 
-	const { incompatiblePaymentMethods } = useSelect( ( select ) => {
-		const { getIncompatiblePaymentMethods } = select( PAYMENT_STORE_KEY );
-		return {
-			incompatiblePaymentMethods: getIncompatiblePaymentMethods(),
-		};
-	}, [] );
-	const incompatiblePaymentMethodsIDs = Object.keys(
-		incompatiblePaymentMethods
-	);
-	const numberOfIncompatiblePaymentMethods =
-		incompatiblePaymentMethodsIDs.length;
+	const [ isVisible, setIsVisible ] = useState( false );
 
 	const isDismissedNoticeUpToDate = dismissedNotices.some(
 		( notice ) =>
 			Object.keys( notice ).includes( blockName ) &&
 			areEqual(
 				notice[ blockName as keyof object ],
-				incompatiblePaymentMethodsIDs
+				allIncompatibleItemSlugs
 			)
 	);
 
 	const shouldBeDismissed =
-		numberOfIncompatiblePaymentMethods === 0 || isDismissedNoticeUpToDate;
+		allIncompatibleItemCount === 0 || isDismissedNoticeUpToDate;
+
 	const dismissNotice = () => {
 		const dismissedNoticesSet = new Set( dismissedNotices );
 		dismissedNoticesSet.add( {
-			[ blockName ]: incompatiblePaymentMethodsIDs,
+			[ blockName ]: allIncompatibleItemSlugs,
 		} );
 		setDismissedNotices( [ ...dismissedNoticesSet ] );
 	};
@@ -75,7 +99,7 @@ export const useIncompatiblePaymentGatewaysNotice = (
 		if ( ! shouldBeDismissed && ! isDismissedNoticeUpToDate ) {
 			setDismissedNotices( ( previousDismissedNotices ) =>
 				previousDismissedNotices.reduce(
-					( acc: StoredIncompatibleGateway[], curr ) => {
+					( acc: StoredIncompatibleExtension[], curr ) => {
 						if ( Object.keys( curr ).includes( blockName ) ) {
 							return acc;
 						}
@@ -97,7 +121,7 @@ export const useIncompatiblePaymentGatewaysNotice = (
 	return [
 		isVisible,
 		dismissNotice,
-		incompatiblePaymentMethods,
-		numberOfIncompatiblePaymentMethods,
+		sortAlphabetically( allIncompatibleItems ),
+		allIncompatibleItemCount,
 	];
 };

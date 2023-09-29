@@ -12,7 +12,7 @@ import { CartCheckoutSidebarCompatibilityNotice } from '@woocommerce/editor-comp
 import { NoPaymentMethodsNotice } from '@woocommerce/editor-components/no-payment-methods-notice';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { DefaultNotice } from '@woocommerce/editor-components/default-notice';
-import { IncompatiblePaymentGatewaysNotice } from '@woocommerce/editor-components/incompatible-payment-gateways-notice';
+import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/incompatible-extension-notice';
 import { useSelect } from '@wordpress/data';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { useState } from '@wordpress/element';
@@ -38,14 +38,14 @@ const withSidebarNotices = createHigherOrderComponent(
 		} = props;
 
 		const [
-			isIncompatiblePaymentGatewaysNoticeDismissed,
-			setIsIncompatiblePaymentGatewaysNoticeDismissed,
+			isIncompatibleExtensionsNoticeDismissed,
+			setIsIncompatibleExtensionsNoticeDismissed,
 		] = useState( true );
 
-		const toggleIncompatiblePaymentGatewaysNoticeDismissedStatus = (
+		const toggleIncompatibleExtensionsNoticeDismissedStatus = (
 			isDismissed: boolean
 		) => {
-			setIsIncompatiblePaymentGatewaysNoticeDismissed( isDismissed );
+			setIsIncompatibleExtensionsNoticeDismissed( isDismissed );
 		};
 
 		const { isCart, isCheckout, isPaymentMethodsBlock, hasPaymentMethods } =
@@ -91,9 +91,9 @@ const withSidebarNotices = createHigherOrderComponent(
 		return (
 			<>
 				<InspectorControls>
-					<IncompatiblePaymentGatewaysNotice
+					<IncompatibleExtensionsNotice
 						toggleDismissedStatus={
-							toggleIncompatiblePaymentGatewaysNoticeDismissedStatus
+							toggleIncompatibleExtensionsNoticeDismissedStatus
 						}
 						block={
 							isCheckout
@@ -104,7 +104,7 @@ const withSidebarNotices = createHigherOrderComponent(
 
 					<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />
 
-					{ isIncompatiblePaymentGatewaysNoticeDismissed ? (
+					{ isIncompatibleExtensionsNoticeDismissed ? (
 						<CartCheckoutSidebarCompatibilityNotice
 							block={ isCheckout ? 'checkout' : 'cart' }
 						/>
