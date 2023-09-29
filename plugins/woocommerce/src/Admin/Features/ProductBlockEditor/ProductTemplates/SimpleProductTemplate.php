@@ -249,6 +249,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
+		// Downloads section
+		$general_group->add_section(
+			[
+				'id'         => 'product-downloads-section',
+				'order'      => 40,
+				'attributes' => [
+					'title'       => __( 'Downloads', 'woocommerce' ),
+					'description' => __( 'Add and manage files for the customer to download immediately after purchasing the product.', 'woocommerce' ),
+				],
+			]
+		);
 	}
 
 	/**
