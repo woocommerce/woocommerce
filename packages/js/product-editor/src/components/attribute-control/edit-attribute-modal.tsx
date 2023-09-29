@@ -193,7 +193,6 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 									terms: val,
 								} );
 							} }
-							readOnlyWhenClosed={ false }
 						/>
 					) : (
 						<CustomAttributeTermInputField
