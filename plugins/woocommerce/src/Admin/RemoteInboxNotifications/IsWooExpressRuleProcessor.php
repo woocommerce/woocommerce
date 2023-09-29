@@ -11,8 +11,8 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Rule processor that passes (or fails) when the site is on the eCommerce
- * plan.
+ * Rule processor that passes (or fails) when the site is on the Woo Express plan.
+ * You may optionally pass a plan name to target specific Woo Express plan.
  */
 class IsWooExpressRuleProcessor implements RuleProcessorInterface {
 	/**
