@@ -79,6 +79,7 @@ export function Edit( {
 
 	const openNewModal = () => {
 		setIsNewModalVisible( true );
+		recordEvent( 'product_options_add_first_option' );
 	};
 
 	const closeNewModal = () => {

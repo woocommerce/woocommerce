@@ -44,6 +44,7 @@ type NewAttributeModalProps = {
 	addLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
@@ -75,6 +76,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	addLabel = __( 'Add', 'woocommerce' ),
 	onCancel,
 	onAdd,
+	onAddAnother = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
@@ -102,6 +104,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
 		scrollAttributeIntoView( values.attributes.length );
+		onAddAnother();
 	};
 
 	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
@@ -453,9 +456,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
-										recordEvent(
-											'product_add_attributes_modal_add_another_attribute_button_click'
-										);
 										addAnother( values, setValue );
 									} }
 								>
