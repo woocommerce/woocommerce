@@ -1,0 +1,231 @@
+const { test, expect, request } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+
+const simpleProductName = 'Single Simple Product';
+const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
+const singleProductPrice = '110.00';
+const singleProductSalePrice = '55.00';
+const firstCrossSellProductPrice = '25.00';
+const secondCrossSellProductPrice = '15.00';
+
+const pageTitle = 'Cart Block';
+const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+
+let product1Id, product2Id, product3Id;
+
+test.describe( 'Cart Block page', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// add 3 products
+		await api
+			.post( 'products', {
+				name: `${ simpleProductName } Cross-Sell 1`,
+				type: 'simple',
+				regular_price: firstCrossSellProductPrice,
+			} )
+			.then( ( response ) => {
+				product2Id = response.data.id;
+			} );
+		await api
+			.post( 'products', {
+				name: `${ simpleProductName } Cross-Sell 2`,
+				type: 'simple',
+				regular_price: secondCrossSellProductPrice,
+			} )
+			.then( ( response ) => {
+				product3Id = response.data.id;
+			} );
+		await api
+			.post( 'products', {
+				name: simpleProductName,
+				description: simpleProductDesc,
+				type: 'simple',
+				regular_price: singleProductPrice,
+				sale_price: singleProductSalePrice,
+				cross_sell_ids: [ product2Id, product3Id ],
+				manage_stock: true,
+				stock_quantity: 2,
+			} )
+			.then( ( response ) => {
+				product1Id = response.data.id;
+			} );
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.post( 'products/batch', {
+			delete: [ product1Id, product2Id, product3Id ],
+		} );
+		const base64auth = Buffer.from(
+			`${ admin.username }:${ admin.password }`
+		).toString( 'base64' );
+		const wpApi = await request.newContext( {
+			baseURL: `${ baseURL }/wp-json/wp/v2/`,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ base64auth }`,
+			},
+		} );
+		let response = await wpApi.get( `pages` );
+		const allPages = await response.json();
+		await allPages.forEach( async ( page ) => {
+			if ( page.title.rendered === pageTitle ) {
+				response = await wpApi.delete( `pages/${ page.id }`, {
+					data: {
+						force: true,
+					},
+				} );
+			}
+		} );
+	} );
+
+	test( 'can see empty cart block', async ( { page } ) => {
+		// create a new page with cart block
+		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		const welcomeModalVisible = await page
+			.getByRole( 'heading', {
+				name: 'Welcome to the block editor',
+			} )
+			.isVisible();
+		if ( welcomeModalVisible ) {
+			await page.getByRole( 'button', { name: 'Close' } ).click();
+		}
+		await page
+			.getByRole( 'textbox', { name: 'Add Title' } )
+			.fill( pageTitle );
+		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page
+			.getByRole( 'document', {
+				name: 'Empty block; start writing or type forward slash to choose a block',
+			} )
+			.fill( '/cart' );
+		await page.keyboard.press( 'Enter' );
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await page
+			.getByRole( 'region', { name: 'Editor publish' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await expect(
+			page.getByText( `${ pageTitle } is now live.` )
+		).toBeVisible();
+
+		// go to the page to test empty cart block
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Your cart is currently empty!' )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Browse store' } )
+		).toBeVisible();
+		await page.getByRole( 'link', { name: 'Browse store' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Shop' } )
+		).toBeVisible();
+	} );
+
+	test( 'can add product to cart block, increase quantity, manage cross-sell products and proceed to checkout', async ( {
+		page,
+	} ) => {
+		// add product to cart block
+		const productSlug = simpleProductName
+			.replace( / /gi, '-' )
+			.toLowerCase();
+		await page.goto( `product/${ productSlug }` );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: simpleProductName, exact: true } )
+		).toBeVisible();
+		await expect( page.getByText( simpleProductDesc ) ).toBeVisible();
+		await expect(
+			page.getByText( `Save $${ singleProductSalePrice }` )
+		).toBeVisible();
+
+		// increase product quantity to its maximum
+		await expect( page.getByText( '2 left in stock' ) ).toBeVisible();
+		await page.getByRole( 'button' ).filter( { hasText: '＋' } ).click();
+		await expect(
+			page.getByRole( 'button' ).filter( { hasText: '＋' } )
+		).toBeDisabled();
+
+		// add cross-sell products to cart
+		await expect(
+			page.getByRole( 'heading', { name: 'You may be interested in…' } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', {
+				name: `${ simpleProductName } Cross-Sell 1`,
+				exact: true,
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', {
+				name: `${ simpleProductName } Cross-Sell 2`,
+				exact: true,
+			} )
+		).toBeVisible();
+		await page
+			.getByRole( 'link', {
+				name: `${ simpleProductName } Cross-Sell 1`,
+				exact: true,
+			} )
+			.click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+		await page.locator( '.add_to_cart_button' ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'You may be interested in…' } )
+		).toBeHidden();
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toHaveText( '$95.00' );
+
+		// remove cross-sell products from cart
+		await page.locator( ':nth-match(:text("Remove item"), 3)' ).click();
+		await page.locator( ':nth-match(:text("Remove item"), 2)' ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'You may be interested in…' } )
+		).toBeVisible();
+
+		// check if the link to proceed to the checkout exists
+		await expect(
+			page.getByRole( 'link', {
+				name: 'Proceed to Checkout',
+			} )
+		).toBeVisible();
+
+		// remove product from cart
+		await page.locator( ':text("Remove item")' ).click();
+		await expect(
+			page.getByText( 'Your cart is currently empty!' )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Browse store' } )
+		).toBeVisible();
+	} );
+} );
