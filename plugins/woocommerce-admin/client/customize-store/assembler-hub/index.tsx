@@ -45,6 +45,7 @@ import { addFilter } from '@wordpress/hooks';
 import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
+import { PreloadFonts } from './preload-fonts';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -149,6 +150,7 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 					<RouterProvider>
 						<Layout />
 					</RouterProvider>
+					<PreloadFonts />
 				</GlobalStylesProvider>
 			</ShortcutProvider>
 		</CustomizeStoreContext.Provider>
