@@ -261,7 +261,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Search by category ID.
 		$products = wc_get_products(
 			array(
-				'category_id' => $cat2['term_id'],
+				'product_category_id' => $cat2['term_id'],
 			)
 		);
 		$this->assertCount( 1, $products );
