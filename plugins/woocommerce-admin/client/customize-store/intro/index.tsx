@@ -4,14 +4,13 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
-import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
+	Button,
 } from '@wordpress/components';
-
 
 /**
  * Internal dependencies

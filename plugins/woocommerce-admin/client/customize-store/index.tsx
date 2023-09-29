@@ -208,7 +208,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
-					actions: [ 'recordTracksBrowseAllThemesClicked', 'redirectToThemes' ],
+					actions: [
+						'recordTracksBrowseAllThemesClicked',
+						'redirectToThemes',
+					],
 				},
 			},
 		},
