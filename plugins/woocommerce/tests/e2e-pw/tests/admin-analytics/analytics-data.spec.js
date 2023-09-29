@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'Analytics-related tests', () => {
+test.describe.serial( 'Analytics-related tests', () => {
 	let categoryIds, productIds, nowOrderIds;
 
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -184,10 +184,7 @@ test.describe( 'Analytics-related tests', () => {
 	test( 'downloads revenue report as CSV', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 
-		// if the tour displays, dismiss it
-		if ( await page.locator( '.woocommerce-tour-kit-step-navigation' ).isVisible() ) {
-			await page.getByRole( 'button', { name: 'Close Tour' } ).click();
-		}
+		await page.getByLabel( 'Close Tour' ).click();
 
 		// click the download button and make sure the snackbar shows
 		await page.getByRole( 'button', { name: 'Download' } ).click();
