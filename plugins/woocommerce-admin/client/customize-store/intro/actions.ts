@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign, DoneInvokeEvent } from 'xstate';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -13,6 +14,7 @@ import { customizeStoreStateMachineEvents } from '..';
  */
 import { customizeStoreStateMachineContext } from '../types';
 import { ThemeCard } from './theme-cards';
+import { events } from './';
 
 export const assignThemeCards = assign<
 	customizeStoreStateMachineContext,
@@ -23,3 +25,24 @@ export const assignThemeCards = assign<
 		return { ...context.intro, themeCards };
 	},
 } );
+
+export const recordTracksDesignWithAIClicked = () => {
+	recordEvent( 'customize_your_store_intro_design_with_ai_click' );
+};
+
+export const recordTracksThemeSelected = (
+	_context: customizeStoreStateMachineContext,
+	event: Extract<
+		events,
+		{ type: 'SELECTED_ACTIVE_THEME' | 'SELECTED_NEW_THEME' }
+	>
+) => {
+	recordEvent( 'wcadmin_customize_your_store_intro_theme_select', {
+		theme: event.payload.theme,
+		is_active: event.type === 'SELECTED_ACTIVE_THEME' ? 'yes' : 'no',
+	} );
+};
+
+export const recordTracksBrowseAllThemesClicked = () => {
+	recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
+};

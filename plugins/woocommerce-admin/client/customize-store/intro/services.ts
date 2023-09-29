@@ -8,6 +8,7 @@ export const fetchThemeCards = async () => {
 			description: 'The default theme for WordPress.',
 			image: 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/twentytwentyone/screenshot.png',
 			styleVariations: [],
+			isActive: true,
 		},
 		{
 			slug: 'twentytwenty',

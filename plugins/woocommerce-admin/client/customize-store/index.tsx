@@ -186,19 +186,23 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			on: {
-				DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				SELECTED_ACTIVE_THEME: {
-					target: 'assemblerHub',
-				},
 				CLICKED_ON_BREADCRUMB: {
 					actions: 'redirectToWooHome',
 				},
+				DESIGN_WITH_AI: {
+					actions: [ 'recordTracksDesignWithAIClicked' ],
+					target: 'designWithAi',
+				},
 				SELECTED_NEW_THEME: {
+					actions: [ 'recordTracksThemeSelected' ],
+					target: 'appearanceTask',
+				},
+				SELECTED_ACTIVE_THEME: {
+					actions: [ 'recordTracksThemeSelected' ],
 					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
+					actions: [ 'recordTracksBrowseAllThemesClicked' ],
 					target: 'appearanceTask',
 				},
 			},

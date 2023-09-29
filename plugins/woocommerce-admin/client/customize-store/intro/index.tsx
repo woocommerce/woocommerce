@@ -4,6 +4,7 @@
 
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -16,7 +17,7 @@ export type events =
 	| { type: 'DESIGN_WITH_AI' }
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
-	| { type: 'SELECTED_ACTIVE_THEME' }
+	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
 	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
 
 export * as actions from './actions';
@@ -89,7 +90,24 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 					<div className="woocommerce-customize-store-theme-cards">
 						{ themeCards?.map( ( themeCard ) => (
-							<div className="theme-card" key={ themeCard.slug }>
+							<Button
+								variant="link"
+								className="theme-card"
+								key={ themeCard.slug }
+								onClick={ () => {
+									if ( themeCard.isActive ) {
+										sendEvent( {
+											type: 'SELECTED_ACTIVE_THEME',
+											payload: { theme: themeCard.slug },
+										} );
+									} else {
+										sendEvent( {
+											type: 'SELECTED_NEW_THEME',
+											payload: { theme: themeCard.slug },
+										} );
+									}
+								} }
+							>
 								<div>
 									<img
 										src={ themeCard.image }
@@ -99,7 +117,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								<h2 className="theme-card__title">
 									{ themeCard.name }
 								</h2>
-							</div>
+							</Button>
 						) ) }
 					</div>
 
@@ -114,14 +132,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							{ __( 'Browse all themes', 'woocommerce' ) }
 						</button>
 					</div>
-
-					<button
-						onClick={ () =>
-							sendEvent( { type: 'SELECTED_ACTIVE_THEME' } )
-						}
-					>
-						Assembler Hub
-					</button>
 				</div>
 			</div>
 		</>
