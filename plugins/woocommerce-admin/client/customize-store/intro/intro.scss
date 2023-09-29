@@ -140,7 +140,8 @@
 .woocommerce-customize-store-theme-cards {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 2rem;
+	gap: 32px;
+	row-gap: 54px;
 	max-width: 820px;
 
 	.theme-card {
