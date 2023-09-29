@@ -1,2 +1,24 @@
 .wp-block-woocommerce-product-downloads-field {
+	.woocommerce-form-file-upload {
+		border: 1px dashed $gray-400;
+		height: 224px;
+		border-radius: 2px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.woocommerce-media-uploader__label {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: $grid-unit-40;
+			margin-bottom: 0;
+
+			.woocommerce-product-form__remove-files-drop-zone-label {
+				color: $gray-700;
+				font-weight: normal;
+				margin: 0;
+			}
+		}
+	}
 }
