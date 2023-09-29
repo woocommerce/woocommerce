@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
 import { BlockAttributes } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { BaseControl } from '@wordpress/components';
 import { ProductTag } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
@@ -25,7 +25,7 @@ export function Edit( {
 	attributes: BlockAttributes;
 	context?: { postType?: string };
 } ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const { name, label, placeholder } = attributes;
 	const [ tags, setTags ] = useEntityProp<
 		Pick< ProductTag, 'id' | 'name' >[]

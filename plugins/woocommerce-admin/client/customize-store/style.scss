@@ -24,6 +24,10 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	& > div.tour-kit.woocommerce-tour-kit > div > div.tour-kit-spotlight.is-visible {
 		outline: 99999px solid rgba(0, 0, 0, 0.15);
 	}
+
+	#screen-meta-links {
+		display: none;
+	}
 }
 
 .woocommerce-cys-layout {
@@ -110,5 +114,27 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+	}
+}
+
+.woocommerce-cys-design-with-ai__error-notice.is-error {
+	background: #fce2e4;
+	padding: $gap-small;
+	// gap: 12px;
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 24px;
+	color: $gray-900;
+	margin: 0 0 60px;
+	width: 615px;
+
+	.components-notice__content {
+		margin: 0;
+	}
+
+	.components-button {
+		padding: 0;
+		height: initial;
 	}
 }

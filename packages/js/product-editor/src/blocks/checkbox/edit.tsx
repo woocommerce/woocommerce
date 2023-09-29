@@ -4,17 +4,18 @@
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { Icon, help } from '@wordpress/icons';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
 
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
-	const blockProps = useBlockProps( {
+	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
+		...attributes,
 	} );
 	const { property, title, label, tooltip } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(

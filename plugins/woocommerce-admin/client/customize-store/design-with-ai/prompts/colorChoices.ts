@@ -231,16 +231,17 @@ export const defaultColorPalette = {
 	queryId: 'default_color_palette',
 
 	// make sure version is updated every time the prompt is changed
-	version: '2023-09-18',
+	version: '2023-09-22',
 	prompt: ( businessDescription: string, look: string, tone: string ) => {
 		return `
-            You are a WordPress theme expert. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
-            Respond in the form: "{ default: "palette name", bestColors: [ "palette name 1", "palette name 2", "palette name 3", "palette name 4", "palette name 5", "palette name 6", "palette name 7", "palette name 8" ] }"
-
+            You are a WordPress theme expert designing a WooCommerce site. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
+			Do not use any palette names that are not part of the color choices provided below.
+			Respond in the form: "{ default: "palette name", bestColors: [ "palette name 1", "palette name 2", "palette name 3", "palette name 4", "palette name 5", "palette name 6", "palette name 7", "palette name 8" ] }"
+			
             Chosen look and tone: ${ look } look, ${ tone } tone.
             Business description: ${ businessDescription }
 
-            Colors to choose from: 
+            Colors schemes to choose from: 
             ${ JSON.stringify( colorChoices ) }
         `;
 	},

@@ -384,6 +384,7 @@ class PageController {
 		$this->order = new $order_class_name();
 		$this->order->set_object_read( false );
 		$this->order->set_status( 'auto-draft' );
+		$this->order->set_created_via( 'admin' );
 		$this->order->save();
 		$this->handle_edit_lock();
 
