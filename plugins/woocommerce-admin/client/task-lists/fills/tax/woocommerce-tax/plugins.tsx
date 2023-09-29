@@ -97,6 +97,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					className="woocommerce-task__caption"
 					size="12"
 					lineHeight="16px"
+					style={ { display: 'block' } }
 				>
 					{ interpolateComponents( {
 						mixedString: __(
