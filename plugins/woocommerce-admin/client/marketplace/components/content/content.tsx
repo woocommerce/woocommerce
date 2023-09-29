@@ -24,11 +24,8 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
-
-	const [ productList, setProductList ] = useState< Product[] >( [] );
-	const { setIsLoading } = marketplaceContextValue;
-
-	const { selectedTab } = marketplaceContextValue;
+	const [ products, setProducts ] = useState< Product[] >( [] );
+	const { setIsLoading, selectedTab } = marketplaceContextValue;
 	const query = useQuery();
 
 	// Get the content for this screen
@@ -38,7 +35,7 @@ export default function Content(): JSX.Element {
 		}
 
 		setIsLoading( true );
-		setProductList( [] );
+		setProducts( [] );
 
 		const params = new URLSearchParams();
 
@@ -76,7 +73,7 @@ export default function Content(): JSX.Element {
 				 * Product card component expects a Product type.
 				 * So we build that object from the API response.
 				 */
-				const products = response.products.map(
+				const productList = response.products.map(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
@@ -95,18 +92,18 @@ export default function Content(): JSX.Element {
 						};
 					}
 				);
-				setProductList( products );
+				setProducts( productList );
 			} )
 			.catch( () => {
-				setProductList( [] );
+				setProducts( [] );
 			} )
 			.finally( () => {
 				setIsLoading( false );
 			} );
 	}, [ query.term, query.category, selectedTab, setIsLoading ] );
 
-	const renderContent = ( tab: string, products: Product[] ): JSX.Element => {
-		switch ( tab ) {
+	const renderContent = (): JSX.Element => {
+		switch ( selectedTab ) {
 			case 'extensions':
 				return (
 					<Products
@@ -136,9 +133,10 @@ export default function Content(): JSX.Element {
 				return <></>;
 		}
 	};
+
 	return (
 		<div className="woocommerce-marketplace__content">
-			{ renderContent( selectedTab, productList ) }
+			{ renderContent() }
 		</div>
 	);
 }

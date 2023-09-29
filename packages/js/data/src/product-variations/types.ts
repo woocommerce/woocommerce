@@ -96,6 +96,7 @@ export type ActionDispatchers = DispatchFromMap< ProductVariationActions >;
 
 export type GenerateRequest = {
 	delete?: boolean;
+	default_values?: Partial< ProductVariation >;
 };
 
 export type BatchUpdateRequest = {

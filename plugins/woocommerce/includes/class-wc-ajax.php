@@ -209,7 +209,7 @@ class WC_AJAX {
 				function( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
-				10,
+				11,
 				2
 			);
 		}

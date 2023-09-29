@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	Block,
-	BlockConfiguration,
-	registerBlockType,
-} from '@wordpress/blocks';
+import { Block, BlockConfiguration } from '@wordpress/blocks';
+import deprecated from '@wordpress/deprecated';
+import { registerWooBlockType } from '@woocommerce/block-templates';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -23,9 +21,13 @@ export function initBlock<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
+	deprecated( 'initBlock()', {
+		alternative: 'registerWooBlockType() from @woocommerce/block-templates',
+	} );
+
 	if ( ! block ) {
 		return;
 	}
-	const { metadata, settings, name } = block;
-	return registerBlockType< T >( { name, ...metadata }, settings );
+
+	return registerWooBlockType( block );
 }
