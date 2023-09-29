@@ -61,7 +61,7 @@ export const AttributeTermInputField: React.FC<
 	attributeId,
 	label = '',
 	autoCreateOnSelect = true,
-	readOnlyWhenClosed = true,
+	readOnlyWhenClosed = false,
 } ) => {
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
