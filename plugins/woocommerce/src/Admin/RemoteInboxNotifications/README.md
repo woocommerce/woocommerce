@@ -411,6 +411,22 @@ This passes when the store is on a WordPress.com site with the eCommerce plan.
 
 `value` is required.
 
+### Is Woo Express
+
+This passes when the store is on a WordPress.com site with a Woo Express plan active.
+You can optionally pass the `plan` name to target a specific Woo Express plan, e.g. `performance`.
+
+```
+{
+	"type": "is_ecommerce",
+	"plan": "trial|essential|performance"
+	"value": true
+}
+```
+
+`value` is required.
+`plan` is optional, e.g. `trial`, `essential`, `performance`.
+
 ### Base location - country
 
 This passes when the store is located in the specified country.

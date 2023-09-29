@@ -48,6 +48,8 @@ class GetRuleProcessor {
 				return new OnboardingProfileRuleProcessor();
 			case 'is_ecommerce':
 				return new IsEcommerceRuleProcessor();
+			case 'is_wooexpress':
+				return new IsWooExpressRuleProcessor();
 			case 'base_location_country':
 				return new BaseLocationCountryRuleProcessor();
 			case 'base_location_state':
