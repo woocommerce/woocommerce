@@ -9,11 +9,11 @@ import {
 	useState,
 } from '@wordpress/element';
 
-import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -41,7 +41,7 @@ import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../hooks/use-product-edits';
 
 export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 

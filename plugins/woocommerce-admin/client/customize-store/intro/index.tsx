@@ -12,6 +12,7 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 
+
 /**
  * Internal dependencies
  */
@@ -25,7 +26,7 @@ export type events =
 	| { type: 'JETPACK_OFFLINE_HOWTO' }
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
-	| { type: 'SELECTED_ACTIVE_THEME' }
+	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
 	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
 
 export * as actions from './actions';

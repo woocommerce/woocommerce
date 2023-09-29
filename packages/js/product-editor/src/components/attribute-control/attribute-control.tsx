@@ -354,6 +354,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						handleEdit( updatedAttribute );
 					} }
 					attribute={ currentAttribute }
+					attributes={ value }
 				/>
 			) }
 			{ removingAttribute && (

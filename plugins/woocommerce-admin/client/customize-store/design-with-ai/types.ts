@@ -30,6 +30,9 @@ export type designWithAiStateMachineContext = {
 		fontPairing: FontPairing[ 'pair_name' ];
 		homepageTemplate: HomepageTemplate[ 'homepage_template' ];
 	};
+	apiCallLoader: {
+		hasErrors: boolean;
+	};
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
 	spawnSaveDescriptionToOptionRef?: ReturnType< typeof spawn >;

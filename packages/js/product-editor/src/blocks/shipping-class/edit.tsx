@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
@@ -10,7 +11,6 @@ import {
 } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { BaseControl, SelectControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -69,11 +69,13 @@ function extractDefaultShippingClassFromProduct(
 	}
 }
 
-export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: BlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
 
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 
 	const { createProductShippingClass, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME

@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
+import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 import {
 	createElement,
 	createInterpolateElement,
 	useMemo,
 } from '@wordpress/element';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	Product,
 	ProductAttribute,
@@ -26,8 +27,10 @@ import { useProductAttributes } from '../../hooks/use-product-attributes';
 import { AttributeControl } from '../../components/attribute-control';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
-export function Edit() {
-	const blockProps = useBlockProps();
+export function Edit( {
+	attributes: blockAttributes,
+}: BlockEditProps< BlockAttributes > ) {
+	const blockProps = useWooBlockProps( blockAttributes );
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
