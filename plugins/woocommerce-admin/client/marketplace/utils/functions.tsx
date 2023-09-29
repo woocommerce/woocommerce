@@ -107,7 +107,7 @@ async function fetchSearchResults(
 				 * Product card component expects a Product type.
 				 * So we build that object from the API response.
 				 */
-				const products = (json as SearchAPIJSONType).products.map(
+				const products = ( json as SearchAPIJSONType ).products.map(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
