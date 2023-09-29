@@ -16,6 +16,8 @@ A list of requirements that must be met for the inner blocks to be rendered. The
 
 ## Usage
 
+Here's the code that was used to create the example in the video above:
+
 ```php
 $wrapper = $product_summary_field->get_parent()->add_block(
   [
