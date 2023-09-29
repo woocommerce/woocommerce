@@ -34,7 +34,7 @@ describe( 'useProductEntityProp', () => {
 		setEmail( 'someone@wordpress.com' );
 		expect( mockFnMetadataProp ).toHaveBeenCalledWith( [
 			{
-				key: 'meta_data.email',
+				key: 'email',
 				value: 'someone@wordpress.com',
 			},
 		] );

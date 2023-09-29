@@ -13,6 +13,7 @@ function useProductEntityProp(
 	property: string
 ): [ string, ( value: string ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
+	const metaPropertyKey = property.replace( 'meta_data.', '' );
 
 	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
 		'postType',
@@ -26,21 +27,23 @@ function useProductEntityProp(
 	);
 
 	const value = isMeta
-		? metadata.find( ( item ) => item.key === property )?.value || ''
+		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value || ''
 		: entityPropValue;
 	const setValue = isMeta
 		? ( newValue: string ) => {
 				const existingEntry = metadata.find(
-					( item ) => item.key === property
+					( item ) => item.key === metaPropertyKey
 				);
 				const entry = existingEntry
 					? { ...existingEntry, value: newValue }
 					: {
-							key: property,
+							key: metaPropertyKey,
 							value: newValue,
 					  };
 				setMetadata( [
-					...metadata.filter( ( item ) => item.key !== property ),
+					...metadata.filter(
+						( item ) => item.key !== metaPropertyKey
+					),
 					entry,
 				] );
 		  }
