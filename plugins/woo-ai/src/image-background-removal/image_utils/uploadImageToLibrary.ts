@@ -1,0 +1,72 @@
+type BackgroundRemovalParams = {
+	imageBlob: Blob;
+	libraryFilename: string;
+};
+
+declare const ajaxurl: string;
+
+export const uploadImageToLibrary = async ( {
+	imageBlob,
+	libraryFilename,
+}: BackgroundRemovalParams ) => {
+	const fileObj = new File( [ imageBlob ], libraryFilename );
+	let _fileId: number | null = null;
+
+	await wp.mediaUtils.uploadMedia( {
+		allowedTypes: 'image',
+		filesList: [ fileObj ],
+		onError: ( e: Error ) => {
+			throw e;
+		},
+		onFileChange: ( files: Array< { id: number } > ) => {
+			if ( files.length > 0 && files[ 0 ] && files[ 0 ].id ) {
+				_fileId = files[ 0 ].id;
+			}
+		},
+	} );
+
+	if ( _fileId !== null ) {
+		const nonceValue =
+			( document.querySelector( '#_wpnonce' ) as HTMLInputElement | null )
+				?.value ?? '';
+
+		const formData = new FormData();
+
+		formData.append( 'action', 'get-attachment' );
+		formData.append( 'id', String( _fileId ) );
+		formData.append( '_ajax_nonce', nonceValue );
+
+		await fetch( ajaxurl, {
+			method: 'POST',
+			body: formData,
+		} )
+			.then( ( res ) => res.json() )
+			.then( ( response ) => {
+				if ( ! response.data ) {
+					return;
+				}
+
+				const fileData = {
+					...response.data,
+					attachment: wp.media.model.Attachment.create( {
+						...response.data,
+						file: fileObj,
+						uploading: false,
+						date: new Date(),
+						filename: fileObj.name,
+						menuOrder: 0,
+						type: 'image',
+						subtype: 'jpeg',
+						uploadedTo: wp.media.model.settings.post.id,
+					} ),
+				};
+
+				wp.media.model.Attachment.get(
+					fileData.id,
+					fileData.attachment
+				);
+				wp.Uploader.queue.add( fileData.attachment );
+				wp.Uploader.queue.reset();
+			} );
+	}
+};
