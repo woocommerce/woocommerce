@@ -13,6 +13,3 @@ The form's structure is defined in PHP using a Template. The template can be mod
 Many extensibility implementations can be done using only the PHP-based Block Template API. More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 
 
-## Index
-
-- [Common tasks](common-tasks.md)
