@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useState,
-	createElement,
-	Fragment,
-	useEffect,
-} from '@wordpress/element';
+import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
 import { trash } from '@wordpress/icons';
 import {
@@ -20,13 +15,7 @@ import {
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	Button,
-	Modal,
-	Notice,
-	// @ts-expect-error ConfirmDialog is not part of the typescript definition yet.
-	__experimentalConfirmDialog as ConfirmDialog,
-} from '@wordpress/components';
+import { Button, Modal, Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -53,9 +42,6 @@ type NewAttributeModalProps = {
 	cancelLabel?: string;
 	addAccessibleLabel?: string;
 	addLabel?: string;
-	confirmMessage?: string;
-	confirmCancelLabel?: string;
-	confirmConfirmLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	selectedAttributeIds?: number[];
@@ -87,12 +73,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	cancelLabel = __( 'Cancel', 'woocommerce' ),
 	addAccessibleLabel = __( 'Add attributes', 'woocommerce' ),
 	addLabel = __( 'Add', 'woocommerce' ),
-	confirmMessage = __(
-		'You have some attributes added to the list, are you sure you want to cancel?',
-		'woocommerce'
-	),
-	confirmCancelLabel = __( 'No thanks', 'woocommerce' ),
-	confirmConfirmLabel = __( 'Yes please!', 'woocommerce' ),
 	onCancel,
 	onAdd,
 	selectedAttributeIds = [],
@@ -113,7 +93,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );
 	};
-	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
 		setValue: (
@@ -212,18 +191,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		}, 0 );
 	};
 
-	const onClose = ( values: AttributeForm ) => {
-		const hasValuesSet = values.attributes.some(
-			( value ) =>
-				value !== null && value?.terms && value?.terms.length > 0
-		);
-		if ( hasValuesSet ) {
-			setShowConfirmClose( true );
-		} else {
-			onCancel();
-		}
-	};
-
 	useEffect( function focusFirstAttributeField() {
 		const firstAttributeFieldLabel =
 			document.querySelector< HTMLLabelElement >(
@@ -316,7 +283,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									| React.FocusEvent< Element >
 							) => {
 								if ( ! event.isPropagationStopped() ) {
-									onClose( values );
+									onCancel();
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
@@ -499,7 +466,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								<Button
 									isSecondary
 									label={ cancelLabel }
-									onClick={ () => onClose( values ) }
+									onClick={ () => onCancel() }
 								>
 									{ cancelLabel }
 								</Button>
@@ -525,16 +492,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			</Form>
 			{ /* Add slot so select control menu renders correctly within Modal */ }
 			<SelectControlMenuSlot />
-			{ showConfirmClose && (
-				<ConfirmDialog
-					cancelButtonText={ confirmCancelLabel }
-					confirmButtonText={ confirmConfirmLabel }
-					onCancel={ () => setShowConfirmClose( false ) }
-					onConfirm={ onCancel }
-				>
-					{ confirmMessage }
-				</ConfirmDialog>
-			) }
 		</>
 	);
 };
