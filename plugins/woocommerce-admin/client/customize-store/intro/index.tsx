@@ -11,6 +11,8 @@ import {
 	__unstableMotion as motion,
 	Button,
 } from '@wordpress/components';
+import { createInterpolateElement, useState } from '@wordpress/element';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -18,7 +20,9 @@ import {
 import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
+import { DesignChangeWarningModal } from './design-change-warning-modal';
 import './intro.scss';
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -33,7 +37,7 @@ export * as services from './services';
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeCards },
+		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
 
 	const [ isNetworkOffline, setIsNetworkOffline ] = useState( false );
@@ -90,9 +94,64 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		);
 		bannerButtonText = __( 'Design with AI', 'woocommerce' );
 	}
+	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
+		useState( false );
 
 	return (
 		<>
+			{ openDesignChangeWarningModal && (
+				<DesignChangeWarningModal
+					title={ __(
+						'Are you sure you want to start a new design?',
+						'woocommerce'
+					) }
+					isOpen={ true }
+					onRequestClose={ () => {
+						setOpenDesignChangeWarningModal( false );
+					} }
+				>
+					<p>
+						{ createInterpolateElement(
+							__(
+								"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+								'woocommerce'
+							),
+							{
+								EditorLink: (
+									<Link
+										onClick={ () => {
+											window.open(
+												`${ ADMIN_URL }site-editor.php`,
+												'_blank'
+											);
+											return false;
+										} }
+										href=""
+									/>
+								),
+							}
+						) }
+					</p>
+					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+						<Button
+							onClick={ () =>
+								setOpenDesignChangeWarningModal( false )
+							}
+							variant="link"
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							onClick={ () =>
+								sendEvent( { type: 'DESIGN_WITH_AI' } )
+							}
+							variant="primary"
+						>
+							{ __( 'Design with AI', 'woocommerce' ) }
+						</Button>
+					</div>
+				</DesignChangeWarningModal>
+			) }
 			<div className="woocommerce-customize-store-header">
 				<SiteHub
 					as={ motion.div }
@@ -141,12 +200,20 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							<p>{ bannerText }</p>
 							<Button
 								onClick={ () => {
+									
 									if ( isJetpackOffline ) {
 										sendEvent( {
 											type: 'JETPACK_OFFLINE_HOWTO',
 										} );
 									} else if ( isNetworkOffline === false ) {
-										sendEvent( { type: 'DESIGN_WITH_AI' } );
+										if (
+											activeThemeHasMods &&
+											! customizeStoreTaskCompleted
+										) {
+											setOpenDesignChangeWarningModal( true );
+										}else {
+											sendEvent( { type: 'DESIGN_WITH_AI' } );
+										}
 									}
 								} }
 								variant={
