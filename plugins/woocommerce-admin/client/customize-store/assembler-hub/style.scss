@@ -295,7 +295,7 @@
 				border-color: #fff;
 			}
 		}
-
+		
 		.components-range-control {
 			margin-bottom: 24px;
 			padding-top: 8px;
@@ -332,7 +332,13 @@
 				border: 1px solid $gray-600;
 				background: #fff;
 				color: $gray-900;
+
+				&:focus + .components-input-control__backdrop {
+					box-shadow: none;
+					border: 1px solid var(--wp-admin-theme-color-darker-10);
+				}
 			}
+
 		}
 
 		.components-base-control__help {
