@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -2928,7 +2929,7 @@ CREATE TABLE $meta_table (
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
 
 		// Prevent this happening multiple time in same request.
-		if ( $this->should_save_after_meta_change( $order ) ) {
+		if ( $this->should_save_after_meta_change( $order, $meta ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
 			return true;
@@ -2947,12 +2948,17 @@ CREATE TABLE $meta_table (
 	 * 1. Order modified date is already the current date, no updates needed in this case.
 	 * 2. If there are changes already queued for order object, then we don't need to update the modified date as it will be updated ina subsequent save() call.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order           $order Order object.
+	 * @param \WC_Meta_Data|null $meta  Metadata object.
 	 *
 	 * @return bool Whether the modified date needs to be updated.
 	 */
-	private function should_save_after_meta_change( $order ) {
+	private function should_save_after_meta_change( $order, $meta = null ) {
+		$skip_for = array(
+			EditLock::META_KEY_NAME,
+		);
+
 		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
-		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() );
+		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $skip_for, true ) );
 	}
 }
