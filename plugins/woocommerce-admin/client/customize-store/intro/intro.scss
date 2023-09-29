@@ -173,22 +173,10 @@
 			padding: 0;
 			gap: 5px;
 			li {
-				display: flex;
-				div {
-					width: 10px;
-					height: 20px;
-					&.theme-card__color-palette-left {
-						border-top-left-radius: 15px;
-						border-bottom-left-radius: 15px;
-						border-right: none !important;
-					}
-					
-					&.theme-card__color-palette-right {
-						border-top-right-radius: 15px;
-						border-bottom-right-radius: 15px;
-						border-left: none !important;
-					}
-				}
+				width: 20px;
+				height: 20px;
+				box-shadow: inset 0 0 0 1px #0003;
+				border-radius: 50%;
 			}
 		}
 		.theme-card__active {
