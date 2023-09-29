@@ -1,18 +1,21 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import {
+	useEffect,
+	useState,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import classNames from 'classnames';
+import { Link } from '@woocommerce/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 	Button,
 } from '@wordpress/components';
-import { createInterpolateElement, useState } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -200,7 +203,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							<p>{ bannerText }</p>
 							<Button
 								onClick={ () => {
-									
 									if ( isJetpackOffline ) {
 										sendEvent( {
 											type: 'JETPACK_OFFLINE_HOWTO',
@@ -210,9 +212,13 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 											activeThemeHasMods &&
 											! customizeStoreTaskCompleted
 										) {
-											setOpenDesignChangeWarningModal( true );
-										}else {
-											sendEvent( { type: 'DESIGN_WITH_AI' } );
+											setOpenDesignChangeWarningModal(
+												true
+											);
+										} else {
+											sendEvent( {
+												type: 'DESIGN_WITH_AI',
+											} );
 										}
 									}
 								} }
