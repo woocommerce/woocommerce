@@ -259,6 +259,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'description' => __( 'Add and manage files for the customer to download immediately after purchasing the product.', 'woocommerce' ),
 				],
 			]
+		)->add_block(
+			[
+				'id'         => 'product-downloads',
+				'blockName'  => 'woocommerce/product-downloads-field',
+				'order'      => 10,
+				'attributes' => [
+					'images' => [],
+				],
+			]
 		);
 	}
 
