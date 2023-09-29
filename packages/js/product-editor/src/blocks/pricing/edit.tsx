@@ -26,11 +26,11 @@ export function Edit( {
 	attributes,
 }: BlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { name, label, help } = attributes;
+	const { property, label, help } = attributes;
 	const [ price, setPrice ] = useEntityProp< string >(
 		'postType',
 		'product',
-		name
+		property
 	);
 	const inputProps = useCurrencyInputProps( {
 		value: price,
