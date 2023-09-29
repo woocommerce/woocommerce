@@ -37,7 +37,7 @@ function maybePruneFetchCache() {
 }
 
 // Wrapper around apiFetch() that caches results in memory
-async function apiFetchWithCache( params: any ): Promise< any > {
+async function apiFetchWithCache( params: object ): Promise< object > {
 	// Attempt to fetch from cache:
 	const cacheKey = JSON.stringify( params );
 	if ( fetchCache.get( cacheKey ) ) {
@@ -52,7 +52,7 @@ async function apiFetchWithCache( params: any ): Promise< any > {
 			.then( ( json ) => {
 				fetchCache.set( cacheKey, json );
 				maybePruneFetchCache();
-				resolve( json );
+				resolve( json as object );
 			} )
 			.catch( () => {
 				reject();
@@ -61,7 +61,7 @@ async function apiFetchWithCache( params: any ): Promise< any > {
 }
 
 // Wrapper around fetch() that caches results in memory
-async function fetchJsonWithCache( url: string ): Promise< any > {
+async function fetchJsonWithCache( url: string ): Promise< object > {
 	// Attempt to fetch from cache:
 	if ( fetchCache.get( url ) ) {
 		return new Promise( ( resolve ) => {
@@ -139,7 +139,9 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 
 	try {
-		return await apiFetchWithCache( { path: url.toString() } );
+		return ( await apiFetchWithCache( {
+			path: url.toString(),
+		} ) ) as Promise< ProductGroup[] >;
 	} catch ( error ) {
 		return [];
 	}
@@ -152,7 +154,9 @@ function fetchCategories(): Promise< CategoryAPIItem[] > {
 		url = `${ url }?locale=${ LOCALE.userLocale }`;
 	}
 
-	return fetchJsonWithCache( url.toString() )
+	return (
+		fetchJsonWithCache( url.toString() ) as Promise< CategoryAPIItem[] >
+	 )
 		.then( ( json ) => {
 			return json;
 		} )
