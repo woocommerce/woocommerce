@@ -53,8 +53,12 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 
 		fetchDiscoverPageData()
 			.then( ( products: ProductGroup[] ) => {
+				const productGroupId =
+					props.type === ProductType.theme
+						? 'popular-themes'
+						: 'most-popular';
 				const mostPopularGroup = products.find(
-					( group ) => group.id === 'most-popular'
+					( group ) => group.id === productGroupId
 				);
 
 				if ( ! mostPopularGroup ) {
@@ -93,6 +97,7 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 				title={ title }
 				products={ productGroup.items }
 				groupURL={ productGroup.url }
+				type={ productGroup.itemType }
 			/>
 		);
 	}
@@ -139,11 +144,9 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 					</p>
 				</div>
 			</div>
-			{ props.type === ProductType.extension && (
-				<div className="woocommerce-marketplace__no-results__product-group">
-					{ renderProductGroup() }
-				</div>
-			) }
+			<div className="woocommerce-marketplace__no-results__product-group">
+				{ renderProductGroup() }
+			</div>
 		</div>
 	);
 }
