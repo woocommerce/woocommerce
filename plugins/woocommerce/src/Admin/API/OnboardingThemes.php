@@ -66,10 +66,10 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/recommended',
 			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_recommended_themes' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
+				'methods'  => 'GET',
+				'callback' => array( $this, 'get_recommended_themes' ),
+				// 'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'     => array(
 					'industry' => array(
 						'type'        => 'string',
 						'description' => 'Limits the results to themes relevant for this industry (optional)',
@@ -81,7 +81,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 						'description' => 'Returns pricing in this currency (optional, default: USD)',
 					),
 				),
-				'schema'              => array( $this, 'get_recommended_item_schema' ),
+				'schema'   => array( $this, 'get_recommended_item_schema' ),
 			)
 		);
 	}
@@ -143,7 +143,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-				/* translators: %s: theme slug (example: woocommerce-services) */
+					/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed. Theme API call failed.', 'woocommerce' ),
 					$theme
 				),
@@ -158,7 +158,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-				/* translators: %s: theme slug (example: woocommerce-services) */
+					/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed.', 'woocommerce' ),
 					$theme
 				),
