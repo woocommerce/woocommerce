@@ -66,10 +66,10 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/recommended',
 			array(
-				'methods'  => 'GET',
-				'callback' => array( $this, 'get_recommended_themes' ),
-				// 'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'     => array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_recommended_themes' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
 					'industry' => array(
 						'type'        => 'string',
 						'description' => 'Limits the results to themes relevant for this industry (optional)',
@@ -81,7 +81,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 						'description' => 'Returns pricing in this currency (optional, default: USD)',
 					),
 				),
-				'schema'   => array( $this, 'get_recommended_item_schema' ),
+				'schema'              => array( $this, 'get_recommended_item_schema' ),
 			)
 		);
 	}
@@ -218,32 +218,18 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$industry = $request->get_param( 'industry' );
 		$currency = $request->get_param( 'currency' ) ?? 'USD';
 
-		/**
-		 * Filter allow marketplace suggestions.
-		 *
-		 * User can disable all suggestions via filter.
-		 *
-		 * @since 8.3.0
-		 */
-		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-			return array(
-				'themes' => array(),
-				'_links' => array(
-					'browse_all' => array(
-						'href' => home_url( '/wp-admin/themes.php' ),
-					),
-				),
-			);
-		}
-
-		/**
-		 * Filter allow marketplace suggestions.
-		 *
-		 * User can disable all suggestions via filter.
-		 *
-		 * @since 8.3.0
-		 */
-		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
+		// Return empty response if marketplace suggestions are disabled.
+		if (
+			/**
+			 * Filter allow marketplace suggestions.
+			 *
+			 * User can disable all suggestions via filter.
+			 *
+			 * @since 8.3.0
+			 */
+			! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ||
+			get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no'
+		) {
 			return array(
 				'themes' => array(),
 				'_links' => array(
