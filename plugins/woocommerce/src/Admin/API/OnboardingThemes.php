@@ -240,7 +240,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// TODO: Fetch themes from the marketplace API.
+		// TODO: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
 		$themes = array(
 			array(
@@ -281,21 +281,19 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 		);
 
-		// Filter themes based on industry (if provided).
+		// TODO: Filter themes based on industry.
 		if ( $industry ) {
 			$filtered_themes = array_filter(
 				$themes,
 				function ( $theme ) use ( $industry ) {
 					// Filter themes by industry.
 					// Example: return $theme['industry'] === $industry;.
-					return true; // Placeholder, modify as needed.
+					return true;
 				}
 			);
 		} else {
 			$filtered_themes = $themes;
 		}
-
-		// TODO: Convert prices to the requested currency.
 
 		$response = array(
 			'themes' => $filtered_themes,
