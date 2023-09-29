@@ -4,14 +4,17 @@
 
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import { createInterpolateElement, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreComponent } from '../types';
-
+import { DesignChangeWarningModal } from './design-change-warning-modal';
 import './intro.scss';
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -25,11 +28,67 @@ export * as services from './services';
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeCards },
+		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
+
+	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
+		useState( false );
 
 	return (
 		<>
+			{ openDesignChangeWarningModal && (
+				<DesignChangeWarningModal
+					title={ __(
+						'Are you sure you want to start a new design?',
+						'woocommerce'
+					) }
+					isOpen={ true }
+					onRequestClose={ () => {
+						setOpenDesignChangeWarningModal( false );
+					} }
+				>
+					<p>
+						{ createInterpolateElement(
+							__(
+								"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+								'woocommerce'
+							),
+							{
+								EditorLink: (
+									<Link
+										onClick={ () => {
+											window.open(
+												`${ ADMIN_URL }site-editor.php`,
+												'_blank'
+											);
+											return false;
+										} }
+										href=""
+									/>
+								),
+							}
+						) }
+					</p>
+					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+						<Button
+							onClick={ () =>
+								setOpenDesignChangeWarningModal( false )
+							}
+							variant="link"
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							onClick={ () =>
+								sendEvent( { type: 'DESIGN_WITH_AI' } )
+							}
+							variant="primary"
+						>
+							{ __( 'Design with AI', 'woocommerce' ) }
+						</Button>
+					</div>
+				</DesignChangeWarningModal>
+			) }
 			<div className="woocommerce-customize-store-header">
 				<h1>{ 'Site title' }</h1>
 			</div>
@@ -72,9 +131,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								) }
 							</p>
 							<button
-								onClick={ () =>
-									sendEvent( { type: 'DESIGN_WITH_AI' } )
-								}
+								onClick={ () => {
+									if (
+										activeThemeHasMods &&
+										! customizeStoreTaskCompleted
+									) {
+										setOpenDesignChangeWarningModal( true );
+									} else {
+										sendEvent( { type: 'DESIGN_WITH_AI' } );
+									}
+								} }
 							>
 								{ __( 'Design with AI', 'woocommerce' ) }
 							</button>

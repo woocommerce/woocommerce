@@ -120,7 +120,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-					/* translators: %s: theme slug (example: woocommerce-services) */
+				/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed. Theme API call failed.', 'woocommerce' ),
 					$theme
 				),
@@ -135,7 +135,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			return new \WP_Error(
 				'woocommerce_rest_theme_install',
 				sprintf(
-					/* translators: %s: theme slug (example: woocommerce-services) */
+				/* translators: %s: theme slug (example: woocommerce-services) */
 					__( 'The requested theme `%s` could not be installed.', 'woocommerce' ),
 					$theme
 				),
