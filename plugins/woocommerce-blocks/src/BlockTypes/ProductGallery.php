@@ -25,6 +25,27 @@ class ProductGallery extends AbstractBlock {
 	}
 
 	/**
+	 * Inject dialog into the product gallery HTML.
+	 *
+	 * @param string $gallery_html The gallery HTML.
+	 * @param string $dialog_html  The dialog HTML.
+	 *
+	 * @return string
+	 */
+	protected function inject_dialog( $gallery_html, $dialog_html ) {
+
+		// Find the position of the last </div>.
+		$pos = strrpos( $gallery_html, '</div>' );
+
+		if ( false !== $pos ) {
+			// Inject the dialog_html at the correct position.
+			$html = substr_replace( $gallery_html, $dialog_html, $pos, 0 );
+
+			return $html;
+		}
+	}
+
+	/**
 	 * Return the dialog content.
 	 *
 	 * @return string
@@ -48,21 +69,6 @@ class ProductGallery extends AbstractBlock {
 		return $gallery_dialog;
 	}
 
-
-	/**
-	 * This function remove the div wrapper.
-	 * The content has a <div> with the class wp-block-woocommerce-product-gallery>.
-	 * We don't need since that we add it in the render method.
-	 *
-	 * @param string $content Block content.
-	 * @return string Rendered block type output.
-	 */
-	private function remove_div_wrapper( $content ) {
-		$parsed_string = preg_replace( '/<div class="wp-block-woocommerce-product-gallery">/', '', $content );
-		$parsed_string = preg_replace( '/<\/div>$/', '', $parsed_string );
-		return $parsed_string;
-	}
-
 	/**
 	 * Include and render the block.
 	 *
@@ -83,22 +89,13 @@ class ProductGallery extends AbstractBlock {
 			$classname_single_image = 'is-single-product-gallery-image';
 		}
 
-		$classname          = $attributes['className'] ?? '';
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( sprintf( 'wc-block-product-gallery %1$s %2$s', $classname, $classname_single_image ) ) ) );
-		$gallery            = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
-		$html               = sprintf(
-			'<div %1$s>
-				%2$s
-				%3$s
-			</div>',
-			$wrapper_attributes,
-			$content,
-			$gallery
-		);
+		$classname = $attributes['className'] ?? '';
+		$dialog    = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
+		$post_id   = $block->context['postId'] ?? '';
+		$product   = wc_get_product( $post_id );
 
-		$post_id = $block->context['postId'] ?? '';
-		$product = wc_get_product( $post_id );
-		$p       = new \WP_HTML_Tag_Processor( $html );
+		$html = $this->inject_dialog( $content, $dialog );
+		$p    = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', true );
@@ -113,6 +110,8 @@ class ProductGallery extends AbstractBlock {
 					)
 				)
 			);
+			$p->add_class( $classname );
+			$p->add_class( $classname_single_image );
 			$html = $p->get_updated_html();
 		}
 
