@@ -135,6 +135,11 @@ export function Edit( {
 				onNewModalOpen={ () => {
 					recordEvent( 'product_options_add_option' );
 				} }
+				onRemoveItem={ () => {
+					recordEvent(
+						'product_add_options_modal_remove_option_button_click'
+					);
+				} }
 				onRemove={ () =>
 					recordEvent(
 						'product_remove_option_confirmation_confirm_click'

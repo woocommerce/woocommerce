@@ -62,6 +62,11 @@ export const Attributes: React.FC< AttributesProps > = ( {
 					'product_add_attributes_modal_add_another_attribute_button_click'
 				);
 			} }
+			onRemoveItem={ () => {
+				recordEvent(
+					'product_add_attributes_modal_remove_attribute_button_click'
+				);
+			} }
 			onRemove={ () =>
 				recordEvent(
 					'product_remove_attribute_confirmation_confirm_click'

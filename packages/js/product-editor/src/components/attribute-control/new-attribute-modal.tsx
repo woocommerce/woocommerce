@@ -45,6 +45,7 @@ type NewAttributeModalProps = {
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
 	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
@@ -77,6 +78,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onCancel,
 	onAdd,
 	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
@@ -167,9 +169,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		recordEvent(
-			'product_add_attributes_modal_remove_attribute_button_click'
-		);
+		onRemoveItem();
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
