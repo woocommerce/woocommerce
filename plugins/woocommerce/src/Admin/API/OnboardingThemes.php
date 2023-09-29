@@ -240,7 +240,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// TODO: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
+		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
 		$themes = array(
 			array(
@@ -281,7 +281,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 		);
 
-		// TODO: Filter themes based on industry.
+		// To be implemented: Filter themes based on industry.
 		if ( $industry ) {
 			$filtered_themes = array_filter(
 				$themes,
