@@ -23,6 +23,8 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
+import { Button } from '@wordpress/components';
+import { closeSmall } from '@wordpress/icons';
 
 function getFileName( download: ProductDownload ) {
 	if ( download.name ) {
@@ -66,6 +68,22 @@ export function Edit( {
 		}
 	}
 
+	function removeHandler( download: ProductDownload ) {
+		return function handleRemoveClick() {
+			const otherDownloads = downloads.reduce< ProductDownload[] >(
+				( others, current ) => {
+					if ( current.id === download.id ) {
+						return others;
+					}
+					return [ ...others, current ];
+				},
+				[]
+			);
+
+			setDownloads( otherDownloads );
+		};
+	}
+
 	return (
 		<div { ...blockProps }>
 			{ Boolean( downloads.length ) ? (
@@ -73,6 +91,13 @@ export function Edit( {
 					{ downloads.map( ( download ) => (
 						<ListItem key={ String( download.id ) }>
 							<span>{ getFileName( download ) }</span>
+							<div className="wp-block-woocommerce-product-downloads-field__table-actions">
+								<Button
+									icon={ closeSmall }
+									label={ __( 'Remove file', 'woocommerce' ) }
+									onClick={ removeHandler( download ) }
+								/>
+							</div>
 						</ListItem>
 					) ) }
 				</Sortable>

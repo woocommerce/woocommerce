@@ -31,6 +31,22 @@ $fixed-section-height: 224px;
 		flex: 1 0 auto;
 	}
 
+	&__table-actions {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: $grid-unit;
+		padding-right: 2px;
+
+		.components-button.has-icon {
+			color: $gray-700;
+			width: $grid-unit-30;
+			height: $grid-unit-30;
+			min-width: inherit;
+			padding: 0;
+		}
+	}
+
 	.woocommerce-sortable {
 		&__item .woocommerce-list-item {
 			display: grid;
