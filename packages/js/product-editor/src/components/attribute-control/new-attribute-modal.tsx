@@ -14,7 +14,6 @@ import {
 	ProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button, Modal, Notice } from '@wordpress/components';
 
 /**
