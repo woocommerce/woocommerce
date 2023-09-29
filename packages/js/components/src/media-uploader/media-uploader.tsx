@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
-import { createElement } from 'react';
+import { Fragment, createElement } from 'react';
 import {
 	MediaItem,
 	MediaUpload,
@@ -106,17 +106,21 @@ export const MediaUploader = ( {
 							allowedTypes={ allowedMediaTypes }
 							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
-							render={ ( { open } ) => (
-								<Button
-									variant="secondary"
-									onClick={ () => {
-										onMediaGalleryOpen();
-										open();
-									} }
-								>
-									{ buttonText }
-								</Button>
-							) }
+							render={ ( { open } ) =>
+								buttonText ? (
+									<Button
+										variant="secondary"
+										onClick={ () => {
+											onMediaGalleryOpen();
+											open();
+										} }
+									>
+										{ buttonText }
+									</Button>
+								) : (
+									<Fragment />
+								)
+							}
 						/>
 
 						{ hasDropZone && (
