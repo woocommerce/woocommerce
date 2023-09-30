@@ -22,11 +22,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import {
-	defaultColorPalette,
-	fontPairings,
-	defaultHomepageTemplate,
-} from './prompts';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -80,8 +76,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 					default: 'Ancient Bronze',
 				} as ColorPaletteResponse,
 				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
-				homepageTemplate: 'template1' as HomepageTemplate[ 'homepage_template' ],
-
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
 			},
 			apiCallLoader: {
 				hasErrors: false,
