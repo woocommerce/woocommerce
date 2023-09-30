@@ -2,6 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const { ENABLE_HPOS } = process.env;
 
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
@@ -75,6 +76,14 @@ module.exports = async ( config ) => {
 				.storageState( { path: process.env.ADMINSTATE } );
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
+
+			if (!ENABLE_HPOS || ENABLE_HPOS === '0') {
+				console.log( 'Trying to switch off HPOS...' );
+				await adminPage.goto('/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features');
+				await adminPage.getByLabel('WordPress posts storage (legacy)').check();
+				await adminPage.getByRole('button', { name: 'Save changes' }).click();
+				console.log('HPOS Switched off successfully');
+			}
 			break;
 		} catch ( e ) {
 			console.log(
@@ -177,6 +186,10 @@ module.exports = async ( config ) => {
 		);
 		process.exit( 1 );
 	}
+
+
+	
+	
 
 	await adminContext.close();
 	await customerContext.close();

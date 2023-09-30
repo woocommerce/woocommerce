@@ -29,6 +29,12 @@ wp-env run tests-cli wp option update blogname 'WooCommerce Core E2E Test Suite'
 echo -e 'Preparing Test Files \n'
 wp-env run tests-cli sudo cp /var/www/html/wp-content/plugins/woocommerce/tests/legacy/unit-tests/importer/sample.csv /var/www/sample.csv
 
+if [ $ENABLE_HPOS == 0 ]; then
+    echo -e 'Disable High-Performance Order Tables\n'
+	wp-env run tests-cli wp option update woocommerce_feature_custom_order_tables_enabled 'no'
+    wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
+fi
+
 if [ $ENABLE_HPOS == 1 ]; then
 	echo -e 'Enable High-Performance Order Tables\n'
 	wp-env run tests-cli wp option update woocommerce_feature_custom_order_tables_enabled 'yes'
