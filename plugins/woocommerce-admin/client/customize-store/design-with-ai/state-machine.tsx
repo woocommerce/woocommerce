@@ -22,11 +22,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import {
-	defaultColorPalette,
-	fontPairings,
-	defaultHomepageTemplate,
-} from './prompts';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -80,7 +76,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 					default: 'Ancient Bronze',
 				} as ColorPaletteResponse,
 				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
-				homepageTemplate: '' as HomepageTemplate[ 'homepage_template' ],
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
 			},
 			apiCallLoader: {
 				hasErrors: false,
@@ -351,43 +348,6 @@ export const designWithAiStateMachineDefinition = createMachine(
 											// If there's an error we don't want to block the user from proceeding.
 											onError: {
 												target: 'success',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							chooseHomepageTemplate: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultHomepageTemplate,
-													prompt: defaultHomepageTemplate.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignHomepageTemplate',
-												],
-												target: 'success',
-											},
-											onError: {
-												actions: [
-													'assignAPICallLoaderError',
-												],
-												target: '#toneOfVoice',
 											},
 										},
 									},
