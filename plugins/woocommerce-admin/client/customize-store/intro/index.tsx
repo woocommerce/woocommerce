@@ -1,23 +1,35 @@
 /**
  * External dependencies
  */
-
+import {
+	useEffect,
+	useState,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
-import { createInterpolateElement, useState } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import classNames from 'classnames';
 import { Link } from '@woocommerce/components';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableMotion as motion,
+	Button,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreComponent } from '../types';
+import { SiteHub } from '../assembler-hub/site-hub';
+import { ThemeCard } from './theme-card';
 import { DesignChangeWarningModal } from './design-change-warning-modal';
 import './intro.scss';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
+	| { type: 'JETPACK_OFFLINE_HOWTO' }
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
@@ -31,6 +43,60 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
 
+	const [ isNetworkOffline, setIsNetworkOffline ] = useState( false );
+	const isJetpackOffline = false;
+
+	const setOfflineBannerIamge = () => {
+		setIsNetworkOffline( true );
+	};
+
+	const removeOfflineBannerImage = () => {
+		setIsNetworkOffline( false );
+	};
+
+	useEffect( () => {
+		window.addEventListener( 'offline', setOfflineBannerIamge );
+		window.addEventListener( 'online', removeOfflineBannerImage );
+		return () => {
+			window.addEventListener( 'offline', setOfflineBannerIamge );
+			window.addEventListener( 'online', removeOfflineBannerImage );
+		};
+	}, [] );
+
+	let bannerText;
+	let bannerTitle;
+	let bannerButtonText;
+	if ( isNetworkOffline ) {
+		bannerText = __(
+			"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
+			'woocommerce'
+		);
+		bannerTitle = __(
+			'Looking to design your store using AI?',
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Retry', 'woocommerce' );
+	} else if ( isJetpackOffline ) {
+		bannerTitle = __(
+			'Looking to design your store using AI?',
+			'woocommerce'
+		);
+		bannerText = __(
+			"It looks like you're using Jetpack's offline mode — switch to online mode to start designing with AI.",
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Find out how', 'woocommerce' );
+	} else {
+		bannerTitle = __(
+			'Use the power of AI to design your store',
+			'woocommerce'
+		);
+		bannerText = __(
+			'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
+			'woocommerce'
+		);
+		bannerButtonText = __( 'Design with AI', 'woocommerce' );
+	}
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
 
@@ -90,7 +156,14 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</DesignChangeWarningModal>
 			) }
 			<div className="woocommerce-customize-store-header">
-				<h1>{ 'Site title' }</h1>
+				<SiteHub
+					as={ motion.div }
+					variants={ {
+						view: { x: 0 },
+					} }
+					isTransparent={ false }
+					className="woocommerce-customize-store__content"
+				/>
 			</div>
 
 			<div className="woocommerce-customize-store-container">
@@ -114,40 +187,51 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</div>
 
 				<div className="woocommerce-customize-store-main">
-					<div className="woocommerce-customize-store-banner">
+					<div
+						className={ classNames(
+							'woocommerce-customize-store-banner',
+							{
+								'offline-banner':
+									isNetworkOffline || isJetpackOffline,
+							}
+						) }
+					>
 						<div
 							className={ `woocommerce-customize-store-banner-content` }
 						>
-							<h1>
-								{ __(
-									'Use the power of AI to design your store',
-									'woocommerce'
-								) }
-							</h1>
-							<p>
-								{ __(
-									'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
-									'woocommerce'
-								) }
-							</p>
-							<button
+							<h1>{ bannerTitle }</h1>
+							<p>{ bannerText }</p>
+							<Button
 								onClick={ () => {
-									if (
-										activeThemeHasMods &&
-										! customizeStoreTaskCompleted
-									) {
-										setOpenDesignChangeWarningModal( true );
-									} else {
-										sendEvent( { type: 'DESIGN_WITH_AI' } );
+									if ( isJetpackOffline ) {
+										sendEvent( {
+											type: 'JETPACK_OFFLINE_HOWTO',
+										} );
+									} else if ( isNetworkOffline === false ) {
+										if (
+											activeThemeHasMods &&
+											! customizeStoreTaskCompleted
+										) {
+											setOpenDesignChangeWarningModal(
+												true
+											);
+										} else {
+											sendEvent( {
+												type: 'DESIGN_WITH_AI',
+											} );
+										}
 									}
 								} }
+								variant={
+									isJetpackOffline ? 'link' : 'primary'
+								}
 							>
-								{ __( 'Design with AI', 'woocommerce' ) }
-							</button>
+								{ bannerButtonText }
+							</Button>
 						</div>
 					</div>
 
-					<p>
+					<p className="select-theme-text">
 						{ __(
 							'Or select a professionally designed theme to customize and make your own.',
 							'woocommerce'
@@ -156,34 +240,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 					<div className="woocommerce-customize-store-theme-cards">
 						{ themeCards?.map( ( themeCard ) => (
-							<Button
-								variant="link"
-								className="theme-card"
+							<ThemeCard
 								key={ themeCard.slug }
-								onClick={ () => {
-									if ( themeCard.isActive ) {
-										sendEvent( {
-											type: 'SELECTED_ACTIVE_THEME',
-											payload: { theme: themeCard.slug },
-										} );
-									} else {
-										sendEvent( {
-											type: 'SELECTED_NEW_THEME',
-											payload: { theme: themeCard.slug },
-										} );
-									}
-								} }
-							>
-								<div>
-									<img
-										src={ themeCard.image }
-										alt={ themeCard.description }
-									/>
-								</div>
-								<h2 className="theme-card__title">
-									{ themeCard.name }
-								</h2>
-							</Button>
+								slug={ themeCard.slug }
+								description={ themeCard.description }
+								image={ themeCard.image }
+								name={ themeCard.name }
+								colorPalettes={ themeCard.colorPalettes }
+								link={ themeCard?.link }
+								isActive={ themeCard.isActive }
+							/>
 						) ) }
 					</div>
 

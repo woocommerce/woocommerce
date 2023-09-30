@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { customizeStoreStateMachineEvents } from '..';
 import { customizeStoreStateMachineContext } from '../types';
-import { ThemeCard } from './theme-cards';
+import { ThemeCard } from './types';
 import { events } from './';
 
 export const assignThemeCards = assign<

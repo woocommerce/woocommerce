@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ import {
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/theme-cards';
+import { ThemeCard } from './intro/types';
 import './style.scss';
 
 export type customizeStoreStateMachineEvents =
@@ -67,6 +68,10 @@ const redirectToWooHome = () => {
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
+const redirectToThemes = () => {
+	window.location.href = addQueryArgs( 'themes.php' );
+};
+
 const markTaskComplete = async () => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
@@ -87,6 +92,7 @@ const browserPopstateHandler =
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
+	redirectToThemes,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -213,8 +219,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
-					actions: [ 'recordTracksBrowseAllThemesClicked' ],
-					target: 'appearanceTask',
+					actions: [
+						'recordTracksBrowseAllThemesClicked',
+						'redirectToThemes',
+					],
 				},
 			},
 		},
