@@ -77,6 +77,8 @@ module.exports = async ( config ) => {
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
 
+			console.log( 'ENABLE_HPOS value=',ENABLE_HPOS );
+
 			if (!ENABLE_HPOS || ENABLE_HPOS === '0') {
 				console.log( 'Trying to switch off HPOS...' );
 				await adminPage.goto('/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features');
