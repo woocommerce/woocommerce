@@ -19,16 +19,14 @@ export type BackgroundRemovalParams = {
 type BackgroundRemovalResponse = {
 	loading: boolean;
 	imageData: Blob | null;
-	fetchImage: ( params: BackgroundRemovalParams ) => void;
+	fetchImage: ( params: BackgroundRemovalParams ) => Promise< Blob >;
 };
 
 export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const [ loading, setLoading ] = useState( false );
 	const [ imageData, setImageData ] = useState< Blob | null >( null );
 
-	const fetchImage = async (
-		params: BackgroundRemovalParams
-	): Promise< Blob | undefined > => {
+	const fetchImage = async ( params: BackgroundRemovalParams ) => {
 		setLoading( true );
 		const { returnedImageType, returnedImageSize, imageFile } = params;
 		const { token } = await requestJetpackToken();
@@ -42,7 +40,6 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				'Invalid image file',
 				'invalid_image_file'
 			);
-			return;
 		}
 
 		const fileSizeInKB = params.imageFile.size / 1024;
@@ -51,7 +48,6 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				'Image file too small, must be at least 5KB',
 				'image_file_too_small'
 			);
-			return;
 		}
 
 		// The WPCOM REST API endpoint has a 10MB image size limit.
@@ -60,7 +56,6 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 				'Image file too large, must be under 10MB',
 				'image_file_too_large'
 			);
-			return;
 		}
 
 		const imageType = returnedImageType ?? 'jpeg';
