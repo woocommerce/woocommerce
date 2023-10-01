@@ -23,13 +23,8 @@ import {
 	useSendMagicLink,
 	SendMagicLinkStates,
 } from './components';
-import {
-	EmailSentPage,
-	JetpackInstallStepperPage,
-	JetpackAlreadyInstalledPage,
-} from './pages';
+import { LoginAppQRPage } from './pages';
 import './style.scss';
-import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
@@ -37,7 +32,6 @@ export const MobileAppModal = () => {
 	const [ isReturningFromWordpressConnection, setIsReturning ] =
 		useState( false );
 
-	const { state, jetpackConnectionData } = useJetpackPluginState();
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const [ pageContent, setPageContent ] = useState< React.ReactNode >();
@@ -56,8 +50,6 @@ export const MobileAppModal = () => {
 	}, [ searchParams ] );
 
 	const [ hasSentEmail, setHasSentEmail ] = useState( false );
-	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
-		useState( false );
 
 	const { requestState: magicLinkRequestStatus, fetchMagicLinkApiCall } =
 		useSendMagicLink();
@@ -74,60 +66,16 @@ export const MobileAppModal = () => {
 	}, [ magicLinkRequestStatus ] );
 
 	useEffect( () => {
-		if ( hasSentEmail ) {
-			setPageContent(
-				<EmailSentPage
-					returnToSendLinkPage={ () => {
-						setHasSentEmail( false );
-						setIsRetryingMagicLinkSend( true );
-						recordEvent( 'magic_prompt_retry_send_signin_link' );
-					} }
-				/>
-			);
-		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
-			setPageContent( <WrongUserConnectedPage /> );
-		} else if (
-			state === JetpackPluginStates.NOT_INSTALLED ||
-			state === JetpackPluginStates.NOT_ACTIVATED ||
-			state === JetpackPluginStates.USERLESS_CONNECTION ||
-			( state === JetpackPluginStates.FULL_CONNECTION &&
-				isReturningFromWordpressConnection )
-		) {
-			setPageContent(
-				<JetpackInstallStepperPage
-					isReturningFromWordpressConnection={
-						isReturningFromWordpressConnection
-					}
-					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
-					sendMagicLinkHandler={ sendMagicLink }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
-				/>
-			);
-		} else if (
-			state === JetpackPluginStates.FULL_CONNECTION &&
-			jetpackConnectionData?.currentUser?.wpcomUser?.email &&
-			! hasSentEmail
-		) {
-			const wordpressAccountEmailAddress =
-				jetpackConnectionData?.currentUser.wpcomUser.email;
-			setPageContent(
-				<JetpackAlreadyInstalledPage
-					wordpressAccountEmailAddress={
-						wordpressAccountEmailAddress
-					}
-					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
-					sendMagicLinkHandler={ sendMagicLink }
-				/>
-			);
-		}
+		setPageContent(
+			<LoginAppQRPage
+				siteURL={ 'https://example.siteurl.com' }
+				userEmail={ 'admin@siteurl.com' }
+			/>
+		);
 	}, [
 		sendMagicLink,
 		hasSentEmail,
 		isReturningFromWordpressConnection,
-		jetpackConnectionData?.currentUser?.wpcomUser?.email,
-		state,
-		isRetryingMagicLinkSend,
 		magicLinkRequestStatus,
 	] );
 
