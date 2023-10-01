@@ -9,7 +9,11 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { uploadImageToLibrary } from './image_utils';
+import { FILENAME_APPEND } from './constants';
+import {
+	uploadImageToLibrary,
+	getCurrentAttachmentDetails,
+} from './image_utils';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -34,25 +38,21 @@ export const BackgroundRemovalLink = () => {
 	const onRemoveClick = async () => {
 		try {
 			setState( 'generating' );
-			const imgUrl = (
-				document.querySelector(
-					'.attachment-details-copy-link'
-				) as HTMLInputElement | null
-			 )?.value;
+
+			const { url: imgUrl, filename: imgFilename } =
+				getCurrentAttachmentDetails();
 
 			if ( ! imgUrl ) {
+				setError( getErrorMessage() );
 				return;
 			}
-
-			const originalFilename =
-				imgUrl?.split( '/' ).pop()?.split( '.' )[ 0 ] ?? '';
 
 			const originalBlob = await fetch( imgUrl ).then( ( res ) =>
 				res.blob()
 			);
 
 			const bgRemoved = await fetchImage( {
-				imageFile: new File( [ originalBlob ], originalFilename, {
+				imageFile: new File( [ originalBlob ], imgFilename ?? '', {
 					type: originalBlob.type,
 				} ),
 			} );
@@ -61,7 +61,9 @@ export const BackgroundRemovalLink = () => {
 
 			await uploadImageToLibrary( {
 				imageBlob: bgRemoved,
-				libraryFilename: `${ originalFilename }_on_white.png`,
+				libraryFilename: `${ imgFilename }${ FILENAME_APPEND }.${ bgRemoved.type
+					.split( '/' )
+					.pop() }`,
 			} );
 			setState( '' );
 		} catch ( err ) {

@@ -10,6 +10,8 @@ import { render, createRoot } from '@wordpress/element';
  * Internal dependencies
  */
 import { BackgroundRemovalLink } from './background-removal-link';
+import { getCurrentAttachmentDetails } from './image_utils';
+import { FILENAME_APPEND } from './constants';
 
 const linkId = 'woocommerce-ai-app-remove-background-link';
 
@@ -34,6 +36,11 @@ export const init = () => {
 				const previousHtml = _previous.template.call( this, view );
 				const dom = document.createElement( 'div' );
 				dom.innerHTML = previousHtml;
+				const attachmentDetails = getCurrentAttachmentDetails( dom );
+
+				if ( attachmentDetails.filename?.includes( FILENAME_APPEND ) ) {
+					return dom.innerHTML;
+				}
 
 				const details = dom.querySelector( '.details' );
 				const reactApp = document.createElement( 'div' );

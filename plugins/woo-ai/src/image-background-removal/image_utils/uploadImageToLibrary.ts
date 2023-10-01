@@ -25,48 +25,44 @@ export const uploadImageToLibrary = async ( {
 		},
 	} );
 
-	if ( _fileId !== null ) {
-		const nonceValue =
-			( document.querySelector( '#_wpnonce' ) as HTMLInputElement | null )
-				?.value ?? '';
-
-		const formData = new FormData();
-
-		formData.append( 'action', 'get-attachment' );
-		formData.append( 'id', String( _fileId ) );
-		formData.append( '_ajax_nonce', nonceValue );
-
-		await fetch( ajaxurl, {
-			method: 'POST',
-			body: formData,
-		} )
-			.then( ( res ) => res.json() )
-			.then( ( response ) => {
-				if ( ! response.data ) {
-					return;
-				}
-
-				const fileData = {
-					...response.data,
-					attachment: wp.media.model.Attachment.create( {
-						...response.data,
-						file: fileObj,
-						uploading: false,
-						date: new Date(),
-						filename: fileObj.name,
-						menuOrder: 0,
-						type: 'image',
-						subtype: 'jpeg',
-						uploadedTo: wp.media.model.settings.post.id,
-					} ),
-				};
-
-				wp.media.model.Attachment.get(
-					fileData.id,
-					fileData.attachment
-				);
-				wp.Uploader.queue.add( fileData.attachment );
-				wp.Uploader.queue.reset();
-			} );
+	if ( _fileId === null ) {
+		return;
 	}
+
+	const nonceValue =
+		( document.querySelector( '#_wpnonce' ) as HTMLInputElement | null )
+			?.value ?? '';
+
+	const formData = new FormData();
+
+	formData.append( 'action', 'get-attachment' );
+	formData.append( 'id', String( _fileId ) );
+	formData.append( '_ajax_nonce', nonceValue );
+
+	const response = await fetch( ajaxurl, {
+		method: 'POST',
+		body: formData,
+	} ).then( ( res ) => res.json() );
+
+	if ( ! response.data ) {
+		return;
+	}
+
+	const fileData = {
+		...response.data,
+		attachment: wp.media.model.Attachment.create( {
+			...response.data,
+			file: fileObj,
+			uploading: false,
+			date: new Date(),
+			filename: fileObj.name,
+			menuOrder: 0,
+			type: 'image',
+			uploadedTo: wp.media.model.settings.post.id,
+		} ),
+	};
+
+	wp.media.model.Attachment.get( fileData.id, fileData.attachment );
+	wp.Uploader.queue.add( fileData.attachment );
+	wp.Uploader.queue.reset();
 };

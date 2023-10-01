@@ -12,8 +12,6 @@ import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 export type BackgroundRemovalParams = {
 	imageFile: File;
-	returnedImageType?: 'png' | 'jpeg';
-	returnedImageSize?: 'hd' | 'medium' | 'preview';
 };
 
 type BackgroundRemovalResponse = {
@@ -28,7 +26,7 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 
 	const fetchImage = async ( params: BackgroundRemovalParams ) => {
 		setLoading( true );
-		const { returnedImageType, returnedImageSize, imageFile } = params;
+		const { imageFile } = params;
 		const { token } = await requestJetpackToken();
 
 		if ( ! token ) {
@@ -58,12 +56,8 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 			);
 		}
 
-		const imageType = returnedImageType ?? 'jpeg';
-
 		const formData = new FormData();
 		formData.append( 'image_file', imageFile );
-		formData.append( 'returned_image_type', imageType );
-		formData.append( 'returned_image_size', returnedImageSize ?? 'hd' );
 		formData.append( 'token', token );
 
 		try {
