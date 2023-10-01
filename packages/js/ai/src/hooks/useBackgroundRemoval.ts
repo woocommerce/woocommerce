@@ -18,14 +18,12 @@ export type BackgroundRemovalParams = {
 
 type BackgroundRemovalResponse = {
 	loading: boolean;
-	error: Error | null;
 	imageData: Blob | null;
 	fetchImage: ( params: BackgroundRemovalParams ) => void;
 };
 
 export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const [ loading, setLoading ] = useState( false );
-	const [ error, setError ] = useState< Error | null >( null );
 	const [ imageData, setImageData ] = useState< Blob | null >( null );
 
 	const fetchImage = async (
@@ -36,38 +34,31 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 		const { token } = await requestJetpackToken();
 
 		if ( ! token ) {
-			setError( createExtendedError( 'Invalid token', 'invalid_jwt' ) );
-			return;
+			throw createExtendedError( 'Invalid token', 'invalid_jwt' );
 		}
 		// Validate that the file is an image and has actual content.
 		if ( ! imageFile.type.startsWith( 'image/' ) ) {
-			setError(
-				createExtendedError(
-					'Invalid image file',
-					'invalid_image_file'
-				)
+			throw createExtendedError(
+				'Invalid image file',
+				'invalid_image_file'
 			);
 			return;
 		}
 
 		const fileSizeInKB = params.imageFile.size / 1024;
 		if ( fileSizeInKB < 5 ) {
-			setError(
-				createExtendedError(
-					'Image file too small, must be at least 5KB',
-					'invalid_image_file_size'
-				)
+			throw createExtendedError(
+				'Image file too small, must be at least 5KB',
+				'image_file_too_small'
 			);
 			return;
 		}
 
 		// The WPCOM REST API endpoint has a 10MB image size limit.
 		if ( fileSizeInKB > 10240 ) {
-			setError(
-				createExtendedError(
-					'Image file too large, must be under 10MB',
-					'invalid_image_file_size'
-				)
+			throw createExtendedError(
+				'Image file too large, must be under 10MB',
+				'image_file_too_large'
 			);
 			return;
 		}
@@ -95,11 +86,11 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 			setImageData( blob );
 			return blob;
 		} catch ( err ) {
-			setError( err as Error );
+			throw err;
 		} finally {
 			setLoading( false );
 		}
 	};
 
-	return { loading, error, imageData, fetchImage };
+	return { loading, imageData, fetchImage };
 };
