@@ -30,7 +30,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'hoverZoom' ];
+		return [ 'postId', 'hoverZoom', 'fullScreenOnClick' ];
 	}
 
 	/**
@@ -41,7 +41,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @param WP_Block $block    The block object.
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
-		if ( $block->context['hoverZoom'] ) {
+		if ( $block->context['hoverZoom'] || $block->context['fullScreenOnClick'] ) {
 			parent::enqueue_assets( $attributes, $content, $block );
 		}
 	}
@@ -124,6 +124,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		);
 
+		if ( $context['fullScreenOnClick'] ) {
+			$attributes['class'] .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
+		}
+
 		if ( $context['hoverZoom'] ) {
 			$attributes['class']              .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
 			$attributes['data-wc-bind--style'] = 'selectors.woocommerce.styles';
@@ -147,17 +151,30 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get directives for the hover zoom.
+	 * Get directives for the block.
 	 *
 	 * @param array $block_context The block context.
 	 *
 	 * @return array
 	 */
 	private function get_directives( $block_context ) {
+		return array_merge(
+			$this->get_zoom_directives( $block_context ),
+			$this->get_open_dialog_directives( $block_context )
+		);
+	}
+
+	/**
+	 * Get directives for zoom.
+	 *
+	 * @param array $block_context The block context.
+	 *
+	 * @return array
+	 */
+	private function get_zoom_directives( $block_context ) {
 		if ( ! $block_context['hoverZoom'] ) {
 			return array();
 		}
-
 		$context = array(
 			'woocommerce' => array(
 				'styles' => array(
@@ -170,8 +187,24 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		return array(
 			'data-wc-on--mousemove'  => 'actions.woocommerce.handleMouseMove',
 			'data-wc-on--mouseleave' => 'actions.woocommerce.handleMouseLeave',
-			'data-wc-on--click'      => 'actions.woocommerce.handleClick',
 			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
+		);
+	}
+
+	/**
+	 * Get directives for opening the dialog.
+	 *
+	 * @param array $block_context The block context.
+	 *
+	 * @return array
+	 */
+	private function get_open_dialog_directives( $block_context ) {
+		if ( ! $block_context['fullScreenOnClick'] ) {
+			return array();
+		}
+
+		return array(
+			'data-wc-on--click' => 'actions.woocommerce.handleClick',
 		);
 	}
 }

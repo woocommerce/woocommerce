@@ -60,7 +60,7 @@ interactivityApiStore( {
 					: 0.2;
 			},
 			isDialogOpen: ( { context }: Store ) => {
-				return context?.woocommerce.isDialogOpen;
+				return context.woocommerce.isDialogOpen;
 			},
 		},
 	},
@@ -70,6 +70,11 @@ interactivityApiStore( {
 				handleClick: ( { context }: Store ) => {
 					context.woocommerce.selectedImage =
 						context.woocommerce.imageId;
+				},
+			},
+			dialog: {
+				handleCloseButtonClick: ( { context }: Store ) => {
+					context.woocommerce.isDialogOpen = false;
 				},
 			},
 			handleSelectImage: ( { context }: Store ) => {
