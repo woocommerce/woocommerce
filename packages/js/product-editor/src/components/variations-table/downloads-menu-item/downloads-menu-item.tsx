@@ -90,6 +90,18 @@ export function DownloadsMenuItem( {
 					>
 						{ __( 'Set download limit', 'woocommerce' ) }
 					</MenuItem>
+
+					<MenuItem
+						onClick={ menuItemClickHandler(
+							'download_expiry',
+							__(
+								'Enter the number of days before a download link expires, or leave blank',
+								'woocommerce'
+							)
+						) }
+					>
+						{ __( 'Set download expiry', 'woocommerce' ) }
+					</MenuItem>
 				</div>
 			) }
 		/>
