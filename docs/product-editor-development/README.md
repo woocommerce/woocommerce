@@ -1,4 +1,4 @@
-# Developing extensions for the product editor
+# Product Editor Development Handbook
 
 > ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
@@ -8,11 +8,12 @@ The product editor's UI consists of Groups (currently rendered as tabs), Section
 
 ![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)
 
-The form's structure is defined in PHP using a Template. The template can be modified by using the Block Template API to add new Groups, Sections, and Fields as well as remove existing ones.
+The form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.
 
-Many extensibility implementations can be done using only the PHP-based Block Template API. More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
+Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [reusable blocks](../../packages/js/product-editor/src/blocks/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 
+## Related documentation
 
-## Index
-
-- [Common tasks](common-tasks.md)
+- [Examples on Template API usage](../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)
+- [Related hooks and Template API documentation](../../plugins/woocommerce/src/Admin/BlockTemplates/README.md)
+- [Reusable blocks documentation](../../packages/js/product-editor/src/blocks/README.md)
