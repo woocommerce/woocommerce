@@ -61,6 +61,29 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/recommended',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_recommended_themes' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
+					'industry' => array(
+						'type'        => 'string',
+						'description' => 'Limits the results to themes relevant for this industry (optional)',
+					),
+					'currency' => array(
+						'type'        => 'string',
+						'enum'        => array( 'USD', 'AUD', 'CAD', 'EUR', 'GBP' ),
+						'default'     => 'USD',
+						'description' => 'Returns pricing in this currency (optional, default: USD)',
+					),
+				),
+				'schema'              => array( $this, 'get_recommended_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -185,6 +208,141 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Get recommended themes.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|array Theme activation status.
+	 */
+	public function get_recommended_themes( $request ) {
+		// Check if "industry" and "currency" parameters are provided in the request.
+		$industry = $request->get_param( 'industry' );
+		$currency = $request->get_param( 'currency' ) ?? 'USD';
+
+		// Return empty response if marketplace suggestions are disabled.
+		if (
+			/**
+			 * Filter allow marketplace suggestions.
+			 *
+			 * User can disable all suggestions via filter.
+			 *
+			 * @since 8.3.0
+			 */
+			! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ||
+			get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no'
+		) {
+
+			/**
+			 * Filter the onboarding recommended themes response.
+			 *
+			 * @since 8.3.0
+			 *
+			 * @param array $response The recommended themes response.
+			 * @param array $filtered_themes The filtered themes.
+			 * @param string $industry The industry to filter by (if provided).
+			 * @param string $currency The currency to convert prices to. (USD, AUD, CAD, EUR, GBP).
+			 *
+			 * @return array
+			 */
+			return apply_filters(
+				'__experimental_woocommerce_rest_get_recommended_themes',
+				array(
+					'themes' => array(),
+					'_links' => array(
+						'browse_all' => array(
+							'href' => home_url( '/wp-admin/themes.php' ),
+						),
+					),
+				),
+				$industry,
+				$currency
+			);
+		}
+
+		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
+		// These are Dotcom themes.
+		$themes = array(
+			array(
+				'name'           => 'Tsubaki',
+				'price'          => 'Free',
+				'color_palettes' => array(),
+				'slug'           => 'tsubaki',
+				'is_active'      => false,
+				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tsubaki/screenshot.png',
+				'link_url'       => 'https://wordpress.com/theme/tsubaki/',
+			),
+			array(
+				'name'           => 'Tazza',
+				'price'          => 'Free',
+				'color_palettes' => array(),
+				'slug'           => 'tazza',
+				'is_active'      => false,
+				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tazza/screenshot.png',
+				'link_url'       => 'https://wordpress.com/theme/tazza/',
+			),
+			array(
+				'name'           => 'Amulet',
+				'price'          => 'Free',
+				'color_palettes' => array(),
+				'slug'           => 'amulet',
+				'is_active'      => false,
+				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/amulet/screenshot.png',
+				'link_url'       => 'https://wordpress.com/theme/tsubaki/',
+			),
+			array(
+				'name'           => 'Zaino',
+				'price'          => 'Free',
+				'color_palettes' => array(),
+				'slug'           => 'zaino',
+				'is_active'      => false,
+				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/zaino/screenshot.png',
+				'link_url'       => 'https://wordpress.com/theme/zaino/',
+			),
+		);
+
+		// To be implemented: Filter themes based on industry.
+		if ( $industry ) {
+			$filtered_themes = array_filter(
+				$themes,
+				function ( $theme ) use ( $industry ) {
+					// Filter themes by industry.
+					// Example: return $theme['industry'] === $industry;.
+					return true;
+				}
+			);
+		} else {
+			$filtered_themes = $themes;
+		}
+
+		$response = array(
+			'themes' => $filtered_themes,
+			'_links' => array(
+				'browse_all' => array(
+					'href' => home_url( '/wp-admin/themes.php' ),
+				),
+			),
+		);
+
+		/**
+		 * Filter the onboarding recommended themes response.
+		 *
+		 * @since 8.3.0
+		 *
+		 * @param array $response The recommended themes response.
+		 * @param array $filtered_themes The filtered themes.
+		 * @param string $industry The industry to filter by (if provided).
+		 * @param string $currency The currency to convert prices to. (USD, AUD, CAD, EUR, GBP).
+		 *
+		 * @return array
+		 */
+		return apply_filters(
+			'__experimental_woocommerce_rest_get_recommended_themes',
+			$response,
+			$industry,
+			$currency
+		);
+	}
+
+	/**
 	 * Get the schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -212,6 +370,96 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the recommended themes schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_recommended_item_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'onboarding_theme',
+			'type'       => 'object',
+			'properties' => array(
+				'themes' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'name'           => array(
+								'type'        => 'string',
+								'description' => 'Theme Name',
+							),
+							'price'          => array(
+								'type'        => 'string',
+								'description' => 'Price',
+							),
+							'is_active'      => array(
+								'type'        => 'boolean',
+								'description' => 'Whether theme is active',
+							),
+							'thumbnail_url'  => array(
+								'type'        => 'string',
+								'description' => 'Thumbnail URL',
+							),
+							'link_url'       => array(
+								'type'        => 'string',
+								'description' => 'Link URL for the theme',
+							),
+							'color_palettes' => array(
+								'type'        => 'array',
+								'description' => 'Array of color palette objects',
+								'items'       => array(
+									'type'       => 'object',
+									'properties' => array(
+										'primary'          => array(
+											'type'        => 'string',
+											'description' => 'Primary color',
+										),
+										'secondary'        => array(
+											'type'        => 'string',
+											'description' => 'Secondary color',
+										),
+										'background'       => array(
+											'type'        => 'string',
+											'description' => 'Background color',
+										),
+										'primary_border'   => array(
+											'type'        => 'string',
+											'description' => 'Primary border color (optional)',
+										),
+										'secondary_border' => array(
+											'type'        => 'string',
+											'description' => 'Secondary border color (optional)',
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+				'_links' => array(
+					'type'        => 'object',
+					'description' => 'Links related to this response',
+					'properties'  => array(
+						'browse_all' => array(
+							'type'        => 'object',
+							'description' => 'Link to browse all themes',
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => 'URL for browsing all themes',
+								),
+							),
+						),
+					),
 				),
 			),
 		);
