@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -39,7 +39,6 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 ];
 
 export const SaveHub = () => {
-	const saveNoticeId = 'site-edit-save-notice';
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
@@ -49,7 +48,7 @@ export const SaveHub = () => {
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createErrorNotice, removeNotice } = useDispatch( noticesStore );
+	const { createErrorNotice } = useDispatch( noticesStore );
 
 	const {
 		dirtyEntityRecords,
@@ -90,70 +89,11 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	useEffect( () => {
-		dirtyEntityRecords.forEach( ( entity ) => {
-			/* This is a hack to reset the entity record when the user navigates away from editing page to main page.
-			This is needed because Gutenberg does not provide a way to reset the entity record. Replace this when we have a better way to do this.
-			We will need to add different conditions here when we implement editing for other entities.
-			 */
-
-			if (
-				entity.kind === 'root' &&
-				entity.name === 'site' &&
-				entity.property
-			) {
-				// Reset site icon edit
-				editEntityRecord(
-					'root',
-					'site',
-					undefined,
-					{
-						[ entity.property ]: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			} else if (
-				entity.kind === 'root' &&
-				entity.name === 'globalStyles'
-			) {
-				editEntityRecord(
-					entity.kind,
-					entity.name,
-					entity.key,
-					{
-						styles: undefined,
-						settings: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			} else {
-				editEntityRecord(
-					entity.kind,
-					entity.name,
-					entity.key,
-					{
-						selection: undefined,
-						blocks: undefined,
-						content: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			}
-		} );
-		// Only run when path changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ urlParams.path ] );
-
-	const save = async () => {
-		const source = `${ urlParams.path.replace(
-			'/customize-store/assembler-hub/',
-			''
-		) }`;
-		recordEvent( 'customize_your_store_assembler_hub_save_click', {
-			source,
-		} );
-		removeNotice( saveNoticeId );
-
+	const save = async (
+		{ redirectToParentAfterSuccess } = {
+			redirectToParentAfterSuccess: false,
+		}
+	) => {
 		try {
 			for ( const { kind, name, key, property } of dirtyEntityRecords ) {
 				if ( kind === 'root' && name === 'site' ) {
@@ -178,7 +118,9 @@ export const SaveHub = () => {
 				}
 			}
 
-			navigator.goToParent();
+			if ( redirectToParentAfterSuccess ) {
+				navigator.goToParent();
+			}
 		} catch ( error ) {
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
@@ -186,17 +128,32 @@ export const SaveHub = () => {
 		}
 	};
 
+	const onClickSaveButton = async () => {
+		const source = `${ urlParams.path.replace(
+			'/customize-store/assembler-hub/',
+			''
+		) }`;
+		recordEvent( 'customize_your_store_assembler_hub_save_click', {
+			source,
+		} );
+
+		await save( {
+			redirectToParentAfterSuccess: true,
+		} );
+	};
+
 	const renderButton = () => {
 		if ( urlParams.path === '/customize-store/assembler-hub' ) {
 			return (
 				<Button
 					variant="primary"
-					onClick={ () => {
+					onClick={ async () => {
 						recordEvent(
 							'customize_your_store_assembler_hub_done_click'
 						);
-
 						setIsResolving( true );
+
+						await save();
 						sendEvent( 'FINISH_CUSTOMIZATION' );
 					} }
 					className="edit-site-save-hub__button"
@@ -218,7 +175,7 @@ export const SaveHub = () => {
 		return (
 			<Button
 				variant="primary"
-				onClick={ save }
+				onClick={ onClickSaveButton }
 				isBusy={ isSaving }
 				disabled={ isDisabled }
 				aria-disabled={ isDisabled }
