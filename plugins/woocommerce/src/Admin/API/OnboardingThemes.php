@@ -159,9 +159,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme activation status.
 	 */
 	public function activate_theme( $request ) {
-		$allowed_themes                 = Themes::get_allowed_themes();
-		$theme                          = sanitize_text_field( $request['theme'] );
-		$theme_switch_via_cys_ai_loader = 1 === absint( $request['theme_switch_via_cys_ai_loader'] );
+		$allowed_themes = Themes::get_allowed_themes();
+		$theme          = sanitize_text_field( $request['theme'] );
 
 		if ( ! in_array( $theme, $allowed_themes, true ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
@@ -174,12 +173,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		if ( ! in_array( $theme, array_keys( $installed_themes ), true ) ) {
 			/* translators: %s: theme slug (example: woocommerce-services) */
 			return new \WP_Error( 'woocommerce_rest_invalid_theme', sprintf( __( 'Invalid theme %s.', 'woocommerce' ), $theme ), 404 );
-		}
-
-		// Prevent the task from being marked as complete if theme is switched via the CYS ai loading screen.
-		if ( $theme_switch_via_cys_ai_loader ) {
-			$task = TaskLists::get_task( 'customize-store' );
-			remove_action( 'switch_theme', array( $task, 'mark_task_as_complete' ) );
 		}
 
 		$result = switch_theme( $theme );
