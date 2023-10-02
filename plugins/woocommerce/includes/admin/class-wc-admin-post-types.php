@@ -137,9 +137,9 @@ class WC_Admin_Post_Types {
 			/* translators: %s: product url */
 			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 			9  => sprintf(
-				/* translators: 1: date 2: product url */
+			/* translators: 1: date 2: product url */
 				__( 'Product scheduled for: %1$s. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), ($post->post_date ? strtotime( $post->post_date ) : false) ) . '</strong>',
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>',
 				esc_url( get_permalink( $post->ID ) )
 			),
 			/* translators: %s: product url */
@@ -159,9 +159,9 @@ class WC_Admin_Post_Types {
 			7  => __( 'Coupon saved.', 'woocommerce' ),
 			8  => __( 'Coupon submitted.', 'woocommerce' ),
 			9  => sprintf(
-				/* translators: %s: date */
+			/* translators: %s: date */
 				__( 'Coupon scheduled for: %s.', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), ($post->post_date ? strtotime( $post->post_date ) : false) ) . '</strong>'
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
 			),
 			10 => __( 'Coupon draft updated.', 'woocommerce' ),
 		);
@@ -187,7 +187,6 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		$theorderDateCreated = $theorder->get_date_created();
 		$messages['shop_order'] = array(
 			0  => '', // Unused. Messages start at index 1.
 			1  => __( 'Order updated.', 'woocommerce' ),
@@ -201,7 +200,7 @@ class WC_Admin_Post_Types {
 			9  => sprintf(
 			/* translators: %s: date */
 				__( 'Order scheduled for: %s.', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), ($theorderDateCreated ? strtotime( $theorderDateCreated ) : false) ) . '</strong>'
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), $theorder->get_id() !== 0 ? strtotime( $theorder->get_date_created() ) : false ) . '</strong>'
 			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and sent.', 'woocommerce' ),
