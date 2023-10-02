@@ -12,16 +12,25 @@ import { customizeStoreStateMachineContext } from '../types';
 import { ThemeCard } from './types';
 import { events } from './';
 
-export const assignThemeCards = assign<
+export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	intro: ( context, event ) => {
 		const themeCards = (
-			event as DoneInvokeEvent< { themeCards: ThemeCard[] } >
-		 ).data.themeCards;
+			event as DoneInvokeEvent< { themeData: { themes: ThemeCard[] } } >
+		 ).data.themeData.themes;
+
 		// type coercion workaround for now
-		return { ...context.intro, themeCards };
+		return {
+			...context.intro,
+			themeData: {
+				themes: themeCards,
+				_links: {
+					browse_all: '/wp-admin/themes.php',
+				},
+			},
+		};
 	},
 } );
 
