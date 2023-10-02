@@ -356,7 +356,12 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute
+																		?.terms
+																		.length >
+																	0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	attribute
@@ -393,7 +398,12 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														) : (
 															<CustomAttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute
+																		?.options
+																		.length >
+																	0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	! attribute.name
