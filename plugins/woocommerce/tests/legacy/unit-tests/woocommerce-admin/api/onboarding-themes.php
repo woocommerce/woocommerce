@@ -219,10 +219,54 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'href', $browse_all_link );
 	}
 
-		/**
-		 * Test that get recommended themes returns the correct data with filter applied.
-		 */
-	public function test_get_recommended_themes_with_filter_applied() {
+	/**
+	 * Test that get recommended themes returns the correct data with filter applied and marketplace suggestions disabled.
+	 */
+	public function test_get_recommended_themes_with_filter_applied_when_marketplace_suggestions_disabled() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/recommended' );
+
+		$request->set_query_params(
+			array(
+				'industry' => 'example-industry',
+				'currency' => 'EUR',
+			)
+		);
+
+		// Mock the get_option() function to return 'yes' for marketplace suggestions.
+		// This is done to test the marketplace suggestions scenario.
+		add_filter(
+			'pre_option_woocommerce_show_marketplace_suggestions',
+			function () {
+				return 'no';
+			}
+		);
+
+		// Mock the apply_filters() function to capture the response.
+		add_filter(
+			'__experimental_woocommerce_rest_get_recommended_themes',
+			function ( $result, $industry, $currency ) {
+				$result['industry'] = $industry;
+				$result['currency'] = $currency;
+				$result['themes']   = array();
+				return $result;
+			},
+			10,
+			3,
+		);
+
+		$response = $this->server->dispatch( $request );
+		$result   = $response->get_data();
+
+		$this->assert_filter_applied_results( $result );
+	}
+
+
+	/**
+	 * Test that get recommended themes returns the correct data with filter applied and marketplace suggestions enabled.
+	 */
+	public function test_get_recommended_themes_with_filter_applied_when_marketplace_suggestions_enabled() {
 		wp_set_current_user( $this->user );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/recommended' );
@@ -245,7 +289,7 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 
 		// Mock the apply_filters() function to capture the response.
 		add_filter(
-			'woocommerce_rest_get_recommended_themes',
+			'__experimental_woocommerce_rest_get_recommended_themes',
 			function ( $result, $industry, $currency ) {
 				$result['industry'] = $industry;
 				$result['currency'] = $currency;
@@ -259,6 +303,15 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$result   = $response->get_data();
 
+		$this->assert_filter_applied_results( $result );
+	}
+
+	/**
+	 * Check that get recommended themes returns the correct data with filter applied.
+	 *
+	 * @param array $result The result of API call.
+	 */
+	private function assert_filter_applied_results( $result ) {
 		// Check that the response is an array.
 		$this->assertIsArray( $result );
 

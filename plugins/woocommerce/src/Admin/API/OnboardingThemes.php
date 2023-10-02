@@ -230,13 +230,31 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ||
 			get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no'
 		) {
-			return array(
-				'themes' => array(),
-				'_links' => array(
-					'browse_all' => array(
-						'href' => home_url( '/wp-admin/themes.php' ),
+
+			/**
+			 * Filter the onboarding recommended themes response.
+			 *
+			 * @since 8.3.0
+			 *
+			 * @param array $response The recommended themes response.
+			 * @param array $filtered_themes The filtered themes.
+			 * @param string $industry The industry to filter by (if provided).
+			 * @param string $currency The currency to convert prices to. (USD, AUD, CAD, EUR, GBP).
+			 *
+			 * @return array
+			 */
+			return apply_filters(
+				'__experimental_woocommerce_rest_get_recommended_themes',
+				array(
+					'themes' => array(),
+					'_links' => array(
+						'browse_all' => array(
+							'href' => home_url( '/wp-admin/themes.php' ),
+						),
 					),
 				),
+				$industry,
+				$currency
 			);
 		}
 
@@ -317,7 +335,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		 * @return array
 		 */
 		return apply_filters(
-			'woocommerce_rest_get_recommended_themes',
+			'__experimental_woocommerce_rest_get_recommended_themes',
 			$response,
 			$industry,
 			$currency
