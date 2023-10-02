@@ -24,11 +24,9 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers with COT enabled.
+            - name: Load docker images and start containers
               working-directory: plugins/woocommerce
-              env:
-                ENABLE_HPOS: 1
-              run: pnpm env:test:cot --filter=woocommerce
+              run: pnpm env:test --filter=woocommerce
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -39,6 +37,7 @@ jobs:
               id: run_playwright_e2e_tests
               env:
                   USE_WP_ENV: 1
+                  ENABLE_HPOS: 0
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
@@ -67,7 +66,7 @@ jobs:
                   retention-days: 5
 
     non-cot-api-tests-run:
-        name: Runs API tests with COT enabled.
+        name: Runs API tests with COT disabled.
         runs-on: ubuntu-20.04
         permissions:
           contents: read
@@ -80,11 +79,9 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers with COT enabled.
+            - name: Load docker images and start containers with COT disabled.
               working-directory: plugins/woocommerce
-              env:
-                ENABLE_HPOS: 1
-              run: pnpm env:test:cot --filter=woocommerce
+              run: pnpm env:test --filter=woocommerce
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests
@@ -93,6 +90,7 @@ jobs:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
+                  ENABLE_HPOS: 0
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate Playwright API Test report.
