@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { BlockEditProps } from '@wordpress/blocks';
 import {
 	OPTIONS_STORE_NAME,
 	Product,
@@ -34,11 +33,12 @@ import {
 	ShippingDimensionsImage,
 } from '../../components/shipping-dimensions-image';
 import { useValidation } from '../../contexts/validation-context';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	clientId,
-}: BlockEditProps< ShippingDimensionsBlockAttributes > ) {
+}: ProductEditorBlockEditProps< ShippingDimensionsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ dimensions, setDimensions ] =

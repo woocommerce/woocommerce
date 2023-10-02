@@ -4,13 +4,14 @@
 import { InnerBlocks } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import type { BlockAttributes } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
 import { TabButton } from './tab-button';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export interface TabBlockAttributes extends BlockAttributes {
 	id: string;
@@ -23,14 +24,10 @@ export function Edit( {
 	setAttributes,
 	attributes,
 	context,
-}: BlockEditProps< TabBlockAttributes > & {
-	context?: {
-		selectedTab?: string | null;
-	};
-} ) {
+}: ProductEditorBlockEditProps< TabBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { id, title, order, isSelected: contextIsSelected } = attributes;
-	const isSelected = context?.selectedTab === id;
+	const isSelected = context.selectedTab === id;
 	if ( isSelected !== contextIsSelected ) {
 		setAttributes( { isSelected } );
 	}

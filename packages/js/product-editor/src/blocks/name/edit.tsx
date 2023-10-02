@@ -9,7 +9,6 @@ import {
 	useState,
 } from '@wordpress/element';
 
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -39,8 +38,11 @@ import { EditProductLinkModal } from '../../components/edit-product-link-modal';
 import { useValidation } from '../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../hooks/use-product-edits';
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );

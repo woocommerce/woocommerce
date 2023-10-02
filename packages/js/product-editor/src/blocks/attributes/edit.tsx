@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
+import { BlockAttributes } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductAttribute } from '@woocommerce/data';
@@ -14,8 +14,11 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { Attributes as AttributesContainer } from '../../components/attributes/attributes';
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
 		ProductAttribute[]
 	>( 'postType', 'product', 'attributes' );

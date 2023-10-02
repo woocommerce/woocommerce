@@ -22,5 +22,5 @@ export const init = () =>
 	registerWooBlockType( {
 		name,
 		metadata: metadata as never,
-		settings,
+		settings: settings as never,
 	} );

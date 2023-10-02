@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, useState } from '@wordpress/element';
@@ -19,10 +18,11 @@ import {
  */
 
 import { RequirePasswordBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< RequirePasswordBlockAttributes > ) {
+}: ProductEditorBlockEditProps< RequirePasswordBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label } = attributes;
 

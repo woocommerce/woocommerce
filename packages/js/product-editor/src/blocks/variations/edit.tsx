@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product, ProductAttribute } from '@woocommerce/data';
@@ -33,10 +32,11 @@ import { getAttributeId } from '../../components/attribute-control/utils';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 import { hasAttributesUsedForVariations } from '../../utils';
 import { TRACKS_SOURCE } from '../../constants';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< VariationsBlockAttributes > ) {
+}: ProductEditorBlockEditProps< VariationsBlockAttributes > ) {
 	const { description } = attributes;
 
 	const { generateProductVariations } = useProductVariationsHelper();
