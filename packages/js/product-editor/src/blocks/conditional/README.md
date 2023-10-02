@@ -2,7 +2,7 @@
 
 Container to only conditionally render inner blocks.
 
-https://github.com/woocommerce/woocommerce/assets/13437655/ccf6888d-59bd-4f7c-9487-105e5e0d8166
+<video src="https://github.com/woocommerce/woocommerce/assets/13437655/ccf6888d-59bd-4f7c-9487-105e5e0d8166"></video>
 
 ## Attributes
 
