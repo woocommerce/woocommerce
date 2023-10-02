@@ -4,34 +4,34 @@
 import * as peggy from 'peggy';
 
 const grammar = `
-start = logicalOr
+Start = LogicalOr
 
-logicalOr
-	= left:logicalAnd whitespace+ "||" whitespace+ right:logicalOr {
+LogicalOr
+	= left:LogicalAnd WhiteSpace+ "||" WhiteSpace+ right:LogicalOr {
 		return left || right;
 	}
-	/ logicalAnd
+	/ LogicalAnd
 
-logicalAnd
-	= left:primary whitespace+ "&&" whitespace+ right:logicalAnd {
+LogicalAnd
+	= left:Primary WhiteSpace+ "&&" WhiteSpace+ right:LogicalAnd {
 		return left && right;
 	}
-	/ factor
+	/ Factor
 
-factor
-	= "!" whitespace* operand:factor {
+Factor
+	= "!" WhiteSpace* operand:Factor {
 		return !operand;
 	}
-	/ primary
+	/ Primary
 
-primary
-	= variable
-	/ "(" logicalOr:logicalOr ")" {
+Primary
+	= Variable
+	/ "(" logicalOr:LogicalOr ")" {
 		return logicalOr;
 	}
 
-variable
-	= variable:identifier accessor:("." identifier)* {
+Variable
+	= variable:Identifier accessor:("." Identifier)* {
 		const path = variable.split( '.' );
 		let result = path.reduce( ( nextObject, propertyName ) => nextObject[ propertyName ], options.context );
 
@@ -42,11 +42,12 @@ variable
 		return result;
 	}
 
-identifier
+Identifier
 	= identifier:$[a-zA-Z0-9_]+
 
-whitespace
-	= [ \t]
+WhiteSpace
+	= " "
+	/ "\t"
 `;
 
 export const parser = peggy.generate( grammar );
