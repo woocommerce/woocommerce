@@ -3090,7 +3090,21 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			}
 		);
 
-		$time = time();
+		/**
+		 * fix for previously flaky test:
+		 * less than a second of time passes while the following saves happen.
+		 */
+		$datetime = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		$now      = $datetime->format( 'Y-m-d H:i:s' );
+		$this->reset_legacy_proxy_mocks();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function( $type, $gmt ) {
+					return $now;
+				},
+			)
+		);
+
 		$order->add_meta_data( 'key1', 'value' );
 		$order->save_meta_data();
 		$order->add_meta_data( 'key2', 'value' );
@@ -3102,11 +3116,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->delete_meta_data( 'key1' );
 		$order->save_meta_data();
 
-		$expected_saves = 1;
-		if ( $time < time() ) {
-			$expected_saves = 2;
-		}
-		$this->assertEquals( $expected_saves, $count );
+		$this->assertEquals( 1, $count );
 		remove_all_actions( 'woocommerce_before_order_object_save' );
 	}
 
