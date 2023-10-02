@@ -256,7 +256,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 40,
 				'attributes' => [
 					'title'       => __( 'Downloads', 'woocommerce' ),
-					'description' => __( 'Add and manage files for the customer to download immediately after purchasing the product.', 'woocommerce' ),
+					'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
 				],
 			]
 		)->add_block(

@@ -3,12 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockEditProps } from '@wordpress/blocks';
-import classnames from 'classnames';
+import { Button, Spinner } from '@wordpress/components';
 import {
 	createElement,
 	Fragment,
 	createInterpolateElement,
+	useState,
+	useEffect,
 } from '@wordpress/element';
+import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
@@ -21,23 +24,18 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { UploadsBlockAttributes } from './types';
+import { DownloadableFileItem, UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
-import { Button } from '@wordpress/components';
-import { closeSmall } from '@wordpress/icons';
 
-function getFileName( download: ProductDownload ) {
-	if ( download.name ) {
-		return download.name;
-	}
-
-	const [ name ] = download.file.split( '/' ).reverse();
+function getFileName( url?: string ) {
+	const [ name ] = url?.split( '/' ).reverse() ?? [];
 	return name;
 }
 
 export function Edit( {
 	attributes,
 }: BlockEditProps< UploadsBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
 		'postType',
 		'product',
@@ -48,17 +46,76 @@ export function Edit( {
 		'product',
 		'downloads'
 	);
+	const [ fileItems, setFileItems ] = useState< DownloadableFileItem[] >(
+		[]
+	);
 
-	const blockProps = useWooBlockProps( attributes );
+	useEffect( () => {
+		setFileItems( ( currentItems ) => {
+			const downloadsMap = downloads.reduce<
+				Record< string, ProductDownload >
+			>(
+				( current, download ) => ( {
+					...current,
+					[ download.id ]: download,
+				} ),
+				{}
+			);
+
+			const fileItemsInDownloads = currentItems.filter(
+				function keepPresentDownload( item ) {
+					if ( item.download.id === '' ) {
+						return true;
+					}
+					if (
+						item.download.id &&
+						item.download.id in downloadsMap
+					) {
+						delete downloadsMap[ item.download.id ];
+						return true;
+					}
+					return false;
+				}
+			);
+
+			return Object.values( downloadsMap ).reduce<
+				DownloadableFileItem[]
+			>( function addAbsentDownload( items, download ) {
+				items.push( {
+					key: String( download.id ),
+					download,
+				} );
+				return items;
+			}, fileItemsInDownloads );
+		} );
+	}, [ downloads ] );
 
 	function handleFileUpload( files: MediaItem[] ) {
-		const uploadedFiles = files
-			.filter( ( file ) => file.id )
-			.map( ( file ) => ( {
-				id: String( file.id ),
-				file: file.url,
-				name: '',
-			} ) );
+		const { uploadedFiles, items } = files.reduce< {
+			uploadedFiles: Product[ 'downloads' ];
+			items: DownloadableFileItem[];
+		} >(
+			( current, file, index ) => {
+				const download = {
+					id: file.id ? String( file.id ) : '',
+					file: file.url,
+					name: '',
+				};
+				const item = {
+					key: `_${ index }`,
+					download,
+					uploading: ! Boolean( file.id ),
+				};
+
+				if ( download.id ) {
+					current.uploadedFiles.push( download );
+				}
+				current.items.push( item );
+
+				return current;
+			},
+			{ uploadedFiles: [], items: [] }
+		);
 
 		if ( uploadedFiles.length ) {
 			if ( ! downloads.length ) {
@@ -66,13 +123,17 @@ export function Edit( {
 			}
 			setDownloads( [ ...downloads, ...uploadedFiles ] );
 		}
+
+		setFileItems( items );
 	}
 
-	function removeHandler( download: ProductDownload ) {
+	function removeHandler( fileItem: DownloadableFileItem ) {
 		return function handleRemoveClick() {
 			const otherDownloads = downloads.reduce< ProductDownload[] >(
-				( others, current ) => {
-					if ( current.id === download.id ) {
+				function removeDownload( others, current ) {
+					if (
+						String( current.id ) === String( fileItem.download.id )
+					) {
 						return others;
 					}
 					return [ ...others, current ];
@@ -90,16 +151,28 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			{ Boolean( downloads.length ) ? (
+			{ Boolean( fileItems.length ) ? (
 				<Sortable className="wp-block-woocommerce-product-downloads-field__table">
-					{ downloads.map( ( download ) => (
-						<ListItem key={ String( download.id ) }>
-							<span>{ getFileName( download ) }</span>
+					{ fileItems.map( ( fileItem ) => (
+						<ListItem key={ String( fileItem.key ) }>
+							<span>
+								{ fileItem.download.name ||
+									getFileName( fileItem.download.file ) }
+							</span>
 							<div className="wp-block-woocommerce-product-downloads-field__table-actions">
+								{ fileItem.uploading && (
+									<Spinner
+										aria-label={ __(
+											'Uploading file',
+											'woocommerce'
+										) }
+									/>
+								) }
 								<Button
 									icon={ closeSmall }
 									label={ __( 'Remove file', 'woocommerce' ) }
-									onClick={ removeHandler( download ) }
+									disabled={ fileItem.uploading }
+									onClick={ removeHandler( fileItem ) }
 								/>
 							</div>
 						</ListItem>
@@ -113,21 +186,25 @@ export function Edit( {
 							<p className="woocommerce-product-form__remove-files-drop-zone-label">
 								{ createInterpolateElement(
 									__(
-										'Supported file types: <Types /> and <LastType/>. <link>Learn more</link>'
+										'Supported file types: <Types /> and more. <link>View all</link>',
+										'woocommerce'
 									),
 									{
 										Types: (
 											<Fragment>
-												PNG, JPG, PDF, PPT, DOC, MP3
+												PNG, JPG, PDF, PPT, DOC, MP3,
+												MP4
 											</Fragment>
 										),
-										LastType: <Fragment>MP4</Fragment>,
 										link: (
 											<a
-												href="#"
+												href="https://codex.wordpress.org/Uploading_Files"
 												target="_blank"
 												rel="noreferrer"
-											/>
+												onClick={ ( event ) =>
+													event.stopPropagation()
+												}
+											></a>
 										),
 									}
 								) }
@@ -135,9 +212,11 @@ export function Edit( {
 						</>
 					}
 					buttonText=""
+					allowedMediaTypes={ [ '*' ] }
 					multipleSelect={ 'add' }
-					onError={ () => null }
 					onUpload={ handleFileUpload }
+					onFileUploadChange={ handleFileUpload }
+					onError={ () => null }
 				/>
 			) }
 		</div>
