@@ -249,7 +249,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		// Downloads section
+		// Downloads section.
 		$general_group->add_section(
 			[
 				'id'         => 'product-downloads-section',
