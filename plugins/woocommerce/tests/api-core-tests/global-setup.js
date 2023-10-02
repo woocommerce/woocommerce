@@ -1,7 +1,6 @@
-const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
+const { GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 module.exports = async ( config ) => {
 	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
@@ -197,44 +196,6 @@ module.exports = async ( config ) => {
 			await expect( updateCompleteMessage ).toBeVisible();
 		} else {
 			console.log( 'No DB update needed' );
-		}
-	}
-
-	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
-	// (if a value for ENABLE_HPOS was set)
-	// This was always being set to 'yes' after login in wp-env so this step ensures the
-	// correct value is set before we begin our tests
-	if (ENABLE_HPOS) {
-		const hposSettingRetries = 5;
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
-		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
-
-		for (let i = 0; i < hposSettingRetries; i++) {
-			try {
-				console.log( `Trying to switch ${ value === 'yes' ? 'on' : 'off' } HPOS...` );
-				const response = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', { value } );
-				if ( response.data.value === value ) {
-					console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
-					hposConfigured = true;
-					break;
-				}
-			} catch (e) {
-				console.log( `HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }` );
-				console.log(e);
-			}
-		}
-
-		if ( ! hposConfigured ) {
-			console.error(
-				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
-			);
-			process.exit( 1 );
 		}
 	}
 };
