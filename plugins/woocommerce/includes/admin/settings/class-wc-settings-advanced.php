@@ -392,11 +392,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'id'    => 'legacy_api_options',
 				),
 				array(
-					'title'   => __( 'Legacy API', 'woocommerce' ),
-					'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
-					'id'      => 'woocommerce_api_enabled',
-					'type'    => 'checkbox',
-					'default' => 'no',
+					'title'    => __( 'Legacy API', 'woocommerce' ),
+					'desc'     => __( 'Enable the legacy REST API', 'woocommerce' ),
+					'id'       => 'woocommerce_api_enabled',
+					'type'     => 'checkbox',
+					'default'  => 'no',
+					'desc_tip' => sprintf(
+						// translators: Placeholder is a URL.
+						__(
+							'⚠<b>️ The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will be available to re-enable it. <b><a target=”_blank” href="%s">Learn more about this change</a></b>',
+							'woocommerce'
+						),
+						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					),
 				),
 				array(
 					'type' => 'sectionend',
