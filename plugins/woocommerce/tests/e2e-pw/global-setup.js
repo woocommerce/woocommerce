@@ -78,7 +78,6 @@ module.exports = async ( config ) => {
 				.storageState( { path: process.env.ADMINSTATE } );
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
-
 			break;
 		} catch ( e ) {
 			console.log(
@@ -184,7 +183,7 @@ module.exports = async ( config ) => {
 
 
 	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
-	// This was always being set to 'yes' after login in wp-env so this ensures the
+	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
 	const hposSettingRetries = 5;
 	const api = new wcApi( {
@@ -198,12 +197,10 @@ module.exports = async ( config ) => {
 		try {
 			if (ENABLE_HPOS === undefined || ENABLE_HPOS === '0') {
 				console.log( 'Trying to switch off HPOS...' );
-
 				// call API to update HPOS setting
 				const HPOSSetOffResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
 					value: "no"
 				} );
-	
 				// validate HPOS setting
 				if (HPOSSetOffResponse.data.value === 'no') {
 					console.log('HPOS Switched off successfully');
@@ -213,12 +210,10 @@ module.exports = async ( config ) => {
 			}
 			if (ENABLE_HPOS === '1') {
 				console.log( 'Trying to switch on HPOS...' );
-
 				// call API to update HPOS setting
 				const HPOSSetOnResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
 					value: "yes"
 				} );
-	
 				// validate HPOS setting
 				if (HPOSSetOnResponse.data.value === 'yes') {
 					console.log('HPOS Switched on successfully');
