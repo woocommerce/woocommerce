@@ -4018,6 +4018,48 @@ table {
 	}
 }
 
+.wc-shipping-class-modal {
+	font-family: $font-sf-pro-text;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 18px;
+
+	.edit {
+		margin: 5px 0;
+	}
+	
+	.edit > input,
+	.edit > select {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.view {
+		font-weight: 600;
+	}
+
+	.wc-shipping-class-modal-action-inactive {
+		display: none;
+	}
+
+	.wc-shipping-class-modal-input {
+		padding: 10px 0;
+	}
+
+	.wc-shipping-class-count {
+		display: none;
+	}
+
+	.wc-shipping-class-modal-help-text {
+		font-size: 12px;
+		line-height: 17px;
+	}
+}
+
+.wc-shipping-class-hide-sibling-view + .view { 
+	display: none;
+}
+
 .wc-shipping-zones-heading .page-title-action {
 	display: inline-block;
 }
@@ -4229,6 +4271,7 @@ table.wc-shipping-classes {
 	.wc-shipping-class-name,
 	.wc-shipping-class-slug,
 	.wc-shipping-zone-name,
+	.wc-shipping-class-actions,
 	.wc-shipping-zone-region {
 		input,
 		select,
