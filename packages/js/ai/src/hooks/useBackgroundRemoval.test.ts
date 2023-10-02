@@ -30,13 +30,9 @@ describe( 'useBackgroundRemoval hook', () => {
 		const imageFile = new File( [ new ArrayBuffer( 51200 ) ], 'test.png', {
 			type: 'image/png',
 		} );
-		const returnedImageType = 'jpeg';
-		const returnedImageSize = 'hd';
 
 		mockRequestParams = {
 			imageFile,
-			returnedImageType,
-			returnedImageSize,
 		};
 		mockedRequestJetpackToken.mockResolvedValue( { token: 'fake_token' } );
 	} );

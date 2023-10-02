@@ -3,7 +3,11 @@ type BackgroundRemovalParams = {
 	libraryFilename: string;
 };
 
-declare const ajaxurl: string;
+declare global {
+	interface Window {
+		ajaxurl?: string;
+	}
+}
 
 export const uploadImageToLibrary = async ( {
 	imageBlob,
@@ -19,7 +23,7 @@ export const uploadImageToLibrary = async ( {
 			throw e;
 		},
 		onFileChange: ( files: Array< { id: number } > ) => {
-			if ( files.length > 0 && files[ 0 ] && files[ 0 ].id ) {
+			if ( files.length > 0 && files[ 0 ]?.id ) {
 				_fileId = files[ 0 ].id;
 			}
 		},
@@ -29,9 +33,12 @@ export const uploadImageToLibrary = async ( {
 		return;
 	}
 
-	const nonceValue =
-		( document.querySelector( '#_wpnonce' ) as HTMLInputElement | null )
-			?.value ?? '';
+	const nonceValue = window?.JP_CONNECTION_INITIAL_STATE.apiNonce ?? '';
+	const ajaxUrl = window?.ajaxurl;
+
+	if ( ! ( ajaxUrl && nonceValue ) ) {
+		throw new Error( 'Missing nonce or ajaxurl' );
+	}
 
 	const formData = new FormData();
 
@@ -39,7 +46,7 @@ export const uploadImageToLibrary = async ( {
 	formData.append( 'id', String( _fileId ) );
 	formData.append( '_ajax_nonce', nonceValue );
 
-	const response = await fetch( ajaxurl, {
+	const response = await fetch( ajaxUrl, {
 		method: 'POST',
 		body: formData,
 	} ).then( ( res ) => res.json() );
