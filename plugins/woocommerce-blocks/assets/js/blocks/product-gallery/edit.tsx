@@ -88,19 +88,14 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
-const setMode = (
-	currentTemplateId: string,
-	templateType: string,
-	setAttributes: ( attrs: Partial< ProductGalleryAttributes > ) => void
-) => {
+const getMode = ( currentTemplateId: string, templateType: string ) => {
 	if (
 		templateType === 'wp_template_part' &&
 		currentTemplateId.includes( 'product-gallery' )
 	) {
-		setAttributes( {
-			mode: 'full',
-		} );
+		return 'full';
 	}
+	return 'standard';
 };
 
 export const Edit = ( {
@@ -123,17 +118,22 @@ export const Edit = ( {
 	);
 
 	useEffect( () => {
-		setMode( currentTemplateId, templateType, setAttributes );
-	}, [ currentTemplateId, setAttributes, templateType ] );
+		const mode = getMode( currentTemplateId, templateType );
 
-	useEffect( () => {
 		setAttributes( {
 			...attributes,
+			mode,
 			productGalleryClientId: clientId,
 		} );
 		// Move the Thumbnails block to the correct above or below the Large Image based on the thumbnailsPosition attribute.
 		moveInnerBlocksToPosition( attributes, clientId );
-	}, [ setAttributes, attributes, clientId ] );
+	}, [
+		setAttributes,
+		attributes,
+		clientId,
+		currentTemplateId,
+		templateType,
+	] );
 
 	return (
 		<div { ...blockProps }>
