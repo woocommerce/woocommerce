@@ -407,11 +407,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_description( wp_filter_post_kses( $request['description'] ) );
 		}
 
+		// Post content (- HTML Format -).
+		if ( isset( $request['description'] ) ) {
+			if ( isset( $request['enable_html_description'] ) && true === $request['enable_html_description'] ) {
+				$product->set_description( html_entity_decode( wp_filter_post_kses( $request['description'] ) ) );
+			}
+		}
+		
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
 			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
 		}
 
+		// Post excerpt (- HTML Format -).
+		if ( isset( $request['short_description'] ) ) {
+			if ( isset( $request['enable_html_short_description'] ) && true === $request['enable_html_short_description'] ) {
+				$product->set_short_description( html_entity_decode( wp_filter_post_kses( $request['short_description'] ) ) );
+			}
+		}
+		
 		// Post status.
 		if ( isset( $request['status'] ) ) {
 			$product->set_status( get_post_status_object( $request['status'] ) ? $request['status'] : 'draft' );
