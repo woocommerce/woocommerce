@@ -33,7 +33,7 @@ export const BackgroundRemovalLink = () => {
 	const [ state, setState ] = useState< '' | 'generating' | 'uploading' >(
 		''
 	);
-	const [ error, setError ] = useState< string | null >( null );
+	const [ displayError, setDisplayError ] = useState< string | null >( null );
 
 	const onRemoveClick = async () => {
 		try {
@@ -43,7 +43,7 @@ export const BackgroundRemovalLink = () => {
 				getCurrentAttachmentDetails();
 
 			if ( ! imgUrl ) {
-				setError( getErrorMessage() );
+				setDisplayError( getErrorMessage() );
 				return;
 			}
 
@@ -67,14 +67,18 @@ export const BackgroundRemovalLink = () => {
 			} );
 			setState( '' );
 		} catch ( err ) {
-			setError(
-				getErrorMessage( ( error as { code?: string } )?.code ?? '' )
+			//eslint-disable-next-line no-console
+			console.error( err );
+			setDisplayError(
+				getErrorMessage( ( err as { code?: string } )?.code ?? '' )
 			);
 		}
 	};
 
-	if ( error ) {
-		return <span className="background-removal-error">{ error }</span>;
+	if ( displayError ) {
+		return (
+			<span className="background-removal-error">{ displayError }</span>
+		);
 	}
 
 	if ( state === 'generating' ) {
