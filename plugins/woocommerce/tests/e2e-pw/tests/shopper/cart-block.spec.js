@@ -8,14 +8,32 @@ const singleProductPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const firstCrossSellProductPrice = '25.00';
 const secondCrossSellProductPrice = '15.00';
+const coupons = [
+	{
+		code: '5fixedcart',
+		discount_type: 'fixed_cart',
+		amount: '5.00',
+	},
+	{
+		code: '50percoff',
+		discount_type: 'percent',
+		amount: '50',
+	},
+	{
+		code: '10fixedproduct',
+		discount_type: 'fixed_product',
+		amount: '10.00',
+	},
+];
 
 const pageTitle = 'Cart Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const productSlug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 
 let product1Id, product2Id, product3Id;
 
 test.describe( 'Cart Block page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	const couponBatchId = new Array();
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -23,6 +41,10 @@ test.describe( 'Cart Block page', () => {
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
+		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
 		} );
 		// add 3 products
 		await api
@@ -57,6 +79,16 @@ test.describe( 'Cart Block page', () => {
 			.then( ( response ) => {
 				product1Id = response.data.id;
 			} );
+		// add coupons
+		await api
+			.post( 'coupons/batch', {
+				create: coupons,
+			} )
+			.then( ( response ) => {
+				for ( let i = 0; i < response.data.create.length; i++ ) {
+					couponBatchId.push( response.data.create[ i ].id );
+				}
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -69,6 +101,7 @@ test.describe( 'Cart Block page', () => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id, product3Id ],
 		} );
+		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
 		const base64auth = Buffer.from(
 			`${ admin.username }:${ admin.password }`
 		).toString( 'base64' );
@@ -91,9 +124,18 @@ test.describe( 'Cart Block page', () => {
 		} );
 	} );
 
+	test.beforeEach( async ( { context } ) => {
+		// Shopping cart is very sensitive to cookies, so be explicit
+		await context.clearCookies();
+	} );
+
 	test( 'can see empty cart block', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log In' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		const welcomeModalVisible = await page
 			.getByRole( 'heading', {
 				name: 'Welcome to the block editor',
@@ -144,9 +186,6 @@ test.describe( 'Cart Block page', () => {
 		page,
 	} ) => {
 		// add product to cart block
-		const productSlug = simpleProductName
-			.replace( / /gi, '-' )
-			.toLowerCase();
 		await page.goto( `product/${ productSlug }` );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.goto( pageSlug );
@@ -226,6 +265,118 @@ test.describe( 'Cart Block page', () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
+		).toBeVisible();
+	} );
+
+	test( 'allows cart block to apply coupon of any type', async ( {
+		page,
+	} ) => {
+		const totals = [ '$50.00', '$27.50', '$45.00' ];
+		// add product to cart block
+		await page.goto( `product/${ productSlug }` );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// apply all coupon types
+		for ( let i = 0; i < coupons.length; i++ ) {
+			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+			await page
+				.locator( '#wc-block-components-totals-coupon__input-0' )
+				.fill( coupons[ i ].code );
+			await page.getByText( 'Apply', { exact: true } ).click();
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.getByText(
+						`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
+					)
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+				)
+			).toHaveText( totals[ i ] );
+			await page.locator( '.wc-block-components-chip__remove' ).click();
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.getByText(
+						`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
+					)
+			).toBeVisible();
+		}
+	} );
+
+	test( 'allows cart block to apply multiple coupons', async ( { page } ) => {
+		const totals = [ '$50.00', '$22.50', '$12.50' ];
+		// add product to cart block
+		await page.goto( `product/${ productSlug }` );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// add all coupon types
+		for ( let i = 0; i < coupons.length; i++ ) {
+			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+			await page
+				.locator( '#wc-block-components-totals-coupon__input-0' )
+				.fill( coupons[ i ].code );
+			await page.getByText( 'Apply', { exact: true } ).click();
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.getByText(
+						`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
+					)
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+				)
+			).toHaveText( totals[ i ] );
+		}
+	} );
+
+	test( 'prevents cart block applying same coupon twice', async ( {
+		page,
+	} ) => {
+		// add product to cart block
+		await page.goto( `product/${ productSlug }` );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// try to add two same coupons and verify the error message
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+		await page
+			.locator( '#wc-block-components-totals-coupon__input-0' )
+			.fill( coupons[ 0 ].code );
+		await page.getByText( 'Apply', { exact: true } ).click();
+		await expect(
+			page
+				.locator( '.wc-block-components-notice-banner__content' )
+				.getByText(
+					`Coupon code "${ coupons[ 0 ].code }" has been applied to your cart.`
+				)
+		).toBeVisible();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+		await page
+			.locator( '#wc-block-components-totals-coupon__input-0' )
+			.fill( coupons[ 0 ].code );
+		await page.getByText( 'Apply', { exact: true } ).click();
+		await expect(
+			page
+				.getByRole( 'alert' )
+				.getByText(
+					`Coupon code "${ coupons[ 0 ].code }" has already been applied.`
+				)
 		).toBeVisible();
 	} );
 } );
