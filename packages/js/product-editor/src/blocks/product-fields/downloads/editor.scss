@@ -31,6 +31,16 @@ $fixed-section-height: 224px;
 		flex: 1 0 auto;
 	}
 
+	&__table-filename {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__table-filename-description {
+		color: $gray-700;
+	}
+
 	&__table-actions {
 		display: flex;
 		justify-content: flex-end;

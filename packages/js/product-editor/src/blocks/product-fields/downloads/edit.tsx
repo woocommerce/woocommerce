@@ -62,21 +62,24 @@ export function Edit( {
 				{}
 			);
 
-			const fileItemsInDownloads = currentItems.filter(
-				function keepPresentDownload( item ) {
-					if ( item.download.id === '' ) {
-						return true;
-					}
-					if (
-						item.download.id &&
-						item.download.id in downloadsMap
-					) {
-						delete downloadsMap[ item.download.id ];
-						return true;
-					}
-					return false;
+			const fileItemsInDownloads = currentItems.reduce<
+				DownloadableFileItem[]
+			>( function keepPresentDownload( items, item ) {
+				if ( item.download.id === '' ) {
+					items.push( item );
+					return items;
 				}
-			);
+				if ( item.download.id && item.download.id in downloadsMap ) {
+					const download = downloadsMap[ item.download.id ];
+					delete downloadsMap[ item.download.id ];
+					items.push( {
+						...item,
+						download,
+					} );
+					return items;
+				}
+				return items;
+			}, [] );
 
 			return Object.values( downloadsMap ).reduce<
 				DownloadableFileItem[]
@@ -99,7 +102,7 @@ export function Edit( {
 				const download = {
 					id: file.id ? String( file.id ) : '',
 					file: file.url,
-					name: '',
+					name: getFileName( file.url ),
 				};
 				const item = {
 					key: `_${ index }`,
@@ -153,30 +156,45 @@ export function Edit( {
 		<div { ...blockProps }>
 			{ Boolean( fileItems.length ) ? (
 				<Sortable className="wp-block-woocommerce-product-downloads-field__table">
-					{ fileItems.map( ( fileItem ) => (
-						<ListItem key={ String( fileItem.key ) }>
-							<span>
-								{ fileItem.download.name ||
-									getFileName( fileItem.download.file ) }
-							</span>
-							<div className="wp-block-woocommerce-product-downloads-field__table-actions">
-								{ fileItem.uploading && (
-									<Spinner
-										aria-label={ __(
-											'Uploading file',
+					{ fileItems.map( ( fileItem ) => {
+						const nameFromUrl = getFileName(
+							fileItem.download.file
+						);
+
+						return (
+							<ListItem key={ String( fileItem.key ) }>
+								<div className="wp-block-woocommerce-product-downloads-field__table-filename">
+									<span>{ fileItem.download.name }</span>
+									{ fileItem.download.name !==
+										nameFromUrl && (
+										<span className="wp-block-woocommerce-product-downloads-field__table-filename-description">
+											{ nameFromUrl }
+										</span>
+									) }
+								</div>
+
+								<div className="wp-block-woocommerce-product-downloads-field__table-actions">
+									{ fileItem.uploading && (
+										<Spinner
+											aria-label={ __(
+												'Uploading file',
+												'woocommerce'
+											) }
+										/>
+									) }
+									<Button
+										icon={ closeSmall }
+										label={ __(
+											'Remove file',
 											'woocommerce'
 										) }
+										disabled={ fileItem.uploading }
+										onClick={ removeHandler( fileItem ) }
 									/>
-								) }
-								<Button
-									icon={ closeSmall }
-									label={ __( 'Remove file', 'woocommerce' ) }
-									disabled={ fileItem.uploading }
-									onClick={ removeHandler( fileItem ) }
-								/>
-							</div>
-						</ListItem>
-					) ) }
+								</div>
+							</ListItem>
+						);
+					} ) }
 				</Sortable>
 			) : (
 				<MediaUploader
@@ -197,6 +215,7 @@ export function Edit( {
 											</Fragment>
 										),
 										link: (
+											// eslint-disable-next-line jsx-a11y/anchor-has-content
 											<a
 												href="https://codex.wordpress.org/Uploading_Files"
 												target="_blank"
@@ -204,7 +223,7 @@ export function Edit( {
 												onClick={ ( event ) =>
 													event.stopPropagation()
 												}
-											></a>
+											/>
 										),
 									}
 								) }
