@@ -89,42 +89,28 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	const save = async (
-		{ redirectToParentAfterSuccess } = {
-			redirectToParentAfterSuccess: false,
-		}
-	) => {
-		try {
-			for ( const { kind, name, key, property } of dirtyEntityRecords ) {
-				if ( kind === 'root' && name === 'site' ) {
-					await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
-						property,
-					] );
-				} else {
-					if (
-						PUBLISH_ON_SAVE_ENTITIES.some(
-							( typeToPublish ) =>
-								typeToPublish.kind === kind &&
-								typeToPublish.name === name
-						)
-					) {
-						editEntityRecord( kind, name, key, {
-							status: 'publish',
-						} );
-					}
-
-					await saveEditedEntityRecord( kind, name, key );
-					__unstableMarkLastChangeAsPersistent();
+	const save = async () => {
+		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
+			if ( kind === 'root' && name === 'site' ) {
+				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
+					property,
+				] );
+			} else {
+				if (
+					PUBLISH_ON_SAVE_ENTITIES.some(
+						( typeToPublish ) =>
+							typeToPublish.kind === kind &&
+							typeToPublish.name === name
+					)
+				) {
+					editEntityRecord( kind, name, key, {
+						status: 'publish',
+					} );
 				}
-			}
 
-			if ( redirectToParentAfterSuccess ) {
-				navigator.goToParent();
+				await saveEditedEntityRecord( kind, name, key );
+				__unstableMarkLastChangeAsPersistent();
 			}
-		} catch ( error ) {
-			createErrorNotice(
-				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
-			);
 		}
 	};
 
@@ -137,9 +123,29 @@ export const SaveHub = () => {
 			source,
 		} );
 
-		await save( {
-			redirectToParentAfterSuccess: true,
-		} );
+		try {
+			await save();
+			navigator.goToParent();
+		} catch ( error ) {
+			createErrorNotice(
+				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
+			);
+		}
+	};
+
+	const onDone = async () => {
+		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		setIsResolving( true );
+
+		try {
+			await save();
+			sendEvent( 'FINISH_CUSTOMIZATION' );
+		} catch ( error ) {
+			createErrorNotice(
+				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
+			);
+			setIsResolving( false );
+		}
 	};
 
 	const renderButton = () => {
@@ -147,15 +153,7 @@ export const SaveHub = () => {
 			return (
 				<Button
 					variant="primary"
-					onClick={ async () => {
-						recordEvent(
-							'customize_your_store_assembler_hub_done_click'
-						);
-						setIsResolving( true );
-
-						await save();
-						sendEvent( 'FINISH_CUSTOMIZATION' );
-					} }
+					onClick={ onDone }
 					className="edit-site-save-hub__button"
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
