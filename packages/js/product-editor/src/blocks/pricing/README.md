@@ -18,7 +18,7 @@ Property in which the price value is stored.
 - **Type:** `String`
 - **Required:** `Yes`
 
-Label that appears at the side of the price field.
+Label that appears on top of the price field.
 
 ### help
 
