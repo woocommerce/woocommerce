@@ -102,26 +102,6 @@ test.describe( 'Cart Block page', () => {
 			delete: [ product1Id, product2Id, product3Id ],
 		} );
 		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
-		let response = await wpApi.get( `pages` );
-		const allPages = await response.json();
-		await allPages.forEach( async ( page ) => {
-			if ( page.title.rendered === pageTitle ) {
-				response = await wpApi.delete( `pages/${ page.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
-		} );
 	} );
 
 	test.beforeEach( async ( { context } ) => {
@@ -242,7 +222,7 @@ test.describe( 'Cart Block page', () => {
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
-		).toHaveText( '$95.00' );
+		).toHaveText( '$150.00' );
 
 		// remove cross-sell products from cart
 		await page.locator( ':nth-match(:text("Remove item"), 3)' ).click();
@@ -299,7 +279,9 @@ test.describe( 'Cart Block page', () => {
 					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 				)
 			).toHaveText( totals[ i ] );
-			await page.locator( '.wc-block-components-chip__remove' ).click();
+			await page
+				.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
+				.click();
 			await expect(
 				page
 					.locator( '.wc-block-components-notice-banner__content' )
@@ -312,6 +294,7 @@ test.describe( 'Cart Block page', () => {
 
 	test( 'allows cart block to apply multiple coupons', async ( { page } ) => {
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
+		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
 		// add product to cart block
 		await page.goto( `product/${ productSlug }` );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
@@ -320,7 +303,7 @@ test.describe( 'Cart Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// add all coupon types
+		// add all coupons and verify prices
 		for ( let i = 0; i < coupons.length; i++ ) {
 			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 			await page
@@ -334,6 +317,22 @@ test.describe( 'Cart Block page', () => {
 						`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
 					)
 			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-discount > .wc-block-components-totals-item__value'
+				)
+			).toHaveText( discounts[ i ] );
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+				)
+			).toHaveText( totals[ i ] );
+		}
+
+		for ( let i = 0; i < coupons.length; i++ ) {
+			await page
+				.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
+				.click();
 			await expect(
 				page.locator(
 					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
