@@ -356,10 +356,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={
+																	attribute?.terms &&
 																	attribute
 																		?.terms
 																		.length >
-																	0
+																		0
 																		? ''
 																		: termPlaceholder
 																}
@@ -398,10 +399,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														) : (
 															<CustomAttributeTermInputField
 																placeholder={
+																	attribute?.options &&
 																	attribute
 																		?.options
 																		.length >
-																	0
+																		0
 																		? ''
 																		: termPlaceholder
 																}

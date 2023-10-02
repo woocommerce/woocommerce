@@ -185,6 +185,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						<AttributeTermInputField
 							label={ termsLabel }
 							placeholder={
+								editableAttribute?.terms &&
 								editableAttribute?.terms.length > 0
 									? ''
 									: termsPlaceholder
@@ -202,6 +203,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 						<CustomAttributeTermInputField
 							label={ termsLabel }
 							placeholder={
+								editableAttribute?.options &&
 								editableAttribute?.options.length > 0
 									? ''
 									: termsPlaceholder
