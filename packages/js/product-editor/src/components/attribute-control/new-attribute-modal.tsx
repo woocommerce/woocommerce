@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
-import { trash } from '@wordpress/icons';
+import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -356,7 +356,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute?.terms &&
+																	attribute
+																		?.terms
+																		.length >
+																		0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	attribute
@@ -393,7 +399,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														) : (
 															<CustomAttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute?.options &&
+																	attribute
+																		?.options
+																		.length >
+																		0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	! attribute.name
@@ -419,7 +431,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
 														<Button
-															icon={ trash }
+															icon={ closeSmall }
 															disabled={
 																values
 																	.attributes
