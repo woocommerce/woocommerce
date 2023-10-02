@@ -2,6 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
 
 module.exports = async ( config ) => {
@@ -40,6 +41,7 @@ module.exports = async ( config ) => {
 	let adminLoggedIn = false;
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
+	let hposConfigured = false;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
 	const contextOptions = { baseURL, userAgent };
@@ -77,13 +79,6 @@ module.exports = async ( config ) => {
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
 
-			if (ENABLE_HPOS === undefined || ENABLE_HPOS === '0') {
-				console.log( 'Trying to switch off HPOS...' );
-				await adminPage.goto('/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features');
-				await adminPage.getByLabel('WordPress posts storage (legacy)').check();
-				await adminPage.getByRole('button', { name: 'Save changes' }).click();
-				console.log('HPOS Switched off successfully');
-			}
 			break;
 		} catch ( e ) {
 			console.log(
@@ -183,6 +178,66 @@ module.exports = async ( config ) => {
 	if ( ! customerLoggedIn ) {
 		console.error(
 			'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
+		);
+		process.exit( 1 );
+	}
+
+
+	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
+	// This was always being set to 'yes' after login in wp-env so this ensures the
+	// correct value is set before we begin our tests
+	const hposSettingRetries = 5;
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	for ( let i = 0; i < hposSettingRetries; i++ ) {
+		try {
+			if (ENABLE_HPOS === undefined || ENABLE_HPOS === '0') {
+				console.log( 'Trying to switch off HPOS...' );
+
+				// call API to update HPOS setting
+				const HPOSSetOffResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
+					value: "no"
+				} );
+	
+				// validate HPOS setting
+				if (HPOSSetOffResponse.data.value === 'no') {
+					console.log('HPOS Switched off successfully');
+					hposConfigured = true;
+					break;
+				}
+			}
+			if (ENABLE_HPOS === '1') {
+				console.log( 'Trying to switch on HPOS...' );
+
+				// call API to update HPOS setting
+				const HPOSSetOnResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
+					value: "yes"
+				} );
+	
+				// validate HPOS setting
+				if (HPOSSetOnResponse.data.value === 'yes') {
+					console.log('HPOS Switched on successfully');
+					hposConfigured = true;
+					break;
+				}
+			}
+			break;
+		} catch ( e ) {
+			console.log(
+				`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
+			);
+			console.log( e );
+		}
+	}
+
+	if ( ! hposConfigured ) {
+		console.error(
+			'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
 		);
 		process.exit( 1 );
 	}
