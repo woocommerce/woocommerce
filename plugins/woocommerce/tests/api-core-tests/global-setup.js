@@ -1,4 +1,4 @@
-const { GITHUB_TOKEN, UPDATE_WC } = process.env;
+const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC, USER_KEY, USER_SECRET } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
 
@@ -196,6 +196,31 @@ module.exports = async ( config ) => {
 			await expect( updateCompleteMessage ).toBeVisible();
 		} else {
 			console.log( 'No DB update needed' );
+		}
+	} else {
+		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is set
+		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+
+		const data = {
+			value: value,
+		};
+		const options = {
+			auth: {
+				username: USER_KEY,
+				password: USER_SECRET
+			}
+		};
+
+		const hposResponse = await axios.post('http://localhost:8086/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', data, options)
+			.catch( ( error ) => {
+			if ( error.response ) {
+				console.log( 'HPOS setup failed.');
+			}
+			throw new Error( error.message );
+		} );
+		
+		if ( hposResponse.data.value === value ) {
+			console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
 		}
 	}
 };
