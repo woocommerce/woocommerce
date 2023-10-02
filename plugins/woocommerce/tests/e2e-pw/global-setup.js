@@ -193,40 +193,20 @@ module.exports = async ( config ) => {
 		version: 'wc/v3',
 	} );
 
-	for ( let i = 0; i < hposSettingRetries; i++ ) {
+	const value = ENABLE_HPOS === '1' ? 'yes' : 'no';
+
+	for (let i = 0; i < hposSettingRetries; i++) {
 		try {
-			if (ENABLE_HPOS === undefined || ENABLE_HPOS === '0') {
-				console.log( 'Trying to switch off HPOS...' );
-				// call API to update HPOS setting
-				const HPOSSetOffResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
-					value: "no"
-				} );
-				// validate HPOS setting
-				if (HPOSSetOffResponse.data.value === 'no') {
-					console.log('HPOS Switched off successfully');
-					hposConfigured = true;
-					break;
-				}
-			}
-			if (ENABLE_HPOS === '1') {
-				console.log( 'Trying to switch on HPOS...' );
-				// call API to update HPOS setting
-				const HPOSSetOnResponse = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', {
-					value: "yes"
-				} );
-				// validate HPOS setting
-				if (HPOSSetOnResponse.data.value === 'yes') {
-					console.log('HPOS Switched on successfully');
-					hposConfigured = true;
-					break;
-				}
-			}
+		  console.log( `Trying to switch ${ value === 'yes' ? 'on' : 'off' } HPOS...` );
+		  const response = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', { value } );
+		  if ( response.data.value === value ) {
+			console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
+			hposConfigured = true;
 			break;
-		} catch ( e ) {
-			console.log(
-				`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
-			);
-			console.log( e );
+		  }
+		} catch (e) {
+		  console.log( `HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }` );
+		  console.log(e);
 		}
 	}
 
