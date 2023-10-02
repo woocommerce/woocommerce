@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useEffect,
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import classNames from 'classnames';
@@ -25,6 +21,7 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import { DesignChangeWarningModal } from './design-change-warning-modal';
 import './intro.scss';
+import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =
@@ -43,25 +40,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
 
-	const [ isNetworkOffline, setIsNetworkOffline ] = useState( false );
 	const isJetpackOffline = false;
 
-	const setOfflineBannerIamge = () => {
-		setIsNetworkOffline( true );
-	};
-
-	const removeOfflineBannerImage = () => {
-		setIsNetworkOffline( false );
-	};
-
-	useEffect( () => {
-		window.addEventListener( 'offline', setOfflineBannerIamge );
-		window.addEventListener( 'online', removeOfflineBannerImage );
-		return () => {
-			window.addEventListener( 'offline', setOfflineBannerIamge );
-			window.addEventListener( 'online', removeOfflineBannerImage );
-		};
-	}, [] );
+	const isNetworkOffline = useNetworkStatus();
 
 	let bannerText;
 	let bannerTitle;
