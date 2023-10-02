@@ -25,7 +25,7 @@ Property name in which the taxonomy value is stored in the product.
 - **Type:** `String`
 - **Required:** `No`
 
-Label that appears at the side of the field.
+Label that appears on top of the field.
 
 ### createTitle
 
