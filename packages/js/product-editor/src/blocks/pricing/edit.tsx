@@ -61,7 +61,7 @@ export function Edit( {
 				<InputControl
 					{ ...inputProps }
 					id={ priceId }
-					name={ name }
+					name={ property }
 					label={ label || __( 'Price', 'woocommerce' ) }
 				/>
 			</BaseControl>
