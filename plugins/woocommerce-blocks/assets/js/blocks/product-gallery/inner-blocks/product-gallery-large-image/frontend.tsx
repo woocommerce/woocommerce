@@ -65,8 +65,16 @@ interactivityStore(
 					context.woocommerce.styles.transform = `scale(1.0)`;
 					context.woocommerce.styles[ 'transform-origin' ] = '';
 				},
-				handleClick: ( { context }: { context: Context } ) => {
-					context.woocommerce.isDialogOpen = true;
+				handleClick: ( {
+					context,
+					event,
+				}: {
+					context: Context;
+					event: Event;
+				} ) => {
+					if ( ( event.target as HTMLElement ).tagName === 'IMG' ) {
+						context.woocommerce.isDialogOpen = true;
+					}
 				},
 			},
 		},

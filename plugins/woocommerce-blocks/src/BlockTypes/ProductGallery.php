@@ -65,7 +65,39 @@ class ProductGallery extends AbstractBlock {
 			''
 		);
 
-		$gallery_dialog = '<dialog data-wc-bind--open="selectors.woocommerce.isDialogOpen">' . $html . '</dialog>';
+		$html_processor = new \WP_HTML_Tag_Processor( $html );
+
+		$html_processor->next_tag(
+			array(
+				'class_name' => 'wp-block-woocommerce-product-gallery',
+			)
+		);
+
+		$html_processor->remove_attribute( 'data-wc-context' );
+
+		$gallery_dialog = strtr(
+			'
+		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!selectors.woocommerce.isDialogOpen">
+			<dialog data-wc-bind--open="selectors.woocommerce.isDialogOpen">
+			<div class="wc-block-product-gallery-dialog__header">
+			<div class="wc-block-product-galler-dialog__header-right">
+				<button class="wc-block-product-gallery-dialog__close" data-wc-on--click="actions.woocommerce.dialog.handleCloseButtonClick">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect width="24" height="24" rx="2"/>
+						<path d="M13 11.8L19.1 5.5L18.1 4.5L12 10.7L5.9 4.5L4.9 5.5L11 11.8L4.5 18.5L5.5 19.5L12 12.9L18.5 19.5L19.5 18.5L13 11.8Z" fill="black"/>
+					</svg>
+				</button>
+			</div>
+			</div>
+			<div class="wc-block-product-gallery-dialog__body">
+				{{html}}
+			</div>
+			</dialog>
+		</div>',
+			array(
+				'{{html}}' => $html_processor->get_updated_html(),
+			)
+		);
 		return $gallery_dialog;
 	}
 

@@ -11,13 +11,39 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 
 // Product Gallery
 #{$gallery} {
+	.wc-block-product-gallery-dialog__overlay {
+		height: 100vh;
+		width: 100vw;
+		position: fixed;
+		top: 0;
+		left: 0;
+		background-color: #808080;
+		z-index: 9999;
+	}
+
 	dialog {
 		position: fixed;
-		width: 90vw;
+		width: calc(100vw - 100px);
+		border: none;
+		border-radius: 10px;
 		height: 90vh;
 		top: 0;
-		margin: $gap-largest;
+		margin-top: $gap-largest;
+		margin-bottom: $gap-largest;
 		z-index: 9999;
+
+		.wc-block-product-galler-dialog__header-right {
+			display: flex;
+			justify-content: flex-end;
+
+			.wc-block-product-gallery-dialog__close {
+				border: none;
+				background-color: transparent;
+				outline: none;
+				cursor: pointer;
+			}
+		}
+
 	}
 }
 
@@ -37,8 +63,15 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 
 	img {
 		display: block;
+		position: relative;
 		margin: 0 auto;
+		z-index: 1;
 		transition: all 0.1s linear;
+
+		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
+		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
+			cursor: pointer;
+		}
 
 		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
 			cursor: zoom-in;
@@ -53,8 +86,6 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		display: flex;
 		flex-direction: column;
 		position: absolute;
-		pointer-events: none;
-		z-index: 1;
 		width: 100%;
 		height: 100%;
 		top: 0;
@@ -75,6 +106,11 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	justify-content: space-between;
 	width: 100%;
 	height: 100%;
+
+	svg {
+		z-index: 3;
+		pointer-events: all;
+	}
 
 	.is-vertically-aligned-top {
 		align-items: flex-start;

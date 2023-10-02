@@ -20,7 +20,8 @@
 		"productGalleryClientId": "productGalleryClientId",
 		"nextPreviousButtonsPosition": "nextPreviousButtonsPosition",
 		"pagerDisplayMode": "pagerDisplayMode",
-		"hoverZoom": "hoverZoom"
+		"hoverZoom": "hoverZoom",
+		"fullScreenOnClick": "fullScreenOnClick"
 	},
 	"usesContext": [ "postId" ],
 	"attributes": {
