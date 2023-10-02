@@ -19,8 +19,11 @@ import {
 import { useValidation } from '../../contexts/validation-context';
 import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { TextBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const {
 		property,
@@ -38,6 +41,12 @@ export function Edit( { attributes }: { attributes: TextBlockAttributes } ) {
 	const { error, validate } = useValidation< Product >(
 		property,
 		async function validator() {
+			if ( typeof value !== 'string' ) {
+				return __(
+					'Unexpected property type assigned to field.',
+					'woocommerce'
+				);
+			}
 			if ( required && ! value ) {
 				return __( 'This field is required.', 'woocommerce' );
 			}

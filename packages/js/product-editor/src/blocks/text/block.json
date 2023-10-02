@@ -2,9 +2,9 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
 	"name": "woocommerce/product-text-field",
-	"title": "Product text control",
+	"title": "Product text field",
 	"category": "woocommerce",
-	"description": "A text control for use in the product editor.",
+	"description": "A text field for use in the product editor.",
 	"keywords": [
 		"products",
 		"text"
