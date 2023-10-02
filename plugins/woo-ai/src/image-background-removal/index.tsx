@@ -25,6 +25,9 @@ export const init = () => {
 
 				setTimeout( () => {
 					const root = document.body.querySelector( `#${ linkId }` );
+					if ( ! root ) {
+						return;
+					}
 					if ( createRoot ) {
 						createRoot( root ).render( <BackgroundRemovalLink /> );
 					} else {
