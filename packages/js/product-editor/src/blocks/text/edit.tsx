@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { createElement, createInterpolateElement } from '@wordpress/element';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
 import { Product } from '@woocommerce/data';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import classNames from 'classnames';
 import {
 	BaseControl,
@@ -24,7 +24,7 @@ import { ProductEditorBlockEditProps } from '../../types';
 export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const {
 		property,
 		label,
