@@ -22,44 +22,44 @@ jobs:
       runs-on: 'ubuntu-20.04'
       needs: 'prime-cache'
       steps:
-          - uses: 'actions/checkout@v3'
-            name: 'Checkout'
-          - uses: './.github/actions/setup-woocommerce-monorepo'
-            name: 'Setup Monorepo'
-          - uses: actions/github-script@v6
-            name: 'Build Testing Matrices'
-            with:
-              script: |
-                const buildTestingMatrices = require( './.github/workflows/scripts/build-test-matrices' );
-                buildTestingMatrices( '${{ github.base_ref || 'origin/trunk' }}' ).then( ( matrices ) => {
-                  core.setOutput( 'matrices', JSON.stringify( matrices ) );
-                } );
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+        - uses: './.github/actions/setup-woocommerce-monorepo'
+          name: 'Setup Monorepo'
+        - uses: actions/github-script@v6
+          name: 'Build Testing Matrices'
+          with:
+            script: |
+              const buildTestingMatrices = require( './.github/workflows/scripts/build-test-matrices' );
+              buildTestingMatrices( '${{ github.base_ref || 'origin/trunk' }}' ).then( ( matrices ) => {
+                core.setOutput( 'matrices', JSON.stringify( matrices ) );
+              } );
     test-javascript:
-        name: 'Tests - JavaScript'
-        runs-on: 'ubuntu-20.04'
-        needs: 'prime-cache'
-        steps:
-            - uses: 'actions/checkout@v3'
-              name: 'Checkout'
-            - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
-            - name: 'Tests'
-              run: 'pnpm -r test:js'
+      name: 'Tests - JavaScript'
+      runs-on: 'ubuntu-20.04'
+      needs: 'prime-cache'
+      steps:
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+        - uses: './.github/actions/setup-woocommerce-monorepo'
+          name: 'Setup Monorepo'
+        - name: 'Tests'
+          run: 'pnpm -r test:js'
     test-php:
-        name: 'Tests - PHP - ${{ matrix.name }}'
-        runs-on: 'ubuntu-20.04'
-        needs: 'build-test-matrices'
-        strategy:
-            matrix: ${{ fromJSON( needs.build-test-matrices.outputs.matrices.php ) }}
-        steps:
-            - uses: 'actions/checkout@v3'
-              name: 'Checkout'
-            - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
-            - name: 'Preparing Test Environment'
-              if: ${{ matrix.has-test-environment }}
-              env:
-                ${{ matrix.test-environment.env.*.name }}: ${{ matrix.test-environment.env.*.value }}
-              run: 'pnpm --filter=${{ matrix.name }} run test:env:start'
-            - name: 'Tests'
-              run: 'pnpm --filter=${{ matrix.name }} test:unit:php ${{ matrix.test-args }}'
+      name: 'Tests - PHP - "${{ matrix.name }}"'
+      runs-on: 'ubuntu-20.04'
+      needs: 'build-test-matrices'
+      strategy:
+        matrix: ${{ fromJSON( needs.build-test-matrices.outputs.matrices.php ) }}
+      steps:
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+        - uses: './.github/actions/setup-woocommerce-monorepo'
+          name: 'Setup Monorepo'
+        - name: 'Preparing Test Environment'
+          if: ${{ matrix.has-test-environment }}
+          env:
+            ${{ matrix.test-environment.env.*.name }}: ${{ matrix.test-environment.env.*.value }}
+          run: 'pnpm --filter=${{ matrix.name }} run test:env:start'
+        - name: 'Tests'
+          run: 'pnpm --filter=${{ matrix.name }} test:unit:php ${{ matrix.test-args }}'
