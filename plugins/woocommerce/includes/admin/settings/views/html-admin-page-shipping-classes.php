@@ -42,8 +42,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- 1. Add labelFor or some kind of attribute for semantic HTML-->
 
 <script type="text/html" id="tmpl-wc-shipping-class-configure">
-<div class="wc-backbone-modal">
-		<div class="wc-backbone-modal-content wc-shipping-class-modal" data-id="{{ data.term_id }}">
+<div class="wc-backbone-modal wc-shipping-class-modal">
+		<div class="wc-backbone-modal-content" data-id="{{ data.term_id }}">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
 					<h1><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></h1>
