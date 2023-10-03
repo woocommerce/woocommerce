@@ -201,26 +201,28 @@ module.exports = async ( config ) => {
 		}
 	} else {
 		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is passed
-		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
-		const data = {
-			value: value,
-		};
-		const options = {
-			auth: {
-				username: playwrightConfig.userKey,
-				password: playwrightConfig.userSecret
+		if (ENABLE_HPOS) {
+			const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+			const data = {
+				value: value,
+			};
+			const options = {
+				auth: {
+					username: playwrightConfig.userKey,
+					password: playwrightConfig.userSecret
+				}
+			};
+			const hposResponse = await axios.post( playwrightConfig.use.baseURL + '/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', data, options)
+				.catch( ( error ) => {
+				if ( error.response ) {
+					console.log( 'HPOS setup failed.');
+				}
+				throw new Error( error.message );
+			} );
+			
+			if ( hposResponse.data.value === value ) {
+				console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
 			}
-		};
-		const hposResponse = await axios.post( playwrightConfig.use.baseURL + '/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', data, options)
-			.catch( ( error ) => {
-			if ( error.response ) {
-				console.log( 'HPOS setup failed.');
-			}
-			throw new Error( error.message );
-		} );
-		
-		if ( hposResponse.data.value === value ) {
-			console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
 		}
 	}
 };
