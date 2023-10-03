@@ -23,7 +23,9 @@ module.exports = async function buildTestMatrices( baseRef ) {
 
     // Generate the testing matrices for the packages that have changed.
     const testMatrices = {
-        php: [],
+        php: {
+            include: [],
+        },
     };
     for ( const projectPath of changedProjects ) {
         // We're only interested in
@@ -41,7 +43,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
             continue;
         }
 
-        testMatrices.php.push( {
+        testMatrices.php.include.push( {
             name: packageFile.name,
             'has-test-environment': true,
             env: {},
