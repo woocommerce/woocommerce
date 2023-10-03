@@ -49,35 +49,21 @@ program
 		'the path to the src directory with client-side logic'
 	)
 	.option( '--namespace <value>', 'internal namespace for the plugin' )
-	.action(
-		async (
-			{
-				// wpScripts,
-				// wpEnv,
-				// template,
-				// variant,
-				// includesDir,
-				// srcDir,
-				// namespace,
-			}
-		) => {
-			// await checkSystemRequirements( engines );
-
-			try {
-				const pluginData = getPluginData();
-				const pluginConfig = getPluginConfig();
-				log.info( JSON.stringify( pluginData ) );
-				log.info( JSON.stringify( pluginConfig ) );
-			} catch ( error ) {
-				if ( error instanceof CLIError ) {
-					log.error( error.message );
-					process.exit( 1 );
-				} else {
-					throw error;
-				}
+	.action( async () => {
+		try {
+			const pluginData = getPluginData();
+			const pluginConfig = getPluginConfig();
+			log.info( JSON.stringify( pluginData ) );
+			log.info( JSON.stringify( pluginConfig ) );
+		} catch ( error ) {
+			if ( error instanceof CLIError ) {
+				log.error( error.message );
+				process.exit( 1 );
+			} else {
+				throw error;
 			}
 		}
-	)
+	} )
 	.on( '--help', () => {
 		log.info( '' );
 		log.info( 'Examples:' );
