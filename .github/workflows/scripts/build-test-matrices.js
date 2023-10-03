@@ -36,7 +36,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
             continue;
         }
 
-        // We only need to generate test matrices for PHP packages because they generally
+        // We only need to generate test matrices for PHP projects because they generally
         // require environments that are mutually exclusive with other PHP projects.
         if ( ! packageFile.scripts[ 'test:php' ] ) {
             continue;
@@ -44,7 +44,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
 
         testMatrices.php.push( {
             name: packageFile.name,
-            'test-environment': JSON.stringify( {} ),
+            'has-test-environment': !! packageFIle.scripts[ 'test:env:start' ],
         } );
     }
 
