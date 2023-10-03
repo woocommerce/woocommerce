@@ -2,12 +2,12 @@
  * Internal dependencies
  */
 import { ModalContentLayoutWithTitle } from '../layouts/ModalContentLayoutWithTitle';
-import { InstallMobileAppInfo } from '../components/InstallMobileAppInfo';
+import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 
-export const InstallMobileAppPage = () => {
+export const MobileAppInstallPage = () => {
 	return (
 		<ModalContentLayoutWithTitle>
-			<InstallMobileAppInfo />
+			<MobileAppInstallationInfo />
 		</ModalContentLayoutWithTitle>
 	);
 };

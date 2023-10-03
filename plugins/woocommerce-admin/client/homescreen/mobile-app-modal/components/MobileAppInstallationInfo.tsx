@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import MobileQRCode from '../illustrations/woo-mobile-download-qrcode.svg';
 
-export const InstallMobileAppInfo = () => {
+export const MobileAppInstallationInfo = () => {
 	return (
 		<div>
 			<img

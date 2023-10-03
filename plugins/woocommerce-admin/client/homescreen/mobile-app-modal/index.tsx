@@ -25,7 +25,7 @@ import {
 } from './components';
 import {
 	EmailSentPage,
-	InstallMobileAppPage,
+	MobileAppInstallPage,
 	JetpackAlreadyInstalledPage,
 } from './pages';
 import './style.scss';
@@ -103,7 +103,7 @@ export const MobileAppModal = () => {
 			);
 		} else {
 			// Shows the installation page by default.
-			setPageContent( <InstallMobileAppPage /> );
+			setPageContent( <MobileAppInstallPage /> );
 		}
 	}, [
 		sendMagicLink,

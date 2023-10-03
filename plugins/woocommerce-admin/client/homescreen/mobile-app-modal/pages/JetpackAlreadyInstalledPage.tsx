@@ -13,7 +13,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { ModalContentLayoutWithTitle } from '../layouts/ModalContentLayoutWithTitle';
 import { SendMagicLinkButton } from '../components';
 import { SendMagicLinkStates } from '../components/useSendMagicLink';
-import { InstallMobileAppInfo } from '../components/InstallMobileAppInfo';
+import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 
 interface JetpackAlreadyInstalledPageProps {
 	wordpressAccountEmailAddress: string | undefined;
@@ -59,7 +59,7 @@ export const JetpackAlreadyInstalledPage: React.FC<
 	return (
 		<ModalContentLayoutWithTitle>
 			<>
-				<InstallMobileAppInfo />
+				<MobileAppInstallationInfo />
 				<div className="modal-subheader jetpack-already-installed">
 					<h3>
 						{ sprintf(
