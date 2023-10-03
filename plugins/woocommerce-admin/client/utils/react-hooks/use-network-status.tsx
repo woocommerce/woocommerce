@@ -7,20 +7,20 @@ export const useNetworkStatus = () => {
 	const [ isNetworkOffline, setIsNetworkOffline ] = useState( false );
 
 	useEffect( () => {
-		const setOfflineBannerImage = () => {
+		const offlineEventHandler = () => {
 			setIsNetworkOffline( true );
 		};
 
-		const removeOfflineBannerImage = () => {
+		const onlineEventHandler = () => {
 			setIsNetworkOffline( false );
 		};
 
-		window.addEventListener( 'offline', setOfflineBannerImage );
-		window.addEventListener( 'online', removeOfflineBannerImage );
+		window.addEventListener( 'offline', offlineEventHandler );
+		window.addEventListener( 'online', onlineEventHandler );
 
 		return () => {
-			window.removeEventListener( 'offline', setOfflineBannerImage );
-			window.removeEventListener( 'online', removeOfflineBannerImage );
+			window.removeEventListener( 'offline', offlineEventHandler );
+			window.removeEventListener( 'online', onlineEventHandler );
 		};
 	}, [] );
 
