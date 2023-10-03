@@ -54,7 +54,7 @@ export class Connect extends Component {
 
 	render() {
 		const {
-			hasErrors,
+			error,
 			isRequesting,
 			onSkip,
 			skipText,
@@ -64,7 +64,7 @@ export class Connect extends Component {
 
 		return (
 			<Fragment>
-				{ hasErrors ? (
+				{ error ? (
 					<Button
 						isPrimary
 						onClick={ () => window.location.reload() }
@@ -103,12 +103,10 @@ Connect.propTypes = {
 	createNotice: PropTypes.func.isRequired,
 	/**
 	 * Human readable error message.
+	 *
+	 * Also used to determine if the "Retry" button should be displayed.
 	 */
 	error: PropTypes.string,
-	/**
-	 * Bool to determine if the "Retry" button should be displayed.
-	 */
-	hasErrors: PropTypes.bool,
 	/**
 	 * Bool to check if the connection URL is still being requested.
 	 */
