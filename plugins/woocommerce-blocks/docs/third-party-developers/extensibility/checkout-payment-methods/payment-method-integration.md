@@ -195,6 +195,8 @@ Any registered `savedTokenComponent` node will also receive a `token` prop which
 
 The checkout block currently has legacy handling for payment processing. It converts incoming `payment_data` provided by the client-side payment method to `$_POST` and calls the payment gateway's `process_payment` function. If you already have a WooCommerce Payment method extension integrated with the existing shortcode checkout flow, the checkout block's legacy handling will take care of processing your payment for you on the server side. However, If your payment method hooks into the core checkout `process_checkout` function in any way, you will need to account for this behavior and make appropriate adjustments. (See the section below about hooking into the checkout process via the Store API.)
 
+See an example of [Passing a value from the client through to server side payment processing](https://github.com/woocommerce/woocommerce-blocks/blob/62243e1731a0773f51b81fb8406ebc2e8b180b40/docs/internal-developers/block-client-apis/checkout/checkout-api.md#passing-a-value-from-the-client-through-to-server-side-payment-processing)
+
 ### Registering Assets
 
 Implementing the correct loading of your client side asset registration is tricky for the blocks integration. This is because there are some dependencies on the _loading order_ of dependent assets in the request. To remove the complexity of this for extension consumers here, the server side API interface helps with ensuring you can register any assets and data to pass along to your client side payment method from the server and handles the correct loading order of those assets.
