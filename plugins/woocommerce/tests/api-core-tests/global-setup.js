@@ -1,8 +1,10 @@
-const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC, USER_KEY, USER_SECRET } = process.env;
+const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
+const playwrightConfig = require('./playwright.config');
 
 module.exports = async ( config ) => {
+
 	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
@@ -198,20 +200,18 @@ module.exports = async ( config ) => {
 			console.log( 'No DB update needed' );
 		}
 	} else {
-		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is set
+		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is passed
 		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
-
 		const data = {
 			value: value,
 		};
 		const options = {
 			auth: {
-				username: USER_KEY,
-				password: USER_SECRET
+				username: playwrightConfig.userKey,
+				password: playwrightConfig.userSecret
 			}
 		};
-
-		const hposResponse = await axios.post('http://localhost:8086/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', data, options)
+		const hposResponse = await axios.post( playwrightConfig.use.baseURL + '/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', data, options)
 			.catch( ( error ) => {
 			if ( error.response ) {
 				console.log( 'HPOS setup failed.');

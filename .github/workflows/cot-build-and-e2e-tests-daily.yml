@@ -91,7 +91,7 @@ jobs:
               id: run_playwright_api_tests
               working-directory: plugins/woocommerce
               env:
-                  BASE_URL: http://localhost:8086
+                  API_BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
