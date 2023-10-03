@@ -84,8 +84,6 @@ export const MobileAppModal = () => {
 					} }
 				/>
 			);
-		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
-			setPageContent( <WrongUserConnectedPage /> );
 		} else if (
 			state === JetpackPluginStates.NOT_INSTALLED ||
 			state === JetpackPluginStates.NOT_ACTIVATED ||
@@ -113,6 +111,9 @@ export const MobileAppModal = () => {
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
+		} else {
+			// Shows the installation page by default.
+			setPageContent( <InstallMobileAppPage /> );
 		}
 	}, [
 		sendMagicLink,
