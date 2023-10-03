@@ -99,7 +99,7 @@ Identifier
 
 IdentifierName
 	= first:IdentifierStart rest:IdentifierPart* {
-		return first + rest.join( '' );
+		return text();
 	}
 
 IdentifierStart
