@@ -53,6 +53,10 @@ export default function Products( props: ProductsProps ): JSX.Element {
 			? MARKETPLACE_SEARCH_RESULTS_PER_PAGE
 			: MARKETPLACE_ITEMS_PER_PAGE;
 
+	// Only show the "View all" button when not on the themes tab
+	// and not already showing all results for a product type.
+	const showAllButton = query.tab !== 'themes' && ! query.section;
+
 	function showSection( section: ProductType ) {
 		navigateTo( {
 			url: getNewPath( { section } ),
@@ -107,11 +111,11 @@ export default function Products( props: ProductsProps ): JSX.Element {
 					<CategorySelector type={ props.type } />
 				) }
 				<ProductListContent products={ products } type={ props.type } />
-				{ ! query?.section && (
+				{ showAllButton && (
 					<Button
 						className={ viewAllButonClassName }
 						variant="secondary"
-						text="View all"
+						text={ __( 'View all', 'woocommerce' ) }
 						onClick={ () => showSection( props.type ) }
 					/>
 				) }
