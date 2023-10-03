@@ -25,7 +25,7 @@ import {
 } from './components';
 import {
 	EmailSentPage,
-	JetpackInstallStepperPage,
+	InstallMobileAppPage,
 	JetpackAlreadyInstalledPage,
 } from './pages';
 import './style.scss';
@@ -94,14 +94,7 @@ export const MobileAppModal = () => {
 				isReturningFromWordpressConnection )
 		) {
 			setPageContent(
-				<JetpackInstallStepperPage
-					isReturningFromWordpressConnection={
-						isReturningFromWordpressConnection
-					}
-					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
-					sendMagicLinkHandler={ sendMagicLink }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
-				/>
+				<InstallMobileAppPage />
 			);
 		} else if (
 			state === JetpackPluginStates.FULL_CONNECTION &&
