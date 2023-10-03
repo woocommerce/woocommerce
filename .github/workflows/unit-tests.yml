@@ -1,5 +1,10 @@
 name: 'Unit Tests'
-on: [ pull_request, push ]
+on: 
+  pull_request:
+  push:
+    branches:
+      - 'trunk'
+      - 'release/*'
 jobs:
     prime-cache:
         name: 'Prime Cache'
