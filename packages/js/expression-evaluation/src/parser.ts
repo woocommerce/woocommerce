@@ -5,7 +5,7 @@ import * as peggy from 'peggy';
 
 const grammar = `
 Start
-	= LogicalOr
+	= LogicalOrExpression
 
 SourceCharacter
 	= .
@@ -220,19 +220,32 @@ TrueToken
 FalseToken
 	= "false" !IdentifierPart
 
-// Logical Expressions
+// Expressions
 
-LogicalOr
-	= left:LogicalAnd WhiteSpace+ "||" WhiteSpace+ right:LogicalOr {
+PrimaryExpression
+	= IdentifierPath
+	/ Literal
+	/ "(" WhiteSpace* expression:LogicalOrExpression WhiteSpace* ")" {
+		return expression;
+	}
+
+LogicalOrExpression
+	= left:LogicalAndExpression WhiteSpace+ LogicalOrOperator WhiteSpace+ right:LogicalOrExpression {
 		return left || right;
 	}
-	/ LogicalAnd
+	/ LogicalAndExpression
 
-LogicalAnd
-	= left:PrimaryExpression WhiteSpace+ "&&" WhiteSpace+ right:LogicalAnd {
+LogicalOrOperator
+	= "||"
+
+LogicalAndExpression
+	= left:PrimaryExpression WhiteSpace+ LogicalAndOperator WhiteSpace+ right:LogicalAndExpression {
 		return left && right;
 	}
 	/ Factor
+
+LogicalAndOperator
+	= "&&"
 
 Factor
 	= "!" WhiteSpace* operand:Factor {
@@ -240,12 +253,7 @@ Factor
 	}
 	/ PrimaryExpression
 
-PrimaryExpression
-	= IdentifierPath
-	/ Literal
-	/ "(" WhiteSpace* expression:LogicalOr WhiteSpace* ")" {
-		return expression;
-	}
+
 `;
 
 export const parser = peggy.generate( grammar );
