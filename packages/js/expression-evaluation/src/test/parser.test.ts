@@ -196,6 +196,18 @@ describe( 'parser', () => {
 		expect( result ).toEqual( true );
 	} );
 
+	it( 'should parse a negative number', () => {
+		const result = parser.parse( '-1' );
+
+		expect( result ).toEqual( -1 );
+	} );
+
+	it( 'should parse a positive number', () => {
+		const result = parser.parse( '+1' );
+
+		expect( result ).toEqual( 1 );
+	} );
+
 	it( 'should throw an error if the expression is invalid', () => {
 		expect( () => parser.parse( '= 1' ) ).toThrow();
 	} );

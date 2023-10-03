@@ -5,6 +5,23 @@ import * as peggy from 'peggy';
 
 const grammar = `
 {{
+	function evaluateUnaryExpression( operator, operand ) {
+		switch ( operator ) {
+			case '!':
+				return !operand;
+				break;
+			case '-':
+				return -operand;
+				break;
+			case '+':
+				return +operand;
+				break;
+			default:
+				return undefined;
+				break;
+		}
+	}
+
 	function evaluateBinaryExpression( head, tail ) {
 		return tail.reduce( ( leftOperand, tailElement ) => {
 			const operator = tailElement[ 1 ];
@@ -262,8 +279,19 @@ PrimaryExpression
 		return expression;
 	}
 
-RelationalExpression
+UnaryExpression
 	= PrimaryExpression
+	/ operator:UnaryOperator WhiteSpace* operand:UnaryExpression {
+		return evaluateUnaryExpression( operator, operand );
+	}
+
+UnaryOperator
+	= "!"
+	/ "-"
+	/ "+"
+
+RelationalExpression
+	= UnaryExpression
 
 EqualityExpression
 	= head:RelationalExpression tail:( WhiteSpace* EqualityOperator WhiteSpace* RelationalExpression)* {
