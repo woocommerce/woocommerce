@@ -39,7 +39,13 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 	// rendering the iframe. Without this, the iframe previews will not render
 	// in mobile viewport sizes, where the editor canvas is hidden.
 	return (
-		<div className="woocommerce-customize-store_sidebar-color-content">
+		<div
+			className="woocommerce-customize-store_sidebar-color-content"
+			style={ {
+				opacity: 0,
+				animation: 'containerFadeIn 1000ms ease-in-out forwards',
+			} }
+		>
 			<BlockEditorProvider
 				settings={ storedSettings }
 				onChange={ noop }

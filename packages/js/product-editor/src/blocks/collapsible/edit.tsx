@@ -1,13 +1,21 @@
 /**
  * External dependencies
  */
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { CollapsibleContent } from '@woocommerce/components';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks } from '@wordpress/block-editor';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
-	const blockProps = useBlockProps();
+/**
+ * Internal dependencies
+ */
+import { ProductEditorBlockEditProps } from '../../types';
+
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { toggleText, initialCollapsed, persistRender = true } = attributes;
 
 	return (

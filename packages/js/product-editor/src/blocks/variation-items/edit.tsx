@@ -8,9 +8,8 @@ import {
 	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
-import { BlockEditProps } from '@wordpress/blocks';
 import { createElement, useMemo, useRef } from '@wordpress/element';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -27,11 +26,13 @@ import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../constants';
 import { handlePrompt } from '../../utils/handle-prompt';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
+	attributes,
 	context,
-}: BlockEditProps< VariationOptionsBlockAttributes > & {
-	context?: {
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
+	context: {
 		isInSelectedTab?: boolean;
 	};
 } ) {
@@ -40,7 +41,7 @@ export function Edit( {
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 	const productId = useEntityId( 'postType', 'product' );
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 	const [ productStatus ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -197,7 +198,7 @@ export function Edit( {
 					}
 				} }
 			/>
-			{ context?.isInSelectedTab && <VariableProductTour /> }
+			{ context.isInSelectedTab && <VariableProductTour /> }
 		</div>
 	);
 }

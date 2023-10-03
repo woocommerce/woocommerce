@@ -7,13 +7,12 @@ import { __experimentalRequestJetpackToken as requestJetpackToken } from '@wooco
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { Sender, assign, createMachine } from 'xstate';
+import { Sender, assign, createMachine, actions } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
-
 /**
  * Internal dependencies
  */
@@ -24,9 +23,10 @@ import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-pal
 import {
 	patternsToNameMap,
 	getTemplatePatterns,
-	LARGE_BUSINESS_TEMPLATES,
-	SMALL_MEDIUM_BUSINESS_TEMPLATES,
 } from '../assembler-hub/hooks/use-home-templates';
+import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+
+const { escalate } = actions;
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -165,7 +165,13 @@ export const queryAiEndpoint = createMachine(
 				always: [
 					{
 						cond: ( context ) => context.retryCount >= 3,
-						target: 'failed',
+						target: 'querying',
+						actions: [
+							// Throw an error to be caught by the parent machine.
+							escalate( () => ( {
+								data: 'Max retries exceeded',
+							} ) ),
+						],
 					},
 					{
 						target: 'querying',
@@ -174,12 +180,6 @@ export const queryAiEndpoint = createMachine(
 						} ),
 					},
 				],
-			},
-			failed: {
-				type: 'final',
-				data: {
-					result: 'failed',
-				},
 			},
 			success: {
 				type: 'final',
@@ -217,7 +217,10 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		await apiFetch( {
+		const response: {
+			ai_content_generated: boolean;
+			additional_errors?: unknown[];
+		} = await apiFetch( {
 			path: '/wc/store/patterns',
 			method: 'POST',
 			data: {
@@ -225,6 +228,14 @@ export const updateStorePatterns = async (
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		if ( ! response.ai_content_generated ) {
+			throw new Error(
+				'AI content not generated: ' + response.additional_errors
+					? JSON.stringify( response.additional_errors )
+					: ''
+			);
+		}
 	} catch ( error ) {
 		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
 			error: error instanceof Error ? error.message : 'unknown',
@@ -278,36 +289,27 @@ const updateGlobalStyles = async ( {
 
 // Update the current theme template
 const updateTemplate = async ( {
-	headerSlug,
-	businessSize,
 	homepageTemplateId,
-	footerSlug,
 }: {
-	headerSlug: string;
-	businessSize: 'SMB' | 'LB';
-	homepageTemplateId:
-		| keyof typeof SMALL_MEDIUM_BUSINESS_TEMPLATES
-		| keyof typeof LARGE_BUSINESS_TEMPLATES;
-	footerSlug: string;
+	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
 } ) => {
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+
+	// Ensure that the patterns are up to date because we populate images and content in previous step.
+	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
+
 	const patterns = ( await resolveSelect(
 		coreStore
 		// @ts-ignore No types for this exist yet.
 	).getBlockPatterns() ) as Pattern[];
-
 	const patternsByName = patternsToNameMap( patterns );
-
-	const headerPattern = patternsByName[ headerSlug ];
-	const footerPattern = patternsByName[ footerSlug ];
-
 	const homepageTemplate = getTemplatePatterns(
-		businessSize === 'SMB'
-			? SMALL_MEDIUM_BUSINESS_TEMPLATES[ homepageTemplateId ]
-			: LARGE_BUSINESS_TEMPLATES[ homepageTemplateId ],
+		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
 		patternsByName
 	);
 
-	const content = [ headerPattern, ...homepageTemplate, footerPattern ]
+	const content = [ ...homepageTemplate ]
 		.filter( Boolean )
 		.map( ( pattern ) => pattern.content )
 		.join( '\n\n' );
@@ -356,11 +358,9 @@ export const assembleSite = async (
 
 	try {
 		await updateTemplate( {
-			headerSlug: context.aiSuggestions.header,
 			// TODO: Get from context
-			businessSize: 'SMB',
-			homepageTemplateId: 'template1',
-			footerSlug: context.aiSuggestions.footer,
+			homepageTemplateId: context.aiSuggestions
+				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
@@ -371,16 +371,37 @@ export const assembleSite = async (
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 	}
+};
 
-	// @ts-ignore No types for this exist yet.
-	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+const installAndActivateTheme = async () => {
+	const themeSlug = 'twentytwentythree';
 
-	// Invalid the selectors so that the new template/style are used in assembler hub.
-	invalidateResolutionForStoreSelector( 'getEntityRecord' );
-	invalidateResolutionForStoreSelector(
-		'__experimentalGetCurrentGlobalStylesId'
-	);
-	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
+	try {
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
+			method: 'POST',
+		} );
+
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
+			method: 'POST',
+		} );
+	} catch ( error ) {
+		recordEvent(
+			'customize_your_store_ai_install_and_activate_theme_error',
+			{
+				theme: themeSlug,
+				error: error instanceof Error ? error.message : 'unknown',
+			}
+		);
+		throw error;
+	}
+};
+
+const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_customize_store_ai_suggestions: context.aiSuggestions,
+	} );
 };
 
 export const services = {
@@ -389,4 +410,6 @@ export const services = {
 	queryAiEndpoint,
 	assembleSite,
 	updateStorePatterns,
+	saveAiResponseToOption,
+	installAndActivateTheme,
 };

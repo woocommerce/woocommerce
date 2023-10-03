@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import type { BlockAttributes } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { Product } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -14,6 +14,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { Notice } from '../../components/notice';
 import { hasAttributesUsedForVariations } from '../../utils';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export interface NoticeBlockAttributes extends BlockAttributes {
 	buttonText: string;
@@ -24,8 +25,8 @@ export interface NoticeBlockAttributes extends BlockAttributes {
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< NoticeBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { buttonText, content, title, type = 'info' } = attributes;
 
 	const [ productAttributes ] = useEntityProp< Product[ 'attributes' ] >(

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
 import {
 	createElement,
 	useState,
@@ -11,6 +10,7 @@ import {
 	useEffect,
 } from '@wordpress/element';
 import '@woocommerce/settings';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { __experimentalSelectTreeControl as SelectTreeControl } from '@woocommerce/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
@@ -22,6 +22,7 @@ import { useSelect } from '@wordpress/data';
 import { CreateTaxonomyModal } from './create-taxonomy-modal';
 import { Taxonomy, TaxonomyMetadata } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
+import { ProductEditorBlockEditProps } from '../../types';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
@@ -34,10 +35,8 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 
 export function Edit( {
 	attributes,
-}: {
-	attributes: TaxonomyBlockAttributes;
-} ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
 			select( 'core' ).getTaxonomy( attributes.slug ) || {

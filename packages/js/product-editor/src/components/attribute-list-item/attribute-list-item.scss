@@ -16,20 +16,6 @@
 		margin-bottom: -1px;
 	}
 
-	&__options {
-		display: flex;
-		flex-direction: row;
-		gap: $gap-smallest;
-	}
-
-	&__option-chip {
-		padding: $gap-smallest $gap-smaller;
-		gap: 2px;
-
-		background: $gray-100;
-		border-radius: 2px;
-	}
-
 	&__actions {
 		display: flex;
 		flex-direction: row;

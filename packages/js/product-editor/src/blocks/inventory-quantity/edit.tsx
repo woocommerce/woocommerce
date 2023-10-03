@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
-import { BlockEditProps } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, useEffect } from '@wordpress/element';
@@ -19,11 +18,13 @@ import {
  */
 import { TrackInventoryBlockAttributes } from './types';
 import { useValidation } from '../../contexts/validation-context';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
+	attributes,
 	clientId,
-}: BlockEditProps< TrackInventoryBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< TrackInventoryBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 
 	const [ manageStock ] = useEntityProp< boolean >(
 		'postType',

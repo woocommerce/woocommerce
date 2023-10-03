@@ -2,14 +2,13 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
-	useBlockProps,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
@@ -33,10 +32,11 @@ import { getAttributeId } from '../../components/attribute-control/utils';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 import { hasAttributesUsedForVariations } from '../../utils';
 import { TRACKS_SOURCE } from '../../constants';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< VariationsBlockAttributes > ) {
+}: ProductEditorBlockEditProps< VariationsBlockAttributes > ) {
 	const { description } = attributes;
 
 	const { generateProductVariations } = useProductVariationsHelper();
@@ -63,7 +63,7 @@ export function Edit( {
 
 	const hasAttributes = hasAttributesUsedForVariations( productAttributes );
 
-	const blockProps = useBlockProps( {
+	const blockProps = useWooBlockProps( attributes, {
 		className: classNames( {
 			'wp-block-woocommerce-product-variations-fields--has-attributes':
 				hasAttributes,
@@ -79,6 +79,7 @@ export function Edit( {
 
 	const openNewModal = () => {
 		setIsNewModalVisible( true );
+		recordEvent( 'product_options_add_first_option' );
 	};
 
 	const closeNewModal = () => {
@@ -133,9 +134,22 @@ export function Edit( {
 					createNewAttributesAsGlobal={ true }
 					notice={ '' }
 					onCancel={ () => {
+						recordEvent(
+							'product_options_modal_cancel_button_click'
+						);
 						closeNewModal();
 					} }
 					onAdd={ handleAdd }
+					onAddAnother={ () => {
+						recordEvent(
+							'product_add_options_modal_add_another_option_button_click'
+						);
+					} }
+					onRemoveItem={ () => {
+						recordEvent(
+							'product_add_options_modal_remove_option_button_click'
+						);
+					} }
 					selectedAttributeIds={ variationOptions.map(
 						( attr ) => attr.id
 					) }

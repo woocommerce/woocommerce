@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DateTimePickerControl } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useBlockProps } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
 import { ToggleControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, useEffect, useState } from '@wordpress/element';
@@ -22,11 +21,13 @@ import { getSettings } from '@wordpress/date';
 import { ScheduleSalePricingBlockAttributes } from './types';
 import { useProductEdits } from '../../hooks/use-product-edits';
 import { useValidation } from '../../contexts/validation-context';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
+	attributes,
 	clientId,
-}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< ScheduleSalePricingBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { hasEdit } = useProductEdits();
 
 	const dateTimeFormat = getSettings().formats.datetime;

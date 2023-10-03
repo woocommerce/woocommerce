@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove confirmation modal for dismissing unsaved attributes or variation options #40500

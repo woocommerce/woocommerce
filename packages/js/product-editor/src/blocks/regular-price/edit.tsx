@@ -2,12 +2,11 @@
  * External dependencies
  */
 import classNames from 'classnames';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { useBlockProps } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement, createInterpolateElement } from '@wordpress/element';
@@ -24,12 +23,13 @@ import {
 import { useValidation } from '../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 import { SalePriceBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	clientId,
-}: BlockEditProps< SalePriceBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { label, help } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',

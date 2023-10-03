@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	OPTIONS_STORE_NAME,
 	Product,
@@ -34,11 +33,13 @@ import {
 	ShippingDimensionsImage,
 } from '../../components/shipping-dimensions-image';
 import { useValidation } from '../../contexts/validation-context';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
+	attributes,
 	clientId,
-}: BlockEditProps< ShippingDimensionsBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< ShippingDimensionsBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 
 	const [ dimensions, setDimensions ] =
 		useEntityProp< Partial< ProductDimensions > | null >(

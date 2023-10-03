@@ -10,11 +10,16 @@
 	.woocommerce-list-item {
 		background: none;
 		border: none;
-		padding-left: 0;
+		padding: 0;
 		grid-template-columns: 26% auto 90px;
 	}
 
 	.woocommerce-sortable__handle {
 		display: none;
+	}
+	.components-button.has-icon {
+		svg {
+			fill: $gray-700;
+		}
 	}
 }

@@ -3,10 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
-import { BlockInstance, parse, serialize } from '@wordpress/blocks';
+import {
+	BlockAttributes,
+	BlockInstance,
+	parse,
+	serialize,
+} from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -14,6 +19,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { ContentPreview } from '../../components/content-preview';
 import { ModalEditor } from '../../components/modal-editor';
+import { ProductEditorBlockEditProps } from '../../types';
 
 /**
  * Internal dependencies
@@ -21,7 +27,7 @@ import { ModalEditor } from '../../components/modal-editor';
 
 /**
  * By default the blocks variable always contains one paragraph
- * block with empty content, that causes the desciption to never
+ * block with empty content, that causes the description to never
  * be empty. This function removes the default block to keep
  * the description empty.
  *
@@ -39,8 +45,10 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 	return blocks;
 }
 
-export function Edit() {
-	const blockProps = useBlockProps();
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',

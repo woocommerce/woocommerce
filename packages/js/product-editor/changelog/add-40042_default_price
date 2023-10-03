@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add regular price as default value if available when generating new product variations.

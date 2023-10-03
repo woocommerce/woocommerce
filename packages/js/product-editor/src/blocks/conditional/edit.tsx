@@ -3,33 +3,27 @@
  */
 import type { BlockAttributes } from '@wordpress/blocks';
 import { createElement, useMemo } from '@wordpress/element';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import { useSelect } from '@wordpress/data';
+import { InnerBlocks } from '@wordpress/block-editor';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DisplayState } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { ProductEditorBlockEditProps } from '../../types';
+
+export interface ConditionalBlockAttributes extends BlockAttributes {
+	mustMatch: Record< string, Array< string > >;
+}
 
 export function Edit( {
 	attributes,
-}: {
-	attributes: BlockAttributes & {
-		mustMatch: Record< string, Array< string > >;
-	};
-} ) {
-	const blockProps = useBlockProps();
+	context,
+}: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
 
-	const productId = useEntityId( 'postType', 'product' );
-	const product: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			productId
-		)
-	);
+	const product = context.editedProduct;
 
 	const displayBlocks = useMemo( () => {
 		for ( const [ prop, values ] of Object.entries( mustMatch ) ) {

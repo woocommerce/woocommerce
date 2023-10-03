@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import {
@@ -10,8 +11,6 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
-import { BlockEditProps } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
@@ -28,11 +27,13 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { useValidation } from '../../contexts/validation-context';
 import { InventoryEmailBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
+	attributes,
 	clientId,
-}: BlockEditProps< InventoryEmailBlockAttributes > ) {
-	const blockProps = useBlockProps();
+}: ProductEditorBlockEditProps< InventoryEmailBlockAttributes > ) {
+	const blockProps = useWooBlockProps( attributes );
 	const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 2 );
 
 	const [ lowStockAmount, setLowStockAmount ] = useEntityProp< number >(

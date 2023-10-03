@@ -1,27 +1,26 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration } from '@wordpress/blocks';
+import { registerWooBlockType } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-block';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
-import { RequirePasswordBlockAttributes } from './types';
 
-const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< RequirePasswordBlockAttributes >;
+const { name, ...metadata } = blockConfiguration;
 
 export { metadata, name };
 
-export const settings: Partial<
-	BlockConfiguration< RequirePasswordBlockAttributes >
-> = {
+export const settings = {
 	edit: Edit,
 };
 
 export function init() {
-	return initBlock( { name, metadata, settings } );
+	return registerWooBlockType( {
+		name,
+		metadata: metadata as never,
+		settings: settings as never,
+	} );
 }

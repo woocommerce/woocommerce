@@ -1,25 +1,24 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
 import { CheckboxControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { CatalogVisibilityBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: {
-	attributes: CatalogVisibilityBlockAttributes;
-} ) {
+}: ProductEditorBlockEditProps< CatalogVisibilityBlockAttributes > ) {
 	const { label, visibility } = attributes;
 
-	const blockProps = useBlockProps();
+	const blockProps = useWooBlockProps( attributes );
 
 	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
 		Product[ 'catalog_visibility' ]
