@@ -31,11 +31,12 @@ jobs:
           name: 'Build Testing Matrices'
           with:
             script: |
-              console.log( ${{ toJson( github.event) }} );
+              let baseRef = ${{ toJson( github.base_ref ) }};
+              if ( baseRef ) {
+                baseRef = 'origin/' + baseRef;
+              }
               const buildTestingMatrices = require( './.github/workflows/scripts/build-test-matrices' );
-              buildTestingMatrices( 
-                ${{ github.event_name == 'pull_request' && toJson( github.event.pull_request.base.sha ) || null }}
-              ).then( ( matrices ) => {
+              buildTestingMatrices( baseRef ).then( ( matrices ) => {
                 core.setOutput( 'matrices', JSON.stringify( matrices ) );
               } );
     test-javascript:
