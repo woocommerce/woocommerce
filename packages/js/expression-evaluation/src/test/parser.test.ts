@@ -220,6 +220,23 @@ describe( 'parser', () => {
 		expect( result ).toEqual( true );
 	} );
 
+	it( 'should parse a multiline expression', () => {
+		const result = parser.parse(
+			`foo
+			|| bar
+			|| baz`,
+			{
+				context: {
+					foo: false,
+					bar: false,
+					baz: true,
+				},
+			}
+		);
+
+		expect( result ).toEqual( true );
+	} );
+
 	it( 'should throw an error if the expression is invalid', () => {
 		expect( () => parser.parse( '= 1' ) ).toThrow();
 	} );

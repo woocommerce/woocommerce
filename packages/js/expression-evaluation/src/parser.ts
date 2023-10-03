@@ -77,6 +77,9 @@ LineTerminatorSequence
 	/ "\\u2028"
 	/ "\\u2029"
 
+__ "skipped"
+	= (WhiteSpace / LineTerminatorSequence )*
+
 IdentifierPath
 	= variable:Identifier accessor:("." Identifier)* {
 		const path = variable.split( '.' );
@@ -275,13 +278,13 @@ FalseToken
 PrimaryExpression
 	= IdentifierPath
 	/ Literal
-	/ "(" WhiteSpace* expression:Expression WhiteSpace* ")" {
+	/ "(" __ expression:Expression __ ")" {
 		return expression;
 	}
 
 UnaryExpression
 	= PrimaryExpression
-	/ operator:UnaryOperator WhiteSpace* operand:UnaryExpression {
+	/ operator:UnaryOperator __ operand:UnaryExpression {
 		return evaluateUnaryExpression( operator, operand );
 	}
 
@@ -294,7 +297,7 @@ RelationalExpression
 	= UnaryExpression
 
 EqualityExpression
-	= head:RelationalExpression tail:( WhiteSpace* EqualityOperator WhiteSpace* RelationalExpression)* {
+	= head:RelationalExpression tail:(__ EqualityOperator __ RelationalExpression)* {
 		return evaluateBinaryExpression( head, tail );
 	}
 
@@ -305,21 +308,15 @@ EqualityOperator
 	/ "!="
 
 LogicalAndExpression
-	= head:EqualityExpression tail:(WhiteSpace+ LogicalAndOperator WhiteSpace+ EqualityExpression)* {
+	= head:EqualityExpression tail:(__ LogicalAndOperator __ EqualityExpression)* {
 		return evaluateBinaryExpression( head, tail );
 	}
 
 LogicalAndOperator
 	= "&&"
 
-Factor
-	= "!" WhiteSpace* operand:Factor {
-		return !operand;
-	}
-	/ PrimaryExpression
-
 LogicalOrExpression
-	= head:LogicalAndExpression tail:(WhiteSpace+ LogicalOrOperator WhiteSpace+ LogicalAndExpression)* {
+	= head:LogicalAndExpression tail:(__ LogicalOrOperator __ LogicalAndExpression)* {
 		return evaluateBinaryExpression( head, tail );
 	}
 
