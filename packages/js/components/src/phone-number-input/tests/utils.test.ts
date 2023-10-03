@@ -74,15 +74,15 @@ describe( 'PhoneNumberInput Utils', () => {
 
 	describe( 'parseData', () => {
 		it( 'parses the data into a more usable format', () => {
-			const data = [
-				{
+			const data = {
+				AF: {
 					alpha2: 'AF',
 					code: '93',
 					priority: 0,
 					start: [ '7' ],
 					lengths: [ 9 ],
 				},
-			];
+			};
 
 			const { countries, countryCodes } = parseData( data );
 			expect( countries ).toEqual( {

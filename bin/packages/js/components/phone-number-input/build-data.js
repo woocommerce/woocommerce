@@ -39,13 +39,19 @@ const evaluate = ( code ) => {
 };
 
 const parse = ( data /*: any[]*/ ) /*: DataType*/ =>
-	data.map( ( item /*: any[]*/ ) => ( {
-		alpha2: item[ 0 ],
-		code: item[ 1 ].toString(),
-		priority: item[ 2 ] || 0,
-		start: item[ 3 ]?.map( String ),
-		lengths: item[ 4 ],
-	} ) );
+	data.reduce(
+		( acc, item ) => ( {
+			...acc,
+			[ item[ 0 ] ]: {
+				alpha2: item[ 0 ],
+				code: item[ 1 ].toString(),
+				priority: item[ 2 ] || 0,
+				start: item[ 3 ]?.map( String ),
+				lengths: item[ 4 ],
+			},
+		} ),
+		{}
+	);
 
 const saveToFile = ( data ) => {
 	const dataString = JSON.stringify( data ).replace( /null/g, '' );

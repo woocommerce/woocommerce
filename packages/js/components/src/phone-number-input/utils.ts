@@ -1,12 +1,20 @@
 /**
- * External dependencies
- */
-import { keyBy, mapValues, sortBy } from 'lodash';
-
-/**
  * Internal dependencies
  */
 import type { DataType } from './types';
+
+const mapValues = < T, U >(
+	object: Record< string, T >,
+	iteratee: ( value: T ) => U
+): Record< string, U > => {
+	const result: Record< string, U > = {};
+
+	for ( const key in object ) {
+		result[ key ] = iteratee( object[ key ] );
+	}
+
+	return result;
+};
 
 /**
  * Removes any non-digit character.
@@ -101,33 +109,25 @@ const pushOrAdd = (
 /**
  * Parses the data from `data.ts` into a more usable format.
  */
-export const parseData = ( data: DataType ) => {
-	const countries = keyBy( data, 'alpha2' );
-	return {
-		countries: mapValues( countries, ( country ) => ( {
-			...country,
-			name: countryNames[ country.alpha2 ] ?? country.alpha2,
-			flag: countryToFlag( country.alpha2 ),
-		} ) ),
-		countryCodes: sortBy( data, 'priority' ).reduce(
-			( acc, { code, alpha2, start } ) => {
-				pushOrAdd( acc, code, alpha2 );
-				if ( start ) {
-					for ( const str of start ) {
-						for ( let i = 1; i <= str.length; i++ ) {
-							pushOrAdd(
-								acc,
-								code + str.substring( 0, i ),
-								alpha2
-							);
-						}
+export const parseData = ( data: DataType ) => ( {
+	countries: mapValues( data, ( country ) => ( {
+		...country,
+		name: countryNames[ country.alpha2 ] ?? country.alpha2,
+		flag: countryToFlag( country.alpha2 ),
+	} ) ),
+	countryCodes: Object.values( data )
+		.sort( ( a, b ) => ( a.priority > b.priority ? 1 : -1 ) )
+		.reduce( ( acc, { code, alpha2, start } ) => {
+			pushOrAdd( acc, code, alpha2 );
+			if ( start ) {
+				for ( const str of start ) {
+					for ( let i = 1; i <= str.length; i++ ) {
+						pushOrAdd( acc, code + str.substring( 0, i ), alpha2 );
 					}
 				}
-				return acc;
-			},
-			{} as Record< string, string[] >
-		),
-	};
-};
+			}
+			return acc;
+		}, {} as Record< string, string[] > ),
+} );
 
 export type Country = ReturnType< typeof parseData >[ 'countries' ][ 0 ];
