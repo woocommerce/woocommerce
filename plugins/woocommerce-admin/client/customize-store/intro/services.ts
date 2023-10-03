@@ -93,9 +93,9 @@ export const fetchIntroData = async () => {
 	const { getTask } = resolveSelect( ONBOARDING_STORE_NAME );
 
 	const activeThemeHasMods =
-		currentTemplate?.modified !== null ||
+		!! currentTemplate?.modified ||
 		styleRevs?.length > 0 ||
-		hasModifiedPages.length > 0;
+		hasModifiedPages;
 	const customizeStoreTaskCompleted = ( await getTask( 'customize-store' ) )
 		?.isComplete;
 	const themeCards = await fetchThemeCards();
