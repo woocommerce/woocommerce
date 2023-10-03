@@ -11,7 +11,7 @@ concurrency:
 jobs:
     prime-cache:
         name: 'Prime Cache'
-        runs-on: 'ubuntu'
+        runs-on: 'ubuntu-20.04'
         steps:
             - uses: 'actions/checkout@v3'
               name: 'Checkout'
@@ -19,7 +19,7 @@ jobs:
               name: 'Setup Monorepo'
     build-test-matrices:
       name: 'Build Testing Matrices'
-      runs-on: 'ubuntu'
+      runs-on: 'ubuntu-20.04'
       steps:
           - uses: 'actions/checkout@v3'
             name: 'Checkout'
@@ -33,7 +33,7 @@ jobs:
                 } );
     test-javascript:
         name: 'Tests - JavaScript'
-        runs-on: 'ubuntu'
+        runs-on: 'ubuntu-20.04'
         needs: 'prime-cache'
         steps:
             - uses: 'actions/checkout@v3'
@@ -44,7 +44,7 @@ jobs:
               run: 'pnpm -r test:js'
     test-php:
         name: 'Tests - PHP - ${{ matrix.name }}'
-        runs-on: 'ubuntu'
+        runs-on: 'ubuntu-20.04'
         needs: [ 'prime-cache', 'build-test-matrices' ]
         strategy:
             matrix: ${{ fromJSON( needs.build-test-matrices.outputs.matrices.php ) }}
