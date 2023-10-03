@@ -3,7 +3,6 @@
  */
 import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	// @ts-expect-error no exported member.
@@ -15,10 +14,11 @@ import {
  */
 import { sanitizeHTML } from '../../utils/sanitize-html';
 import { SectionBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< SectionBlockAttributes > ) {
+}: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
