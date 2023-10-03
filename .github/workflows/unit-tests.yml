@@ -35,7 +35,7 @@ jobs:
             script: |
               let baseRef = ${{ toJson( github.base_ref ) }};
               if ( baseRef ) {
-                baseRef = 'refs/heads/' + baseRef;
+                baseRef = 'origin/' + baseRef;
               }
               const buildTestMatrices = require( './.github/workflows/scripts/build-test-matrices' );
               buildTestMatrices( baseRef ).then( ( matrices ) => {
