@@ -426,7 +426,7 @@
 								const fieldset = input.closest( 'fieldset' );
 
 								if ( fieldset.length ) {
-									fieldset.append( `<div>${ text }</div>` );
+									fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
 								}
 							}
 
