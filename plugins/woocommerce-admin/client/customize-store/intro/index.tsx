@@ -1,16 +1,13 @@
 /**
  * External dependencies
  */
-import { useState, createInterpolateElement } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
-import classNames from 'classnames';
-import { Link } from '@woocommerce/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
-	Button,
 } from '@wordpress/components';
 
 /**
@@ -20,9 +17,14 @@ import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import { DesignChangeWarningModal } from './design-change-warning-modal';
-import './intro.scss';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { ADMIN_URL } from '~/utils/admin-settings';
+import './intro.scss';
+import {
+	NetworkOfflineBanner,
+	ThemeHasModsBanner,
+	JetpackOfflineBanner,
+	DefaultBanner,
+} from './intro-banners';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -35,6 +37,16 @@ export type events =
 export * as actions from './actions';
 export * as services from './services';
 
+type BannerStatus = keyof typeof BANNER_COMPONENTS;
+
+const BANNER_COMPONENTS = {
+	'network-offline': NetworkOfflineBanner,
+	'task-incomplete-active-theme-has-mods': ThemeHasModsBanner,
+	'jetpack-offline': JetpackOfflineBanner,
+	'existing-ai-theme': DefaultBanner,
+	default: DefaultBanner,
+};
+
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
@@ -44,40 +56,26 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	const isNetworkOffline = useNetworkStatus();
 
-	let bannerText;
-	let bannerTitle;
-	let bannerButtonText;
-	if ( isNetworkOffline ) {
-		bannerText = __(
-			"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
-			'woocommerce'
-		);
-		bannerTitle = __(
-			'Looking to design your store using AI?',
-			'woocommerce'
-		);
-		bannerButtonText = __( 'Retry', 'woocommerce' );
-	} else if ( isJetpackOffline ) {
-		bannerTitle = __(
-			'Looking to design your store using AI?',
-			'woocommerce'
-		);
-		bannerText = __(
-			"It looks like you're using Jetpack's offline mode — switch to online mode to start designing with AI.",
-			'woocommerce'
-		);
-		bannerButtonText = __( 'Find out how', 'woocommerce' );
-	} else {
-		bannerTitle = __(
-			'Use the power of AI to design your store',
-			'woocommerce'
-		);
-		bannerText = __(
-			'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
-			'woocommerce'
-		);
-		bannerButtonText = __( 'Design with AI', 'woocommerce' );
+	let modalStatus: ModalStatus = 'no-modal';
+	let bannerStatus: BannerStatus = 'default';
+
+	switch ( true ) {
+		case isNetworkOffline:
+			bannerStatus = 'network-offline';
+			break;
+		case isJetpackOffline as boolean:
+			bannerStatus = 'jetpack-offline';
+			break;
+		case activeThemeHasMods && ! customizeStoreTaskCompleted:
+			bannerStatus = 'task-incomplete-active-theme-has-mods';
+			break;
+		case context.intro.currentThemeIsAiGenerated:
+			bannerStatus = 'existing-ai-theme';
+			break;
 	}
+
+	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
 
@@ -168,49 +166,12 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</div>
 
 				<div className="woocommerce-customize-store-main">
-					<div
-						className={ classNames(
-							'woocommerce-customize-store-banner',
-							{
-								'offline-banner':
-									isNetworkOffline || isJetpackOffline,
-							}
-						) }
-					>
-						<div
-							className={ `woocommerce-customize-store-banner-content` }
-						>
-							<h1>{ bannerTitle }</h1>
-							<p>{ bannerText }</p>
-							<Button
-								onClick={ () => {
-									if ( isJetpackOffline ) {
-										sendEvent( {
-											type: 'JETPACK_OFFLINE_HOWTO',
-										} );
-									} else if ( isNetworkOffline === false ) {
-										if (
-											activeThemeHasMods &&
-											! customizeStoreTaskCompleted
-										) {
-											setOpenDesignChangeWarningModal(
-												true
-											);
-										} else {
-											sendEvent( {
-												type: 'DESIGN_WITH_AI',
-											} );
-										}
-									}
-								} }
-								variant={
-									isJetpackOffline ? 'link' : 'primary'
-								}
-							>
-								{ bannerButtonText }
-							</Button>
-						</div>
-					</div>
+					<BannerComponent
+						setOpenDesignChangeWarningModal={
+							setOpenDesignChangeWarningModal
+						}
+						sendEvent={ sendEvent }
+					/>
 
 					<p className="select-theme-text">
 						{ __(
