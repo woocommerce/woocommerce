@@ -6,7 +6,7 @@ on:
       - 'trunk'
       - 'release/*'
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 jobs:
     prime-cache:
@@ -23,6 +23,8 @@ jobs:
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
+          with:
+            fetch-depth: 0
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
           with:
