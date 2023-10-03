@@ -47,6 +47,14 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
+		/**
+		 * Controls whether we add a submenu item for the WooCommerce Addons page.
+		 * Woo Express uses this filter.
+		 *
+		 * @since 8.2.1
+		 *
+		 * @param bool $show_addons_page If the addons page should be included.
+		 */
 		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
 			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
 				$container = wc_get_container();
