@@ -311,7 +311,7 @@ class WCAdminAssets {
 					isset( $_GET['path'] ) &&
 					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
 				);
-				if ( ! $is_customize_store_page ) {
+				if ( ! $is_customize_store_page && WC_ADMIN_APP === $script ) {
 					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-editor' ) );
 				}
 
