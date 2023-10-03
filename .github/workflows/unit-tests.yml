@@ -26,6 +26,8 @@ jobs:
           name: 'Checkout'
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
+          with:
+            install: 'false'
         - uses: actions/github-script@v6
           name: 'Build Testing Matrices'
           with:
