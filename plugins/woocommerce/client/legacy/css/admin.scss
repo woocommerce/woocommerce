@@ -3912,6 +3912,20 @@ table.wc_shipping {
 		box-shadow: none;
 		border-top: 1px solid #E0E0E0;
 		background-color: #fff;
+
+		.inner {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.wc-shipping-zone-method-modal-info {
+			display: flex;
+			align-items: center;
+			font-size: 11px;
+			font-weight: 500;
+			line-height: 16px;
+		}
+		
 	}
 
 	.wc-shipping-zone-method-input {

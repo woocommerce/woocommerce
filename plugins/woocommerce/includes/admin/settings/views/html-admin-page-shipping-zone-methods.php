@@ -186,6 +186,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
+						<div class="wc-shipping-zone-method-modal-info"><?php esc_html_e( 'STEP 1 OF 2', 'woocommerce' ); ?></div>
 						<button id="btn-next" class="button button-primary button-large"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
