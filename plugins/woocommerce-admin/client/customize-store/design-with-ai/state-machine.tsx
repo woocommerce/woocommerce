@@ -374,6 +374,26 @@ export const designWithAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
 						},
 						onDone: 'postApiCallLoader',
 					},
