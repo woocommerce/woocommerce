@@ -10,9 +10,6 @@ const fs = require( 'fs' );
  * @param {string} baseRef The base branch to compare against.
  */
 module.exports = async function buildTestMatrices( baseRef ) {
-    const check = child_process.execSync( 'git branch -r', { encoding: 'utf8', } );
-    console.log( check );
-
     // Support filtering against a list of packages changed since a base ref if one is given.
     const refFilter = baseRef ? `--filter='...[${ baseRef }]'` : '';
 
@@ -50,6 +47,8 @@ module.exports = async function buildTestMatrices( baseRef ) {
             env: {},
         } );
     }
+
+    console.log(testMatrices);
 
     return testMatrices;
 }
