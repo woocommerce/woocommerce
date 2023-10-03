@@ -407,34 +407,43 @@
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
+					const helpTipsToRemove = [ 'woocommerce_flat_rate_cost' ];
 					const settings = $( html );
 					const labels = settings.find( 'label' );
 					labels.each( (i) => {
 						const label = $( labels[ i ] );
 						const helpTip = label.find( '.woocommerce-help-tip' );
-						
-						if ( helpTip.length ) {
-							const id = label.attr( 'for' );
-							if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
-								const input = settings.find( `#${ id }` );
-								const fieldset = input.closest( 'fieldset' );
-								const inputLabel = fieldset.find( 'label' );
-								inputLabel.append( helpTip );
-							} else {
-								const text = helpTip.data( 'tip' );
-								const input = settings.find( `#${ id }` );
-								const fieldset = input.closest( 'fieldset' );
 
-								if ( fieldset.length ) {
-									fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
-								}
-							}
+						if ( helpTip.length === 0 ) {
+							return;
+						}
 
-							// Coupon discounts doesn't get a title on Free Shipping.
-							if ( label.text().trim() === 'Coupons discounts' ) {
-								label.text( '' );
+						const id = label.attr( 'for' );
+
+						if ( helpTipsToRemove.includes( id ) ) {
+							return;
+						}
+
+						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
+							const input = settings.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+							const inputLabel = fieldset.find( 'label' );
+							inputLabel.append( helpTip );
+						} else {
+							const text = helpTip.data( 'tip' );
+							const input = settings.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+
+							if ( fieldset.length ) {
+								fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
 							}
 						}
+
+						// Coupon discounts doesn't get a title on Free Shipping.
+						if ( label.text().trim() === 'Coupons discounts' ) {
+							label.text( '' );
+						}
+
 					} );
 
 					return settings.prop('outerHTML');
