@@ -35,8 +35,8 @@ jobs:
               if ( baseRef ) {
                 baseRef = 'refs/heads/' + baseRef;
               }
-              const buildTestingMatrices = require( './.github/workflows/scripts/build-test-matrices' );
-              buildTestingMatrices( baseRef ).then( ( matrices ) => {
+              const buildTestMatrices = require( './.github/workflows/scripts/build-test-matrices' );
+              buildTestMatrices( baseRef ).then( ( matrices ) => {
                 core.setOutput( 'matrices', JSON.stringify( matrices ) );
               } );
     test-javascript:
