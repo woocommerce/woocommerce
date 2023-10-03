@@ -110,8 +110,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<footer>
 					<div class="inner">
 						<button id="btn-ok" disabled class="button button-primary button-large disabled">
-							<div class="wc-shipping-class-modal-action-{{ data.action === 'create' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
-							<div class="wc-shipping-class-modal-action-{{ data.action === 'edit' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.action === 'create' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.action === 'edit' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
 						</button>
 					</div>
 				</footer>

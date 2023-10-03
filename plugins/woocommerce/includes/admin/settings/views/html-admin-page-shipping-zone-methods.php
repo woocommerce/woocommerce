@@ -150,8 +150,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
-						<div class="wc-shipping-zone-method-modal-info"><?php esc_html_e( 'STEP 2 OF 2', 'woocommerce' ); ?></div>
+						<button id="btn-ok" class="button button-primary button-large">
+							<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
+						</button>
+						<div class="wc-shipping-zone-method-modal-info wc-shipping-zone-method-modal-info-{{ data.status === 'existing' ? 'inactive' : 'active' }}"><?php esc_html_e( 'STEP 2 OF 2', 'woocommerce' ); ?></div>
 					</div>
 				</footer>
 			</section>

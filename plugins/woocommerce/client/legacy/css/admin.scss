@@ -3944,6 +3944,10 @@ table.wc_shipping {
 			font-size: 11px;
 			font-weight: 500;
 			line-height: 16px;
+
+			&.wc-shipping-zone-method-modal-info-inactive {
+				display: none;
+			}
 		}
 		
 	}
@@ -4021,6 +4025,10 @@ table.wc_shipping {
 			color: #757575;
 		}
 	}
+
+	.wc-backbone-modal-action-inactive {
+		display: none;
+	}
 }
 
 table {
@@ -4054,10 +4062,6 @@ table {
 		font-size: 11px;
 		font-weight: 500;
 		line-height: 16px;
-	}
-
-	.wc-shipping-class-modal-action-inactive {
-		display: none;
 	}
 
 	.wc-shipping-class-modal-input {
