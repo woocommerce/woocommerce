@@ -15,7 +15,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
 
-function convertMediaFileToDownloadFile( value: Record< string, any > ) {
+function convertMediaFileToDownloadFile( value: Record< string, unknown > ) {
 	return { id: `${ value.id }`, name: value.name, file: value.url };
 }
 
@@ -29,7 +29,7 @@ export function DownloadsMenuItem( {
 		: selection.id;
 
 	function handleMediaUploadSelect(
-		value: Record< string, any > | Record< string, any >[]
+		value: Record< string, unknown > | Record< string, unknown >[]
 	) {
 		const downloads = Array.isArray( value )
 			? value.map( convertMediaFileToDownloadFile )
