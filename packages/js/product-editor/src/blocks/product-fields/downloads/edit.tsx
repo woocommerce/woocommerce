@@ -201,7 +201,7 @@ export function Edit( {
 					label={
 						<>
 							<UploadImage />
-							<p className="woocommerce-product-form__remove-files-drop-zone-label">
+							<p className="woocommerce-product-form__supported-files-drop-zone-label">
 								{ createInterpolateElement(
 									__(
 										'Supported file types: <Types /> and more. <link>View all</link>',

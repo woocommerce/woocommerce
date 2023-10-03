@@ -261,12 +261,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			]
 		)->add_block(
 			[
-				'id'         => 'product-downloads',
-				'blockName'  => 'woocommerce/product-downloads-field',
-				'order'      => 10,
-				'attributes' => [
-					'images' => [],
-				],
+				'id'        => 'product-downloads',
+				'blockName' => 'woocommerce/product-downloads-field',
+				'order'     => 10,
 			]
 		);
 	}
