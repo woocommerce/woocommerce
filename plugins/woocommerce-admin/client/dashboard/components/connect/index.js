@@ -53,14 +53,8 @@ export class Connect extends Component {
 	}
 
 	render() {
-		const {
-			error,
-			isRequesting,
-			onSkip,
-			skipText,
-			onAbort,
-			abortText,
-		} = this.props;
+		const { error, isRequesting, onSkip, skipText, onAbort, abortText } =
+			this.props;
 
 		return (
 			<Fragment>
