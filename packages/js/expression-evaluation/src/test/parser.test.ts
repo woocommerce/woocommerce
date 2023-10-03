@@ -29,10 +29,34 @@ describe( 'parser', () => {
 		expect( result ).toEqual( 23 );
 	} );
 
+	it( 'should parse a signed negative integer literal', () => {
+		const result = parser.parse( '-1' );
+
+		expect( result ).toEqual( -1 );
+	} );
+
+	it( 'should parse a signed positive integer literal', () => {
+		const result = parser.parse( '+1' );
+
+		expect( result ).toEqual( 1 );
+	} );
+
 	it( 'should parse a numeric floating point literal', () => {
 		const result = parser.parse( '5.23' );
 
 		expect( result ).toEqual( 5.23 );
+	} );
+
+	it( 'should parse a signed negative floating point literal', () => {
+		const result = parser.parse( '-9.95' );
+
+		expect( result ).toEqual( -9.95 );
+	} );
+
+	it( 'should parse a signed positive floating point literal', () => {
+		const result = parser.parse( '+9.95' );
+
+		expect( result ).toEqual( 9.95 );
 	} );
 
 	it( 'should parse a numeric hexadecimal literal', () => {
@@ -194,18 +218,6 @@ describe( 'parser', () => {
 		} );
 
 		expect( result ).toEqual( true );
-	} );
-
-	it( 'should parse a negative number', () => {
-		const result = parser.parse( '-1' );
-
-		expect( result ).toEqual( -1 );
-	} );
-
-	it( 'should parse a positive number', () => {
-		const result = parser.parse( '+1' );
-
-		expect( result ).toEqual( 1 );
 	} );
 
 	it( 'should throw an error if the expression is invalid', () => {
