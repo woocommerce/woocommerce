@@ -28,7 +28,7 @@ jobs:
             with:
               script: |
                 const buildTestingMatrices = require( './.github/workflows/scripts/build-test-matrices' );
-                buildTestingMatrices( ${{ github.base_ref || 'trunk' }} ).then( ( matrices ) => {
+                buildTestingMatrices( '${{ github.base_ref || 'origin/trunk' }}' ).then( ( matrices ) => {
                   core.setOutput( 'matrices', JSON.stringify( matrices ) );
                 } );
     test-javascript:
