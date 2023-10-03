@@ -8,6 +8,7 @@ const fs = require( 'fs' );
  * Generates test matrices to be used in testing workflows.
  * 
  * @param {string} baseRef The base branch to compare against.
+ * @return {Promise.<Object>} The test matrices to be used in testing workflows.
  */
 module.exports = async function buildTestMatrices( baseRef ) {
     // Support filtering against a list of packages changed since a base ref if one is given.
@@ -23,9 +24,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
 
     // Generate the testing matrices for the packages that have changed.
     const testMatrices = {
-        php: {
-            include: [],
-        },
+        php: [],
     };
     for ( const projectPath of changedProjects ) {
         // We're only interested in
@@ -43,7 +42,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
             continue;
         }
 
-        testMatrices.php.include.push( {
+        testMatrices.php.push( {
             name: packageFile.name,
             'has-test-environment': true,
             env: {},

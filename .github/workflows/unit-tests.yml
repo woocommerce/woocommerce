@@ -21,7 +21,7 @@ jobs:
       name: 'Build Testing Matrices'
       runs-on: 'ubuntu-20.04'
       outputs:
-        matrices: ${{ steps.build-test-matrices.outputs.matrices }}
+        php: ${{ steps.build-test-matrices.outputs.php }}
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
@@ -42,7 +42,7 @@ jobs:
               }
               const buildTestMatrices = require( './.github/workflows/scripts/build-test-matrices' );
               buildTestMatrices( baseRef ).then( ( matrices ) => {
-                core.setOutput( 'matrices', JSON.stringify( matrices ) );
+                core.setOutput( 'php', JSON.stringify( matrices.php ) );
               } );
     test-javascript:
       name: 'Tests - JavaScript'
@@ -58,18 +58,22 @@ jobs:
     test-php:
       name: 'Tests - PHP - "${{ matrix.name }}"'
       runs-on: 'ubuntu-20.04'
-      needs: [ 'build-test-matrices' ]
+      needs: [ 'prime-cache', 'build-test-matrices' ]
       strategy:
-        matrix: ${{ fromJSON( needs.build-test-matrices.outputs.matrices ).php }}
+        matrix:
+          include: ${{ fromJSON( needs.build-test-matrices.outputs.php ) }}
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
-        - name: 'Preparing Test Environment'
+          with:
+              install-filters: ${{ matrix.name }}
+              build-filters: ${{ matrix.name }}
+        - name: 'Prepare Test Environment'
           if: ${{ matrix.has-test-environment }}
           env:
             ${{ matrix.test-environment.env.*.name }}: ${{ matrix.test-environment.env.*.value }}
           run: 'pnpm --filter=${{ matrix.name }} run test:env:start'
         - name: 'Run Tests'
-          run: 'pnpm --filter=${{ matrix.name }} test:unit:php ${{ matrix.test-args }}'
+          run: 'pnpm --filter=${{ matrix.name }} test:php ${{ matrix.test-args }}'
