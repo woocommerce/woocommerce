@@ -53,9 +53,8 @@ export default function Products( props: ProductsProps ): JSX.Element {
 			? MARKETPLACE_SEARCH_RESULTS_PER_PAGE
 			: MARKETPLACE_ITEMS_PER_PAGE;
 
-	// Only show the "View all" button when not on the themes tab
-	// and not already showing all results for a product type.
-	const showAllButton = query.tab !== 'themes' && ! query.section;
+	// Only show the "View all" button when on search but not showing a specific section of results.
+	const showAllButton = query.tab === 'search' && ! query.section;
 
 	function showSection( section: ProductType ) {
 		navigateTo( {
@@ -83,7 +82,7 @@ export default function Products( props: ProductsProps ): JSX.Element {
 		);
 	}
 
-	const baseContainerClass = 'woocommerce-marketplace__';
+	const baseContainerClass = 'woocommerce-marketplace__search-';
 	const baseProductListTitleClass = 'product-list-title--';
 
 	const containerClassName = classnames( baseContainerClass + label );
