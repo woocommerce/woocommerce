@@ -44,8 +44,7 @@ module.exports = async function buildTestMatrices( baseRef ) {
 
         testMatrices.php.push( {
             name: packageFile.name,
-            'has-test-environment': true,
-            env: {},
+            'test-environment': JSON.stringify( {} ),
         } );
     }
 
