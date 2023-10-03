@@ -64,6 +64,7 @@ class BlockRegistry {
 	 * Get a file path for a given block file.
 	 *
 	 * @param string $path File path.
+	 * @param string $dir File directory.
 	 */
 	private function get_file_path( $path, $dir ) {
 		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
