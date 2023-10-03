@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix backwards compatibility issue with `wc_get_orders()` when HPOS is active and the pagination bit is set.
