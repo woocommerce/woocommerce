@@ -47,6 +47,15 @@ const BANNER_COMPONENTS = {
 	default: DefaultBanner,
 };
 
+const MODAL_COMPONENTS = {
+	'no-modal': null,
+	'task-incomplete-override-design-changes': DesignChangeWarningModal,
+	'task-complete-with-ai-theme': null,
+	'task-complete-without-ai-theme': null,
+};
+
+type ModalStatus = keyof typeof MODAL_COMPONENTS;
+
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
@@ -55,6 +64,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const isJetpackOffline = false;
 
 	const isNetworkOffline = useNetworkStatus();
+
+	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
+		useState( false );
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
@@ -74,65 +86,29 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 	}
 
-	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+	switch ( true ) {
+		case openDesignChangeWarningModal === false:
+			modalStatus = 'no-modal';
+			break;
+		case bannerStatus === 'task-incomplete-active-theme-has-mods':
+			modalStatus = 'task-incomplete-override-design-changes';
+			break;
+	}
 
-	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
-		useState( false );
+	const ModalComponent = MODAL_COMPONENTS[ modalStatus ];
+
+	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
 
 	return (
 		<>
-			{ openDesignChangeWarningModal && (
-				<DesignChangeWarningModal
-					title={ __(
-						'Are you sure you want to start a new design?',
-						'woocommerce'
-					) }
-					isOpen={ true }
-					onRequestClose={ () => {
-						setOpenDesignChangeWarningModal( false );
-					} }
-				>
-					<p>
-						{ createInterpolateElement(
-							__(
-								"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
-								'woocommerce'
-							),
-							{
-								EditorLink: (
-									<Link
-										onClick={ () => {
-											window.open(
-												`${ ADMIN_URL }site-editor.php`,
-												'_blank'
-											);
-											return false;
-										} }
-										href=""
-									/>
-								),
-							}
-						) }
-					</p>
-					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
-						<Button
-							onClick={ () =>
-								setOpenDesignChangeWarningModal( false )
-							}
-							variant="link"
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							onClick={ () =>
-								sendEvent( { type: 'DESIGN_WITH_AI' } )
-							}
-							variant="primary"
-						>
-							{ __( 'Design with AI', 'woocommerce' ) }
-						</Button>
-					</div>
-				</DesignChangeWarningModal>
+			{ ModalComponent && (
+				<ModalComponent
+					isOpen={ openDesignChangeWarningModal }
+					sendEvent={ sendEvent }
+					setOpenDesignChangeWarningModal={
+						setOpenDesignChangeWarningModal
+					}
+				/>
 			) }
 			<div className="woocommerce-customize-store-header">
 				<SiteHub
