@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Correctly set 'created_via' for HPOS orders created on the admin. [#40469](https://github.com/woocommerce/woocommerce/pull/40469)
 * Fix - Fix backwards compatibility issue with `wc_get_orders()` when HPOS is active and the pagination bit is set. [#40551](https://github.com/woocommerce/woocommerce/pull/40551)
 * Fix - Save hpos order data before clearing the order from cache [#40282](https://github.com/woocommerce/woocommerce/pull/40282)
 * Fix - Disable WP's post lock on HPOS order edit screen. [#40355](https://github.com/woocommerce/woocommerce/pull/40355)
