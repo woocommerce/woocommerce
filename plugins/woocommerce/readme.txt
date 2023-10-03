@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix backwards compatibility issue with `wc_get_orders()` when HPOS is active and the pagination bit is set. [#40551](https://github.com/woocommerce/woocommerce/pull/40551)
 * Fix - Save hpos order data before clearing the order from cache [#40282](https://github.com/woocommerce/woocommerce/pull/40282)
 * Fix - Disable WP's post lock on HPOS order edit screen. [#40355](https://github.com/woocommerce/woocommerce/pull/40355)
 * Fix - Enqueue media scripts for Images block within the product editor, as is required for Images block. [#40356](https://github.com/woocommerce/woocommerce/pull/40356)
