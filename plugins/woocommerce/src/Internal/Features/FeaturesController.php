@@ -176,7 +176,6 @@ class FeaturesController {
 				'product_block_editor' => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-					'option_key'      => NewProductManagementExperience::TOGGLE_OPTION_NAME,
 					'is_experimental' => true,
 					'disable_ui'      => false,
 					'is_legacy'       => true,
