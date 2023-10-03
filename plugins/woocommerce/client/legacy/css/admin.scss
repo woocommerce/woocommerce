@@ -3880,10 +3880,17 @@ table.wc_shipping {
 	line-height: 16px;
 	color: #1e1e1e;
 
-	.wc-backbone-modal-content {
+	&.wc-backbone-modal .wc-backbone-modal-content {
 		border-radius: 8px;
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
+		max-width: 600px;
+
+		@media screen and (max-width: 782px) {
+			border-radius: none;
+			border-top: none;
+			border-bottom: none;
+		}
 	}
 
 	.wc-backbone-modal-main article {
