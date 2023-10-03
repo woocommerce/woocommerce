@@ -3872,7 +3872,8 @@ table.wc_shipping {
 	display: table-row-group;
 }
 
-.wc-backbone-modal-add-shipping-method, 
+.wc-backbone-modal-add-shipping-method,
+.wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
 	font-family: $font-sf-pro-text;
 	font-size: 13px;
@@ -3895,6 +3896,7 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main article {
 		padding: 0 1.5em 3em 1.5em;
+		
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
@@ -4395,8 +4397,6 @@ table.wc-shipping-classes {
 }
 
 .wc-modal-shipping-method-settings {
-	background: #f8f8f8;
-	padding: 1em !important;
 
 	form .form-table {
 		width: 100%;
