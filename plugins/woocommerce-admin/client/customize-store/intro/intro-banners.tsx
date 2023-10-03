@@ -27,9 +27,10 @@ export const BaseIntroBanner = ( {
 } ) => {
 	return (
 		<div
-			className={ classNames( 'woocommerce-customize-store-banner', {
-				bannerClass,
-			} ) }
+			className={ classNames(
+				'woocommerce-customize-store-banner',
+				bannerClass
+			) }
 		>
 			<div className={ `woocommerce-customize-store-banner-content` }>
 				<h1>{ bannerTitle }</h1>
