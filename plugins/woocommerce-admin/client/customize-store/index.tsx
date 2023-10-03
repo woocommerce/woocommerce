@@ -11,7 +11,6 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -34,6 +33,7 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { getAdminLink } from '@woocommerce/settings';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -66,8 +66,8 @@ const redirectToWooHome = () => {
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 	window.location.href =
-		_context?.intro?.themeData?._links?.browse_all ??
-		addQueryArgs( 'themes.php' );
+		_context?.intro?.themeData?._links?.browse_all?.href ??
+		getAdminLink( 'themes.php' );
 };
 
 const markTaskComplete = async () => {
@@ -121,7 +121,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			themeData: {
 				themes: [] as ThemeCard[],
 				_links: {
-					browse_all: '',
+					browse_all: {
+						href: getAdminLink( 'themes.php' ),
+					},
 				},
 			},
 			activeTheme: '',

@@ -8,8 +8,10 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-import { customizeStoreStateMachineContext } from '../types';
-import { ThemeCard } from './types';
+import {
+	customizeStoreStateMachineContext,
+	RecommendThemesAPIResponse,
+} from '../types';
 import { events } from './';
 
 export const assignThemeData = assign<
@@ -17,19 +19,16 @@ export const assignThemeData = assign<
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	intro: ( context, event ) => {
-		const themeCards = (
-			event as DoneInvokeEvent< { themeData: { themes: ThemeCard[] } } >
-		 ).data.themeData.themes;
+		const apiResponse = (
+			event as DoneInvokeEvent< {
+				themeData: RecommendThemesAPIResponse;
+			} >
+		 ).data.themeData;
 
 		// type coercion workaround for now
 		return {
 			...context.intro,
-			themeData: {
-				themes: themeCards,
-				_links: {
-					browse_all: '/wp-admin/themes.php',
-				},
-			},
+			themeData: apiResponse,
 		};
 	},
 } );
