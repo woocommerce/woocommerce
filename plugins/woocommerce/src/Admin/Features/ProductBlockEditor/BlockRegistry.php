@@ -127,6 +127,7 @@ class BlockRegistry {
 	 * Register a single block.
 	 *
 	 * @param string $block_name Block name.
+	 * @param string $block_dir Block directory.
 	 *
 	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
 	 */
