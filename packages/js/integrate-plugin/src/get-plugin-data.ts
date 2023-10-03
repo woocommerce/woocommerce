@@ -18,20 +18,20 @@ export function getPluginData() {
 			continue;
 		}
 		const content = readFileSync( file, 'utf8' );
-		const name = content.match( /^\s+\*\s+Plugin Name:\s+(.*)/m );
+		const name = content.match( /^\s+\*\s*Plugin Name:\s*(.*)/m );
 		if ( name && name.length > 1 ) {
 			const description = content.match(
-				/^\s+\*\s+Description:\s+(.*)/m
+				/^\s+\*\s+Description:\s*(.*)/m
 			);
-			const textdomain = content.match( /^\s+\*\s+Text Domain:\s+(.*)/m );
-			const version = content.match( /^\s+\*\s+Version:\s+(.*)/m );
+			const textdomain = content.match( /^\s+\*\s*Text Domain:\s*(.*)/m );
+			const version = content.match( /^\s+\*\s*Version:\s*(.*)/m );
 
 			return {
-				description: description && description[ 1 ],
-				name: name[ 1 ],
-				textdomain: textdomain && textdomain[ 1 ],
-				version: version && version[ 1 ],
-				namespace: textdomain && textdomain[ 1 ],
+				description: description && description[ 1 ].trim(),
+				name: name[ 1 ].trim(),
+				textdomain: textdomain && textdomain[ 1 ].trim(),
+				version: version && version[ 1 ].trim(),
+				namespace: textdomain && textdomain[ 1 ].trim(),
 			};
 		}
 	}
