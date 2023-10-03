@@ -114,6 +114,46 @@ describe( 'parser', () => {
 		expect( result ).toEqual( 'baz' );
 	} );
 
+	it( 'should parse an strict equality expression', () => {
+		const result = parser.parse( 'foo === "bar"', {
+			context: {
+				foo: 'bar',
+			},
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should parse an strict inequality expression', () => {
+		const result = parser.parse( 'foo !== "bar"', {
+			context: {
+				foo: 'bar',
+			},
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should parse an equality expression', () => {
+		const result = parser.parse( 'foo == "bar"', {
+			context: {
+				foo: 'bar',
+			},
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should parse an inequality expression', () => {
+		const result = parser.parse( 'foo != "bar"', {
+			context: {
+				foo: 'bar',
+			},
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
 	it( 'should parse a logical OR expression', () => {
 		const result = parser.parse( 'foo || bar', {
 			context: {

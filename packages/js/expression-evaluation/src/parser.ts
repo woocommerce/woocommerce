@@ -4,8 +4,41 @@
 import * as peggy from 'peggy';
 
 const grammar = `
+{{
+	function evaluateBinaryExpression( head, tail ) {
+		return tail.reduce( ( leftOperand, tailElement ) => {
+			const operator = tailElement[ 1 ];
+			const rightOperand = tailElement[ 3 ];
+
+			switch ( operator ) {
+				case '&&':
+					return leftOperand && rightOperand;
+					break;
+				case '||':
+					return leftOperand || rightOperand;
+					break;
+				case '===':
+					return leftOperand === rightOperand;
+					break;
+				case '!==':
+					return leftOperand !== rightOperand;
+					break;
+				case '==':
+					return leftOperand == rightOperand;
+					break;
+				case '!=':
+					return leftOperand != rightOperand;
+					break;
+				default:
+					return undefined;
+					break;
+			}
+		}, head );
+	}
+}}
+
 Start
-	= LogicalOrExpression
+	= Expression
 
 SourceCharacter
 	= .
@@ -225,24 +258,28 @@ FalseToken
 PrimaryExpression
 	= IdentifierPath
 	/ Literal
-	/ "(" WhiteSpace* expression:LogicalOrExpression WhiteSpace* ")" {
+	/ "(" WhiteSpace* expression:Expression WhiteSpace* ")" {
 		return expression;
 	}
 
-LogicalOrExpression
-	= left:LogicalAndExpression WhiteSpace+ LogicalOrOperator WhiteSpace+ right:LogicalOrExpression {
-		return left || right;
-	}
-	/ LogicalAndExpression
+RelationalExpression
+	= PrimaryExpression
 
-LogicalOrOperator
-	= "||"
+EqualityExpression
+	= head:RelationalExpression tail:( WhiteSpace* EqualityOperator WhiteSpace* RelationalExpression)* {
+		return evaluateBinaryExpression( head, tail );
+	}
+
+EqualityOperator
+	= "==="
+	/ "!=="
+	/ "=="
+	/ "!="
 
 LogicalAndExpression
-	= left:PrimaryExpression WhiteSpace+ LogicalAndOperator WhiteSpace+ right:LogicalAndExpression {
-		return left && right;
+	= head:EqualityExpression tail:(WhiteSpace+ LogicalAndOperator WhiteSpace+ EqualityExpression)* {
+		return evaluateBinaryExpression( head, tail );
 	}
-	/ Factor
 
 LogicalAndOperator
 	= "&&"
@@ -253,7 +290,16 @@ Factor
 	}
 	/ PrimaryExpression
 
+LogicalOrExpression
+	= head:LogicalAndExpression tail:(WhiteSpace+ LogicalOrOperator WhiteSpace+ LogicalAndExpression)* {
+		return evaluateBinaryExpression( head, tail );
+	}
 
+LogicalOrOperator
+	= "||"
+
+Expression
+	= LogicalOrExpression
 `;
 
 export const parser = peggy.generate( grammar );
