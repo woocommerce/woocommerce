@@ -10,9 +10,12 @@ const fs = require( 'fs' );
  * @param {string} baseRef The base branch to compare against.
  */
 module.exports = async function buildTestMatrices( baseRef ) {
-    // We can use PNPM to get a list of packages that have changed since the base branch.
+    // Support filtering against a list of packages changed since a base ref if one is given.
+    const refFilter = baseRef ? `--filter='...[${ baseRef }]'` : '';
+
+    // We can use PNPM to get a list of packages that we should consider for testing.
     const rawProjectList = child_process.execSync(
-        `pnpm list --filter='...[${ baseRef }]' --filter='!./tools/*' --depth='-1' --parseable`,
+        `pnpm list ${ refFilter } --filter='!./tools/*' --depth='-1' --parseable`,
         { encoding: 'utf8', }
     );
     // The `--parseable` flag returns a list of package directories separated by newlines.
