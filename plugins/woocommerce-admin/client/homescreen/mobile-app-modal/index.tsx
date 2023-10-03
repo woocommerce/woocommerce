@@ -85,16 +85,6 @@ export const MobileAppModal = () => {
 				/>
 			);
 		} else if (
-			state === JetpackPluginStates.NOT_INSTALLED ||
-			state === JetpackPluginStates.NOT_ACTIVATED ||
-			state === JetpackPluginStates.USERLESS_CONNECTION ||
-			( state === JetpackPluginStates.FULL_CONNECTION &&
-				isReturningFromWordpressConnection )
-		) {
-			setPageContent(
-				<InstallMobileAppPage />
-			);
-		} else if (
 			state === JetpackPluginStates.FULL_CONNECTION &&
 			jetpackConnectionData?.currentUser?.wpcomUser?.email &&
 			! hasSentEmail
