@@ -3872,6 +3872,10 @@ table.wc_shipping {
 	display: table-row-group;
 }
 
+/**
+* New Shipping Settings Refresh Modal Styles
+**/
+
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
@@ -3978,6 +3982,21 @@ table.wc_shipping {
 		&:after {
 			top: -6px;
 			font-size: 24px;
+		}
+	}
+	
+	.wc-shipping-zone-method-fields {
+
+		& > label {
+			text-transform: uppercase;
+
+			& > .woocommerce-help-tip {
+				display: none;
+			}
+		}
+
+		fieldset {
+			margin-bottom: 18px;
 		}
 	}
 }

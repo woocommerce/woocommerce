@@ -326,6 +326,8 @@
 
 					event.preventDefault();
 
+					method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-shipping-method-settings',
 						variable : {
@@ -400,6 +402,43 @@
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
 				},
+				/**
+				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
+				 * markup, it needs to be manipulated here.
+				 */
+				reformatSettingsHTML: function( html ) {
+					const settings = $( html );
+					const labels = settings.find( 'label' );
+					labels.each( (i) => {
+						const label = $( labels[ i ] );
+						const helpTip = label.find( '.woocommerce-help-tip' );
+						
+						if ( helpTip.length ) {
+							const id = label.attr( 'for' );
+							if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
+								const input = settings.find( `#${ id }` );
+								const fieldset = input.closest( 'fieldset' );
+								const inputLabel = fieldset.find( 'label' );
+								inputLabel.append( helpTip );
+							} else {
+								const text = helpTip.data( 'tip' );
+								const input = settings.find( `#${ id }` );
+								const fieldset = input.closest( 'fieldset' );
+
+								if ( fieldset.length ) {
+									fieldset.append( `<div>${ text }</div>` );
+								}
+							}
+
+							// Coupon discounts doesn't get a title on Free Shipping.
+							if ( label.text().trim() === 'Coupons discounts' ) {
+								label.text( '' );
+							}
+						}
+					} );
+
+					return settings.prop('outerHTML');
+				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
@@ -439,26 +478,7 @@
 
 							shippingMethodView.unblock();
 
-							
-							const settings = $( method.settings_html );
-							const labels = settings.find( 'label' );
-							labels.each( (i) => {
-								const label = $( labels[ i ] );
-								const helpTip = label.find( '.woocommerce-help-tip' );
-								if ( helpTip.length ) {
-									const id = label.attr( 'for' );
-									const text = helpTip.data( 'tip' );
-									const fieldset = settings.find( `#${ id }` );
-
-									if ( fieldset.length ) {
-										console.log(id)
-										console.log(text)
-										fieldset.after( `<div>${ text }</div>` );
-									}
-								}
-							} );
-
-							method.settings_html = settings.prop('outerHTML');
+							method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
 
 							// Pop up next modal
 							$( this ).WCBackboneModal({
@@ -487,7 +507,6 @@
 						var btnData = $( '#btn-ok' ).data();
 
 						if ( ! addButtonCalled && btnData && btnData.status === 'new' ) {
-							console.log( 'delete instance_id: ' + post_data.instance_id );
 							shippingMethodView.block();
 
 							var view    = shippingMethodView,

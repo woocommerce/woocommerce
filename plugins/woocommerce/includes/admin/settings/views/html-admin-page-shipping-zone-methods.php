@@ -134,7 +134,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						printf(
 							/* translators: %s: shipping method title */
 							esc_html__( 'Configure %s', 'woocommerce' ),
-							'{{{ data.method.method_title }}}'
+							'{{{ data.method.method_title.toLowerCase() }}}'
 						);
 						?>
 					</h1>
