@@ -47,10 +47,49 @@ describe( 'parser', () => {
 		expect( result ).toEqual( 'foo' );
 	} );
 
+	it( 'should parse a string literal with double quotes and single quotes', () => {
+		const result = parser.parse( '"foo \'bar\'"' );
+
+		expect( result ).toEqual( "foo 'bar'" );
+	} );
+
+	it( 'should parse a string literal with double quotes and escaped double quotes', () => {
+		const result = parser.parse( '"foo \\"bar\\""' );
+
+		expect( result ).toEqual( 'foo "bar"' );
+	} );
+
+	it( 'should parse a string literal with double quotes and escaped backslashes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = parser.parse( '"foo \\\\\\"bar\\\\\\""' );
+
+		expect( result ).toEqual( 'foo \\"bar\\"' );
+	} );
+
 	it( 'should parse a string literal with single quotes', () => {
 		const result = parser.parse( "'foo'" );
 
 		expect( result ).toEqual( 'foo' );
+	} );
+
+	it( 'should parse a string literal with single quotes and double quotes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = parser.parse( "'foo \"bar\"'" );
+
+		expect( result ).toEqual( 'foo "bar"' );
+	} );
+
+	it( 'should parse a string literal with single quotes and escaped single quotes', () => {
+		const result = parser.parse( "'foo \\'bar\\''" );
+
+		expect( result ).toEqual( "foo 'bar'" );
+	} );
+
+	it( 'should parse a string literal with single quotes and escaped backslashes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = parser.parse( "'foo \\\\\\'bar\\\\\\''" );
+
+		expect( result ).toEqual( "foo \\'bar\\'" );
 	} );
 
 	it( 'should parse a top-level context property', () => {

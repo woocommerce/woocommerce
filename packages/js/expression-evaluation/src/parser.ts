@@ -7,9 +7,25 @@ const grammar = `
 Start
 	= LogicalOr
 
+SourceCharacter
+	= .
+
 WhiteSpace
 	= " "
-	/ "\t"
+	/ "\\t"
+
+LineTerminator
+	= "\\n"
+	/ "\\r"
+	/ "\\u2028"
+	/ "\\u2029"
+
+LineTerminatorSequence
+	= "\\n"
+	/ "\\r\\n"
+	/ "\\r"
+	/ "\\u2028"
+	/ "\\u2029"
 
 IdentifierPath
 	= variable:Identifier accessor:("." Identifier)* {
@@ -51,6 +67,7 @@ Literal
 	= NullLiteral
 	/ BooleanLiteral
 	/ NumericLiteral
+	/ StringLiteral
 
 NullLiteral
 	= NullToken { return null; }
@@ -104,6 +121,93 @@ ExponentIndicator
 
 SignedInteger
 	= [+-]? DecimalDigit+
+
+StringLiteral
+	= '"' chars:DoubleQuotedStringCharacter* '"' {
+		return chars.join( '' );
+	}
+	/ "'" chars:SingleQuotedStringCharacter* "'" {
+		return chars.join( '' );
+	}
+
+DoubleQuotedStringCharacter
+	= !('"' / "\\\\" / LineTerminator) SourceCharacter {
+		return text();
+	}
+	/ "\\\\" escapeSequence:EscapeSequence {
+		return escapeSequence;
+	}
+	/ LineContinuation
+
+SingleQuotedStringCharacter
+	= !("'" / "\\\\" / LineTerminator) SourceCharacter {
+		return text();
+	}
+	/ "\\\\" escapeSequence:EscapeSequence {
+		return escapeSequence;
+	}
+	/ LineContinuation
+
+LineContinuation
+	= "\\\\" LineTerminatorSequence {
+		return '';
+	}
+
+EscapeSequence
+	= CharacterEscapeSequence
+	/ "0" !DecimalDigit {
+		return "\\0";
+	}
+	/ HexEscapeSequence
+	/ UnicodeEscapeSequence
+
+CharacterEscapeSequence
+	= SingleEscapeCharacter
+	/ NonEscapeCharacter
+
+SingleEscapeCharacter
+	= "'"
+	/ '"'
+	/ "\\\\"
+	/ "b" {
+		return "\\b";
+	}
+	/ "f" {
+		return "\\f";
+	}
+	/ "n" {
+		return "\\n";
+	}
+	/ "r" {
+		return "\\r";
+	}
+	/ "t" {
+		return "\\t";
+	}
+	/ "v" {
+		return "\\v";
+	}
+
+NonEscapeCharacter
+	= (!EscapeCharacter / LineTerminator) SourceCharacter {
+		return text();
+	}
+
+EscapeCharacter
+	= SingleEscapeCharacter
+	/ DecimalDigit
+	/ "x"
+	/ "u"
+
+HexEscapeSequence
+	= "x" digits:$(HexDigit HexDigit) {
+		return String.fromCharCode( parseInt( digits, 16 ) );
+	}
+
+UnicodeEscapeSequence
+	= "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
+		return String.fromCharCode( parseInt( digits, 16 ) );
+	}
 
 // Tokens
 
