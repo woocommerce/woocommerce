@@ -5,6 +5,9 @@ on:
     branches:
       - 'trunk'
       - 'release/*'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
     prime-cache:
         name: 'Prime Cache'
