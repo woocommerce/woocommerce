@@ -157,24 +157,19 @@ Connect.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const {
-			getJetpackAuthUrl,
-			isOnboardingRequesting,
-			getOnboardingError,
-		} = select( ONBOARDING_STORE_NAME );
+		const { getJetpackAuthUrl, isResolving, getOnboardingError } = select(
+			ONBOARDING_STORE_NAME
+		);
 
 		const queryArgs = {
 			redirectUrl: props.redirectUrl || window.location.href,
 			from: 'woocommerce-services',
 		};
-		const isRequesting = isOnboardingRequesting( 'getJetpackAuthUrl' );
-		const error = getOnboardingError( 'getJetpackAuthUrl' ) || '';
-		const jetpackAuthUrl = getJetpackAuthUrl( queryArgs ).url;
 
 		return {
-			error,
-			isRequesting,
-			jetpackAuthUrl,
+			error: getOnboardingError( 'getJetpackAuthUrl' ) || '',
+			isRequesting: isResolving( 'getJetpackAuthUrl', [ queryArgs ] ),
+			jetpackAuthUrl: getJetpackAuthUrl( queryArgs ).url,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
