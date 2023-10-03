@@ -419,11 +419,11 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
-										'primary'          => array(
+										'primary'   => array(
 											'type'        => 'string',
 											'description' => 'Primary color',
 										),
-										'secondary'        => array(
+										'secondary' => array(
 											'type'        => 'string',
 											'description' => 'Secondary color',
 										),
