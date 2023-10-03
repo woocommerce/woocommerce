@@ -52,6 +52,15 @@ jobs:
           name: 'Setup Monorepo'
         - name: 'Tests'
           run: 'pnpm -r test:js'
+    test-output:
+      name: 'Tests - Output'
+      runs-on: 'ubuntu-20.04'
+      needs: [ 'build-test-matrices' ]
+      steps:
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+        - name: 'Dump'
+          run: 'echo "${{ needs.build-test-matrices.outputs.matrices }}"'
     test-php:
       name: 'Tests - PHP - "${{ matrix.name }}"'
       runs-on: 'ubuntu-20.04'
