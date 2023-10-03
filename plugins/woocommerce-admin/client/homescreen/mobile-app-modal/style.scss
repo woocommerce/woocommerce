@@ -51,16 +51,13 @@
 					.modal-layout-body {
 						flex-grow: 1;
 						.modal-subheader {
-							margin-top: -16px;
+							margin-top: 16px;
 							margin-bottom: 24px;
 							h3 {
 								font-weight: 400;
 								color: #757575;
 								line-height: 1.6rem;
 							}
-						}
-						.modal-subheader.jetpack-already-installed {
-							margin-bottom: 48px; // there's a bit of space so space it out
 						}
 					}
 
@@ -165,6 +162,7 @@ button.components-button.send-magic-link-button {
 	background: #007cba;
 	color: #fff;
 	position: relative;
+	margin-bottom: 1em;
 	:hover {
 		// the hover state makes the text invisible so we need to override it
 		color: #fff;
