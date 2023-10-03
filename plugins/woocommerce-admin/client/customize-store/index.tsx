@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -33,7 +34,6 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { getAdminLink } from '@woocommerce/settings';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
