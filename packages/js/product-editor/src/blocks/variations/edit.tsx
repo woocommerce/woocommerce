@@ -79,6 +79,7 @@ export function Edit( {
 
 	const openNewModal = () => {
 		setIsNewModalVisible( true );
+		recordEvent( 'product_options_add_first_option' );
 	};
 
 	const closeNewModal = () => {
@@ -133,9 +134,22 @@ export function Edit( {
 					createNewAttributesAsGlobal={ true }
 					notice={ '' }
 					onCancel={ () => {
+						recordEvent(
+							'product_options_modal_cancel_button_click'
+						);
 						closeNewModal();
 					} }
 					onAdd={ handleAdd }
+					onAddAnother={ () => {
+						recordEvent(
+							'product_add_options_modal_add_another_option_button_click'
+						);
+					} }
+					onRemoveItem={ () => {
+						recordEvent(
+							'product_add_options_modal_remove_option_button_click'
+						);
+					} }
 					selectedAttributeIds={ variationOptions.map(
 						( attr ) => attr.id
 					) }

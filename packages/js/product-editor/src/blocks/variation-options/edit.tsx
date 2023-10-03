@@ -14,6 +14,7 @@ import {
 	ProductAttribute,
 	useUserPreferences,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -113,6 +114,9 @@ export function Edit( {
 					attributes,
 					entityDefaultAttributes,
 				] ) }
+				onAdd={ () => {
+					recordEvent( 'product_options_modal_add_button_click' );
+				} }
 				onChange={ handleChange }
 				createNewAttributesAsGlobal={ true }
 				useRemoveConfirmationModal={ true }
@@ -120,6 +124,32 @@ export function Edit( {
 					updateUserPreferences( {
 						product_block_variable_options_notice_dismissed: 'yes',
 					} )
+				}
+				onAddAnother={ () => {
+					recordEvent(
+						'product_add_options_modal_add_another_option_button_click'
+					);
+				} }
+				onNewModalCancel={ () => {
+					recordEvent( 'product_options_modal_cancel_button_click' );
+				} }
+				onNewModalOpen={ () => {
+					recordEvent( 'product_options_add_option' );
+				} }
+				onRemoveItem={ () => {
+					recordEvent(
+						'product_add_options_modal_remove_option_button_click'
+					);
+				} }
+				onRemove={ () =>
+					recordEvent(
+						'product_remove_option_confirmation_confirm_click'
+					)
+				}
+				onRemoveCancel={ () =>
+					recordEvent(
+						'product_remove_option_confirmation_cancel_click'
+					)
 				}
 				disabledAttributeIds={ entityAttributes
 					.filter( ( attr ) => ! attr.variation )
