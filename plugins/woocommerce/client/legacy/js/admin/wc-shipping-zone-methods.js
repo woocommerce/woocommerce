@@ -105,6 +105,7 @@
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+					$( document.body ).on( 'wc_backbone_modal_validation', this.validateFormArguments );
 				},
 				onUpdateZoneRegionPicker: function( event ) {
 					var value = event.detail,
@@ -509,6 +510,15 @@
 							// Close original modal
 							closeModal();
 						}, 'json' );
+					}
+				},
+				validateFormArguments: function( element, target, data ) {
+					if ( target === 'wc-modal-add-shipping-method' ) {
+						if ( data.add_method_id ) {
+							const nextButton = document.getElementById( 'btn-next' );
+							nextButton.disabled = false;
+							nextButton.classList.remove( 'disabled' );
+						}
 					}
 				},
 				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
