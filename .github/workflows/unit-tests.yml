@@ -20,6 +20,8 @@ jobs:
     build-test-matrices:
       name: 'Build Testing Matrices'
       runs-on: 'ubuntu-20.04'
+      outputs:
+        matrices: ${{ steps.build-test-matrices.outputs.matrices }}
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
@@ -30,7 +32,8 @@ jobs:
           with:
             install: 'false'
         - uses: actions/github-script@v6
-          name: 'Build Testing Matrices'
+          id: 'build-test-matrices'
+          name: 'Build Test Matrices'
           with:
             script: |
               let baseRef = ${{ toJson( github.base_ref ) }};
@@ -50,17 +53,8 @@ jobs:
           name: 'Checkout'
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
-        - name: 'Tests'
+        - name: 'Run Tests'
           run: 'pnpm -r test:js'
-    test-output:
-      name: 'Tests - Output'
-      runs-on: 'ubuntu-20.04'
-      needs: [ 'build-test-matrices' ]
-      steps:
-        - uses: 'actions/checkout@v3'
-          name: 'Checkout'
-        - name: 'Dump'
-          run: 'echo "${{ needs.build-test-matrices.outputs.matrices }}"'
     test-php:
       name: 'Tests - PHP - "${{ matrix.name }}"'
       runs-on: 'ubuntu-20.04'
@@ -77,5 +71,5 @@ jobs:
           env:
             ${{ matrix.test-environment.env.*.name }}: ${{ matrix.test-environment.env.*.value }}
           run: 'pnpm --filter=${{ matrix.name }} run test:env:start'
-        - name: 'Tests'
+        - name: 'Run Tests'
           run: 'pnpm --filter=${{ matrix.name }} test:unit:php ${{ matrix.test-args }}'

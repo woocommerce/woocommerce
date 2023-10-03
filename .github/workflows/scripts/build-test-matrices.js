@@ -50,7 +50,5 @@ module.exports = async function buildTestMatrices( baseRef ) {
         } );
     }
 
-    console.log(testMatrices);
-
     return testMatrices;
 }
