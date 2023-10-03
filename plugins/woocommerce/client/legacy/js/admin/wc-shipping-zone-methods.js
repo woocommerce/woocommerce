@@ -439,6 +439,27 @@
 
 							shippingMethodView.unblock();
 
+							
+							const settings = $( method.settings_html );
+							const labels = settings.find( 'label' );
+							labels.each( (i) => {
+								const label = $( labels[ i ] );
+								const helpTip = label.find( '.woocommerce-help-tip' );
+								if ( helpTip.length ) {
+									const id = label.attr( 'for' );
+									const text = helpTip.data( 'tip' );
+									const fieldset = settings.find( `#${ id }` );
+
+									if ( fieldset.length ) {
+										console.log(id)
+										console.log(text)
+										fieldset.after( `<div>${ text }</div>` );
+									}
+								}
+							} );
+
+							method.settings_html = settings.prop('outerHTML');
+
 							// Pop up next modal
 							$( this ).WCBackboneModal({
 								template : 'wc-modal-shipping-method-settings',

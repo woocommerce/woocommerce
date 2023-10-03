@@ -3895,7 +3895,13 @@ table.wc_shipping {
 	}
 
 	.wc-backbone-modal-main article {
-		padding: 0 1.5em 3em 1.5em;
+		padding: 0 32px 32px 32px;
+		
+	}
+
+	.wc-backbone-modal-main header,
+	.wc-backbone-modal-main footer, {
+		padding: 12px 32px;
 		
 	}
 

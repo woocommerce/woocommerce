@@ -133,7 +133,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						printf(
 							/* translators: %s: shipping method title */
-							esc_html__( '%s Settings', 'woocommerce' ),
+							esc_html__( 'Configure %s', 'woocommerce' ),
 							'{{{ data.method.method_title }}}'
 						);
 						?>
@@ -150,6 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
+						<div class="wc-shipping-zone-method-modal-info"><?php esc_html_e( 'STEP 2 OF 2', 'woocommerce' ); ?></div>
 						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
