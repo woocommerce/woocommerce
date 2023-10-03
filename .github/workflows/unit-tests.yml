@@ -9,14 +9,6 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 jobs:
-    prime-cache:
-        name: 'Prime Cache'
-        runs-on: 'ubuntu-20.04'
-        steps:
-            - uses: 'actions/checkout@v3'
-              name: 'Checkout'
-            - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
     build-test-matrices:
       name: 'Build Testing Matrices'
       runs-on: 'ubuntu-20.04'
@@ -47,7 +39,6 @@ jobs:
     test-javascript:
       name: 'Tests - JavaScript'
       runs-on: 'ubuntu-20.04'
-      needs: 'prime-cache'
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
@@ -58,7 +49,7 @@ jobs:
     test-php:
       name: 'Tests - PHP - "${{ matrix.name }}"'
       runs-on: 'ubuntu-20.04'
-      needs: [ 'prime-cache', 'build-test-matrices' ]
+      needs: 'build-test-matrices'
       strategy:
         matrix:
           include: ${{ fromJSON( needs.build-test-matrices.outputs.php ) }}
