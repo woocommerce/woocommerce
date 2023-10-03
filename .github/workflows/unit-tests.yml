@@ -23,6 +23,8 @@ jobs:
       steps:
           - uses: 'actions/checkout@v3'
             name: 'Checkout'
+          - uses: './.github/actions/setup-woocommerce-monorepo'
+            name: 'Setup Monorepo'
           - uses: actions/github-script@v6
             name: 'Build Testing Matrices'
             with:
