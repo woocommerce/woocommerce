@@ -435,7 +435,7 @@
 							const input = settings.find( `#${ id }` );
 							const fieldset = input.closest( 'fieldset' );
 
-							if ( fieldset.length ) {
+							if ( fieldset.length && fieldset.find( '.wc-shipping-zone-method-fields-help-text' ).length === 0 ) {
 								fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
 							}
 						}
