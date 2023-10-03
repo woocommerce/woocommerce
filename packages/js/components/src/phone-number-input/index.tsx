@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import React, { useState, useRef, useLayoutEffect } from 'react';
-import { createElement } from '@wordpress/element';
+import {
+	createElement,
+	useState,
+	useRef,
+	useLayoutEffect,
+} from '@wordpress/element';
 import { useSelect } from 'downshift';
 import classNames from 'classnames';
 
