@@ -31,12 +31,18 @@ function Search(): JSX.Element {
 		}
 	}, [ query.term ] );
 
+	useEffect( () => {
+		if ( query.tab !== 'search' ) {
+			setSearchTerm( '' );
+		}
+	}, [ query.tab ] );
+
 	const runSearch = () => {
 		const term = searchTerm.trim();
 
 		// When the search term changes, we reset the category on purpose.
 		navigateTo( {
-			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+			url: getNewPath( { term, category: null, tab: 'search' } ),
 		} );
 
 		return [];
