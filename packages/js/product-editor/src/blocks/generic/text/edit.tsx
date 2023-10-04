@@ -35,7 +35,7 @@ export function Edit( {
 		minLength,
 		maxLength,
 	} = attributes;
-	const [ value, setValue ] = useProductEntityProp( property );
+	const [ value, setValue ] = useProductEntityProp< string >( property, '' );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
 	const { error, validate } = useValidation< Product >(
