@@ -134,6 +134,30 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( 'baz' );
 	} );
 
+	it( 'should evaluate a NOT expression', () => {
+		const result = evaluate( '!foo', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a double NOT expression', () => {
+		const result = evaluate( '!!foo', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a NOT expression with parentheses', () => {
+		const result = evaluate( '!( foo )', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
 	it( 'should evaluate a less than or equal expression', () => {
 		const result = evaluate( 'foo <= 1', {
 			foo: 1,
@@ -211,30 +235,6 @@ describe( 'evaluate', () => {
 		const result = evaluate( 'foo && bar', {
 			foo: true,
 			bar: false,
-		} );
-
-		expect( result ).toEqual( false );
-	} );
-
-	it( 'should evaluate a NOT expression', () => {
-		const result = evaluate( '!foo', {
-			foo: true,
-		} );
-
-		expect( result ).toEqual( false );
-	} );
-
-	it( 'should evaluate a double NOT expression', () => {
-		const result = evaluate( '!!foo', {
-			foo: true,
-		} );
-
-		expect( result ).toEqual( true );
-	} );
-
-	it( 'should evaluate a NOT expression with parentheses', () => {
-		const result = evaluate( '!( foo )', {
-			foo: true,
 		} );
 
 		expect( result ).toEqual( false );
