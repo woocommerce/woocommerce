@@ -326,6 +326,23 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( true );
 	} );
 
+	it( 'should evaluate a complex expression with arithmetic, relational, and logical operators', () => {
+		const result = evaluate(
+			`foo.bar
+			&& ( foo.baz === "qux" || foo.baz === "quux" )
+			&& ( foo.quux > 1 && foo.quux <= 5 )`,
+			{
+				foo: {
+					bar: true,
+					baz: 'quux',
+					quux: 10,
+				},
+			}
+		);
+
+		expect( result ).toEqual( false );
+	} );
+
 	it( 'should evaluate an expression with needless parentheses', () => {
 		const result = evaluate( '(((foo)))', {
 			foo: true,
