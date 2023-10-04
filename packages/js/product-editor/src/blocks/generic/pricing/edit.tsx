@@ -6,7 +6,6 @@ import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
-import { useEntityProp } from '@wordpress/core-data';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -21,17 +20,14 @@ import {
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { PricingBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { property, label, help } = attributes;
-	const [ price, setPrice ] = useEntityProp< string >(
-		'postType',
-		'product',
-		property
-	);
+	const [ price, setPrice ] = useProductEntityProp< string >( property, '' );
 	const inputProps = useCurrencyInputProps( {
 		value: price,
 		onChange: setPrice,
