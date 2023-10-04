@@ -197,7 +197,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			OBJECT_K
 		);
 
-		$count_query_string  = $this->get_query( $sidewide_stock_threshold_only, true );
+		$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
 		$count_query_results = $wpdb->get_results(
 		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
