@@ -4,7 +4,6 @@
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
 import { Icon, help } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
@@ -12,6 +11,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
  * Internal dependencies
  */
 import { ProductEditorBlockEditProps } from '../../../types';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
@@ -21,10 +21,9 @@ export function Edit( {
 		...attributes,
 	} );
 	const { property, title, label, tooltip } = attributes;
-	const [ value, setValue ] = useEntityProp< boolean >(
-		'postType',
-		'product',
-		property
+	const [ value, setValue ] = useProductEntityProp< boolean >(
+		property,
+		false
 	);
 
 	return (
