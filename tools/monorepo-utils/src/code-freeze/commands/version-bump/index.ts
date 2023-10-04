@@ -16,7 +16,7 @@ import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
-import { validateArgs } from './lib/validate';
+import { validateArgs, getIsAccelRelease } from './lib/validate';
 import { Options } from './types';
 
 export const versionBumpCommand = new Command( 'version-bump' )
@@ -45,6 +45,16 @@ export const versionBumpCommand = new Command( 'version-bump' )
 	.option(
 		'-c --commit-direct-to-base',
 		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
+		false
+	)
+	.option(
+		'-f --force',
+		'Force a version bump, even when the new version is less than the existing version',
+		false
+	)
+	.option(
+		'-a --allow-accel',
+		'Allow accelerated versioning. When this option is not present, versions must be semantically correct',
 		false
 	)
 	.action( async ( version, options: Options ) => {
@@ -78,7 +88,10 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
-		const majorMinor = getMajorMinor( version );
+
+		const majorMinor = getIsAccelRelease( version )
+			? version
+			: getMajorMinor( version );
 		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 
 		try {
