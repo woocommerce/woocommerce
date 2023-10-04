@@ -64,7 +64,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
 		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
-		$count_query_string            = $this->get_query( $sidewide_stock_threshold_only, true );
+		$count_query_string            = $this->get_count_query( $sidewide_stock_threshold_only );
 		$count_query_results           = $wpdb->get_results(
 		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
@@ -255,14 +255,18 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	}
 
 	/**
-	 * Generate a query.
+	 * Return a query string for low in stock products.
+	 * The query string incldues the following replacement strings:
+	 * - :selects
+	 * - :postmeta_join
+	 * - :postmeta_wheres
+	 * - :orderAndLimit
 	 *
-	 * @param bool $siteside_only generates a query for sitewide low stock threshold only query.
-	 * @param bool $return_count_query returns count query instead of the actual query.
+	 * @param $replacements array of replacement strings.
 	 *
 	 * @return string
 	 */
-	protected function get_query( $siteside_only = false, $return_count_query = false ) {
+	private function get_base_query( $replacements = array() ) {
 		global $wpdb;
 		$query = "
 			SELECT
@@ -280,42 +284,23 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			  :orderAndLimit
 		";
 
-		if ( $return_count_query === false ) {
-			$query = strtr(
-				$query,
-				array(
-					':selects'       => '
-						wp_posts.*,
-						:postmeta_select
-						wc_product_meta_lookup.stock_quantity
-					',
-					':orderAndLimit' => '
-						order by wc_product_meta_lookup.product_id DESC
-						limit %d, %d
-					',
-				)
-			);
-		} else {
-			$query = strtr(
-				$query,
-				array(
-					':selects'       => 'count(*) as total',
-					':orderAndLimit' => '',
-				)
-			);
-		}
+		return strtr( $query, $replacements );
+	}
 
+	/**
+	 * Add sitewide stock query string to base query string.
+	 *
+	 * @param $query string Base query string
+	 *
+	 * @return string
+	 */
+	private function add_sitewide_stock_query_str( $query ) {
+		global $wpdb;
 		$postmeta = array(
-			'select' => '',
-			'join'   => '',
-			'wheres' => 'AND wc_product_meta_lookup.stock_quantity <= %d',
-		);
-
-		if ( ! $siteside_only ) {
-			$postmeta['select'] = 'meta.meta_value AS low_stock_amount,';
-			$postmeta['join']   = "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id
-			  AND meta.meta_key = '_low_stock_amount'";
-			$postmeta['wheres'] = "AND (
+			'select' => 'meta.meta_value AS low_stock_amount,',
+			'join'   => "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id
+			  AND meta.meta_key = '_low_stock_amount'",
+			'wheres' => "AND (
 			    (
 			      meta.meta_value > ''
 			      AND wc_product_meta_lookup.stock_quantity <= CAST(
@@ -329,8 +314,8 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			      )
 			      AND wc_product_meta_lookup.stock_quantity <= %d
 			    )
-		    )";
-		}
+		    )",
+		);
 
 		return strtr(
 			$query,
@@ -338,6 +323,64 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 				':postmeta_select' => $postmeta['select'],
 				':postmeta_join'   => $postmeta['join'],
 				':postmeta_wheres' => $postmeta['wheres'],
+			)
+		);
+	}
+
+	/**
+	 * Generate a query.
+	 *
+	 * @param bool $sitewide_only generates a query for sitewide low stock threshold only query.
+	 *
+	 * @return string
+	 */
+	protected function get_query( $sitewide_only = false ) {
+		$query = $this->get_base_query(
+			array(
+				':selects'       => 'wp_posts.*, :postmeta_select wc_product_meta_lookup.stock_quantity',
+				':orderAndLimit' => 'order by wc_product_meta_lookup.product_id DESC limit %d, %d',
+			)
+		);
+
+		if ( ! $sitewide_only ) {
+			return $this->add_sitewide_stock_query_str( $query );
+		}
+
+		return strtr(
+			$query,
+			array(
+				':postmeta_select' => '',
+				':postmeta_join'   => '',
+				':postmeta_wheres' => 'AND wc_product_meta_lookup.stock_quantity <= %d',
+			)
+		);
+	}
+
+	/**
+	 * Generate a count query.
+	 *
+	 * @param $sitewide_only bool generates a query for sitewide low stock threshold only query.
+	 *
+	 * @return string
+	 */
+	protected function get_count_query( $sitewide_only = false ) {
+		$query = $this->get_base_query(
+			array(
+				':selects'       => 'count(*) as total',
+				':orderAndLimit' => '',
+			)
+		);
+
+		if ( ! $sitewide_only ) {
+			return $this->add_sitewide_stock_query_str( $query );
+		}
+
+		return strtr(
+			$query,
+			array(
+				':postmeta_select' => '',
+				':postmeta_join'   => '',
+				':postmeta_wheres' => 'AND wc_product_meta_lookup.stock_quantity <= %d',
 			)
 		);
 	}
