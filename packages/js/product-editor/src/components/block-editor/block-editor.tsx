@@ -36,10 +36,12 @@ import { ProductEditorContext } from '../../types';
 
 type BlockEditorProps = {
 	context: Partial< ProductEditorContext >;
-	product: Partial< Product >;
+	postType: 'product' | 'product_variation';
+	postId: number;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
 				template?: Template[];
+				templates: Record< string, Template[] >;
 		  } )
 		| undefined;
 };
@@ -47,7 +49,8 @@ type BlockEditorProps = {
 export function BlockEditor( {
 	context,
 	settings: _settings,
-	product,
+	postType,
+	postId,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges();
 
@@ -82,23 +85,22 @@ export function BlockEditor( {
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
-		'product',
-		{ id: product.id }
+		postType,
+		{ id: postId }
 	);
 
 	useLayoutEffect( () => {
 		onChange(
-			synchronizeBlocksWithTemplate( [], _settings?.template ),
+			synchronizeBlocksWithTemplate(
+				[],
+				_settings?.templates[ postType ]
+			),
 			{}
 		);
-	}, [ product.id ] );
+	}, [ postId ] );
 
 	const editedProduct: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			product.id
-		)
+		select( 'core' ).getEditedEntityRecord( 'postType', postType, postId )
 	);
 
 	if ( ! blocks ) {

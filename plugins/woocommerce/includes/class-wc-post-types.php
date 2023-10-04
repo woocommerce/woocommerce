@@ -380,6 +380,7 @@ class WC_Post_Types {
 					'supports'        => false,
 					'capability_type' => 'product',
 					'rewrite'         => false,
+					'show_in_rest'    => true,
 				)
 			)
 		);

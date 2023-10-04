@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
 use WP_Block_Editor_Context;
@@ -48,6 +49,7 @@ class Init {
 			// Register the product block template.
 			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
 			$template_registry->register( new SimpleProductTemplate() );
+			$template_registry->register( new ProductVariationTemplate() );
 
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
@@ -77,11 +79,16 @@ class Init {
 		}
 		$post_type_object     = get_post_type_object( 'product' );
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
+		$template_registry 	  = wc_get_container()->get( BlockTemplateRegistry::class );
 
 		$editor_settings = array();
 		if ( ! empty( $post_type_object->template ) ) {
 			$editor_settings['template']                 = $post_type_object->template;
 			$editor_settings['templateLock']             = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
+			$editor_settings['templates']     = array(
+				'product' 			=> $post_type_object->template,
+				'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template()
+			);
 		}
 
 		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );
