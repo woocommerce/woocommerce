@@ -11,7 +11,8 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
-import { getAdminLink } from '@woocommerce/settings';
+import { addQueryArgs } from '@wordpress/url';
+import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -365,7 +366,9 @@ export const CustomizeStoreController = ( {
 						currentState={ state.value }
 					/>
 				) : (
-					<div />
+					<div className="woocommerce-customize-store__loading">
+						<Spinner />
+					</div>
 				) }
 			</div>
 		</>
