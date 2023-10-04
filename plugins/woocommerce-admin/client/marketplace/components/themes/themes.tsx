@@ -46,12 +46,12 @@ export default function Themes( props: ThemeProps ): JSX.Element {
 		}
 
 		if ( products.length === 0 ) {
-			return <NoResults />;
+			return <NoResults type={ ProductType.theme } />;
 		}
 
 		return (
 			<>
-				<CategorySelector />
+				<CategorySelector type={ ProductType.theme } />
 				<ProductListContent
 					products={ products }
 					type={ ProductType.theme }

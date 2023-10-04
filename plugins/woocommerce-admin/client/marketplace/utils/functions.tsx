@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { Product } from '../components/product-list/types';
+import { Product, ProductType } from '../components/product-list/types';
 import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_CATEGORY_API_PATH,
@@ -19,6 +19,7 @@ interface ProductGroup {
 	title: string;
 	items: Product[];
 	url: string;
+	itemType: ProductType;
 }
 
 // Fetch data for the discover page from the WooCommerce.com API
@@ -36,7 +37,7 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
-function fetchCategories( selectedTab: string ): Promise< CategoryAPIItem[] > {
+function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
 
 	if ( LOCALE.userLocale ) {
@@ -45,8 +46,8 @@ function fetchCategories( selectedTab: string ): Promise< CategoryAPIItem[] > {
 
 	// We don't define parent for extensions since that is provided by default
 	// This is to ensure the old marketplace continues to work when this isn't defined
-	if ( selectedTab === 'themes' ) {
-		url.searchParams.set( 'parent', selectedTab );
+	if ( type === ProductType.theme ) {
+		url.searchParams.set( 'parent', 'themes' );
 	}
 
 	return fetch( url.toString() )

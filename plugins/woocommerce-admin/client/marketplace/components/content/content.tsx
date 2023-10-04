@@ -40,7 +40,10 @@ export default function Content(): JSX.Element {
 		}
 
 		if ( query.category ) {
-			params.append( 'category', query.category );
+			params.append(
+				'category',
+				query.category === '_all' ? '' : query.category
+			);
 		} else if ( selectedTab === 'themes' ) {
 			params.append( 'category', 'themes' );
 		} else if ( selectedTab === 'search' ) {

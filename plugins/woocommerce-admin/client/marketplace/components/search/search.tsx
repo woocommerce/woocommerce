@@ -31,6 +31,12 @@ function Search(): JSX.Element {
 		}
 	}, [ query.term ] );
 
+	useEffect( () => {
+		if ( query.tab !== 'search' ) {
+			setSearchTerm( '' );
+		}
+	}, [ query.tab ] );
+
 	const runSearch = () => {
 		const term = searchTerm.trim();
 
