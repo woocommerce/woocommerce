@@ -15,8 +15,6 @@ import { init as initBackgroundRemoval } from './image-background-removal';
 
 import './index.scss';
 
-// TODO: We really need to move the logic in this file into their respective feature folders.
-
 // This sets up loading and saving the plugin's preferences.
 setPreferencesPersistence();
 
