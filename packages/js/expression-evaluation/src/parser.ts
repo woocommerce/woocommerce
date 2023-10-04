@@ -104,16 +104,22 @@ LineTerminatorSequence
 	/ "\\u2028"
 	/ "\\u2029"
 
+Comment "comment"
+	= MultiLineComment
+
+MultiLineComment
+	= "/*" (!"*/" SourceCharacter)* "*/"
+
 __ "skipped"
-	= (WhiteSpace / LineTerminatorSequence )*
+	= (WhiteSpace / LineTerminatorSequence / Comment)*
 
 IdentifierPath
-	= variable:Identifier accessor:("." Identifier)* {
+	= variable:Identifier accessor:(__ "." __ Identifier)* {
 		const path = variable.split( '.' );
 		let result = path.reduce( ( nextObject, propertyName ) => nextObject[ propertyName ], options.context );
 
 		for ( let i = 0; i < accessor.length; i++ ) {
-			result = result[ accessor[ i ][ 1 ] ];
+			result = result[ accessor[ i ][ 3 ] ];
 		}
 
 		return result;
@@ -378,7 +384,9 @@ LogicalOrOperator
 	= "||"
 
 Expression
-	= LogicalOrExpression
+	= __ expression:LogicalOrExpression __ {
+		return expression;
+	}
 `;
 
 export const parser = peggy.generate( grammar );

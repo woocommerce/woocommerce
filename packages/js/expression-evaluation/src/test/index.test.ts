@@ -116,8 +116,22 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( "foo \\'bar\\'" );
 	} );
 
+	it( 'should evaluate a literal with whitespace around it', () => {
+		const result = evaluate( ' 23 ' );
+
+		expect( result ).toEqual( 23 );
+	} );
+
 	it( 'should evaluate a top-level context property', () => {
 		const result = evaluate( 'foo', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( 'bar' );
+	} );
+
+	it( 'should evaluate a top-level context property with whitespace', () => {
+		const result = evaluate( ' foo ', {
 			foo: 'bar',
 		} );
 
@@ -130,6 +144,30 @@ describe( 'evaluate', () => {
 				bar: 'baz',
 			},
 		} );
+
+		expect( result ).toEqual( 'baz' );
+	} );
+
+	it( 'should evaluate a nested context property with whitespace', () => {
+		const result = evaluate( 'foo. bar', {
+			foo: {
+				bar: 'baz',
+			},
+		} );
+
+		expect( result ).toEqual( 'baz' );
+	} );
+
+	it( 'should evaluate a nested context property with multiple lines', () => {
+		const result = evaluate(
+			`foo.
+			bar`,
+			{
+				foo: {
+					bar: 'baz',
+				},
+			}
+		);
 
 		expect( result ).toEqual( 'baz' );
 	} );
@@ -152,6 +190,14 @@ describe( 'evaluate', () => {
 
 	it( 'should evaluate a NOT expression with parentheses', () => {
 		const result = evaluate( '!( foo )', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a NOT expression with parentheses and spaces', () => {
+		const result = evaluate( '! ( foo ) ', {
 			foo: true,
 		} );
 
@@ -349,6 +395,50 @@ describe( 'evaluate', () => {
 		} );
 
 		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate an expression with a multiline comment at the end', () => {
+		const result = evaluate( 'foo /* + 23 */', {
+			foo: 5,
+		} );
+
+		expect( result ).toEqual( 5 );
+	} );
+
+	it( 'should evaluate an expression with a multiline comment at the beginning', () => {
+		const result = evaluate( '/* 23 + */ foo', {
+			foo: 5,
+		} );
+
+		expect( result ).toEqual( 5 );
+	} );
+
+	it( 'should evaluate an expression with a multiline comment in the middle', () => {
+		const result = evaluate( 'foo + /* 23 */ bar', {
+			foo: 5,
+			bar: 3,
+		} );
+
+		expect( result ).toEqual( 8 );
+	} );
+
+	it( 'should evaluate a multiline expression with a multiline comment', () => {
+		const result = evaluate(
+			`foo
+			/*
+			+ bar
+			+ boo
+			*/
+			+ baz`,
+			{
+				foo: 5,
+				bar: 23,
+				boo: 6,
+				baz: 3,
+			}
+		);
+
+		expect( result ).toEqual( 8 );
 	} );
 
 	it( 'should throw an error if the expression is invalid', () => {
