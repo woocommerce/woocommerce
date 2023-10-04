@@ -28,7 +28,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Connect from '../../../dashboard/components/connect';
+import Connect, { PrefetchJetpackAuthUrl } from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
@@ -60,6 +60,10 @@ export class Shipping extends Component {
 
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;
+
+		this.jetpackAuthRedirectUrl = getAdminLink(
+			'admin.php?page=wc-admin'
+		);
 	}
 
 	componentDidMount() {
@@ -363,9 +367,7 @@ export class Shipping extends Component {
 				),
 				content: (
 					<Connect
-						redirectUrl={ getAdminLink(
-							'admin.php?page=wc-admin'
-						) }
+						redirectUrl={ this.jetpackAuthRedirectUrl }
 						completeStep={ this.completeStep }
 						onConnect={ () => {
 							recordEvent( 'tasklist_shipping_connect_store' );
@@ -638,6 +640,9 @@ export class Shipping extends Component {
 			<div className="woocommerce-task-shipping">
 				<Card className="woocommerce-task-card">
 					<CardBody>
+						<PrefetchJetpackAuthUrl
+							redirectUrl={ this.jetpackAuthRedirectUrl }
+						/>
 						<Stepper
 							isPending={
 								isPending || isUpdateSettingsRequesting

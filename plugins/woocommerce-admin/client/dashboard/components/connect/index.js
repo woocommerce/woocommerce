@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useSelect, withDispatch, withSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 export class Connect extends Component {
@@ -147,16 +147,18 @@ Connect.defaultProps = {
 	setIsPending: () => {},
 };
 
+const formatJetpackAuthUrlQueryArgs = ( redirectUrl ) => ( {
+	redirectUrl: redirectUrl || window.location.href,
+	from: 'woocommerce-services',
+} );
+
 export default compose(
 	withSelect( ( select, props ) => {
 		const { getJetpackAuthUrl, isResolving, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
 
-		const queryArgs = {
-			redirectUrl: props.redirectUrl || window.location.href,
-			from: 'woocommerce-services',
-		};
+		const queryArgs = formatJetpackAuthUrlQueryArgs( props.redirectUrl );
 
 		return {
 			error: getOnboardingError( 'getJetpackAuthUrl' ) || '',
@@ -172,3 +174,16 @@ export default compose(
 		};
 	} )
 )( Connect );
+
+export const PrefetchJetpackAuthUrl = ( { redirectUrl = undefined } ) => {
+	useSelect(
+		( select ) => {
+			select( ONBOARDING_STORE_NAME ).getJetpackAuthUrl(
+				formatJetpackAuthUrlQueryArgs( redirectUrl )
+			);
+		},
+		[ redirectUrl ]
+	);
+
+	return <></>;
+};
