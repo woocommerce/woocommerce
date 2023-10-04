@@ -27,5 +27,6 @@ export type customizeStoreStateMachineContext = {
 		activeTheme: string;
 		activeThemeHasMods: boolean;
 		customizeStoreTaskCompleted: boolean;
+		currentThemeIsAiGenerated: boolean;
 	};
 };
