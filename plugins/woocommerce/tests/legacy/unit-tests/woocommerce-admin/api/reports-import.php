@@ -143,12 +143,14 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$order_2->save();
 
 		// Compare against name to make sure previously imported customer was skipped.
-		wp_update_user(
+		$result = wp_update_user(
 			array(
 				'ID'         => $this->customer,
 				'first_name' => 'Changed',
 			)
 		);
+
+		print_r( $result );
 
 		// Delete scheduled actions to avoid default order processing.
 		WC_Helper_Queue::cancel_all_pending();
