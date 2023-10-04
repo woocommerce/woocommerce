@@ -247,6 +247,29 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( true );
 	} );
 
+	it( 'should evaluate a complex expression', () => {
+		const result = evaluate(
+			`foo.bar
+			&& ( foo.baz === "qux" || foo.baz === "quux" )`,
+			{
+				foo: {
+					bar: true,
+					baz: 'quux',
+				},
+			}
+		);
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate an expression with too many parentheses', () => {
+		const result = evaluate( '(((foo)))', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
 	it( 'should throw an error if the expression is invalid', () => {
 		expect( () => evaluate( '= 1' ) ).toThrow();
 	} );
