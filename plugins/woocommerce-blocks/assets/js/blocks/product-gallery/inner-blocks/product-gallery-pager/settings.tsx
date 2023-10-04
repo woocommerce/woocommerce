@@ -59,7 +59,7 @@ export const ProductGalleryPagerBlockSettings = ( {
 
 	return (
 		<PanelBody
-			className="wc-block-editor-product-gallery-large-image-next-previous-settings"
+			className="wc-block-editor-product-gallery-pager-settings"
 			title={ __( 'Pager', 'woo-gutenberg-products-block' ) }
 		>
 			<ToggleGroupControl
