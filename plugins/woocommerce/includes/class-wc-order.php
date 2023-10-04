@@ -1784,6 +1784,14 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
+		/**
+		 * Filter the URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url',
 			wp_nonce_url(
@@ -1809,6 +1817,14 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
+		/**
+		 * Filter the raw URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url_raw',
 			add_query_arg(
