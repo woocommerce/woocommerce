@@ -258,7 +258,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * Generate a query.
 	 *
 	 * @param bool $siteside_only generates a query for sitewide low stock threshold only query.
-	 * @param bool $return_count_query returns country query instead of the actual query.
+	 * @param bool $return_count_query returns count query instead of the actual query.
 	 *
 	 * @return string
 	 */
