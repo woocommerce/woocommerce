@@ -8,15 +8,16 @@ import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { default as ConnectForm } from '~/dashboard/components/connect';
-import { SetupStepProps } from './setup';
+import { ConnectStepProps } from './setup';
 
-export const Connect: React.FC< SetupStepProps > = ( {
+export const Connect: React.FC< ConnectStepProps > = ( {
 	onDisable,
 	onManual,
+	jetpackAuth,
 } ) => {
 	return (
 		<ConnectForm
-			// @ts-expect-error ConnectForm is pure JS component
+			jetpackAuth={ jetpackAuth }
 			onConnect={ () => {
 				recordEvent( 'tasklist_tax_connect_store', {
 					connect: true,

@@ -9,13 +9,17 @@ import { recordEvent } from '@woocommerce/tracks';
 import { default as ConnectForm } from '~/dashboard/components/connect';
 
 type ConnectProps = {
+	jetpackAuth: object;
 	onConnect: () => void;
 };
 
-export const Connect: React.FC< ConnectProps > = ( { onConnect } ) => {
+export const Connect: React.FC< ConnectProps > = ( {
+	jetpackAuth,
+	onConnect,
+} ) => {
 	return (
 		<ConnectForm
-			// @ts-expect-error ConnectForm is pure JS component
+			jetpackAuth={ jetpackAuth }
 			onConnect={ () => {
 				recordEvent( 'tasklist_shipping_recommendation_connect_store', {
 					connect: true,

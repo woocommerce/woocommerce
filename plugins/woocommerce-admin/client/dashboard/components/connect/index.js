@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { withDispatch } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 export class Connect extends Component {
@@ -21,8 +21,12 @@ export class Connect extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { createNotice, error, isRequesting, onError, setIsPending } =
-			this.props;
+		const {
+			createNotice,
+			jetpackAuth: { error, isRequesting },
+			onError,
+			setIsPending,
+		} = this.props;
 
 		if ( prevProps.isRequesting && ! isRequesting ) {
 			setIsPending( false );
@@ -37,7 +41,7 @@ export class Connect extends Component {
 	}
 
 	async connectJetpack() {
-		const { jetpackAuthUrl, onConnect } = this.props;
+		const { jetpackAuth, onConnect } = this.props;
 
 		this.setState(
 			{
@@ -47,14 +51,19 @@ export class Connect extends Component {
 				if ( onConnect ) {
 					onConnect();
 				}
-				window.location = jetpackAuthUrl;
+				window.location = jetpackAuth.url;
 			}
 		);
 	}
 
 	render() {
-		const { error, isRequesting, onSkip, skipText, onAbort, abortText } =
-			this.props;
+		const {
+			jetpackAuth: { error, isRequesting },
+			onSkip,
+			skipText,
+			onAbort,
+			abortText,
+		} = this.props;
 
 		return (
 			<Fragment>
@@ -96,19 +105,18 @@ Connect.propTypes = {
 	 */
 	createNotice: PropTypes.func.isRequired,
 	/**
-	 * Human readable error message.
+	 * Result of retrieving Jetpack authentication URL from the onboarding data store.
 	 *
-	 * Also used to determine if the "Retry" button should be displayed.
+	 * Fields:
+	 * - error: Human-readable error message. Also used to determine if the "Retry" button should be displayed.
+	 * - isRequesting: Bool to check if the connection URL is still being requested.
+	 * - url: The Jetpack authentication URL.
 	 */
-	error: PropTypes.string,
-	/**
-	 * Bool to check if the connection URL is still being requested.
-	 */
-	isRequesting: PropTypes.bool,
-	/**
-	 * Generated Jetpack authentication URL.
-	 */
-	jetpackAuthUrl: PropTypes.string,
+	jetpackAuth: PropTypes.exact( {
+		url: PropTypes.string,
+		error: PropTypes.string,
+		isRequesting: PropTypes.bool,
+	} ),
 	/**
 	 * Called before the redirect to Jetpack.
 	 */
@@ -148,22 +156,6 @@ Connect.defaultProps = {
 };
 
 export default compose(
-	withSelect( ( select, props ) => {
-		const { getJetpackAuthUrl, isResolving, getOnboardingError } = select(
-			ONBOARDING_STORE_NAME
-		);
-
-		const queryArgs = {
-			redirectUrl: props.redirectUrl || window.location.href,
-			from: 'woocommerce-services',
-		};
-
-		return {
-			error: getOnboardingError( 'getJetpackAuthUrl' ) || '',
-			isRequesting: isResolving( 'getJetpackAuthUrl', [ queryArgs ] ),
-			jetpackAuthUrl: getJetpackAuthUrl( queryArgs ).url,
-		};
-	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 
@@ -172,3 +164,20 @@ export default compose(
 		};
 	} )
 )( Connect );
+
+export const prefetchJetpackAuthData = ( select, redirectUrl ) => {
+	const { getJetpackAuthUrl, isResolving, getOnboardingError } = select(
+		ONBOARDING_STORE_NAME
+	);
+
+	const queryArgs = {
+		redirectUrl: redirectUrl || window.location.href,
+		from: 'woocommerce-services',
+	};
+
+	return {
+		error: getOnboardingError( 'getJetpackAuthUrl' ) || '',
+		isRequesting: isResolving( 'getJetpackAuthUrl', [ queryArgs ] ),
+		url: getJetpackAuthUrl( queryArgs ).url,
+	};
+};

@@ -11,11 +11,13 @@ import { Card, CardBody, Button } from '@wordpress/components';
  * Internal dependencies
  */
 import { Connect } from './components/connect';
+import { prefetchJetpackAuthData } from '~/dashboard/components/connect';
 import { Plugins } from './components/plugins';
 import { StoreLocation } from './components/store-location';
 import { WCSBanner } from './components/wcs-banner';
 import { TaskProps, ShippingRecommendationProps } from './types';
 import { redirectToWCSSettings } from './utils';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Plugins required to automate shipping.
@@ -76,6 +78,10 @@ export const ShippingRecommendation: React.FC<
 		setPluginsToActivate( remainingPlugins );
 	}, [ activePlugins, isJetpackConnected, isResolving, pluginsToActivate ] );
 
+	const prefetchedJetpackAuthData = useSelect( ( select ) => {
+		return prefetchJetpackAuthData( select );
+	} );
+
 	const steps = [
 		{
 			key: 'store_location',
@@ -121,7 +127,10 @@ export const ShippingRecommendation: React.FC<
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>
 			) : (
-				<Connect onConnect={ redirect } />
+				<Connect
+					jetpackAuth={ prefetchedJetpackAuthData }
+					onConnect={ redirect }
+				/>
 			),
 		},
 	];

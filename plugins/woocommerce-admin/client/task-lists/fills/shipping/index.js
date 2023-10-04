@@ -28,7 +28,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Connect from '../../../dashboard/components/connect';
+import Connect, { prefetchJetpackAuthData } from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
@@ -363,9 +363,7 @@ export class Shipping extends Component {
 				),
 				content: (
 					<Connect
-						redirectUrl={ getAdminLink(
-							'admin.php?page=wc-admin'
-						) }
+						jetpackAuth={ this.props.prefetchedJetpackAuthData }
 						completeStep={ this.completeStep }
 						onConnect={ () => {
 							recordEvent( 'tasklist_shipping_connect_store' );
@@ -674,6 +672,11 @@ const ShippingWrapper = compose(
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
 
+		const prefetchedJetpackAuthData = prefetchJetpackAuthData(
+			select,
+			getAdminLink( 'admin.php?page=wc-admin' )
+		);
+
 		return {
 			countryCode,
 			countryName,
@@ -682,6 +685,7 @@ const ShippingWrapper = compose(
 			activePlugins,
 			isJetpackConnected: isJetpackConnected(),
 			shippingPartners,
+			prefetchedJetpackAuthData,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
