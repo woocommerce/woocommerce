@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Fix: HPOS keeping disabled when the database tables were created via enabling the setting
