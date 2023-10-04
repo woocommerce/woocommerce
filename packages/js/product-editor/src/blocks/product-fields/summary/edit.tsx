@@ -29,6 +29,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	setAttributes,
+	context,
 }: ProductEditorBlockEditProps< SummaryAttributes > ) {
 	const { align, allowedFormats, direction, label } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
@@ -40,8 +41,8 @@ export function Edit( {
 	);
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
-		'product',
-		'short_description'
+		context.postType || 'product',
+		attributes.name || 'short_description'
 	);
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.

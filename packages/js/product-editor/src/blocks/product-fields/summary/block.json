@@ -8,6 +8,9 @@
 	"keywords": [ "products", "summary", "excerpt" ],
 	"textdomain": "default",
 	"attributes": {
+		"name": {
+			"type": "string"
+		},
 		"align": {
 			"type": "string"
 		},
@@ -46,5 +49,6 @@
 		"inserter": false,
 		"lock": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }

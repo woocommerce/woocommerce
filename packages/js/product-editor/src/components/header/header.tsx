@@ -75,6 +75,7 @@ export function Header( { onTabSelect, postType = 'product' }: HeaderProps ) {
 					/>
 
 					<PublishButton
+						postType={ postType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 

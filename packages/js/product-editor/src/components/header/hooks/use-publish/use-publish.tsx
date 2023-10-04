@@ -16,6 +16,7 @@ import { WPError } from '../../../../utils/get-product-error-message';
 import { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
+	postType = 'product',
 	productStatus,
 	disabled,
 	onClick,
@@ -28,11 +29,7 @@ export function usePublish( {
 } ): Button.ButtonProps {
 	const { isValidating, validate } = useValidations< Product >();
 
-	const [ productId ] = useEntityProp< number >(
-		'postType',
-		'product',
-		'id'
-	);
+	const [ productId ] = useEntityProp< number >( 'postType', postType, 'id' );
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -41,7 +38,7 @@ export function usePublish( {
 			return {
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
-					'product',
+					postType,
 					productId
 				),
 			};
@@ -69,14 +66,14 @@ export function usePublish( {
 			// but also save all the pending changes. So even if the status is
 			// publish it's possible to save the product too.
 			if ( ! isPublished ) {
-				await editEntityRecord( 'postType', 'product', productId, {
+				await editEntityRecord( 'postType', postType, productId, {
 					status: 'publish',
 				} );
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
+				postType,
 				productId,
 				{
 					throwOnError: true,

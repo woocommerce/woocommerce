@@ -12,6 +12,17 @@ const routeMatchers = [
 	{
 		matcher: new RegExp( '^/wp/v2/product_variation' ),
 		replacement: '/wc/v3/products/0/variations',
+		getReplaceString: (): string => {
+			const query: { page?: string; path?: string } = getQuery();
+			const variationMatcher = new RegExp(
+				'/product/([0-9]+)/variation/([0-9]+)'
+			);
+			const matched = ( query.path || '' ).match( variationMatcher );
+			if ( matched && matched.length === 3 ) {
+				return '/wc/v3/products/' + matched[ 1 ] + '/variations';
+			}
+			return '/wc/v3/products/0/variations';
+		},
 	},
 ];
 
@@ -30,9 +41,19 @@ export const productApiFetchMiddleware = () => {
 	// without disturbing the rest_namespace outside of the product block editor.
 	apiFetch.use( ( options, next ) => {
 		if ( options.path && isProductEditor() ) {
-			for ( const { matcher, replacement } of routeMatchers ) {
+			for ( const {
+				matcher,
+				replacement,
+				getReplaceString,
+			} of routeMatchers ) {
 				if ( matcher.test( options.path ) ) {
-					options.path = options.path.replace( matcher, replacement );
+					const replacementString = getReplaceString
+						? getReplaceString()
+						: replacement;
+					options.path = options.path.replace(
+						matcher,
+						replacementString
+					);
 					break;
 				}
 			}

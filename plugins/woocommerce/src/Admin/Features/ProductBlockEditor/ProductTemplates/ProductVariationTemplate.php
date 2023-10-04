@@ -115,6 +115,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'        => 'product-summary',
 				'blockName' => 'woocommerce/product-summary-field',
 				'order'     => 20,
+				'attributes' => [
+					'name' => 'description'
+				],
 			]
 		);
 
