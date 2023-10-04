@@ -7,7 +7,14 @@ import type { BlockAttributes } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { InnerBlocks } from '@wordpress/block-editor';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+/**
+ * Internal dependencies
+ */
+import { ProductEditorBlockEditProps } from '../../types';
+
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { toggleText, initialCollapsed, persistRender = true } = attributes;
 

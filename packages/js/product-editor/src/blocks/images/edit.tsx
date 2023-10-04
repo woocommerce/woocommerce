@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
+import { BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
 import classnames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
@@ -20,11 +20,18 @@ import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { ProductEditorBlockEditProps } from '../../types';
+
 type Image = MediaItem & {
 	src: string;
 };
 
-export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const [ images, setImages ] = useEntityProp< MediaItem[] >(
 		'postType',
 		'product',

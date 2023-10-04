@@ -20,7 +20,7 @@
 	}
 
 	@media (width <= $breakpoint-medium) {
-		margin: $content-spacing-small;
+		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
 	}
 }
 

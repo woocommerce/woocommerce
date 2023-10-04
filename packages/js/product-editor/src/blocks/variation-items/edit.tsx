@@ -10,7 +10,6 @@ import {
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
-import { BlockEditProps } from '@wordpress/blocks';
 import { createElement, useMemo, useRef } from '@wordpress/element';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -27,12 +26,13 @@ import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../constants';
 import { handlePrompt } from '../../utils/handle-prompt';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
 	context,
-}: BlockEditProps< VariationOptionsBlockAttributes > & {
-	context?: {
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
+	context: {
 		isInSelectedTab?: boolean;
 	};
 } ) {
@@ -198,7 +198,7 @@ export function Edit( {
 					}
 				} }
 			/>
-			{ context?.isInSelectedTab && <VariableProductTour /> }
+			{ context.isInSelectedTab && <VariableProductTour /> }
 		</div>
 	);
 }

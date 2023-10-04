@@ -64,3 +64,4 @@ export const TRACKS_SOURCE = 'product-block-editor-v1';
 export const DEFAULT_PER_PAGE_OPTION = 25;
 
 export const DEFAULT_VARIATION_PER_PAGE_OPTION = 5;
+export const DEFAULT_VARIATION_PER_PAGE_OPTIONS = [ 5, 10, 25 ];

@@ -36,7 +36,7 @@ Property in which the checkbox value is stored.
 
 Tooltip text that is shown when hovering the icon at the side of the label.
 
-## Example
+## Usage
 
 Here's an example on the code that is used for the 'sold_individually' field in the Inventory section:
 

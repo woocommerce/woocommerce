@@ -8,7 +8,7 @@
 	"keywords": [ "products", "price" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
+		"property": {
 			"type": "string",
 			"__experimentalRole": "content"
 		},

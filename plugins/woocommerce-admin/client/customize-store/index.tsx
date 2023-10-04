@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ import {
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/theme-cards';
+import { ThemeCard } from './intro/types';
 import './style.scss';
 
 export type customizeStoreStateMachineEvents =
@@ -67,6 +68,10 @@ const redirectToWooHome = () => {
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
+const redirectToThemes = () => {
+	window.location.href = addQueryArgs( 'themes.php' );
+};
+
 const markTaskComplete = async () => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
@@ -87,6 +92,7 @@ const browserPopstateHandler =
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
+	redirectToThemes,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -114,8 +120,11 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	},
 	context: {
 		intro: {
+			hasErrors: false,
 			themeCards: [] as ThemeCard[],
 			activeTheme: '',
+			activeThemeHasMods: false,
+			customizeStoreTaskCompleted: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -172,10 +181,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			states: {
 				preIntro: {
 					invoke: {
-						src: 'fetchThemeCards',
+						src: 'fetchIntroData',
+						onError: {
+							actions: 'assignFetchIntroDataError',
+							target: 'intro',
+						},
 						onDone: {
 							target: 'intro',
-							actions: [ 'assignThemeCards' ],
+							actions: [
+								'assignThemeCards',
+								'assignActiveThemeHasMods',
+								'assignCustomizeStoreCompleted',
+							],
 						},
 					},
 				},
@@ -186,20 +203,26 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			on: {
-				DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				SELECTED_ACTIVE_THEME: {
-					target: 'assemblerHub',
-				},
 				CLICKED_ON_BREADCRUMB: {
 					actions: 'redirectToWooHome',
 				},
+				DESIGN_WITH_AI: {
+					actions: [ 'recordTracksDesignWithAIClicked' ],
+					target: 'designWithAi',
+				},
 				SELECTED_NEW_THEME: {
+					actions: [ 'recordTracksThemeSelected' ],
+					target: 'appearanceTask',
+				},
+				SELECTED_ACTIVE_THEME: {
+					actions: [ 'recordTracksThemeSelected' ],
 					target: 'appearanceTask',
 				},
 				SELECTED_BROWSE_ALL_THEMES: {
-					target: 'appearanceTask',
+					actions: [
+						'recordTracksBrowseAllThemesClicked',
+						'redirectToThemes',
+					],
 				},
 			},
 		},
@@ -338,7 +361,7 @@ export const CustomizeStoreController = ( {
 	return (
 		<>
 			<div
-				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ currentNodeCssLabel }` }
+				className={ `woocommerce-customize-store__container woocommerce-customize-store__step-${ currentNodeCssLabel }` }
 			>
 				{ CurrentComponent ? (
 					<CurrentComponent

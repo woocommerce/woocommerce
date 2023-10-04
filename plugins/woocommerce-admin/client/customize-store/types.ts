@@ -7,7 +7,7 @@ import { AnyInterpreter, Sender } from 'xstate';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '.';
-import { ThemeCard } from './intro/theme-cards';
+import { ThemeCard } from './intro/types';
 
 export type CustomizeStoreComponent = ( props: {
 	parentMachine: AnyInterpreter;
@@ -22,7 +22,10 @@ export type CustomizeStoreComponentMeta = {
 export type customizeStoreStateMachineContext = {
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
+		hasErrors: boolean;
 		themeCards: ThemeCard[];
 		activeTheme: string;
+		activeThemeHasMods: boolean;
+		customizeStoreTaskCompleted: boolean;
 	};
 };

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useEntityProp } from '@wordpress/core-data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
@@ -11,8 +10,11 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
  */
 import { RadioField } from '../../components/radio-field';
 import { RadioBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: BlockEditProps< RadioBlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< RadioBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { description, options, property, title } = attributes;
 	const [ value, setValue ] = useEntityProp< string >(

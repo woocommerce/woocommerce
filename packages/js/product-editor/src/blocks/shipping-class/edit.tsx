@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import {
@@ -29,6 +28,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { ShippingClassBlockAttributes } from './types';
 import { AddNewShippingClassModal } from '../../components';
 import { ADD_NEW_SHIPPING_CLASS_OPTION_VALUE } from '../../constants';
+import { ProductEditorBlockEditProps } from '../../types';
 
 type ServerErrorResponse = {
 	code: string;
@@ -71,7 +71,7 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< ShippingClassBlockAttributes > ) {
+}: ProductEditorBlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
 
