@@ -578,5 +578,31 @@
 				}
 			]
 		}
+	},
+	{
+		"name": "Featured Category Cover Image",
+		"slug": "woocommerce-blocks/featured-category-cover-image",
+		"images_total": 1,
+		"images_format": "landscape",
+		"content": {
+			"titles": [
+				{
+					"default": "100% natural denim",
+					"ai_prompt": "A description for a product"
+				}
+			],
+			"descriptions": [
+				{
+					"default": "Only the finest goes into our products. You deserve it.",
+					"ai_prompt": "An impact phrase that advertises the products"
+				}
+			],
+			"buttons": [
+				{
+					"default": "Shop jeans",
+					"ai_prompt": "The button text to go to the shop page"
+				}
+			]
+		}
 	}
 ]
