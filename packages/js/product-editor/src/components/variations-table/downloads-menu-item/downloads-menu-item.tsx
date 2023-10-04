@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { Dropdown, MenuItem } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
 import { MediaUpload } from '@wordpress/media-utils';
+import { ProductDownload } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -14,6 +15,10 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+
+const MODAL_CLASS_NAME = 'downloads_menu_item__upload_files_modal';
+const MODAL_WRAPPER_CLASS_NAME =
+	'downloads_menu_item__upload_files_modal_wrapper';
 
 function convertMediaFileToDownloadFile( value: Record< string, unknown > ) {
 	return { id: `${ value.id }`, name: value.name, file: value.url };
@@ -27,6 +32,14 @@ export function DownloadsMenuItem( {
 	const ids = Array.isArray( selection )
 		? selection.map( ( { id } ) => id )
 		: selection.id;
+
+	const downloadsIds: number[] = (
+		Array.isArray( selection )
+			? selection[ 0 ].downloads
+			: selection.downloads
+	).map( ( { id }: ProductDownload ) => Number.parseInt( id, 10 ) );
+
+	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 
 	function handleMediaUploadSelect(
 		value: Record< string, unknown > | Record< string, unknown >[]
@@ -69,6 +82,7 @@ export function DownloadsMenuItem( {
 			} );
 
 			openMediaUploadModal();
+			setUploadFilesModalOpen( true );
 		};
 	}
 
@@ -103,9 +117,25 @@ export function DownloadsMenuItem( {
 					} );
 				},
 			} );
+			setUploadFilesModalOpen( false );
 			onClose();
 		};
 	}
+
+	useEffect(
+		function addUploadModalClass() {
+			const modal = document.querySelector( `.${ MODAL_CLASS_NAME }` );
+			const dialog = modal?.closest( '[role="dialog"]' );
+			const wrapper = dialog?.parentElement;
+
+			wrapper?.classList.add( MODAL_WRAPPER_CLASS_NAME );
+
+			return () => {
+				wrapper?.classList.remove( MODAL_WRAPPER_CLASS_NAME );
+			};
+		},
+		[ uploadFilesModalOpen ]
+	);
 
 	return (
 		<Dropdown
@@ -129,8 +159,10 @@ export function DownloadsMenuItem( {
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
 					<MediaUpload
+						modalClass={ MODAL_CLASS_NAME }
 						// @ts-expect-error multiple also accepts string.
 						multiple={ 'add' }
+						value={ downloadsIds }
 						onSelect={ handleMediaUploadSelect }
 						render={ ( { open } ) => (
 							<MenuItem
