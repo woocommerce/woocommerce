@@ -218,7 +218,7 @@ module.exports = async ( config ) => {
 			}
 			if ( ! hposConfigured ) {
 				console.error(
-					'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+					'Cannot proceed to api tests, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
 				);
 				process.exit( 1 );
 			}
