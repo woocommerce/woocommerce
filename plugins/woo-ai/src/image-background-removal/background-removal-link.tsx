@@ -14,6 +14,7 @@ import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
+import { getPostId, recordTracksFactory } from '../utils';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -28,6 +29,10 @@ const getErrorMessage = ( errorCode?: string ) => {
 	}
 };
 
+const recordTracks = recordTracksFactory( 'image_background_removal', () => ( {
+	post_id: getPostId(),
+} ) );
+
 export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
 	const [ state, setState ] = useState< '' | 'generating' | 'uploading' >(
@@ -35,8 +40,12 @@ export const BackgroundRemovalLink = () => {
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
 
+	recordTracks( 'view_ui' );
+
 	const onRemoveClick = async () => {
 		try {
+			recordTracks( 'click' );
+
 			setState( 'generating' );
 
 			const { url: imgUrl, filename: imgFilename } =
@@ -66,12 +75,17 @@ export const BackgroundRemovalLink = () => {
 					.pop() }`,
 			} );
 			setState( '' );
+
+			recordTracks( 'complete' );
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );
-			setDisplayError(
-				getErrorMessage( ( err as { code?: string } )?.code ?? '' )
-			);
+			const errorCode = ( err as { code?: string } )?.code ?? '';
+			setDisplayError( getErrorMessage( errorCode ) );
+
+			recordTracks( 'error', {
+				error: errorCode,
+			} );
 		}
 	};
 
