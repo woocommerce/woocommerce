@@ -1,4 +1,4 @@
-name: Run tests against PR in an environment with COT disabled
+name: Run tests against PR in an environment with HPOS disabled
 on:
     pull_request:
     workflow_dispatch:
@@ -10,8 +10,8 @@ concurrency:
 permissions: {}
 
 jobs:
-    non-cot-e2e-tests-run:
-        name: Runs E2E tests with COT disabled.
+    non-hpos-e2e-tests-run:
+        name: Runs E2E tests with HPOS disabled.
         runs-on: ubuntu-20.04
         permissions:
           contents: read
@@ -65,8 +65,8 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    non-cot-api-tests-run:
-        name: Runs API tests with COT disabled.
+    non-hpos-api-tests-run:
+        name: Runs API tests with HPOS disabled.
         runs-on: ubuntu-20.04
         permissions:
           contents: read
@@ -79,7 +79,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers with COT disabled.
+            - name: Load docker images and start containers
               working-directory: plugins/woocommerce
               run: pnpm env:test --filter=woocommerce
 
