@@ -20,7 +20,6 @@ import { Connect } from './connect';
 import { Plugins } from './plugins';
 import { StoreLocation } from '../components/store-location';
 import './setup.scss';
-import { prefetchJetpackAuthData } from '~/dashboard/components/connect';
 
 export type SetupProps = {
 	isPending: boolean;
@@ -37,10 +36,6 @@ export type SetupStepProps = {
 	onAutomate: () => void;
 	onManual: () => void;
 	pluginsToActivate: string[];
-};
-
-export type ConnectStepProps = SetupStepProps & {
-	jetpackAuth: object;
 };
 
 export const Setup: React.FC< SetupProps > = ( {
@@ -96,10 +91,6 @@ export const Setup: React.FC< SetupProps > = ( {
 		pluginsToActivate,
 	};
 
-	const prefetchedJetpackAuthData = useSelect( ( select ) => {
-		return prefetchJetpackAuthData( select );
-	} );
-
 	const steps = [
 		{
 			key: 'store_location',
@@ -126,12 +117,7 @@ export const Setup: React.FC< SetupProps > = ( {
 				'Connect your store to WordPress.com to enable automated sales tax calculations',
 				'woocommerce'
 			),
-			content: (
-				<Connect
-					jetpackAuth={ prefetchedJetpackAuthData }
-					{ ...stepProps }
-				/>
-			),
+			content: <Connect { ...stepProps } />,
 		},
 	];
 
