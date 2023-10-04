@@ -20,6 +20,7 @@
 		"automattic/jetpack-connection": "1.51.7",
 		"automattic/jetpack-constants": "^1.6.22",
 		"composer/installers": "^1.9",
+		"illuminate/database": "^8.83",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.6.2",
@@ -47,7 +48,8 @@
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
 			"composer/installers": true,
-			"bamarni/composer-bin-plugin": true
+			"bamarni/composer-bin-plugin": true,
+			"kylekatarnls/update-helper": true
 		}
 	},
 	"autoload": {
