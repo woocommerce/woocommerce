@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AnyInterpreter, Sender } from 'xstate';
+import { AnyInterpreter, Sender, StateValue } from 'xstate';
 
 /**
  * Internal dependencies
@@ -13,6 +13,7 @@ export type CustomizeStoreComponent = ( props: {
 	parentMachine: AnyInterpreter;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 	context: customizeStoreStateMachineContext;
+	currentState: StateValue;
 } ) => React.ReactElement | null;
 
 export type CustomizeStoreComponentMeta = {

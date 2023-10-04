@@ -353,6 +353,7 @@ export const CustomizeStoreController = ( {
 						parentMachine={ service }
 						sendEvent={ send }
 						context={ state.context }
+						currentState={ state.value }
 					/>
 				) : (
 					<div />

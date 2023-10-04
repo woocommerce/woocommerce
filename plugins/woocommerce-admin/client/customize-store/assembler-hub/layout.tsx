@@ -34,7 +34,6 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
-import { getPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -77,12 +76,11 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const { sendEvent } = useContext( CustomizeStoreContext );
-	const isTransitional = getPath() === '/customize-store/transitional';
+	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
 
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
-	if ( isTransitional ) {
+	if ( currentState === 'transitionalScreen' ) {
 		return (
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
