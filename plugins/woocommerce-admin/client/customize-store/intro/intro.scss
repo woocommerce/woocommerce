@@ -113,6 +113,13 @@
 		background-position-y: 29px;
 	}
 
+	&.existing-ai-theme-banner {
+		background: rgba(246, 247, 247, 1) url(../assets/images/intro-banner-existing-ai.svg) no-repeat center right;
+		background-size: auto 218px;
+		background-position-y: 29px;
+		background-position-x: 91%;
+	}
+
 	.woocommerce-customize-store-banner-content {
 		width: 375px;
 		margin-left: 50px;
@@ -121,6 +128,10 @@
 			color: #3858e9;
 			text-decoration: none;
 			font-weight: 500;
+		}
+
+		button.components-button + button.components-button { // add left margin for all buttons with another button to its left
+			margin-left: 12px;
 		}
 
 		h1 {
@@ -236,7 +247,6 @@
 		text-decoration: none !important;
 	}
 	h1 {
-		width: 320px;
 		line-height: 28px;
 		font-size: 20px;
 		color: #1e1e1e;

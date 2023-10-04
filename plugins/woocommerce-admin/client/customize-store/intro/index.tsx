@@ -16,7 +16,11 @@ import {
 import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
-import { DesignChangeWarningModal } from './design-change-warning-modal';
+import {
+	DesignChangeWarningModal,
+	StartNewDesignWarningModal,
+	StartOverWarningModal,
+} from './warning-modals';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
 import {
@@ -24,6 +28,8 @@ import {
 	ThemeHasModsBanner,
 	JetpackOfflineBanner,
 	DefaultBanner,
+	ExistingAiThemeBanner,
+	ExistingThemeBanner,
 } from './intro-banners';
 
 export type events =
@@ -43,22 +49,28 @@ const BANNER_COMPONENTS = {
 	'network-offline': NetworkOfflineBanner,
 	'task-incomplete-active-theme-has-mods': ThemeHasModsBanner,
 	'jetpack-offline': JetpackOfflineBanner,
-	'existing-ai-theme': DefaultBanner,
+	'existing-ai-theme': ExistingAiThemeBanner,
+	'existing-theme': ExistingThemeBanner,
 	default: DefaultBanner,
 };
 
 const MODAL_COMPONENTS = {
 	'no-modal': null,
 	'task-incomplete-override-design-changes': DesignChangeWarningModal,
-	'task-complete-with-ai-theme': null,
-	'task-complete-without-ai-theme': null,
+	'task-complete-with-ai-theme': StartOverWarningModal,
+	'task-complete-without-ai-theme': StartNewDesignWarningModal,
 };
 
 type ModalStatus = keyof typeof MODAL_COMPONENTS;
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeData, activeThemeHasMods, customizeStoreTaskCompleted },
+		intro: {
+			themeCards,
+			activeThemeHasMods,
+			customizeStoreTaskCompleted,
+			currentThemeIsAiGenerated,
+		},
 	} = context;
 
 	const isJetpackOffline = false;
@@ -78,11 +90,14 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
 			break;
-		case activeThemeHasMods && ! customizeStoreTaskCompleted:
+		case ! customizeStoreTaskCompleted && activeThemeHasMods:
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
 			break;
-		case context.intro.currentThemeIsAiGenerated:
+		case customizeStoreTaskCompleted && currentThemeIsAiGenerated:
 			bannerStatus = 'existing-ai-theme';
+			break;
+		case customizeStoreTaskCompleted && ! currentThemeIsAiGenerated:
+			bannerStatus = 'existing-theme';
 			break;
 	}
 
@@ -92,6 +107,12 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case bannerStatus === 'task-incomplete-active-theme-has-mods':
 			modalStatus = 'task-incomplete-override-design-changes';
+			break;
+		case bannerStatus === 'existing-ai-theme':
+			modalStatus = 'task-complete-with-ai-theme';
+			break;
+		case bannerStatus === 'existing-theme':
+			modalStatus = 'task-complete-without-ai-theme';
 			break;
 	}
 
@@ -103,7 +124,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		<>
 			{ ModalComponent && (
 				<ModalComponent
-					isOpen={ openDesignChangeWarningModal }
 					sendEvent={ sendEvent }
 					setOpenDesignChangeWarningModal={
 						setOpenDesignChangeWarningModal
