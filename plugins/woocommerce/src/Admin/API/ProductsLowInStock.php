@@ -69,13 +69,14 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	}
 
 	public function get_low_in_stock_count( $request ) {
-		global $wpdb;
 		$status              = $request->get_param( 'status' );
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
 		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
 
-		$count_query = $this->get_base_query()->where( 'wp_posts.post_status', '=', $status );
+		$count_query = $this->get_base_query()
+		                    ->where( 'wp_posts.post_status', '=', $status )
+							->where('wc_product_meta_lookup.stock_quantity', '<=', $low_stock_threshold);
 
 		if ( ! $sidewide_stock_threshold_only ) {
 			$count_query = $this->add_sitewide_stock_query( $count_query, $low_stock_threshold );
