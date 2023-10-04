@@ -64,6 +64,10 @@ const injectNotice = ( domNode: Element, errorMessage: string ) => {
 	} );
 };
 
+// RequestIdleCallback is not available in Safari, so we use setTimeout as an alternative.
+const callIdleCallback =
+	window.requestIdleCallback || ( ( cb ) => setTimeout( cb, 100 ) );
+
 const getProductById = ( cartState: Cart | undefined, productId: number ) => {
 	return cartState?.items.find( ( item ) => item.id === productId );
 };
@@ -286,7 +290,7 @@ interactivityStore(
 
 			// This selector triggers a fetch of the Cart data. It is done in a
 			// `requestIdleCallback` to avoid potential performance issues.
-			requestIdleCallback( () => {
+			callIdleCallback( () => {
 				if ( ! selectors.woocommerce.hasCartLoaded( store ) ) {
 					select( storeKey ).getCartData();
 				}
