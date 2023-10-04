@@ -122,6 +122,18 @@ export class ProductGalleryPage {
 		return this.editorUtils.getBlockByName( blockName );
 	}
 
+	async getPagerBlock( { page }: { page: 'frontend' | 'editor' } ) {
+		const blockName = 'woocommerce/product-gallery-pager';
+		if ( page === 'frontend' ) {
+			return (
+				await this.frontendUtils.getBlockByName( blockName )
+			 ).filter( {
+				has: this.page.locator( ':visible' ),
+			} );
+		}
+		return this.editorUtils.getBlockByName( blockName );
+	}
+
 	async getBlock( { page }: { page: 'frontend' | 'editor' } ) {
 		const blockName = 'woocommerce/product-gallery';
 		if ( page === 'frontend' ) {

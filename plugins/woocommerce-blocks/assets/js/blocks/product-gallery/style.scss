@@ -186,13 +186,13 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	padding: 0;
 }
 
-.wc-block-product-gallery-pager__item {
+.wc-block-product-gallery-pager__pager-item {
 	@include font-size(regular);
 	color: $gray-600;
 	cursor: pointer;
 }
 
-.wc-block-woocommerce-product-gallery__pager-item--is-active {
+.wc-block-product-gallery-pager__pager-item--is-active {
 	font-weight: bold;
 	color: $black;
 }
