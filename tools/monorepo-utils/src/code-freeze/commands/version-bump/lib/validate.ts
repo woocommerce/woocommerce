@@ -18,7 +18,7 @@ import { Options } from '../types';
  * @return {boolean} True if the version corresponds with an accel release, otherwise false
  */
 export const getIsAccelRelease = ( version: string ): boolean => {
-	const isAccelRelease = version.match( /^(?:\d+\.){3}\d+(?:\.\d+)?$/ );
+	const isAccelRelease = version.match( /^(?:\d+\.){3}\d+?$/ );
 	return isAccelRelease !== null;
 };
 
