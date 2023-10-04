@@ -324,6 +324,22 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( false );
 	} );
 
+	it( 'should evaluate a conditional expression that is true', () => {
+		const result = evaluate( 'foo ? "bar" : "baz"', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( 'bar' );
+	} );
+
+	it( 'should evaluate a conditional expression that is false', () => {
+		const result = evaluate( 'foo ? "bar" : "baz"', {
+			foo: false,
+		} );
+
+		expect( result ).toEqual( 'baz' );
+	} );
+
 	it( 'should evaluate a logical OR expression', () => {
 		const result = evaluate( 'foo || bar', {
 			foo: true,
@@ -387,6 +403,25 @@ describe( 'evaluate', () => {
 		);
 
 		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a complex expression with conditional, arithmetic, relational, and logical operators', () => {
+		const result = evaluate(
+			`foo.bar
+			&& ( foo.baz === "qux" || foo.baz === "quux" )
+			&& ( foo.quux > 1 && foo.quux <= 5 )
+			? "boo"
+			: "baa"`,
+			{
+				foo: {
+					bar: true,
+					baz: 'quux',
+					quux: 10,
+				},
+			}
+		);
+
+		expect( result ).toEqual( 'baa' );
 	} );
 
 	it( 'should evaluate an expression with needless parentheses', () => {

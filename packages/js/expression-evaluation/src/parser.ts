@@ -383,8 +383,14 @@ LogicalOrExpression
 LogicalOrOperator
 	= "||"
 
+ConditionalExpression
+	= test:LogicalOrExpression __ "?" __ consequent:ConditionalExpression __ ":" __ alternate:ConditionalExpression {
+		return test ? consequent : alternate;
+	}
+	/ LogicalOrExpression
+
 Expression
-	= __ expression:LogicalOrExpression __ {
+	= __ expression:ConditionalExpression __ {
 		return expression;
 	}
 `;
