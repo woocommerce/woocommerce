@@ -134,6 +134,38 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( 'baz' );
 	} );
 
+	it( 'should evaluate a less than or equal expression', () => {
+		const result = evaluate( 'foo <= 1', {
+			foo: 1,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a less than expression', () => {
+		const result = evaluate( 'foo < 1', {
+			foo: 1,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a greater than or equal expression', () => {
+		const result = evaluate( 'foo >= 1', {
+			foo: 1,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a greater than expression', () => {
+		const result = evaluate( 'foo > 1', {
+			foo: 1,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
 	it( 'should evaluate an strict equality expression', () => {
 		const result = evaluate( 'foo === "bar"', {
 			foo: 'bar',

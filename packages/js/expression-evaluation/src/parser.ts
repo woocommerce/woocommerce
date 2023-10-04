@@ -46,6 +46,18 @@ const grammar = `
 				case '!=':
 					return leftOperand != rightOperand;
 					break;
+				case '<=':
+					return leftOperand <= rightOperand;
+					break;
+				case '<':
+					return leftOperand < rightOperand;
+					break;
+				case '>=':
+					return leftOperand >= rightOperand;
+					break;
+				case '>':
+					return leftOperand > rightOperand;
+					break;
 				default:
 					return undefined;
 					break;
@@ -294,7 +306,15 @@ UnaryOperator
 	/ "+"
 
 RelationalExpression
-	= UnaryExpression
+	= head:UnaryExpression tail:(__ RelationalOperator __ UnaryExpression)* {
+		return evaluateBinaryExpression( head, tail );
+	}
+
+RelationalOperator
+	= "<="
+	/ "<"
+	/ ">="
+	/ ">"
 
 EqualityExpression
 	= head:RelationalExpression tail:(__ EqualityOperator __ RelationalExpression)* {
