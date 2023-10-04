@@ -116,7 +116,7 @@ class Patterns extends AbstractRoute {
 
 		if ( ! isset( $response ) ) {
 			$response = $this->prepare_item_for_response(
-				(object) [
+				[
 					'ai_content_generated' => true,
 				],
 				$request
