@@ -29,7 +29,6 @@ import {
 	JetpackAlreadyInstalledPage,
 } from './pages';
 import './style.scss';
-import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
