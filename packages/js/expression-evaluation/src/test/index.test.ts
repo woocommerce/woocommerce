@@ -232,6 +232,14 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( true );
 	} );
 
+	it( 'should evaluate a NOT expression with parentheses', () => {
+		const result = evaluate( '!( foo )', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
 	it( 'should evaluate a multiline expression', () => {
 		const result = evaluate(
 			`foo
@@ -262,7 +270,7 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( true );
 	} );
 
-	it( 'should evaluate an expression with too many parentheses', () => {
+	it( 'should evaluate an expression with needless parentheses', () => {
 		const result = evaluate( '(((foo)))', {
 			foo: true,
 		} );
