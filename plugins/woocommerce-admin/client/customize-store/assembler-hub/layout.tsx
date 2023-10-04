@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -47,6 +47,7 @@ import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
+import { CustomizeStoreContext } from './';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -76,6 +77,7 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
+	const { sendEvent } = useContext( CustomizeStoreContext );
 	const isTransitional = getPath() === '/customize-store/transitional';
 
 	const editor = <Editor isLoading={ isEditorLoading } />;
@@ -88,7 +90,7 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional editor={ editor } />
+					<Transitional sendEvent={ sendEvent } editor={ editor } />
 				</EntityProvider>
 			</EntityProvider>
 		);

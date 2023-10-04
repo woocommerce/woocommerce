@@ -3,7 +3,6 @@
 /**
  * External dependencies
  */
-import { useContext } from '@wordpress/element';
 import classNames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
@@ -21,15 +20,19 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  * Internal dependencies
  */
 import { SiteHub } from '../assembler-hub/site-hub';
-import { CustomizeStoreContext } from '../assembler-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
 
-export const Transitional = ( { editor }: { editor: React.ReactNode } ) => {
-	const { sendEvent } = useContext( CustomizeStoreContext );
+export const Transitional = ( {
+	editor,
+	sendEvent,
+}: {
+	editor: React.ReactNode;
+	sendEvent: ( event: events ) => void;
+} ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const isEditorLoading = useIsSiteEditorLoading();
 

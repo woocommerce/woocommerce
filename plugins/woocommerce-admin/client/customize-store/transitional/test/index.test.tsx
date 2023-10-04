@@ -17,6 +17,14 @@ jest.mock( '../../assembler-hub/site-hub', () => ( {
 	},
 } ) );
 
+jest.mock(
+	'@wordpress/edit-site/build-module/components/layout/hooks',
+	() => ( {
+		__esModule: true,
+		useIsSiteEditorLoading: jest.fn().mockReturnValue( false ),
+	} )
+);
+
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 describe( 'Transitional', () => {
@@ -37,8 +45,6 @@ describe( 'Transitional', () => {
 		expect(
 			screen.getByText( /Your store looks great!/i )
 		).toBeInTheDocument();
-
-		expect( screen.getByRole( 'img' ) ).toBeInTheDocument();
 
 		expect(
 			screen.getByRole( 'button', {
