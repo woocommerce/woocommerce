@@ -28,7 +28,7 @@ describe( 'useProductEntityProp', () => {
 	} );
 	it( 'should correctly set meta_data property with key and value properties', async () => {
 		const [ email, setEmail ] = renderHook( () =>
-			useProductEntityProp( 'meta_data.email' )
+			useProductEntityProp( 'meta_data.email', '' )
 		).result.current;
 		expect( email ).toBe( '' );
 		setEmail( 'someone@wordpress.com' );
@@ -41,7 +41,7 @@ describe( 'useProductEntityProp', () => {
 	} );
 	it( 'should call useEntityProp function passing the new value', async () => {
 		const [ value, setValue ] = renderHook( () =>
-			useProductEntityProp( 'regular_prop' )
+			useProductEntityProp( 'regular_prop', '' )
 		).result.current;
 		expect( value ).toBe( '' );
 		setValue( 'someone@wordpress.com' );
