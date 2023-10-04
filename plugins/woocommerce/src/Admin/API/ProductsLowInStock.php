@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Database\QueryManager;
+use Illuminate\Database\Query\Builder;
+
 /**
  * ProductsLowInStock controller.
  *
@@ -17,12 +20,18 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
+	private QueryManager $queryBuilder;
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
 	protected $namespace = 'wc-analytics';
+
+	public function __construct() {
+		parent::__construct();
+		$this->queryBuilder = QueryManager::instance();
+	}
 
 	/**
 	 * Register routes.
@@ -220,8 +229,10 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 */
 	protected function is_using_sitewide_stock_threshold_only() {
 		global $wpdb;
-		$count = $wpdb->get_var( "select count(*) as total from {$wpdb->postmeta} where meta_key='_low_stock_amount'" );
-		return 0 === (int) $count;
+		return 0 === (int) $this->queryBuilder
+		                               ->table( $wpdb->postmeta )
+		                               ->where( 'meta_key', '_low_stock_amount' )
+		                               ->count();
 	}
 
 	/**
@@ -264,33 +275,23 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 *
 	 * @param $replacements array of replacement strings.
 	 *
-	 * @return string
+	 * @return Builder
 	 */
-	private function get_base_query( $replacements = array() ) {
+	private function get_base_query() {
 		global $wpdb;
-		$query = "
-			SELECT
-				:selects
-			FROM
-			  {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
-			  LEFT JOIN {$wpdb->posts} wp_posts ON wp_posts.ID = wc_product_meta_lookup.product_id
-			  :postmeta_join
-			WHERE
-			  wp_posts.post_type IN ('product', 'product_variation')
-			  AND wp_posts.post_status = %s
-			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL
-			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock')
-			  :postmeta_wheres
-			  :orderAndLimit
-		";
-
-		return strtr( $query, $replacements );
+		$query = $this->queryBuilder->table( $wpdb->wc_product_meta_lookup . ' as wc_product_meta_lookup' )
+			->join($wpdb->posts . ' as wp_posts', 'wp_posts.ID', '=', 'wc_product_meta_lookup.product_id' )
+			->where( 'wp_posts.post_type', 'IN', array( 'product', 'product_variation' ) )
+//			->where( 'wp_posts.post_status', '=', '%s' )
+			->where( 'wc_product_meta_lookup.stock_quantity', 'IS NOT', null )
+			->where( 'wc_product_meta_lookup.stock_status', 'IN', array( 'instock', 'outofstock' ) )
+		return $query;
 	}
 
 	/**
 	 * Add sitewide stock query string to base query string.
 	 *
-	 * @param $query string Base query string
+	 * @param $query Builder Base query string
 	 *
 	 * @return string
 	 */
@@ -335,6 +336,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return string
 	 */
 	protected function get_query( $sitewide_only = false ) {
+
 		$query = $this->get_base_query(
 			array(
 				':selects'       => 'wp_posts.*, :postmeta_select wc_product_meta_lookup.stock_quantity',
@@ -370,6 +372,8 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 				':orderAndLimit' => '',
 			)
 		);
+
+		$query = $this->get_base_query();
 
 		if ( ! $sitewide_only ) {
 			return $this->add_sitewide_stock_query_str( $query );
