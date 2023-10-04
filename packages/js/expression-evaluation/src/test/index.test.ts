@@ -1,0 +1,221 @@
+/**
+ * Internal dependencies
+ */
+
+import { evaluate } from '../';
+
+describe( 'evaluate', () => {
+	it( 'should evaluate a null literal', () => {
+		const result = evaluate( 'null' );
+
+		expect( result ).toEqual( null );
+	} );
+
+	it( 'should evaluate a boolean true literal', () => {
+		const result = evaluate( 'true' );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a boolean false literal', () => {
+		const result = evaluate( 'false' );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a numeric integer literal', () => {
+		const result = evaluate( '23' );
+
+		expect( result ).toEqual( 23 );
+	} );
+
+	it( 'should evaluate a signed negative integer literal', () => {
+		const result = evaluate( '-1' );
+
+		expect( result ).toEqual( -1 );
+	} );
+
+	it( 'should evaluate a signed positive integer literal', () => {
+		const result = evaluate( '+1' );
+
+		expect( result ).toEqual( 1 );
+	} );
+
+	it( 'should evaluate a numeric floating point literal', () => {
+		const result = evaluate( '5.23' );
+
+		expect( result ).toEqual( 5.23 );
+	} );
+
+	it( 'should evaluate a signed negative floating point literal', () => {
+		const result = evaluate( '-9.95' );
+
+		expect( result ).toEqual( -9.95 );
+	} );
+
+	it( 'should evaluate a signed positive floating point literal', () => {
+		const result = evaluate( '+9.95' );
+
+		expect( result ).toEqual( 9.95 );
+	} );
+
+	it( 'should evaluate a numeric hexadecimal literal', () => {
+		const result = evaluate( '0x23' );
+
+		expect( result ).toEqual( 35 );
+	} );
+
+	it( 'should evaluate a string literal with double quotes', () => {
+		const result = evaluate( '"foo"' );
+
+		expect( result ).toEqual( 'foo' );
+	} );
+
+	it( 'should evaluate a string literal with double quotes and single quotes', () => {
+		const result = evaluate( '"foo \'bar\'"' );
+
+		expect( result ).toEqual( "foo 'bar'" );
+	} );
+
+	it( 'should evaluate a string literal with double quotes and escaped double quotes', () => {
+		const result = evaluate( '"foo \\"bar\\""' );
+
+		expect( result ).toEqual( 'foo "bar"' );
+	} );
+
+	it( 'should evaluate a string literal with double quotes and escaped backslashes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = evaluate( '"foo \\\\\\"bar\\\\\\""' );
+
+		expect( result ).toEqual( 'foo \\"bar\\"' );
+	} );
+
+	it( 'should evaluate a string literal with single quotes', () => {
+		const result = evaluate( "'foo'" );
+
+		expect( result ).toEqual( 'foo' );
+	} );
+
+	it( 'should evaluate a string literal with single quotes and double quotes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = evaluate( "'foo \"bar\"'" );
+
+		expect( result ).toEqual( 'foo "bar"' );
+	} );
+
+	it( 'should evaluate a string literal with single quotes and escaped single quotes', () => {
+		const result = evaluate( "'foo \\'bar\\''" );
+
+		expect( result ).toEqual( "foo 'bar'" );
+	} );
+
+	it( 'should evaluate a string literal with single quotes and escaped backslashes', () => {
+		// eslint-disable-next-line prettier/prettier
+		const result = evaluate( "'foo \\\\\\'bar\\\\\\''" );
+
+		expect( result ).toEqual( "foo \\'bar\\'" );
+	} );
+
+	it( 'should evaluate a top-level context property', () => {
+		const result = evaluate( 'foo', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( 'bar' );
+	} );
+
+	it( 'should evaluate a nested context property', () => {
+		const result = evaluate( 'foo.bar', {
+			foo: {
+				bar: 'baz',
+			},
+		} );
+
+		expect( result ).toEqual( 'baz' );
+	} );
+
+	it( 'should evaluate an strict equality expression', () => {
+		const result = evaluate( 'foo === "bar"', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate an strict inequality expression', () => {
+		const result = evaluate( 'foo !== "bar"', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate an equality expression', () => {
+		const result = evaluate( 'foo == "bar"', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate an inequality expression', () => {
+		const result = evaluate( 'foo != "bar"', {
+			foo: 'bar',
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a logical OR expression', () => {
+		const result = evaluate( 'foo || bar', {
+			foo: true,
+			bar: false,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a logical AND expression', () => {
+		const result = evaluate( 'foo && bar', {
+			foo: true,
+			bar: false,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a NOT expression', () => {
+		const result = evaluate( '!foo', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( false );
+	} );
+
+	it( 'should evaluate a double NOT expression', () => {
+		const result = evaluate( '!!foo', {
+			foo: true,
+		} );
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should evaluate a multiline expression', () => {
+		const result = evaluate(
+			`foo
+			|| bar
+			|| baz`,
+			{
+				foo: false,
+				bar: false,
+				baz: true,
+			}
+		);
+
+		expect( result ).toEqual( true );
+	} );
+
+	it( 'should throw an error if the expression is invalid', () => {
+		expect( () => evaluate( '= 1' ) ).toThrow();
+	} );
+} );
