@@ -32,11 +32,10 @@ import {
  * Internal dependencies
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+import { ProductEditorContext } from '../../types';
 
 type BlockEditorProps = {
-	context: {
-		[ key: string ]: unknown;
-	};
+	context: Partial< ProductEditorContext >;
 	product: Partial< Product >;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
@@ -94,13 +93,21 @@ export function BlockEditor( {
 		);
 	}, [ product.id ] );
 
+	const editedProduct: Product = useSelect( ( select ) =>
+		select( 'core' ).getEditedEntityRecord(
+			'postType',
+			'product',
+			product.id
+		)
+	);
+
 	if ( ! blocks ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
+			<BlockContextProvider value={ { ...context, editedProduct } }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

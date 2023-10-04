@@ -11,8 +11,11 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 /**
  * Internal dependencies
  */
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
 		...attributes,

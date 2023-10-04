@@ -11,7 +11,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
@@ -19,13 +19,12 @@ import {
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
-import { FontFamiliesLoader, FontFamily } from './font-families-loader';
+import { FontFamily } from './font-families-loader';
 import {
 	FONT_PREVIEW_LARGE_WIDTH,
 	FONT_PREVIEW_LARGE_HEIGHT,
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
-	SYSTEM_FONT_SLUG,
 } from './constants';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
@@ -75,10 +74,6 @@ export const FontPairingVariationPreview = () => {
 		: FONT_PREVIEW_HEIGHT;
 	const ratio = width ? width / defaultWidth : 1;
 	const normalizedHeight = Math.ceil( defaultHeight * ratio );
-	const externalFontFamilies = fontFamilies.filter(
-		( { slug } ) => slug !== SYSTEM_FONT_SLUG
-	);
-	const [ isLoaded, setIsLoaded ] = useState( ! externalFontFamilies.length );
 	const getFontFamilyName = ( targetFontFamily: string ) => {
 		const fontFamily = fontFamilies.find(
 			( { fontFamily: _fontFamily } ) => _fontFamily === targetFontFamily
@@ -95,8 +90,6 @@ export const FontPairingVariationPreview = () => {
 		() => getFontFamilyName( headingFontFamily ),
 		[ headingFontFamily, fontFamilies ]
 	);
-
-	const handleOnLoad = () => setIsLoaded( true );
 
 	return (
 		<GlobalStylesVariationIframe
@@ -118,7 +111,7 @@ export const FontPairingVariationPreview = () => {
 						style={ {
 							height: '100%',
 							overflow: 'hidden',
-							opacity: isLoaded ? 1 : 0,
+							opacity: 1,
 						} }
 					>
 						<HStack
@@ -166,10 +159,6 @@ export const FontPairingVariationPreview = () => {
 						</HStack>
 					</div>
 				</div>
-				<FontFamiliesLoader
-					fontFamilies={ externalFontFamilies }
-					onLoad={ handleOnLoad }
-				/>
 			</>
 		</GlobalStylesVariationIframe>
 	);

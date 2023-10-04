@@ -48,11 +48,7 @@ export const SidebarNavigationScreenPages = () => {
 					),
 				}
 			) }
-			content={
-				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header"></div>
-				</>
-			}
+			content={ <></> }
 		/>
 	);
 };

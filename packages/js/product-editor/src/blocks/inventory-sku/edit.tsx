@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
+import { BlockAttributes } from '@wordpress/blocks';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
@@ -19,8 +19,15 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ProductEditorBlockEditProps } from '../../types';
 
-export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
+/**
+ * Internal dependencies
+ */
+
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );

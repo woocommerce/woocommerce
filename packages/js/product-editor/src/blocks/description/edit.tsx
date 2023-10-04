@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
 import {
-	BlockEditProps,
 	BlockAttributes,
 	BlockInstance,
 	parse,
@@ -20,6 +19,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { ContentPreview } from '../../components/content-preview';
 import { ModalEditor } from '../../components/modal-editor';
+import { ProductEditorBlockEditProps } from '../../types';
 
 /**
  * Internal dependencies
@@ -45,7 +45,9 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 	return blocks;
 }
 
-export function Edit( { attributes }: BlockEditProps< BlockAttributes > ) {
+export function Edit( {
+	attributes,
+}: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ description, setDescription ] = useEntityProp< string >(

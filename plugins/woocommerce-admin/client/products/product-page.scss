@@ -67,8 +67,10 @@ html.interface-interface-skeleton__html-container {
 	}
 }
 
-div#wpwrap {
-	.woocommerce-product-block-editor {
-		background-color: $white;
+body {
+	background-color: $white;
+
+	&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
+		min-height: calc(100vh - 96px);
 	}
 }

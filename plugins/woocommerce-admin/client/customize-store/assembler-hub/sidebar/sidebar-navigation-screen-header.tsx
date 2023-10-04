@@ -23,9 +23,11 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../hooks/use-patterns';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { findPatternByBlock } from './utils';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
@@ -45,6 +47,8 @@ export const SidebarNavigationScreenHeader = () => {
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
 		setHighlightedBlockIndex( 0 );
@@ -64,13 +68,27 @@ export const SidebarNavigationScreenHeader = () => {
 		[ patterns ]
 	);
 
+	useEffect( () => {
+		if ( selectedPattern || ! blocks.length || ! headerPatterns.length ) {
+			return;
+		}
+
+		const currentSelectedPattern = findPatternByBlock(
+			headerPatterns,
+			blocks[ 0 ]
+		);
+		setSelectedPattern( currentSelectedPattern );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, headerPatterns ] );
+
 	const onClickHeaderPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern ]
 	);
 
 	return (
@@ -105,7 +123,7 @@ export const SidebarNavigationScreenHeader = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
+					<div className="woocommerce-customize-store__sidebar-header-content">
 						{ isLoading && (
 							<span className="components-placeholder__preview">
 								<Spinner />

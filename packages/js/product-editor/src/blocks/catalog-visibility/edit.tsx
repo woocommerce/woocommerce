@@ -11,12 +11,11 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import { CatalogVisibilityBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../types';
 
 export function Edit( {
 	attributes,
-}: {
-	attributes: CatalogVisibilityBlockAttributes;
-} ) {
+}: ProductEditorBlockEditProps< CatalogVisibilityBlockAttributes > ) {
 	const { label, visibility } = attributes;
 
 	const blockProps = useWooBlockProps( attributes );

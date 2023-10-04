@@ -22,6 +22,7 @@ import { useSelect } from '@wordpress/data';
 import { CreateTaxonomyModal } from './create-taxonomy-modal';
 import { Taxonomy, TaxonomyMetadata } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
+import { ProductEditorBlockEditProps } from '../../types';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
@@ -34,9 +35,7 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 
 export function Edit( {
 	attributes,
-}: {
-	attributes: TaxonomyBlockAttributes;
-} ) {
+}: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
