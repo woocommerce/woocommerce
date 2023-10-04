@@ -82,9 +82,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 							link: (
 								<Link
 									href="https://wordpress.com/tos/"
-									target="_blank"
 									type="external"
-									rel="noreferrer"
 								/>
 							),
 						},

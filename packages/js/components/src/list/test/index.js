@@ -86,12 +86,14 @@ describe( 'List', () => {
 					.dataset.linkType
 			).toBe( 'wc-admin' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } )
-					.dataset.linkType
+				screen.getByRole( 'menuitem', {
+					name: 'WooCommerce.com (opens in a new tab)',
+				} ).dataset.linkType
 			).toBe( 'external' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
-					.dataset.linkType
+				screen.getByRole( 'menuitem', {
+					name: 'WordPress.org (opens in a new tab)',
+				} ).dataset.linkType
 			).toBe( 'external' );
 		} );
 
@@ -132,12 +134,14 @@ describe( 'List', () => {
 					.dataset.listItemTag
 			).toBe( 'marketing' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } )
-					.dataset.listItemTag
+				screen.getByRole( 'menuitem', {
+					name: 'WooCommerce.com (opens in a new tab)',
+				} ).dataset.listItemTag
 			).toBe( 'woocommerce.com-site' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
-					.dataset.listItemTag
+				screen.getByRole( 'menuitem', {
+					name: 'WordPress.org (opens in a new tab)',
+				} ).dataset.listItemTag
 			).toBeUndefined();
 		} );
 	} );

@@ -39,20 +39,12 @@ export const WCPayBannerText: React.VFC< {
 } > = ( { actionButton, isWooPayEligible } ) => {
 	const links = {
 		tosLink: (
-			<Link
-				href="https://wordpress.com/tos/"
-				type="external"
-				target="_blank"
-			>
+			<Link href="https://wordpress.com/tos/" type="external">
 				<></>
 			</Link>
 		),
 		privacyLink: (
-			<Link
-				href="https://automattic.com/privacy/"
-				type="external"
-				target="_blank"
-			>
+			<Link href="https://automattic.com/privacy/" type="external">
 				<></>
 			</Link>
 		),
@@ -60,7 +52,6 @@ export const WCPayBannerText: React.VFC< {
 			<Link
 				href="https://wordpress.com/tos/#more-woopay-specifically"
 				type="external"
-				target="_blank"
 			>
 				<></>
 			</Link>

@@ -34,7 +34,6 @@ const page = {
 						<Link
 							href="https://wordpress.com/support/new-woocommerce-experience-on-wordpress-dot-com/"
 							type="external"
-							target="_blank"
 						/>
 					),
 				},

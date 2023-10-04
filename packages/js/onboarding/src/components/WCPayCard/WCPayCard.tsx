@@ -51,9 +51,7 @@ export const WCPayCardBody: React.VFC< WCPayCardBodyProps > = ( {
 			{ description }
 			<br />
 			<Link
-				target="_blank"
 				type="external"
-				rel="noreferrer"
 				href="https://woocommerce.com/payments/?utm_medium=product"
 				onClick={ onLinkClick }
 			>
