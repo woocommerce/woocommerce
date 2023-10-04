@@ -15,14 +15,12 @@ import { Options } from '../types';
  * Determine whether a version is an accel release.
  *
  * @param {string} version Version number
- * @return {bool} True if the version corresponds with an accel release, otherwise false
+ * @return {boolean} True if the version corresponds with an accel release, otherwise false
  */
-export const getIsAccelRelease = (
-	version: string
-): boolean => {
+export const getIsAccelRelease = ( version: string ): boolean => {
 	const isAccelRelease = version.match( /^(?:\d+\.){3}\d+(?:\.\d+)?$/ );
 	return isAccelRelease !== null;
-}
+};
 
 /**
  * Get a plugin's current version.
@@ -73,7 +71,8 @@ export const validateArgs = async (
 ): Promise< void > => {
 	const { allowAccel, base, force } = options;
 	const nextVersion = version;
-	const isAllowedAccelRelease = allowAccel && getIsAccelRelease( nextVersion );
+	const isAllowedAccelRelease =
+		allowAccel && getIsAccelRelease( nextVersion );
 
 	if ( isAllowedAccelRelease ) {
 		if ( base === 'trunk' ) {

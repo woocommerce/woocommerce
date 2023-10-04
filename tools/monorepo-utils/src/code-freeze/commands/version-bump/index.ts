@@ -88,8 +88,10 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
-		
-		const majorMinor = getIsAccelRelease( version ) ? version : getMajorMinor( version );
+
+		const majorMinor = getIsAccelRelease( version )
+			? version
+			: getMajorMinor( version );
 		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 
 		try {
