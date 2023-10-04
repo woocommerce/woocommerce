@@ -12,7 +12,6 @@ import {
 import '@woocommerce/settings';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { __experimentalSelectTreeControl as SelectTreeControl } from '@woocommerce/components';
-import { useEntityProp } from '@wordpress/core-data';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 
@@ -23,6 +22,7 @@ import { CreateTaxonomyModal } from './create-taxonomy-modal';
 import { Taxonomy, TaxonomyMetadata } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
 import { ProductEditorBlockEditProps } from '../../../types';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
@@ -72,11 +72,9 @@ export function Edit( {
 		searchDelayed( '' );
 	}, [] );
 
-	const [ selectedEntries, setSelectedEntries ] = useEntityProp< Taxonomy[] >(
-		'postType',
-		'product',
-		property
-	);
+	const [ selectedEntries, setSelectedEntries ] = useProductEntityProp<
+		Taxonomy[]
+	>( property, [] );
 
 	const mappedEntries = selectedEntries.map( ( b ) => ( {
 		value: String( b.id ),
