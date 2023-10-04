@@ -8,6 +8,7 @@ import { join } from 'path';
  * Internal dependencies
  */
 import { info } from './log';
+import { PluginConfig } from './types';
 
 const { writeFile } = promises;
 function getUniqueItems( arr: string[] ) {
@@ -19,7 +20,7 @@ function getUniqueItems( arr: string[] ) {
 	return Object.keys( uniqueObject );
 }
 
-const getPluginConfig = () => {
+function getPluginConfig(): Partial< PluginConfig > {
 	const cwd = join( process.cwd() );
 
 	if ( ! existsSync( join( cwd, '.woo-plugin.json' ) ) ) {
@@ -29,9 +30,9 @@ const getPluginConfig = () => {
 	return JSON.parse(
 		readFileSync( join( cwd, '.woo-plugin.json' ), 'utf8' )
 	);
-};
+}
 
-const updateConfig = async ( { modules }: { modules: string[] } ) => {
+const updateConfig = async ( { modules }: PluginConfig ) => {
 	const cwd = join( process.cwd() );
 	const config = getPluginConfig();
 

@@ -6,11 +6,16 @@ import CLIError from '@wordpress/create-block/lib/cli-error';
 import path from 'path';
 
 /**
+ * Internal dependencies
+ */
+import { PluginData } from './types';
+
+/**
  * Get the plugin data.
  *
  * @return {Object} - Plugin data as key value pairs.
  */
-export function getPluginData() {
+export function getPluginData(): PluginData {
 	const files = readdirSync( process.cwd() );
 	for ( let i = 0; i < files.length; i++ ) {
 		const file = path.join( process.cwd(), files[ i ] );

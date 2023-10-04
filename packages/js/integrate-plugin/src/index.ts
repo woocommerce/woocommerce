@@ -12,6 +12,8 @@ import CLIError from '@wordpress/create-block/lib/cli-error';
 import * as log from './log';
 import { getPluginData } from './get-plugin-data';
 import { getPluginConfig } from './get-plugin-config';
+import { OptionValues } from './types';
+import { scaffold } from './scaffold';
 
 //add the following line
 const program = new Command();
@@ -49,21 +51,62 @@ program
 		'the path to the src directory with client-side logic'
 	)
 	.option( '--namespace <value>', 'internal namespace for the plugin' )
-	.action( async () => {
-		try {
-			const pluginData = getPluginData();
-			const pluginConfig = getPluginConfig();
-			log.info( JSON.stringify( pluginData ) );
-			log.info( JSON.stringify( pluginConfig ) );
-		} catch ( error ) {
-			if ( error instanceof CLIError ) {
-				log.error( error.message );
-				process.exit( 1 );
-			} else {
-				throw error;
+	.action(
+		async ( {
+			wpScripts,
+			wpEnv,
+			template,
+			includesDir,
+			srcDir,
+			namespace,
+		}: OptionValues ) => {
+			try {
+				const optionsValues: Partial< OptionValues > =
+					Object.fromEntries(
+						Object.entries( {
+							includesDir,
+							namespace,
+							srcDir,
+							template,
+							wpEnv,
+							wpScripts,
+						} ).filter( ( [ , value ] ) => value !== undefined )
+					);
+
+				const defaultValues = {
+					$schema: 'https://schemas.wp.org/trunk/block.json',
+					apiVersion: 3,
+					wpScripts: true,
+					wpEnv: false,
+					namespace: 'create-block',
+					author: 'The WordPress Contributors',
+					license: 'GPL-2.0-or-later',
+					licenseURI: 'https://www.gnu.org/licenses/gpl-2.0.html',
+					npmDependencies: [],
+				};
+				const pluginData = getPluginData();
+				const pluginConfig = getPluginConfig();
+				log.info( JSON.stringify( pluginData ) );
+				log.info( JSON.stringify( pluginConfig ) );
+
+				const answers = {
+					...defaultValues,
+					...pluginData,
+					...pluginConfig,
+					...optionsValues,
+				};
+
+				await scaffold( answers );
+			} catch ( error ) {
+				if ( error instanceof CLIError ) {
+					log.error( error.message );
+					process.exit( 1 );
+				} else {
+					throw error;
+				}
 			}
 		}
-	} )
+	)
 	.on( '--help', () => {
 		log.info( '' );
 		log.info( 'Examples:' );
