@@ -7,7 +7,7 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './extensions.scss';
+import './themes.scss';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import CategorySelector from '../category-selector/category-selector';
 import ProductListContent from '../product-list-content/product-list-content';
@@ -16,32 +16,26 @@ import NoResults from '../product-list-content/no-results';
 import { Product, ProductType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
-interface ExtensionsProps {
+interface ThemeProps {
 	products?: Product[];
 	perPage?: number;
 }
 
-export default function Extensions( props: ExtensionsProps ): JSX.Element {
+export default function Themes( props: ThemeProps ): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading } = marketplaceContextValue;
-
 	const products =
 		props.products?.slice(
 			0,
 			props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE
 		) ?? [];
 
-	let title = __( '0 extensions found', 'woocommerce' );
+	let title = __( '0 themes found', 'woocommerce' );
 
 	if ( products.length > 0 ) {
 		title = sprintf(
-			// translators: %s: number of extensions
-			_n(
-				'%s extension',
-				'%s extensions',
-				products.length,
-				'woocommerce'
-			),
+			// translators: %s: number of themes
+			_n( '%s theme', '%s themes', products.length, 'woocommerce' ),
 			products.length
 		);
 	}
@@ -52,23 +46,23 @@ export default function Extensions( props: ExtensionsProps ): JSX.Element {
 		}
 
 		if ( products.length === 0 ) {
-			return <NoResults type={ ProductType.extension } />;
+			return <NoResults type={ ProductType.theme } />;
 		}
 
 		return (
 			<>
-				<CategorySelector type={ ProductType.extension } />
+				<CategorySelector type={ ProductType.theme } />
 				<ProductListContent
 					products={ products }
-					type={ ProductType.extension }
+					type={ ProductType.theme }
 				/>
 			</>
 		);
 	}
 
 	return (
-		<div className="woocommerce-marketplace__extensions">
-			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--extensions">
+		<div className="woocommerce-marketplace__themes">
+			<h2 className="woocommerce-marketplace__product-list-title  woocommerce-marketplace__product-list-title--themes">
 				{ title }
 			</h2>
 			{ content() }

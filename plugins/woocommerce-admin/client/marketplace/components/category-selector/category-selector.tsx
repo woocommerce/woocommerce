@@ -15,10 +15,20 @@ import CategoryDropdown from './category-dropdown';
 import { Category, CategoryAPIItem } from './types';
 import { fetchCategories } from '../../utils/functions';
 import './category-selector.scss';
+import { ProductType } from '../product-list/types';
 
-const ALL_CATEGORIES_SLUG = '_all';
+const ALL_CATEGORIES_SLUGS = {
+	[ ProductType.extension ]: '_all',
+	[ ProductType.theme ]: 'themes',
+};
 
-export default function CategorySelector(): JSX.Element {
+interface CategorySelectorProps {
+	type: ProductType;
+}
+
+export default function CategorySelector(
+	props: CategorySelectorProps
+): JSX.Element {
 	const [ visibleItems, setVisibleItems ] = useState< Category[] >( [] );
 	const [ dropdownItems, setDropdownItems ] = useState< Category[] >( [] );
 	const [ selected, setSelected ] = useState< Category >();
@@ -28,7 +38,7 @@ export default function CategorySelector(): JSX.Element {
 
 	useEffect( () => {
 		// If no category is selected, show All as selected
-		let categoryToSearch = ALL_CATEGORIES_SLUG;
+		let categoryToSearch = ALL_CATEGORIES_SLUGS[ props.type ];
 
 		if ( query.category ) {
 			categoryToSearch = query.category;
@@ -43,12 +53,12 @@ export default function CategorySelector(): JSX.Element {
 		if ( selectedCategory ) {
 			setSelected( selectedCategory );
 		}
-	}, [ query, visibleItems, dropdownItems ] );
+	}, [ query.category, props.type, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
 		setIsLoading( true );
 
-		fetchCategories()
+		fetchCategories( props.type )
 			.then( ( categoriesFromAPI: CategoryAPIItem[] ) => {
 				const categories: Category[] = categoriesFromAPI
 					.map( ( categoryAPIItem: CategoryAPIItem ): Category => {
@@ -76,7 +86,7 @@ export default function CategorySelector(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [] );
+	}, [ props.type ] );
 
 	function mobileCategoryDropdownLabel() {
 		const allCategoriesText = __( 'All Categories', 'woocommerce' );
