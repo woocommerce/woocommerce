@@ -10,13 +10,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { Transitional } from '../index';
 
-jest.mock( '../mshots-image', () => ( {
-	__esModule: true,
-	MShotsImage: () => {
-		return <img alt="preview-img" />;
-	},
-} ) );
-
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	__esModule: true,
 	SiteHub: () => {

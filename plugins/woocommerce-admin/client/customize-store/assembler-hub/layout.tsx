@@ -34,6 +34,7 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+import { getPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -45,6 +46,7 @@ import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
+import { Transitional } from '../transitional';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -73,6 +75,24 @@ export const Layout = () => {
 
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
+
+	const isTransitional = getPath() === '/customize-store/transitional';
+
+	const editor = <Editor isLoading={ isEditorLoading } />;
+
+	if ( isTransitional ) {
+		return (
+			<EntityProvider kind="root" type="site">
+				<EntityProvider
+					kind="postType"
+					type={ templateType }
+					id={ templateId }
+				>
+					<Transitional editor={ editor } />
+				</EntityProvider>
+			</EntityProvider>
+		);
+	}
 
 	return (
 		<LogoBlockContext.Provider
@@ -188,11 +208,7 @@ export const Layout = () => {
 																backgroundColor,
 														} }
 													>
-														<Editor
-															isLoading={
-																isEditorLoading
-															}
-														/>
+														{ editor }
 													</ResizableFrame>
 												</ErrorBoundary>
 											</motion.div>

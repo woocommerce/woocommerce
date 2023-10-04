@@ -116,6 +116,8 @@ export const BlockEditor = ( {} ) => {
 		[ history, urlParams, pages ]
 	);
 
+	const isTransitional = urlParams.path === '/customize-store/transitional';
+
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>
@@ -124,6 +126,7 @@ export const BlockEditor = ( {} ) => {
 					settings={ settings }
 					additionalStyles={ '' }
 					isNavigable={ false }
+					isScrollable={ ! isTransitional }
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
