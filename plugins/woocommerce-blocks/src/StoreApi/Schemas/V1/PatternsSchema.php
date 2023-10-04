@@ -31,12 +31,12 @@ class PatternsSchema extends AbstractSchema {
 	/**
 	 * Get the Patterns response.
 	 *
-	 * @param object $item Item to get response for.
+	 * @param array $item Item to get response for.
 	 *
-	 * @return object
+	 * @return array
 	 */
 	public function get_item_response( $item ) {
-		return (object) [
+		return [
 			'ai_content_generated' => true,
 		];
 	}
