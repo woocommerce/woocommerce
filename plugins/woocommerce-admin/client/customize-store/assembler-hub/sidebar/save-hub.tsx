@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -39,7 +39,6 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 ];
 
 export const SaveHub = () => {
-	const saveNoticeId = 'site-edit-save-notice';
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
@@ -49,7 +48,7 @@ export const SaveHub = () => {
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createErrorNotice, removeNotice } = useDispatch( noticesStore );
+	const { createErrorNotice } = useDispatch( noticesStore );
 
 	const {
 		dirtyEntityRecords,
@@ -90,61 +89,32 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	useEffect( () => {
-		dirtyEntityRecords.forEach( ( entity ) => {
-			/* This is a hack to reset the entity record when the user navigates away from editing page to main page.
-			This is needed because Gutenberg does not provide a way to reset the entity record. Replace this when we have a better way to do this.
-			We will need to add different conditions here when we implement editing for other entities.
-			 */
-
-			if (
-				entity.kind === 'root' &&
-				entity.name === 'site' &&
-				entity.property
-			) {
-				// Reset site icon edit
-				editEntityRecord(
-					'root',
-					'site',
-					undefined,
-					{
-						[ entity.property ]: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			} else if (
-				entity.kind === 'root' &&
-				entity.name === 'globalStyles'
-			) {
-				editEntityRecord(
-					entity.kind,
-					entity.name,
-					entity.key,
-					{
-						styles: undefined,
-						settings: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			} else {
-				editEntityRecord(
-					entity.kind,
-					entity.name,
-					entity.key,
-					{
-						selection: undefined,
-						blocks: undefined,
-						content: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			}
-		} );
-		// Only run when path changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ urlParams.path ] );
-
 	const save = async () => {
+		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
+			if ( kind === 'root' && name === 'site' ) {
+				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
+					property,
+				] );
+			} else {
+				if (
+					PUBLISH_ON_SAVE_ENTITIES.some(
+						( typeToPublish ) =>
+							typeToPublish.kind === kind &&
+							typeToPublish.name === name
+					)
+				) {
+					editEntityRecord( kind, name, key, {
+						status: 'publish',
+					} );
+				}
+
+				await saveEditedEntityRecord( kind, name, key );
+				__unstableMarkLastChangeAsPersistent();
+			}
+		}
+	};
+
+	const onClickSaveButton = async () => {
 		const source = `${ urlParams.path.replace(
 			'/customize-store/assembler-hub/',
 			''
@@ -152,32 +122,9 @@ export const SaveHub = () => {
 		recordEvent( 'customize_your_store_assembler_hub_save_click', {
 			source,
 		} );
-		removeNotice( saveNoticeId );
 
 		try {
-			for ( const { kind, name, key, property } of dirtyEntityRecords ) {
-				if ( kind === 'root' && name === 'site' ) {
-					await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
-						property,
-					] );
-				} else {
-					if (
-						PUBLISH_ON_SAVE_ENTITIES.some(
-							( typeToPublish ) =>
-								typeToPublish.kind === kind &&
-								typeToPublish.name === name
-						)
-					) {
-						editEntityRecord( kind, name, key, {
-							status: 'publish',
-						} );
-					}
-
-					await saveEditedEntityRecord( kind, name, key );
-					__unstableMarkLastChangeAsPersistent();
-				}
-			}
-
+			await save();
 			navigator.goToParent();
 		} catch ( error ) {
 			createErrorNotice(
@@ -186,19 +133,27 @@ export const SaveHub = () => {
 		}
 	};
 
+	const onDone = async () => {
+		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		setIsResolving( true );
+
+		try {
+			await save();
+			sendEvent( 'FINISH_CUSTOMIZATION' );
+		} catch ( error ) {
+			createErrorNotice(
+				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
+			);
+			setIsResolving( false );
+		}
+	};
+
 	const renderButton = () => {
 		if ( urlParams.path === '/customize-store/assembler-hub' ) {
 			return (
 				<Button
 					variant="primary"
-					onClick={ () => {
-						recordEvent(
-							'customize_your_store_assembler_hub_done_click'
-						);
-
-						setIsResolving( true );
-						sendEvent( 'FINISH_CUSTOMIZATION' );
-					} }
+					onClick={ onDone }
 					className="edit-site-save-hub__button"
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
@@ -218,7 +173,7 @@ export const SaveHub = () => {
 		return (
 			<Button
 				variant="primary"
-				onClick={ save }
+				onClick={ onClickSaveButton }
 				isBusy={ isSaving }
 				disabled={ isDisabled }
 				aria-disabled={ isDisabled }
