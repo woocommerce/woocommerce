@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createExtendedError } from '@woocommerce/ai';
+
 type BackgroundRemovalParams = {
 	imageBlob: Blob;
 	libraryFilename: string;
@@ -37,7 +42,10 @@ export const uploadImageToLibrary = async ( {
 	const ajaxUrl = window?.ajaxurl;
 
 	if ( ! ( ajaxUrl && nonceValue ) ) {
-		throw new Error( 'Missing nonce or ajaxurl' );
+		throw createExtendedError(
+			'Missing nonce or ajaxurl',
+			'missing_nonce'
+		);
 	}
 
 	const formData = new FormData();
@@ -52,7 +60,10 @@ export const uploadImageToLibrary = async ( {
 	} ).then( ( res ) => res.json() );
 
 	if ( ! response.data ) {
-		return;
+		throw createExtendedError(
+			'Invalid response from ajax request',
+			'invalid_response'
+		);
 	}
 
 	const fileData = {
