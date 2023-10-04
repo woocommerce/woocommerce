@@ -66,21 +66,18 @@ export const uploadImageToLibrary = async ( {
 		);
 	}
 
-	const fileData = {
+	const attachmentData = wp.media.model.Attachment.create( {
 		...response.data,
-		attachment: wp.media.model.Attachment.create( {
-			...response.data,
-			file: fileObj,
-			uploading: false,
-			date: new Date(),
-			filename: fileObj.name,
-			menuOrder: 0,
-			type: 'image',
-			uploadedTo: wp.media.model.settings.post.id,
-		} ),
-	};
+		file: fileObj,
+		uploading: false,
+		date: new Date(),
+		filename: fileObj.name,
+		menuOrder: 0,
+		type: 'image',
+		uploadedTo: wp.media.model.settings.post.id,
+	} );
 
-	wp.media.model.Attachment.get( fileData.id, fileData.attachment );
-	wp.Uploader.queue.add( fileData.attachment );
+	wp.media.model.Attachment.get( _fileId, attachmentData );
+	wp.Uploader.queue.add( attachmentData );
 	wp.Uploader.queue.reset();
 };
