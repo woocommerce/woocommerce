@@ -31,12 +31,12 @@ interface ProductsProps {
 
 const LABELS = {
 	[ ProductType.extension ]: {
-		label: __( 'extensions' ),
-		singularLabel: __( 'extension' ),
+		label: __( 'extensions', 'woocommerce' ),
+		singularLabel: __( 'extension', 'woocommerce' ),
 	},
 	[ ProductType.theme ]: {
-		label: __( 'themes' ),
-		singularLabel: __( 'theme' ),
+		label: __( 'themes', 'woocommerce' ),
+		singularLabel: __( 'theme', 'woocommerce' ),
 	},
 };
 
