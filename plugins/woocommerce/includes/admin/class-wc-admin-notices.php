@@ -138,11 +138,11 @@ class WC_Admin_Notices {
 				'%s%s',
 				sprintf(
 					'<h4>%s</h4>',
-					esc_html__( 'WooCommerce Legacy API to be removed soon', 'woocommerce' )
+					esc_html__( 'The WooCommerce Legacy REST API will be removed soon', 'woocommerce' )
 				),
 				sprintf(
 					// translators: Placeholders are URLs.
-					wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. A separate WooCommerce extension will be available to re-enable it. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ) ) ),
+					wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. A separate WooCommerce extension will be available to keep it enabled. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ) ) ),
 					admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
 					'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 				)
