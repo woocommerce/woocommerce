@@ -249,23 +249,6 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Create the custom orders tables in response to the user pressing the tool button.
-	 *
-	 * @param bool $verify_nonce True to perform the nonce verification, false to skip it.
-	 *
-	 * @throws \Exception Can't create the tables.
-	 */
-	private function create_custom_orders_tables( bool $verify_nonce = true ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( $verify_nonce && ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) ) {
-			throw new \Exception( 'Invalid nonce' );
-		}
-
-		$this->data_synchronizer->create_database_tables();
-		update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
-	}
-
-	/**
 	 * Delete the custom orders tables and any related options and data in response to the user pressing the tool button.
 	 *
 	 * @throws \Exception Can't delete the tables.
@@ -365,7 +348,10 @@ class CustomOrdersTableController {
 		}
 
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			$this->create_custom_orders_tables( false );
+			$success = $this->data_synchronizer->create_database_tables();
+			if ( ! $success ) {
+				update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+			}
 		}
 	}
 
@@ -461,7 +447,7 @@ class CustomOrdersTableController {
 			'disabled'    => $disabled_option,
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
-			'row_class' => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'row_class'   => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 		);
 	}
 

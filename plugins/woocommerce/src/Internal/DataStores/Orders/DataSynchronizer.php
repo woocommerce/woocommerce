@@ -155,7 +155,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
-		$this->check_orders_table_exists();
+		$success = $this->check_orders_table_exists();
+		if ( ! $success ) {
+			$missing_tables = $this->database_util->get_missing_tables( $this->data_store->get_database_schema() );
+			$missing_tables = implode( ', ', $missing_tables );
+			$this->error_logger->error( "HPOS tables are missing in the database and couldn't be created. The missing tables are: $missing_tables" );
+		}
+		return $success;
 	}
 
 	/**
