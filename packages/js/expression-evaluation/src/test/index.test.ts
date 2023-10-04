@@ -158,6 +158,62 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( false );
 	} );
 
+	it( 'should evaluate a multiplication expression', () => {
+		const result = evaluate( 'foo * 2', {
+			foo: 2,
+		} );
+
+		expect( result ).toEqual( 4 );
+	} );
+
+	it( 'should evaluate a division expression', () => {
+		const result = evaluate( 'foo / 2', {
+			foo: 4,
+		} );
+
+		expect( result ).toEqual( 2 );
+	} );
+
+	it( 'should evaluate a modulo expression', () => {
+		const result = evaluate( 'foo % 2', {
+			foo: 5,
+		} );
+
+		expect( result ).toEqual( 1 );
+	} );
+
+	it( 'should evaluate an addition expression', () => {
+		const result = evaluate( 'foo + 2', {
+			foo: 3,
+		} );
+
+		expect( result ).toEqual( 5 );
+	} );
+
+	it( 'should evaluate a subtraction expression', () => {
+		const result = evaluate( 'foo - 2', {
+			foo: 5,
+		} );
+
+		expect( result ).toEqual( 3 );
+	} );
+
+	it( 'should evaluate a complex arithmetic expression', () => {
+		const result = evaluate( 'foo * 2 + 1', {
+			foo: 3,
+		} );
+
+		expect( result ).toEqual( 7 );
+	} );
+
+	it( 'should evaluate a complex arithmetic expression with parenthesis', () => {
+		const result = evaluate( 'foo * (2 + 1)', {
+			foo: 3,
+		} );
+
+		expect( result ).toEqual( 9 );
+	} );
+
 	it( 'should evaluate a less than or equal expression', () => {
 		const result = evaluate( 'foo <= 1', {
 			foo: 1,

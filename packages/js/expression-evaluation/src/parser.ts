@@ -58,6 +58,21 @@ const grammar = `
 				case '>':
 					return leftOperand > rightOperand;
 					break;
+				case '+':
+					return leftOperand + rightOperand;
+					break;
+				case '-':
+					return leftOperand - rightOperand;
+					break;
+				case '*':
+					return leftOperand * rightOperand;
+					break;
+				case '/':
+					return leftOperand / rightOperand;
+					break;
+				case '%':
+					return leftOperand % rightOperand;
+					break;
 				default:
 					return undefined;
 					break;
@@ -305,8 +320,27 @@ UnaryOperator
 	/ "-"
 	/ "+"
 
+MultiplicativeExpression
+	= head:UnaryExpression tail:(__ MultiplicativeOperator __ UnaryExpression)* {
+		return evaluateBinaryExpression( head, tail );
+	}
+
+MultiplicativeOperator
+	= "*"
+	/ "/"
+	/ "%"
+
+AdditiveExpression
+	= head:MultiplicativeExpression tail:(__ AdditiveOperator __ MultiplicativeExpression)* {
+		return evaluateBinaryExpression( head, tail );
+	}
+
+AdditiveOperator
+	= "+"
+	/ "-"
+
 RelationalExpression
-	= head:UnaryExpression tail:(__ RelationalOperator __ UnaryExpression)* {
+	= head:AdditiveExpression tail:(__ RelationalOperator __ AdditiveExpression)* {
 		return evaluateBinaryExpression( head, tail );
 	}
 
