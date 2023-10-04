@@ -3,34 +3,36 @@
  */
 import { useEntityProp } from '@wordpress/core-data';
 
-interface Metadata {
+interface Metadata< T > {
 	id?: number;
 	key: string;
-	value: string;
+	value: T;
 }
 
-function useProductEntityProp(
-	property: string
-): [ string, ( value: string ) => void ] {
+function useProductEntityProp< T >(
+	property: string,
+	fallbackValue: T
+): [ T, ( value: T ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
 	const metaPropertyKey = property.replace( 'meta_data.', '' );
 
-	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
+	const [ entityPropValue, setEntityPropValue ] = useEntityProp< T >(
 		'postType',
 		'product',
 		property
 	);
-	const [ metadata, setMetadata ] = useEntityProp< Metadata[] >(
+	const [ metadata, setMetadata ] = useEntityProp< Metadata< T >[] >(
 		'postType',
 		'product',
 		'meta_data'
 	);
 
 	const value = isMeta
-		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value || ''
+		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value ||
+		  fallbackValue
 		: entityPropValue;
 	const setValue = isMeta
-		? ( newValue: string ) => {
+		? ( newValue: T ) => {
 				const existingEntry = metadata.find(
 					( item ) => item.key === metaPropertyKey
 				);
