@@ -2,19 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import MobileQRCode from '../illustrations/woo-mobile-download-qrcode.svg';
+import { QRCodeSVG } from 'qrcode.react';
 
 export const MobileAppInstallationInfo = () => {
 	return (
 		<div>
-			<img
-				src={ MobileQRCode }
-				alt={ __( 'Download WooCommerce mobile app', 'woocommerce' ) }
-				width="150"
+			<QRCodeSVG
+				value={
+					'https://woocommerce.com/mobile/?utm_source=wc_onboarding_mobile_task'
+				}
+				size={ 140 }
 			/>
 			<p>
 				{ __(
