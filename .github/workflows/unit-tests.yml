@@ -53,6 +53,9 @@ jobs:
         - name: 'Prepare Test Environment'
           if: ${{ matrix.needsTestEnvironment }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
-        - name: 'Test'
-          if: ${{ matrix.runTests }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" test'
+        - name: 'Test - JS'
+          if: ${{ matrix.runJSTests }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" test:js'
+        - name: 'Test - PHP'
+          if: ${{ matrix.runPHPTests }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" test:php'

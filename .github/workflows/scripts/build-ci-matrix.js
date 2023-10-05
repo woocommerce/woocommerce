@@ -26,9 +26,13 @@ function getProjectPathFromAbsolutePath( absolutePath ) {
  *
  * @typedef {Object} ProjectChanges
  * @property {string}  path                 The path to the project.
- * @property {boolean} sourceFileChanges    Whether or not the project has changes to source files.
+ * @property {boolean} phpSourceChanges     Whether or not the project has changes to PHP source files.
+ * @property {boolean} jsSourceChanges      Whether or not the project has changes to JS source files.
+ * @property {boolean} sourceFileChanges    A greedier indication of whether any files that might be source files have changed.
  * @property {boolean} documentationChanges Whether or not the project has documentation changes.
- * @property {boolean} testFileChanges      Whether or not the project has changes to test files.
+ * @property {boolean} phpTestFileChanges   Whether or not the project has changes to PHP test files.
+ * @property {boolean} jsTestFileChanges    Whether or not the project has changes to JS test files.
+ * @property {boolean} testFileChanges      A greedier indication of whether any test files have changed.
  * @property {boolean} e2eTestFileChanges   Whether or not the project has changes to e2e test files.
  */
 
@@ -69,8 +73,12 @@ function detectProjectChanges( baseRef ) {
 		}
 
 		// Keep track of the kind of changes that have occurred.
+		let phpSourceChanges = false;
+		let jsSourceChanges = false;
 		let sourceFileChanges = false;
 		let documentationChanges = false;
+		let phpTestFileChanges = false;
+		let jsTestFileChanges = false;
 		let testFileChanges = false;
 		let e2eTestFileChanges = false;
 
@@ -82,18 +90,27 @@ function detectProjectChanges( baseRef ) {
 				continue;
 			}
 
-			// We're going to be greedy with the detection of source files to avoid false negatives.
+			// As part of the detection of source files we are going to try and identify the type of source file that was changed.
+			// This isn't necessarily going to be completely perfect but it should be good enough for our purposes.
+			phpSourceChanges = !! filePath.match(
+				/\.(?:php|html)$|composer.(?:json|lock)$/i
+			);
+			jsSourceChanges = !! filePath.match(
+				/\.(?:(?:t|j)sx?|json|html)$|package.json$/i
+			);
+
+			// We're also going to have a greedy detection of source file changes just in case we missed something.
 			if (
-				filePath.match(
-					/\.(?:(?:t|j)sx?|php|json|ya?ml|lock|xml|csv|txt|html)$/i
-				)
+				phpSourceChanges ||
+				jsSourceChanges ||
+				filePath.match( /\.(?:ya?ml|lock|xml|csv|txt)$/i )
 			) {
 				sourceFileChanges = true;
-				continue;
 			}
 
 			// We also want to consider asset files to be source files.
 			if (
+				! sourceFileChanges &&
 				filePath.match(
 					/\.(?:png|jpg|gif|scss|css|ttf|svg|eot|woff)$/i
 				)
@@ -108,15 +125,15 @@ function detectProjectChanges( baseRef ) {
 				continue;
 			}
 
-			// With test changes we're going to make some assumptions about filenames and file paths.
-			if (
-				filePath.match(
-					/\.(?:spec|test)\.(?:t|j)sx?)$|\/tests?\/(?!e2e)/i
-				)
-			) {
-				testFileChanges = true;
-				continue;
-			}
+			// For the detection of test files we are going to make some assumptions about file
+			// paths based on common practices in our community as well as the wider ecosystem.
+			phpTestFileChanges = !! filePath.match(
+				/(?:[a-z]+Test|-test|\/tests?\/[^\.]+)\.php$/i
+			);
+			jsTestFileChanges = !! filePath.match(
+				/(?:(?<!e2e[^\.]+)\.(?:spec|test)|\/tests?\/(?!e2e)[^\.]+)\.(?:t|j)sx?$/i
+			);
+			testFileChanges = phpTestFileChanges || jsTestFileChanges;
 
 			// We're going to base this assumption about E2E test file paths on what seems to be standard elsewhere in our ecosystem.
 			if ( filePath.match( /\/test?\/e2e/i ) ) {
@@ -138,9 +155,12 @@ function detectProjectChanges( baseRef ) {
 		// We can use the information we've collected to generate the project change object.
 		projectChanges.push( {
 			path: projectPath,
+			phpSourceChanges,
+			jsSourceChanges,
 			sourceFileChanges,
 			documentationChanges,
-			testFileChanges,
+			phpTestFileChanges,
+			jsTestFileChanges,
 			e2eTestFileChanges,
 		} );
 	}
@@ -216,14 +236,23 @@ function cascadeProjectChanges( projectChanges ) {
 			if ( ! cascadedChanges[ affectedProjectPath ] ) {
 				cascadedChanges[ affectedProjectPath ] = {
 					path: affectedProjectPath,
+					phpSourceChanges: false,
+					jsSourceChanges: false,
 					sourceFileChanges: false,
 					documentationChanges: false,
-					testFileChanges: false,
+					phpTestFileChanges: false,
+					jsTestFileChanges: false,
 					e2eTestFileChanges: false,
 				};
 			}
 
 			// Consider the source files to have changed in the affected project because they are dependent on the source files in the changed project.
+			if ( changes.phpSourceChanges ) {
+				cascadedChanges[ affectedProjectPath ].phpSourceChanges = true;
+			}
+			if ( changes.jsSourceChanges ) {
+				cascadedChanges[ affectedProjectPath ].jsSourceChanges = true;
+			}
 			if ( changes.sourceFileChanges ) {
 				cascadedChanges[ affectedProjectPath ].sourceFileChanges = true;
 			}
@@ -252,6 +281,52 @@ function cascadeProjectChanges( projectChanges ) {
  */
 
 /**
+ * Checks the commands that are available for a project and returns the ones that meet the change criteria.
+ *
+ * @param {Object}              packageFile The package.json content for the project.
+ * @param {ProjectChanges|null} changes     Any changes that have occurred to the project.
+ * @return {Array.<string>} The commands that can be run for the project.
+ */
+function getPossibleCommands( packageFile, changes ) {
+	// Here are all of the commands that we support and the change criteria that they require to execute.
+	const commandCriteria = {
+		lint: [ 'sourceFileChanges' ],
+		'test:php': [ 'phpSourceChanges', 'phpTestFileChanges' ],
+		'test:js': [ 'jsSourceChanges', 'jsTestFileChanges' ],
+		e2e: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
+	};
+
+	// We only want the list of possible commands to contain those that
+	// the project actually has and meet the criteria for execution.
+	const possibleCommands = [];
+	commandLoop: for ( const command in commandCriteria ) {
+		if ( ! packageFile.scripts?.[ command ] ) {
+			continue;
+		}
+
+		// The criteria only needs to be checked if there is a change object to evaluate.
+		if ( changes ) {
+			for ( const criteria of commandCriteria[ command ] ) {
+				// Confidence check to make sure the criteria wasn't misspelled.
+				if ( ! changes.hasOwnProperty( criteria ) ) {
+					throw new Error(
+						`Unknown criteria "${ criteria }" for command "${ command }".`
+					);
+				}
+
+				if ( ! changes[ criteria ] ) {
+					continue commandLoop;
+				}
+			}
+		}
+
+		possibleCommands.push( command );
+	}
+
+	return possibleCommands;
+}
+
+/**
  * Builds a task object for the project with support for limiting the tasks to only those that have changed.
  *
  * @param {string}              projectPath The path to the project.
@@ -266,34 +341,16 @@ function buildTasksForProject( projectPath, changes ) {
 	);
 	const packageFile = JSON.parse( rawPackageFile );
 
-	// Evaluate what tasks are possible for this project based on what is available and what is necessary given the changes.
-	const possibleCommands = [];
-	if (
-		packageFile.scripts?.lint &&
-		( ! changes || changes.sourceFileChanges )
-	) {
-		possibleCommands.push( 'lint' );
-	}
-	if (
-		packageFile.scripts?.test &&
-		( ! changes || changes.sourceFileChanges || changes.testFileChanges )
-	) {
-		possibleCommands.push( 'test' );
-	}
-	if (
-		packageFile.scripts?.e2e &&
-		( ! changes || changes.sourceFileChanges || changes.e2eTestFileChanges )
-	) {
-		possibleCommands.push( 'e2e' );
-	}
-
 	// There's nothing to do if the project has no tasks.
+	const possibleCommands = getPossibleCommands( packageFile, changes );
 	if ( ! possibleCommands.length ) {
 		return null;
 	}
 
 	// Certain tasks may require a test environment if one exists.
 	const hasTestEnvironment = !! packageFile.scripts?.[ 'test:env:start' ];
+	const needsTestEnvironmentFn = ( task ) =>
+		task === 'test:php' || task === 'test:js' || task === 'e2e';
 	const testEnvConfig = packageFile.config?.ci?.testEnvConfig ?? {};
 
 	// The package tasks will include both the default tasks and any tasks that have been added by the package.json configuration.
@@ -303,9 +360,7 @@ function buildTasksForProject( projectPath, changes ) {
 			commands: possibleCommands,
 			needsTestEnvironment:
 				hasTestEnvironment &&
-				possibleCommands.some(
-					( task ) => task === 'test' || task === 'e2e'
-				),
+				possibleCommands.some( needsTestEnvironmentFn ),
 			testEnvConfig,
 		},
 	];
@@ -335,9 +390,7 @@ function buildTasksForProject( projectPath, changes ) {
 			// Make sure to use the additional task's configuration as overrides instead of a replacement for the entire config object.
 			const taskNeedsTestEnvironment =
 				hasTestEnvironment &&
-				taskCommands.some(
-					( task ) => task === 'test' || task === 'e2e'
-				);
+				taskCommands.some( needsTestEnvironmentFn );
 			const taskTestEnvConfig = Object.assign(
 				{},
 				testEnvConfig,
@@ -442,7 +495,10 @@ function buildCIMatrix( baseRef ) {
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
 			// Right now we're only using this for the testing matrix.
-			if ( ! task.commands.includes( 'test' ) ) {
+			if (
+				! task.commands.includes( 'test:php' ) &&
+				task.commands.includes( 'test:js' )
+			) {
 				continue;
 			}
 
@@ -451,7 +507,8 @@ function buildCIMatrix( baseRef ) {
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
 				testEnvConfig: JSON.stringify( task.testEnvConfig ),
-				runTests: task.commands.includes( 'test' ),
+				runPHPTests: task.commands.includes( 'test:php' ),
+				runJSTests: task.commands.includes( 'test:js' ),
 			} );
 		}
 	}
