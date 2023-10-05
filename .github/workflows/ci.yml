@@ -51,7 +51,6 @@ jobs:
             install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
         - name: 'Dump Test ENV Vars'
-          if: ${{ matrix.needsTestEnvironment }}
           env: ${{ fromJson( matrix.testEnvVars ) }}
           run: 'printenv'
         - name: 'Prepare Test Environment'
