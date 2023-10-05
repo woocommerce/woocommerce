@@ -4,20 +4,9 @@
  * Slug: woocommerce-blocks/product-details-listing
  * Categories: WooCommerce
  */
-
-$query = new \WC_Product_Query(
-	array(
-		'limit'  => 1,
-		'return' => 'ids',
-		'status' => array( 'publish' ),
-	)
-);
-
-$products   = $query->get_products();
-$product_id = $products ? $products[0] : null;
 ?>
 
-<!-- wp:woocommerce/single-product {"productId":<?php echo esc_attr( $product_id ); ?>} -->
+<!-- wp:woocommerce/single-product {"isPreview": true} -->
 <div class="wp-block-woocommerce-single-product">
 	<!-- wp:columns -->
 	<div class="wp-block-columns">
