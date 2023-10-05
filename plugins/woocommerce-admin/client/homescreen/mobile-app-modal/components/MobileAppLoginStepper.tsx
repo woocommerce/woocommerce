@@ -53,7 +53,6 @@ export const MobileAppLoginStepper = ( {
 							<Button
 								className="install-jetpack-button"
 								onClick={ () => {
-									// TODO: track event `recordEvent`
 									completeInstallationStepHandler();
 								} }
 							>

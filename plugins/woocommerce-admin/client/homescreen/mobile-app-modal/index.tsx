@@ -60,8 +60,7 @@ export const MobileAppModal = () => {
 
 	const completeAppInstallationStep = useCallback( () => {
 		setAppInstalledClicked( true );
-		// TODO: track event
-		// recordEvent( 'magic_prompt_send_signin_link_click' );
+		recordEvent( 'onboarding_app_install_click' );
 	}, [] );
 
 	const sendMagicLink = useCallback( () => {

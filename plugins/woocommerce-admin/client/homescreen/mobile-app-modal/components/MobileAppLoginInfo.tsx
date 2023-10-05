@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import React from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 
 export const MobileAppLoginInfo = ( {
@@ -39,7 +40,7 @@ export const MobileAppLoginInfo = ( {
 								target="_blank"
 								type="external"
 								onClick={ () => {
-									// TODO: track event
+									recordEvent('onboarding_app_login_faq_click');
 								} }
 							/>
 						),
