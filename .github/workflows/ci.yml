@@ -32,7 +32,7 @@ jobs:
               if ( baseRef ) {
                 baseRef = 'origin/' + baseRef;
               }
-              const buildCIMatrix = require( './.github/workflows/scripts/build-project-matrix' );
+              const buildCIMatrix = require( './.github/workflows/scripts/build-ci-matrix' );
               core.setOutput( 'matrix', JSON.stringify( buildCIMatrix( baseRef ) ) );
     project-task-matrix:
       name: '${{ matrix.projectName }} - ${{ matrix.taskName }}'
