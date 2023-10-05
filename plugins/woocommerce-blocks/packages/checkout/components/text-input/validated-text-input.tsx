@@ -166,6 +166,8 @@ const ValidatedTextInput = forwardRef<
 
 				if ( formattedValue !== value ) {
 					onChange( formattedValue );
+				} else {
+					validateInput( true );
 				}
 			}
 		}, [ validateInput, customFormatter, value, previousValue, onChange ] );
