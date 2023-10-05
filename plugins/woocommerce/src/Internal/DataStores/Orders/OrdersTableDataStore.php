@@ -2953,7 +2953,7 @@ CREATE TABLE $meta_table (
 	 *
 	 * @return bool Whether the modified date needs to be updated.
 	 */
-    private function should_save_after_meta_change( $order, $meta = null ) {
+	private function should_save_after_meta_change( $order, $meta = null ) {
 		$current_time      = $this->legacy_proxy->call_function( 'current_time', 'mysql', 1 );
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
 		$skip_for          = array(
