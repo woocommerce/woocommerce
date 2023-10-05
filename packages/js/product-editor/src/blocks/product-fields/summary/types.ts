@@ -4,4 +4,5 @@ export type SummaryAttributes = {
 	direction: 'ltr' | 'rtl';
 	label: string;
 	property: string;
+	helpText?: string;
 };

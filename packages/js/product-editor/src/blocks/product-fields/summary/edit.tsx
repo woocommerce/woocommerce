@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement } from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -31,7 +31,7 @@ export function Edit( {
 	setAttributes,
 	context,
 }: ProductEditorBlockEditProps< SummaryAttributes > ) {
-	const { align, allowedFormats, direction, label } = attributes;
+	const { align, allowedFormats, direction, label, helpText } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
@@ -88,11 +88,24 @@ export function Edit( {
 
 			<BaseControl
 				id={ contentId.toString() }
-				label={ label || __( 'Summary', 'woocommerce' ) }
-				help={ __(
-					"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
-					'woocommerce'
+				label={ createInterpolateElement(
+					label || __( 'Summary', 'woocommerce' ),
+					{
+						optional: (
+							<span className="woocommerce-product-form__optional-input">
+								{ __( '(OPTIONAL)', 'woocommerce' ) }
+							</span>
+						),
+					}
 				) }
+				help={
+					helpText !== undefined
+						? __(
+								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+								'woocommerce'
+						  )
+						: helpText
+				}
 			>
 				<div { ...blockProps }>
 					<RichText

@@ -36,6 +36,9 @@
 		"label": {
 			"type": "string"
 		},
+		"helpText": {
+			"type": "string"
+		},
 		"content": {
 			"type": "string",
 			"__experimentalRole": "content"
