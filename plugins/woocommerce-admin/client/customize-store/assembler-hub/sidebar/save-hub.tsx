@@ -30,6 +30,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -43,7 +44,9 @@ export const SaveHub = () => {
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
 	const navigator = useNavigator();
-
+	const { resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
+	);
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
@@ -125,6 +128,7 @@ export const SaveHub = () => {
 
 		try {
 			await save();
+			resetHighlightedBlockIndex();
 			navigator.goToParent();
 		} catch ( error ) {
 			createErrorNotice(
