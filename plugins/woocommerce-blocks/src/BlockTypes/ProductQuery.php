@@ -170,7 +170,7 @@ class ProductQuery extends AbstractBlock {
 	 */
 	public function update_query( $pre_render, $parsed_block ) {
 		if ( 'core/query' !== $parsed_block['blockName'] ) {
-			return;
+			return $pre_render;
 		}
 
 		$this->parsed_block = $parsed_block;
@@ -186,6 +186,8 @@ class ProductQuery extends AbstractBlock {
 				1
 			);
 		}
+
+		return $pre_render;
 	}
 
 	/**
