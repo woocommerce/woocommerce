@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 
 /**
  * ProductGallery class.
@@ -121,10 +121,11 @@ class ProductGallery extends AbstractBlock {
 			$classname_single_image = 'is-single-product-gallery-image';
 		}
 
-		$classname = $attributes['className'] ?? '';
-		$dialog    = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
-		$post_id   = $block->context['postId'] ?? '';
-		$product   = wc_get_product( $post_id );
+		$number_of_thumbnails = $block->attributes['thumbnailsNumberOfThumbnails'] ?? 0;
+		$classname            = $attributes['className'] ?? '';
+		$dialog               = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
+		$post_id              = $block->context['postId'] ?? '';
+		$product              = wc_get_product( $post_id );
 
 		$html = $this->inject_dialog( $content, $dialog );
 		$p    = new \WP_HTML_Tag_Processor( $html );
@@ -136,8 +137,9 @@ class ProductGallery extends AbstractBlock {
 				wp_json_encode(
 					array(
 						'woocommerce' => array(
-							'selectedImage' => $product->get_image_id(),
-							'isDialogOpen'  => false,
+							'selectedImage'    => $product->get_image_id(),
+							'visibleImagesIds' => ProductGalleryUtils::get_product_gallery_image_ids( $product, $number_of_thumbnails, true ),
+							'isDialogOpen'     => false,
 						),
 					)
 				)

@@ -125,7 +125,7 @@ class ProductGalleryPager extends AbstractBlock {
 					'data-wc-context',
 					wp_json_encode(
 						array(
-							'woocommerce' => array( 'imageId' => strval( $product_gallery_image_id ) ),
+							'woocommerce' => array( 'imageId' => $product_gallery_image_id ),
 						)
 					)
 				);

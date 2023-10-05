@@ -11,6 +11,7 @@ interface Context {
 	woocommerce: {
 		selectedImage: string;
 		imageId: string;
+		visibleImagesIds: string[];
 		isDialogOpen: boolean;
 	};
 }
@@ -19,6 +20,7 @@ interface Selectors {
 	woocommerce: {
 		isSelected: ( store: unknown ) => boolean;
 		pagerDotFillOpacity: ( store: SelectorsStore ) => number;
+		selectedImageIndex: ( store: SelectorsStore ) => number;
 		isDialogOpen: ( store: unknown ) => boolean;
 	};
 }
@@ -79,6 +81,33 @@ interactivityApiStore( {
 			},
 			handleSelectImage: ( { context }: Store ) => {
 				context.woocommerce.selectedImage = context.woocommerce.imageId;
+			},
+			handleNextImageButtonClick: ( store: Store ) => {
+				const { context } = store;
+				const selectedImageIdIndex =
+					context.woocommerce.visibleImagesIds.indexOf(
+						context.woocommerce.selectedImage
+					);
+				const nextImageIndex = Math.min(
+					selectedImageIdIndex + 1,
+					context.woocommerce.visibleImagesIds.length - 1
+				);
+
+				context.woocommerce.selectedImage =
+					context.woocommerce.visibleImagesIds[ nextImageIndex ];
+			},
+			handlePreviousImageButtonClick: ( store: Store ) => {
+				const { context } = store;
+				const selectedImageIdIndex =
+					context.woocommerce.visibleImagesIds.indexOf(
+						context.woocommerce.selectedImage
+					);
+				const previousImageIndex = Math.max(
+					selectedImageIdIndex - 1,
+					0
+				);
+				context.woocommerce.selectedImage =
+					context.woocommerce.visibleImagesIds[ previousImageIndex ];
 			},
 		},
 	},
