@@ -384,10 +384,16 @@ LogicalOrOperator
 	= "||"
 
 ConditionalExpression
-	= test:LogicalOrExpression __ "?" __ consequent:ConditionalExpression __ ":" __ alternate:ConditionalExpression {
-		return test ? consequent : alternate;
+	= condition:LogicalOrExpression __ ConditionalTrueOperator __ expressionIfTrue:ConditionalExpression __ ConditionalFalseOperator __ expressionIfFalse:ConditionalExpression {
+		return condition ? expressionIfTrue : expressionIfFalse;
 	}
 	/ LogicalOrExpression
+
+ConditionalTrueOperator
+	= "?"
+
+ConditionalFalseOperator
+	= ":"
 
 Expression
 	= __ expression:ConditionalExpression __ {
