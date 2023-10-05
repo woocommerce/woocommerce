@@ -106,7 +106,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'         => 'variation-details',
 				'order'      => 10,
 				'attributes' => [
-					'title' => __( 'Variation details', 'woocommerce' ),
+					'title'       => __( 'Variation details', 'woocommerce' ),
+					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
 				],
 			]
 		);
