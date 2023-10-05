@@ -18,7 +18,7 @@ import {
 } from '@wordpress/block-editor';
 import { Template } from '@wordpress/blocks';
 import { Popover, SlotFillProvider } from '@wordpress/components';
-import { Product, ProductVariation } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -47,7 +47,7 @@ export type ProductEditorSettings = Partial<
 };
 
 type EditorProps = {
-	product: Product | ProductVariation;
+	product: Pick< Product, 'id' | 'type' >;
 	productType?: string;
 	settings: ProductEditorSettings | undefined;
 };
