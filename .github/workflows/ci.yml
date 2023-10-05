@@ -1,90 +1,67 @@
-name: Run CI
-on:
-    push:
-        branches:
-            - trunk
-            - 'release/**'
-    workflow_dispatch:
-
-defaults:
-    run:
-        shell: bash
+name: 'CI'
+on: 
+  pull_request:
+  push:
+    branches:
+      - 'trunk'
+      - 'release/*'
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
-
-permissions: {}
-
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
 jobs:
-    test:
-        name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} - ${{ matrix.unittests }}
-        timeout-minutes: 30
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        continue-on-error: ${{ matrix.wp == 'nightly' }}
-        strategy:
-            fail-fast: false
-            matrix:
-                php: ['7.4', '8.0']
-                wp: ['latest']
-                unittests: ['shard1', 'shard2']
-                include:
-                    - wp: nightly
-                      php: '7.4'
-                      unittests: 'shard1'
-                    - wp: nightly
-                      php: '7.4'
-                      unittests: 'shard2'
-                    - wp: '6.1'
-                      php: 7.4
-                      unittests: 'shard1'
-                    - wp: '6.1'
-                      php: 7.4
-                      unittests: 'shard2'
-        services:
-            database:
-                image: mysql:5.6
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                ports:
-                    - 3306:3306
-                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build-filters: woocommerce
-
-            - name: Tool versions
-              run: |
-                  php --version
-                  composer --version
-
-            - name: Build Admin feature config
-              working-directory: plugins/woocommerce
-              run: pnpm run build:feature-config
-
-            - id: parseMatrix
-              name: Parse Matrix Variables
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
-                      parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
-                        core.setOutput( 'wpVersion', version );
-                      } );
-
-            - name: Prepare Testing Environment
-              env:
-                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce env:test
-
-            - name: Run Tests
-              env:
-                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce test:unit:env --testsuite ${{ matrix.unittests }}
+    project-matrix:
+      name: 'Build Project Matrix'
+      runs-on: 'ubuntu-20.04'
+      outputs:
+        matrix: ${{ steps.project-matrix.outputs.matrix }}
+      steps:
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+          with:
+            fetch-depth: 0
+        - uses: './.github/actions/setup-woocommerce-monorepo'
+          name: 'Setup Monorepo'
+          with:
+            install: false
+        - uses: actions/github-script@v6
+          id: 'project-matrix'
+          name: 'Build Matrix'
+          with:
+            script: |
+              let baseRef = ${{ toJson( github.base_ref ) }};
+              if ( baseRef ) {
+                baseRef = 'origin/' + baseRef;
+              }
+              const buildCIMatrix = require( './.github/workflows/scripts/build-project-matrix' );
+              core.setOutput( 'matrix', JSON.stringify( buildCIMatrix( baseRef ) ) );
+    project-task-matrix:
+      name: '${{ matrix.projectName }} - ${{ matrix.taskName }}'
+      runs-on: 'ubuntu-20.04'
+      needs: 'project-matrix'
+      strategy:
+        fail-fast: false
+        matrix:
+          include: ${{ fromJSON( needs.project-matrix.outputs.matrix ) }}
+      steps:
+        - uses: 'actions/checkout@v3'
+          name: 'Checkout'
+        - uses: './.github/actions/setup-woocommerce-monorepo'
+          name: 'Setup Monorepo'
+          with:
+            install-filters: '${{ matrix.projectName }}...'
+            build-filters: '${{ matrix.projectName }}'
+        - name: 'Prepare Test Environment'
+          if: ${{ matrix.needsTestEnvironment }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
+        - name: 'Lint'
+          if: ${{ matrix.runLint }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" lint'
+        - name: 'Test - JS'
+          if: ${{ matrix.runJSTests }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" test:js'
+        - name: 'Test - PHP'
+          if: ${{ matrix.runPHPTests }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" test:php'
+        - name: 'E2E'
+          if: ${{ matrix.runE2E }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" e2e'
