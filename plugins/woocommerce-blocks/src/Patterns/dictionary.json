@@ -610,5 +610,17 @@
 				}
 			]
 		}
+	},
+	{
+		"name": "Product Collection: Featured Products 5 Columns",
+		"slug": "woocommerce-blocks/product-collection-featured-products-5-columns",
+		"content": {
+			"titles": [
+				{
+					"default": "Shop new arrivals",
+					"ai_prompt": "An impact phrase that advertises the newest additions to the store"
+				}
+			]
+		}
 	}
 ]
