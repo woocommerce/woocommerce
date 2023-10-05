@@ -47,8 +47,8 @@ class Hydration {
 		$this->restore_cached_store_notices();
 		$this->restore_nonce_check();
 
-		// Returns just the single preloaded request.
-		return $preloaded_requests[ $path ];
+		// Returns just the single preloaded request, or an empty array if it doesn't exist.
+		return $preloaded_requests[ $path ] ?? [];
 	}
 
 	/**
