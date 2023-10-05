@@ -8,7 +8,7 @@ const https = require( 'http' );
 /**
  * Uses the WordPress API to get the downlod URL to the latest version of an X.X version line. This
  * also accepts "latest-X" to get an offset from the latest version of WordPress.
- * 
+ *
  * @param {string} wpVersion The version of WordPress to look for.
  * @return {Promise.<string>} The precise WP version download URL.
  */
@@ -25,7 +25,9 @@ async function getPreciseWPVersionURL( wpVersion ) {
 				} );
 
 				// Once we have the entire response we can process it.
-				response.on( 'end', () => resolve( JSON.parse( responseData ) ) );
+				response.on( 'end', () =>
+					resolve( JSON.parse( responseData ) )
+				);
 			}
 		);
 
@@ -42,7 +44,7 @@ async function getPreciseWPVersionURL( wpVersion ) {
 				if ( allVersions[ version ] !== 'latest' ) {
 					continue;
 				}
-				
+
 				// We don't care about the patch version because we will
 				// the latest version from the version line below.
 				const versionParts = version.match( /^([0-9]+)\.([0-9]+)/ );
@@ -70,9 +72,7 @@ async function getPreciseWPVersionURL( wpVersion ) {
 		let latestPatch = -1;
 		for ( const v in allVersions ) {
 			// Parse the version so we can make sure we're looking for the latest.
-			const matches = v.match(
-				/([0-9]+)\.([0-9]+)(?:\.([0-9]+))?/
-			);
+			const matches = v.match( /([0-9]+)\.([0-9]+)(?:\.([0-9]+))?/ );
 
 			// We only care about the correct minor version.
 			const minor = `${ matches[ 1 ] }.${ matches[ 2 ] }`;
@@ -82,9 +82,7 @@ async function getPreciseWPVersionURL( wpVersion ) {
 
 			// Track the latest version in the line.
 			const patch =
-				matches[ 3 ] === undefined
-					? 0
-					: parseInt( matches[ 3 ] );
+				matches[ 3 ] === undefined ? 0 : parseInt( matches[ 3 ], 10 );
 
 			if ( patch > latestPatch ) {
 				latestPatch = patch;
@@ -98,20 +96,16 @@ async function getPreciseWPVersionURL( wpVersion ) {
 			);
 		}
 
-		return `https://wordpress.org/wordpress-${ latestVersion }.zip`
+		return `https://wordpress.org/wordpress-${ latestVersion }.zip`;
 	} );
 }
 
 /**
-  For convenience, this method will convert between a display-friendly version format and one used
-  internally by wp-env. We lean towards using WordPress.org ZIPs which requires us to reference
-  the full URL to the archive. For instance, instead of needing the action to fully define the
-  URL to the nightly build we can pass "nightly" to this function and retrieve it.
- 
-   @param {string} wpVersion The display-friendly version. Supports ("master", "trunk", "nightly",
-                             "latest", "X.X" for version lines, and "X.X.X" for specific versions)
-  @return {Promise.<string>} The wp-env "core" property".
- **/
+ * Parses a display-friendly WordPress version and returns a link to download the given version.
+ *
+ * @param {string} wpVersion A display-friendly WordPress version. Supports ("master", "trunk", "nightly", "latest", "latest-X", "X.X" for version lines, and "X.X.X" for specific versions)
+ * @return {Promise.<string>} A link to download the given version of WordPress.
+ */
 async function parseWPVersion( wpVersion ) {
 	// Start with versions we can infer immediately.
 	switch ( wpVersion ) {
@@ -622,6 +616,27 @@ function generateProjectTasksForWorkspace() {
  */
 
 /**
+ * Parses the test environment's configuration and returns any environment variables that
+ * should be set.
+ *
+ * @param {Object} testEnvConfig The test environment configuration.
+ * @return {Promise.<Object>} The environment variables for the test environment.
+ */
+async function parseTestEnvConfig( testEnvConfig ) {
+	const envVars = {};
+
+	// Convert `wp-env` configuration options to environment variables.
+	if ( testEnvConfig.wpVersion ) {
+		envVars.WP_ENV_CORE = await parseWPVersion( testEnvConfig.wpVersion );
+	}
+	if ( testEnvConfig.phpVersion ) {
+		envVars.WP_ENV_PHP_VERSION = testEnvConfig.phpVersion;
+	}
+
+	return envVars;
+}
+
+/**
  * Generates a matrix for the CI GitHub Workflow.
  *
  * @param {string} baseRef The base branch to check for changes against. If empty we check for everything.
@@ -640,19 +655,19 @@ async function buildCIMatrix( baseRef ) {
 		projectTasks = generateProjectTasksForWorkspace();
 	}
 
-	// Note: For now all we care about is testing.
+	// Parse the tasks and generate matrix entries for each of them.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
-			// Convert the given WordPress version into a download URL.
-			if ( task.testEnvConfig.wpVersion ) {
-				task.testEnvConfig.wpVersion = await parseWPVersion( task.testEnvConfig.wpVersion );
-			}
+			// Must be a string so that it can be unwrapped by the workflow.
+			const testEnvVars = JSON.stringify(
+				await parseTestEnvConfig( task.testEnvConfig )
+			);
 
 			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
-				testEnvConfig: JSON.stringify( task.testEnvConfig ),
+				testEnvVars,
 				runLint: task.commands.includes( 'lint' ),
 				runPHPTests: task.commands.includes( 'test:php' ),
 				runJSTests: task.commands.includes( 'test:js' ),
