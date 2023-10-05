@@ -45,7 +45,7 @@ Placeholder text that appears in the field when it's empty.
 
 ## Usage
 
-Here's an:
+Here's a snippet that adds a field similar to the previous screenshot:
 
 ```php
 $section->add_block(
