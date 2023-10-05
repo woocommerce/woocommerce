@@ -15,10 +15,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
+		'GENERAL'   => 'general',
+		'PRICING'   => 'pricing',
+		'INVENTORY' => 'inventory',
+		'SHIPPING'  => 'shipping',
 	);
 
 	/**
@@ -106,24 +106,23 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'         => 'variation-details',
 				'order'      => 10,
 				'attributes' => [
-					'title'       => __( 'Variation details', 'woocommerce' )
+					'title' => __( 'Variation details', 'woocommerce' ),
 				],
 			]
 		);
 		$basic_details->add_block(
 			[
-				'id'        => 'product-summary',
-				'blockName' => 'woocommerce/product-summary-field',
-				'order'     => 20,
+				'id'         => 'product-summary',
+				'blockName'  => 'woocommerce/product-summary-field',
+				'order'      => 20,
 				'attributes' => [
 					'property' => 'description',
-					'label'	   => __( 'Note <optional />', 'woocommerce' ),
-					'helpText' => ''
+					'label'    => __( 'Note <optional />', 'woocommerce' ),
+					'helpText' => '',
 				],
 			]
 		);
 
-		
 		// Images section.
 		$images_section = $general_group->add_section(
 			[
@@ -364,15 +363,15 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => [
-					'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-					'property' => 'manage_stock',
-					'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
+					'property'     => 'manage_stock',
+					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
 					'disabledCopy' => sprintf(
 						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
-							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
-							'</a>'
-						),
+						__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
 				],
 			]
 		);

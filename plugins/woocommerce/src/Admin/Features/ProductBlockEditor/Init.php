@@ -80,15 +80,15 @@ class Init {
 		}
 		$post_type_object     = get_post_type_object( 'product' );
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
-		$template_registry 	  = wc_get_container()->get( BlockTemplateRegistry::class );
+		$template_registry    = wc_get_container()->get( BlockTemplateRegistry::class );
 
 		$editor_settings = array();
 		if ( ! empty( $post_type_object->template ) ) {
-			$editor_settings['template']                 = $post_type_object->template;
-			$editor_settings['templateLock']             = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
-			$editor_settings['templates']     = array(
-				'product' 			=> $post_type_object->template,
-				'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template()
+			$editor_settings['template']     = $post_type_object->template;
+			$editor_settings['templateLock'] = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
+			$editor_settings['templates']    = array(
+				'product'           => $post_type_object->template,
+				'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
 			);
 		}
 
@@ -189,7 +189,7 @@ class Init {
 	 */
 	public function enable_rest_api_for_product_variation( $args ) {
 		$args['show_in_rest'] = true;
-		
+
 		return $args;
 	}
 
@@ -205,7 +205,7 @@ class Init {
 			array(
 				'variable_product_block_tour_shown',
 				'product_block_variable_options_notice_dismissed',
-				'variable_items_without_price_notice_dismissed'
+				'variable_items_without_price_notice_dismissed',
 			)
 		);
 	}
