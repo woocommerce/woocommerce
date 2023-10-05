@@ -296,7 +296,7 @@ function buildTasksForProject( projectPath, changes ) {
 	// The package tasks will include both the default tasks and any tasks that have been added by the package.json configuration.
 	const projectTasks = [
 		{
-			name: '',
+			name: 'default',
 			commands: possibleCommands,
 			needsTestEnvironment:
 				hasTestEnvironment &&
@@ -420,10 +420,10 @@ function generateProjectTasksForWorkspace() {
  * Generates a matrix for the CI GitHub Workflow.
  *
  * @param {string} baseRef The base branch to check for changes against. If empty we check for everything.
- * @return {Array.<CIMatrix>} The CI matrices to be used in the CI workflows.
+ * @return {Array.<CIMatrix>} The CI matrix to be used in the CI workflows.
  */
-function buildCIMatrices( baseRef ) {
-	const matrices = [];
+function buildCIMatrix( baseRef ) {
+	const matrix = [];
 
 	// Build the project tasks based on the branch we are comparing against.
 	let projectTasks = [];
@@ -443,7 +443,7 @@ function buildCIMatrices( baseRef ) {
 				continue;
 			}
 
-			matrices.push( {
+			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
@@ -453,7 +453,7 @@ function buildCIMatrices( baseRef ) {
 		}
 	}
 
-	return matrices;
+	return matrix;
 }
 
-module.exports = buildCIMatrices;
+module.exports = buildCIMatrix;
