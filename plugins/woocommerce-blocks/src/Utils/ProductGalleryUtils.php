@@ -47,7 +47,7 @@ class ProductGalleryUtils {
 						wp_json_encode(
 							array(
 								'woocommerce' => array(
-									'imageId' => strval( $product_gallery_image_id ),
+									'imageId' => $product_gallery_image_id,
 								),
 							)
 						)
@@ -64,21 +64,33 @@ class ProductGalleryUtils {
 	/**
 	 * Get the product gallery image IDs.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @return array
+	 * @param \WC_Product $product                      The product object to retrieve the gallery images for.
+	 * @param int         $max_number_of_visible_images The maximum number of visible images to return. Defaults to 8.
+	 * @param bool        $only_visible                 Whether to return only the visible images. Defaults to false.
+	 * @return array An array of unique image IDs for the product gallery.
 	 */
-	public static function get_product_gallery_image_ids( $product ) {
+	public static function get_product_gallery_image_ids( $product, $max_number_of_visible_images = 8, $only_visible = false ) {
 		// Main product featured image.
 		$featured_image_id = $product->get_image_id();
 		// All other product gallery images.
 		$product_gallery_image_ids = $product->get_gallery_image_ids();
 
 		// We don't want to show the same image twice, so we have to remove the featured image from the gallery if it's there.
-		return array_unique(
+		$unique_image_ids = array_unique(
 			array_merge(
 				array( $featured_image_id ),
 				$product_gallery_image_ids
 			)
 		);
+
+		foreach ( $unique_image_ids as $key => $image_id ) {
+			$unique_image_ids[ $key ] = strval( $image_id );
+		}
+
+		if ( count( $unique_image_ids ) > $max_number_of_visible_images && $only_visible ) {
+			$unique_image_ids = array_slice( $unique_image_ids, 0, $max_number_of_visible_images );
+		}
+
+		return $unique_image_ids;
 	}
 }
