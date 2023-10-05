@@ -117,7 +117,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'     => 20,
 				'attributes' => [
 					'property' => 'description',
-					'label'	   => __( 'Note <optional />', 'woocommerce' )
+					'label'	   => __( 'Note <optional />', 'woocommerce' ),
+					'helpText' => ''
 				],
 			]
 		);

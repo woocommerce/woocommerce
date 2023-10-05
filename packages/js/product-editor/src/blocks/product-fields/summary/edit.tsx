@@ -99,12 +99,12 @@ export function Edit( {
 					}
 				) }
 				help={
-					helpText !== undefined
-						? __(
+					typeof helpText === 'string'
+						? helpText
+						: __(
 								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
 								'woocommerce'
 						  )
-						: helpText
 				}
 			>
 				<div { ...blockProps }>
