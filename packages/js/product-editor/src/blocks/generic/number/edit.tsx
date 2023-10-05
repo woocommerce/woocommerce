@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
