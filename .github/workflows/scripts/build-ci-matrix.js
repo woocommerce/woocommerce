@@ -3,6 +3,147 @@
  */
 const child_process = require( 'child_process' );
 const fs = require( 'fs' );
+const https = require( 'http' );
+
+/**
+ * Uses the WordPress API to get the downlod URL to the latest version of an X.X version line. This
+ * also accepts "latest-X" to get an offset from the latest version of WordPress.
+ * 
+ * @param {string} wpVersion The version of WordPress to look for.
+ * @return {Promise.<string>} The precise WP version download URL.
+ */
+async function getPreciseWPVersionURL( wpVersion ) {
+	return new Promise( ( resolve, reject ) => {
+		// We're going to use the WordPress.org API to get information about available versions of WordPress.
+		const request = https.get(
+			'http://api.wordpress.org/core/stable-check/1.0/',
+			( response ) => {
+				// Listen for the response data.
+				let responseData = '';
+				response.on( 'data', ( chunk ) => {
+					responseData += chunk;
+				} );
+
+				// Once we have the entire response we can process it.
+				response.on( 'end', () => resolve( JSON.parse( responseData ) ) );
+			}
+		);
+
+		request.on( 'error', ( error ) => {
+			reject( error );
+		} );
+	} ).then( ( allVersions ) => {
+		// Note: allVersions is an object where the keys are the version and the value is information about the version's status.
+
+		// If we're requesting a "latest" offset then we need to figure out what version line we're offsetting from.
+		const latestSubMatch = wpVersion.match( /^latest(?:-([0-9]+))?$/i );
+		if ( latestSubMatch ) {
+			for ( const version in allVersions ) {
+				if ( allVersions[ version ] !== 'latest' ) {
+					continue;
+				}
+				
+				// We don't care about the patch version because we will
+				// the latest version from the version line below.
+				const versionParts = version.match( /^([0-9]+)\.([0-9]+)/ );
+
+				// We're going to subtract the offset to figure out the right version.
+				let offset = parseInt( latestSubMatch[ 1 ] ?? 0, 10 );
+				let majorVersion = parseInt( versionParts[ 1 ], 10 );
+				let minorVersion = parseInt( versionParts[ 2 ], 10 );
+				while ( offset > 0 ) {
+					minorVersion--;
+					if ( minorVersion < 0 ) {
+						majorVersion--;
+						minorVersion = 9;
+					}
+					offset--;
+				}
+
+				// Set the version that we found in the offset.
+				wpVersion = majorVersion + '.' + minorVersion;
+			}
+		}
+
+		// Scan through all of the versions to find the latest version in the version line.
+		let latestVersion = null;
+		let latestPatch = -1;
+		for ( const v in allVersions ) {
+			// Parse the version so we can make sure we're looking for the latest.
+			const matches = v.match(
+				/([0-9]+)\.([0-9]+)(?:\.([0-9]+))?/
+			);
+
+			// We only care about the correct minor version.
+			const minor = `${ matches[ 1 ] }.${ matches[ 2 ] }`;
+			if ( minor !== wpVersion ) {
+				continue;
+			}
+
+			// Track the latest version in the line.
+			const patch =
+				matches[ 3 ] === undefined
+					? 0
+					: parseInt( matches[ 3 ] );
+
+			if ( patch > latestPatch ) {
+				latestPatch = patch;
+				latestVersion = v;
+			}
+		}
+
+		if ( ! latestVersion ) {
+			throw new Error(
+				`Unable to find latest version for version line ${ wpVersion }.`
+			);
+		}
+
+		return `https://wordpress.org/wordpress-${ latestVersion }.zip`
+	} );
+}
+
+/**
+  For convenience, this method will convert between a display-friendly version format and one used
+  internally by wp-env. We lean towards using WordPress.org ZIPs which requires us to reference
+  the full URL to the archive. For instance, instead of needing the action to fully define the
+  URL to the nightly build we can pass "nightly" to this function and retrieve it.
+ 
+   @param {string} wpVersion The display-friendly version. Supports ("master", "trunk", "nightly",
+                             "latest", "X.X" for version lines, and "X.X.X" for specific versions)
+  @return {Promise.<string>} The wp-env "core" property".
+ **/
+async function parseWPVersion( wpVersion ) {
+	// Start with versions we can infer immediately.
+	switch ( wpVersion ) {
+		case 'master':
+		case 'trunk': {
+			return 'WordPress/WordPress#master';
+		}
+
+		case 'nightly': {
+			return 'https://wordpress.org/nightly-builds/wordpress-latest.zip';
+		}
+
+		case 'latest': {
+			return 'https://wordpress.org/latest.zip';
+		}
+	}
+
+	// We can also infer X.X.X versions immediately.
+	const parsedVersion = wpVersion.match( /^([0-9]+)\.([0-9]+)\.([0-9]+)$/ );
+	if ( parsedVersion ) {
+		// Note that X.X.0 versions use a X.X download URL.
+		let urlVersion = `${ parsedVersion[ 1 ] }.${ parsedVersion[ 2 ] }`;
+		if ( parsedVersion[ 3 ] !== '0' ) {
+			urlVersion += `.${ parsedVersion[ 3 ] }`;
+		}
+
+		return `https://wordpress.org/wordpress-${ urlVersion }.zip`;
+	}
+
+	// Since we haven't found a URL yet we're going to use the WordPress.org API to try and infer one.
+	return getPreciseWPVersionURL( wpVersion );
+}
 
 /**
  * Given a path within a project,
@@ -364,7 +505,7 @@ function buildTasksForProject( projectPath, changes ) {
 	// The package tasks will include both the default tasks and any tasks that have been added by the package.json configuration.
 	const projectTasks = [
 		{
-			name: 'default',
+			name: packageFile.config?.ci?.name ?? 'default',
 			commands: possibleCommands,
 			needsTestEnvironment:
 				hasTestEnvironment &&
@@ -484,9 +625,9 @@ function generateProjectTasksForWorkspace() {
  * Generates a matrix for the CI GitHub Workflow.
  *
  * @param {string} baseRef The base branch to check for changes against. If empty we check for everything.
- * @return {Array.<CIMatrix>} The CI matrix to be used in the CI workflows.
+ * @return {Promise.<Array.<CIMatrix>>} The CI matrix to be used in the CI workflows.
  */
-function buildCIMatrix( baseRef ) {
+async function buildCIMatrix( baseRef ) {
 	const matrix = [];
 
 	// Build the project tasks based on the branch we are comparing against.
@@ -502,6 +643,11 @@ function buildCIMatrix( baseRef ) {
 	// Note: For now all we care about is testing.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
+			// Convert the given WordPress version into a download URL.
+			if ( task.testEnvConfig.wpVersion ) {
+				task.testEnvConfig.wpVersion = await parseWPVersion( task.testEnvConfig.wpVersion );
+			}
+
 			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
