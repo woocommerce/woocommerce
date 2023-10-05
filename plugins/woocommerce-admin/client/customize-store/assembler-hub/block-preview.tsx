@@ -17,29 +17,41 @@ import {
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
-import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { useEditorBlocks } from './hooks/use-editor-blocks';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
 	additionalStyles,
+	previewOpacity = 0.5,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
 	useSubRegistry?: boolean;
+	previewOpacity?: number;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
-	const renderedBlocks = useMemo(
-		() => ( Array.isArray( blocks ) ? blocks : [ blocks ] ),
-		[ blocks ]
-	);
+	const [ , , onChange ] = useEditorBlocks();
 
 	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const previewOpacity = useScrollOpacity(
-		'.interface-navigable-region.interface-interface-skeleton__content',
-		'topDown'
-	);
+	const renderedBlocks = useMemo( () => {
+		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
+
+		return _blocks.map( ( block, i ) => {
+			if ( i === highlightedBlockIndex ) {
+				return block;
+			}
+
+			return {
+				...block,
+				attributes: {
+					...block.attributes,
+					className: block.attributes.className + ' preview-opacity',
+				},
+			};
+		} );
+	}, [ blocks, highlightedBlockIndex ] );
 
 	const opacityStyles =
 		highlightedBlockIndex === -1
@@ -52,21 +64,10 @@ export const BlockPreview = ( {
 
 	return (
 		<BlockEditorProvider
-			value={ renderedBlocks.map( ( block, i ) => {
-				if ( i === highlightedBlockIndex ) {
-					return block;
-				}
-
-				return {
-					...block,
-					attributes: {
-						...block.attributes,
-						className:
-							block.attributes.className + ' preview-opacity',
-					},
-				};
-			} ) }
+			value={ renderedBlocks }
 			settings={ settings }
+			// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
+			onChange={ opacityStyles ? undefined : onChange }
 			useSubRegistry={ useSubRegistry }
 		>
 			<AutoHeightBlockPreview

@@ -1291,7 +1291,7 @@ class WC_Checkout {
 	 * Get a posted address field after sanitization and validation.
 	 *
 	 * @param string $key  Field key.
-	 * @param string $type Type of address. Available options: 'billing' or 'shipping'.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {

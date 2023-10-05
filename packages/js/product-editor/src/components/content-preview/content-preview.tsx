@@ -67,26 +67,22 @@ export function ContentPreview( { content }: ContentPreviewProps ) {
 
 	return (
 		<div className="woocommerce-content-preview">
-			<Iframe
-				head={
-					<>
-						<EditorStyles styles={ parentEditorSettings?.styles } />
-						<style>
-							{ `body {
+			<Iframe className="woocommerce-content-preview__iframe">
+				<>
+					<EditorStyles styles={ parentEditorSettings?.styles } />
+					<style>
+						{ `body {
 									overflow: hidden;
 								}` }
-						</style>
-					</>
-				}
-				className="woocommerce-content-preview__iframe"
-			>
-				<div
-					className="woocommerce-content-preview__content"
-					dangerouslySetInnerHTML={ sanitizeHTML( content, {
-						tags: CONTENT_TAGS,
-						attr: CONTENT_ATTR,
-					} ) }
-				/>
+					</style>
+					<div
+						className="woocommerce-content-preview__content"
+						dangerouslySetInnerHTML={ sanitizeHTML( content, {
+							tags: CONTENT_TAGS,
+							attr: CONTENT_ATTR,
+						} ) }
+					/>
+				</>
 			</Iframe>
 		</div>
 	);

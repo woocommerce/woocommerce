@@ -208,7 +208,6 @@ class Edit {
 	 * @return void
 	 */
 	public function handle_order_update() {
-		global $theorder;
 		if ( ! isset( $this->order ) ) {
 			return;
 		}
@@ -232,6 +231,8 @@ class Edit {
 		 * @since 2.1.0
 		 */
 		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
+
+		$this->custom_meta_box->handle_metadata_changes($this->order);
 
 		// Order updated message.
 		$this->message = 1;

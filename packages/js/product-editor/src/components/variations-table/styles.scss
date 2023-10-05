@@ -1,4 +1,5 @@
 @import "./variations-actions-menu/styles.scss";
+@import "./pagination/styles.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -12,6 +13,25 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		border-bottom: 1px solid $gray-200;
+
+		.variations-actions-menu__toogle:disabled {
+			cursor: not-allowed;
+		}
+	}
+
+	&__notice {
+		border-left: 0px;
+		margin: 0 0 $gap-large 0;
+		&.is-error {
+			background-color: #fcf0f1;
+		}
+
+		.components-notice__actions {
+			margin-top: $gap-small;
+			.components-button:first-child {
+				margin-left: 0px;
+			}
+		}
 	}
 
 	&__table {
@@ -25,6 +45,7 @@ $table-row-height: calc($grid-unit * 9);
 				border-color: $gray-600;
 			}
 		}
+		margin-left: $gap-smallest;
 	}
 
 	&__filters {
@@ -82,6 +103,8 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+		gap: $gap-smaller;
+		margin-right: $gap-smallest;
 
 		&--delete {
 			&.components-button.components-menu-item__button.is-link {
@@ -144,7 +167,7 @@ $table-row-height: calc($grid-unit * 9);
 	}
 
 	&__footer {
-		padding: $gap 0;
-		justify-content: space-between;
+		border-top: 1px solid $gray-200;
+		padding-top: $grid-unit-30;
 	}
 }

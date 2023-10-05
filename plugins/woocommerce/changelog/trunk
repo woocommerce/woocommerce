@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use correct object reference when cloning a cart
+Escape the default 'thank you' text instead of the filtered message.

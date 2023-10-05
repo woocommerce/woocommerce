@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -45,6 +45,8 @@ import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
+import { Transitional } from '../transitional';
+import { CustomizeStoreContext } from './';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -73,6 +75,24 @@ export const Layout = () => {
 
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
+
+	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
+
+	const editor = <Editor isLoading={ isEditorLoading } />;
+
+	if ( currentState === 'transitionalScreen' ) {
+		return (
+			<EntityProvider kind="root" type="site">
+				<EntityProvider
+					kind="postType"
+					type={ templateType }
+					id={ templateId }
+				>
+					<Transitional sendEvent={ sendEvent } editor={ editor } />
+				</EntityProvider>
+			</EntityProvider>
+		);
+	}
 
 	return (
 		<LogoBlockContext.Provider
@@ -188,11 +208,7 @@ export const Layout = () => {
 																backgroundColor,
 														} }
 													>
-														<Editor
-															isLoading={
-																isEditorLoading
-															}
-														/>
+														{ editor }
 													</ResizableFrame>
 												</ErrorBoundary>
 											</motion.div>

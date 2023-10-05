@@ -23,7 +23,7 @@ import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-t
 import { SidebarNavigationScreenHeader } from './sidebar-navigation-screen-header';
 import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage';
 import { SidebarNavigationScreenFooter } from './sidebar-navigation-screen-footer';
-import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
+// import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 
 import { SaveHub } from './save-hub';
@@ -124,9 +124,10 @@ function SidebarScreens() {
 			<NavigatorScreen path="/customize-store/assembler-hub/footer">
 				<SidebarNavigationScreenFooter />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/pages">
+			{ /* TODO: Implement pages sidebar in Phrase 2 */ }
+			{ /* <NavigatorScreen path="/customize-store/assembler-hub/pages">
 				<SidebarNavigationScreenPages />
-			</NavigatorScreen>
+			</NavigatorScreen> */ }
 			<NavigatorScreen path="/customize-store/assembler-hub/logo">
 				<SidebarNavigationScreenLogo />
 			</NavigatorScreen>
@@ -146,8 +147,8 @@ function Sidebar() {
 				initialPath={ initialPath.current }
 			>
 				<SidebarScreens />
+				<SaveHub />
 			</NavigatorProvider>
-			<SaveHub />
 		</>
 	);
 }

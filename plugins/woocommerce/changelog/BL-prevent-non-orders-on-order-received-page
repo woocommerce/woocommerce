@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Avoid a fatal error on the order received page if the order ID is not for a valid order.

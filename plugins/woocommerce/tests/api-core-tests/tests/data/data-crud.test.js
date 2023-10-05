@@ -3307,7 +3307,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VE',
-							name: 'Bolívar soberano',
+							name: 'Bolívar',
 							currency_code: 'VES',
 							currency_pos: 'left',
 							decimal_sep: ',',

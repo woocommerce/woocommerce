@@ -214,6 +214,8 @@ class Options extends \WC_REST_Data_Controller {
 			'wcpay_welcome_page_viewed_timestamp',
 			'wcpay_welcome_page_exit_survey_more_info_needed_timestamp',
 			'woocommerce_customize_store_onboarding_tour_hidden',
+			'woocommerce_customize_store_ai_suggestions',
+			'woocommerce_admin_customize_store_completed',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',

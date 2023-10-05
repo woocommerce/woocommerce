@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -59,6 +59,14 @@ export const ToneOfVoice = ( {
 			? choices[ 0 ].key
 			: context.toneOfVoice.choice
 	);
+
+	const onContinue = () => {
+		sendEvent( {
+			type: 'TONE_OF_VOICE_COMPLETE',
+			payload: sound,
+		} );
+	};
+
 	return (
 		<div>
 			<ProgressBar
@@ -77,8 +85,38 @@ export const ToneOfVoice = ( {
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
-						{ __( 'How would you like to sound?', 'woocommerce' ) }
+						{ __(
+							'Which writing style do you prefer?',
+							'woocommerce'
+						) }
 					</h1>
+					{ context.apiCallLoader.hasErrors && (
+						<Notice
+							className="woocommerce-cys-design-with-ai__error-notice"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while generating your store. <retryButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ onContinue }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					<div className="choices">
 						{ choices.map( ( { title, subtitle, key } ) => {
 							return (
@@ -96,16 +134,7 @@ export const ToneOfVoice = ( {
 							);
 						} ) }
 					</div>
-
-					<Button
-						variant="primary"
-						onClick={ () => {
-							sendEvent( {
-								type: 'TONE_OF_VOICE_COMPLETE',
-								payload: sound,
-							} );
-						} }
-					>
+					<Button variant="primary" onClick={ onContinue }>
 						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</div>

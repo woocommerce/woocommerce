@@ -67,11 +67,11 @@
 'plugin: woo-ai':
 - plugins/woo-ai/**/*
 
-'focus: performance tests [team:Solaris]':
+'focus: performance tests':
 - plugins/woocommerce/tests/performance/**/*
 
-'focus: api tests [team:Solaris]':
+'focus: api tests':
 - plugins/woocommerce/tests/api-core-tests/**/*
 
-'focus: e2e tests [team:Solaris]':
+'focus: e2e tests':
 - plugins/woocommerce/tests/e2e-pw/**/*

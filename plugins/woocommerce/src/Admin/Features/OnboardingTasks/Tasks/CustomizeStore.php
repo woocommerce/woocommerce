@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Jetpack_Gutenberg;
 
 /**
  * Customize Your Store Task
@@ -15,7 +16,15 @@ class CustomizeStore extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
+
+		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
+		global $_GET;
+		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
+		if ( ! $theme_switch_via_cys_ai_loader ) {
+				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
+		}
 	}
 
 	/**
@@ -182,5 +191,17 @@ class CustomizeStore extends Task {
 		 * @since 8.0.3
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+
+		// Load Jetpack's block editor assets because they are not enqueued by default.
+		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
+			Jetpack_Gutenberg::enqueue_block_editor_assets();
+		}
+	}
+
+	/**
+	 * Mark task as complete.
+	 */
+	public function mark_task_as_complete() {
+		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 }

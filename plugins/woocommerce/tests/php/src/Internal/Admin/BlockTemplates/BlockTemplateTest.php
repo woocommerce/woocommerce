@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\BlockTemplates;
 
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplate;
 
 use WC_Unit_Test_Case;
@@ -33,6 +34,140 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $block, $template->get_block( 'test-block-id' ) );
+	}
+
+	/**
+	 * Test the after_add_block hooks fires.
+	 */
+	public function test_after_add_block_hooks() {
+		$template = new BlockTemplate();
+
+		$hook_called = false;
+
+		$after_add_block_hook = function( BlockInterface $block ) use ( &$hook_called ) {
+			$hook_called = true;
+
+			if ( 'test-block-id' === $block->get_id() ) {
+				$hook_called = true;
+			}
+
+			$root_template = $block->get_root_template();
+
+			if ( $root_template->get_block( 'test-block-id-2' ) ) {
+				// The block was already added, so just return.
+				// This short-circuiting done because this hook will be called two times:
+				// 1. When the `test-block-id` block is added to the root template.
+				// 2. When the `test-block-id-2` block is added to the template in this hook.
+				// Without this short-circuiting, the second time `add_block` is called in this
+				// hook would throw an exception, which is handled by the API (an error gets logged).
+				return;
+			}
+
+			$root_template->add_block(
+				[
+					'id'        => 'test-block-id-2',
+					'blockName' => 'test-block-name-2',
+				]
+			);
+		};
+
+		try {
+			add_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
+
+			$specific_hook_called = false;
+
+			$specific_after_add_block_hook = function( BlockInterface $block ) use ( &$specific_hook_called ) {
+				if ( 'test-block-id' === $block->get_id() ) {
+					$specific_hook_called = true;
+				}
+			};
+
+			add_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
+
+			$template->add_block(
+				[
+					'id'        => 'test-block-id',
+					'blockName' => 'test-block-name',
+				]
+			);
+
+			$this->assertTrue(
+				$hook_called,
+				'Failed asserting that that the hook was called.'
+			);
+
+			$this->assertTrue(
+				$specific_hook_called,
+				'Failed asserting that that the specific hook was called.'
+			);
+
+			$this->assertNotNull(
+				$template->get_block( 'test-block-id-2' ),
+				'Failed asserting that the block was added to the template from the hook.'
+			);
+		} finally {
+			remove_action( 'woocommerce_block_template_after_add_block', $after_add_block_hook );
+			remove_action( 'woocommerce_block_template_area_uncategorized_after_add_block_test-block-id', $specific_after_add_block_hook );
+		}
+	}
+
+	/**
+	 * Test the after_remove_block hooks fires.
+	 */
+	public function test_after_remove_block_hooks() {
+		$template = new BlockTemplate();
+
+		$hook_called = false;
+
+		$after_remove_block_hook = function( BlockInterface $block ) use ( &$hook_called ) {
+			$hook_called = true;
+
+			if ( 'test-block-id' === $block->get_id() ) {
+				$hook_called = true;
+			}
+
+			$root_template = $block->get_root_template();
+		};
+
+		$specific_hook_called = false;
+
+		$specific_after_remove_block_hook = function( BlockInterface $block ) use ( &$specific_hook_called ) {
+			if ( 'test-block-id' === $block->get_id() ) {
+				$specific_hook_called = true;
+			}
+		};
+
+		try {
+			add_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
+			add_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+
+			$block = $template->add_block(
+				[
+					'id'        => 'test-block-id',
+					'blockName' => 'test-block-name',
+				]
+			);
+
+			$block->remove();
+
+			$this->assertTrue(
+				$hook_called,
+				'Failed asserting that that the hook was called.'
+			);
+
+			$this->assertTrue(
+				$specific_hook_called,
+				'Failed asserting that that the specific hook was called.'
+			);
+
+			$this->assertTrue(
+				$block->is_detached(),
+				'Failed asserting that the block was added to the template from the hook.'
+			);
+		} finally {
+			remove_action( 'woocommerce_block_template_after_remove_block', $after_remove_block_hook );
+			remove_action( 'woocommerce_block_template_area_uncategorized_after_remove_block_test-block-id', $specific_after_remove_block_hook );
+		}
 	}
 
 	/**
@@ -175,42 +310,55 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'test-block-name-a-1',
+						'_templateBlockOrder' => 10,
 					],
 				],
 				[
 					'test-block-name-b',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'test-block-name-b-1',
+						'_templateBlockOrder' => 50,
 					],
 					[
 						[
 							'test-block-name-1',
 							[
-								'attr-3' => 'value-3',
-								'attr-4' => 'value-4',
+								'attr-3'              => 'value-3',
+								'attr-4'              => 'value-4',
+								'_templateBlockId'    => 'test-block-name-1-1',
+								'_templateBlockOrder' => 10,
 							],
 						],
 						[
 							'test-block-name-2',
 							[
-								'attr-1' => 'value-1',
-								'attr-2' => 'value-2',
+								'attr-1'              => 'value-1',
+								'attr-2'              => 'value-2',
+								'_templateBlockId'    => 'test-block-name-2-1',
+								'_templateBlockOrder' => 20,
 							],
 						],
 						[
 							'test-block-name-3',
-							[],
+							[
+								'_templateBlockId'    => 'test-block-name-3-1',
+								'_templateBlockOrder' => 30,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],
@@ -311,52 +459,71 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'a',
+						'_templateBlockOrder' => 10,
 					],
 					[
 						[
 							'inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'inserted-block-1',
+								'_templateBlockOrder' => 10,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-b',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'b',
+						'_templateBlockOrder' => 50,
 					],
 					[
 						[
 							'test-block-name-1',
 							[
-								'attr-3' => 'value-3',
-								'attr-4' => 'value-4',
+								'attr-3'              => 'value-3',
+								'attr-4'              => 'value-4',
+								'_templateBlockId'    => 'test-block-name-1-1',
+								'_templateBlockOrder' => 10,
 							],
 						],
 						[
 							'another-inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'another-inserted-block-1',
+								'_templateBlockOrder' => 15,
+							],
 						],
 						[
 							'test-block-name-2',
 							[
-								'attr-1' => 'value-1',
-								'attr-2' => 'value-2',
+								'attr-1'              => 'value-1',
+								'attr-2'              => 'value-2',
+								'_templateBlockId'    => 'test-block-name-2-1',
+								'_templateBlockOrder' => 20,
 							],
 						],
 						[
 							'test-block-name-3',
-							[],
+							[
+								'_templateBlockId'    => 'test-block-name-3-1',
+								'_templateBlockOrder' => 30,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],
@@ -450,21 +617,28 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 				[
 					'test-block-name-a',
 					[
-						'attr-1' => 'value-1',
-						'attr-2' => 'value-2',
+						'attr-1'              => 'value-1',
+						'attr-2'              => 'value-2',
+						'_templateBlockId'    => 'a',
+						'_templateBlockOrder' => 10,
 					],
 					[
 						[
 							'inserted-block',
-							[],
+							[
+								'_templateBlockId'    => 'inserted-block-1',
+								'_templateBlockOrder' => 10,
+							],
 						],
 					],
 				],
 				[
 					'test-block-name-c',
 					[
-						'attr-c1' => 'value-c1',
-						'attr-c2' => 'value-c2',
+						'attr-c1'             => 'value-c1',
+						'attr-c2'             => 'value-c2',
+						'_templateBlockId'    => 'test-block-name-c-1',
+						'_templateBlockOrder' => 100,
 					],
 				],
 			],
