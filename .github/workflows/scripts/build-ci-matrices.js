@@ -231,14 +231,21 @@ function cascadeProjectChanges( projectChanges ) {
 }
 
 /**
+ * Details about a task that should be run for a project.
+ *
+ * @typedef {Object} ProjectTask
+ * @property {string}                 name                 The name of the task.
+ * @property {Array.<string>}         tasks                The tasks that the project should run.
+ * @property {boolean}                needsTestEnvironment Whether or not the project needs a test environment.
+ * @property {Object.<string,string>} testEnvConfig        Any configuration for the test environment if one is needed.
+ */
+
+/**
  * Details about a project and the tasks that should be run	for it.
  *
  * @typedef {Object} ProjectTasks
- * @property {string}  name               The name of the project.
- * @property {boolean} lint               Whether or not linting should be run for the project.
- * @property {boolean} hasTestEnvironment Whether or not the project has a test environment.
- * @property {boolean} test               Whether or not tests should be run for the project.
- * @property {boolean} e2e                Whether or not E2E tests should be run for the project.
+ * @property {string}              name  The name of the project.
+ * @property {Array.<ProjectTask>} tasks The tasks that should be run for the project.
  */
 
 /**
@@ -246,7 +253,7 @@ function cascadeProjectChanges( projectChanges ) {
  *
  * @param {string}              projectPath The path to the project.
  * @param {ProjectChanges|null} changes     Any changes that have occurred to the project.
- * @return {ProjectTasks} The tasks that should be run for the project.
+ * @return {ProjectTasks|null} The tasks that should be run for the project.
  */
 function buildTasksForProject( projectPath, changes ) {
 	// Load the package file so we can check for task existence before adding them.
@@ -256,44 +263,97 @@ function buildTasksForProject( projectPath, changes ) {
 	);
 	const packageFile = JSON.parse( rawPackageFile );
 
-	// Record the tasks that the project supports running.
-	let lint = false;
-	let hasTestEnvironment = false;
-	let test = false;
-	let e2e = false;
+	// Evaluate what tasks are possible for this project based on what is available and what is necessary given the changes.
+	const possibleCommands = [];
 	if (
 		packageFile.scripts?.lint &&
 		( ! changes || changes.sourceFileChanges )
 	) {
-		lint = true;
-	}
-	if ( packageFile.scripts?.[ 'test:env:start' ] ) {
-		hasTestEnvironment = true;
+		possibleCommands.push( 'lint' );
 	}
 	if (
 		packageFile.scripts?.test &&
 		( ! changes || changes.sourceFileChanges || changes.testFileChanges )
 	) {
-		test = true;
+		possibleCommands.push( 'test' );
 	}
 	if (
 		packageFile.scripts?.e2e &&
 		( ! changes || changes.sourceFileChanges || changes.e2eTestFileChanges )
 	) {
-		e2e = true;
+		possibleCommands.push( 'e2e' );
 	}
 
 	// There's nothing to do if the project has no tasks.
-	if ( ! lint && ! test && ! e2e ) {
+	if ( ! possibleCommands.length ) {
 		return null;
+	}
+
+	// Certain tasks may require a test environment if one exists.
+	const hasTestEnvironment = !! packageFile.scripts?.[ 'test:env:start' ];
+	const testEnvConfig = packageFile.config?.ci?.testEnvConfig ?? {};
+
+	// The package tasks will include both the default tasks and any tasks that have been added by the package.json configuration.
+	const projectTasks = [
+		{
+			name: '',
+			commands: possibleCommands,
+			needsTestEnvironment:
+				hasTestEnvironment &&
+				possibleCommands.some(
+					( task ) => task === 'test' || task === 'e2e'
+				),
+			testEnvConfig,
+		},
+	];
+
+	if ( packageFile.config?.ci?.additionalTasks ) {
+		for ( const additionalTask of packageFile.config.ci.additionalTasks ) {
+			if ( ! additionalTask.name ) {
+				throw new Error(
+					`No name specified for additional task in ${ projectPath }.`
+				);
+			}
+
+			if (
+				! additionalTask.commands ||
+				! additionalTask.commands.length
+			) {
+				throw new Error(
+					`No commands specified for additional task "${ additionalTask.name }" in ${ projectPath }.`
+				);
+			}
+
+			// We only want to add the commands that are possible for this project.
+			const taskCommands = additionalTask.commands.filter(
+				( command ) => command
+			);
+
+			// Make sure to use the additional task's configuration as overrides instead of a replacement for the entire config object.
+			const taskNeedsTestEnvironment =
+				hasTestEnvironment &&
+				taskCommands.some(
+					( task ) => task === 'test' || task === 'e2e'
+				);
+			const taskTestEnvConfig = Object.assign(
+				{},
+				testEnvConfig,
+				additionalTask.testEnvConfig ?? {}
+			);
+
+			// We can create the task now that we're sure we have the whole configuration.
+			projectTasks.push( {
+				name: additionalTask.name,
+				commands: taskCommands,
+				needsTestEnvironment: taskNeedsTestEnvironment,
+				testEnvConfig: taskTestEnvConfig,
+			} );
+		}
 	}
 
 	return {
 		name: packageFile.name,
-		lint,
-		hasTestEnvironment,
-		test,
-		e2e,
+		tasks: projectTasks,
 	};
 }
 
@@ -376,17 +436,21 @@ function buildCIMatrices( baseRef ) {
 	}
 
 	// Note: For now all we care about is testing.
-	for ( const tasks of projectTasks ) {
-		// Right now we're only using this for the testing matrix.
-		if ( ! tasks.test ) {
-			continue;
-		}
+	for ( const project of projectTasks ) {
+		for ( const task of project.tasks ) {
+			// Right now we're only using this for the testing matrix.
+			if ( ! task.commands.includes( 'test' ) ) {
+				continue;
+			}
 
-		matrices.push( {
-			name: tasks.name,
-			hasTestEnvironment: tasks.hasTestEnvironment,
-			runTests: tasks.test,
-		} );
+			matrices.push( {
+				projectName: project.name,
+				taskName: task.name,
+				needsTestEnvironment: task.needsTestEnvironment,
+				testEnvConfig: JSON.stringify( task.testEnvConfig ),
+				runTests: task.commands.includes( 'test' ),
+			} );
+		}
 	}
 
 	return matrices;
