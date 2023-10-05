@@ -5,7 +5,6 @@ import { useProductHelper } from './use-product-helper';
 
 export type NumberInputProps = {
 	value: string;
-	sanitize: ( value: string | number ) => string;
 	onChange: ( value: string ) => void;
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
@@ -24,13 +23,10 @@ export const useNumberInputProps = ( {
 	onFocus,
 	onKeyUp,
 }: Props ) => {
-	const { sanitizePrice } = useProductHelper();
+	const { formatNumber, parseNumber } = useProductHelper();
 
 	const numberInputProps: NumberInputProps = {
-		value,
-		sanitize: ( val: string | number ) => {
-			return sanitizePrice( String( val ) );
-		},
+		value: formatNumber( value ),
 		onFocus( event: React.FocusEvent< HTMLInputElement > ) {
 			// In some browsers like safari .select() function inside
 			// the onFocus event doesn't work as expected because it
@@ -49,7 +45,7 @@ export const useNumberInputProps = ( {
 			}
 		},
 		onKeyUp( event: React.KeyboardEvent< HTMLInputElement > ) {
-			const amount = Number.parseFloat( sanitizePrice( value || '0' ) );
+			const amount = Number.parseFloat( value || '0' );
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {
 				onChange( String( amount + step ) );
@@ -62,10 +58,8 @@ export const useNumberInputProps = ( {
 			}
 		},
 		onChange( newValue: string ) {
-			const sanitizeValue = sanitizePrice( newValue );
-			if ( onChange ) {
-				onChange( sanitizeValue );
-			}
+			const sanitizeValue = parseNumber( newValue );
+			onChange( sanitizeValue );
 		},
 	};
 	return numberInputProps;
