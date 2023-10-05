@@ -19,7 +19,7 @@ export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, property, suffix } = attributes;
+	const { label, property, suffix, placeholder, help } = attributes;
 	const [ value, setValue ] = useProductEntityProp( property );
 
 	const inputProps = useNumberInputProps( {
@@ -29,7 +29,13 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<InputControl label={ label } { ...inputProps } suffix={ suffix } />
+			<InputControl
+				{ ...inputProps }
+				label={ label }
+				suffix={ suffix }
+				help={ help }
+				placeholder={ placeholder }
+			/>
 		</div>
 	);
 }

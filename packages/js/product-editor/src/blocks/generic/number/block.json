@@ -15,10 +15,13 @@
 		"property": {
 			"type": "string"
 		},
-		"tooltip": {
+		"suffix": {
 			"type": "string"
 		},
-		"suffix": {
+		"help": {
+			"type": "string"
+		},
+		"placeholder": {
 			"type": "string"
 		}
 	},

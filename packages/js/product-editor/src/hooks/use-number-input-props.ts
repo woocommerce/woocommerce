@@ -1,14 +1,7 @@
 /**
- * External dependencies
- */
-import { CurrencyContext } from '@woocommerce/currency';
-import { useContext } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import { useProductHelper } from './use-product-helper';
-import { formatCurrencyDisplayValue } from '../utils';
 
 export type NumberInputProps = {
 	value: string;
@@ -33,16 +26,8 @@ export const useNumberInputProps = ( {
 }: Props ) => {
 	const { sanitizePrice } = useProductHelper();
 
-	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig, formatAmount } = context;
-	const currencyConfig = getCurrencyConfig();
-
-	const currencyInputProps: NumberInputProps = {
-		value: formatCurrencyDisplayValue(
-			String( value ),
-			currencyConfig,
-			formatAmount
-		),
+	const numberInputProps: NumberInputProps = {
+		value,
 		sanitize: ( val: string | number ) => {
 			return sanitizePrice( String( val ) );
 		},
@@ -83,5 +68,5 @@ export const useNumberInputProps = ( {
 			}
 		},
 	};
-	return currencyInputProps;
+	return numberInputProps;
 };
