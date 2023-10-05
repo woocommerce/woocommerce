@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement } from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -29,8 +29,9 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	setAttributes,
+	context,
 }: ProductEditorBlockEditProps< SummaryAttributes > ) {
-	const { align, allowedFormats, direction, label } = attributes;
+	const { align, allowedFormats, direction, label, helpText } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
@@ -40,8 +41,8 @@ export function Edit( {
 	);
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
-		'product',
-		'short_description'
+		context.postType || 'product',
+		attributes.property
 	);
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -87,11 +88,24 @@ export function Edit( {
 
 			<BaseControl
 				id={ contentId.toString() }
-				label={ label || __( 'Summary', 'woocommerce' ) }
-				help={ __(
-					"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
-					'woocommerce'
+				label={ createInterpolateElement(
+					label || __( 'Summary', 'woocommerce' ),
+					{
+						optional: (
+							<span className="woocommerce-product-form__optional-input">
+								{ __( '(OPTIONAL)', 'woocommerce' ) }
+							</span>
+						),
+					}
 				) }
+				help={
+					typeof helpText === 'string'
+						? helpText
+						: __(
+								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+								'woocommerce'
+						  )
+				}
 			>
 				<div { ...blockProps }>
 					<RichText

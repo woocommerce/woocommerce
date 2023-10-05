@@ -3,4 +3,6 @@ export type SummaryAttributes = {
 	allowedFormats?: string[];
 	direction: 'ltr' | 'rtl';
 	label: string;
+	property: string;
+	helpText?: string;
 };
