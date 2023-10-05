@@ -105,7 +105,8 @@
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
-					$( document.body ).on( 'wc_backbone_modal_validation', this.validateFormArguments );
+					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
+					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onModalLoaded );
 				},
 				onUpdateZoneRegionPicker: function( event ) {
 					var value = event.detail,
@@ -512,13 +513,41 @@
 						}, 'json' );
 					}
 				},
-				validateFormArguments: function( element, target, data ) {
+				possiblyHideFreeShippingRequirements: function( data ) {
+					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === '' || data.woocommerce_free_shipping_requires === 'coupon';
+
+						const select = $( '#woocommerce_free_shipping_requires' );
+						const fieldset = select.closest( 'fieldset' );
+						const allOtherLabelElementsAfter = fieldset.nextAll( 'label' );
+						const allOtherFieldsetElementsAfter = fieldset.nextAll( 'fieldset' );
+
+						allOtherLabelElementsAfter.each( ( i ) => {
+							$( allOtherLabelElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+
+						allOtherFieldsetElementsAfter.each( ( i ) => {
+							$( allOtherFieldsetElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+					}
+				},
+				onModalLoaded: function( event, target ) {
+					if ( target === 'wc-modal-shipping-method-settings' ) {
+						const select = $( '#woocommerce_free_shipping_requires' );
+						if ( select.length > 0 ) {
+							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
+						}
+					}
+				},
+				validateFormArguments: function( event, target, data ) {
 					if ( target === 'wc-modal-add-shipping-method' ) {
 						if ( data.add_method_id ) {
 							const nextButton = document.getElementById( 'btn-next' );
 							nextButton.disabled = false;
 							nextButton.classList.remove( 'disabled' );
 						}
+					} else if ( target === 'wc-modal-shipping-method-settings' ) {
+						event.data.view.possiblyHideFreeShippingRequirements( data );
 					}
 				},
 				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
