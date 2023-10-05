@@ -7,6 +7,10 @@ import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Button, Tooltip } from '@wordpress/components';
+import { chevronLeft, group, Icon } from '@wordpress/icons';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,11 +21,17 @@ import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
 import { Tabs } from '../tabs';
+import { TRACKS_SOURCE } from '../../constants';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
 	productType?: string;
 };
+
+const RETRUN_TO_MAIN_PRODUCT = __(
+	'Return to the main product',
+	'woocommerce'
+);
 
 export function Header( {
 	onTabSelect,
@@ -63,12 +73,56 @@ export function Header( {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
-				<div />
+				{ productType === 'product_variation' ? (
+					<div className="woocommerce-product-header__back">
+						<Tooltip
+							// @ts-expect-error className is missing in TS, should remove this when it is included.
+							className="woocommerce-product-header__back-tooltip"
+							text={ RETRUN_TO_MAIN_PRODUCT }
+						>
+							<div className="woocommerce-product-header__back-tooltip-wrapper">
+								<Button
+									icon={ chevronLeft }
+									isTertiary={ true }
+									onClick={ () => {
+										recordEvent(
+											'product_variation_back_to_main_product',
+											{
+												source: TRACKS_SOURCE,
+											}
+										);
+										const url = getNewPath(
+											{ tab: 'variations' },
+											`/product/${ lastPersistedProduct.parent_id }`
+										);
+										navigateTo( { url } );
+									} }
+								>
+									{ __( 'Main product', 'woocommerce' ) }
+								</Button>
+							</div>
+						</Tooltip>
+					</div>
+				) : (
+					<div />
+				) }
 
 				<h1 className="woocommerce-product-header__title">
-					{ getHeaderTitle(
-						editedProductName,
-						lastPersistedProduct?.name
+					{ productType === 'product_variation' ? (
+						<div className="woocommerce-product-header__variable-product-title">
+							<Icon icon={ group } />
+							<span className="woocommerce-product-header__variable-product-name">
+								{ lastPersistedProduct?.name }
+							</span>
+							<span className="woocommerce-product-header__variable-product-id">
+								# { lastPersistedProduct.id }
+							</span>
+						</div>
+					) : (
+						getHeaderTitle(
+							editedProductName,
+							lastPersistedProduct.name
+						)
 					) }
 				</h1>
 
