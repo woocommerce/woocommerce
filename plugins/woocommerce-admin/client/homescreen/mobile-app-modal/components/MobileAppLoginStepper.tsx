@@ -123,6 +123,16 @@ export const MobileAppLoginStepper = ( {
 				const siteUrl: string | undefined =
 					getAdminSetting( 'siteUrl' );
 				const username = getAdminSetting( 'currentUserData' ).username;
+				const loginUrl = `woocommerce://app-login?siteUrl=${ siteUrl }&username=${ username }`;
+				const description = loginUrl
+					? __(
+							'Scan the QR code below and enter the wp-admin password in the app.',
+							'woocommerce'
+					  )
+					: __(
+							'Follow the instructions in the app to sign in.',
+							'woocommerce'
+					  );
 				setStepsToDisplay( [
 					{
 						key: 'first',
@@ -133,16 +143,8 @@ export const MobileAppLoginStepper = ( {
 					{
 						key: 'second',
 						label: 'Sign into the app',
-						description: __(
-							'Scan the QR code below and enter the wp-admin password in the app.',
-							'woocommerce'
-						),
-						content: (
-							<MobileAppLoginInfo
-								siteUrl={ siteUrl }
-								username={ username }
-							/>
-						),
+						description,
+						content: <MobileAppLoginInfo loginUrl={ loginUrl } />,
 					},
 				] );
 			}
