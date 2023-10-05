@@ -26,13 +26,21 @@ describe( 'Intro Modals', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: true,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);
