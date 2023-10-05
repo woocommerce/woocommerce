@@ -48,8 +48,8 @@ jobs:
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
           with:
-            install-filters: ${{ matrix.projectName }}
-            build-filters: ${{ matrix.projectName }}
+            install-filters: '${{ matrix.projectName }}...'
+            build-filters: '${{ matrix.projectName }}'
         - name: 'Prepare Test Environment'
           if: ${{ matrix.needsTestEnvironment }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'

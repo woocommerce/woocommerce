@@ -494,13 +494,7 @@ function buildCIMatrix( baseRef ) {
 	// Note: For now all we care about is testing.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
-			// Right now we're only using this for the testing matrix.
-			if (
-				! task.commands.includes( 'test:php' ) &&
-				task.commands.includes( 'test:js' )
-			) {
-				continue;
-			}
+			
 
 			matrix.push( {
 				projectName: project.name,
@@ -517,3 +511,6 @@ function buildCIMatrix( baseRef ) {
 }
 
 module.exports = buildCIMatrix;
+
+const check = buildCIMatrix( 'origin/trunk' );
+console.log( check );
