@@ -14,10 +14,11 @@ import {
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { useNumberInputProps } from '../../../hooks/use-number-input-props';
+import { NumberBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, property, suffix, placeholder, help } = attributes;
 	const [ value, setValue ] = useProductEntityProp( property );
