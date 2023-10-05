@@ -119,6 +119,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
+			'name'					=> preg_replace( '/' . preg_quote( $object->get_title().' - ', '/') . '/', '', $object->get_name(), 1 ),
+			'parent_id'				=> $object->get_parent_id(),
 		);
 
 		$data     = $this->add_additional_fields_to_object( $data, $request );
