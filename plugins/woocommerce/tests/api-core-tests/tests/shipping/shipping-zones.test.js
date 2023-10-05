@@ -172,13 +172,8 @@ test.describe.serial( 'Shipping zones API tests', () => {
 		await expect( putResponseStateOnly.status() ).toEqual( 200 );
 
 		// running on external hosts, this can be 0 or 1
-		const responseLength = await putResponseStateOnlyJSON.length;
+		expect([0, 1]).toContain(putResponseStateOnlyJSON.length);
 
-		if ( responseLength == 0 ) {
-			await expect( putResponseStateOnlyJSON ).toHaveLength( 0 );
-		} else {
-			await expect( putResponseStateOnlyJSON ).toHaveLength( 1 );
-		}
 	} );
 
 	test( 'can delete a shipping zone', async ({request}) => {
