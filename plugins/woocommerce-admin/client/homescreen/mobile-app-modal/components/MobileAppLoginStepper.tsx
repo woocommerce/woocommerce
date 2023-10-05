@@ -51,25 +51,12 @@ export const MobileAppLoginStepper = ( {
 						<>
 							<MobileAppInstallationInfo />
 							<Button
-								className="install-jetpack-button"
+								className="install-app-button"
 								onClick={ () => {
 									completeInstallationStepHandler();
 								} }
 							>
-								<div
-									style={ {
-										visibility: 'visible',
-									} }
-									className="install-jetpack-button-contents"
-								>
-									<div className="jetpack-icon" />
-									<div className="install-jetpack-button-text">
-										{ __(
-											'App is installed',
-											'woocommerce'
-										) }
-									</div>
-								</div>
+								{ __( 'App is installed', 'woocommerce' ) }
 							</Button>
 						</>
 					),
@@ -156,7 +143,7 @@ export const MobileAppLoginStepper = ( {
 	] );
 
 	return (
-		<div className="jetpack-stepper-wrapper">
+		<div className="login-stepper-wrapper">
 			{ stepsToDisplay && (
 				<Stepper
 					isVertical={ true }
