@@ -130,7 +130,7 @@ class WC_Admin_Notices {
 	 * TODO: Change this method in WooCommerce 9.0 so that it checks if the Legacy REST API extension is installed, and if not, it points to the extension URL in the WordPress plugins directory.
 	 */
 	private static function maybe_add_legacy_api_removal_notice() {
-		if ( 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
+		if ( ! self::must_show_legacy_api_removal_notice() ) {
 			return;
 		}
 
@@ -158,9 +158,20 @@ class WC_Admin_Notices {
 	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
 	 */
 	private static function maybe_remove_legacy_api_removal_notice() {
-		if ( 'yes' !== get_option( 'woocommerce_api_enabled' ) && self::has_notice( 'legacy_api_removed_in_woo_90' ) ) {
+		if ( self::has_notice( 'legacy_api_removed_in_woo_90' ) && ! self::must_show_legacy_api_removal_notice() ) {
 			self::remove_notice( 'legacy_api_removed_in_woo_90' );
 		}
+	}
+
+	/**
+	 * Is it needed to display the legacy API removal notice?
+	 *
+	 * TODO: Change or remove this method in WooCommerce 9.0 accordingly, depending on the changes to maybe_add/remove_legacy_api_removal_notice.
+	 *
+	 * @return bool True if the legacy API removal notice must be displayed.
+	 */
+	private static function must_show_legacy_api_removal_notice() {
+		return 'yes' === get_option( 'woocommerce_api_enabled' ) && ! is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 	}
 
 	// phpcs:enable Generic.Commenting.Todo.TaskFound
