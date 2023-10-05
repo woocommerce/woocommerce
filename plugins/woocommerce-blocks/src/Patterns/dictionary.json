@@ -368,6 +368,18 @@
 		}
 	},
 	{
+		"name": "Product Collection 3 Columns",
+		"slug": "woocommerce-blocks/product-collection-3-columns",
+		"content": {
+			"titles": [
+				{
+					"default": "Our newest arrivals",
+					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+				}
+			]
+		}
+	},
+	{
 		"name": "Product Collection 4 Columns",
 		"slug": "woocommerce-blocks/product-collection-4-columns",
 		"content": {

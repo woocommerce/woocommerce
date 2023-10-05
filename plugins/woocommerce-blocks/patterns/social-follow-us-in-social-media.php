@@ -15,73 +15,77 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 $image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/dining-room.png' );
 ?>
 
-<!-- wp:columns {"verticalAlignment":null,"align":"wide"} -->
-<div class="wp-block-columns alignwide">
-	<!-- wp:column {"verticalAlignment":"bottom","width":"75%","layout":{"type":"constrained"}} -->
-	<div class="wp-block-column is-vertically-aligned-bottom" style="flex-basis:75%">
-		<!-- wp:heading {"level":3,"align":"wide"} -->
-		<h3 class="wp-block-heading alignwide"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
-		<!-- /wp:heading --></div>
-	<!-- /wp:column -->
+<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
+	<!-- wp:columns {"verticalAlignment":null,"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"verticalAlignment":"bottom","width":"75%","layout":{"type":"constrained"}} -->
+		<div class="wp-block-column is-vertically-aligned-bottom" style="flex-basis:75%">
+			<!-- wp:heading {"level":3,"align":"wide"} -->
+			<h3 class="wp-block-heading alignwide"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
+			<!-- /wp:heading --></div>
+		<!-- /wp:column -->
 
-	<!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
-	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%">
-		<!-- wp:social-links {"iconColor":"contrast","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0"}}},"className":"is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
-		<ul class="wp-block-social-links has-icon-color is-style-logos-only">
-			<!-- wp:social-link {"url":"<?php echo esc_url( 'https://twitter.com/' ); ?>","service":"twitter"} /-->
+		<!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
+		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%">
+			<!-- wp:social-links {"iconColor":"contrast","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0"}}},"className":"is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
+			<ul class="wp-block-social-links has-icon-color is-style-logos-only">
+				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://twitter.com/' ); ?>","service":"twitter"} /-->
 
-			<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.instagram.com/' ); ?>","service":"instagram"} /-->
+				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.instagram.com/' ); ?>","service":"instagram"} /-->
 
-			<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.facebook.com/' ); ?>","service":"facebook"} /-->
+				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.facebook.com/' ); ?>","service":"facebook"} /-->
 
-			<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.twitch.tv/' ); ?>","service":"twitch"} /-->
-		</ul>
-		<!-- /wp:social-links -->
+				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.twitch.tv/' ); ?>","service":"twitch"} /-->
+			</ul>
+			<!-- /wp:social-links -->
+		</div>
+		<!-- /wp:column -->
 	</div>
-	<!-- /wp:column -->
+	<!-- /wp:columns -->
+
+	<!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
+	<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)">
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+			<figure class="wp-block-image size-large">
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			</figure>
+			<!-- /wp:image -->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+			<figure class="wp-block-image size-large">
+				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			</figure>
+			<!-- /wp:image -->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+			<figure class="wp-block-image size-large">
+				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			</figure>
+			<!-- /wp:image -->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+			<figure class="wp-block-image size-large">
+				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			</figure>
+			<!-- /wp:image -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
 </div>
-<!-- /wp:columns -->
-
-<!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
-<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)">
-	<!-- wp:column -->
-	<div class="wp-block-column">
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-		<figure class="wp-block-image size-large">
-			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
-		</figure>
-		<!-- /wp:image -->
-	</div>
-	<!-- /wp:column -->
-
-	<!-- wp:column -->
-	<div class="wp-block-column">
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-		<figure class="wp-block-image size-large">
-			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
-		</figure>
-		<!-- /wp:image -->
-	</div>
-	<!-- /wp:column -->
-
-	<!-- wp:column -->
-	<div class="wp-block-column">
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-		<figure class="wp-block-image size-large">
-			<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
-		</figure>
-		<!-- /wp:image -->
-	</div>
-	<!-- /wp:column -->
-
-	<!-- wp:column -->
-	<div class="wp-block-column">
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
-		<figure class="wp-block-image size-large">
-			<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
-		</figure>
-		<!-- /wp:image -->
-	</div>
-	<!-- /wp:column -->
-</div>
-<!-- /wp:columns -->
+<!-- /wp:group -->
