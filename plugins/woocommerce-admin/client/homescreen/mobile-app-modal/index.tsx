@@ -23,11 +23,7 @@ import {
 	useSendMagicLink,
 	SendMagicLinkStates,
 } from './components';
-import {
-	EmailSentPage,
-	MobileAppInstallPage,
-	JetpackAlreadyInstalledPage,
-} from './pages';
+import { EmailSentPage, MobileAppLoginStepperPage } from './pages';
 import './style.scss';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
@@ -54,12 +50,19 @@ export const MobileAppModal = () => {
 		}
 	}, [ searchParams ] );
 
+	const [ appInstalledClicked, setAppInstalledClicked ] = useState( false );
 	const [ hasSentEmail, setHasSentEmail ] = useState( false );
 	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
 		useState( false );
 
 	const { requestState: magicLinkRequestStatus, fetchMagicLinkApiCall } =
 		useSendMagicLink();
+
+	const completeAppInstallationStep = useCallback( () => {
+		setAppInstalledClicked( true );
+		// TODO: track event
+		// recordEvent( 'magic_prompt_send_signin_link_click' );
+	}, [] );
 
 	const sendMagicLink = useCallback( () => {
 		fetchMagicLinkApiCall();
@@ -83,28 +86,30 @@ export const MobileAppModal = () => {
 					} }
 				/>
 			);
-		} else if (
-			state === JetpackPluginStates.FULL_CONNECTION &&
-			jetpackConnectionData?.currentUser?.wpcomUser?.email &&
-			! hasSentEmail
-		) {
+		} else {
+			const isJetpackPluginInstalled =
+				( state === JetpackPluginStates.FULL_CONNECTION &&
+					jetpackConnectionData?.currentUser?.wpcomUser?.email !==
+						undefined ) ??
+				false;
 			const wordpressAccountEmailAddress =
-				jetpackConnectionData?.currentUser.wpcomUser.email;
+				jetpackConnectionData?.currentUser?.wpcomUser?.email;
 			setPageContent(
-				<JetpackAlreadyInstalledPage
+				<MobileAppLoginStepperPage
+					appInstalledClicked={ appInstalledClicked }
+					isJetpackPluginInstalled={ isJetpackPluginInstalled }
 					wordpressAccountEmailAddress={
 						wordpressAccountEmailAddress
 					}
 					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
+					completeInstallationHandler={ completeAppInstallationStep }
 					sendMagicLinkHandler={ sendMagicLink }
+					sendMagicLinkStatus={ magicLinkRequestStatus }
 				/>
 			);
-		} else {
-			// Shows the installation page by default.
-			setPageContent( <MobileAppInstallPage /> );
 		}
 	}, [
+		appInstalledClicked,
 		sendMagicLink,
 		hasSentEmail,
 		isReturningFromWordpressConnection,
