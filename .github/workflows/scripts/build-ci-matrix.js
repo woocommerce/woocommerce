@@ -289,6 +289,7 @@ function cascadeProjectChanges( projectChanges ) {
  */
 function getPossibleCommands( packageFile, changes ) {
 	// Here are all of the commands that we support and the change criteria that they require to execute.
+	// We treat the command's criteria as passing if any of the properties are true.
 	const commandCriteria = {
 		lint: [ 'sourceFileChanges' ],
 		'test:php': [ 'phpSourceChanges', 'phpTestFileChanges' ],
@@ -299,13 +300,14 @@ function getPossibleCommands( packageFile, changes ) {
 	// We only want the list of possible commands to contain those that
 	// the project actually has and meet the criteria for execution.
 	const possibleCommands = [];
-	commandLoop: for ( const command in commandCriteria ) {
+	for ( const command in commandCriteria ) {
 		if ( ! packageFile.scripts?.[ command ] ) {
 			continue;
 		}
 
 		// The criteria only needs to be checked if there is a change object to evaluate.
 		if ( changes ) {
+			let commandCriteriaMet = false;
 			for ( const criteria of commandCriteria[ command ] ) {
 				// Confidence check to make sure the criteria wasn't misspelled.
 				if ( ! changes.hasOwnProperty( criteria ) ) {
@@ -314,9 +316,15 @@ function getPossibleCommands( packageFile, changes ) {
 					);
 				}
 
-				if ( ! changes[ criteria ] ) {
-					continue commandLoop;
+				if ( changes[ criteria ] ) {
+					commandCriteriaMet = true;
+					break;
 				}
+			}
+
+			// As long as we meet one of the criteria requirements we can add the command.
+			if ( ! commandCriteriaMet ) {
+				continue;
 			}
 		}
 
@@ -511,6 +519,3 @@ function buildCIMatrix( baseRef ) {
 }
 
 module.exports = buildCIMatrix;
-
-const check = buildCIMatrix( 'origin/trunk' );
-console.log( check );
