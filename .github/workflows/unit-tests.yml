@@ -39,6 +39,7 @@ jobs:
       runs-on: 'ubuntu-20.04'
       needs: 'build-ci-matrix'
       strategy:
+        fail-fast: false
         matrix:
           include: ${{ fromJSON( needs.build-ci-matrix.outputs.matrix ) }}
       steps:
@@ -54,4 +55,4 @@ jobs:
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
         - name: 'Test'
           if: ${{ matrix.runTests }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" lint'
+          run: 'pnpm --filter="${{ matrix.projectName }}" test'
