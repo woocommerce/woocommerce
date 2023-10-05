@@ -14,7 +14,7 @@ export const MobileAppInstallationInfo = () => {
 			<img
 				src={ MobileQRCode }
 				alt={ __( 'Download WooCommerce mobile app', 'woocommerce' ) }
-				width="100"
+				width="150"
 			/>
 			<p>
 				{ __(
