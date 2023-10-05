@@ -347,6 +347,9 @@ export const designWithAiStateMachineDefinition = createMachine(
 											},
 											// If there's an error we don't want to block the user from proceeding.
 											onError: {
+												actions: [
+													'assignFontPairing',
+												],
 												target: 'success',
 											},
 										},
