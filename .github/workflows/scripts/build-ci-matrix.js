@@ -177,6 +177,9 @@ function cascadeProjectChanges( projectChanges ) {
 		}
 
 		// Use PNPM to get a list of dependent packages that may have been affected.
+		// Note: This is actually a pretty slow way of doing this. If we find it is
+		// taking too long we can instead use `--depth="Infinity" --json` and then
+		// traverse the dependency tree ourselves.
 		const output = child_process.execSync(
 			`pnpm list --filter='...{./${ changes.path }}' --only-projects --depth='-1' --parseable`,
 			{ encoding: 'utf8' }
