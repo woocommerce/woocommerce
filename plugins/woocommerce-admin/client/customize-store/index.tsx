@@ -1,3 +1,6 @@
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
@@ -10,7 +13,7 @@ import {
 	updateQueryString,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { dispatch } from '@wordpress/data';
+import { dispatch, resolveSelect } from '@wordpress/data';
 import { addQueryArgs } from '@wordpress/url';
 import { Spinner } from '@woocommerce/components';
 
@@ -72,8 +75,15 @@ const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 };
 
 const markTaskComplete = async () => {
+	const currentTemplate = await resolveSelect(
+		coreStore
+		// @ts-expect-error No types for this exist yet.
+	).__experimentalGetTemplateForLink( '/' );
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
+		// we use this on the intro page to determine if this same theme was used in the last customization
+		woocommerce_admin_customize_store_completed_theme_id:
+			currentTemplate.id ?? undefined,
 	} );
 };
 
@@ -130,6 +140,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			activeTheme: '',
 			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
+			currentThemeIsAiGenerated: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -197,6 +208,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								'assignThemeData',
 								'assignActiveThemeHasMods',
 								'assignCustomizeStoreCompleted',
+								'assignCurrentThemeIsAiGenerated',
 							],
 						},
 					},

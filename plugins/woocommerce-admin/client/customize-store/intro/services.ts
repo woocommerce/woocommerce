@@ -1,12 +1,12 @@
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 // @ts-ignore No types for this exist yet.
-import { store as coreStore } from '@wordpress/core-data';
 import apiFetch from '@wordpress/api-fetch';
 
 // placeholder xstate async service that returns a set of theme cards
@@ -20,10 +20,21 @@ export const fetchThemeCards = async () => {
 };
 
 export const fetchIntroData = async () => {
+	let currentThemeIsAiGenerated = false;
 	const currentTemplate = await resolveSelect(
 		coreStore
 		// @ts-expect-error No types for this exist yet.
 	).__experimentalGetTemplateForLink( '/' );
+	const maybePreviousTemplate = await resolveSelect(
+		OPTIONS_STORE_NAME
+	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
+
+	if (
+		maybePreviousTemplate &&
+		currentTemplate?.id === maybePreviousTemplate
+	) {
+		currentThemeIsAiGenerated = true;
+	}
 
 	const styleRevs = await resolveSelect(
 		coreStore
