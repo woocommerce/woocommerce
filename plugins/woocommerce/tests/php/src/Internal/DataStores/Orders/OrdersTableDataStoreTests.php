@@ -3084,7 +3084,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save();
 
 		$this->assertTrue( $call_private->call( $this->sut, $order ) );
-	
+
 		// count the calls to the filter to ensure it's called only once.
 		$count = 0;
 		add_filter(
@@ -3101,7 +3101,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$current_time_called = false;
 		$datetime            = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		$now                 = $datetime->format( 'Y-m-d H:i:s' );
-		
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'current_time' => function( $type, $gmt ) use ( &$current_time_called, $now ) {
