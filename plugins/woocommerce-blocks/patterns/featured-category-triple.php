@@ -23,8 +23,8 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 1 out of 3.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image1 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
-				<!-- wp:heading {"level":4} -->
-				<h4 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h4>
+				<!-- wp:heading {"textAlign":"center","level":4} -->
+				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
@@ -44,8 +44,8 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 2 out of 3.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image2 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
-				<!-- wp:heading {"level":4} -->
-				<h4 class="wp-block-heading"><?php echo esc_html( $content['titles'][1]['default'] ); ?></h4>
+				<!-- wp:heading {"textAlign":"center","level":4} -->
+				<h4 class="wp-block-heading has-text-align-center "><?php echo esc_html( $content['titles'][1]['default'] ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
@@ -65,8 +65,8 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 3 out of 3', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image3 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
-				<!-- wp:heading {"level":4} -->
-				<h4 class="wp-block-heading"><?php echo esc_html( $content['titles'][2]['default'] ); ?></h4>
+				<!-- wp:heading {"textAlign":"center","level":4} -->
+				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $content['titles'][2]['default'] ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
