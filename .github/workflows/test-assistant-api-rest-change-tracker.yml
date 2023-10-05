@@ -1,4 +1,5 @@
 name: Send a Slack notification when a PR contains rest api changes
+
 on:
   pull_request_target:
     types: [labeled]
@@ -13,15 +14,6 @@ jobs:
       - name: Wait 2 minutes for other labelling jobs to finish
         run: sleep 2m
         shell: bash
-      
-      - name: Get Milestone Information
-        id: get-milestone
-        run: |
-          milestone_title=$(curl -s -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ github.event.pull_request.issue.milestone.url }}" | jq -r '.title')
-          milestone_description=$(curl -s -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ github.event.pull_request.issue.milestone.url }}" | jq -r '.description')
-          echo "::set-output name=milestone_title::$milestone_title"
-          echo "::set-output name=milestone_description::$milestone_description"
-
       - name: Notify Slack
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
         id: notify
@@ -31,7 +23,8 @@ jobs:
             slack-text: |
                 <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
                 *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
-                *Milestone:* ${{ steps.get-milestone.outputs.milestone_title }}
-                *Milestone Description:* ${{ steps.get-milestone.outputs.milestone_description }}
+                *Milestone:* <${{ github.event.pull_request.milestone.html_url }}|${{ github.event.pull_request.milestone.title }}>
+                *Due on:* ${{ github.event.pull_request.milestone.due_on }}
+                *Description:* ${{ github.event.pull_request.milestone.description }}
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
