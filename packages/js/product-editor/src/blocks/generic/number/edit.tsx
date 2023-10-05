@@ -31,6 +31,7 @@ export function Edit( {
 		<div { ...blockProps }>
 			<InputControl
 				{ ...inputProps }
+				__next36pxDefaultSize
 				label={ label }
 				suffix={ suffix }
 				help={ help }
