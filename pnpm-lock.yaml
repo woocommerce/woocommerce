@@ -2943,6 +2943,9 @@ importers:
       memize:
         specifier: ^1.1.0
         version: 1.1.0
+      qrcode.react:
+        specifier: ^3.1.0
+        version: 3.1.0(react@17.0.2)
       qs:
         specifier: ^6.10.3
         version: 6.10.3
@@ -42020,6 +42023,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /qrcode.react@3.1.0(react@17.0.2):
+    resolution: {integrity: sha512-oyF+Urr3oAMUG/OiOuONL3HXM+53wvuH3mtIWQrYmsXoAq0DkvZp2RYUWFSMFtbdOpuS++9v+WAkzNVkMlNW6Q==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 17.0.2
+    dev: false
 
   /qs@6.10.3:
     resolution: {integrity: sha512-wr7M2E0OFRfIfJZjKGieI8lBKb7fRCH4Fv5KNPEs7gJ8jadvotdsS08PzOKR7opXhZ/Xkjtt3WF9g38drmyRqQ==}
