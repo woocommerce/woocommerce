@@ -76,6 +76,7 @@ runs:
               fi
 
         - name: Cache Build Output
+          if: ${{ inputs.build == 'true' }}
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: .turbo
