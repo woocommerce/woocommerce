@@ -42,7 +42,7 @@ export function Edit( {
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
-		attributes.name || 'short_description'
+		attributes.property
 	);
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.

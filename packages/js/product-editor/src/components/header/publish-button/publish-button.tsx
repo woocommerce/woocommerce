@@ -20,7 +20,7 @@ import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
 export function PublishButton( {
 	productStatus,
-	postType = 'product',
+	productType = 'product',
 	...props
 }: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
@@ -29,7 +29,7 @@ export function PublishButton( {
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 
 	const publishButtonProps = usePublish( {
-		postType,
+		productType,
 		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {

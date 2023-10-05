@@ -59,6 +59,7 @@ class Init {
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
+			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
@@ -177,6 +178,18 @@ class Init {
 				$args['template']      = $template->get_formatted_template();
 			}
 		}
+		return $args;
+	}
+
+	/**
+	 * Enables variation post type in REST API.
+	 *
+	 * @param array $args Array of post type arguments.
+	 * @return array Array of post type arguments.
+	 */
+	public function enable_rest_api_for_product_variation( $args ) {
+		$args['show_in_rest'] = true;
+		
 		return $args;
 	}
 

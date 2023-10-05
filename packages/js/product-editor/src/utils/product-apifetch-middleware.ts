@@ -7,7 +7,7 @@ import { getQuery } from '@woocommerce/navigation';
 const routeMatchers = [
 	{
 		matcher: new RegExp( '^/wp/v2/product(?!_)' ),
-		replacement: '/wc/v3/products',
+		getReplaceString: (): string => '/wc/v3/products',
 	},
 	{
 		matcher: new RegExp( '^/wp/v2/product_variation' ),
@@ -41,18 +41,11 @@ export const productApiFetchMiddleware = () => {
 	// without disturbing the rest_namespace outside of the product block editor.
 	apiFetch.use( ( options, next ) => {
 		if ( options.path && isProductEditor() ) {
-			for ( const {
-				matcher,
-				replacement,
-				getReplaceString,
-			} of routeMatchers ) {
+			for ( const { matcher, getReplaceString } of routeMatchers ) {
 				if ( matcher.test( options.path ) ) {
-					const replacementString = getReplaceString
-						? getReplaceString()
-						: replacement;
 					options.path = options.path.replace(
 						matcher,
-						replacementString
+						getReplaceString()
 					);
 					break;
 				}

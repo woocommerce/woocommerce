@@ -8,7 +8,7 @@
 	"keywords": [ "products", "summary", "excerpt" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
+		"property": {
 			"type": "string"
 		},
 		"align": {

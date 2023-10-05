@@ -3,5 +3,5 @@ export type SummaryAttributes = {
 	allowedFormats?: string[];
 	direction: 'ltr' | 'rtl';
 	label: string;
-	name?: string;
+	property: string;
 };

@@ -20,18 +20,25 @@ import { Tabs } from '../tabs';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
-	postType?: string;
+	productType?: string;
 };
 
-export function Header( { onTabSelect, postType = 'product' }: HeaderProps ) {
-	const [ productId ] = useEntityProp< number >( 'postType', postType, 'id' );
+export function Header( {
+	onTabSelect,
+	productType = 'product',
+}: HeaderProps ) {
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		productType,
+		'id'
+	);
 
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return getEntityRecord< Product | ProductVariation >(
 				'postType',
-				postType,
+				productType,
 				productId
 			);
 		},
@@ -40,7 +47,7 @@ export function Header( { onTabSelect, postType = 'product' }: HeaderProps ) {
 
 	const [ editedProductName ] = useEntityProp< string >(
 		'postType',
-		postType,
+		productType,
 		'name'
 	);
 
@@ -67,15 +74,17 @@ export function Header( { onTabSelect, postType = 'product' }: HeaderProps ) {
 
 				<div className="woocommerce-product-header__actions">
 					<SaveDraftButton
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 
 					<PreviewButton
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 
 					<PublishButton
-						postType={ postType }
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 

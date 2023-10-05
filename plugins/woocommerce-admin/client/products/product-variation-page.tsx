@@ -18,7 +18,6 @@ import { useParams } from 'react-router-dom';
  */
 import './fills/product-block-editor-fills';
 import './product-page.scss';
-import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 import { useProductVariationEntityRecord } from './hooks/use-product-variation-entity-record';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
@@ -58,10 +57,9 @@ export default function ProductPage() {
 		<>
 			<Editor
 				product={ product }
-				postType="product_variation"
+				productType="product_variation"
 				settings={ productBlockEditorSettings || {} }
 			/>
-			<BlockEditorTourWrapper />
 		</>
 	);
 }

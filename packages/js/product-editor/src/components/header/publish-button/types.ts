@@ -9,5 +9,5 @@ export type PublishButtonProps = Omit<
 	'aria-disabled' | 'variant' | 'children'
 > & {
 	productStatus: Product[ 'status' ];
-	postType?: string;
+	productType?: string;
 };

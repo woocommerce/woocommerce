@@ -48,13 +48,13 @@ export type ProductEditorSettings = Partial<
 
 type EditorProps = {
 	product: Product | ProductVariation;
-	postType?: 'product' | 'product_variation';
+	productType?: string;
 	settings: ProductEditorSettings | undefined;
 };
 
 export function Editor( {
 	product,
-	postType = 'product',
+	productType = 'product',
 	settings,
 }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
@@ -66,7 +66,7 @@ export function Editor( {
 			<StrictMode>
 				<EntityProvider
 					kind="postType"
-					type={ postType }
+					type={ productType }
 					id={ product.id }
 				>
 					<ShortcutProvider>
@@ -77,18 +77,18 @@ export function Editor( {
 									header={
 										<Header
 											onTabSelect={ setSelectedTab }
-											postType={ postType }
+											productType={ productType }
 										/>
 									}
 									content={
 										<>
 											<BlockEditor
 												settings={ settings }
-												postType={ postType }
-												postId={ product.id }
+												productType={ productType }
+												productId={ product.id }
 												context={ {
 													selectedTab,
-													postType,
+													postType: productType,
 													postId: product.id,
 												} }
 											/>
@@ -97,7 +97,6 @@ export function Editor( {
 										</>
 									}
 								/>
-
 								<Popover.Slot />
 							</ValidationProvider>
 						</SlotFillProvider>
