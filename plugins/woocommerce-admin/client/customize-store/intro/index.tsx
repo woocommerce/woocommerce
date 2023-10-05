@@ -58,7 +58,7 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { themeCards, activeThemeHasMods, customizeStoreTaskCompleted },
+		intro: { themeData, activeThemeHasMods, customizeStoreTaskCompleted },
 	} = context;
 
 	const isJetpackOffline = false;
@@ -157,16 +157,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					</p>
 
 					<div className="woocommerce-customize-store-theme-cards">
-						{ themeCards?.map( ( themeCard ) => (
+						{ themeData.themes?.map( ( theme ) => (
 							<ThemeCard
-								key={ themeCard.slug }
-								slug={ themeCard.slug }
-								description={ themeCard.description }
-								image={ themeCard.image }
-								name={ themeCard.name }
-								colorPalettes={ themeCard.colorPalettes }
-								link={ themeCard?.link }
-								isActive={ themeCard.isActive }
+								key={ theme.slug }
+								slug={ theme.slug }
+								description={ theme.description }
+								thumbnail_url={ theme.thumbnail_url }
+								name={ theme.name }
+								color_palettes={ theme.color_palettes }
+								link_url={ theme?.link_url }
+								is_active={ theme.is_active }
 							/>
 						) ) }
 					</div>

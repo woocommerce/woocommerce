@@ -20,11 +20,20 @@ export type CustomizeStoreComponentMeta = {
 	component: CustomizeStoreComponent;
 };
 
+export type RecommendThemesAPIResponse = {
+	themes: ThemeCard[];
+	_links: {
+		browse_all?: {
+			href: string;
+		};
+	};
+};
+
 export type customizeStoreStateMachineContext = {
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
 		hasErrors: boolean;
-		themeCards: ThemeCard[];
+		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
 		activeThemeHasMods: boolean;
 		customizeStoreTaskCompleted: boolean;

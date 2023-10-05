@@ -28,13 +28,21 @@ describe( 'Intro Banners', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);
@@ -56,13 +64,21 @@ describe( 'Intro Banners', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);
