@@ -494,15 +494,15 @@ function buildCIMatrix( baseRef ) {
 	// Note: For now all we care about is testing.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
-			
-
 			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
 				testEnvConfig: JSON.stringify( task.testEnvConfig ),
+				runLint: task.commands.includes( 'lint' ),
 				runPHPTests: task.commands.includes( 'test:php' ),
 				runJSTests: task.commands.includes( 'test:js' ),
+				runE2E: task.commands.includes( 'e2e' ),
 			} );
 		}
 	}
