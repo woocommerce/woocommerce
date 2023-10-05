@@ -24,7 +24,5 @@ jobs:
                 <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
                 *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
                 *Milestone:* <${{ github.event.pull_request.milestone.html_url }}|${{ github.event.pull_request.milestone.title }}>
-                *Due on:* ${{ github.event.pull_request.milestone.due_on }}
-                *Description:* ${{ github.event.pull_request.milestone.description }}
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
