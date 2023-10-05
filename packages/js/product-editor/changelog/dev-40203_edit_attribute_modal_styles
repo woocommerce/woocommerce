@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Fix field label styling in the edit attribute modal #40449

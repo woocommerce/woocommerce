@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add z-index=1 to tour-kit close btn to ensure it's clickable

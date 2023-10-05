@@ -12,7 +12,7 @@ export const ProductFormFooter: React.FC< {
 } > = ( { product } ) => {
 	return (
 		<>
-			{ product && <ProductMVPCESFooter product={ product } /> }
+			{ product && <ProductMVPCESFooter productType={ product.type } /> }
 			<ProductMVPFeedbackModalContainer />
 		</>
 	);

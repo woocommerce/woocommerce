@@ -26,11 +26,10 @@ jobs:
 
             - name: Get Changed Files
               id: changed-files
-              uses: tj-actions/changed-files@v32
+              uses: tj-actions/changed-files@v39
               with:
                   path: plugins/woocommerce
-                  files: |
-                      **/*.php
+                  files: "**/*.php"
 
             - name: Setup WooCommerce Monorepo
               if: steps.changed-files.outputs.any_changed == 'true'
@@ -49,7 +48,4 @@ jobs:
             - name: Run PHPCS
               if: steps.changed-files.outputs.any_changed == 'true'
               working-directory: plugins/woocommerce
-              run: |
-                  HEAD_REF=$(git rev-parse HEAD)
-                  git checkout $HEAD_REF
-                  phpcs-changed -s --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+              run: phpcs-changed -s --git --git-base ${{ github.event.pull_request.base.sha }} ${{ steps.changed-files.outputs.all_changed_files }}

@@ -11,9 +11,8 @@ import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
 	FontPairing,
-	Header,
-	Footer,
 	ColorPaletteResponse,
+	HomepageTemplate,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -23,12 +22,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import {
-	defaultColorPalette,
-	fontPairings,
-	defaultHeader,
-	defaultFooter,
-} from './prompts';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -77,10 +71,16 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
-				defaultColorPalette: {} as ColorPaletteResponse,
-				fontPairing: '' as FontPairing[ 'pair_name' ],
-				header: '' as Header[ 'slug' ],
-				footer: '' as Footer[ 'slug' ],
+				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
+				defaultColorPalette: {
+					default: 'Ancient Bronze',
+				} as ColorPaletteResponse,
+				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
+			},
+			apiCallLoader: {
+				hasErrors: false,
 			},
 		},
 		initial: 'navigate',
@@ -310,6 +310,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 												],
 												target: 'success',
 											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												target: 'success',
+											},
 										},
 									},
 									success: { type: 'final' },
@@ -341,62 +345,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 												],
 												target: 'success',
 											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							chooseHeader: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultHeader,
-													prompt: defaultHeader.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [ 'assignHeader' ],
-												target: 'success',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							chooseFooter: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...defaultFooter,
-													prompt: defaultFooter.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [ 'assignFooter' ],
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
 												target: 'success',
 											},
 										},
@@ -414,8 +364,30 @@ export const designWithAiStateMachineDefinition = createMachine(
 												target: 'success',
 											},
 											onError: {
-												// TODO: handle error
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
 												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
 											},
 										},
 									},
@@ -438,15 +410,15 @@ export const designWithAiStateMachineDefinition = createMachine(
 												target: 'done',
 											},
 											onError: {
-												target: 'failed',
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
 											},
 										},
 									},
 									done: {
 										type: 'final',
-									},
-									failed: {
-										type: 'final', // If there's an error we should not block the user from proceeding. They'll just not see the AI suggestions, but that's better than being stuck
 									},
 								},
 							},
@@ -475,9 +447,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 						},
 						onDone: {
 							actions: [
-								sendParent( () => ( {
-									type: 'THEME_SUGGESTED',
-								} ) ),
+								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
+								'redirectToAssemblerHub',
 							],
 						},
 					},

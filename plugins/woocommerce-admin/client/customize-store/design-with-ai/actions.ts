@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { assign, spawn } from 'xstate';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	getQuery,
+	updateQueryString,
+	getNewPath,
+} from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -18,6 +22,7 @@ import {
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
+	HomepageTemplate,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -150,6 +155,24 @@ const assignFooter = assign<
 	},
 } );
 
+const assignHomepageTemplate = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			homepageTemplate: (
+				event as {
+					data: {
+						response: HomepageTemplate;
+					};
+				}
+			 ).data.response.homepage_template,
+		};
+	},
+} );
+
 const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woo_ai_describe_store_description: descriptionText,
@@ -171,6 +194,17 @@ const spawnSaveDescriptionToOption = assign<
 				),
 			'update-woo-ai-business-description-option'
 		),
+} );
+
+const assignAPICallLoaderError = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	apiCallLoader: () => {
+		return {
+			hasErrors: true,
+		};
+	},
 } );
 
 const logAIAPIRequestError = () => {
@@ -234,6 +268,14 @@ const recordTracksStepCompleted = (
 	} );
 };
 
+const redirectToAssemblerHub = () => {
+	window.location.href = getNewPath(
+		{},
+		'/customize-store/assembler-hub',
+		{}
+	);
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -243,10 +285,13 @@ export const actions = {
 	assignFontPairing,
 	assignHeader,
 	assignFooter,
+	assignHomepageTemplate,
+	assignAPICallLoaderError,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
 	recordTracksStepClosed,
 	recordTracksStepCompleted,
 	spawnSaveDescriptionToOption,
+	redirectToAssemblerHub,
 };

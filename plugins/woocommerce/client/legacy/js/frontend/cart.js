@@ -60,23 +60,22 @@ jQuery( function( $ ) {
 	/**
 	 * Removes duplicate notices.
 	 *
-	 * @param {JQuery Object} notices
+	 * @param {JQuery Object} $notices
 	 */
-	var remove_duplicate_notices = function( notices ) {
-		var seen = [];
-		var new_notices = notices;
+	var remove_duplicate_notices = function( $notices ) {
+		var seen                 = new Set();
+		var deduplicated_notices = [];
 
-		notices.each( function( index ) {
-			var text = $( this ).text();
+		$notices.each( function() {
+			const text = $( this ).text();
 
-			if ( 'undefined' === typeof seen[ text ] ) {
-				seen[ text ] = true;
-			} else {
-				new_notices.splice( index, 1 );
+			if ( ! seen.has( text ) ) {
+				seen.add( text );
+				deduplicated_notices.push( this );
 			}
 		} );
 
-		return new_notices;
+		return $( deduplicated_notices );
 	};
 
 	/**

@@ -24,6 +24,14 @@ export default function Discover(): JSX.Element | null {
 		setIsLoading( true );
 
 		fetchDiscoverPageData()
+			.then(
+				( response: Array< ProductGroup > | { success: boolean } ) => {
+					if ( ! Array.isArray( response ) ) {
+						return [];
+					}
+					return response as Array< ProductGroup >;
+				}
+			)
 			.then( ( products: Array< ProductGroup > ) => {
 				setProductGroups( products );
 			} )
@@ -45,6 +53,7 @@ export default function Discover(): JSX.Element | null {
 					title={ groups.title }
 					products={ groups.items }
 					groupURL={ groups.url }
+					type={ groups.itemType }
 				/>
 			) ) }
 		</div>

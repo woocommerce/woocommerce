@@ -43,10 +43,10 @@ async function getDefaultVariationValues(
 		if ( products && products.length > 0 && products[ 0 ].regular_price ) {
 			return {
 				regular_price: products[ 0 ].regular_price,
-				stock_quantity: products[ 0 ].stock_quantity,
+				stock_quantity: products[ 0 ].stock_quantity ?? undefined,
 				stock_status: products[ 0 ].stock_status,
 				manage_stock: products[ 0 ].manage_stock,
-				low_stock_amount: products[ 0 ].low_stock_amount,
+				low_stock_amount: products[ 0 ].low_stock_amount ?? undefined,
 			};
 		}
 		return {};

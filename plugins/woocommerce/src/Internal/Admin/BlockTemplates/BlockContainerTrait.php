@@ -9,6 +9,10 @@ use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
  * Trait for block containers.
  */
 trait BlockContainerTrait {
+	use BlockFormattedTemplateTrait {
+		get_formatted_template as get_block_formatted_template;
+	}
+
 	/**
 	 * The inner blocks.
 	 *
@@ -197,10 +201,7 @@ trait BlockContainerTrait {
 	 * Get the inner blocks as a formatted template.
 	 */
 	public function get_formatted_template(): array {
-		$arr = [
-			$this->get_name(),
-			$this->get_attributes(),
-		];
+		$arr = $this->get_block_formatted_template();
 
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
