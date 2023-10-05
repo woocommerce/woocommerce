@@ -9,11 +9,10 @@ import { Stepper, StepperProps } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { SendMagicLinkStates } from './';
+import { SendMagicLinkButton, SendMagicLinkStates } from './';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
-import { JetpackAlreadyInstalledPage } from '../pages';
 
 export const MobileAppLoginStepper = ( {
 	step,
@@ -92,15 +91,12 @@ export const MobileAppLoginStepper = ( {
 							wordpressAccountEmailAddress
 						),
 						content: (
-							<JetpackAlreadyInstalledPage
-								wordpressAccountEmailAddress={
-									wordpressAccountEmailAddress
+							<SendMagicLinkButton
+								isFetching={
+									sendMagicLinkStatus ===
+									SendMagicLinkStates.FETCHING
 								}
-								isRetryingMagicLinkSend={
-									isRetryingMagicLinkSend
-								}
-								sendMagicLinkStatus={ sendMagicLinkStatus }
-								sendMagicLinkHandler={ sendMagicLinkHandler }
+								onClickHandler={ sendMagicLinkHandler }
 							/>
 						),
 					},
