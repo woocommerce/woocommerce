@@ -45,9 +45,6 @@ jobs:
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
-        - name: 'Dump Test ENV Vars'
-          env: ${{ matrix.testEnvVars }}
-          run: 'printenv'
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
           with:
