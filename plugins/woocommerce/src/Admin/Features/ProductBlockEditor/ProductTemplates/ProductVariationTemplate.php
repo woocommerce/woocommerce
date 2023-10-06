@@ -196,9 +196,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-regular-price-field',
 				'order'      => 10,
 				'attributes' => [
-					'name'  => 'regular_price',
-					'label' => __( 'Regular price', 'woocommerce' ),
-					'isRequired' => true
+					'name'       => 'regular_price',
+					'label'      => __( 'Regular price', 'woocommerce' ),
+					'isRequired' => true,
 				],
 			]
 		);
@@ -229,7 +229,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'     => 20,
 			]
 		);
-		
+
 		$product_pricing_section->add_block(
 			[
 				'id'         => 'product-tax-class',
