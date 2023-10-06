@@ -52,7 +52,7 @@ jobs:
             install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
         - name: 'Lint'
-          if: ${{ matrix.runLint && !cancelled() && steps.setup-monorepo.conclusion == 'success' }}
+          if: ${{ !cancelled() && matrix.runLint && steps.setup-monorepo.conclusion == 'success' }}
           run: 'pnpm --filter="${{ matrix.projectName }}" lint'
         - name: 'Prepare Test Environment'
           id: 'prepare-test-environment'
@@ -60,11 +60,11 @@ jobs:
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
         - name: 'Test - JS'
-          if: ${{ matrix.runJSTests && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.runJSTests && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:js'
         - name: 'Test - PHP'
-          if: ${{ matrix.runPHPTests && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.runPHPTests && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:php'
         - name: 'E2E'
-          if: ${{ matrix.runE2E && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.runE2E && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" e2e'
