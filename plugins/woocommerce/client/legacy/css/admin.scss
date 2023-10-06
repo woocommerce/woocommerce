@@ -3940,6 +3940,10 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings {
+	#zone_name {
+		width: 600px;
+	}
+
 	th {
 		padding: 24px 24px 24px 0;
 	}
@@ -3974,9 +3978,12 @@ table.wc_shipping {
 
 	.wc-shipping-zone-postcodes-toggle {
 		margin: 0.5em 0 0;
-		font-size: 0.9em;
 		text-decoration: underline;
 		display: block;
+		font-family: $font-sf-pro-text;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
 	}
 
 	.wc-shipping-zone-postcodes-toggle + .wc-shipping-zone-postcodes {
@@ -3984,14 +3991,27 @@ table.wc_shipping {
 	}
 
 	.wc-shipping-zone-postcodes {
-		textarea {
+		width: 100%;
+		max-width: 600px;
+
+		#zone_postcodes {
 			margin: 10px 0;
+			padding: 8px;
+			width: 100%;
 		}
 
 		.description {
-			font-size: 0.9em;
-			color: #999;
+			font-family: $font-sf-pro-text;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 18px;
+			color: #3C434A;
 		}
+	}
+
+	#wc-shipping-zone-region-picker-root {
+		width: 100%;
+			max-width: 600px;
 	}
 }
 
