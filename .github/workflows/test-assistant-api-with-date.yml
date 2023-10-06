@@ -12,21 +12,23 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Wait 1 minute for other labelling jobs to finish
-        run: sleep 2m
+        run: sleep 1m
         shell: bash
-      
+
       # New Step to Calculate Test Date
       - name: Calculate test date
         id: calculate_date
         run: |
-          # Your Bash script to calculate the date and determine the message.
-          # This may involve using the `date` command and possibly `jq` to parse JSON outputs from GitHub API.
-          # Example:
-          # current_week_day=$(date -u +"%u")  # 1 (for Monday) through 7 (for Sunday)
-          # ... [More scripting to determine the message based on the current date and time]
-          # echo "Can be tested: [Your Calculated Date]"
-          echo "TEST_DATE_MESSAGE=Can be tested: [Your Calculated Date]" >> $GITHUB_ENV
-      
+          #!/bin/bash
+          DAY_MERGED=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%u")
+          HOUR_MERGED=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%H")
+          if [[ "$DAY_MERGED" -le 3 ]] || [[ "$DAY_MERGED" -eq 3 && "$HOUR_MERGED" -lt 23 ]]; then
+            TEST_DATE_MESSAGE="Can be tested this Thursday"
+          else
+            TEST_DATE_MESSAGE="Can be tested next Thursday"
+          fi
+          echo "TEST_DATE_MESSAGE=${TEST_DATE_MESSAGE}" >> $GITHUB_ENV
+
       # Notify Slack Step
       - name: Notify Slack
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
