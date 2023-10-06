@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes } from '@wordpress/blocks';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
 import { Icon, help } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -12,16 +11,19 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { CheckboxBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
 	context: { postType },
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: ProductEditorBlockEditProps< CheckboxBlockAttributes > ) {
+	const { property, title, label, tooltip, onValue, offValue } = attributes;
+
 	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
 		...attributes,
 	} );
-	const { property, title, label, tooltip, onValue, offValue } = attributes;
+
 	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
 		postType,
 		fallbackValue: false,
