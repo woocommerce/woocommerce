@@ -245,6 +245,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'property'    => 'tax_class',
 					'options'     => [
 						[
+							'label' => __( 'Same as main product', 'woocommerce' ),
+							'value' => 'parent',
+						],
+						[
 							'label' => __( 'Standard', 'woocommerce' ),
 							'value' => '',
 						],
