@@ -3,6 +3,7 @@ export type Subscription = {
 	product_id: number;
 	product_name: string;
 	product_url: string;
+	product_icon: string;
 	key_type: string;
 	key_type_label: string;
 	autorenew: boolean;

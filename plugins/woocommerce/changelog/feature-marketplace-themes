@@ -1,3 +1,5 @@
 Significance: minor
-Type: update
-Comment: Moved "My Subscriptions" functionality into the new WooCommerce > Extensions system and updated the design.
+Type: enhancement
+
+Add Themes to the Extensions catalogue for easy download and installation. 
+
