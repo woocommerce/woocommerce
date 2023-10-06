@@ -13,7 +13,8 @@
 .components-guide.woocommerce__mobile-app-welcome-modal {
 	max-width: 964px;
 	min-width: 534px;
-	height: 600px;
+	// Overrides the default modal max-height.
+	max-height: 663px;
 
 	.components-modal__header {
 		height: 0;
