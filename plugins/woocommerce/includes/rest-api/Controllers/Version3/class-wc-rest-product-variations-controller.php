@@ -99,7 +99,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
 			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
 			'tax_status'            => $object->get_tax_status(),
-			'tax_class'             => $object->get_tax_class(),
+			'tax_class'             => $object->get_tax_class( $context ),
 			'manage_stock'          => $object->managing_stock(),
 			'stock_quantity'        => $object->get_stock_quantity(),
 			'stock_status'          => $object->get_stock_status(),
