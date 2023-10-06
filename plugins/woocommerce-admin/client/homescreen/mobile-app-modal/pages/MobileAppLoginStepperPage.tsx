@@ -14,7 +14,6 @@ interface MobileAppLoginStepperPageProps {
 	appInstalledClicked: boolean;
 	isJetpackPluginInstalled: boolean;
 	wordpressAccountEmailAddress: string | undefined;
-	isRetryingMagicLinkSend: boolean;
 	completeInstallationHandler: () => void;
 	sendMagicLinkHandler: () => void;
 	sendMagicLinkStatus: SendMagicLinkStates;
@@ -26,7 +25,6 @@ export const MobileAppLoginStepperPage: React.FC<
 	appInstalledClicked,
 	isJetpackPluginInstalled,
 	wordpressAccountEmailAddress,
-	isRetryingMagicLinkSend,
 	completeInstallationHandler,
 	sendMagicLinkHandler,
 	sendMagicLinkStatus,
@@ -44,7 +42,6 @@ export const MobileAppLoginStepperPage: React.FC<
 			step={ appInstalledClicked ? 'second' : 'first' }
 			isJetpackPluginInstalled={ isJetpackPluginInstalled }
 			wordpressAccountEmailAddress={ wordpressAccountEmailAddress }
-			isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 			completeInstallationStepHandler={ completeInstallationHandler }
 			sendMagicLinkHandler={ sendMagicLinkHandler }
 			sendMagicLinkStatus={ sendMagicLinkStatus }

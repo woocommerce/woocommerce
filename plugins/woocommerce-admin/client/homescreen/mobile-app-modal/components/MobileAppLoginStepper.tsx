@@ -18,7 +18,6 @@ export const MobileAppLoginStepper = ( {
 	step,
 	isJetpackPluginInstalled,
 	wordpressAccountEmailAddress,
-	isRetryingMagicLinkSend,
 	completeInstallationStepHandler,
 	sendMagicLinkHandler,
 	sendMagicLinkStatus,
@@ -26,7 +25,6 @@ export const MobileAppLoginStepper = ( {
 	step: 'first' | 'second';
 	isJetpackPluginInstalled: boolean;
 	wordpressAccountEmailAddress: string | undefined;
-	isRetryingMagicLinkSend: boolean;
 	completeInstallationStepHandler: () => void;
 	sendMagicLinkHandler: () => void;
 	sendMagicLinkStatus: SendMagicLinkStates;

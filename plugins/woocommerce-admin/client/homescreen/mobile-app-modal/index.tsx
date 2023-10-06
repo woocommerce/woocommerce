@@ -100,7 +100,6 @@ export const MobileAppModal = () => {
 					wordpressAccountEmailAddress={
 						wordpressAccountEmailAddress
 					}
-					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
 					completeInstallationHandler={ completeAppInstallationStep }
 					sendMagicLinkHandler={ sendMagicLink }
 					sendMagicLinkStatus={ magicLinkRequestStatus }
