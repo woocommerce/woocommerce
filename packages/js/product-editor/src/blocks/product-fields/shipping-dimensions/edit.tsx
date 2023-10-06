@@ -38,19 +38,20 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	clientId,
+	context,
 }: ProductEditorBlockEditProps< ShippingDimensionsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ dimensions, setDimensions ] =
 		useEntityProp< Partial< ProductDimensions > | null >(
 			'postType',
-			'product',
+			context.postType,
 			'dimensions'
 		);
 
 	const [ weight, setWeight ] = useEntityProp< string | null >(
 		'postType',
-		'product',
+		context.postType,
 		'weight'
 	);
 

@@ -426,22 +426,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
-		$shipping_group->add_block(
-			[
-				'id'         => 'product_variation_notice_shipping_tab',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
-				'order'      => 10,
-				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
-				],
-			]
-		);
-		// Product Pricing Section.
+		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
-				'id'         => 'product-fee-and-dimensions-section',
+				'id'         => 'product-variation-fee-and-dimensions-section',
 				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
@@ -456,14 +444,14 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_fee_and_dimensions_section->add_block(
 			[
-				'id'        => 'product-shipping-class',
+				'id'        => 'product-variation-shipping-class',
 				'blockName' => 'woocommerce/product-shipping-class-field',
 				'order'     => 10,
 			]
 		);
 		$product_fee_and_dimensions_section->add_block(
 			[
-				'id'        => 'product-shipping-dimensions',
+				'id'        => 'product-variation-shipping-dimensions',
 				'blockName' => 'woocommerce/product-shipping-dimensions-fields',
 				'order'     => 20,
 			]

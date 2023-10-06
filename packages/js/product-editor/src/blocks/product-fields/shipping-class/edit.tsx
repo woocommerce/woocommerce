@@ -71,6 +71,7 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
+	context,
 }: ProductEditorBlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
@@ -90,7 +91,7 @@ export function Edit( {
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
-		'product',
+		context.postType,
 		'shipping_class'
 	);
 
