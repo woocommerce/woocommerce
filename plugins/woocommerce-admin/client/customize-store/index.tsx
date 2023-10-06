@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
-import { addQueryArgs } from '@wordpress/url';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -25,11 +25,7 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	Transitional,
-	events as transitionalEvents,
-	services as transitionalServices,
-} from './transitional';
+import { events as transitionalEvents } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -68,8 +64,10 @@ const redirectToWooHome = () => {
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
-const redirectToThemes = () => {
-	window.location.href = addQueryArgs( 'themes.php' );
+const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
+	window.location.href =
+		_context?.intro?.themeData?._links?.browse_all?.href ??
+		getAdminLink( 'themes.php' );
 };
 
 const markTaskComplete = async () => {
@@ -102,7 +100,6 @@ export const customizeStoreStateMachineActions = {
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
-	...transitionalServices,
 	browserPopstateHandler,
 	markTaskComplete,
 };
@@ -121,7 +118,14 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	context: {
 		intro: {
 			hasErrors: false,
-			themeCards: [] as ThemeCard[],
+			themeData: {
+				themes: [] as ThemeCard[],
+				_links: {
+					browse_all: {
+						href: getAdminLink( 'themes.php' ),
+					},
+				},
+			},
 			activeTheme: '',
 			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
@@ -189,7 +193,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						onDone: {
 							target: 'intro',
 							actions: [
-								'assignThemeCards',
+								'assignThemeData',
 								'assignActiveThemeHasMods',
 								'assignCustomizeStoreCompleted',
 							],
@@ -264,14 +268,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'markTaskComplete',
 						onDone: {
-							target: 'waitForSitePreview',
-						},
-					},
-				},
-				waitForSitePreview: {
-					after: {
-						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
-						5000: {
 							target: '#customizeStore.transitionalScreen',
 						},
 					},
@@ -279,8 +275,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
-					// Pre-fetch the site preview image for the site for transitional page.
-					actions: [ 'prefetchSitePreview' ],
 					target: '.postAssemblerHub',
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
@@ -291,7 +285,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
 			meta: {
-				component: Transitional,
+				component: AssemblerHub,
 			},
 			on: {
 				GO_BACK_TO_HOME: {
@@ -368,6 +362,7 @@ export const CustomizeStoreController = ( {
 						parentMachine={ service }
 						sendEvent={ send }
 						context={ state.context }
+						currentState={ state.value }
 					/>
 				) : (
 					<div />

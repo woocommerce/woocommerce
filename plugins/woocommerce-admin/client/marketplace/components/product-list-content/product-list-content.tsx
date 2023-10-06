@@ -3,12 +3,13 @@
  */
 import './product-list-content.scss';
 import ProductCard from '../product-card/product-card';
-import { Product } from '../product-list/types';
+import { Product, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 import { getAdminSetting } from '../../../utils/admin-settings';
 
 export default function ProductListContent( props: {
 	products: Product[];
+	type: ProductType;
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -17,9 +18,11 @@ export default function ProductListContent( props: {
 			{ props.products.map( ( product ) => (
 				<ProductCard
 					key={ product.id }
-					type="classic"
+					type={ props.type }
 					product={ {
 						title: product.title,
+						image: product.image,
+						type: product.type,
 						icon: product.icon,
 						vendorName: product.vendorName,
 						vendorUrl: product.vendorUrl

@@ -13,31 +13,31 @@ import { ColorPalettes } from './color-palettes';
 export const ThemeCard = ( {
 	slug,
 	description,
-	image,
+	thumbnail_url,
 	name,
-	colorPalettes = [],
-	link = '',
-	isActive = false,
+	color_palettes = [],
+	link_url = '',
+	is_active = false,
 }: TypeThemeCard ) => {
 	return (
 		<div className="theme-card" key={ slug }>
 			<div>
-				{ link ? (
-					<Link href={ link }>
-						<img src={ image } alt={ description } />
+				{ link_url ? (
+					<Link href={ link_url }>
+						<img src={ thumbnail_url } alt={ description } />
 					</Link>
 				) : (
-					<img src={ image } alt={ description } />
+					<img src={ thumbnail_url } alt={ description } />
 				) }
 			</div>
 			<div className="theme-card__info">
 				<h2 className="theme-card__title">{ name }</h2>
-				{ colorPalettes && (
-					<ColorPalettes colorPalettes={ colorPalettes } />
+				{ color_palettes && (
+					<ColorPalettes colorPalettes={ color_palettes } />
 				) }
 			</div>
 			<div>
-				{ isActive && (
+				{ is_active && (
 					<span className="theme-card__active">
 						{ __( 'Active theme', 'woocommerce' ) }
 					</span>

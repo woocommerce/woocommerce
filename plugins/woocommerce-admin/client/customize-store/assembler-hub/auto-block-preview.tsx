@@ -47,7 +47,8 @@ export type ScaledBlockPreviewProps = {
 	};
 	additionalStyles: string;
 	onClickNavigationItem: ( event: MouseEvent ) => void;
-	isNavigable: boolean;
+	isNavigable?: boolean;
+	isScrollable?: boolean;
 };
 
 function ScaledBlockPreview( {
@@ -57,6 +58,7 @@ function ScaledBlockPreview( {
 	additionalStyles,
 	onClickNavigationItem,
 	isNavigable = false,
+	isScrollable = true,
 }: ScaledBlockPreviewProps ) {
 	const { setLogoBlock } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
@@ -78,6 +80,7 @@ function ScaledBlockPreview( {
 		<DisabledProvider value={ true }>
 			<Iframe
 				aria-hidden
+				scrolling={ isScrollable ? 'yes' : 'no' }
 				tabIndex={ -1 }
 				readonly={ ! isNavigable }
 				contentRef={ useRefEffect(
