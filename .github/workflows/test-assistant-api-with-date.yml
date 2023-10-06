@@ -14,6 +14,20 @@ jobs:
       - name: Wait 1 minute for other labelling jobs to finish
         run: sleep 2m
         shell: bash
+      
+      # New Step to Calculate Test Date
+      - name: Calculate test date
+        id: calculate_date
+        run: |
+          # Your Bash script to calculate the date and determine the message.
+          # This may involve using the `date` command and possibly `jq` to parse JSON outputs from GitHub API.
+          # Example:
+          # current_week_day=$(date -u +"%u")  # 1 (for Monday) through 7 (for Sunday)
+          # ... [More scripting to determine the message based on the current date and time]
+          # echo "Can be tested: [Your Calculated Date]"
+          echo "TEST_DATE_MESSAGE=Can be tested: [Your Calculated Date]" >> $GITHUB_ENV
+      
+      # Notify Slack Step
       - name: Notify Slack
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
         id: notify
@@ -24,5 +38,6 @@ jobs:
                 <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
                 *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
                 *Milestone:* <${{ github.event.pull_request.milestone.html_url }}|${{ github.event.pull_request.milestone.title }}>
+                *${{ env.TEST_DATE_MESSAGE }}*
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
