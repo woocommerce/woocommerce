@@ -123,6 +123,19 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
+		$basic_details->add_block(
+			[
+				'id'         => 'product-variation-visibility',
+				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 30,
+				'attributes' => [
+					'property' => 'status',
+					'label'    => __( 'Hide in product catalog', 'woocommerce' ),
+					'onValue'  => 'private',
+					'offValue' => 'publish',
+				],
+			]
+		);
 
 		// Images section.
 		$images_section = $general_group->add_section(
