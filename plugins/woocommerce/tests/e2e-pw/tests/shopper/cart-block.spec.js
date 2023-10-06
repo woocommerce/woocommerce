@@ -4,14 +4,18 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const simpleProductName = 'Single Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
-const singleProductPrice = '110.00';
+const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const firstCrossSellProductPrice = '25.00';
 const secondCrossSellProductPrice = '15.00';
+const doubleProductsPrice = +singleProductSalePrice * 2;
+const singleProductWithCrossSellProducts =
+	+singleProductFullPrice +
+	+firstCrossSellProductPrice +
+	+secondCrossSellProductPrice;
 
 const pageTitle = 'Cart Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
-const productSlug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 
 let product1Id, product2Id, product3Id;
 
@@ -51,7 +55,7 @@ test.describe( 'Cart Block page', () => {
 				name: simpleProductName,
 				description: simpleProductDesc,
 				type: 'simple',
-				regular_price: singleProductPrice,
+				regular_price: singleProductFullPrice,
 				sale_price: singleProductSalePrice,
 				cross_sell_ids: [ product2Id, product3Id ],
 				manage_stock: true,
@@ -136,8 +140,8 @@ test.describe( 'Cart Block page', () => {
 		page,
 	} ) => {
 		// add product to cart block
-		await page.goto( `product/${ productSlug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -160,7 +164,7 @@ test.describe( 'Cart Block page', () => {
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
-		).toHaveText( '$110.00' );
+		).toContainText( `$${ doubleProductsPrice.toString() }` );
 		await expect(
 			page.getByRole( 'button' ).filter( { hasText: '＋', exact: true } )
 		).toBeDisabled();
@@ -200,7 +204,9 @@ test.describe( 'Cart Block page', () => {
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
-		).toHaveText( '$150.00' );
+		).toContainText(
+			`$${ singleProductWithCrossSellProducts.toString() }`
+		);
 
 		// remove cross-sell products from cart
 		await page.locator( ':nth-match(:text("Remove item"), 3)' ).click();

@@ -3,7 +3,7 @@ const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const simpleProductName = 'A Simple Product';
-const singleProductPrice = '110.00';
+const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
 	{
@@ -25,11 +25,10 @@ const coupons = [
 
 const pageTitle = 'Cart Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
-const productSlug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 
 let product1Id;
 
-test.describe( 'Cart Block applying coupons', () => {
+test.describe( 'Cart Block Applying Coupons', () => {
 	const couponBatchId = new Array();
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -48,7 +47,7 @@ test.describe( 'Cart Block applying coupons', () => {
 			.post( 'products', {
 				name: simpleProductName,
 				type: 'simple',
-				regular_price: singleProductPrice,
+				regular_price: singleProductFullPrice,
 				sale_price: singleProductSalePrice,
 			} )
 			.then( ( response ) => {
@@ -126,8 +125,8 @@ test.describe( 'Cart Block applying coupons', () => {
 	} ) => {
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
 		// add product to cart block
-		await page.goto( `product/${ productSlug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -170,8 +169,8 @@ test.describe( 'Cart Block applying coupons', () => {
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
 		// add product to cart block
-		await page.goto( `product/${ productSlug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -219,8 +218,8 @@ test.describe( 'Cart Block applying coupons', () => {
 		page,
 	} ) => {
 		// add product to cart block
-		await page.goto( `product/${ productSlug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
