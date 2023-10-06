@@ -36,12 +36,12 @@ To choose, put yourself in the merchant’s shoes: where would you go to find th
 
 Field extensions are the simplest type of extension. They can add new, replace, and expand existing form fields in any section, hide fields, and change form defaults.
 
-#### ✅ What they are for:
+#### ✅ What they are for
 
 * Single-field, supplementary features
 * Showing or hiding form elements depending on specific conditions
 
-#### ❌ What they aren’t for:
+#### ❌ What they aren’t for
 
 * Multi-field or multi-step forms
 * Complex tables
@@ -56,13 +56,13 @@ Field extensions are the simplest type of extension. They can add new, replace, 
 
 Groups add extra fields to existing form sections. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
-#### ✅ What they are for:
+#### ✅ What they are for
 
 * Relevant features that can be crucial to merchants’ product creation flow
 * 2-5 field forms with limited functionality, f.e. dimensions or tax settings
 * Lists of items, f.e. attachments, channels, or accounts
 
-#### ❌ What they aren’t for:
+#### ❌ What they aren’t for
 
 * Simple extensions with 1-2 fields
 * Multi-step forms and complex tables
@@ -78,13 +78,13 @@ Groups add extra fields to existing form sections. They are small forms with a l
 
 Sections are significant parts of the form that may consist of multiple groups and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
-#### ✅ What they are for:
+#### ✅ What they are for
 
 * Complex forms with multiple fields, tables, and list items
 * Standalone features that that doesn’t build off of anything else
 * Extensions that rely on user-created items, such as tags or attributes
 
-#### ❌ What they aren’t for:
+#### ❌ What they aren’t for
 
 * Simple extensions with 1-2 fields
 * Read-only descriptions, setup guides, and advertisements
