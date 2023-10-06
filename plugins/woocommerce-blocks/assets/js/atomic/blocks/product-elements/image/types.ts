@@ -24,4 +24,6 @@ export interface BlockAttributes {
 	width?: string;
 	// Image scaling method.
 	scale: 'cover' | 'contain' | 'fill';
+	// Aspect ratio of the image.
+	aspectRatio: string;
 }
