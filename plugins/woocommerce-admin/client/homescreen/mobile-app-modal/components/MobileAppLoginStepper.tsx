@@ -13,6 +13,12 @@ import { SendMagicLinkButton, SendMagicLinkStates } from './';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
+import apiFetch from '@wordpress/api-fetch';
+
+interface ApplicationPasswordData {
+	password: string;
+	uuid: string;
+}
 
 export const MobileAppLoginStepper = ( {
 	step,
@@ -102,9 +108,47 @@ export const MobileAppLoginStepper = ( {
 					},
 				] );
 			} else {
-				const siteUrl: string | undefined =
-					getAdminSetting( 'siteUrl' );
+				const siteUrl: string = getAdminSetting( 'siteUrl' );
 				const username = getAdminSetting( 'currentUserData' ).username;
+
+				// TODO: move to a separate function for generating application password
+				const userId = getAdminSetting( 'currentUserData' ).id;
+				const currentDate = new Date();
+				const dateString = currentDate.toISOString();
+				const applicationPasswordName = `wc_onboarding_mobile_app_login_${ dateString }`;
+				const data = {
+					name: applicationPasswordName,
+				};
+
+				const promise: Promise< ApplicationPasswordData > = apiFetch( {
+					path: `/wp/v2/users/${ userId }/application-passwords`,
+					method: 'POST',
+					data,
+				} );
+
+				promise
+					.then( ( data ) => {
+						const applicationPassword = data.password;
+						const applicationPasswordUUID = data.uuid;
+						const loginUrl = `woocommerce://app-login?site_url=${ encodeURIComponent(
+							siteUrl
+						) }&username=${ encodeURIComponent(
+							username
+						) }&application_password=${ encodeURIComponent(
+							applicationPassword
+						) }&uuid=${ encodeURIComponent(
+							applicationPasswordUUID
+						) }`;
+						console.log( loginUrl );
+					} )
+					.catch( ( error ) => {
+						// TODO: handle the error here
+						console.error(
+							'API request error from generating application password:',
+							error
+						);
+					} );
+
 				const loginUrl = `woocommerce://app-login?siteUrl=${ siteUrl }&username=${ username }`;
 				const description = loginUrl
 					? __(
