@@ -63,7 +63,7 @@ export const MediaUploader = ( {
 	return (
 		<FormFileUpload
 			accept={ getFormFileUploadAcceptedFiles().toString() }
-			multiple={ true }
+			multiple={ Boolean( multipleSelect ) }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
 					filesList: currentTarget.files as FileList,
