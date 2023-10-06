@@ -1,16 +1,35 @@
-#woocommerce-ai-app-remove-background-link {
-	display: flex;
 
-	> button {
-		color: #2271b1;
-		padding: 0;
-		border: 0;
-		background: none;
-		cursor: pointer;
+#woocommerce-ai-app-remove-background-link  {
+	.components-notice {
+		padding: 0 0 0 5px;
+		margin: 5px 0 0 0;
+		font-size: .8em;
+		max-width: 125px;
+
+		.components-button.has-icon {
+			width: 25px;
+			min-width: unset;
+		}
 	}
 
-	> img {
-		height: 16px;
-	}
+	.background-link_actions {
+		display: flex;
 
+		> button {
+			color: #2271b1;
+			padding: 0;
+			border: 0;
+			background: none;
+			cursor: pointer;
+		}
+
+		> img {
+			height: 16px;
+		}
+	}
 }
+
+body.post-type-product .woocommerce-layout__footer {
+	z-index: 160001; /* value chosen to appear above media library modal */
+}
+
