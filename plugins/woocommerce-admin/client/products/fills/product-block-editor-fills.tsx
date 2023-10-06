@@ -3,15 +3,8 @@
  */
 import { MenuGroup } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-} from '@woocommerce/product-editor';
-import { Product } from '@woocommerce/data';
+import { __experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { registerPlugin } from '@wordpress/plugins';
-import { useSelect } from '@wordpress/data';
-import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -27,16 +20,10 @@ import {
 	AboutTheEditorMenuItem,
 } from '../fills/more-menu-items';
 
-const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
+export const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
-
-	const { type, status } = useSelect(
-		( select ) => {
-			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', 'product', id ) as Product;
-		},
-		[ id ]
-	);
+	const [ type ] = useEntityProp( 'postType', 'product', 'type' );
+	const [ status ] = useEntityProp( 'postType', 'product', 'status' );
 
 	const recordClick = ( optionName: string ) => {
 		recordEvent( 'product_dropdown_option_click', {
@@ -77,25 +64,8 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	);
 };
 
-const ProductHeaderFill = () => {
+export const ProductHeaderFill = () => {
 	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
 
 	return <ProductMVPFeedbackModalContainer productId={ id } />;
 };
-
-registerPlugin( 'wc-admin-more-menu', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-block-editor',
-	render: () => (
-		<>
-			<WooProductMoreMenuItem>
-				{ ( { onClose }: { onClose: () => void } ) => (
-					<MoreMenuFill onClose={ onClose } />
-				) }
-			</WooProductMoreMenuItem>
-			<WooHeaderItem name="product">
-				<ProductHeaderFill />
-			</WooHeaderItem>
-		</>
-	),
-} );

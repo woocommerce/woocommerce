@@ -4,23 +4,30 @@
 import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
+	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 } from '@woocommerce/product-editor';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { WooFooterItem } from '@woocommerce/admin-layout';
+import { registerPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
-import './fills/product-block-editor-fills';
-import './product-page.scss';
+import {
+	MoreMenuFill,
+	ProductHeaderFill,
+} from './fills/product-block-editor-fills';
 import { useProductVariationEntityRecord } from './hooks/use-product-variation-entity-record';
+import { DeleteVariationMenuItem } from './fills/more-menu-items';
+import './product-page.scss';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
 
@@ -73,3 +80,23 @@ export default function ProductPage() {
 		</>
 	);
 }
+
+registerPlugin( 'wc-admin-more-menu', {
+	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
+	scope: 'woocommerce-product-block-editor',
+	render: () => (
+		<>
+			<WooProductMoreMenuItem>
+				{ ( { onClose }: { onClose: () => void } ) => (
+					<>
+						<DeleteVariationMenuItem onClick={ onClose } />
+						<MoreMenuFill onClose={ onClose } />
+					</>
+				) }
+			</WooProductMoreMenuItem>
+			<WooHeaderItem name="product">
+				<ProductHeaderFill />
+			</WooHeaderItem>
+		</>
+	),
+} );
