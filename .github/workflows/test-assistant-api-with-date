@@ -1,4 +1,4 @@
-name: Send a Slack notification when a PR contains rest api changes
+name: Test Send a Slack notification when a PR contains rest api changes
 
 on:
   pull_request_target:
