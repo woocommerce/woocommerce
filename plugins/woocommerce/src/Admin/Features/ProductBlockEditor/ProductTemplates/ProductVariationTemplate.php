@@ -156,18 +156,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
-		$pricing_group->add_block(
-			[
-				'id'         => 'pricing-has-variations-notice',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
-				'order'      => 10,
-				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
-				],
-			]
-		);
 		// Product Pricing Section.
 		$product_pricing_section = $pricing_group->add_section(
 			[
@@ -209,7 +197,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'      => 10,
 				'attributes' => [
 					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
+					'label' => __( 'Regular price', 'woocommerce' ),
 				],
 			]
 		);
@@ -240,48 +228,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'     => 20,
 			]
 		);
+		
 		$product_pricing_section->add_block(
-			[
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => [
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => [
-						[
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						],
-						[
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						],
-						[
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						],
-					],
-				],
-			]
-		);
-		$pricing_advanced_block = $product_pricing_section->add_block(
-			[
-				'id'         => 'product-pricing-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 40,
-				'attributes' => [
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				],
-			]
-		);
-		$pricing_advanced_block->add_block(
 			[
 				'id'         => 'product-tax-class',
 				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
+				'order'      => 40,
 				'attributes' => [
 					'title'       => __( 'Tax class', 'woocommerce' ),
 					'description' => sprintf(
