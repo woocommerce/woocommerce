@@ -253,12 +253,13 @@ export function Edit( {
 					{ ( Array.isArray( propertyValue )
 						? propertyValue
 						: [ propertyValue ]
-					).map( ( image ) => (
+					).map( ( image, index ) => (
 						<ImageGalleryItem
 							key={ image.id }
 							alt={ image.alt }
 							src={ image.src }
 							id={ `${ image.id }` }
+							isCover={ multiple && index === 0 }
 						/>
 					) ) }
 				</ImageGallery>

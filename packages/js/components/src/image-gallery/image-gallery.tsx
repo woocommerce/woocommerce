@@ -100,12 +100,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
-					const isCoverItem = ( childIndex === 0 ) as boolean;
 
 					return cloneElement(
 						child,
 						{
-							isCover: isCoverItem,
+							isDraggable: allowDragging && ! child.props.isCover,
 							className: classnames( {
 								'is-toolbar-visible': isToolbarVisible,
 							} ),
