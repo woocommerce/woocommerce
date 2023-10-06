@@ -585,6 +585,10 @@
 		"content": {
 			"titles": [
 				{
+					"default": "What our customers say",
+					"ai_prompt": "A title that advertises the set of testimonials"
+				},
+				{
 					"default": "Great experience",
 					"ai_prompt": "A title that advertises the first testimonial"
 				},
@@ -595,10 +599,6 @@
 				{
 					"default": "Awesome couch and great buying experience",
 					"ai_prompt": "A title that advertises the third testimonial"
-				},
-				{
-					"default": "What our customers say",
-					"ai_prompt": "A title that advertises the set of testimonials"
 				}
 			],
 			"descriptions": [
