@@ -46,23 +46,25 @@ jobs:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
         - uses: './.github/actions/setup-woocommerce-monorepo'
+          id: 'setup-monorepo'
           name: 'Setup Monorepo'
           with:
             install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
+        - name: 'Lint'
+          if: ${{ matrix.runLint && !cancelled() && steps.setup-monorepo.conclusion == 'success' }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" lint'
         - name: 'Prepare Test Environment'
+          id: 'prepare-test-environment'
           if: ${{ matrix.needsTestEnvironment }}
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
-        - name: 'Lint'
-          if: ${{ matrix.runLint }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" lint'
         - name: 'Test - JS'
-          if: ${{ matrix.runJSTests }}
+          if: ${{ matrix.runJSTests && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:js'
         - name: 'Test - PHP'
-          if: ${{ matrix.runPHPTests }}
+          if: ${{ matrix.runPHPTests && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:php'
         - name: 'E2E'
-          if: ${{ matrix.runE2E }}
+          if: ${{ matrix.runE2E && !cancelled() && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" e2e'
