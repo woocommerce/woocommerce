@@ -11,7 +11,7 @@ jobs:
     if: "${{ github.event.label.name == 'test: label' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
     runs-on: ubuntu-20.04
     steps:
-      - name: Wait 2 minutes for other labelling jobs to finish
+      - name: Wait 1 minute for other labelling jobs to finish
         run: sleep 2m
         shell: bash
       - name: Notify Slack
