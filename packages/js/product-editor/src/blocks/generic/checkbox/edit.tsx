@@ -15,16 +15,17 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
 		...attributes,
 	} );
 	const { property, title, label, tooltip } = attributes;
-	const [ value, setValue ] = useProductEntityProp< boolean >(
-		property,
-		false
-	);
+	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
+		postType,
+		fallbackValue: false,
+	} );
 
 	return (
 		<div { ...blockProps }>

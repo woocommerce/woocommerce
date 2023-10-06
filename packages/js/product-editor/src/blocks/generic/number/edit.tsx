@@ -17,13 +17,17 @@ import { NumberBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, property, suffix, placeholder, help } = attributes;
-	const [ value, setValue ] = useProductEntityProp( property );
+	const [ value, setValue ] = useProductEntityProp( property, {
+		postType,
+		fallbackValue: '',
+	} );
 
 	const inputProps = useNumberInputProps( {
-		value,
+		value: value || '',
 		onChange: setValue,
 	} );
 

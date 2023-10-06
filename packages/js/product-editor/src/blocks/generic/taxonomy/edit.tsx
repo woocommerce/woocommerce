@@ -35,6 +35,7 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
@@ -74,9 +75,9 @@ export function Edit( {
 
 	const [ selectedEntries, setSelectedEntries ] = useProductEntityProp<
 		Taxonomy[]
-	>( property, [] );
+	>( property, { postType, fallbackValue: [] } );
 
-	const mappedEntries = selectedEntries.map( ( b ) => ( {
+	const mappedEntries = ( selectedEntries || [] ).map( ( b ) => ( {
 		value: String( b.id ),
 		label: b.name,
 	} ) );
@@ -127,7 +128,7 @@ export function Edit( {
 									name: i.label,
 									parent: +( i.parent || 0 ),
 								} ) ),
-								...selectedEntries,
+								...( selectedEntries || [] ),
 							] );
 						} else {
 							setSelectedEntries( [
@@ -136,14 +137,14 @@ export function Edit( {
 									name: selectedItems.label,
 									parent: +( selectedItems.parent || 0 ),
 								},
-								...selectedEntries,
+								...( selectedEntries || [] ),
 							] );
 						}
 					} }
 					onRemove={ ( removedItems ) => {
 						if ( Array.isArray( removedItems ) ) {
 							setSelectedEntries(
-								selectedEntries.filter(
+								( selectedEntries || [] ).filter(
 									( taxonomy ) =>
 										! removedItems.find(
 											( item ) =>
@@ -154,7 +155,7 @@ export function Edit( {
 							);
 						} else {
 							setSelectedEntries(
-								selectedEntries.filter(
+								( selectedEntries || [] ).filter(
 									( taxonomy ) =>
 										String( taxonomy.id ) !==
 										removedItems.value
@@ -180,7 +181,7 @@ export function Edit( {
 									name: taxonomy.name,
 									parent: taxonomy.parent,
 								},
-								...selectedEntries,
+								...( selectedEntries || [] ),
 							] );
 						} }
 						initialName={ searchValue }

@@ -24,12 +24,16 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { property, label, help } = attributes;
-	const [ price, setPrice ] = useProductEntityProp< string >( property, '' );
+	const [ price, setPrice ] = useProductEntityProp< string >( property, {
+		postType,
+		fallbackValue: '',
+	} );
 	const inputProps = useCurrencyInputProps( {
-		value: price,
+		value: price || '',
 		onChange: setPrice,
 	} );
 

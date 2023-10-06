@@ -6,19 +6,24 @@ import { useEntityProp } from '@wordpress/core-data';
 interface Metadata< T > {
 	id?: number;
 	key: string;
-	value: T;
+	value?: T;
+}
+
+interface UseProductEntityPropConfig< T > {
+	postType?: string;
+	fallbackValue?: T;
 }
 
 function useProductEntityProp< T >(
 	property: string,
-	fallbackValue: T
-): [ T, ( value: T ) => void ] {
+	config?: UseProductEntityPropConfig< T >
+): [ T | undefined, ( value: T ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
 	const metaPropertyKey = property.replace( 'meta_data.', '' );
 
 	const [ entityPropValue, setEntityPropValue ] = useEntityProp< T >(
 		'postType',
-		'product',
+		config?.postType || 'product',
 		property
 	);
 	const [ metadata, setMetadata ] = useEntityProp< Metadata< T >[] >(
@@ -29,7 +34,7 @@ function useProductEntityProp< T >(
 
 	const value = isMeta
 		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value ||
-		  fallbackValue
+		  config?.fallbackValue
 		: entityPropValue;
 	const setValue = isMeta
 		? ( newValue: T ) => {

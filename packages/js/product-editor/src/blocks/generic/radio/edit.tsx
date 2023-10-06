@@ -14,10 +14,14 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< RadioBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { description, options, property, title } = attributes;
-	const [ value, setValue ] = useProductEntityProp< string >( property, '' );
+	const [ value, setValue ] = useProductEntityProp< string >( property, {
+		postType,
+		fallbackValue: '',
+	} );
 
 	return (
 		<div { ...blockProps }>
