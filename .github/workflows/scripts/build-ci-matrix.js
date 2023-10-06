@@ -610,9 +610,14 @@ function generateProjectTasksForWorkspace() {
  * A CI matrix for the GitHub workflow.
  *
  * @typedef	{Object} CIMatrix
- * @property {string}  name               The name of the project.
- * @property {boolean} hasTestEnvironment Whether or not the project has a test environment.
- * @property {boolean} runTests           Whether or not tests should be run for the project.
+ * @property {string}                 projectName          The name of the project.
+ * @property {string}                 taskName             The name of the task.
+ * @property {boolean}                needsTestEnvironment Whether or not the task needs a test environment.
+ * @property {Object.<string,string>} testEnvVars          The environment variables for the test environment.
+ * @property {boolean}                runLint              Whether or not linting should be run for the project.
+ * @property {boolean}                runPHPTests          Whether or not PHP tests should be run for the project.
+ * @property {boolean}                runJSTests           Whether or not JS tests should be run for the project.
+ * @property {boolean}                runE2E               Whether or not E2E tests should be run for the project.
  */
 
 /**
@@ -658,16 +663,11 @@ async function buildCIMatrix( baseRef ) {
 	// Parse the tasks and generate matrix entries for each of them.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
-			// Must be a string so that it can be unwrapped by the workflow.
-			const testEnvVars = JSON.stringify(
-				await parseTestEnvConfig( task.testEnvConfig )
-			);
-
 			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
-				testEnvVars,
+				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
 				runLint: task.commands.includes( 'lint' ),
 				runPHPTests: task.commands.includes( 'test:php' ),
 				runJSTests: task.commands.includes( 'test:js' ),
