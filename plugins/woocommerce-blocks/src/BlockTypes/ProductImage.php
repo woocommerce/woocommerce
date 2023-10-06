@@ -158,6 +158,9 @@ class ProductImage extends AbstractBlock {
 		if ( ! empty( $attributes['scale'] ) ) {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
+		if ( ! empty( $attributes['aspectRatio'] ) ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
+		}
 
 		if ( ! $product->get_image_id() ) {
 			// The alt text is left empty on purpose, as it's considered a decorative image.

@@ -47,6 +47,9 @@ export const blockAttributes: BlockAttributes = {
 		type: 'string',
 		default: 'cover',
 	},
+	aspectRatio: {
+		type: 'string',
+	},
 };
 
 export default blockAttributes;
