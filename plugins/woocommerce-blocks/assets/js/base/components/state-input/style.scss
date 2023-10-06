@@ -1,3 +1,8 @@
 .wc-block-components-state-input {
 	margin-top: em($gap-large);
+
+	// Fixes width in the editor.
+	.components-flex {
+		width: 100%;
+	}
 }
