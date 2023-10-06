@@ -198,6 +198,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'name'  => 'regular_price',
 					'label' => __( 'Regular price', 'woocommerce' ),
+					'isRequired' => true
 				],
 			]
 		);
