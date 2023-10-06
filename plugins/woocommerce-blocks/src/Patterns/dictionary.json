@@ -526,14 +526,14 @@
 		}
 	},
 	{
-		"name": "Social: Follow us in social media",
+		"name": "Social: Follow us on social media",
 		"slug": "woocommerce-blocks/social-follow-us-in-social-media",
 		"images_total": 4,
 		"images_format": "landscape",
 		"content": {
 			"titles": [
 				{
-					"default": "Follow us in social media",
+					"default": "Follow us on social media",
 					"ai_prompt": "An phrase that advertises the social media accounts"
 				}
 			]
