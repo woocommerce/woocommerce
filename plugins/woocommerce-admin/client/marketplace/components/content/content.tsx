@@ -26,6 +26,7 @@ export default function Content(): JSX.Element {
 
 	// Get the content for this screen
 	useEffect( () => {
+		const abortController = new AbortController();
 		if ( [ '', 'discover' ].includes( selectedTab ) ) {
 			return;
 		}
@@ -62,7 +63,7 @@ export default function Content(): JSX.Element {
 			params.toString();
 
 		// Fetch data from WCCOM API
-		fetch( wccomSearchEndpoint )
+		fetch( wccomSearchEndpoint, { signal: abortController.signal } )
 			.then( ( response ) => response.json() )
 			.then( ( response ) => {
 				/**
@@ -96,6 +97,9 @@ export default function Content(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
+		return () => {
+			abortController.abort();
+		};
 	}, [ query.term, query.category, selectedTab, setIsLoading ] );
 
 	const renderContent = (): JSX.Element => {
