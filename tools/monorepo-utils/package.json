@@ -47,7 +47,8 @@
 		"lint": "eslint . --ext .ts",
 		"postinstall": "pnpm run build",
 		"turbo:test": "jest",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name"
+		"test": "pnpm test:js",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name"
 	},
 	"engines": {
 		"node": "^16.14.1",
