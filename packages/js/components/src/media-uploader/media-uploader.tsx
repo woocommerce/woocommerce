@@ -36,8 +36,8 @@ type MediaUploaderProps = {
 		file: File;
 	} ) => void;
 	onMediaGalleryOpen?: () => void;
-	onUpload?: ( files: MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem[] ) => void;
+	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
+	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
 };
 
@@ -60,16 +60,21 @@ export const MediaUploader = ( {
 	const getFormFileUploadAcceptedFiles = () =>
 		allowedMediaTypes.map( ( type ) => `${ type }/*` );
 
+	const multiple = Boolean( multipleSelect );
+
 	return (
 		<FormFileUpload
 			accept={ getFormFileUploadAcceptedFiles().toString() }
-			multiple={ Boolean( multipleSelect ) }
+			multiple={ multiple }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
+					allowedTypes: allowedMediaTypes,
 					filesList: currentTarget.files as FileList,
-					onError,
-					onFileChange: onFileUploadChange,
 					maxUploadFileSize,
+					onError,
+					onFileChange( files ) {
+						onFileUploadChange( multiple ? files : files[ 0 ] );
+					},
 				} );
 			} }
 			render={ ( { openFileDialog } ) => (
@@ -118,10 +123,15 @@ export const MediaUploader = ( {
 							<DropZone
 								onFilesDrop={ ( files ) =>
 									uploadMedia( {
+										allowedTypes: allowedMediaTypes,
 										filesList: files,
-										onError,
-										onFileChange: onUpload,
 										maxUploadFileSize,
+										onError,
+										onFileChange( files ) {
+											onUpload(
+												multiple ? files : files[ 0 ]
+											);
+										},
 									} )
 								}
 							/>
