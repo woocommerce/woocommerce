@@ -30,13 +30,9 @@ describe( 'useBackgroundRemoval hook', () => {
 		const imageFile = new File( [ new ArrayBuffer( 51200 ) ], 'test.png', {
 			type: 'image/png',
 		} );
-		const returnedImageType = 'jpeg';
-		const returnedImageSize = 'hd';
 
 		mockRequestParams = {
 			imageFile,
-			returnedImageType,
-			returnedImageSize,
 		};
 		mockedRequestJetpackToken.mockResolvedValue( { token: 'fake_token' } );
 	} );
@@ -45,20 +41,16 @@ describe( 'useBackgroundRemoval hook', () => {
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		expect( result.current.imageData ).toBeNull();
 		expect( result.current.loading ).toBeFalsy();
-		expect( result.current.error ).toBeNull();
 	} );
 
 	it( 'should return error on empty token', async () => {
 		mockedRequestJetpackToken.mockResolvedValue( { token: '' } );
 		const { result } = renderHook( () => useBackgroundRemoval() );
-		act( () => {
-			result.current.fetchImage( mockRequestParams );
-		} );
-		await waitFor( () =>
-			expect( result.current.error ).toEqual(
-				new Error( 'Invalid token' )
-			)
-		);
+		await expect(
+			act( async () => {
+				result.current.fetchImage( mockRequestParams );
+			} )
+		).rejects.toThrow( 'Invalid token' );
 	} );
 
 	it( 'should handle invalid file type', async () => {
@@ -67,16 +59,12 @@ describe( 'useBackgroundRemoval hook', () => {
 			'test.txt',
 			{ type: 'text/plain' }
 		);
-
 		const { result } = renderHook( () => useBackgroundRemoval() );
-
-		await act( async () => {
-			result.current.fetchImage( mockRequestParams );
-		} );
-
-		expect( result.current.error ).toEqual(
-			new Error( 'Invalid image file' )
-		);
+		await expect(
+			act( async () => {
+				result.current.fetchImage( mockRequestParams );
+			} )
+		).rejects.toThrow( 'Invalid image file' );
 	} );
 
 	it( 'should return error on image file too small', async () => {
@@ -85,16 +73,12 @@ describe( 'useBackgroundRemoval hook', () => {
 			'test.png',
 			{ type: 'image/png' }
 		); // 1KB
-
 		const { result } = renderHook( () => useBackgroundRemoval() );
-
-		await act( async () => {
-			result.current.fetchImage( mockRequestParams );
-		} );
-
-		expect( result.current.error ).toEqual(
-			new Error( 'Image file too small, must be at least 5KB' )
-		);
+		await expect(
+			act( async () => {
+				result.current.fetchImage( mockRequestParams );
+			} )
+		).rejects.toThrow( 'Image file too small, must be at least 5KB' );
 	} );
 
 	it( 'should return error on image file too large', async () => {
@@ -103,16 +87,12 @@ describe( 'useBackgroundRemoval hook', () => {
 			'test.png',
 			{ type: 'image/png' }
 		); // 10MB
-
 		const { result } = renderHook( () => useBackgroundRemoval() );
-
-		await act( async () => {
-			result.current.fetchImage( mockRequestParams );
-		} );
-
-		expect( result.current.error ).toEqual(
-			new Error( 'Image file too large, must be under 10MB' )
-		);
+		await expect(
+			act( async () => {
+				result.current.fetchImage( mockRequestParams );
+			} )
+		).rejects.toThrow( 'Image file too large, must be under 10MB' );
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
@@ -135,7 +115,6 @@ describe( 'useBackgroundRemoval hook', () => {
 			result.current.fetchImage( mockRequestParams );
 		} );
 		expect( result.current.loading ).toBe( false );
-		expect( result.current.error ).toBe( null );
 		expect( result.current.imageData ).toBeInstanceOf( Blob );
 	} );
 
@@ -144,11 +123,12 @@ describe( 'useBackgroundRemoval hook', () => {
 			apiFetch as jest.MockedFunction< typeof apiFetch >
 		 ).mockRejectedValue( new Error( 'API Error' ) );
 		const { result } = renderHook( () => useBackgroundRemoval() );
-		await act( async () => {
-			result.current.fetchImage( mockRequestParams );
-		} );
+		await expect(
+			act( async () => {
+				result.current.fetchImage( mockRequestParams );
+			} )
+		).rejects.toThrow( 'API Error' );
 		expect( result.current.loading ).toBe( false );
-		expect( result.current.error ).not.toBeNull();
 		expect( result.current.imageData ).toBe( null );
 	} );
 } );
