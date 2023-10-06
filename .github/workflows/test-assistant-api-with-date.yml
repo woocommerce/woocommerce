@@ -15,14 +15,24 @@ jobs:
         run: sleep 1m
         shell: bash
 
-      # New Step to Calculate Test Date
       - name: Calculate test date
         id: calculate_date
         run: |
           #!/bin/bash
-          DAY_MERGED=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%u")
-          HOUR_MERGED=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%H")
-          if [[ "$DAY_MERGED" -le 3 ]] || [[ "$DAY_MERGED" -eq 3 && "$HOUR_MERGED" -lt 23 ]]; then
+          MERGED_TIMESTAMP=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%s")
+          
+          # Get the day of the week of the merged PR (0 for Sunday, 1 for Monday, etc.)
+          MERGE_DAY_OF_WEEK=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%u")
+          
+          # Calculate days until the next Wednesday after the merge
+          DAYS_UNTIL_NEXT_WEDNESDAY=$(( (3 - MERGE_DAY_OF_WEEK + 7) % 7 + 1 ))
+          
+          # Calculate the next Wednesday timestamp after the merge
+          WEDNESDAY_AFTER_MERGE_TIMESTAMP=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_WEDNESDAY days" +"%s")
+          
+          CURRENT_TIMESTAMP=$(date -u +"%s")
+          
+          if [[ "$WEDNESDAY_AFTER_MERGE_TIMESTAMP" -le "$CURRENT_TIMESTAMP" ]]; then
             TEST_DATE_MESSAGE="Can be tested this Thursday"
           else
             TEST_DATE_MESSAGE="Can be tested next Thursday"
