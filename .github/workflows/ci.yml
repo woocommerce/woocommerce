@@ -60,7 +60,7 @@ jobs:
           id: 'prepare-test-environment'
           if: ${{ !cancelled() && matrix.needsTestEnvironment && steps.setup-monorepo.conclusion == 'success' }}
           env: ${{ matrix.testEnvVars }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
+          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnvCommand }}'
         - name: 'Test - JS'
           if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.jsTestCommand }}'

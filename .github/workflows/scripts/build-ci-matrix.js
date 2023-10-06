@@ -404,6 +404,7 @@ function cascadeProjectChanges( projectChanges ) {
  * @property {string}                 name                 The name of the task.
  * @property {Array.<string>}         commands             The commands that the project should run.
  * @property {Object.<string,string>} customCommands       Any commands that should be run in place of the default commands.
+ * @property {string}				  testEnvCommand       The command that should be run to start the test environment.
  * @property {boolean}                needsTestEnvironment Whether or not the project needs a test environment.
  * @property {Object.<string,string>} testEnvConfig        Any configuration for the test environment if one is needed.
  */
@@ -516,8 +517,24 @@ function buildTasksForProject( projectPath, changes ) {
 	// command is actually run when it comes time to execute the task.
 	const customCommands = packageFile.config?.ci?.customCommands ?? {};
 
+	// Support overriding the test environment command.
+	let testEnvCommand = null;
+	if ( packageFile.config?.ci?.testEnvCommand ) {
+		testEnvCommand = packageFile.config.ci.testEnvCommand;
+
+		// Since this was entered by a developer we need to throw an error
+		// if the command doesn't exist. This prevents mistakes from
+		// going unnoticed.
+		if ( ! packageFile.scripts?.[ testEnvCommand ] ) {
+			throw new Error(
+				`Unknown test environment command "${ testEnvCommand }".`
+			);
+		}
+	} else if ( packageFile.scripts?.[ 'test:env:start' ] ) {
+		testEnvCommand = 'test:env:start';
+	}
+
 	// Certain tasks may require a test environment if one exists.
-	const hasTestEnvironment = !! packageFile.scripts?.[ 'test:env:start' ];
 	const needsTestEnvironmentFn = ( task ) =>
 		task === 'test:php' || task === 'test:js' || task === 'e2e';
 	const testEnvConfig = packageFile.config?.ci?.testEnvConfig ?? {};
@@ -528,8 +545,9 @@ function buildTasksForProject( projectPath, changes ) {
 			name: packageFile.config?.ci?.name ?? 'default',
 			commands: possibleCommands,
 			customCommands,
+			testEnvCommand: testEnvCommand,
 			needsTestEnvironment:
-				hasTestEnvironment &&
+				testEnvCommand &&
 				possibleCommands.some( needsTestEnvironmentFn ),
 			testEnvConfig,
 		},
@@ -569,9 +587,35 @@ function buildTasksForProject( projectPath, changes ) {
 				additionalTask.customCommands ?? {}
 			);
 
+			// Make sure all of the custom commands exist.
+			for ( const command in taskCustomCommands ) {
+				const commandScript = taskCustomCommands[ command ];
+				if ( ! packageFile.scripts?.[ commandScript ] ) {
+					throw new Error(
+						`Unknown custom command "${ commandScript }" for additional task "${ additionalTask.name }" in ${ projectPath }.`
+					);
+				}
+			}
+
+			let taskTestEnvCommand = null;
+			if ( additionalTask.testEnvCommand ) {
+				taskTestEnvCommand = additionalTask.testEnvCommand;
+
+				// Since this was entered by a developer we need to throw an error
+				// if the command doesn't exist. This prevents mistakes from
+				// going unnoticed.
+				if ( ! packageFile.scripts?.[ taskTestEnvCommand ] ) {
+					throw new Error(
+						`Unknown test environment command "${ taskTestEnvCommand }" for additional task "${ additionalTask.name }" in ${ projectPath }.`
+					);
+				}
+			} else if ( packageFile.scripts?.[ 'test:env:start' ] ) {
+				taskTestEnvCommand = 'test:env:start';
+			}
+
 			// Make sure to use the additional task's configuration as overrides instead of a replacement for the entire config object.
 			const taskNeedsTestEnvironment =
-				hasTestEnvironment &&
+				taskTestEnvCommand &&
 				taskCommands.some( needsTestEnvironmentFn );
 			const taskTestEnvConfig = Object.assign(
 				{},
@@ -584,6 +628,7 @@ function buildTasksForProject( projectPath, changes ) {
 				name: additionalTask.name,
 				commands: taskCommands,
 				customCommands: taskCustomCommands,
+				testEnvCommand: taskTestEnvCommand,
 				needsTestEnvironment: taskNeedsTestEnvironment,
 				testEnvConfig: taskTestEnvConfig,
 			} );
@@ -750,6 +795,7 @@ async function buildCIMatrix( baseRef ) {
 				projectName: project.name,
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
+				testEnvCommand: task.testEnvCommand,
 				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
 				lintCommand: getCommandForMatrix( task, 'lint', commandTokens ),
 				phpTestCommand: getCommandForMatrix(
@@ -771,3 +817,5 @@ async function buildCIMatrix( baseRef ) {
 }
 
 module.exports = buildCIMatrix;
+
+buildCIMatrix( 'origin/trunk' ).then( ( matrix ) => console.log( matrix ) );
