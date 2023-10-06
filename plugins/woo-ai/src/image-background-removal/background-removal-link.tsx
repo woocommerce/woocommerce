@@ -86,11 +86,13 @@ export const BackgroundRemovalLink = () => {
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );
-			const errorCode = ( err as { code?: string } )?.code ?? '';
-			setDisplayError( getErrorMessage( errorCode ) );
+			const errorMessage = getErrorMessage(
+				( err as { code?: string } )?.code ?? ''
+			);
+			setDisplayError( errorMessage );
 
 			recordTracks( 'error', {
-				error: errorCode,
+				error: errorMessage,
 			} );
 		} finally {
 			setState( '' );
