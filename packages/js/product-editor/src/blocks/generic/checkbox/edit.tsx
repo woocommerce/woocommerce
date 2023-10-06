@@ -21,20 +21,35 @@ export function Edit( {
 		className: 'woocommerce-product-form__checkbox',
 		...attributes,
 	} );
-	const { property, title, label, tooltip } = attributes;
+	const { property, title, label, tooltip, onValue, offValue } = attributes;
 	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
 		postType,
 		fallbackValue: false,
 	} );
 
+	function isChecked() {
+		if ( onValue ) {
+			return onValue === value;
+		}
+		return value as boolean;
+	}
+
+	function handleChange( checked: boolean ) {
+		if ( checked ) {
+			setValue( onValue !== undefined ? onValue : checked );
+		} else {
+			setValue( offValue !== undefined ? offValue : checked );
+		}
+	}
+
 	return (
 		<div { ...blockProps }>
-			<h4>{ title }</h4>
+			{ title && <h4>{ title }</h4> }
 			<div className="woocommerce-product-form__checkbox-wrapper">
 				<CheckboxControl
 					label={ label }
-					checked={ value }
-					onChange={ ( selected ) => setValue( selected ) }
+					checked={ isChecked() }
+					onChange={ handleChange }
 				/>
 				{ tooltip && (
 					<Tooltip

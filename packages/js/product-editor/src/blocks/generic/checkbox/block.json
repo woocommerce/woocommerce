@@ -20,6 +20,12 @@
 		},
 		"tooltip": {
 			"type": "string"
+		},
+		"onValue": {
+			"type": "string"
+		},
+		"offValue": {
+			"type": "string"
 		}
 	},
 	"supports": {

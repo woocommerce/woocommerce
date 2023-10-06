@@ -10,35 +10,53 @@ _Please note that to persist a custom field in the product it also needs to be a
 
 ### title
 
-- **Type:** `String`
-- **Required:** `No`
+-   **Type:** `String`
+-   **Required:** `No`
 
 Header that appears above the checkbox.
 
 ### label
 
-- **Type:** `String`
-- **Required:** `No`
+-   **Type:** `String`
+-   **Required:** `No`
 
 Label that appears at the side of the checkbox.
 
 ### property
 
-- **Type:** `String`
-- **Required:** `Yes`
+-   **Type:** `String`
+-   **Required:** `Yes`
 
 Property in which the checkbox value is stored.
 
 ### tooltip
 
-- **Type:** `String`
-- **Required:** `No`
+-   **Type:** `String`
+-   **Required:** `No`
 
 Tooltip text that is shown when hovering the icon at the side of the label.
 
+### onValue
+
+-   **Type:** `String`
+-   **Required:** `No`
+
+If it is set, the checked state will be `property` === `onValue`. When `onChange` is fired with the checked value set to `true` then the `property` value will be set to the one stored in `onValue`.
+
+This is needed for cases where the `property` type is not a `boolean`.
+
+### offValue
+
+-   **Type:** `String`
+-   **Required:** `No`
+
+If it is set, the unchecked state will be `property` !== `onValue`. When `onChange` is fired with the checked value set to `false` then the `property` value will be set to the one stored in `offValue`.
+
+This is needed for cases where the `property` type is not a `boolean`.
+
 ## Usage
 
-Here's an example on the code that is used for the 'sold_individually' field in the Inventory section:
+Here's an example on the code that is used for the `sold_individually` field in the Inventory section:
 
 ```php
 $parent_container->add_block(
@@ -65,3 +83,22 @@ $parent_container->add_block(
 );
 ```
 
+#### Here's an example that is used to toggle the product variation `status` from `publish` to `private`.
+
+In this case the checkbox will be checked when the variation `status === 'private'`, changing the checked state of the checkbox will toggle the `status` value from `private` to `publish` and not from `true` to `false` like in the previous example:
+
+```php
+$parent_container->add_block(
+  [
+    'id'         => 'product-variation-visibility',
+    'blockName'  => 'woocommerce/product-checkbox-field',
+    'order'      => 30,
+    'attributes' => [
+      'property' => 'status',
+      'label'    => __( 'Hide in product catalog', 'woocommerce' ),
+      'onValue'  => 'private',
+      'offValue' => 'publish',
+    ],
+  ]
+);
+```
