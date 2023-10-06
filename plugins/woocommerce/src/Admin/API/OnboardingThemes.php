@@ -328,31 +328,36 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'name'           => 'Zaino',
 				'price'          => 'Free',
 				'color_palettes' => array(
-					'Default' => array(
+					array(
+						'title'			=> 'Default',
 						'primary'		=> '#E3CBC0',
 						'secondary'		=> '#E8EAED',
 						'foreground'	=> '#FFFFFF',
 						'background'	=> '#202124',
 					),
-					'Aubergine' => array(
+					array(
+						'title'			=> 'Aubergine',
 						'primary'		=> '#FF746D',
 						'secondary'		=> '#551C5E',
 						'foreground'	=> '#FFFFFF',
 						'background'	=> '#1B1031',
 					),
-					'Block out' => array(
+					array(
+						'title'			=> 'Block out',
 						'primary'		=> '#FFFFFF',
 						'secondary'		=> '#FF2D34',
 						'foreground'	=> '#252525',
 						'background'	=> '#FF5252',
 					),
-					'Canary' => array(
+					array(
+						'title'			=> 'Canary',
 						'primary'		=> '#000000',
 						'secondary'		=> '#353535',
 						'foreground'	=> '#000000',
 						'background'	=> '#FDFF85',
 					),
-					'Electric' => array(
+					array(
+						'title'			=> 'Electric',
 						'primary'		=> '#F3F3F1',
 						'secondary'		=> '#2500FF',
 						'foreground'	=> '#2500FF',
