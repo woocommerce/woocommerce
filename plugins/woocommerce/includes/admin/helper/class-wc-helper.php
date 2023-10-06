@@ -59,6 +59,7 @@ class WC_Helper {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-subscriptions-api.php';
 	}
 
 	/**
@@ -112,14 +113,17 @@ class WC_Helper {
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
-		$site_id                   = absint( $auth['site_id'] );
-		$subscriptions             = self::get_subscriptions();
+		$subscriptions_list_data   = self::get_subscription_list_data();
+		$subscriptions			   = array_filter(
+			$subscriptions_list_data,
+			function( $subscription ) {
+				return ! empty( $subscription['product_key'] );
+			}
+		);
 		$updates                   = WC_Helper_Updater::get_update_data();
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
 		foreach ( $subscriptions as &$subscription ) {
-			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
-
 			$subscription['activate_url'] = add_query_arg(
 				array(
 					'page'                  => 'wc-addons',
@@ -146,44 +150,20 @@ class WC_Helper {
 				admin_url( 'admin.php' )
 			);
 
-			$subscription['local'] = array(
-				'installed' => false,
-				'active'    => false,
-				'version'   => null,
-			);
-
 			$subscription['update_url'] = admin_url( 'update-core.php' );
 
 			$local = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
 
 			if ( ! empty( $local ) ) {
 				$local                              = array_shift( $local );
-				$subscription['local']['installed'] = true;
-				$subscription['local']['version']   = $local['Version'];
-
 				if ( 'plugin' == $local['_type'] ) {
-					if ( is_plugin_active( $local['_filename'] ) ) {
-						$subscription['local']['active'] = true;
-					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
-						$subscription['local']['active'] = true;
-					}
-
 					// A magic update_url.
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' ) . $local['_filename'], 'upgrade-plugin_' . $local['_filename'] );
 
 				} elseif ( 'theme' == $local['_type'] ) {
-					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
-						$subscription['local']['active'] = true;
-					}
-
 					// Another magic update_url.
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . $local['_stylesheet'] ), 'upgrade-theme_' . $local['_stylesheet'] );
 				}
-			}
-
-			$subscription['has_update'] = false;
-			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
-				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
 			}
 
 			$subscription['download_primary'] = true;
@@ -1311,6 +1291,123 @@ class WC_Helper {
 
 		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
 		return $data;
+	}
+
+	/**
+	 * Get subscription data for a given product key.
+	 * @param string $product_key Subscription product key.
+	 * @return array|bool The array containing sub data or false.
+	 */
+	public static function get_subscription( $product_key ) {
+		$subscriptions = wp_list_filter(
+			self::get_subscriptions(),
+			array( 'product_key' => $product_key )
+		);
+
+		if ( empty( $subscriptions ) ) {
+			return false;
+		}
+		return array_values( $subscriptions )[0];
+	}
+
+	/**
+	 * Get the connected user's subscription list data.
+	 * This is used by the My Subscriptions page.
+	 *
+	 * @return array
+	 */
+	public static function get_subscription_list_data() {
+		$subscriptions = self::get_subscriptions();
+
+		// Installed plugins and themes, with or without an active subscription.
+		$woo_plugins = self::get_local_woo_plugins();
+		$woo_themes  = self::get_local_woo_themes();
+
+		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
+
+		$auth    = WC_Helper_Options::get( 'auth' );
+		$site_id = absint( $auth['site_id'] );
+
+		// Installed products without a subscription.
+		foreach ( array_merge( $woo_plugins, $woo_themes ) as $filename => $data ) {
+			if ( in_array( $data['_product_id'], $subscriptions_product_ids ) ) {
+				continue;
+			}
+			$subscriptions[] = array(
+				'product_key'     => '',
+				'product_id'      => $data['_product_id'],
+				'product_name'    => $data['Name'],
+				'product_url'     => $data['PluginURI'],
+				'key_type'        => '',
+				'key_type_label'  => '',
+				'lifetime'        => false,
+				'product_status'  => 'publish',
+				'connections'     => array(),
+				'expires'         => 0,
+				'expired'         => true,
+				'expiring'        => false,
+				'sites_max'       => 0,
+				'sites_active'    => 0,
+				'autorenew'       => false,
+				'maxed'           => false,
+			);
+		}
+
+		$active_product_ids = array_column(
+			array_filter(
+				$subscriptions,
+				function( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'] );
+				}
+			),
+			'product_id'
+		);
+		
+		foreach ( $subscriptions as &$subscription ) {
+			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
+
+			$subscription['local'] = array(
+				'installed' => false,
+				'active'    => false,
+				'version'   => null,
+			);
+
+			$updates = WC_Helper_Updater::get_update_data();
+			$local   = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
+
+			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
+			if ( ! empty( $local ) && ! $inactive_license ) {
+				$local                              = array_shift( $local );
+				$subscription['local']['installed'] = true;
+				$subscription['local']['version']   = $local['Version'];
+
+				if ( 'plugin' == $local['_type'] ) {
+					if ( is_plugin_active( $local['_filename'] ) ) {
+						$subscription['local']['active'] = true;
+					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
+						$subscription['local']['active'] = true;
+					}
+				} elseif ( 'theme' == $local['_type'] ) {
+					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
+						$subscription['local']['active'] = true;
+					}
+				}
+			}
+
+			$subscription['has_update'] = false;
+			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
+				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
+			}
+
+			if (! empty( $updates[ $subscription['product_id'] ] )) {
+				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
+			}
+		}
+
+		// Break the by-ref.
+		unset( $subscription );
+
+		return $subscriptions;
 	}
 
 	/**

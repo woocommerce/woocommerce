@@ -6,15 +6,36 @@ import { Button, Tooltip } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { help } from '@wordpress/icons';
 import { Table } from '@woocommerce/components';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '~/utils/admin-settings';
+import { getAdminSetting } from '../../../utils/admin-settings';
 import { Subscription } from './types';
 import './my-subscriptions.scss';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { fetchSubscriptions } from '../../../marketplace/utils/functions';
 
 export default function MySubscriptions(): JSX.Element {
+	const [ subscriptions, setSubscriptions ] = useState<
+		Array< Subscription >
+	>( [] );
+	const { setIsLoading } = useContext( MarketplaceContext );
+
+	// Get the content for this screen
+	useEffect( () => {
+		setIsLoading( true );
+
+		fetchSubscriptions()
+			.then( ( subscriptionResponse ) => {
+				setSubscriptions( subscriptionResponse );
+			} )
+			.finally( () => {
+				setIsLoading( false );
+			} );
+	}, [] );
+
 	const updateConnectionUrl = getNewPath(
 		{
 			page: 'wc-addons',
@@ -26,6 +47,7 @@ export default function MySubscriptions(): JSX.Element {
 		''
 	);
 	const updateConnectionHTML = sprintf(
+		// translators: %s is a link to the update connection page.
 		__(
 			'If you don\'t see your subscription, try <a href="%s">updating</a> your connection.',
 			'woocommerce'
@@ -64,7 +86,9 @@ export default function MySubscriptions(): JSX.Element {
 			label: __( 'Actions', 'woocommerce' ),
 		},
 	];
-	const subscriptionsInstalled: Array< Subscription > = [];
+	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
+		( subscription: Subscription ) => subscription.local.installed
+	);
 
 	const tableHeadersAvailable = [
 		{
@@ -97,7 +121,38 @@ export default function MySubscriptions(): JSX.Element {
 			label: __( 'Actions', 'woocommerce' ),
 		},
 	];
-	const subscriptionsAvailable: Array< Subscription > = [];
+	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
+		( subscription: Subscription ) =>
+			! subscriptionsInstalled.includes( subscription )
+	);
+
+	const getStatus = ( subscription: Subscription ): string => {
+		// TODO add statuses for subscriptions
+		if ( subscription.product_key === '' ) {
+			return __( 'Not found', 'woocommerce' );
+		} else if ( subscription.expired ) {
+			return __( 'Expired', 'woocommerce' );
+		} else if ( subscription.active ) {
+			return __( 'Active', 'woocommerce' );
+		}
+		return __( 'Inactive', 'woocommerce' );
+	};
+
+	const getVersion = ( subscription: Subscription ): string => {
+		if ( subscription.local.version === subscription.version ) {
+			return subscription.local.version;
+		}
+		if ( subscription.local.version && subscription.version ) {
+			return subscription.local.version + ' > ' + subscription.version;
+		}
+		if ( subscription.version ) {
+			return subscription.version;
+		}
+		if ( subscription.local.version ) {
+			return subscription.local.version;
+		}
+		return '';
+	};
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
@@ -141,12 +196,12 @@ export default function MySubscriptions(): JSX.Element {
 					headers={ tableHeadersInstalled }
 					rows={ subscriptionsInstalled.map( ( item ) => {
 						return [
-							{ display: item.name },
-							{ display: item.status },
-							{ display: item.expiry },
-							{ display: item.autoRenew ? 'true' : 'false' },
-							{ display: item.version },
-							{ display: item.activated ? 'true' : 'false' },
+							{ display: item.product_name },
+							{ display: getStatus( item ) },
+							{ display: item.expires },
+							{ display: item.autorenew ? 'true' : 'false' },
+							{ display: getVersion( item ) },
+							{ display: item.active ? 'true' : 'false' },
 							{ display: '...' },
 						];
 					} ) }
@@ -165,11 +220,11 @@ export default function MySubscriptions(): JSX.Element {
 					headers={ tableHeadersAvailable }
 					rows={ subscriptionsAvailable.map( ( item ) => {
 						return [
-							{ display: item.name },
-							{ display: item.status },
-							{ display: item.expiry },
-							{ display: item.autoRenew ? 'true' : 'false' },
-							{ display: item.version },
+							{ display: item.product_name },
+							{ display: getStatus( item ) },
+							{ display: item.expires },
+							{ display: item.autorenew ? 'true' : 'false' },
+							{ display: getVersion( item ) },
 							{ display: '...' },
 							{ display: '...' },
 						];
