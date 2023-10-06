@@ -109,10 +109,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$allowed_themes = Themes::get_allowed_themes();
 		$theme          = sanitize_text_field( $request['theme'] );
 
-		if ( ! in_array( $theme, $allowed_themes, true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
-		}
-
 		$installed_themes = wp_get_themes();
 
 		if ( in_array( $theme, array_keys( $installed_themes ), true ) ) {
