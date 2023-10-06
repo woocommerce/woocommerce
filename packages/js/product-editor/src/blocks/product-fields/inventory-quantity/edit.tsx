@@ -23,18 +23,19 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	clientId,
+	context,
 }: ProductEditorBlockEditProps< TrackInventoryBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ manageStock ] = useEntityProp< boolean >(
 		'postType',
-		'product',
+		context.postType,
 		'manage_stock'
 	);
 
 	const [ stockQuantity, setStockQuantity ] = useEntityProp< number | null >(
 		'postType',
-		'product',
+		context.postType,
 		'stock_quantity'
 	);
 
