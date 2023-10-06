@@ -8,9 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
@@ -491,11 +489,17 @@ class WC_Install {
 
 		$schema = self::get_schema();
 
-		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		if (
-			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION )
-			|| $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION )
-		) {
+		$hpos_settings = filter_var_array(
+			array(
+				'cot'       => get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ),
+				'data_sync' => get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ),
+			),
+			array(
+				'cot'       => FILTER_VALIDATE_BOOLEAN,
+				'data_sync' => FILTER_VALIDATE_BOOLEAN,
+			)
+		);
+		if ( in_array( true, $hpos_settings, true ) ) {
 			$schema .= wc_get_container()
 				->get( OrdersTableDataStore::class )
 				->get_database_schema();
@@ -912,7 +916,7 @@ class WC_Install {
 			return false;
 		}
 
-		$plugin_compat_info = $feature_controller->get_compatible_plugins_for_feature( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, true );
+		$plugin_compat_info = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		if ( ! empty( $plugin_compat_info['incompatible'] ) || ! empty( $plugin_compat_info['uncertain'] ) ) {
 			return false;
 		}

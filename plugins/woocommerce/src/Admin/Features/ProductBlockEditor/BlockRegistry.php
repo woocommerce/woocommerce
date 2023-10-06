@@ -11,51 +11,64 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  * Product block registration and style registration functionality.
  */
 class BlockRegistry {
-	/**
-	 * The directory where blocks are stored after build.
-	 */
-	const BLOCKS_DIR = 'product-editor/blocks';
 
 	/**
-	 * Array of all available product blocks.
+	 * Generic blocks directory.
 	 */
-	const PRODUCT_BLOCKS = [
+	const GENERIC_BLOCKS_DIR = 'product-editor/blocks/generic';
+	/**
+	 * Product fields blocks directory.
+	 */
+	const PRODUCT_FIELDS_BLOCKS_DIR = 'product-editor/blocks/product-fields';
+	/**
+	 * Array of all available generic blocks.
+	 */
+	const GENERIC_BLOCKS = [
 		'woocommerce/conditional',
-		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
+		'woocommerce/product-radio-field',
+		'woocommerce/product-pricing-field',
+		'woocommerce/product-section',
+		'woocommerce/product-tab',
+		'woocommerce/product-toggle-field',
+		'woocommerce/product-taxonomy-field',
+		'woocommerce/product-text-field',
+		'woocommerce/product-number-field',
+	];
+
+	/**
+	 * Array of all available product fields blocks.
+	 */
+	const PRODUCT_FIELDS_BLOCKS = [
+		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-description-field',
 		'woocommerce/product-images-field',
 		'woocommerce/product-inventory-email-field',
 		'woocommerce/product-sku-field',
 		'woocommerce/product-name-field',
-		'woocommerce/product-pricing-field',
-		'woocommerce/product-radio-field',
 		'woocommerce/product-regular-price-field',
 		'woocommerce/product-sale-price-field',
 		'woocommerce/product-schedule-sale-fields',
-		'woocommerce/product-section',
 		'woocommerce/product-shipping-class-field',
 		'woocommerce/product-shipping-dimensions-fields',
 		'woocommerce/product-summary-field',
-		'woocommerce/product-tab',
 		'woocommerce/product-tag-field',
 		'woocommerce/product-inventory-quantity-field',
-		'woocommerce/product-toggle-field',
 		'woocommerce/product-variation-items-field',
 		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
-		'woocommerce/product-taxonomy-field',
 	];
 
 	/**
 	 * Get a file path for a given block file.
 	 *
 	 * @param string $path File path.
+	 * @param string $dir File directory.
 	 */
-	private function get_file_path( $path ) {
-		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( self::BLOCKS_DIR ) . $path;
+	private function get_file_path( $path, $dir ) {
+		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
 	}
 
 	/**
@@ -70,8 +83,11 @@ class BlockRegistry {
 	 * Register all the product blocks.
 	 */
 	private function register_product_blocks() {
-		foreach ( self::PRODUCT_BLOCKS as $block_name ) {
-			$this->register_block( $block_name );
+		foreach ( self::PRODUCT_FIELDS_BLOCKS as $block_name ) {
+			$this->register_block( $block_name, self::PRODUCT_FIELDS_BLOCKS_DIR );
+		}
+		foreach ( self::GENERIC_BLOCKS as $block_name ) {
+			$this->register_block( $block_name, self::GENERIC_BLOCKS_DIR );
 		}
 	}
 
@@ -112,12 +128,13 @@ class BlockRegistry {
 	 * Register a single block.
 	 *
 	 * @param string $block_name Block name.
+	 * @param string $block_dir Block directory.
 	 *
 	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
 	 */
-	private function register_block( $block_name ) {
+	private function register_block( $block_name, $block_dir ) {
 		$block_name      = $this->remove_block_prefix( $block_name );
-		$block_json_file = $this->get_file_path( $block_name . '/block.json' );
+		$block_json_file = $this->get_file_path( $block_name . '/block.json', $block_dir );
 
 		if ( ! file_exists( $block_json_file ) ) {
 			return false;

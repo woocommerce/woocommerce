@@ -18,6 +18,7 @@ import { PreviewButtonProps } from '../../preview-button';
 
 export function usePreview( {
 	productStatus,
+	productType = 'product',
 	disabled,
 	onClick,
 	onSaveSuccess,
@@ -31,13 +32,13 @@ export function usePreview( {
 
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
 	const [ permalink ] = useEntityProp< string >(
 		'postType',
-		'product',
+		productType,
 		'permalink'
 	);
 
@@ -47,7 +48,7 @@ export function usePreview( {
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 
@@ -55,7 +56,7 @@ export function usePreview( {
 				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -107,7 +108,7 @@ export function usePreview( {
 			// reach the preview page, so the status is changed to `draft`
 			// before redirecting.
 			if ( productStatus === 'auto-draft' ) {
-				await editEntityRecord( 'postType', 'product', productId, {
+				await editEntityRecord( 'postType', productType, productId, {
 					status: 'draft',
 				} );
 			}
@@ -115,7 +116,7 @@ export function usePreview( {
 			// Persist the product changes before redirecting
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
+				productType,
 				productId,
 				{
 					throwOnError: true,

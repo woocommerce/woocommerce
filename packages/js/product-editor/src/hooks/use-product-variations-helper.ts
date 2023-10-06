@@ -9,12 +9,51 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
 	ProductDefaultAttribute,
+	ProductVariation,
 } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from './use-product-attributes';
+import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../constants';
+
+async function getDefaultVariationValues(
+	productId: number
+): Promise< Partial< Omit< ProductVariation, 'id' > > > {
+	try {
+		const { attributes } = await resolveSelect(
+			'core'
+		).getEntityRecord< Product >( 'postType', 'product', productId );
+		const alreadyHasVariableAttribute = attributes.some(
+			( attr ) => attr.variation
+		);
+		if ( ! alreadyHasVariableAttribute ) {
+			return {};
+		}
+		const products = await resolveSelect(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		).getProductVariations< ProductVariation[] >( {
+			product_id: productId,
+			page: 1,
+			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
+			order: 'asc',
+			orderby: 'menu_order',
+		} );
+		if ( products && products.length > 0 && products[ 0 ].regular_price ) {
+			return {
+				regular_price: products[ 0 ].regular_price,
+				stock_quantity: products[ 0 ].stock_quantity ?? undefined,
+				stock_status: products[ 0 ].stock_status,
+				manage_stock: products[ 0 ].manage_stock,
+				low_stock_amount: products[ 0 ].low_stock_amount ?? undefined,
+			};
+		}
+		return {};
+	} catch {
+		return {};
+	}
+}
 
 export function useProductVariationsHelper() {
 	const [ productId ] = useEntityProp< number >(
@@ -36,15 +75,19 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
-			const lastStatus = (
-				( await resolveSelect( 'core' ).getEditedEntityRecord(
-					'postType',
-					'product',
-					productId
-				) ) as Product
-			 ).status;
+			const { status: lastStatus } = await resolveSelect(
+				'core'
+			).getEditedEntityRecord< Product >(
+				'postType',
+				'product',
+				productId
+			);
 			const hasVariableAttribute = attributes.some(
 				( attr ) => attr.variation
+			);
+
+			const defaultVariationValues = await getDefaultVariationValues(
+				productId
 			);
 
 			return _generateProductVariations< {
@@ -61,6 +104,7 @@ export function useProductVariationsHelper() {
 				},
 				{
 					delete: true,
+					default_values: defaultVariationValues,
 				}
 			)
 				.then( () => {

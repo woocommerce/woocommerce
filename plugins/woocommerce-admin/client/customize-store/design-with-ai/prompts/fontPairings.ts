@@ -7,6 +7,13 @@ import { z } from 'zod';
 /** Original source: plugins/woocommerce-admin/client/customize-store/assembler-hub/sidebar/global-styles/font-pairing-variations/constants.ts */
 const fontChoices = [
 	{
+		pair_name: 'Inter + Inter',
+		fonts: {
+			Inter: 'A highly legible sans-serif, optimized for UI design.',
+		},
+		settings: 'Inter is used for buttons and general typography.',
+	},
+	{
 		pair_name: 'Bodoni Moda + Overpass',
 		fonts: {
 			'Bodoni Moda':

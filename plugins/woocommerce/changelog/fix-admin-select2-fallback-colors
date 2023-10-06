@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use fallback color for select2 fields on non WooCommerce pages.

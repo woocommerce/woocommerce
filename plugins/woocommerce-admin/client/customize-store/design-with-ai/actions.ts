@@ -1,9 +1,15 @@
 /**
  * External dependencies
  */
-import { assign } from 'xstate';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import { assign, spawn, EventObject } from 'xstate';
+import {
+	getQuery,
+	updateQueryString,
+	getNewPath,
+} from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { dispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,6 +22,7 @@ import {
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
+	HomepageTemplate,
 } from './types';
 import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
@@ -99,6 +106,28 @@ const assignFontPairing = assign<
 	designWithAiStateMachineEvents
 >( {
 	aiSuggestions: ( context, event: unknown ) => {
+		if ( ( event as EventObject ).type === 'xstate.error' ) {
+			let fontPairing = context.aiSuggestions.fontPairing;
+			const choice = context.lookAndFeel.choice;
+
+			switch ( true ) {
+				case choice === 'Contemporary':
+					fontPairing = 'Inter + Inter';
+					break;
+				case choice === 'Classic':
+					fontPairing = 'Bodoni Moda + Overpass';
+					break;
+				case choice === 'Bold':
+					fontPairing = 'Rubik + Inter';
+					break;
+			}
+
+			return {
+				...context.aiSuggestions,
+				fontPairing,
+			};
+		}
+
 		return {
 			...context.aiSuggestions,
 			fontPairing: (
@@ -144,6 +173,58 @@ const assignFooter = assign<
 					};
 				}
 			 ).data.response.slug,
+		};
+	},
+} );
+
+const assignHomepageTemplate = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			homepageTemplate: (
+				event as {
+					data: {
+						response: HomepageTemplate;
+					};
+				}
+			 ).data.response.homepage_template,
+		};
+	},
+} );
+
+const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woo_ai_describe_store_description: descriptionText,
+	} );
+};
+
+const spawnSaveDescriptionToOption = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents,
+	designWithAiStateMachineEvents
+>( {
+	spawnSaveDescriptionToOptionRef: (
+		context: designWithAiStateMachineContext
+	) =>
+		spawn(
+			() =>
+				updateWooAiStoreDescriptionOption(
+					context.businessInfoDescription.descriptionText
+				),
+			'update-woo-ai-business-description-option'
+		),
+} );
+
+const assignAPICallLoaderError = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	apiCallLoader: () => {
+		return {
+			hasErrors: true,
 		};
 	},
 } );
@@ -209,6 +290,14 @@ const recordTracksStepCompleted = (
 	} );
 };
 
+const redirectToAssemblerHub = () => {
+	window.location.href = getNewPath(
+		{},
+		'/customize-store/assembler-hub',
+		{}
+	);
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -218,9 +307,13 @@ export const actions = {
 	assignFontPairing,
 	assignHeader,
 	assignFooter,
+	assignHomepageTemplate,
+	assignAPICallLoaderError,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,
 	recordTracksStepClosed,
 	recordTracksStepCompleted,
+	spawnSaveDescriptionToOption,
+	redirectToAssemblerHub,
 };

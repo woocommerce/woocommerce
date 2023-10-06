@@ -15,6 +15,7 @@ import {
 	useEffect,
 	createElement,
 	Fragment,
+	useRef,
 } from '@wordpress/element';
 import { chevronDown } from '@wordpress/icons';
 
@@ -138,10 +139,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 	const instanceId = useInstanceId(
 		SelectControl,
 		'woocommerce-experimental-select-control'
-	);
+	) as string;
 
 	const innerInputClassName =
 		'woocommerce-experimental-select-control__input';
+
+	const selectControlWrapperRef = useRef< HTMLDivElement >( null );
 
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
@@ -186,6 +189,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		openMenu,
 		closeMenu,
 	} = useCombobox< ItemType | null >( {
+		id: instanceId,
 		initialSelectedItem: singleSelectedItem,
 		inputValue,
 		items: filteredItems,
@@ -246,12 +250,15 @@ function SelectControl< ItemType = DefaultItemType >( {
 	} );
 
 	const isEventOutside = ( event: React.FocusEvent ) => {
-		const inputClasses = event?.target?.className;
+		const selectControlWrapperElement = selectControlWrapperRef.current;
+		const menuElement = document.getElementById( `${ instanceId }-menu` );
+		const parentPopoverMenuElement = menuElement?.closest(
+			'.woocommerce-experimental-select-control__popover-menu'
+		);
+
 		return (
-			! document
-				.querySelector( '.' + instanceId )
-				?.contains( event.relatedTarget ) &&
-			! inputClasses.includes( innerInputClassName )
+			! selectControlWrapperElement?.contains( event.relatedTarget ) &&
+			! parentPopoverMenuElement?.contains( event.relatedTarget )
 		);
 	};
 
@@ -276,10 +283,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 
 	return (
 		<div
+			id={ instanceId }
+			ref={ selectControlWrapperRef }
 			className={ classnames(
 				'woocommerce-experimental-select-control',
 				className,
-				instanceId,
 				{
 					'is-read-only': isReadOnly,
 					'is-focused': isFocused,
