@@ -19,14 +19,14 @@
 			"additionalTasks": [
 				{
 					"name": "WP: latest-1",
-					"commands": [ "test" ],
+					"commands": [ "test:php" ],
 					"testEnvConfig": {
 						"wpVersion": "latest-1"
 					}
 				},
 				{
 					"name": "WP: latest-2",
-					"commands": [ "test" ],
+					"commands": [ "test:php" ],
 					"testEnvConfig": {
 						"wpVersion": "latest-2"
 					}
