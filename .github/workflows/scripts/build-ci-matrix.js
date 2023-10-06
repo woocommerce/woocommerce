@@ -436,12 +436,28 @@ function getPossibleCommands( packageFile, changes ) {
 	// Projects can override the default commands to execute with custom commands.
 	const customCommands = packageFile.config?.ci?.customCommands ?? {};
 
+	// Custom commands may have tokens in them that we need to remove.
+	// This lets us easily check for the command existence.
+	for ( const command in customCommands ) {
+		const split = customCommands[ command ].split( ' ' );
+		customCommands[ command ] = split[0];
+	}
+
 	// We only want the list of possible commands to contain those that
 	// the project actually has and meet the criteria for execution.
 	const possibleCommands = [];
 	for ( const command in commandCriteria ) {
+		// We can only run commands that actually exist.
 		const commandScript = customCommands[ command ] ?? command;
 		if ( ! packageFile.scripts?.[ commandScript ] ) {
+			// Since developers define the custom commands themselves we should make
+			// sure that they didn't make a mistake and set one that doesn't exist.
+			if ( customCommands[ command ] ) {
+				throw new Error(
+					`Unknown custom command "${ commandScript }".`
+				);
+			}
+
 			continue;
 		}
 
