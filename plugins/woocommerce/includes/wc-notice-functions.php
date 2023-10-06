@@ -137,9 +137,11 @@ function wc_print_notices( $return = false ) {
 		return;
 	}
 
+	$session = WC()->session;
+	
 	// If the session handler has not initialized, there will be no notices for us to read.
-	if ( null === ( $session = WC()->session ) ) {
-		return;
+	if ( null === $session ) {
+		return null;
 	}
 
 	$all_notices  = $session->get( 'wc_notices', array() );
