@@ -28,7 +28,7 @@ function useProductEntityProp< T >(
 	);
 	const [ metadata, setMetadata ] = useEntityProp< Metadata< T >[] >(
 		'postType',
-		'product',
+		config?.postType || 'product',
 		'meta_data'
 	);
 
