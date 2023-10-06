@@ -83,9 +83,11 @@ $parent_container->add_block(
 );
 ```
 
-#### Here's an example that is used to toggle the product variation `status` from `publish` to `private`.
+---
 
-In this case the checkbox will be checked when the variation `status === 'private'`, changing the checked state of the checkbox will toggle the `status` value from `private` to `publish` and not from `true` to `false` like in the previous example:
+Here's an example that is used to toggle the product variation `status` from `publish` to `private`:
+
+> In this case the checkbox will be checked when the variation `status === 'private'`, changing the checked state of the checkbox will toggle the `status` value from `private` to `publish` and not from `true` to `false` like in the previous example:
 
 ```php
 $parent_container->add_block(

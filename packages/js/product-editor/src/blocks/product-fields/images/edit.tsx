@@ -116,7 +116,6 @@ export function Edit( {
 	}
 
 	function handleSelect( selection: UploadImage | UploadImage[] ) {
-		console.log( 'handleSelect', selection );
 		recordEvent( 'product_images_add_via_media_library' );
 
 		if ( Array.isArray( selection ) ) {
