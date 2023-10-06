@@ -390,7 +390,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			'themes' => $filtered_themes,
 			'_links' => array(
 				'browse_all' => array(
-					'href' => home_url( '/wp-admin/themes.php' ),
+					'href' => admin_url( 'themes.php' ),
 				),
 			),
 		);
