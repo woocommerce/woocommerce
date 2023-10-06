@@ -58,7 +58,7 @@ jobs:
           run: 'pnpm --filter="${{ matrix.projectName }}" lint'
         - name: 'Prepare Test Environment'
           id: 'prepare-test-environment'
-          if: ${{ matrix.needsTestEnvironment }}
+          if: ${{ !cancelled() && matrix.needsTestEnvironment && steps.setup-monorepo.conclusion == 'success' }}
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
         - name: 'Test - JS'
