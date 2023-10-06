@@ -1179,6 +1179,11 @@ class WC_Helper {
 				continue;
 			}
 
+			// Omit the WooCommerce plugin used on Woo Express sites.
+			if ( 'WooCommerce' === $data['Name'] ) {
+				continue;
+			}
+
 			$data['_filename']        = $filename;
 			$data['_product_id']      = absint( $product_id );
 			$data['_file_id']         = $file_id;

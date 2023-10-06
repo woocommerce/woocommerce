@@ -2700,21 +2700,26 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 1, $new_count );
 		$this->assertEquals( 0, $update_count );
 
-		// An update to the order should only trigger 'woocommerce_update_order'.
-		$order->set_billing_city( 'Los Angeles' );
+		// Saving an order again (with no changes) should still trigger 'woocommerce_update_order'.
 		$order->save();
 		$this->assertEquals( 1, $new_count );
 		$this->assertEquals( 1, $update_count );
 
+		// An update to the order should only trigger 'woocommerce_update_order'.
+		$order->set_billing_city( 'Los Angeles' );
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 2, $update_count );
+
 		// Updating datastore-level props should not trigger anything.
 		$order->get_data_store()->set_download_permissions_granted( $order->get_id(), true );
 		$this->assertEquals( 1, $new_count );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// Trashing should not fire an update.
 		$order->get_data_store()->delete( $order );
 		$this->assertEquals( $order->get_status(), 'trash' );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// Untrashing should not fire an update.
 		if ( $cot_is_authoritative ) {
@@ -2725,7 +2730,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order = wc_get_order( $order->get_id() ); // Refresh order.
 		}
 		$this->assertNotEquals( $order->get_status(), 'trash' );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// An auto-draft order should not trigger 'woocommerce_new_order' until first saved with a valid status.
 		if ( $cot_is_authoritative ) {
@@ -2734,13 +2739,13 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order->save();
 
 			$this->assertEquals( 1, $new_count );
-			$this->assertEquals( 1, $update_count );
+			$this->assertEquals( 2, $update_count );
 
 			$order->set_status( 'on-hold' );
 			$order->save();
 
 			$this->assertEquals( 2, $new_count );
-			$this->assertEquals( 1, $update_count );
+			$this->assertEquals( 2, $update_count );
 		}
 
 		remove_action( 'woocommerce_new_order', $callback );
