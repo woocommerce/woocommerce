@@ -7,7 +7,7 @@
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
 		"postinstall": "composer install",
-		"test": "pnpm test:php",
+		"test": "pnpm test:php ",
 		"test:env:start": "wp-env start && wp-env run cli --env-cwd=wp-content/plugins/woocommerce-docs composer install",
 		"test:php": "wp-env run tests-cli vendor/bin/phpunit --env-cwd=wp-content/plugins/woocommerce-docs",
 		"test:env-setup": "pnpm test:env:start",
