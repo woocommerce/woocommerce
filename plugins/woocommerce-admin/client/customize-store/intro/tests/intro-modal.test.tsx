@@ -77,13 +77,21 @@ describe( 'Intro Modals', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: true,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);
@@ -118,13 +126,21 @@ describe( 'Intro Modals', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);
