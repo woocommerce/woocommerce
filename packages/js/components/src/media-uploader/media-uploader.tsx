@@ -25,6 +25,7 @@ type MediaUploaderProps = {
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
 	multipleSelect?: boolean | string;
+	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
@@ -48,6 +49,7 @@ export const MediaUploader = ( {
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
 	multipleSelect = false,
+	value,
 	onError = () => null,
 	onFileUploadChange = () => null,
 	onMediaGalleryOpen = () => null,
@@ -94,6 +96,7 @@ export const MediaUploader = ( {
 						</div>
 
 						<MediaUploadComponent
+							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
 							// @ts-expect-error - TODO multiple also accepts string.

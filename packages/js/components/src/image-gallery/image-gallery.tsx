@@ -152,6 +152,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						},
 						isToolbarVisible ? (
 							<ImageGalleryToolbar
+								value={ child.props.id }
 								allowDragging={ allowDragging }
 								childIndex={ childIndex }
 								lastChild={
