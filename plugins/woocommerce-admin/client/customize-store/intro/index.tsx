@@ -66,7 +66,7 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
-			themeCards,
+			themeData,
 			activeThemeHasMods,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,

@@ -6,10 +6,8 @@ import { store as coreStore } from '@wordpress/core-data';
  */
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
-// @ts-ignore No types for this exist yet.
 import apiFetch from '@wordpress/api-fetch';
 
-// placeholder xstate async service that returns a set of theme cards
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
 		path: '/wc-admin/onboarding/themes/recommended',
@@ -68,5 +66,6 @@ export const fetchIntroData = async () => {
 		activeThemeHasMods,
 		customizeStoreTaskCompleted,
 		themeData,
+		currentThemeIsAiGenerated,
 	};
 };
