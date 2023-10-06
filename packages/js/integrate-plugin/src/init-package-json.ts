@@ -10,20 +10,20 @@ import writePkg from 'write-pkg';
  * Internal dependencies
  */
 import { error, info } from './log';
-import { ScriptConfig } from './types';
+import { PluginTemplateHeaderFields, PluginTemplateProject } from './types';
 
 async function initPackageJSON( {
-	author,
-	textdomain,
-	description,
-	license,
-	version,
-	wpEnv,
-	wpScripts,
+	author = '',
+	textdomain = '',
+	description = '',
+	license = '',
+	version = '1.0.0',
+	wpEnv = false,
+	wpScripts = true,
 	npmDependencies,
 	npmDevDependencies,
 	customScripts,
-}: ScriptConfig ) {
+}: PluginTemplateProject & PluginTemplateHeaderFields ) {
 	const cwd = join( process.cwd() );
 
 	info( '' );

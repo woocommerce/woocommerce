@@ -3,80 +3,61 @@
  */
 import { existsSync } from 'fs';
 import path from 'path';
-import { pascalCase, snakeCase } from 'change-case';
+import { pascalCase } from 'change-case';
 
 /**
  * Internal dependencies
  */
 import { code, info, success } from './log';
 import {
-	BlockJSONData,
-	OptionValues,
-	PackageJSONData,
+	ComposerJSONData,
 	PluginConfig,
-	PluginData,
-	ScriptConfig,
+	PluginTemplate,
+	PluginTemplateDefaults,
 } from './types';
 import { initPackageJSON } from './init-package-json';
-import { getUniqueItems } from './get-plugin-config';
+import { getUniqueItems, updateConfig } from './get-plugin-config';
 import { isGitDirectory, updateOrCreateGitIgnore } from './git-tools';
-// const initTemplate = require( './init-template' );
-// const initComposer = require( './init-composer' );
+import { initTemplates } from './init-templates';
+import { initComposer } from './init-composer';
 
-async function scaffold( {
-	$schema,
-	name,
-	apiVersion,
-	textdomain,
-	wpScripts,
-	wpEnv,
-	license,
-	author,
-	npmDependencies,
-	npmDevDependencies,
-	customScripts,
-	version,
-	description,
-	includesDir,
-	srcDir,
-	namespace,
-	modules,
-}: PluginData &
-	Partial< PluginConfig > &
-	Omit< OptionValues, 'namespace' > &
-	BlockJSONData &
-	PackageJSONData ) {
+async function scaffold(
+	{
+		pluginOutputTemplates,
+		includesOutputTemplates,
+		srcOutputTemplates,
+		modules: templateModules,
+		onComplete,
+		composerDependencies,
+		composerDevDependencies,
+	}: PluginTemplate & ComposerJSONData & PluginConfig,
+	pluginDefaultValues: PluginTemplateDefaults
+) {
 	info( '' );
-	info( `Integrating ${ name } with WooCommerce build scripts.` );
-
-	const view: ScriptConfig = {
-		$schema,
-		name,
-		apiVersion,
-		textdomain,
-		wpScripts,
-		wpEnv,
-		license,
-		author,
-		npmDependencies,
-		npmDevDependencies,
-		customScripts,
-		version,
-		description,
-		includesDir,
-		srcDir,
-		namespace,
-		namespaceSnakeCase: snakeCase( namespace || '' ),
-		namespacePascalCase: pascalCase( namespace || '' ),
-		modules: getUniqueItems( [ ...( modules || [] ) ] ),
-		composerDependencies: [],
-		composerDevDependencies: [],
-	};
+	info(
+		`Integrating ${ pluginDefaultValues.name } with WooCommerce build scripts.`
+	);
 
 	const usesGit = isGitDirectory();
 
+	if ( pluginDefaultValues.template ) {
+		updateConfig( {
+			modules: getUniqueItems( [
+				...( pluginDefaultValues.modules || [] ),
+				...templateModules,
+			] ),
+		} );
+		initTemplates( {
+			includesOutputTemplates,
+			pluginOutputTemplates,
+			srcOutputTemplates,
+			defaultValues: pluginDefaultValues,
+			variants: {},
+		} );
+	}
+
 	if ( ! existsSync( path.join( process.cwd(), 'package.json' ) ) ) {
-		await initPackageJSON( view );
+		await initPackageJSON( pluginDefaultValues );
 		if ( usesGit ) {
 			updateOrCreateGitIgnore( 'Node Package Dependencies', [
 				'node_modules/',
@@ -84,15 +65,26 @@ async function scaffold( {
 		}
 	}
 
-	// await initComposer( view );
+	await initComposer( {
+		...pluginDefaultValues,
+		namespacePascalCase: pascalCase(
+			pluginDefaultValues.namespace || 'create-block'
+		),
+		composerDependencies,
+		composerDevDependencies,
+	} );
+	if ( usesGit ) {
+		updateOrCreateGitIgnore( 'Composer Dependencies', [ 'vendor/' ] );
+		updateOrCreateGitIgnore( 'Build files', [ 'build/' ] );
+	}
 
 	info( '' );
 	success(
-		`Done: WordPress plugin ${ name } integrated with WooCommerce build scripts.`
+		`Done: WordPress plugin ${ pluginDefaultValues.name } integrated with WooCommerce build scripts.`
 	);
 
 	// @todo We should check that these were successfully added before showing each of these commands.
-	if ( wpScripts ) {
+	if ( pluginDefaultValues.wpScripts ) {
 		info( '' );
 		info( 'You can run several commands inside:' );
 		info( '' );
@@ -117,7 +109,7 @@ async function scaffold( {
 		code( '  $ npm run packages-update' );
 		info( '    Updates WordPress packages to the latest version.' );
 	}
-	if ( wpEnv ) {
+	if ( pluginDefaultValues.wpEnv ) {
 		info( '' );
 		info( 'You can start WordPress with:' );
 		info( '' );
@@ -126,9 +118,9 @@ async function scaffold( {
 	info( '' );
 	info( 'Code is Poetry' );
 
-	// if ( typeof onComplete === 'function' ) {
-	// 	onComplete();
-	// }
+	if ( typeof onComplete === 'function' ) {
+		onComplete();
+	}
 }
 
 export { scaffold };

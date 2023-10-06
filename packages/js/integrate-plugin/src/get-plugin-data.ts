@@ -32,11 +32,11 @@ export function getPluginData(): PluginData {
 			const version = content.match( /^\s+\*\s*Version:\s*(.*)/m );
 
 			return {
-				description: description && description[ 1 ].trim(),
+				description: description ? description[ 1 ].trim() : undefined,
 				name: name[ 1 ].trim(),
-				textdomain: textdomain && textdomain[ 1 ].trim(),
-				version: version && version[ 1 ].trim(),
-				namespace: textdomain && textdomain[ 1 ].trim(),
+				textdomain: textdomain ? textdomain[ 1 ].trim() : undefined,
+				version: version ? version[ 1 ].trim() : undefined,
+				namespace: textdomain ? textdomain[ 1 ].trim() : undefined,
 			};
 		}
 	}

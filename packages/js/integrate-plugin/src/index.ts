@@ -14,6 +14,7 @@ import { getPluginData } from './get-plugin-data';
 import { getPluginConfig } from './get-plugin-config';
 import { OptionValues } from './types';
 import { scaffold } from './scaffold';
+import { getPluginTemplate, getDefaultValues } from './templates';
 
 //add the following line
 const program = new Command();
@@ -56,38 +57,54 @@ program
 			wpScripts,
 			wpEnv,
 			template,
+			variant,
 			includesDir,
 			srcDir,
 			namespace,
 		}: OptionValues ) => {
 			try {
-				const optionsValues: Partial< OptionValues > =
-					Object.fromEntries(
+				const pluginTemplate = await getPluginTemplate( template );
+				if ( ! pluginTemplate ) {
+					return;
+				}
+				const availableVariants = Object.keys(
+					pluginTemplate.variants
+				);
+				if ( variant && ! availableVariants.includes( variant ) ) {
+					if ( ! availableVariants.length ) {
+						throw new CLIError(
+							`"${ variant }" variant was selected. This template does not have any variants!`
+						);
+					}
+					throw new CLIError(
+						`"${ variant }" is not a valid variant for this template. Available variants are: ${ availableVariants.join(
+							', '
+						) }.`
+					);
+				}
+				const optionsValues: Pick<
+					OptionValues,
+					'template' | 'wpScripts' | 'wpEnv'
+				> &
+					Partial< OptionValues > = {
+					template,
+					wpScripts,
+					wpEnv,
+					...Object.fromEntries(
 						Object.entries( {
 							includesDir,
 							namespace,
 							srcDir,
-							template,
-							wpEnv,
-							wpScripts,
 						} ).filter( ( [ , value ] ) => value !== undefined )
-					);
-
-				const defaultValues = {
-					$schema: 'https://schemas.wp.org/trunk/block.json',
-					apiVersion: 3,
-					wpScripts: true,
-					wpEnv: false,
-					namespace: 'create-block',
-					author: 'The WordPress Contributors',
-					license: 'GPL-2.0-or-later',
-					licenseURI: 'https://www.gnu.org/licenses/gpl-2.0.html',
-					npmDependencies: [],
+					),
 				};
+
 				const pluginData = getPluginData();
 				const pluginConfig = getPluginConfig();
-				log.info( JSON.stringify( pluginData ) );
-				log.info( JSON.stringify( pluginConfig ) );
+				const defaultValues = getDefaultValues(
+					pluginTemplate,
+					variant
+				);
 
 				const answers = {
 					...defaultValues,
@@ -96,7 +113,7 @@ program
 					...optionsValues,
 				};
 
-				await scaffold( answers );
+				await scaffold( pluginTemplate, answers );
 			} catch ( error ) {
 				if ( error instanceof CLIError ) {
 					log.error( error.message );
