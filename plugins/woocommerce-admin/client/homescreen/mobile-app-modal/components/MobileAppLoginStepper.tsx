@@ -100,10 +100,11 @@ export const MobileAppLoginStepper = ( {
 					},
 				] );
 			} else {
-				const siteUrl: string | undefined =
-					getAdminSetting( 'siteUrl' );
+				const siteUrl: string = getAdminSetting( 'siteUrl' );
 				const username = getAdminSetting( 'currentUserData' ).username;
-				const loginUrl = `woocommerce://app-login?siteUrl=${ siteUrl }&username=${ username }`;
+				const loginUrl = `woocommerce://app-login?siteUrl=${ encodeURIComponent(
+					siteUrl
+				) }&username=${ encodeURIComponent( username ) }`;
 				const description = loginUrl
 					? __(
 							'Scan the QR code below and enter the wp-admin password in the app.',
