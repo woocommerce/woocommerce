@@ -402,7 +402,8 @@ function cascadeProjectChanges( projectChanges ) {
  *
  * @typedef {Object} ProjectTask
  * @property {string}                 name                 The name of the task.
- * @property {Array.<string>}         tasks                The tasks that the project should run.
+ * @property {Array.<string>}         commands             The commands that the project should run.
+ * @property {Object.<string,string>} customCommands	   Any commands that should be run in place of the default commands.
  * @property {boolean}                needsTestEnvironment Whether or not the project needs a test environment.
  * @property {Object.<string,string>} testEnvConfig        Any configuration for the test environment if one is needed.
  */
@@ -490,6 +491,11 @@ function buildTasksForProject( projectPath, changes ) {
 		return null;
 	}
 
+	// Projects can override the default commands to execute with custom commands.
+	// This lets us talk about the default commands internally but change what
+	// command is actually run when it comes time to execute the task.
+	const customCommands = packageFile.ci?.customCommands ?? {};
+
 	// Certain tasks may require a test environment if one exists.
 	const hasTestEnvironment = !! packageFile.scripts?.[ 'test:env:start' ];
 	const needsTestEnvironmentFn = ( task ) =>
@@ -501,6 +507,7 @@ function buildTasksForProject( projectPath, changes ) {
 		{
 			name: packageFile.config?.ci?.name ?? 'default',
 			commands: possibleCommands,
+			customCommands,
 			needsTestEnvironment:
 				hasTestEnvironment &&
 				possibleCommands.some( needsTestEnvironmentFn ),
@@ -530,6 +537,13 @@ function buildTasksForProject( projectPath, changes ) {
 				( command ) => command
 			);
 
+			// Make sure to use the additional task's custom commands as overrides instead of a replacement for the entire object.
+			const taskCustomCommands = Object.assign(
+				{},
+				customCommands,
+				additionalTask.customCommands ?? {},
+			);
+
 			// Make sure to use the additional task's configuration as overrides instead of a replacement for the entire config object.
 			const taskNeedsTestEnvironment =
 				hasTestEnvironment &&
@@ -544,6 +558,8 @@ function buildTasksForProject( projectPath, changes ) {
 			projectTasks.push( {
 				name: additionalTask.name,
 				commands: taskCommands,
+				customCommands: taskCustomCommands,
+				customCommands: additionalTask.customCommands ?? {},
 				needsTestEnvironment: taskNeedsTestEnvironment,
 				testEnvConfig: taskTestEnvConfig,
 			} );
@@ -642,6 +658,25 @@ async function parseTestEnvConfig( testEnvConfig ) {
 }
 
 /**
+ * Checks a task for a command and returns either it or the custom command override if one exists.
+ * 
+ * @param {ProjectTask} task The task to get the command for.
+ * @param {string} command The command to run.
+ * @return {string|null} The command that should be run for the task or null if the command should not be run.
+ */
+function getCommandOrOverride( task, command ) {
+	if ( ! task.commands.includes( command ) ) {
+		return null;
+	}
+
+	if ( task.customCommands[ command ] ) {
+		return task.customCommands[ command ];
+	}
+
+	return command;
+}
+
+/**
  * Generates a matrix for the CI GitHub Workflow.
  *
  * @param {string} baseRef The base branch to check for changes against. If empty we check for everything.
@@ -668,10 +703,10 @@ async function buildCIMatrix( baseRef ) {
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
 				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
-				runLint: task.commands.includes( 'lint' ),
-				runPHPTests: task.commands.includes( 'test:php' ),
-				runJSTests: task.commands.includes( 'test:js' ),
-				runE2E: task.commands.includes( 'e2e' ),
+				lintCommand: getCommandOrOverride( task, 'lint' ),
+				phpTestCommand: getCommandOrOverride( task, 'test:php' ),
+				jsTestCommand: getCommandOrOverride( task, 'test:js' ),
+				e2eCommand: getCommandOrOverride( task, 'e2e' ),
 			} );
 		}
 	}

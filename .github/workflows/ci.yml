@@ -54,22 +54,22 @@ jobs:
             install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
         - name: 'Lint'
-          if: ${{ !cancelled() && matrix.runLint && steps.setup-monorepo.conclusion == 'success' }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" lint'
+          if: ${{ !cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success' }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.lintCommand }}'
         - name: 'Prepare Test Environment'
           id: 'prepare-test-environment'
           if: ${{ !cancelled() && matrix.needsTestEnvironment && steps.setup-monorepo.conclusion == 'success' }}
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" test:env:start'
         - name: 'Test - JS'
-          if: ${{ !cancelled() && matrix.runJSTests && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" test:js'
+          if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.jsTestCommand }}'
         - name: 'Test - PHP'
-          if: ${{ !cancelled() && matrix.runPHPTests && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" test:php'
+          if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.phpTestCommand }}'
         - name: 'E2E'
-          if: ${{ !cancelled() && matrix.runE2E && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" e2e'
+          if: ${{ !cancelled() && matrix.e2eTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.e2eTestCommand }}'
     project-task-matrix-evaluation:
       name: 'Evaluate Project Matrix'
       runs-on: 'ubuntu-20.04'

@@ -13,6 +13,9 @@
 		"build_step": "pnpm run build:zip",
 		"ci": {
 			"name": "WP: latest",
+			"customCommands": {
+				"test:php": "test:php:env"
+			},
 			"testEnvConfig": {
 				"wpVersion": "latest"
 			},
@@ -42,11 +45,7 @@
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-<<<<<<< HEAD
-		"lint": "pnpm lint:php:changes",
-=======
 		"lint": "pnpm lint:php",
->>>>>>> parent of efef597bd5 (Separated PHP and JS Unit Tests)
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",
 		"lint:fix": "pnpm lint:js:fix && pnpm lint:php:fix",
