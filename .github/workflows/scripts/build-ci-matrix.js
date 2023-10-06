@@ -433,11 +433,15 @@ function getPossibleCommands( packageFile, changes ) {
 		e2e: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
 	};
 
+	// Projects can override the default commands to execute with custom commands.
+	const customCommands = packageFile.config?.ci?.customCommands ?? {};
+
 	// We only want the list of possible commands to contain those that
 	// the project actually has and meet the criteria for execution.
 	const possibleCommands = [];
 	for ( const command in commandCriteria ) {
-		if ( ! packageFile.scripts?.[ command ] ) {
+		const commandScript = customCommands[ command ] ?? command;
+		if ( ! packageFile.scripts?.[ commandScript ] ) {
 			continue;
 		}
 
