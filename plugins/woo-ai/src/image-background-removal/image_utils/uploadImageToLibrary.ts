@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createExtendedError } from '@woocommerce/ai';
+
 type BackgroundRemovalParams = {
 	imageBlob: Blob;
 	libraryFilename: string;
@@ -37,7 +42,10 @@ export const uploadImageToLibrary = async ( {
 	const ajaxUrl = window?.ajaxurl;
 
 	if ( ! ( ajaxUrl && nonceValue ) ) {
-		throw new Error( 'Missing nonce or ajaxurl' );
+		throw createExtendedError(
+			'Missing nonce or ajaxurl',
+			'missing_nonce'
+		);
 	}
 
 	const formData = new FormData();
@@ -52,24 +60,24 @@ export const uploadImageToLibrary = async ( {
 	} ).then( ( res ) => res.json() );
 
 	if ( ! response.data ) {
-		return;
+		throw createExtendedError(
+			'Invalid response from ajax request',
+			'invalid_response'
+		);
 	}
 
-	const fileData = {
+	const attachmentData = wp.media.model.Attachment.create( {
 		...response.data,
-		attachment: wp.media.model.Attachment.create( {
-			...response.data,
-			file: fileObj,
-			uploading: false,
-			date: new Date(),
-			filename: fileObj.name,
-			menuOrder: 0,
-			type: 'image',
-			uploadedTo: wp.media.model.settings.post.id,
-		} ),
-	};
+		file: fileObj,
+		uploading: false,
+		date: new Date(),
+		filename: fileObj.name,
+		menuOrder: 0,
+		type: 'image',
+		uploadedTo: wp.media.model.settings.post.id,
+	} );
 
-	wp.media.model.Attachment.get( fileData.id, fileData.attachment );
-	wp.Uploader.queue.add( fileData.attachment );
+	wp.media.model.Attachment.get( _fileId, attachmentData );
+	wp.Uploader.queue.add( attachmentData );
 	wp.Uploader.queue.reset();
 };

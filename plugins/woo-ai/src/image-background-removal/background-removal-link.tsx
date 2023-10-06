@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 import { __ } from '@wordpress/i18n';
+import { Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -42,7 +43,7 @@ export const BackgroundRemovalLink = () => {
 
 	recordTracks( 'view_ui' );
 
-	const onRemoveClick = async () => {
+	const onRemoveBackgroundClick = async () => {
 		try {
 			recordTracks( 'click' );
 
@@ -74,7 +75,6 @@ export const BackgroundRemovalLink = () => {
 					.split( '/' )
 					.pop() }`,
 			} );
-			setState( '' );
 
 			recordTracks( 'complete' );
 		} catch ( err ) {
@@ -86,14 +86,10 @@ export const BackgroundRemovalLink = () => {
 			recordTracks( 'error', {
 				error: errorCode,
 			} );
+		} finally {
+			setState( '' );
 		}
 	};
-
-	if ( displayError ) {
-		return (
-			<span className="background-removal-error">{ displayError }</span>
-		);
-	}
 
 	if ( state === 'generating' ) {
 		return <span>{ __( 'Generating…', 'woocommerce' ) }</span>;
@@ -105,10 +101,17 @@ export const BackgroundRemovalLink = () => {
 
 	return (
 		<>
-			<button onClick={ () => onRemoveClick() }>
-				{ __( 'Remove background', 'woocommerce' ) }
-			</button>
-			<img src={ MagicIcon } alt="" />
+			<div className="background-link_actions">
+				<button onClick={ () => onRemoveBackgroundClick() }>
+					{ __( 'Remove background', 'woocommerce' ) }
+				</button>
+				<img src={ MagicIcon } alt="" />
+			</div>
+			{ displayError && (
+				<Notice onRemove={ () => setDisplayError( null ) }>
+					{ displayError }
+				</Notice>
+			) }
 		</>
 	);
 };
