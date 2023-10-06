@@ -10,8 +10,8 @@ const userSecret = USER_SECRET ?? 'password';
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
-	userKey: userKey,
-	userSecret, userSecret,
+	userKey,
+	userSecret,
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 90 * 1000,
