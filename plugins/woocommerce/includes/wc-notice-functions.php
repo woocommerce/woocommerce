@@ -137,7 +137,12 @@ function wc_print_notices( $return = false ) {
 		return;
 	}
 
-	$all_notices  = WC()->session->get( 'wc_notices', array() );
+	// If the session handler has not initialized, there will be no notices for us to read.
+	if ( null === ( $session = WC()->session ) ) {
+		return;
+	}
+
+	$all_notices  = $session->get( 'wc_notices', array() );
 	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
 
 	// Buffer output.
