@@ -494,7 +494,7 @@ function buildTasksForProject( projectPath, changes ) {
 	// Projects can override the default commands to execute with custom commands.
 	// This lets us talk about the default commands internally but change what
 	// command is actually run when it comes time to execute the task.
-	const customCommands = packageFile.ci?.customCommands ?? {};
+	const customCommands = packageFile.config?.ci?.customCommands ?? {};
 
 	// Certain tasks may require a test environment if one exists.
 	const hasTestEnvironment = !! packageFile.scripts?.[ 'test:env:start' ];
@@ -559,7 +559,6 @@ function buildTasksForProject( projectPath, changes ) {
 				name: additionalTask.name,
 				commands: taskCommands,
 				customCommands: taskCustomCommands,
-				customCommands: additionalTask.customCommands ?? {},
 				needsTestEnvironment: taskNeedsTestEnvironment,
 				testEnvConfig: taskTestEnvConfig,
 			} );
@@ -658,22 +657,36 @@ async function parseTestEnvConfig( testEnvConfig ) {
 }
 
 /**
- * Checks a task for a command and returns either it or the custom command override if one exists.
+ * Generates a command for the task that can be executed in the CI matrix. This will check the task
+ * for the command, apply any command override, and replace any valid tokens with their values.
  * 
  * @param {ProjectTask} task The task to get the command for.
  * @param {string} command The command to run.
+ * @param {Object.<string,string>} tokenValues Any tokens that should be replaced and their associated values.
  * @return {string|null} The command that should be run for the task or null if the command should not be run.
  */
-function getCommandOrOverride( task, command ) {
+function getCommandForMatrix( task, command, tokenValues ) {
 	if ( ! task.commands.includes( command ) ) {
 		return null;
 	}
 
-	if ( task.customCommands[ command ] ) {
-		return task.customCommands[ command ];
+	// Support overriding the default command with a custom one.
+	command = task.customCommands[ command ] ?? command;
+
+	// Replace any of the tokens that are used in commands with their values if one exists.
+	let matrixCommand = command;
+	const matches = command.matchAll( /\${([a-z0-9_\-]+)}/gi );
+	if ( matches ) {
+		for ( const match of matches ) {
+			if ( ! tokenValues.hasOwnProperty( match[1] ) ) {
+				throw new Error( `Command "${ command }" contains unknown token "${ match[1] }".` );
+			}
+	
+			matrixCommand = matrixCommand.replace( "${" + match + "}", tokenValues[ match[1] ] );
+		}
 	}
 
-	return command;
+	return matrixCommand;
 }
 
 /**
@@ -695,6 +708,11 @@ async function buildCIMatrix( baseRef ) {
 		projectTasks = generateProjectTasksForWorkspace();
 	}
 
+	// Prepare the tokens that are able to be replaced in commands.
+	const commandTokens = {
+		baseRef: baseRef ?? '',
+	};
+
 	// Parse the tasks and generate matrix entries for each of them.
 	for ( const project of projectTasks ) {
 		for ( const task of project.tasks ) {
@@ -703,10 +721,10 @@ async function buildCIMatrix( baseRef ) {
 				taskName: task.name,
 				needsTestEnvironment: task.needsTestEnvironment,
 				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
-				lintCommand: getCommandOrOverride( task, 'lint' ),
-				phpTestCommand: getCommandOrOverride( task, 'test:php' ),
-				jsTestCommand: getCommandOrOverride( task, 'test:js' ),
-				e2eCommand: getCommandOrOverride( task, 'e2e' ),
+				lintCommand: getCommandForMatrix( task, 'lint', commandTokens ),
+				phpTestCommand: getCommandForMatrix( task, 'test:php', commandTokens ),
+				jsTestCommand: getCommandForMatrix( task, 'test:js', commandTokens ),
+				e2eCommand: getCommandForMatrix( task, 'e2e', commandTokens ),
 			} );
 		}
 	}
