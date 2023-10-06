@@ -15,7 +15,16 @@ import {
 import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 // Mocking the apiFetch function
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@wordpress/api-fetch', () =>
+	jest.fn().mockResolvedValue( {
+		blob: () =>
+			Promise.resolve(
+				new Blob( [ new ArrayBuffer( 51200 ) ], {
+					type: 'image/jpeg',
+				} )
+			),
+	} )
+);
 jest.mock( '../utils/requestJetpackToken' );
 const mockedRequestJetpackToken = requestJetpackToken as jest.MockedFunction<
 	typeof requestJetpackToken
@@ -48,7 +57,7 @@ describe( 'useBackgroundRemoval hook', () => {
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
-				result.current.fetchImage( mockRequestParams );
+				await result.current.fetchImage( mockRequestParams );
 			} )
 		).rejects.toThrow( 'Invalid token' );
 	} );
@@ -62,7 +71,7 @@ describe( 'useBackgroundRemoval hook', () => {
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
-				result.current.fetchImage( mockRequestParams );
+				await result.current.fetchImage( mockRequestParams );
 			} )
 		).rejects.toThrow( 'Invalid image file' );
 	} );
@@ -76,7 +85,7 @@ describe( 'useBackgroundRemoval hook', () => {
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
-				result.current.fetchImage( mockRequestParams );
+				await result.current.fetchImage( mockRequestParams );
 			} )
 		).rejects.toThrow( 'Image file too small, must be at least 5KB' );
 	} );
@@ -90,29 +99,48 @@ describe( 'useBackgroundRemoval hook', () => {
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
-				result.current.fetchImage( mockRequestParams );
+				await result.current.fetchImage( mockRequestParams );
 			} )
 		).rejects.toThrow( 'Image file too large, must be under 10MB' );
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
-		const { result } = renderHook( () => useBackgroundRemoval() );
-		act( () => {
-			result.current.fetchImage( mockRequestParams );
+		(
+			apiFetch as jest.MockedFunction< typeof apiFetch >
+		 ).mockResolvedValue( {
+			blob: () =>
+				Promise.resolve(
+					new Blob( [ new ArrayBuffer( 51200 ) ], {
+						type: 'image/jpeg',
+					} )
+				),
 		} );
-		await waitFor( () => expect( result.current.loading ).toBeTruthy() );
+
+		const { result } = renderHook( () => useBackgroundRemoval() );
+		await act( async () => {
+			result.current.fetchImage( mockRequestParams );
+			await waitFor( () =>
+				expect( result.current.loading ).toBeTruthy()
+			);
+		} );
 		expect( mockedRequestJetpackToken ).toHaveBeenCalled();
 	} );
 
 	it( 'should handle successful API call', async () => {
 		(
 			apiFetch as jest.MockedFunction< typeof apiFetch >
-		 ).mockResolvedValue(
-			new Blob( [ new ArrayBuffer( 51200 ) ], { type: 'image/jpeg' } )
-		);
+		 ).mockResolvedValue( {
+			blob: () =>
+				Promise.resolve(
+					new Blob( [ new ArrayBuffer( 51200 ) ], {
+						type: 'image/jpeg',
+					} )
+				),
+		} );
+
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await act( async () => {
-			result.current.fetchImage( mockRequestParams );
+			await result.current.fetchImage( mockRequestParams );
 		} );
 		expect( result.current.loading ).toBe( false );
 		expect( result.current.imageData ).toBeInstanceOf( Blob );
@@ -121,14 +149,17 @@ describe( 'useBackgroundRemoval hook', () => {
 	it( 'should handle API errors', async () => {
 		(
 			apiFetch as jest.MockedFunction< typeof apiFetch >
-		 ).mockRejectedValue( new Error( 'API Error' ) );
+		 ).mockImplementation( () => {
+			throw new Error( 'API Error' );
+		} );
+
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
-				result.current.fetchImage( mockRequestParams );
+				await result.current.fetchImage( mockRequestParams );
 			} )
 		).rejects.toThrow( 'API Error' );
-		expect( result.current.loading ).toBe( false );
+		await waitFor( () => expect( result.current.loading ).toBeFalsy() );
 		expect( result.current.imageData ).toBe( null );
 	} );
 } );
