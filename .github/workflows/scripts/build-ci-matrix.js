@@ -537,8 +537,8 @@ function buildTasksForProject( projectPath, changes ) {
 			}
 
 			// We only want to add the commands that are possible for this project.
-			const taskCommands = additionalTask.commands.filter(
-				( command ) => possibleCommands.includes( command )
+			const taskCommands = additionalTask.commands.filter( ( command ) =>
+				possibleCommands.includes( command )
 			);
 
 			// Don't add the additional task if it wouldn't run any commands.
