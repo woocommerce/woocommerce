@@ -23,18 +23,17 @@ jobs:
           # Get the day of the week of the merged PR (0 for Sunday, 1 for Monday, etc.)
           MERGE_DAY_OF_WEEK=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%u")
           
-          # Calculate days until the next Wednesday after the merge
-          DAYS_UNTIL_NEXT_WEDNESDAY=$(( (3 - MERGE_DAY_OF_WEEK + 7) % 7 + 1 ))
-          DAYS_UNTIL_NEXT_THURSDAY=$((DAYS_UNTIL_NEXT_WEDNESDAY + 1))
+          # Calculate days until the next Thursday after the merge
+          DAYS_UNTIL_NEXT_THURSDAY=$(( (4 - MERGE_DAY_OF_WEEK + 7) % 7 + 1 ))
           
           # Calculate the date for the next Thursday after the merge
           THURSDAY_AFTER_MERGE=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_THURSDAY days" +"%Y-%m-%d")
           NEXT_THURSDAY=$(date -u -d "${{ github.event.pull_request.merged_at }} + $(($DAYS_UNTIL_NEXT_THURSDAY + 7)) days" +"%Y-%m-%d")
           
           CURRENT_TIMESTAMP=$(date -u +"%s")
-          WEDNESDAY_AFTER_MERGE_TIMESTAMP=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_WEDNESDAY days" +"%s")
+          THURSDAY_AFTER_MERGE_TIMESTAMP=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_THURSDAY days" +"%s")
           
-          if [[ "$WEDNESDAY_AFTER_MERGE_TIMESTAMP" -le "$CURRENT_TIMESTAMP" ]]; then
+          if [[ "$THURSDAY_AFTER_MERGE_TIMESTAMP" -le "$CURRENT_TIMESTAMP" ]]; then
             TEST_DATE_MESSAGE="Can be tested from: Thursday, $THURSDAY_AFTER_MERGE"
           else
             TEST_DATE_MESSAGE="Can be tested from: Thursday, $NEXT_THURSDAY"
