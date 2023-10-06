@@ -17,7 +17,8 @@ export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< CheckboxBlockAttributes > ) {
-	const { property, title, label, tooltip, onValue, offValue } = attributes;
+	const { property, title, label, tooltip, checkedValue, uncheckedValue } =
+		attributes;
 
 	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
@@ -30,17 +31,17 @@ export function Edit( {
 	} );
 
 	function isChecked() {
-		if ( onValue !== undefined ) {
-			return onValue === value;
+		if ( checkedValue !== undefined ) {
+			return checkedValue === value;
 		}
 		return value as boolean;
 	}
 
 	function handleChange( checked: boolean ) {
 		if ( checked ) {
-			setValue( onValue !== undefined ? onValue : checked );
+			setValue( checkedValue !== undefined ? checkedValue : checked );
 		} else {
-			setValue( offValue !== undefined ? offValue : checked );
+			setValue( uncheckedValue !== undefined ? uncheckedValue : checked );
 		}
 	}
 

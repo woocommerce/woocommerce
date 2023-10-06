@@ -21,10 +21,10 @@
 		"tooltip": {
 			"type": "string"
 		},
-		"onValue": {
+		"checkedValue": {
 			"type": "string"
 		},
-		"offValue": {
+		"uncheckedValue": {
 			"type": "string"
 		}
 	},

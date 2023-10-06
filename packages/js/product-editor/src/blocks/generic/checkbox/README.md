@@ -36,21 +36,21 @@ Property in which the checkbox value is stored.
 
 Tooltip text that is shown when hovering the icon at the side of the label.
 
-### onValue
+### checkedValue
 
 -   **Type:** `String`
 -   **Required:** `No`
 
-If it is set, the checked state will be `property` === `onValue`. When `onChange` is fired with the checked value set to `true` then the `property` value will be set to the one stored in `onValue`.
+If it is set, the checked state will be `property` === `checkedValue`. When `onChange` is fired with the checked value set to `true` then the `property` value will be set to the one stored in `checkedValue`.
 
 This is needed for cases where the `property` type is not a `boolean`.
 
-### offValue
+### uncheckedValue
 
 -   **Type:** `String`
 -   **Required:** `No`
 
-If it is set, the unchecked state will be `property` !== `onValue`. When `onChange` is fired with the checked value set to `false` then the `property` value will be set to the one stored in `offValue`.
+If it is set, the unchecked state will be `property` !== `checkedValue`. When `onChange` is fired with the checked value set to `false` then the `property` value will be set to the one stored in `uncheckedValue`.
 
 This is needed for cases where the `property` type is not a `boolean`.
 
@@ -98,8 +98,8 @@ $parent_container->add_block(
     'attributes' => [
       'property' => 'status',
       'label'    => __( 'Hide in product catalog', 'woocommerce' ),
-      'onValue'  => 'private',
-      'offValue' => 'publish',
+      'checkedValue'  => 'private',
+      'uncheckedValue' => 'publish',
     ],
   ]
 );

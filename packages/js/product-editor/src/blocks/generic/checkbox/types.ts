@@ -8,6 +8,6 @@ export interface CheckboxBlockAttributes extends BlockAttributes {
 	title?: string;
 	label?: string;
 	tooltip?: string;
-	onValue?: string | null;
-	offValue?: string | null;
+	checkedValue?: string | null;
+	uncheckedValue?: string | null;
 }
