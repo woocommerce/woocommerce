@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 import { __ } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
@@ -40,8 +40,14 @@ export const BackgroundRemovalLink = () => {
 		''
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
+	const [ viewed, setViewed ] = useState< boolean >( false );
 
-	recordTracks( 'view_ui' );
+	useEffect( () => {
+		if ( ! viewed ) {
+			setViewed( true );
+			recordTracks( 'view_ui' );
+		}
+	}, [ viewed ] );
 
 	const onRemoveBackgroundClick = async () => {
 		try {
