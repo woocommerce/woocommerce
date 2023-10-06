@@ -28,7 +28,7 @@ export function Edit( {
 	} );
 
 	function isChecked() {
-		if ( onValue ) {
+		if ( onValue !== undefined ) {
 			return onValue === value;
 		}
 		return value as boolean;
