@@ -14,12 +14,13 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes,
+	context,
 }: ProductEditorBlockEditProps< RadioBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { description, options, property, title } = attributes;
 	const [ value, setValue ] = useEntityProp< string >(
 		'postType',
-		'product',
+		context.postType,
 		property
 	);
 
