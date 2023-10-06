@@ -27,10 +27,15 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes,
+	context,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
+	const [ sku, setSku ] = useEntityProp(
+		'postType',
+		context.postType,
+		'sku'
+	);
 
 	return (
 		<div { ...blockProps }>

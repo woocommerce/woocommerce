@@ -231,6 +231,7 @@ for ( const currentPage of wcPages ) {
 
 				await expect(
 					page.locator( currentPage.subpages[ i ].element )
+					.first()
 				).toBeVisible();
 
 				await expect(
