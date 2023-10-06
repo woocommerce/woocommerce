@@ -25,17 +25,18 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	clientId,
+	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, help } = attributes;
 	const [ regularPrice ] = useEntityProp< string >(
 		'postType',
-		'product',
+		context.postType || 'product',
 		'regular_price'
 	);
 	const [ salePrice, setSalePrice ] = useEntityProp< string >(
 		'postType',
-		'product',
+		context.postType || 'product',
 		'sale_price'
 	);
 	const inputProps = useCurrencyInputProps( {
