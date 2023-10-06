@@ -15,12 +15,13 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes,
+	context,
 }: ProductEditorBlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, property, disabled, disabledCopy } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(
 		'postType',
-		'product',
+		context.postType,
 		property
 	);
 

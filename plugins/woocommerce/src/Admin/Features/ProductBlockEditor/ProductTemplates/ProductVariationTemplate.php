@@ -315,22 +315,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
-		$inventory_group->add_block(
-			[
-				'id'         => 'product_variation_notice_inventory_tab',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
-				'order'      => 10,
-				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
-				],
-			]
-		);
-		// Product Pricing Section.
+		// Product Inventory Section.
 		$product_inventory_section       = $inventory_group->add_section(
 			[
-				'id'         => 'product-inventory-section',
+				'id'         => 'product-variation-inventory-section',
 				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Inventory', 'woocommerce' ),
@@ -346,20 +334,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_inner_section = $product_inventory_section->add_section(
 			[
-				'id'    => 'product-inventory-inner-section',
+				'id'    => 'product-variation-inventory-inner-section',
 				'order' => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
-				'id'        => 'product-sku-field',
+				'id'        => 'product-variation-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
-				'id'         => 'product-track-stock',
+				'id'         => 'product-variation-track-stock',
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => [
@@ -377,7 +365,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
 			[
-				'id'         => 'product-inventory-quantity-conditional-wrapper',
+				'id'         => 'product-variation-inventory-quantity-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 30,
 				'attributes' => [
@@ -389,14 +377,14 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_quantity_conditional->add_block(
 			[
-				'id'        => 'product-inventory-quantity',
+				'id'        => 'product-variation-inventory-quantity',
 				'blockName' => 'woocommerce/product-inventory-quantity-field',
 				'order'     => 10,
 			]
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
 			[
-				'id'         => 'product-stock-status-conditional-wrapper',
+				'id'         => 'product-variation-stock-status-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 20,
 				'attributes' => [
@@ -408,7 +396,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_stock_status_conditional->add_block(
 			[
-				'id'         => 'product-stock-status',
+				'id'         => 'product-variation-stock-status',
 				'blockName'  => 'woocommerce/product-radio-field',
 				'order'      => 10,
 				'attributes' => [
@@ -428,97 +416,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 							'value' => 'onbackorder',
 						],
 					],
-				],
-			]
-		);
-		$product_inventory_advanced         = $product_inventory_section->add_block(
-			[
-				'id'         => 'product-inventory-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 30,
-				'attributes' => [
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				],
-			]
-		);
-		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
-			[
-				'blockName'  => 'woocommerce/product-section',
-				'order'      => 10,
-				'attributes' => [
-					'blockGap' => 'unit-40',
-				],
-			]
-		);
-		$product_out_of_stock_conditional   = $product_inventory_advanced_wrapper->add_block(
-			[
-				'id'         => 'product-out-of-stock-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 10,
-				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
-				],
-			]
-		);
-		$product_out_of_stock_conditional->add_block(
-			[
-				'id'         => 'product-out-of-stock',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => [
-					'title'    => __( 'When out of stock', 'woocommerce' ),
-					'property' => 'backorders',
-					'options'  => [
-						[
-							'label' => __( 'Allow purchases', 'woocommerce' ),
-							'value' => 'yes',
-						],
-						[
-							'label' => __(
-								'Allow purchases, but notify customers',
-								'woocommerce'
-							),
-							'value' => 'notify',
-						],
-						[
-							'label' => __( "Don't allow purchases", 'woocommerce' ),
-							'value' => 'no',
-						],
-					],
-				],
-			]
-		);
-		$product_out_of_stock_conditional->add_block(
-			[
-				'id'        => 'product-inventory-email',
-				'blockName' => 'woocommerce/product-inventory-email-field',
-				'order'     => 20,
-			]
-		);
-
-		$product_inventory_advanced_wrapper->add_block(
-			[
-				'id'         => 'product-limit-purchase',
-				'blockName'  => 'woocommerce/product-checkbox-field',
-				'order'      => 20,
-				'attributes' => [
-					'title'    => __(
-						'Restrictions',
-						'woocommerce'
-					),
-					'label'    => __(
-						'Limit purchases to 1 item per order',
-						'woocommerce'
-					),
-					'property' => 'sold_individually',
-					'tooltip'  => __(
-						'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-						'woocommerce'
-					),
 				],
 			]
 		);
