@@ -107,6 +107,11 @@ async function getPreciseWPVersionURL( wpVersion ) {
  * @return {Promise.<string>} A link to download the given version of WordPress.
  */
 async function parseWPVersion( wpVersion ) {
+	// Allow for download URLs in place of a version.
+	if ( wpVersion.match( /[a-z]+:\/\//i ) ) {
+		return wpVersion;
+	}
+
 	// Start with versions we can infer immediately.
 	switch ( wpVersion ) {
 		case 'master':
@@ -679,7 +684,11 @@ async function parseTestEnvConfig( testEnvConfig ) {
 
 	// Convert `wp-env` configuration options to environment variables.
 	if ( testEnvConfig.wpVersion ) {
-		envVars.WP_ENV_CORE = await parseWPVersion( testEnvConfig.wpVersion );
+		try {
+			envVars.WP_ENV_CORE = await parseWPVersion( testEnvConfig.wpVersion );
+		} catch ( error ) {
+			throw new Error( `Failed to parse WP version: ${ error.message }.` );
+		}
 	}
 	if ( testEnvConfig.phpVersion ) {
 		envVars.WP_ENV_PHP_VERSION = testEnvConfig.phpVersion;
