@@ -16,6 +16,7 @@ export const ThemeCard = ( {
 	thumbnail_url,
 	name,
 	color_palettes = [],
+	total_palettes = 0,
 	link_url = '',
 	is_active = false,
 }: TypeThemeCard ) => {
@@ -33,7 +34,10 @@ export const ThemeCard = ( {
 			<div className="theme-card__info">
 				<h2 className="theme-card__title">{ name }</h2>
 				{ color_palettes && (
-					<ColorPalettes colorPalettes={ color_palettes } />
+					<ColorPalettes 
+						colorPalettes={ color_palettes } 
+						totalPalettes={ total_palettes }
+					/>
 				) }
 			</div>
 			<div>

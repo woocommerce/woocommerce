@@ -14,4 +14,5 @@ export type ThemeCard = {
 	is_active: boolean;
 	link_url?: string;
 	color_palettes: ColorPalette[];
+	total_palettes: number;
 };

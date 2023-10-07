@@ -5,9 +5,17 @@ import { ColorPalette } from './types';
 
 export const ColorPalettes = ( {
 	colorPalettes,
+	totalPalettes,
 }: {
 	colorPalettes: ColorPalette[];
+	totalPalettes: number;
 } ) => {
+    let extra = null;
+
+    if ( totalPalettes > 4 ) {
+      extra = <li className="more_palettes">+{ totalPalettes - 4 }</li>;
+    }
+
 	return (
 		<ul className="theme-card__color-palettes">
 			{ colorPalettes.map( ( colorPalette ) => (
@@ -28,6 +36,7 @@ export const ColorPalettes = ( {
 					} }
 				></li>
 			) ) }
+			{ extra }
 		</ul>
 	);
 };
