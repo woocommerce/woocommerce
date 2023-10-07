@@ -16,13 +16,13 @@ export const ColorPalettes = ( {
 					style={ {
 						background:
 							'linear-gradient(to right, ' +
-							colorPalette.secondary + 
+							colorPalette.primary + 
 							' 0px, ' +
+							colorPalette.primary +
+							' 50%, ' +
 							colorPalette.secondary +
 							' 50%, ' +
-							colorPalette.primary +
-							' 50%, ' +
-							colorPalette.primary +
+							colorPalette.secondary +
 							' 100%' +
 							')',
 					} }
