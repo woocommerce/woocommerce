@@ -403,23 +403,50 @@ function cascadeProjectChanges( projectChanges ) {
 }
 
 /**
+ * The valid commands that we can execute.
+ *
+ * @typedef {string} CommandType
+ * @enum {CommandType}
+ */
+const COMMAND_TYPE = {
+	Lint: 'lint',
+	TestPHP: 'test:php',
+	TestJS: 'test:js',
+	E2E: 'e2e',
+};
+
+/**
+ * Indicates whether or not the command is a test command.
+ *
+ * @param {CommandType} command The command to check.
+ * @return {boolean} Whether or not the command is a test command.
+ */
+function isTestCommand( command ) {
+	return (
+		command === COMMAND_TYPE.TestPHP ||
+		command === COMMAND_TYPE.TestJS ||
+		command === COMMAND_TYPE.E2E
+	);
+}
+
+/**
  * Details about a task that should be run for a project.
  *
  * @typedef {Object} ProjectTask
- * @property {string}                 name                 The name of the task.
- * @property {Array.<string>}         commands             The commands that the project should run.
- * @property {Object.<string,string>} customCommands       Any commands that should be run in place of the default commands.
- * @property {string|null}		      testEnvCommand       The command that should be run to start the test environment if one is needed.
- * @property {Object.<string,string>} testEnvConfig        Any configuration for the test environment if one is needed.
+ * @property {string}                 name           The name of the task.
+ * @property {Array.<CommandType>}    commands       The commands that the project should run.
+ * @property {Object.<string,string>} customCommands Any commands that should be run in place of the default commands.
+ * @property {string|null}            testEnvCommand The command that should be run to start the test environment if one is needed.
+ * @property {Object.<string,string>} testEnvConfig  Any configuration for the test environment if one is needed.
  */
 
 /**
  * Parses the task configuration from the package.json file and returns a task object.
- * 
- * @param {Object} packageFile The package file for the project.
- * @param {Object} config The taw task configuration.
- * @param {Array.<string>} possibleCommands The commands that can be run for the project.
- * @param {ProjectTask|null} parentTask The task that this task is a child of.
+ *
+ * @param {Object}              packageFile      The package file for the project.
+ * @param {Object}              config           The taw task configuration.
+ * @param {Array.<CommandType>} possibleCommands The commands that can be run for the project.
+ * @param {ProjectTask|null}    parentTask       The task that this task is a child of.
  * @return {ProjectTask} The parsed task.
  */
 function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
@@ -429,9 +456,7 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 	if ( parentTask ) {
 		taskName = config.name;
 		if ( ! taskName ) {
-			throw new Error(
-				`${ packageFile.name }: missing name for task.`
-			);
+			throw new Error( `${ packageFile.name }: missing name for task.` );
 		}
 	}
 
@@ -446,7 +471,9 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 			);
 		}
 
-		commands = commands.filter( ( command ) => config.commands.includes( command ) );
+		commands = commands.filter( ( command ) =>
+			config.commands.includes( command )
+		);
 	}
 
 	// Since not every project will have the same standardized commands we need to support
@@ -456,14 +483,17 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 	const customCommands = Object.assign(
 		{},
 		parentTask?.customCommands ?? {},
-		config?.customCommands ?? {},
+		config?.customCommands ?? {}
 	);
 
 	// The test environment command only needs to be set when a test environment is needed.
 	let testEnvCommand = null;
-	if ( commands.filter( ( command ) => command === 'test:php' || command === 'test:js' || command === 'e2e' ) ) {
+	if ( commands.filter( ( command ) => isTestCommand( command ) ) ) {
 		// Cascade the test environment command from parent to child for ease of use.
-		testEnvCommand = config?.testEnvCommand ?? parentTask?.testEnvCommand ?? 'test:env:start';
+		testEnvCommand =
+			config?.testEnvCommand ??
+			parentTask?.testEnvCommand ??
+			'test:env:start';
 
 		// Make sure that a developer hasn't put in a test command that doesn't exist.
 		if ( config?.testEnvCommand ) {
@@ -479,7 +509,7 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 	const testEnvConfig = Object.assign(
 		{},
 		parentTask?.testEnvConfig ?? {},
-		config?.testEnvConfig ?? {},
+		config?.testEnvConfig ?? {}
 	);
 
 	return {
@@ -510,10 +540,10 @@ function getPossibleCommands( packageFile, changes ) {
 	// Here are all of the commands that we support and the change criteria that they require to execute.
 	// We treat the command's criteria as passing if any of the properties are true.
 	const commandCriteria = {
-		lint: [ 'sourceFileChanges' ],
-		'test:php': [ 'phpSourceChanges', 'phpTestFileChanges' ],
-		'test:js': [ 'jsSourceChanges', 'jsTestFileChanges' ],
-		e2e: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
+		[ COMMAND_TYPE.Lint ]: [ 'sourceFileChanges' ],
+		[ COMMAND_TYPE.TestPHP ]: [ 'phpSourceChanges', 'phpTestFileChanges' ],
+		[ COMMAND_TYPE.TestJS ]: [ 'jsSourceChanges', 'jsTestFileChanges' ],
+		[ COMMAND_TYPE.E2E ]: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
 	};
 
 	// Projects can override the default commands to execute with custom commands.
@@ -523,7 +553,7 @@ function getPossibleCommands( packageFile, changes ) {
 	// This lets us easily check for the command existence.
 	for ( const command in customCommands ) {
 		const split = customCommands[ command ].split( ' ' );
-		customCommands[ command ] = split[0];
+		customCommands[ command ] = split[ 0 ];
 	}
 
 	// We only want the list of possible commands to contain those that
@@ -595,11 +625,23 @@ function buildTasksForProject( projectPath, changes ) {
 	}
 
 	// Parse the task configuration from the package.json file.
-	const task = parseTaskConfig( packageFile, packageFile.config?.ci, possibleCommands, null );
+	const task = parseTaskConfig(
+		packageFile,
+		packageFile.config?.ci,
+		possibleCommands,
+		null
+	);
 	const projectTasks = [ task ];
 	if ( packageFile.config?.ci?.additionalTasks ) {
 		for ( const additionalTask of packageFile.config.ci.additionalTasks ) {
-			projectTasks.push( parseTaskConfig( packageFile, additionalTask, possibleCommands, task ) );
+			projectTasks.push(
+				parseTaskConfig(
+					packageFile,
+					additionalTask,
+					possibleCommands,
+					task
+				)
+			);
 		}
 	}
 
@@ -663,13 +705,13 @@ function generateProjectTasksForWorkspace() {
  * A CI matrix for the GitHub workflow.
  *
  * @typedef	{Object} CIMatrix
- * @property {string}                 projectName          The name of the project.
- * @property {string}                 taskName             The name of the task.
- * @property {Object.<string,string>} testEnvVars          The environment variables for the test environment.
- * @property {boolean}                runLint              Whether or not linting should be run for the project.
- * @property {boolean}                runPHPTests          Whether or not PHP tests should be run for the project.
- * @property {boolean}                runJSTests           Whether or not JS tests should be run for the project.
- * @property {boolean}                runE2E               Whether or not E2E tests should be run for the project.
+ * @property {string}                 projectName    The name of the project.
+ * @property {string}                 taskName       The name of the task.
+ * @property {Object.<string,string>} testEnvVars    The environment variables for the test environment.
+ * @property {string|null}            lintCommand    The command to run if linting is necessary.
+ * @property {string|null}            phpTestCommand The command to run if PHP tests are necessary.
+ * @property {string|null}            jsTestCommand  The command to run if JS tests are necessary.
+ * @property {string|null}            e2eCommand     The command to run if E2E is necessary.
  */
 
 /**
@@ -685,9 +727,13 @@ async function parseTestEnvConfig( testEnvConfig ) {
 	// Convert `wp-env` configuration options to environment variables.
 	if ( testEnvConfig.wpVersion ) {
 		try {
-			envVars.WP_ENV_CORE = await parseWPVersion( testEnvConfig.wpVersion );
+			envVars.WP_ENV_CORE = await parseWPVersion(
+				testEnvConfig.wpVersion
+			);
 		} catch ( error ) {
-			throw new Error( `Failed to parse WP version: ${ error.message }.` );
+			throw new Error(
+				`Failed to parse WP version: ${ error.message }.`
+			);
 		}
 	}
 	if ( testEnvConfig.phpVersion ) {
@@ -702,7 +748,7 @@ async function parseTestEnvConfig( testEnvConfig ) {
  * for the command, apply any command override, and replace any valid tokens with their values.
  *
  * @param {ProjectTask}            task        The task to get the command for.
- * @param {string}                 command     The command to run.
+ * @param {CommandType}            command     The command to run.
  * @param {Object.<string,string>} tokenValues Any tokens that should be replaced and their associated values.
  * @return {string|null} The command that should be run for the task or null if the command should not be run.
  */
@@ -767,18 +813,26 @@ async function buildCIMatrix( baseRef ) {
 				taskName: task.name,
 				testEnvCommand: task.testEnvCommand,
 				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
-				lintCommand: getCommandForMatrix( task, 'lint', commandTokens ),
+				lintCommand: getCommandForMatrix(
+					task,
+					COMMAND_TYPE.Lint,
+					commandTokens
+				),
 				phpTestCommand: getCommandForMatrix(
 					task,
-					'test:php',
+					COMMAND_TYPE.TestPHP,
 					commandTokens
 				),
 				jsTestCommand: getCommandForMatrix(
 					task,
-					'test:js',
+					COMMAND_TYPE.TestJS,
 					commandTokens
 				),
-				e2eCommand: getCommandForMatrix( task, 'e2e', commandTokens ),
+				e2eCommand: getCommandForMatrix(
+					task,
+					COMMAND_TYPE.E2E,
+					commandTokens
+				),
 			} );
 		}
 	}
@@ -787,5 +841,3 @@ async function buildCIMatrix( baseRef ) {
 }
 
 module.exports = buildCIMatrix;
-
-buildCIMatrix( 'origin/trunk' ).then( ( matrix ) => console.log( matrix ) );
