@@ -416,6 +416,22 @@ const COMMAND_TYPE = {
 };
 
 /**
+ * Checks a command to see whether or not it is valid.
+ *
+ * @param {CommandType} command The command to check.
+ * @return {boolean} Whether or not the command is valid.T
+ */
+function isValidCommand( command ) {
+	for ( const commandType in COMMAND_TYPE ) {
+		if ( COMMAND_TYPE[ commandType ] === command ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Indicates whether or not the command is a test command.
  *
  * @param {CommandType} command The command to check.
@@ -471,9 +487,39 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 			);
 		}
 
-		commands = commands.filter( ( command ) =>
-			config.commands.includes( command )
-		);
+		commands = config.commands.filter( ( command ) => {
+			// Check for invalid commands being since they won't do anything.
+			if ( ! isValidCommand( command ) ) {
+				throw new Error(
+					`${ packageFile.name }: invalid command type "${ command } for task "${ taskName }".`
+				);
+			}
+
+			// Only include commands that are possible.
+			return commands.includes( command );
+		} );
+	}
+
+	// Make sure that no invalid custom commands have been entered.
+	if ( config?.customCommands ) {
+		for ( const customCommandType in config.customCommands ) {
+			// Check for invalid commands being mapped since they won't do anything.
+			if ( ! isValidCommand( customCommandType ) ) {
+				throw new Error(
+					`${ packageFile.name }: invalid custom command type "${ customCommandType } for task "${ taskName }".`
+				);
+			}
+
+			// Custom commands may have tokens that we need to remove in order to check them for existence.
+			const split = config.customCommands[ customCommandType ].split( ' ' );
+			const customCommand = split[ 0 ];
+
+			if ( ! packageFile.scripts?.[ customCommand ] ) {
+				throw new Error(
+					`${ packageFile.name }: unknown custom "${ customCommandType }" command "${ config.testEnvCommand }" for task "${ taskName }".`
+				);
+			}
+		}
 	}
 
 	// Since not every project will have the same standardized commands we need to support
@@ -563,14 +609,6 @@ function getPossibleCommands( packageFile, changes ) {
 		// We can only run commands that actually exist.
 		const commandScript = customCommands[ command ] ?? command;
 		if ( ! packageFile.scripts?.[ commandScript ] ) {
-			// Since developers define the custom commands themselves we should make
-			// sure that they didn't make a mistake and set one that doesn't exist.
-			if ( customCommands[ command ] ) {
-				throw new Error(
-					`${ packageFile.name }: unknown custom CI command "${ commandScript }".`
-				);
-			}
-
 			continue;
 		}
 
