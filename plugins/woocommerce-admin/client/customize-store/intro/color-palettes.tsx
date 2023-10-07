@@ -16,9 +16,9 @@ export const ColorPalettes = ( {
 					style={ {
 						background:
 							'linear-gradient(to right, ' +
-							colorPalette.background + 
+							colorPalette.secondary + 
 							' 0px, ' +
-							colorPalette.background +
+							colorPalette.secondary +
 							' 50%, ' +
 							colorPalette.primary +
 							' 50%, ' +
