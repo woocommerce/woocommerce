@@ -58,17 +58,17 @@ jobs:
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.lintCommand }}'
         - name: 'Prepare Test Environment'
           id: 'prepare-test-environment'
-          if: ${{ !cancelled() && matrix.needsTestEnvironment && steps.setup-monorepo.conclusion == 'success' }}
+          if: ${{ !cancelled() && matrix.testEnvCommand && steps.setup-monorepo.conclusion == 'success' }}
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnvCommand }}'
         - name: 'Test - JS'
-          if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.jsTestCommand }}'
         - name: 'Test - PHP'
-          if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.phpTestCommand }}'
         - name: 'E2E'
-          if: ${{ !cancelled() && matrix.e2eTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.needsTestEnvironment || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: ${{ !cancelled() && matrix.e2eTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.e2eTestCommand }}'
     project-task-matrix-evaluation:
       name: 'Evaluate Project Matrix'

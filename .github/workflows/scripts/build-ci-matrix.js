@@ -404,10 +404,87 @@ function cascadeProjectChanges( projectChanges ) {
  * @property {string}                 name                 The name of the task.
  * @property {Array.<string>}         commands             The commands that the project should run.
  * @property {Object.<string,string>} customCommands       Any commands that should be run in place of the default commands.
- * @property {string}				  testEnvCommand       The command that should be run to start the test environment.
- * @property {boolean}                needsTestEnvironment Whether or not the project needs a test environment.
+ * @property {string|null}		      testEnvCommand       The command that should be run to start the test environment if one is needed.
  * @property {Object.<string,string>} testEnvConfig        Any configuration for the test environment if one is needed.
  */
+
+/**
+ * Parses the task configuration from the package.json file and returns a task object.
+ * 
+ * @param {Object} packageFile The package file for the project.
+ * @param {Object} config The taw task configuration.
+ * @param {Array.<string>} possibleCommands The commands that can be run for the project.
+ * @param {ProjectTask|null} parentTask The task that this task is a child of.
+ * @return {ProjectTask} The parsed task.
+ */
+function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
+	// Child tasks are required to have a name because otherwise
+	// every task for a project would be named "default".
+	let taskName = 'default';
+	if ( parentTask ) {
+		taskName = config.name;
+		if ( ! taskName ) {
+			throw new Error(
+				`${ packageFile.name }: missing name for task.`
+			);
+		}
+	}
+
+	// Child tasks are required to define the commands that they should run.
+	// Since not all of these tasks may be running, however, we need to
+	// filter the tasks according to the possible tasks.
+	let commands = possibleCommands;
+	if ( parentTask ) {
+		if ( ! config?.commands || ! config.commands.length ) {
+			throw new Error(
+				`${ packageFile.name }: missing commands for task "${ taskName }".`
+			);
+		}
+
+		commands = commands.filter( ( command ) => config.commands.includes( command ) );
+	}
+
+	// Since not every project will have the same standardized commands we need to support
+	// custom commands that can be run instead of the standardized commands. For
+	// ease of use we will add parent tasks to children and allow the children
+	// to override any specific tasks if desired.
+	const customCommands = Object.assign(
+		{},
+		parentTask?.customCommands ?? {},
+		config?.customCommands ?? {},
+	);
+
+	// The test environment command only needs to be set when a test environment is needed.
+	let testEnvCommand = null;
+	if ( commands.filter( ( command ) => command === 'test:php' || command === 'test:js' || command === 'e2e' ) ) {
+		// Cascade the test environment command from parent to child for ease of use.
+		testEnvCommand = config?.testEnvCommand ?? parentTask?.testEnvCommand ?? 'test:env:start';
+
+		// Make sure that a developer hasn't put in a test command that doesn't exist.
+		if ( config?.testEnvCommand ) {
+			if ( ! packageFile.scripts?.[ config.testEnvCommand ] ) {
+				throw new Error(
+					`${ packageFile.name }: unknown test environment command "${ config.testEnvCommand }" for task "${ taskName }".`
+				);
+			}
+		}
+	}
+
+	// The test environment configuration should also cascade from parent task to child task.
+	const testEnvConfig = Object.assign(
+		{},
+		parentTask?.testEnvConfig ?? {},
+		config?.testEnvConfig ?? {},
+	);
+
+	return {
+		name: taskName,
+		commands,
+		customCommands,
+		testEnvCommand,
+		testEnvConfig,
+	};
+}
 
 /**
  * Details about a project and the tasks that should be run	for it.
@@ -455,7 +532,7 @@ function getPossibleCommands( packageFile, changes ) {
 			// sure that they didn't make a mistake and set one that doesn't exist.
 			if ( customCommands[ command ] ) {
 				throw new Error(
-					`Unknown custom command "${ commandScript }".`
+					`${ packageFile.name }: unknown custom CI command "${ commandScript }".`
 				);
 			}
 
@@ -469,7 +546,7 @@ function getPossibleCommands( packageFile, changes ) {
 				// Confidence check to make sure the criteria wasn't misspelled.
 				if ( ! changes.hasOwnProperty( criteria ) ) {
 					throw new Error(
-						`Unknown criteria "${ criteria }" for command "${ command }".`
+						`${ packageFile.name }: unknown criteria "${ criteria }" for command "${ command }".`
 					);
 				}
 
@@ -512,126 +589,12 @@ function buildTasksForProject( projectPath, changes ) {
 		return null;
 	}
 
-	// Projects can override the default commands to execute with custom commands.
-	// This lets us talk about the default commands internally but change what
-	// command is actually run when it comes time to execute the task.
-	const customCommands = packageFile.config?.ci?.customCommands ?? {};
-
-	// Support overriding the test environment command.
-	let testEnvCommand = null;
-	if ( packageFile.config?.ci?.testEnvCommand ) {
-		testEnvCommand = packageFile.config.ci.testEnvCommand;
-
-		// Since this was entered by a developer we need to throw an error
-		// if the command doesn't exist. This prevents mistakes from
-		// going unnoticed.
-		if ( ! packageFile.scripts?.[ testEnvCommand ] ) {
-			throw new Error(
-				`Unknown test environment command "${ testEnvCommand }".`
-			);
-		}
-	} else if ( packageFile.scripts?.[ 'test:env:start' ] ) {
-		testEnvCommand = 'test:env:start';
-	}
-
-	// Certain tasks may require a test environment if one exists.
-	const needsTestEnvironmentFn = ( task ) =>
-		task === 'test:php' || task === 'test:js' || task === 'e2e';
-	const testEnvConfig = packageFile.config?.ci?.testEnvConfig ?? {};
-
-	// The package tasks will include both the default tasks and any tasks that have been added by the package.json configuration.
-	const projectTasks = [
-		{
-			name: packageFile.config?.ci?.name ?? 'default',
-			commands: possibleCommands,
-			customCommands,
-			testEnvCommand: testEnvCommand,
-			needsTestEnvironment:
-				testEnvCommand &&
-				possibleCommands.some( needsTestEnvironmentFn ),
-			testEnvConfig,
-		},
-	];
-
+	// Parse the task configuration from the package.json file.
+	const task = parseTaskConfig( packageFile, packageFile.config?.ci, possibleCommands, null );
+	const projectTasks = [ task ];
 	if ( packageFile.config?.ci?.additionalTasks ) {
 		for ( const additionalTask of packageFile.config.ci.additionalTasks ) {
-			if ( ! additionalTask.name ) {
-				throw new Error(
-					`No name specified for additional task in ${ projectPath }.`
-				);
-			}
-
-			if (
-				! additionalTask.commands ||
-				! additionalTask.commands.length
-			) {
-				throw new Error(
-					`No commands specified for additional task "${ additionalTask.name }" in ${ projectPath }.`
-				);
-			}
-
-			// We only want to add the commands that are possible for this project.
-			const taskCommands = additionalTask.commands.filter( ( command ) =>
-				possibleCommands.includes( command )
-			);
-
-			// Don't add the additional task if it wouldn't run any commands.
-			if ( ! taskCommands.length ) {
-				continue;
-			}
-
-			// Make sure to use the additional task's custom commands as overrides instead of a replacement for the entire object.
-			const taskCustomCommands = Object.assign(
-				{},
-				customCommands,
-				additionalTask.customCommands ?? {}
-			);
-
-			// Make sure all of the custom commands exist.
-			for ( const command in taskCustomCommands ) {
-				const commandScript = taskCustomCommands[ command ];
-				if ( ! packageFile.scripts?.[ commandScript ] ) {
-					throw new Error(
-						`Unknown custom command "${ commandScript }" for additional task "${ additionalTask.name }" in ${ projectPath }.`
-					);
-				}
-			}
-
-			let taskTestEnvCommand = null;
-			if ( additionalTask.testEnvCommand ) {
-				taskTestEnvCommand = additionalTask.testEnvCommand;
-
-				// Since this was entered by a developer we need to throw an error
-				// if the command doesn't exist. This prevents mistakes from
-				// going unnoticed.
-				if ( ! packageFile.scripts?.[ taskTestEnvCommand ] ) {
-					throw new Error(
-						`Unknown test environment command "${ taskTestEnvCommand }" for additional task "${ additionalTask.name }" in ${ projectPath }.`
-					);
-				}
-			} else if ( packageFile.scripts?.[ 'test:env:start' ] ) {
-				taskTestEnvCommand = 'test:env:start';
-			}
-
-			// Make sure to use the additional task's configuration as overrides instead of a replacement for the entire config object.
-			const taskNeedsTestEnvironment =
-				taskTestEnvCommand &&
-				taskCommands.some( needsTestEnvironmentFn );
-			const taskTestEnvConfig = Object.assign(
-				{},
-				testEnvConfig,
-				additionalTask.testEnvConfig ?? {}
-			);
-
-			// We can create the task now that we're sure we have the whole configuration.
-			projectTasks.push( {
-				name: additionalTask.name,
-				commands: taskCommands,
-				customCommands: taskCustomCommands,
-				testEnvCommand: taskTestEnvCommand,
-				needsTestEnvironment: taskNeedsTestEnvironment,
-				testEnvConfig: taskTestEnvConfig,
-			} );
+			projectTasks.push( parseTaskConfig( packageFile, additionalTask, possibleCommands, task ) );
 		}
 	}
 
@@ -697,7 +660,6 @@ function generateProjectTasksForWorkspace() {
  * @typedef	{Object} CIMatrix
  * @property {string}                 projectName          The name of the project.
  * @property {string}                 taskName             The name of the task.
- * @property {boolean}                needsTestEnvironment Whether or not the task needs a test environment.
  * @property {Object.<string,string>} testEnvVars          The environment variables for the test environment.
  * @property {boolean}                runLint              Whether or not linting should be run for the project.
  * @property {boolean}                runPHPTests          Whether or not PHP tests should be run for the project.
@@ -794,7 +756,6 @@ async function buildCIMatrix( baseRef ) {
 			matrix.push( {
 				projectName: project.name,
 				taskName: task.name,
-				needsTestEnvironment: task.needsTestEnvironment,
 				testEnvCommand: task.testEnvCommand,
 				testEnvVars: await parseTestEnvConfig( task.testEnvConfig ),
 				lintCommand: getCommandForMatrix( task, 'lint', commandTokens ),

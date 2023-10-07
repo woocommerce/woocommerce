@@ -17,7 +17,7 @@
 				"lint": "lint:php:changes:branch ${baseRef}",
 				"test:php": "test:php:env"
 			},
-			"testEnvCommand": "env:start",
+			"testEnvCommand": "env:test",
 			"testEnvConfig": {
 				"wpVersion": "latest"
 			},
