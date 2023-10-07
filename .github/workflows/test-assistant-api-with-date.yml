@@ -49,6 +49,7 @@ jobs:
           # Mapping of milestone titles to release dates
           declare -A MILESTONE_DATES
           MILESTONE_DATES=(
+            ["8.0.0"]="2023-08-08"
             ["8.1.0"]="2023-09-12"
             ["8.2.0"]="2023-10-10"
             ["8.3.0"]="2023-11-14"
