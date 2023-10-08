@@ -10,6 +10,10 @@ concurrency:
   cancel-in-progress: true
 jobs:
     project-matrix:
+      # Since this is a monorepo, not every pull request or change is going to impact every project.
+      # Instead of running CI tasks on all projects indiscriminately, we use a script to detect
+      # which projects have changed and what kind of change occurred. This lets us build a
+      # matrix that we can use to run CI tasks only on the projects that need them.
       name: 'Build Project Matrix'
       runs-on: 'ubuntu-20.04'
       outputs:
@@ -35,6 +39,9 @@ jobs:
               const buildCIMatrix = require( './.github/workflows/scripts/build-ci-matrix' );
               core.setOutput( 'matrix', JSON.stringify( await buildCIMatrix( baseRef ) ) );
     project-task-matrix:
+      # This is the actual CI job that will be ran against every project with applicable changes.
+      # Note that we only run the tasks that have commands set. Our script will set them if
+      # they are needed and so all the workflow needs to do is run them.
       name: '${{ matrix.projectName }} - ${{ matrix.taskName }}'
       runs-on: 'ubuntu-20.04'
       needs: 'project-matrix'
@@ -69,6 +76,11 @@ jobs:
           if: ${{ !cancelled() && matrix.e2eTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.e2eTestCommand }}'
     project-task-matrix-evaluation:
+      # In order to add a required status check we need a consistent job that we can grab onto.
+      # Since we are dynamically generating a project matrix, however, we can't rely on
+      # on any specific job being present. We can get around this limitation by using
+      # a job that runs after all the others and either passes or fails based on the
+      # results of the other jobs in the workflow.
       name: 'Evaluate Project Matrix'
       runs-on: 'ubuntu-20.04'
       needs: 'project-task-matrix'
