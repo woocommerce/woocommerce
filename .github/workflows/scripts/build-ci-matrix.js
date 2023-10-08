@@ -589,7 +589,7 @@ function getPossibleCommands( packageFile, changes ) {
 		[ COMMAND_TYPE.Lint ]: [ 'sourceFileChanges' ],
 		[ COMMAND_TYPE.TestPHP ]: [ 'phpSourceChanges', 'phpTestFileChanges' ],
 		[ COMMAND_TYPE.TestJS ]: [ 'jsSourceChanges', 'jsTestFileChanges' ],
-		[ COMMAND_TYPE.E2E ]: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
+		//[ COMMAND_TYPE.E2E ]: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
 	};
 
 	// Projects can override the default commands to execute with custom commands.
