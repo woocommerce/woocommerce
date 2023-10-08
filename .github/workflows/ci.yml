@@ -56,7 +56,7 @@ jobs:
           id: 'setup-monorepo'
           name: 'Setup Monorepo'
           with:
-            install-filters: '${{ matrix.projectName }}...'
+            # install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
         - name: 'Lint'
           if: ${{ !cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success' }}
