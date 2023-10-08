@@ -45,8 +45,6 @@ jobs:
       steps:
         - uses: 'actions/checkout@v3'
           name: 'Checkout'
-        - name: 'Debug'
-          run: 'echo "${{ toJSON( matrix ) }}"'
         - uses: './.github/actions/setup-woocommerce-monorepo'
           id: 'setup-monorepo'
           name: 'Setup Monorepo'
