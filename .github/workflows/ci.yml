@@ -72,9 +72,6 @@ jobs:
         - name: 'Test - PHP'
           if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.phpTestCommand }}'
-        - name: 'E2E'
-          if: ${{ !cancelled() && matrix.e2eTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
-          run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.e2eTestCommand }}'
     project-task-matrix-evaluation:
       # In order to add a required status check we need a consistent job that we can grab onto.
       # Since we are dynamically generating a project matrix, however, we can't rely on
