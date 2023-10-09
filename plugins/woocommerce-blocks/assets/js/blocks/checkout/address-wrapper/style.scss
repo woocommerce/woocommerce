@@ -1,0 +1,25 @@
+.address-fade-transition-wrapper {
+	position: relative;
+}
+.address-fade-transition-enter {
+	opacity: 0;
+}
+.address-fade-transition-enter-active {
+	opacity: 1;
+	transition: opacity 300ms ease-in;
+}
+.address-fade-transition-enter-done {
+	opacity: 1;
+}
+.address-fade-transition-exit {
+	opacity: 1;
+	position: absolute;
+	top: 0;
+}
+.address-fade-transition-exit-active {
+	opacity: 0;
+	transition: opacity 300ms ease-out;
+}
+.address-fade-transition-done {
+	opacity: 0;
+}
