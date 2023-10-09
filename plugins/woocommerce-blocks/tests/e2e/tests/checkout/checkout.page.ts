@@ -125,7 +125,40 @@ export class CheckoutPage {
 		}
 	}
 
+	async editBillingDetails() {
+		const editButton = await this.page
+			.locator(
+				'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
+			)
+			.isVisible();
+
+		if ( editButton ) {
+			await this.page
+				.locator(
+					'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
+				)
+				.click();
+		}
+	}
+
+	async editShippingDetails() {
+		const editButton = await this.page
+			.locator(
+				'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
+			)
+			.isVisible();
+
+		if ( editButton ) {
+			await this.page
+				.locator(
+					'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
+				)
+				.click();
+		}
+	}
+
 	async fillBillingDetails( customerBillingDetails ) {
+		await this.editBillingDetails();
 		const billingForm = this.page.getByRole( 'group', {
 			name: 'Billing address',
 		} );
@@ -168,6 +201,7 @@ export class CheckoutPage {
 	}
 
 	async fillShippingDetails( customerShippingDetails ) {
+		await this.editShippingDetails();
 		const shippingForm = this.page.getByRole( 'group', {
 			name: 'Shipping address',
 		} );
