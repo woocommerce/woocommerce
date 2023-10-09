@@ -12,6 +12,25 @@ The form's structure is defined in PHP using a Template, which is a tree structu
 
 Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](../../packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 
+## Declaring compatibility with the product editor
+
+To declare compatibility with the product editor, you need to add the following to your plugin's root PHP file:
+
+```php
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
+add_action(
+	'before_woocommerce_init',
+	function() {
+		if ( class_exists( FeaturesUtil::class ) ) {
+			FeaturesUtil::declare_compatibility( 'product_block_editor', plugin_basename( __FILE__ ), true );
+		}
+	}
+);
+```
+
+Please note that we are currently not enforcing this check: we still allow enabling the feature even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.
+
 ## Related documentation
 
 - [Examples on Template API usage](../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)
