@@ -649,6 +649,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'data-quantity'    => '1',
 			'data-product_id'  => $product->get_id(),
 			'data-product_sku' => $product->get_sku(),
+			'data-price'       => wc_get_price_to_display( $product ),
 			'rel'              => 'nofollow',
 			'class'            => 'wp-block-button__link ' . ( function_exists( 'wc_wp_theme_get_element_class_name' ) ? wc_wp_theme_get_element_class_name( 'button' ) : '' ) . ' add_to_cart_button',
 		);
