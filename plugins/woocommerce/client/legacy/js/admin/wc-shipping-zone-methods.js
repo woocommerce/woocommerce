@@ -415,6 +415,7 @@
 					return htmlWithMovedHelpTips;
 				},
 				moveHTMLHelpTips: function( html ) {
+					// These help tips aren't moved.
 					const helpTipsToIgnore = [ 'woocommerce_flat_rate_cost' ];
 
 					const htmlContent = $( html );
@@ -433,6 +434,7 @@
 							return;
 						}
 
+						// woocommerce_free_shipping_ignore_discounts gets a helpTip appended to its label. Otherwise, add the text as the last element in the fieldset.
 						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
 							const input = htmlContent.find( `#${ id }` );
 							const fieldset = input.closest( 'fieldset' );
@@ -458,6 +460,9 @@
 					return htmlContent.prop( 'outerHTML' );
 				},
 				replaceHTMLTables: function ( html ) {
+					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
+					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
+					// Removing the `table` is sufficient.
 					const htmlContent = $( html );
 					const tables = htmlContent.find( 'table.form-table' );
 
@@ -533,6 +538,7 @@
 						}, 'json' );
 					}
 				},
+				// Free Shipping has hidden field elements depending on data values.
 				possiblyHideFreeShippingRequirements: function( data ) {
 					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
 						const shouldHideRequirements = data.woocommerce_free_shipping_requires === '' || data.woocommerce_free_shipping_requires === 'coupon';
