@@ -11,11 +11,12 @@ import { Notice } from '@wordpress/components';
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import { FILENAME_APPEND } from './constants';
+import { useFeedbackSnackbar } from '../hooks';
+import { recordTracksFactory, getPostId } from '../utils';
 import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
-import { getPostId, recordTracksFactory } from '../utils';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -30,24 +31,30 @@ const getErrorMessage = ( errorCode?: string ) => {
 	}
 };
 
-const recordTracks = recordTracksFactory( 'image_background_removal', () => ( {
-	post_id: getPostId(),
-} ) );
+const recordBgRemovalTracks = recordTracksFactory(
+	'background_removal',
+	() => ( {
+		post_id: getPostId(),
+	} )
+);
 
 export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
-	const [ state, setState ] = useState< '' | 'generating' | 'uploading' >(
-		''
+	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+
+	const [ state, setState ] = useState< 'none' | 'generating' | 'uploading' >(
+		'none'
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
 
 	useEffect( () => {
-		recordTracks( 'view_ui' );
+		recordBgRemovalTracks( 'view_ui' );
 	}, [] );
 
 	const onRemoveBackgroundClick = async () => {
+		removeSnackbar();
 		try {
-			recordTracks( 'click' );
+			recordBgRemovalTracks( 'click' );
 
 			setState( 'generating' );
 
@@ -78,7 +85,20 @@ export const BackgroundRemovalLink = () => {
 					.pop() }`,
 			} );
 
-			recordTracks( 'complete' );
+			recordBgRemovalTracks( 'complete' );
+			showSnackbar( {
+				label: __( 'Was the generated image helpful?', 'woocommerce' ),
+				onPositiveResponse: () => {
+					recordBgRemovalTracks( 'feedback', {
+						response: 'positive',
+					} );
+				},
+				onNegativeResponse: () => {
+					recordBgRemovalTracks( 'feedback', {
+						response: 'negative',
+					} );
+				},
+			} );
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );
@@ -89,12 +109,12 @@ export const BackgroundRemovalLink = () => {
 
 			setDisplayError( getErrorMessage( errCode ) );
 
-			recordTracks( 'error', {
+			recordBgRemovalTracks( 'error', {
 				code: errCode ?? null,
 				message: errMessage ?? null,
 			} );
 		} finally {
-			setState( '' );
+			setState( 'none' );
 		}
 	};
 
