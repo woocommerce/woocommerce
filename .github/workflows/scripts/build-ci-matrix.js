@@ -523,7 +523,7 @@ function parseTaskConfig(
 
 			if ( ! packageFile.scripts?.[ customCommand ] ) {
 				throw new Error(
-					`${ packageFile.name }: unknown custom "${ customCommandType }" command "${ config.testEnvCommand }" for task "${ taskName }".`
+					`${ packageFile.name }: unknown custom "${ customCommandType }" command "${ customCommand }" for task "${ taskName }".`
 				);
 			}
 
