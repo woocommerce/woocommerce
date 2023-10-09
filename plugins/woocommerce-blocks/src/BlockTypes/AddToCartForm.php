@@ -162,6 +162,11 @@ class AddToCartForm extends AbstractBlock {
 	public function add_to_cart_redirect_filter( $url ) {
 		// phpcs:ignore
 		if ( isset( $_POST['is-descendent-of-single-product-block'] ) && 'true' == $_POST['is-descendent-of-single-product-block'] ) {
+
+			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+				return wc_get_cart_url();
+			}
+
 			return wp_validate_redirect( wp_get_referer(), $url );
 		}
 
