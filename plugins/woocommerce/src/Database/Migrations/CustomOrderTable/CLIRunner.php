@@ -581,11 +581,19 @@ class CLIRunner {
 	 * @return array Failed IDs with meta details.
 	 */
 	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
+		$meta_keys_to_ignore = array(
+			'_paid_date', // This is set by the CPT datastore but no longer used anywhere.
+			'_edit_lock',
+		);
+
 		global $wpdb;
 		if ( ! count( $order_ids ) ) {
 			return array();
 		}
-		$excluded_columns             = $this->post_to_cot_migrator->get_migrated_meta_keys();
+		$excluded_columns             = array_merge(
+			$this->post_to_cot_migrator->get_migrated_meta_keys(),
+			$meta_keys_to_ignore
+		);
 		$excluded_columns_placeholder = implode( ', ', array_fill( 0, count( $excluded_columns ), '%s' ) );
 		$order_ids_placeholder        = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 		$meta_table                   = OrdersTableDataStore::get_meta_table_name();

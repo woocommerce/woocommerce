@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "8.2.0",
+	"version": "8.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -19,7 +19,8 @@
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test": "pnpm test:js",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm lint:php",
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",
@@ -48,8 +49,11 @@
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-		"test:unit:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:env:start": "pnpm env:test",
+		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:unit": "pnpm test:php",
+		"test:unit:env": "pnpm test:php:env",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},
@@ -58,6 +62,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
+		"@playwright/test": "^1.38.1",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/experimental-utils": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
@@ -116,7 +121,6 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@playwright/test": "^1.37.1",
 		"@wordpress/browserslist-config": "wp-6.0"
 	}
 }

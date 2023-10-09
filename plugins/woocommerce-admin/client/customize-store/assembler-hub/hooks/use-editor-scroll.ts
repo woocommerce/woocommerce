@@ -24,14 +24,14 @@ export const useEditorScroll = ( {
 		}
 
 		const previewContainer =
-			document.querySelector< HTMLDivElement >( editorSelector );
+			document.querySelector< HTMLIFrameElement >( editorSelector );
 		if ( previewContainer ) {
-			previewContainer?.scrollTo(
+			previewContainer.contentWindow?.scrollTo(
 				0,
 				scrollDirection === 'bottom'
-					? previewContainer?.scrollHeight
+					? previewContainer.contentDocument?.body.scrollHeight || 0
 					: 0
 			);
 		}
-	}, [ isEditorLoading, scrollDirection ] );
+	}, [ isEditorLoading, editorSelector, scrollDirection ] );
 };

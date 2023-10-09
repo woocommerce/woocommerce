@@ -30,5 +30,5 @@ wp plugin activate filter-setter
 # initialize pretty permalinks
 wp rewrite structure /%postname%/
 
-# Activate our Enable Experimental Features utility.
-wp plugin activate enable-experimental-features
+# Activate our helper APIs plugin.
+wp plugin activate test-helper-apis

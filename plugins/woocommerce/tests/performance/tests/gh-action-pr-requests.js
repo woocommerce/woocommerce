@@ -272,7 +272,7 @@ export function cartFlow() {
 }
 export function allMerchantFlow() {
 	wpLogin();
-	homeWCAdmin();
+	homeWCAdmin( { other: false, orders: false, reviews: false, products: false} );
 	addOrder();
 	orders();
 	ordersSearch();

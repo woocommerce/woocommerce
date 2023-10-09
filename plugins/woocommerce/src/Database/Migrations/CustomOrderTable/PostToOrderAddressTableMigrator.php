@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
  */
 class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	/**
-	 * Type of addresses being migrated, could be billing|shipping.
+	 * Type of addresses being migrated; 'billing' or 'shipping'.
 	 *
 	 * @var $type
 	 */
@@ -25,7 +25,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	/**
 	 * PostToOrderAddressTableMigrator constructor.
 	 *
-	 * @param string $type Type of addresses being migrated, could be billing|shipping.
+	 * @param string $type Type of address being migrated; 'billing' or 'shipping'.
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;

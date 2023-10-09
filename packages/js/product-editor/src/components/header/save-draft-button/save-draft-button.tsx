@@ -19,6 +19,7 @@ import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
 export function SaveDraftButton( {
 	productStatus,
+	productType = 'product',
 	...props
 }: SaveDraftButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
@@ -28,6 +29,7 @@ export function SaveDraftButton( {
 
 	const saveDraftButtonProps = useSaveDraft( {
 		productStatus,
+		productType,
 		...props,
 		onSaveSuccess( savedProduct: Product ) {
 			recordProductEvent( 'product_edit', savedProduct );

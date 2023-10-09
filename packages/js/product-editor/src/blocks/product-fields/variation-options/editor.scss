@@ -1,0 +1,25 @@
+.wp-block-woocommerce-product-variations-options-field {
+	.woocommerce-sortable {
+		padding: 0;
+
+		&__item:not(:last-child) .woocommerce-list-item {
+			border-bottom: 1px solid $gray-200;
+		}
+	}
+
+	.woocommerce-list-item {
+		background: none;
+		border: none;
+		padding: 0;
+		grid-template-columns: 26% auto 90px;
+	}
+
+	.woocommerce-sortable__handle {
+		display: none;
+	}
+	.components-button.has-icon {
+		svg {
+			fill: $gray-700;
+		}
+	}
+}

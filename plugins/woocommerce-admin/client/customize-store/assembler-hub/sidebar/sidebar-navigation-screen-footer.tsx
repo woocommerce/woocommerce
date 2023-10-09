@@ -12,7 +12,9 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
+
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
@@ -25,6 +27,8 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
+import { findPatternByBlock } from './utils';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu-and-cart',
@@ -34,8 +38,7 @@ const SUPPORTED_FOOTER_PATTERNS = [
 
 export const SidebarNavigationScreenFooter = () => {
 	useEditorScroll( {
-		editorSelector:
-			'.interface-navigable-region.interface-interface-skeleton__content',
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
 	} );
 
@@ -44,6 +47,8 @@ export const SidebarNavigationScreenFooter = () => {
 	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
 		if ( blocks && blocks.length ) {
@@ -65,13 +70,29 @@ export const SidebarNavigationScreenFooter = () => {
 		[ patterns ]
 	);
 
+	useEffect( () => {
+		// Set the selected pattern when the footer screen is loaded.
+		if ( selectedPattern || ! blocks.length || ! footerPatterns.length ) {
+			return;
+		}
+
+		const currentSelectedPattern = findPatternByBlock(
+			footerPatterns,
+			blocks[ blocks.length - 1 ]
+		);
+		setSelectedPattern( currentSelectedPattern );
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, footerPatterns ] );
+
 	const onClickFooterPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
 			} );
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern ]
 	);
 
 	return (
@@ -86,15 +107,27 @@ export const SidebarNavigationScreenFooter = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'footer',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-footer">
+					<div className="woocommerce-customize-store__sidebar-footer-content">
 						{ isLoading && (
 							<span className="components-placeholder__preview">
 								<Spinner />

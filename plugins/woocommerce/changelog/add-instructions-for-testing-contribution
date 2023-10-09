@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Update CONTRIBUTING.md file to include instructions on how adding unit, API and E2E tests when applicable.
-
-

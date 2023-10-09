@@ -1,39 +1,40 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 } from '@wordpress/components';
+// @ts-ignore No types for this exist yet.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
  */
 import { SiteHub } from '../assembler-hub/site-hub';
-import { MShotsImage } from './mshots-image';
 import { ADMIN_URL } from '~/utils/admin-settings';
+
 import './style.scss';
-export * as services from './services';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
-export const PREVIEW_IMAGE_OPTION = {
-	vpw: 1200,
-	vph: 742,
-	w: 588,
-	h: 363.58,
-	requeue: true,
-};
 
 export const Transitional = ( {
+	editor,
 	sendEvent,
 }: {
+	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
+	const isEditorLoading = useIsSiteEditorLoading();
 
 	return (
 		<div className="woocommerce-customize-store__transitional">
@@ -59,22 +60,25 @@ export const Transitional = ( {
 				<Button
 					className="woocommerce-customize-store__transitional-preview-button"
 					variant="primary"
-					href={ homeUrl }
-					target="_blank"
+					onClick={ () => {
+						recordEvent(
+							'customize_your_store_transitional_preview_store_click'
+						);
+						window.open( homeUrl, '_blank' );
+					} }
 				>
 					{ __( 'Preview store', 'woocommerce' ) }
 				</Button>
 
-				<div className="woocommerce-customize-store__transitional-site-img-container">
-					<MShotsImage
-						url={ homeUrl }
-						alt={ __( 'Your store screenshot', 'woocommerce' ) }
-						aria-labelledby={ __(
-							'Your store screenshot',
-							'woocommerce'
-						) }
-						options={ PREVIEW_IMAGE_OPTION }
-					/>
+				<div
+					className={ classNames(
+						'woocommerce-customize-store__transitional-site-preview-container',
+						{
+							'is-loading': isEditorLoading,
+						}
+					) }
+				>
+					{ editor }
 				</div>
 				<div className="woocommerce-customize-store__transitional-actions">
 					<div className="woocommerce-customize-store__transitional-action">
@@ -89,7 +93,12 @@ export const Transitional = ( {
 						</p>
 						<Button
 							variant="tertiary"
-							href={ `${ ADMIN_URL }site-editor.php` }
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_transitional_editor_click'
+								);
+								window.location.href = `${ ADMIN_URL }site-editor.php`;
+							} }
 						>
 							{ __( 'Go to the Editor', 'woocommerce' ) }
 						</Button>
@@ -110,11 +119,14 @@ export const Transitional = ( {
 						</p>
 						<Button
 							variant="tertiary"
-							onClick={ () =>
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_transitional_home_click'
+								);
 								sendEvent( {
 									type: 'GO_BACK_TO_HOME',
-								} )
-							}
+								} );
+							} }
 						>
 							{ __( 'Back to Home', 'woocommerce' ) }
 						</Button>
