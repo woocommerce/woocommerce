@@ -14,7 +14,7 @@ Many extensibility implementations can be done using only the PHP-based Block Te
 
 ## Declaring compatibility with the product editor
 
-To declare compatibility with the product editor, you need to add the following to your plugin's root PHP file:
+To declare compatibility with the product editor, add the following to your plugin's root PHP file:
 
 ```php
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -29,7 +29,7 @@ add_action(
 );
 ```
 
-Please note that we are currently not enforcing this check: we still allow enabling the feature even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.
+Please note that this check is currently not being enforced: the product editor can still be enabled even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.
 
 ## Related documentation
 
