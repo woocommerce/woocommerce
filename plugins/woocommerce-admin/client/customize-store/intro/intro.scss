@@ -174,24 +174,34 @@
 		}
 
 		.theme-card__info {
-			margin: 24px 0 14px 0;
+			margin: 24px 0 8px 0;
 			display: flex;
 			.theme-card__color-palettes {
 				margin-left: auto;
 			}
 		}
+
 		.theme-card__color-palettes {
 			display: flex;
 			margin: 0 0 0 auto;
 			padding: 0;
 			gap: 5px;
+
 			li {
 				width: 20px;
 				height: 20px;
 				box-shadow: inset 0 0 0 1px #0003;
 				border-radius: 50%;
+				margin-bottom: 0;
+
+				&.more_palettes {
+					box-shadow: none;
+					font-size: 11px;
+					text-align: center;
+				}
 			}
 		}
+
 		.theme-card__active {
 			border-radius: 100px;
 			background: rgba(56, 88, 233, 0.2);

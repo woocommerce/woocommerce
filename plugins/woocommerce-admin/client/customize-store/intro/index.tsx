@@ -185,6 +185,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								thumbnail_url={ theme.thumbnail_url }
 								name={ theme.name }
 								color_palettes={ theme.color_palettes }
+								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
 							/>
