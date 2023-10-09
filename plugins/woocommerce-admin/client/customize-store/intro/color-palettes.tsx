@@ -10,11 +10,11 @@ export const ColorPalettes = ( {
 	colorPalettes: ColorPalette[];
 	totalPalettes: number;
 } ) => {
-    let extra = null;
+	let extra = null;
 
-    if ( totalPalettes > 4 ) {
-      extra = <li className="more_palettes">+{ totalPalettes - 4 }</li>;
-    }
+	if ( totalPalettes > 4 ) {
+		extra = <li className="more_palettes">+{ totalPalettes - 4 }</li>;
+	}
 
 	return (
 		<ul className="theme-card__color-palettes">
@@ -24,7 +24,7 @@ export const ColorPalettes = ( {
 					style={ {
 						background:
 							'linear-gradient(to right, ' +
-							colorPalette.primary + 
+							colorPalette.primary +
 							' 0px, ' +
 							colorPalette.primary +
 							' 50%, ' +

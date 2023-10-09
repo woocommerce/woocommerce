@@ -106,8 +106,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme installation status.
 	 */
 	public function install_theme( $request ) {
-		$allowed_themes = Themes::get_allowed_themes();
-		$theme          = sanitize_text_field( $request['theme'] );
+		$theme = sanitize_text_field( $request['theme'] );
 
 		$installed_themes = wp_get_themes();
 
@@ -283,24 +282,24 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'price'          => 'Free',
 				'color_palettes' => array(
 					array(
-						'title'			=> 'Default',
-						'primary'		=> '#FEFBF3',
-						'secondary'		=> '#7F7E7A',
+						'title'     => 'Default',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
 					),
 					array(
-						'title'			=> 'Brown Sugar',
-						'primary'		=> '#EFEBE0',
-						'secondary'		=> '#AC6239',
+						'title'     => 'Brown Sugar',
+						'primary'   => '#EFEBE0',
+						'secondary' => '#AC6239',
 					),
 					array(
-						'title'			=> 'Midnight',
-						'primary'		=> '#161514',
-						'secondary'		=> '#AFADA7',
+						'title'     => 'Midnight',
+						'primary'   => '#161514',
+						'secondary' => '#AFADA7',
 					),
 					array(
-						'title'			=> 'Olive',
-						'primary'		=> '#FEFBF3',
-						'secondary'		=> '#7F7E7A',
+						'title'     => 'Olive',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
 					),
 				),
 				'total_palettes' => 5,
@@ -314,24 +313,24 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'price'          => 'Free',
 				'color_palettes' => array(
 					array(
-						'title'			=> 'Default',
-						'primary'		=> '#202124',
-						'secondary'		=> '#E3CBC0',
+						'title'     => 'Default',
+						'primary'   => '#202124',
+						'secondary' => '#E3CBC0',
 					),
 					array(
-						'title'			=> 'Aubergine',
-						'primary'		=> '#1B1031',
-						'secondary'		=> '#E1746D',
+						'title'     => 'Aubergine',
+						'primary'   => '#1B1031',
+						'secondary' => '#E1746D',
 					),
 					array(
-						'title'			=> 'Block out',
-						'primary'		=> '#FF5252',
-						'secondary'		=> '#252525',
+						'title'     => 'Block out',
+						'primary'   => '#FF5252',
+						'secondary' => '#252525',
 					),
 					array(
-						'title'			=> 'Canary',
-						'primary'		=> '#FDFF85',
-						'secondary'		=> '#353535',
+						'title'     => 'Canary',
+						'primary'   => '#FDFF85',
+						'secondary' => '#353535',
 					),
 				),
 				'total_palettes' => 11,
