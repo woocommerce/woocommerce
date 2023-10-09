@@ -569,11 +569,10 @@ function parseTaskConfig(
 				);
 			}
 
-			// Cascade the test environment command from parent to child for ease of use.
 			testEnvCommand =
-				config?.testEnvCommand ??
-				parentTask?.testEnvCommand ??
-				'test:env:start';
+				config?.testEnvCommand ?? parentTask?.testEnvCommand;
+		} else if ( packageFile.scripts?.[ 'test:env:start' ] ) {
+			testEnvCommand = 'test:env:start';
 		}
 	}
 
