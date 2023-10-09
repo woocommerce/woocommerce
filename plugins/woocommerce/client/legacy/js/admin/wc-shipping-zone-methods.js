@@ -409,10 +409,17 @@
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
-					const helpTipsToRemove = [ 'woocommerce_flat_rate_cost' ];
-					const settings = $( html );
-					const labels = settings.find( 'label' );
-					labels.each( (i) => {
+					const htmlWithoutTables = this.replaceHTMLTables( html );
+					const htmlWithMovedHelpTips = this.moveHTMLHelpTips( htmlWithoutTables );
+				
+					return htmlWithMovedHelpTips;
+				},
+				moveHTMLHelpTips: function( html ) {
+					const helpTipsToIgnore = [ 'woocommerce_flat_rate_cost' ];
+
+					const htmlContent = $( html );
+					const labels = htmlContent.find( 'label' );
+					labels.each( ( i ) => {
 						const label = $( labels[ i ] );
 						const helpTip = label.find( '.woocommerce-help-tip' );
 
@@ -422,18 +429,18 @@
 
 						const id = label.attr( 'for' );
 
-						if ( helpTipsToRemove.includes( id ) ) {
+						if ( helpTipsToIgnore.includes( id ) ) {
 							return;
 						}
 
 						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
-							const input = settings.find( `#${ id }` );
+							const input = htmlContent.find( `#${ id }` );
 							const fieldset = input.closest( 'fieldset' );
 							const inputLabel = fieldset.find( 'label' );
 							inputLabel.append( helpTip );
 						} else {
 							const text = helpTip.data( 'tip' );
-							const input = settings.find( `#${ id }` );
+							const input = htmlContent.find( `#${ id }` );
 							const fieldset = input.closest( 'fieldset' );
 
 							if ( fieldset.length && fieldset.find( '.wc-shipping-zone-method-fields-help-text' ).length === 0 ) {
@@ -448,7 +455,20 @@
 
 					} );
 
-					return settings.prop('outerHTML');
+					return htmlContent.prop( 'outerHTML' );
+				},
+				replaceHTMLTables: function ( html ) {
+					const htmlContent = $( html );
+					const tables = htmlContent.find( 'table.form-table' );
+
+					tables.each( ( i ) => {
+						const table = $( tables[ i ] );
+						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
+						div.html( table.html() );
+						table.replaceWith( div );
+					} );
+
+					return htmlContent.prop('outerHTML');
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
