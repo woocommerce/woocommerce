@@ -831,7 +831,7 @@ function getCommandForMatrix( task, command, tokenValues ) {
 			}
 
 			matrixCommand = matrixCommand.replace(
-				'${' + match + '}',
+				match[ 0 ],
 				tokenValues[ match[ 1 ] ]
 			);
 		}
