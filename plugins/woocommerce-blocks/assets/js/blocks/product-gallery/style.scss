@@ -5,6 +5,8 @@ $next-previous: "#{$large-image}-next-previous";
 $next-previous-left-off: "#{$next-previous}-left--off";
 $next-previous-right-off: "#{$next-previous}-right--off";
 $gallery-next-previous-outside-image: "#{$gallery}[data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image)";
+$gallery-next-previous-inside-image: "#{$gallery}:not([data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image))";
+
 
 $outside-image-offset: 30px;
 $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
@@ -61,6 +63,12 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		margin: 0 auto;
 	}
 
+	#{$gallery-next-previous-inside-image} & .wc-block-woocommerce-product-gallery-large-image__container {
+		overflow: unset;
+		max-width: unset;
+		margin: unset;
+	}
+
 	img {
 		display: block;
 		position: relative;
@@ -94,6 +102,12 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		#{$gallery-next-previous-outside-image} & > * {
 			margin-left: $outside-image-offset;
 			margin-right: $outside-image-offset;
+		}
+
+		// Unset the margin of the inner blocks when the Next/Previous buttons are inside the image.
+		#{$gallery-next-previous-inside-image}  & > * {
+			margin-left: unset;
+			margin-right: unset;
 		}
 	}
 }
