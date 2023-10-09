@@ -108,23 +108,23 @@
         },
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.11.23",
+            "version": "v2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "4198bea356038fcf73fcb32df73b08818abbf8f3"
+                "reference": "632b69cfc73ed5505f2b03165e7f68d414d0da12"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/4198bea356038fcf73fcb32df73b08818abbf8f3",
-                "reference": "4198bea356038fcf73fcb32df73b08818abbf8f3",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/632b69cfc73ed5505f2b03165e7f68d414d0da12",
+                "reference": "632b69cfc73ed5505f2b03165e7f68d414d0da12",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^1.1 || ^2.0"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^3.3.9",
+                "automattic/jetpack-changelogger": "^3.3.11",
                 "yoast/phpunit-polyfills": "1.1.0"
             },
             "type": "composer-plugin",
@@ -135,8 +135,11 @@
                 "changelogger": {
                     "link-template": "https://github.com/Automattic/jetpack-autoloader/compare/v${old}...v${new}"
                 },
+                "version-constants": {
+                    "::VERSION": "src/AutoloadGenerator.php"
+                },
                 "branch-alias": {
-                    "dev-trunk": "2.11.x-dev"
+                    "dev-trunk": "2.12.x-dev"
                 }
             },
             "autoload": {
@@ -161,9 +164,9 @@
                 "wordpress"
             ],
             "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.11.23"
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/v2.12.0"
             },
-            "time": "2023-09-19T18:19:19+00:00"
+            "time": "2023-09-28T18:33:34+00:00"
         },
         {
             "name": "automattic/jetpack-config",
