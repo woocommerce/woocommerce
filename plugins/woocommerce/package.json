@@ -24,14 +24,14 @@
 			"additionalTasks": [
 				{
 					"name": "WP: latest-1",
-					"commands": [ "test:php" ],
+					"commandFilter": [ "test:php" ],
 					"testEnvConfig": {
 						"wpVersion": "latest-1"
 					}
 				},
 				{
 					"name": "WP: latest-2",
-					"commands": [ "test:php" ],
+					"commandFilter": [ "test:php" ],
 					"testEnvConfig": {
 						"wpVersion": "latest-2"
 					}

@@ -450,7 +450,7 @@ function isTestCommand( command ) {
  *
  * @typedef {Object} ProjectTask
  * @property {string}                 name           The name of the task.
- * @property {Array.<CommandType>}    commands       The commands that the project should run.
+ * @property {Array.<CommandType>}    commandsToRun  The commands that the project should run.
  * @property {Object.<string,string>} customCommands Any commands that should be run in place of the default commands.
  * @property {string|null}            testEnvCommand The command that should be run to start the test environment if one is needed.
  * @property {Object.<string,string>} testEnvConfig  Any configuration for the test environment if one is needed.
@@ -459,13 +459,18 @@ function isTestCommand( command ) {
 /**
  * Parses the task configuration from the package.json file and returns a task object.
  *
- * @param {Object}              packageFile      The package file for the project.
- * @param {Object}              config           The taw task configuration.
- * @param {Array.<CommandType>} possibleCommands The commands that can be run for the project.
- * @param {ProjectTask|null}    parentTask       The task that this task is a child of.
- * @return {ProjectTask} The parsed task.
+ * @param {Object}              packageFile        The package file for the project.
+ * @param {Object}              config             The taw task configuration.
+ * @param {Array.<CommandType>} commandsForChanges The commands that we should run for the project.
+ * @param {ProjectTask|null}    parentTask         The task that this task is a child of.
+ * @return {ProjectTask|null} The parsed task.
  */
-function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
+function parseTaskConfig(
+	packageFile,
+	config,
+	commandsForChanges,
+	parentTask
+) {
 	// Child tasks are required to have a name because otherwise
 	// every task for a project would be named "default".
 	let taskName = 'default';
@@ -476,31 +481,32 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 		}
 	}
 
-	// Child tasks are required to define the commands that they should run.
-	// Since not all of these tasks may be running, however, we need to
-	// filter the tasks according to the possible tasks.
-	let commands = possibleCommands;
-	if ( parentTask ) {
-		if ( ! config?.commands || ! config.commands.length ) {
-			throw new Error(
-				`${ packageFile.name }: missing commands for task "${ taskName }".`
-			);
-		}
-
-		commands = config.commands.filter( ( command ) => {
-			// Check for invalid commands being since they won't do anything.
+	// When the config object declares a command filter we should remove any
+	// of the commands it contains from the list of commands to run.
+	if ( config?.commandFilter ) {
+		// Check for invalid commands being used since they won't do anything.
+		for ( const command of config.commandFilter ) {
 			if ( ! isValidCommand( command ) ) {
 				throw new Error(
-					`${ packageFile.name }: invalid command type "${ command } for task "${ taskName }".`
+					`${ packageFile.name }: invalid command filter type of "${ command }" for task "${ taskName }".`
 				);
 			}
+		}
 
-			// Only include commands that are possible.
-			return commands.includes( command );
-		} );
+		// Apply the command filter.
+		commandsForChanges = commandsForChanges.filter( ( command ) =>
+			config.commandFilter.includes( command )
+		);
 	}
 
-	// Make sure that no invalid custom commands have been entered.
+	// Custom commands developers to support a command without having to use the
+	// standardized script name for it. For ease of use we will add parent task
+	// custom commands to children and allow the children to override any
+	// specific tasks they want.
+	const customCommands = Object.assign(
+		{},
+		parentTask?.customCommands ?? {}
+	);
 	if ( config?.customCommands ) {
 		for ( const customCommandType in config.customCommands ) {
 			// Check for invalid commands being mapped since they won't do anything.
@@ -511,7 +517,8 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 			}
 
 			// Custom commands may have tokens that we need to remove in order to check them for existence.
-			const split = config.customCommands[ customCommandType ].split( ' ' );
+			const split =
+				config.customCommands[ customCommandType ].split( ' ' );
 			const customCommand = split[ 0 ];
 
 			if ( ! packageFile.scripts?.[ customCommand ] ) {
@@ -519,28 +526,41 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 					`${ packageFile.name }: unknown custom "${ customCommandType }" command "${ config.testEnvCommand }" for task "${ taskName }".`
 				);
 			}
+
+			// We only need to bother with commands we can actually run.
+			if ( commandsForChanges.includes( customCommandType ) ) {
+				customCommands[ customCommandType ] =
+					config.customCommands[ customCommandType ];
+			}
 		}
 	}
 
-	// Since not every project will have the same standardized commands we need to support
-	// custom commands that can be run instead of the standardized commands. For
-	// ease of use we will add parent tasks to children and allow the children
-	// to override any specific tasks if desired.
-	const customCommands = Object.assign(
-		{},
-		parentTask?.customCommands ?? {},
-		config?.customCommands ?? {}
-	);
+	// Our goal is to run only the commands that have changes, however, not all
+	// projects will have scripts for all of the commands we want to run.
+	const commandsToRun = [];
+	for ( const command of commandsForChanges ) {
+		// We have already filtered and confirmed custom commands.
+		if ( customCommands[ command ] ) {
+			commandsToRun.push( command );
+			continue;
+		}
+
+		// Commands that don't have a script to run should be ignored.
+		if ( ! packageFile.scripts?.[ command ] ) {
+			continue;
+		}
+
+		commandsToRun.push( command );
+	}
+
+	// We don't want to create a task if there aren't any commands to run.
+	if ( ! commandsToRun.length ) {
+		return null;
+	}
 
 	// The test environment command only needs to be set when a test environment is needed.
 	let testEnvCommand = null;
-	if ( commands.filter( ( command ) => isTestCommand( command ) ) ) {
-		// Cascade the test environment command from parent to child for ease of use.
-		testEnvCommand =
-			config?.testEnvCommand ??
-			parentTask?.testEnvCommand ??
-			'test:env:start';
-
+	if ( commandsToRun.filter( ( command ) => isTestCommand( command ) ) ) {
 		// Make sure that a developer hasn't put in a test command that doesn't exist.
 		if ( config?.testEnvCommand ) {
 			if ( ! packageFile.scripts?.[ config.testEnvCommand ] ) {
@@ -549,6 +569,12 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 				);
 			}
 		}
+
+		// Cascade the test environment command from parent to child for ease of use.
+		testEnvCommand =
+			config?.testEnvCommand ??
+			parentTask?.testEnvCommand ??
+			'test:env:start';
 	}
 
 	// The test environment configuration should also cascade from parent task to child task.
@@ -560,7 +586,7 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
 
 	return {
 		name: taskName,
-		commands,
+		commandsToRun,
 		customCommands,
 		testEnvCommand,
 		testEnvConfig,
@@ -576,13 +602,13 @@ function parseTaskConfig( packageFile, config, possibleCommands, parentTask ) {
  */
 
 /**
- * Checks the commands that are available for a project and returns the ones that meet the change criteria.
+ * Evaluates the given changes against the possible commands and returns those that should run as
+ * a result of the change criteria being met.
  *
- * @param {Object}              packageFile The package.json content for the project.
- * @param {ProjectChanges|null} changes     Any changes that have occurred to the project.
+ * @param {ProjectChanges|null} changes Any changes that have occurred to the project.
  * @return {Array.<string>} The commands that can be run for the project.
  */
-function getPossibleCommands( packageFile, changes ) {
+function getCommandsForChanges( changes ) {
 	// Here are all of the commands that we support and the change criteria that they require to execute.
 	// We treat the command's criteria as passing if any of the properties are true.
 	const commandCriteria = {
@@ -592,26 +618,10 @@ function getPossibleCommands( packageFile, changes ) {
 		//[ COMMAND_TYPE.E2E ]: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
 	};
 
-	// Projects can override the default commands to execute with custom commands.
-	const customCommands = packageFile.config?.ci?.customCommands ?? {};
-
-	// Custom commands may have tokens in them that we need to remove.
-	// This lets us easily check for the command existence.
-	for ( const command in customCommands ) {
-		const split = customCommands[ command ].split( ' ' );
-		customCommands[ command ] = split[ 0 ];
-	}
-
 	// We only want the list of possible commands to contain those that
 	// the project actually has and meet the criteria for execution.
-	const possibleCommands = [];
+	const commandsForChanges = [];
 	for ( const command in commandCriteria ) {
-		// We can only run commands that actually exist.
-		const commandScript = customCommands[ command ] ?? command;
-		if ( ! packageFile.scripts?.[ commandScript ] ) {
-			continue;
-		}
-
 		// The criteria only needs to be checked if there is a change object to evaluate.
 		if ( changes ) {
 			let commandCriteriaMet = false;
@@ -619,7 +629,7 @@ function getPossibleCommands( packageFile, changes ) {
 				// Confidence check to make sure the criteria wasn't misspelled.
 				if ( ! changes.hasOwnProperty( criteria ) ) {
 					throw new Error(
-						`${ packageFile.name }: unknown criteria "${ criteria }" for command "${ command }".`
+						`Invalid criteria "${ criteria }" for command "${ command }".`
 					);
 				}
 
@@ -635,10 +645,10 @@ function getPossibleCommands( packageFile, changes ) {
 			}
 		}
 
-		possibleCommands.push( command );
+		commandsForChanges.push( command );
 	}
 
-	return possibleCommands;
+	return commandsForChanges;
 }
 
 /**
@@ -649,6 +659,12 @@ function getPossibleCommands( packageFile, changes ) {
  * @return {ProjectTasks|null} The tasks that should be run for the project.
  */
 function buildTasksForProject( projectPath, changes ) {
+	// There's nothing to do if the project has no tasks.
+	const commandsForChanges = getCommandsForChanges( changes );
+	if ( ! commandsForChanges.length ) {
+		return null;
+	}
+
 	// Load the package file so we can check for task existence before adding them.
 	const rawPackageFile = fs.readFileSync(
 		`${ projectPath }/package.json`,
@@ -656,31 +672,36 @@ function buildTasksForProject( projectPath, changes ) {
 	);
 	const packageFile = JSON.parse( rawPackageFile );
 
-	// There's nothing to do if the project has no tasks.
-	const possibleCommands = getPossibleCommands( packageFile, changes );
-	if ( ! possibleCommands.length ) {
-		return null;
-	}
+	// We're going to parse each of the projects and add them to the list of tasks if necessary.
+	const projectTasks = [];
 
 	// Parse the task configuration from the package.json file.
-	const task = parseTaskConfig(
+	const parentTask = parseTaskConfig(
 		packageFile,
 		packageFile.config?.ci,
-		possibleCommands,
+		commandsForChanges,
 		null
 	);
-	const projectTasks = [ task ];
+	if ( parentTask ) {
+		projectTasks.push( parentTask );
+	}
+
 	if ( packageFile.config?.ci?.additionalTasks ) {
 		for ( const additionalTask of packageFile.config.ci.additionalTasks ) {
-			projectTasks.push(
-				parseTaskConfig(
-					packageFile,
-					additionalTask,
-					possibleCommands,
-					task
-				)
+			const task = parseTaskConfig(
+				packageFile,
+				additionalTask,
+				commandsForChanges,
+				parentTask
 			);
+			if ( task ) {
+				projectTasks.push( task );
+			}
 		}
+	}
+
+	if ( ! projectTasks.length ) {
+		return null;
 	}
 
 	return {
@@ -791,7 +812,7 @@ async function parseTestEnvConfig( testEnvConfig ) {
  * @return {string|null} The command that should be run for the task or null if the command should not be run.
  */
 function getCommandForMatrix( task, command, tokenValues ) {
-	if ( ! task.commands.includes( command ) ) {
+	if ( ! task.commandsToRun.includes( command ) ) {
 		return null;
 	}
 
