@@ -561,20 +561,20 @@ function parseTaskConfig(
 	// The test environment command only needs to be set when a test environment is needed.
 	let testEnvCommand = null;
 	if ( commandsToRun.filter( ( command ) => isTestCommand( command ) ) ) {
-		// Make sure that a developer hasn't put in a test command that doesn't exist.
 		if ( config?.testEnvCommand ) {
+			// Make sure that a developer hasn't put in a test command that doesn't exist.
 			if ( ! packageFile.scripts?.[ config.testEnvCommand ] ) {
 				throw new Error(
 					`${ packageFile.name }: unknown test environment command "${ config.testEnvCommand }" for task "${ taskName }".`
 				);
 			}
-		}
 
-		// Cascade the test environment command from parent to child for ease of use.
-		testEnvCommand =
-			config?.testEnvCommand ??
-			parentTask?.testEnvCommand ??
-			'test:env:start';
+			// Cascade the test environment command from parent to child for ease of use.
+			testEnvCommand =
+				config?.testEnvCommand ??
+				parentTask?.testEnvCommand ??
+				'test:env:start';
+		}
 	}
 
 	// The test environment configuration should also cascade from parent task to child task.
