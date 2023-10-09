@@ -23,6 +23,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const {
@@ -35,7 +36,10 @@ export function Edit( {
 		minLength,
 		maxLength,
 	} = attributes;
-	const [ value, setValue ] = useProductEntityProp( property );
+	const [ value, setValue ] = useProductEntityProp< string >( property, {
+		postType,
+		fallbackValue: '',
+	} );
 	const nameControlId = useInstanceId( BaseControl, property ) as string;
 
 	const { error, validate } = useValidation< Product >(
