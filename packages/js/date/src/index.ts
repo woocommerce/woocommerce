@@ -11,8 +11,6 @@ type Query = {
 	[ key: string ]: string | undefined;
 };
 
-// Test Change
-
 export const isoDateFormat = 'YYYY-MM-DD';
 export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
 
