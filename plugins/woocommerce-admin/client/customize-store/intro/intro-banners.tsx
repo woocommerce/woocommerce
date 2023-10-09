@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -17,6 +18,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
+	children,
 }: {
 	bannerTitle: string;
 	bannerText: string;
@@ -24,6 +26,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink: boolean;
 	bannerButtonOnClick: () => void;
 	bannerButtonText: string;
+	children?: React.ReactNode;
 } ) => {
 	return (
 		<div
@@ -41,6 +44,7 @@ export const BaseIntroBanner = ( {
 				>
 					{ bannerButtonText }
 				</Button>
+				{ children }
 			</div>
 		</div>
 	);
@@ -88,6 +92,31 @@ export const JetpackOfflineBanner = ( {
 				} );
 			} }
 			bannerButtonText={ __( 'Find out how', 'woocommerce' ) }
+		/>
+	);
+};
+
+export const ExistingThemeBanner = ( {
+	setOpenDesignChangeWarningModal,
+}: {
+	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
+} ) => {
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __(
+				'Use the power of AI to design your store',
+				'woocommerce'
+			) }
+			bannerText={ __(
+				'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
+				'woocommerce'
+			) }
+			bannerClass=""
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				setOpenDesignChangeWarningModal( true );
+			} }
+			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
 		/>
 	);
 };
@@ -141,5 +170,41 @@ export const ThemeHasModsBanner = ( {
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
 		/>
+	);
+};
+
+export const ExistingAiThemeBanner = ( {
+	setOpenDesignChangeWarningModal,
+}: {
+	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
+} ) => {
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Customize your custom theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Keep customizing the look of your AI-generated store, or start over and create a new one.',
+				'woocommerce'
+			) }
+			bannerClass="existing-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				window.location.href = getNewPath(
+					{},
+					'/customize-store/assembler-hub',
+					{}
+				);
+			} }
+			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
+		>
+			<Button
+				className=""
+				onClick={ () => {
+					setOpenDesignChangeWarningModal( true );
+				} }
+				variant={ 'secondary' }
+			>
+				{ __( 'Create a new one', 'woocommerce' ) }
+			</Button>
+		</BaseIntroBanner>
 	);
 };
