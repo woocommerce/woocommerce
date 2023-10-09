@@ -560,7 +560,7 @@ function parseTaskConfig(
 
 	// The test environment command only needs to be set when a test environment is needed.
 	let testEnvCommand = null;
-	if ( commandsToRun.filter( ( command ) => isTestCommand( command ) ) ) {
+	if ( commandsToRun.some( ( command ) => isTestCommand( command ) ) ) {
 		if ( config?.testEnvCommand ) {
 			// Make sure that a developer hasn't put in a test command that doesn't exist.
 			if ( ! packageFile.scripts?.[ config.testEnvCommand ] ) {
