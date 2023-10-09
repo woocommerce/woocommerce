@@ -40,14 +40,10 @@ export const BackgroundRemovalLink = () => {
 		''
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
-	const [ viewed, setViewed ] = useState< boolean >( false );
 
 	useEffect( () => {
-		if ( ! viewed ) {
-			setViewed( true );
-			recordTracks( 'view_ui' );
-		}
-	}, [ viewed ] );
+		recordTracks( 'view_ui' );
+	}, [] );
 
 	const onRemoveBackgroundClick = async () => {
 		try {
@@ -86,13 +82,16 @@ export const BackgroundRemovalLink = () => {
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );
-			const errorMessage = getErrorMessage(
-				( err as { code?: string } )?.code ?? ''
-			);
-			setDisplayError( errorMessage );
+			const { message: errMessage, code: errCode } = err as {
+				code?: string;
+				message?: string;
+			};
+
+			setDisplayError( getErrorMessage( errCode ) );
 
 			recordTracks( 'error', {
-				error: errorMessage,
+				code: errCode ?? null,
+				message: errMessage ?? null,
 			} );
 		} finally {
 			setState( '' );
