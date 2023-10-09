@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 import { __ } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
@@ -15,6 +15,7 @@ import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
+import { getPostId, recordTracksFactory } from '../utils';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -29,6 +30,10 @@ const getErrorMessage = ( errorCode?: string ) => {
 	}
 };
 
+const recordTracks = recordTracksFactory( 'image_background_removal', () => ( {
+	post_id: getPostId(),
+} ) );
+
 export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
 	const [ state, setState ] = useState< '' | 'generating' | 'uploading' >(
@@ -36,8 +41,14 @@ export const BackgroundRemovalLink = () => {
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
 
+	useEffect( () => {
+		recordTracks( 'view_ui' );
+	}, [] );
+
 	const onRemoveBackgroundClick = async () => {
 		try {
+			recordTracks( 'click' );
+
 			setState( 'generating' );
 
 			const { url: imgUrl, filename: imgFilename } =
@@ -66,12 +77,22 @@ export const BackgroundRemovalLink = () => {
 					.split( '/' )
 					.pop() }`,
 			} );
+
+			recordTracks( 'complete' );
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );
-			setDisplayError(
-				getErrorMessage( ( err as { code?: string } )?.code ?? '' )
-			);
+			const { message: errMessage, code: errCode } = err as {
+				code?: string;
+				message?: string;
+			};
+
+			setDisplayError( getErrorMessage( errCode ) );
+
+			recordTracks( 'error', {
+				code: errCode ?? null,
+				message: errMessage ?? null,
+			} );
 		} finally {
 			setState( '' );
 		}
