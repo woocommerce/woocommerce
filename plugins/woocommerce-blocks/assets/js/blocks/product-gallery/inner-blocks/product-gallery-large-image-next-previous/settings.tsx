@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import {
-	PanelBody,
 	// @ts-expect-error `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -19,7 +18,7 @@ import {
  */
 import { NextPreviousButtonSettingValues } from './types';
 import { InsideTheImage, OutsideTheImage } from './icons';
-import { Context } from '../../types';
+import { ProductGalleryLargeImageNextPreviousContext } from '../../types';
 
 const NextPreviousButtonIcons = {
 	[ NextPreviousButtonSettingValues.insideTheImage ]: <InsideTheImage />,
@@ -54,41 +53,38 @@ const getHelpText = ( buttonPosition: NextPreviousButtonSettingValues ) => {
 export const ProductGalleryNextPreviousBlockSettings = ( {
 	context,
 }: {
-	context: Context;
+	context: ProductGalleryLargeImageNextPreviousContext;
 } ) => {
 	const { productGalleryClientId, nextPreviousButtonsPosition } = context;
 	// @ts-expect-error @wordpress/block-editor/store types not provided
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	return (
-		<PanelBody
+		<ToggleGroupControl
+			label={ __( 'Next/Prev Buttons', 'woo-gutenberg-products-block' ) }
 			className="wc-block-editor-product-gallery-large-image-next-previous-settings"
-			title={ __( 'Next/Prev Buttons', 'woo-gutenberg-products-block' ) }
+			style={ {
+				width: '100%',
+			} }
+			onChange={ ( value: NextPreviousButtonSettingValues ) =>
+				updateBlockAttributes( productGalleryClientId, {
+					nextPreviousButtonsPosition: value,
+				} )
+			}
+			help={ getHelpText( nextPreviousButtonsPosition ) }
+			value={ nextPreviousButtonsPosition }
 		>
-			<ToggleGroupControl
-				style={ {
-					width: '100%',
-				} }
-				onChange={ ( value: NextPreviousButtonSettingValues ) =>
-					updateBlockAttributes( productGalleryClientId, {
-						nextPreviousButtonsPosition: value,
-					} )
-				}
-				help={ getHelpText( nextPreviousButtonsPosition ) }
-				value={ nextPreviousButtonsPosition }
-			>
-				<ToggleGroupControlOption
-					value={ NextPreviousButtonSettingValues.off }
-					label={ __( 'Off', 'woo-gutenberg-products-block' ) }
-				/>
-				<ToggleGroupControlOption
-					value={ NextPreviousButtonSettingValues.insideTheImage }
-					label={ NextPreviousButtonIcons.insideTheImage }
-				/>
-				<ToggleGroupControlOption
-					value={ NextPreviousButtonSettingValues.outsideTheImage }
-					label={ NextPreviousButtonIcons.outsideTheImage }
-				/>
-			</ToggleGroupControl>
-		</PanelBody>
+			<ToggleGroupControlOption
+				value={ NextPreviousButtonSettingValues.off }
+				label={ __( 'Off', 'woo-gutenberg-products-block' ) }
+			/>
+			<ToggleGroupControlOption
+				value={ NextPreviousButtonSettingValues.insideTheImage }
+				label={ NextPreviousButtonIcons.insideTheImage }
+			/>
+			<ToggleGroupControlOption
+				value={ NextPreviousButtonSettingValues.outsideTheImage }
+				label={ NextPreviousButtonIcons.outsideTheImage }
+			/>
+		</ToggleGroupControl>
 	);
 };

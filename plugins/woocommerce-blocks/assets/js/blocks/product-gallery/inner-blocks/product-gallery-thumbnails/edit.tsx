@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
+import { Disabled, PanelBody } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import classNames from 'classnames';
@@ -55,11 +55,13 @@ export const Edit = ( { attributes, setAttributes, context }: EditProps ) => {
 		<>
 			<div { ...blockProps }>
 				<InspectorControls>
-					<ProductGalleryThumbnailsBlockSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
-						context={ context }
-					/>
+					<PanelBody>
+						<ProductGalleryThumbnailsBlockSettings
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+							context={ context }
+						/>
+					</PanelBody>
 				</InspectorControls>
 				<Disabled>
 					<Placeholder />

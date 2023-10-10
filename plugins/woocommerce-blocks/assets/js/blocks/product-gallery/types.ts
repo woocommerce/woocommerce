@@ -33,14 +33,11 @@ export interface ProductGalleryBlockEditProps {
 export interface ProductGallerySettingsProps {
 	attributes: ProductGalleryBlockAttributes;
 	setAttributes: ( attributes: ProductGalleryBlockAttributes ) => void;
+	context: ProductGalleryContext;
 }
 
 export interface ProductGalleryThumbnailsSettingsProps {
-	attributes: ProductGalleryThumbnailsBlockAttributes;
-	setAttributes: (
-		attributes: ProductGalleryThumbnailsBlockAttributes
-	) => void;
-	context: ProductGalleryThumbnailsBlockAttributes;
+	context: ProductGalleryThumbnailsContext;
 }
 
 export type ProductGalleryContext = {
@@ -53,6 +50,18 @@ export type ProductGalleryContext = {
 export type ProductGalleryPagerContext = Pick<
 	ProductGalleryContext,
 	'productGalleryClientId' | 'pagerDisplayMode'
+>;
+
+export type ProductGalleryLargeImageNextPreviousContext = Pick<
+	ProductGalleryContext,
+	'productGalleryClientId' | 'nextPreviousButtonsPosition'
+>;
+
+export type ProductGalleryThumbnailsContext = Pick<
+	ProductGalleryContext,
+	| 'productGalleryClientId'
+	| 'thumbnailsPosition'
+	| 'thumbnailsNumberOfThumbnails'
 >;
 
 export type ProductGalleryAttributes = ProductGalleryThumbnailsBlockAttributes &
