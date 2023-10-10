@@ -186,7 +186,7 @@ function getProjectPathFromAbsolutePath( absolutePath ) {
 function detectProjectChanges( baseRef ) {
 	// Using a diff will not only allow us to find the projects that have changed but we can also identify the nature of the change.
 	const output = child_process.execSync(
-		`git diff --name-only ${ baseRef }`,
+		`git diff --relative --name-only ${ baseRef }`,
 		{ encoding: 'utf8' }
 	);
 	const changedFilePaths = output.split( '\n' );
@@ -233,10 +233,10 @@ function detectProjectChanges( baseRef ) {
 			// As part of the detection of source files we are going to try and identify the type of source file that was changed.
 			// This isn't necessarily going to be completely perfect but it should be good enough for our purposes.
 			phpSourceChanges = !! filePath.match(
-				/\.(?:php|html)$|composer.(?:json|lock)$/i
+				/\.(?:php|html)$|composer.\(?:json|lock)$/i
 			);
 			jsSourceChanges = !! filePath.match(
-				/\.(?:(?:t|j)sx?|json|html)$|package.json$/i
+				/\.(?:(?:t|j)sx?|json|html)$|package\.json$/i
 			);
 
 			// We're also going to have a greedy detection of source file changes just in case we missed something.
