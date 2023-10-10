@@ -25,10 +25,13 @@ export function Edit( {
 		...attributes,
 	} );
 
-	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
-		postType,
-		fallbackValue: false,
-	} );
+	const [ value, setValue ] = useProductEntityProp< boolean | string | null >(
+		property,
+		{
+			postType,
+			fallbackValue: false,
+		}
+	);
 
 	function isChecked() {
 		if ( checkedValue !== undefined ) {
