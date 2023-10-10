@@ -232,12 +232,16 @@ function detectProjectChanges( baseRef ) {
 
 			// As part of the detection of source files we are going to try and identify the type of source file that was changed.
 			// This isn't necessarily going to be completely perfect but it should be good enough for our purposes.
-			phpSourceChanges = !! filePath.match(
-				/\.(?:php|html)$|composer\.(?:json|lock)$/i
-			);
-			jsSourceChanges = !! filePath.match(
-				/\.(?:(?:t|j)sx?|json|html)$|package\.json$/i
-			);
+			if (
+				filePath.match( /\.(?:php|html)$|composer\.(?:json|lock)$/i )
+			) {
+				phpSourceChanges = true;
+			}
+			if (
+				filePath.match( /\.(?:(?:t|j)sx?|json|html)$|package\.json$/i )
+			) {
+				jsSourceChanges = true;
+			}
 
 			// We're also going to have a greedy detection of source file changes just in case we missed something.
 			if (
@@ -267,13 +271,21 @@ function detectProjectChanges( baseRef ) {
 
 			// For the detection of test files we are going to make some assumptions about file
 			// paths based on common practices in our community as well as the wider ecosystem.
-			phpTestFileChanges = !! filePath.match(
-				/(?:[a-z]+Test|-test|\/tests?\/[^\.]+)\.php$/i
-			);
-			jsTestFileChanges = !! filePath.match(
-				/(?:(?<!e2e[^\.]+)\.(?:spec|test)|\/tests?\/(?!e2e)[^\.]+)\.(?:t|j)sx?$/i
-			);
-			testFileChanges = phpTestFileChanges || jsTestFileChanges;
+			if (
+				filePath.match( /(?:[a-z]+Test|-test|\/tests?\/[^\.]+)\.php$/i )
+			) {
+				phpTestFileChanges = true;
+			}
+			if (
+				filePath.match(
+					/(?:(?<!e2e[^\.]+)\.(?:spec|test)|\/tests?\/(?!e2e)[^\.]+)\.(?:t|j)sx?$/i
+				)
+			) {
+				jsTestFileChanges = true;
+			}
+			if ( phpTestFileChanges || jsTestFileChanges ) {
+				testFileChanges = true;
+			}
 
 			// We're going to base this assumption about E2E test file paths on what seems to be standard elsewhere in our ecosystem.
 			if ( filePath.match( /\/test?\/e2e/i ) ) {
