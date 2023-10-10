@@ -62,6 +62,15 @@ class File {
 	}
 
 	/**
+	 * Get the name of the file, with extension, but without full path.
+	 *
+	 * @return string
+	 */
+	public function get_basename() {
+		return basename( $this->path );
+	}
+
+	/**
 	 * Get the file's source property.
 	 *
 	 * @return string

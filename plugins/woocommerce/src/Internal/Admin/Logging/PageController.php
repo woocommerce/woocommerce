@@ -49,6 +49,21 @@ class PageController {
 	}
 
 	/**
+	 * Get the canonical URL for the Logs tab of the Status admin page.
+	 *
+	 * @return string
+	 */
+	public function get_logs_tab_url() {
+		return add_query_arg(
+			array(
+				'page' => 'wc-status',
+				'tab'  => 'logs',
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Determine the default log handler.
 	 *
 	 * @return string
@@ -144,7 +159,7 @@ class PageController {
 			return $this->list_table;
 		}
 
-		$this->list_table = new ListTable( $this->file_controller );
+		$this->list_table = new ListTable( $this->file_controller, $this );
 
 		return $this->list_table;
 	}
