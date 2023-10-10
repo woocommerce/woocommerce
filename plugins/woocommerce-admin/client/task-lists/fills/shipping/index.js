@@ -28,7 +28,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Connect, { PrefetchJetpackAuthUrl } from '../../../dashboard/components/connect';
+import Connect, { prefetchJetpackAuthUrl } from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
@@ -68,6 +68,7 @@ export class Shipping extends Component {
 
 	componentDidMount() {
 		this.reset();
+		prefetchJetpackAuthUrl( this.jetpackAuthRedirectUrl );
 	}
 
 	reset() {
@@ -640,9 +641,6 @@ export class Shipping extends Component {
 			<div className="woocommerce-task-shipping">
 				<Card className="woocommerce-task-card">
 					<CardBody>
-						<PrefetchJetpackAuthUrl
-							redirectUrl={ this.jetpackAuthRedirectUrl }
-						/>
 						<Stepper
 							isPending={
 								isPending || isUpdateSettingsRequesting

@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { useSelect, withDispatch, withSelect } from '@wordpress/data';
+import { resolveSelect, withDispatch, withSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 export class Connect extends Component {
@@ -175,15 +175,8 @@ export default compose(
 	} )
 )( Connect );
 
-export const PrefetchJetpackAuthUrl = ( { redirectUrl = undefined } ) => {
-	useSelect(
-		( select ) => {
-			select( ONBOARDING_STORE_NAME ).getJetpackAuthUrl(
-				formatJetpackAuthUrlQueryArgs( redirectUrl )
-			);
-		},
-		[ redirectUrl ]
+export const prefetchJetpackAuthUrl = ( { redirectUrl = undefined } ) => {
+	resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl(
+		formatJetpackAuthUrlQueryArgs( redirectUrl )
 	);
-
-	return <></>;
 };

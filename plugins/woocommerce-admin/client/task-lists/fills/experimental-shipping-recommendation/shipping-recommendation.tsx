@@ -16,7 +16,7 @@ import { StoreLocation } from './components/store-location';
 import { WCSBanner } from './components/wcs-banner';
 import { TaskProps, ShippingRecommendationProps } from './types';
 import { redirectToWCSSettings } from './utils';
-import { PrefetchJetpackAuthUrl } from '~/dashboard/components/connect';
+import { prefetchJetpackAuthUrl } from '~/dashboard/components/connect';
 
 /**
  * Plugins required to automate shipping.
@@ -77,6 +77,10 @@ export const ShippingRecommendation: React.FC<
 		setPluginsToActivate( remainingPlugins );
 	}, [ activePlugins, isJetpackConnected, isResolving, pluginsToActivate ] );
 
+	useEffect( () => {
+		prefetchJetpackAuthUrl();
+	}, [] );
+
 	const steps = [
 		{
 			key: 'store_location',
@@ -133,7 +137,6 @@ export const ShippingRecommendation: React.FC<
 		<div className="woocommerce-task-shipping-recommendation">
 			<Card className="woocommerce-task-card">
 				<CardBody>
-					<PrefetchJetpackAuthUrl />
 					<Stepper
 						isPending={ isResolving }
 						isVertical={ true }
