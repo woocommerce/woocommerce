@@ -82,14 +82,15 @@ jobs:
       # results of the other jobs in the workflow.
       name: 'Evaluate Project Matrix'
       runs-on: 'ubuntu-20.04'
-      needs: 'project-task-matrix'
+      needs: [ 'project-matrix', 'project-task-matrix' ]
       if: ${{ always() }}
       steps:
-        - name: 'Debug'
-          run: 'echo "${{ toJson( needs ) }}"'
         - name: 'Check Matrix Success'
+          # Matrix jobs with no matrices are marked as a "failure" by default. We need to keep
+          # this in mind when checking the results because we don't want to fail the workflow.
+          # For the sake of clarity we will mark the job as "skipped".
           run: |
-            result="${{ needs.project-task-matrix.result }}"
+            result="${{ needs.project-matrix.outputs.matrix == '[]'  && 'skipped' || needs.project-task-matrix.result }}"
             if [[ $result == "success" || $result == "skipped" ]]; then
               echo "The matrix has completed successfully."
               exit 0
