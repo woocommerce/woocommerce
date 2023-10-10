@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classNames from 'classnames';
+
+/**
  * Internal dependencies
  */
 import './product-list-content.scss';
@@ -13,8 +18,14 @@ export default function ProductListContent( props: {
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
+	const classes = classNames(
+		'woocommerce-marketplace__product-list-content',
+		'woocommerce-marketplace__product-list-content--' +
+			( props.products.length % 4 === 0 ? 'four' : 'three' )
+	);
+
 	return (
-		<div className="woocommerce-marketplace__product-list-content">
+		<div className={ classes }>
 			{ props.products.map( ( product ) => (
 				<ProductCard
 					key={ product.id }
