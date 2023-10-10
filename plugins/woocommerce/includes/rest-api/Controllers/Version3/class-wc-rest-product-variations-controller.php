@@ -514,7 +514,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 *
 	 * @throws WC_REST_Exception REST API exceptions.
 	 * @param WC_Product_Variation $variation Product Variation instance.
-	 * @param array      $images  Images data.
+	 * @param array                $images  Images data.
 	 * @return WC_Product_Variation
 	 */
 	protected function set_variation_images( $variation, $images ) {
@@ -530,6 +530,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 					if ( is_wp_error( $upload ) ) {
+						// If true it ignores image upload errors to let other images to be set
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), $images ) ) {
 							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 						} else {
