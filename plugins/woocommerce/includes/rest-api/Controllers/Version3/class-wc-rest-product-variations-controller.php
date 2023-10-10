@@ -48,6 +48,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
 						'type'        => 'boolean',
 					),
+					'default_values' => array(
+						'description' => __( 'Default values for generated variations.', 'woocommerce' ),
+						'type' 		 => 'object',
+						'properties' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					)
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -816,9 +821,29 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
-		// Filter by local attributes.
+		/**
+		 * @deprecated 8.1.0 replaced by attributes.
+		 * Filter by local attributes.
+		 */
 		if ( ! empty( $request['local_attributes'] ) && is_array( $request['local_attributes'] ) ) {
+			wc_deprecated_argument( 'local_attributes', '8.1', 'Use "attributes" instead.' );
 			foreach ( $request['local_attributes'] as $attribute ) {
+				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
+					continue;
+				}
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					$args,
+					array(
+						'key'   => 'attribute_' . $attribute['attribute'],
+						'value' => $attribute['term'],
+					)
+				);
+			}
+		}
+
+		// Filter by attributes.
+		if ( ! empty( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
+			foreach ( $request['attributes'] as $attribute ) {
 				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
 					continue;
 				}
@@ -864,6 +889,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+		}
+
+		// Price filter.
+		if ( is_bool( $request['has_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_price',
+					'compare' => $request['has_price'] ? 'EXISTS' : 'NOT EXISTS',
+				)
+			);
 		}
 
 		// Filter product based on stock_status.
@@ -927,6 +963,31 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['has_price'] = array(
+			'description'       => __( 'Limit result set to products with or without price.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['attributes'] = array(
+			'description'       => __( 'Limit result set to products with specified attributes.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' 		 => 'object',
+				'properties' => array(
+					'attribute'           => array(
+						'type'        => 'string',
+						'description' => __( 'Attribute slug.', 'woocommerce' ),
+					),
+					'term'  => array(
+						'type'        => 'string',
+						'description' => __( 'Attribute term.', 'woocommerce' ),
+					),
+				),
+			),
+		);
+
 		return $params;
 	}
 
@@ -982,8 +1043,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		$response          = array();
 		$product           = wc_get_product( $product_id );
+		$default_values	   = isset( $request['default_values'] ) ? $request['default_values'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
 
 		if ( isset( $request['delete'] ) && $request['delete'] ) {
 			$deleted_count = $this->delete_unmatched_product_variations( $product );

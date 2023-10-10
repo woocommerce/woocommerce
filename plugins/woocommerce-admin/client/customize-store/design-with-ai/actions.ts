@@ -1,22 +1,35 @@
 /**
  * External dependencies
  */
-import { assign } from 'xstate';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import { assign, spawn, EventObject } from 'xstate';
+import {
+	getQuery,
+	updateQueryString,
+	getNewPath,
+} from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
+import { dispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import {
+	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	FontPairing,
+	LookAndToneCompletionResponse,
+	Header,
+	Footer,
+	HomepageTemplate,
 } from './types';
+import { aiWizardClosedBeforeCompletionEvent } from './events';
 import {
 	businessInfoDescriptionCompleteEvent,
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
-import { LookAndToneCompletionResponse } from './services';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -70,6 +83,152 @@ const assignLookAndTone = assign<
 	},
 } );
 
+const assignDefaultColorPalette = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			defaultColorPalette: (
+				event as {
+					data: {
+						response: ColorPaletteResponse;
+					};
+				}
+			 ).data.response,
+		};
+	},
+} );
+
+const assignFontPairing = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		if ( ( event as EventObject ).type === 'xstate.error' ) {
+			let fontPairing = context.aiSuggestions.fontPairing;
+			const choice = context.lookAndFeel.choice;
+
+			switch ( true ) {
+				case choice === 'Contemporary':
+					fontPairing = 'Inter + Inter';
+					break;
+				case choice === 'Classic':
+					fontPairing = 'Bodoni Moda + Overpass';
+					break;
+				case choice === 'Bold':
+					fontPairing = 'Rubik + Inter';
+					break;
+			}
+
+			return {
+				...context.aiSuggestions,
+				fontPairing,
+			};
+		}
+
+		return {
+			...context.aiSuggestions,
+			fontPairing: (
+				event as {
+					data: {
+						response: FontPairing;
+					};
+				}
+			 ).data.response.pair_name,
+		};
+	},
+} );
+
+const assignHeader = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			header: (
+				event as {
+					data: {
+						response: Header;
+					};
+				}
+			 ).data.response.slug,
+		};
+	},
+} );
+
+const assignFooter = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			footer: (
+				event as {
+					data: {
+						response: Footer;
+					};
+				}
+			 ).data.response.slug,
+		};
+	},
+} );
+
+const assignHomepageTemplate = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	aiSuggestions: ( context, event: unknown ) => {
+		return {
+			...context.aiSuggestions,
+			homepageTemplate: (
+				event as {
+					data: {
+						response: HomepageTemplate;
+					};
+				}
+			 ).data.response.homepage_template,
+		};
+	},
+} );
+
+const updateWooAiStoreDescriptionOption = ( descriptionText: string ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woo_ai_describe_store_description: descriptionText,
+	} );
+};
+
+const spawnSaveDescriptionToOption = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents,
+	designWithAiStateMachineEvents
+>( {
+	spawnSaveDescriptionToOptionRef: (
+		context: designWithAiStateMachineContext
+	) =>
+		spawn(
+			() =>
+				updateWooAiStoreDescriptionOption(
+					context.businessInfoDescription.descriptionText
+				),
+			'update-woo-ai-business-description-option'
+		),
+} );
+
+const assignAPICallLoaderError = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	apiCallLoader: () => {
+		return {
+			hasErrors: true,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -99,11 +258,62 @@ const updateQueryStep = (
 	}
 };
 
+const recordTracksStepViewed = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_view', {
+		step,
+	} );
+};
+
+const recordTracksStepClosed = (
+	_context: unknown,
+	event: aiWizardClosedBeforeCompletionEvent
+) => {
+	const { step } = event.payload;
+	recordEvent( `customize_your_store_ai_wizard_step_close`, {
+		step: step.replaceAll( '-', '_' ),
+	} );
+};
+
+const recordTracksStepCompleted = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( 'customize_your_store_ai_wizard_step_complete', {
+		step,
+	} );
+};
+
+const redirectToAssemblerHub = () => {
+	window.location.href = getNewPath(
+		{},
+		'/customize-store/assembler-hub',
+		{}
+	);
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
 	assignLookAndTone,
+	assignDefaultColorPalette,
+	assignFontPairing,
+	assignHeader,
+	assignFooter,
+	assignHomepageTemplate,
+	assignAPICallLoaderError,
 	logAIAPIRequestError,
 	updateQueryStep,
+	recordTracksStepViewed,
+	recordTracksStepClosed,
+	recordTracksStepCompleted,
+	spawnSaveDescriptionToOption,
+	redirectToAssemblerHub,
 };

@@ -10,6 +10,9 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
+	FontPairing,
+	ColorPaletteResponse,
+	HomepageTemplate,
 } from './types';
 import {
 	BusinessInfoDescription,
@@ -19,6 +22,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
+import { defaultColorPalette, fontPairings } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -50,19 +54,33 @@ export const designWithAiStateMachineDefinition = createMachine(
 				target: 'navigate',
 			},
 			AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-				actions: sendParent( ( _context, event ) => event ),
+				actions: [
+					sendParent( ( _context, event ) => event ),
+					'recordTracksStepClosed',
+				],
 			},
 		},
 		context: {
 			businessInfoDescription: {
 				descriptionText: '',
 			},
-
 			lookAndFeel: {
 				choice: '',
 			},
 			toneOfVoice: {
 				choice: '',
+			},
+			aiSuggestions: {
+				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
+				defaultColorPalette: {
+					default: 'Ancient Bronze',
+				} as ColorPaletteResponse,
+				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
+			},
+			apiCallLoader: {
+				hasErrors: false,
 			},
 		},
 		initial: 'navigate',
@@ -116,9 +134,18 @@ export const designWithAiStateMachineDefinition = createMachine(
 						meta: {
 							component: BusinessInfoDescription,
 						},
+						entry: [
+							{
+								type: 'recordTracksStepViewed',
+								step: 'business_info_description',
+							},
+						],
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
-								actions: [ 'assignBusinessInfoDescription' ],
+								actions: [
+									'assignBusinessInfoDescription',
+									'spawnSaveDescriptionToOption',
+								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
@@ -127,11 +154,23 @@ export const designWithAiStateMachineDefinition = createMachine(
 						invoke: {
 							src: 'getLookAndTone',
 							onError: {
-								actions: [ 'logAIAPIRequestError' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'logAIAPIRequestError',
+								],
 								target: '#lookAndFeel',
 							},
 							onDone: {
-								actions: [ 'assignLookAndTone' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+									'assignLookAndTone',
+								],
 								target: '#lookAndFeel',
 							},
 						},
@@ -156,10 +195,20 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'look-and-feel',
 							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'look_and_feel',
+							},
 						],
 						on: {
 							LOOK_AND_FEEL_COMPLETE: {
-								actions: [ 'assignLookAndFeel' ],
+								actions: [
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'look_and_feel',
+									},
+									'assignLookAndFeel',
+								],
 								target: 'postLookAndFeel',
 							},
 						},
@@ -189,10 +238,20 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'tone-of-voice',
 							},
+							{
+								type: 'recordTracksStepViewed',
+								step: 'tone_of_voice',
+							},
 						],
 						on: {
 							TONE_OF_VOICE_COMPLETE: {
-								actions: [ 'assignToneOfVoice' ],
+								actions: [
+									'assignToneOfVoice',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'tone_of_voice',
+									},
+								],
 								target: 'postToneOfVoice',
 							},
 						},
@@ -223,8 +282,179 @@ export const designWithAiStateMachineDefinition = createMachine(
 								step: 'api-call-loader',
 							},
 						],
+						type: 'parallel',
+						states: {
+							chooseColorPairing: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultColorPalette,
+													prompt: defaultColorPalette.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignDefaultColorPalette',
+												],
+												target: 'success',
+											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							chooseFontPairing: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...fontPairings,
+													prompt: fontPairings.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignFontPairing',
+												],
+												target: 'success',
+											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												actions: [
+													'assignFontPairing',
+												],
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							updateStorePatterns: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+						},
+						onDone: 'postApiCallLoader',
 					},
-					postApiCallLoader: {},
+					postApiCallLoader: {
+						type: 'parallel',
+						states: {
+							assembleSite: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'assembleSite',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+								},
+							},
+							saveAiResponse: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'saveAiResponseToOption',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												target: 'failed',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+									failed: {
+										type: 'final',
+									},
+								},
+							},
+						},
+						onDone: {
+							actions: [
+								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
+								'redirectToAssemblerHub',
+							],
+						},
+					},
 				},
 			},
 		},

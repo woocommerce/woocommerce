@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c27792dd3b1927fff20aa226d428068",
+    "content-hash": "6dbaa76c3a13dc3d312b2ad734d0bc91",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -206,28 +206,28 @@
         },
         {
             "name": "automattic/jetpack-connection",
-            "version": "v1.51.7",
+            "version": "v1.57.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-connection.git",
-                "reference": "4c4bae836858957d9aaf6854cf4e24c3261242c4"
+                "reference": "d6c83b19aef56cc08a8314e84ab79e66cfbf3e03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/4c4bae836858957d9aaf6854cf4e24c3261242c4",
-                "reference": "4c4bae836858957d9aaf6854cf4e24c3261242c4",
+                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/d6c83b19aef56cc08a8314e84ab79e66cfbf3e03",
+                "reference": "d6c83b19aef56cc08a8314e84ab79e66cfbf3e03",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-a8c-mc-stats": "^1.4.20",
-                "automattic/jetpack-admin-ui": "^0.2.19",
+                "automattic/jetpack-admin-ui": "^0.2.20",
                 "automattic/jetpack-constants": "^1.6.22",
                 "automattic/jetpack-redirect": "^1.7.25",
                 "automattic/jetpack-roles": "^1.4.23",
-                "automattic/jetpack-status": "^1.16.4"
+                "automattic/jetpack-status": "^1.18.0"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^3.3.2",
+                "automattic/jetpack-changelogger": "^3.3.7",
                 "automattic/wordbless": "@dev",
                 "brain/monkey": "2.6.1",
                 "yoast/phpunit-polyfills": "1.0.4"
@@ -247,7 +247,7 @@
                     "link-template": "https://github.com/Automattic/jetpack-connection/compare/v${old}...v${new}"
                 },
                 "branch-alias": {
-                    "dev-trunk": "1.51.x-dev"
+                    "dev-trunk": "1.57.x-dev"
                 }
             },
             "autoload": {
@@ -263,9 +263,9 @@
             ],
             "description": "Everything needed to connect to the Jetpack infrastructure",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-connection/tree/v1.51.7"
+                "source": "https://github.com/Automattic/jetpack-connection/tree/v1.57.0"
             },
-            "time": "2023-04-10T11:44:13+00:00"
+            "time": "2023-08-21T17:33:13+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -964,16 +964,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.6.2",
+            "version": "3.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "4eb2fa9737a53e4d284dafcf3e0bf428b5f941bc"
+                "reference": "c33dd732e37c90f37c3f9662f7eed888c11dc60d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/4eb2fa9737a53e4d284dafcf3e0bf428b5f941bc",
-                "reference": "4eb2fa9737a53e4d284dafcf3e0bf428b5f941bc",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/c33dd732e37c90f37c3f9662f7eed888c11dc60d",
+                "reference": "c33dd732e37c90f37c3f9662f7eed888c11dc60d",
                 "shasum": ""
             },
             "require-dev": {
@@ -998,32 +998,34 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.6.2"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.6.3"
             },
-            "time": "2023-08-09T19:43:41+00:00"
+            "time": "2023-09-13T13:40:20+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "11.0.0",
+            "version": "11.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "926f174399738ea25de191b1db05cf42ef4635d3"
+                "reference": "86e93ddd06606100e199fdae049baaa5754c2a17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/926f174399738ea25de191b1db05cf42ef4635d3",
-                "reference": "926f174399738ea25de191b1db05cf42ef4635d3",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/86e93ddd06606100e199fdae049baaa5754c2a17",
+                "reference": "86e93ddd06606100e199fdae049baaa5754c2a17",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-autoloader": "^2.9.1",
+                "automattic/jetpack-autoloader": "^2.11",
+                "automattic/jetpack-config": "^1.15",
+                "automattic/jetpack-connection": "^1.57",
                 "composer/installers": "^1.7.0",
                 "ext-hash": "*",
                 "ext-json": "*"
             },
             "require-dev": {
-                "mockery/mockery": "1.6.5",
+                "mockery/mockery": "1.6.6",
                 "nikic/php-parser": "4.16.0 as 1.0.0",
                 "phpdocumentor/reflection": "3.0.1",
                 "phpunit/php-code-coverage": "9.2.27",
@@ -1062,9 +1064,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.0.0"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.2.0"
             },
-            "time": "2023-08-30T10:20:08+00:00"
+            "time": "2023-09-27T17:36:02+00:00"
         }
     ],
     "packages-dev": [
@@ -3947,5 +3949,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.3.0"
 }

@@ -57,6 +57,16 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				}
 				recordEvent( 'product_add_attribute_button' );
 			} }
+			onAddAnother={ () => {
+				recordEvent(
+					'product_add_attributes_modal_add_another_attribute_button_click'
+				);
+			} }
+			onRemoveItem={ () => {
+				recordEvent(
+					'product_add_attributes_modal_remove_attribute_button_click'
+				);
+			} }
 			onRemove={ () =>
 				recordEvent(
 					'product_remove_attribute_confirmation_confirm_click'

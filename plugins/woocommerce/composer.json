@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "8.2.0",
+	"version": "8.3.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -17,13 +17,13 @@
 		"php": ">=7.4",
 		"automattic/jetpack-autoloader": "2.11.18",
 		"automattic/jetpack-config": "1.15.2",
-		"automattic/jetpack-connection": "1.51.7",
+		"automattic/jetpack-connection": "^1.57",
 		"automattic/jetpack-constants": "^1.6.22",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.6.2",
-		"woocommerce/woocommerce-blocks": "11.0.0"
+		"woocommerce/action-scheduler": "3.6.3",
+		"woocommerce/woocommerce-blocks": "11.2.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

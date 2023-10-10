@@ -3,31 +3,59 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
-import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords, useEntityBlockEditor } from '@wordpress/core-data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+// @ts-ignore No types for this exist yet.
+import { useEntityRecords } from '@wordpress/core-data';
+import { select } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-import { BlockInstance } from '@wordpress/blocks';
+import { useQuery } from '@woocommerce/navigation';
+import { useContext, useCallback } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { useCallback } from '@wordpress/element';
+import { useEditorBlocks } from './hooks/use-editor-blocks';
+import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { CustomizeStoreContext } from './';
 
-const { useHistory, useLocation } = unlock( routerPrivateApis );
+const { useHistory } = unlock( routerPrivateApis );
 
 type Page = {
 	link: string;
 	title: { rendered: string; raw: string };
 	[ key: string ]: unknown;
+};
+
+const findPageIdByLinkOrTitle = ( event: MouseEvent, _pages: Page[] ) => {
+	const target = event.target as HTMLAnchorElement;
+	const clickedPage =
+		_pages.find( ( page ) => page.link === target.href ) ||
+		_pages.find( ( page ) => page.title.rendered === target.innerText );
+	return clickedPage ? clickedPage.id : null;
+};
+
+const findPageIdByBlockClientId = ( event: MouseEvent ) => {
+	const navLink = ( event.target as HTMLAnchorElement ).closest(
+		'.wp-block-navigation-link'
+	);
+	if ( navLink ) {
+		const blockClientId = navLink.getAttribute( 'data-block' );
+		const navLinkBlocks =
+			// @ts-ignore No types for this exist yet.
+			select( blockEditorStore ).getBlocksByClientId( blockClientId );
+
+		if ( navLinkBlocks && navLinkBlocks.length ) {
+			return navLinkBlocks[ 0 ].attributes.id;
+		}
+	}
+	return null;
 };
 
 // We only show the edit option when page count is <= MAX_PAGE_COUNT
@@ -36,20 +64,19 @@ const MAX_PAGE_COUNT = 100;
 
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
-	const location = useLocation();
 	const settings = useSiteEditorSettings();
+	const [ blocks ] = useEditorBlocks();
+	const urlParams = useQuery();
+	const { currentState } = useContext( CustomizeStoreContext );
 
-	const { templateType } = useSelect( ( select ) => {
-		const { getEditedPostType } = unlock( select( editSiteStore ) );
+	const scrollDirection =
+		urlParams.path === '/customize-store/assembler-hub/footer'
+			? 'bottomUp'
+			: 'topDown';
 
-		return {
-			templateType: getEditedPostType(),
-		};
-	}, [] );
-
-	const [ blocks ]: [ BlockInstance[] ] = useEntityBlockEditor(
-		'postType',
-		templateType
+	const previewOpacity = useScrollOpacity(
+		'.woocommerce-customize-store__block-editor iframe',
+		scrollDirection
 	);
 
 	// // See packages/block-library/src/page-list/edit.js.
@@ -65,86 +92,32 @@ export const BlockEditor = ( {} ) => {
 
 	const onClickNavigationItem = useCallback(
 		( event: MouseEvent ) => {
-			const clickedPage =
-				pages.find(
-					( page: Page ) =>
-						page.link === ( event.target as HTMLAnchorElement ).href
-				) ||
-				// Fallback to page title if the link is not found. This is needed for a bug in the block library
-				// See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817
-				pages.find(
-					( page: Page ) =>
-						page.title.rendered ===
-						( event.target as HTMLAnchorElement ).innerText
-				);
-			if ( clickedPage ) {
+			// If the user clicks on a navigation item, we want to update the URL to reflect the page they are on.
+			// Because of bug in the block library (See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817), we're not able to use href link to find the page ID. Instead, we'll use the link/title first, and if that doesn't work, we'll use the block client ID. It depends on the header block type to determine which one to use.
+			// This is a temporary solution until the block library is fixed.
+
+			const pageId =
+				findPageIdByLinkOrTitle( event, pages ) ||
+				findPageIdByBlockClientId( event );
+
+			if ( pageId ) {
 				history.push( {
-					...location.params,
-					postId: clickedPage.id,
+					...urlParams,
+					postId: pageId,
 					postType: 'page',
 				} );
-			} else {
-				// Home page
-				const { postId, postType, ...params } = location.params;
-				history.push( {
-					...params,
-				} );
+				return;
 			}
+
+			// Home page
+			const { postId, postType, ...params } = urlParams;
+			history.push( {
+				...params,
+			} );
 		},
-		[ history, location.params, pages ]
+		[ history, urlParams, pages ]
 	);
 
-	if ( location.params.path === '/customize-store/homepage' ) {
-		// When assembling the homepage preview, we need to render the blocks in a different way than the rest of the pages.
-		// Because we want to show a action bar when hovering over a pattern. This is not needed for the rest of the pages and will cause an issue with logo editing.
-		return (
-			<div className="woocommerce-customize-store__block-editor">
-				{ blocks.map( ( block, index ) => {
-					// Add padding to the top and bottom of the block preview.
-					let additionalStyles = '';
-					let hasActionBar = false;
-					switch ( true ) {
-						case index === 0:
-							// header
-							additionalStyles = `
-				.editor-styles-wrapper{ padding-top: var(--wp--style--root--padding-top) };'
-			`;
-							break;
-
-						case index === blocks.length - 1:
-							// footer
-							additionalStyles = `
-				.editor-styles-wrapper{ padding-bottom: var(--wp--style--root--padding-bottom) };
-			`;
-							break;
-						default:
-							hasActionBar = true;
-					}
-
-					return (
-						<div
-							key={ block.clientId }
-							className={ classNames(
-								'woocommerce-block-preview-container',
-								{
-									'has-action-menu': hasActionBar,
-								}
-							) }
-						>
-							<BlockPreview
-								blocks={ block }
-								settings={ settings }
-								additionalStyles={ additionalStyles }
-								onClickNavigationItem={ onClickNavigationItem }
-								// Use sub registry because we have multiple previews
-								useSubRegistry={ true }
-							/>
-						</div>
-					);
-				} ) }
-			</div>
-		);
-	}
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>
@@ -152,9 +125,12 @@ export const BlockEditor = ( {} ) => {
 					blocks={ blocks }
 					settings={ settings }
 					additionalStyles={ '' }
+					isNavigable={ false }
+					isScrollable={ currentState !== 'transitionalScreen' }
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
+					previewOpacity={ previewOpacity }
 				/>
 			</div>
 		</div>

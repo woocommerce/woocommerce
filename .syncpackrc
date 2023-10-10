@@ -118,6 +118,7 @@
 				"@wordpress/edit-site"
 			],
 			"packages": [
+				"@woocommerce/block-templates",
 				"@woocommerce/product-editor",
 				"woocommerce/client/admin",
 				"@woocommerce/components"

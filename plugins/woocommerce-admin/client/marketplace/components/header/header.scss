@@ -7,10 +7,7 @@
 	display: grid;
 	grid-template: 'mktpl-title mktpl-search mktpl-meta' 60px
 		'mktpl-tabs mktpl-tabs mktpl-tabs' auto / 1fr 320px 36px;
-	left: 0;
 	padding: 0 $content-spacing-large;
-	position: absolute;
-	top: -60px;
 	width: 100%;
 
 	/* On narrow screens, "stack" header items and hide the bottom border */

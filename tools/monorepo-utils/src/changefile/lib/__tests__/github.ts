@@ -351,6 +351,53 @@ describe( 'getChangelogDetails', () => {
 		expect( details.comment ).toEqual( 'This is a very useful comment.' );
 	} );
 
+	it( 'should remove newlines from message and comment', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n' +
+			'<details>\r\n' +
+			'\r\n' +
+			'#### Significance\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [x] Patch\r\n' +
+			'- [ ] Minor\r\n' +
+			'- [ ] Major\r\n' +
+			'\r\n' +
+			'#### Type\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [x] Fix - Fixes an existing bug\r\n' +
+			'- [ ] Add - Adds functionality\r\n' +
+			'- [ ] Update - Update existing functionality\r\n' +
+			'- [ ] Dev - Development related task\r\n' +
+			'- [ ] Tweak - A minor adjustment to the codebase\r\n' +
+			'- [ ] Performance - Address performance issues\r\n' +
+			'- [ ] Enhancement\r\n' +
+			'\r\n' +
+			'#### Message ' +
+			'<!-- Add a changelog message here -->\r\n' +
+			'This is a very useful fix.\r\n' +
+			'I promise!\r\n' +
+			'\r\n' +
+			'#### Comment ' +
+			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
+			'This is a very useful comment.\r\n' +
+			"I don't promise!\r\n" +
+			'\r\n' +
+			'</details>';
+
+		const details = getChangelogDetails( body );
+		expect( details.message ).toEqual(
+			'This is a very useful fix. I promise!'
+		);
+		expect( details.comment ).toEqual(
+			"This is a very useful comment. I don't promise!"
+		);
+	} );
+
 	it( 'should return a comment even when it is entered with a significance other than patch', () => {
 		const body =
 			'### Changelog entry\r\n' +

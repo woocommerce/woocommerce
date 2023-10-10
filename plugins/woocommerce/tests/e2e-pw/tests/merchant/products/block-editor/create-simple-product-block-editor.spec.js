@@ -23,6 +23,40 @@ const productData = {
 test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'General tab', () => {
+	test.describe( 'Simple product form', () => {
+		test.use( { storageState: process.env.ADMINSTATE } );
+
+		test.beforeEach( async ( { browser } ) => {
+			const context = await browser.newContext();
+			const page = await context.newPage();
+			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
+				page
+			);
+			if ( ! isNewProductEditorEnabled ) {
+				await toggleBlockProductEditor( 'enable', page );
+			}
+		} );
+
+		test.afterEach( async ( { browser } ) => {
+			const context = await browser.newContext();
+			const page = await context.newPage();
+			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
+				page
+			);
+			if ( isNewProductEditorEnabled ) {
+				await toggleBlockProductEditor( 'disable', page );
+			}
+		} );
+
+		test( 'renders each block without error', async ( { page } ) => {
+			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			await clickOnTab( 'General', page );
+			await page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' ).isVisible();
+
+			expect( page.locator( '.block-editor-warning' ) ).toHaveCount( 0 );
+		} );
+	} );
+
 	test.describe( 'Create product', () => {
 		let productId;
 		test.use( { storageState: process.env.ADMINSTATE } );

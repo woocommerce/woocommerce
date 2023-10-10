@@ -17,6 +17,13 @@ interface ContainerInterface {
 	public function get_formatted_template(): array;
 
 	/**
+	 * Get a block by ID.
+	 *
+	 * @param string $block_id The block ID.
+	 */
+	public function get_block( string $block_id ): ?BlockInterface;
+
+	/**
 	 * Removes a block from the container.
 	 *
 	 * @param string $block_id The block ID.

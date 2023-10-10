@@ -6,26 +6,36 @@
  * External dependencies
  */
 import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useMemo, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
+	privateApis as blockEditorPrivateApis,
 	BlockList,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
+// @ts-ignore No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { noop } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
+import {
+	FontFamiliesLoader,
+	FontFamily,
+} from './sidebar/global-styles/font-pairing-variations/font-families-loader';
+import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 
-const MAX_HEIGHT = 2000;
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
 
 // This is used to avoid rendering the block list if the sizes change.
 let MemoizedBlockList: typeof BlockList | undefined;
+
+const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -37,192 +47,190 @@ export type ScaledBlockPreviewProps = {
 	};
 	additionalStyles: string;
 	onClickNavigationItem: ( event: MouseEvent ) => void;
+	isNavigable?: boolean;
+	isScrollable?: boolean;
 };
 
 function ScaledBlockPreview( {
 	viewportWidth,
 	containerWidth,
-	minHeight,
 	settings,
 	additionalStyles,
 	onClickNavigationItem,
+	isNavigable = false,
+	isScrollable = true,
 }: ScaledBlockPreviewProps ) {
 	const { setLogoBlock } = useContext( LogoBlockContext );
+	const [ fontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies.theme'
+	) as [ FontFamily[] ];
+
+	const externalFontFamilies = fontFamilies.filter(
+		( { slug } ) => slug !== SYSTEM_FONT_SLUG
+	);
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
 	}
 
-	// @ts-ignore No types for this exist yet.
-	const [ contentResizeListener, { height: contentHeight } ] =
-		useResizeObserver();
-
-	// Avoid scrollbars for pattern previews.
-	const editorStyles = useMemo( () => {
-		return [
-			{
-				css: 'body{height:auto;overflow:hidden;border:none;padding:0;}',
-				__unstableType: 'presets',
-			},
-			...settings.styles,
-		];
-	}, [ settings.styles ] );
-
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
-	const scale = containerWidth / viewportWidth;
 
 	return (
 		<DisabledProvider value={ true }>
 			<Iframe
-				contentRef={ useRefEffect( ( bodyElement: HTMLBodyElement ) => {
-					const {
-						ownerDocument: { documentElement },
-					} = bodyElement;
+				aria-hidden
+				scrolling={ isScrollable ? 'yes' : 'no' }
+				tabIndex={ -1 }
+				readonly={ ! isNavigable }
+				contentRef={ useRefEffect(
+					( bodyElement: HTMLBodyElement ) => {
+						const {
+							ownerDocument: { documentElement },
+						} = bodyElement;
 
-					documentElement.classList.add(
-						'block-editor-block-preview__content-iframe'
-					);
-					documentElement.style.position = 'absolute';
-					documentElement.style.width = '100%';
+						documentElement.classList.add(
+							'block-editor-block-preview__content-iframe'
+						);
+						documentElement.style.position = 'absolute';
+						documentElement.style.width = '100%';
 
-					// Necessary for contentResizeListener to work.
-					bodyElement.style.boxSizing = 'border-box';
-					bodyElement.style.position = 'absolute';
-					bodyElement.style.width = '100%';
+						// Necessary for contentResizeListener to work.
+						bodyElement.style.boxSizing = 'border-box';
+						bodyElement.style.position = 'absolute';
+						bodyElement.style.width = '100%';
 
-					let navigationContainers: NodeListOf< HTMLDivElement >;
-					let siteTitles: NodeListOf< HTMLAnchorElement >;
-					const onClickNavigation = ( event: MouseEvent ) => {
-						event.preventDefault();
-						onClickNavigationItem( event );
-					};
+						let navigationContainers: NodeListOf< HTMLDivElement >;
+						let siteTitles: NodeListOf< HTMLAnchorElement >;
+						const onClickNavigation = ( event: MouseEvent ) => {
+							event.preventDefault();
+							onClickNavigationItem( event );
+						};
 
-					const onMouseMove = ( event: MouseEvent ) => {
-						event.stopImmediatePropagation();
-					};
+						const onMouseMove = ( event: MouseEvent ) => {
+							event.stopImmediatePropagation();
+						};
 
-					const possiblyRemoveAllListeners = () => {
-						bodyElement.removeEventListener(
+						const possiblyRemoveAllListeners = () => {
+							bodyElement.removeEventListener(
+								'mousemove',
+								onMouseMove,
+								false
+							);
+							if ( navigationContainers ) {
+								navigationContainers.forEach( ( element ) => {
+									element.removeEventListener(
+										'click',
+										onClickNavigation
+									);
+								} );
+							}
+
+							if ( siteTitles ) {
+								siteTitles.forEach( ( element ) => {
+									element.removeEventListener(
+										'click',
+										onClickNavigation
+									);
+								} );
+							}
+						};
+
+						const enableNavigation = () => {
+							// Remove contenteditable and inert attributes from editable elements so that users can click on navigation links.
+							bodyElement
+								.querySelectorAll(
+									'.block-editor-rich-text__editable[contenteditable="true"]'
+								)
+								.forEach( ( element ) => {
+									element.removeAttribute(
+										'contenteditable'
+									);
+								} );
+
+							bodyElement
+								.querySelectorAll( '*[inert="true"]' )
+								.forEach( ( element ) => {
+									element.removeAttribute( 'inert' );
+								} );
+
+							possiblyRemoveAllListeners();
+							navigationContainers = bodyElement.querySelectorAll(
+								'.wp-block-navigation__container'
+							);
+							navigationContainers.forEach( ( element ) => {
+								element.addEventListener(
+									'click',
+									onClickNavigation,
+									true
+								);
+							} );
+
+							siteTitles = bodyElement.querySelectorAll(
+								'.wp-block-site-title a'
+							);
+							siteTitles.forEach( ( element ) => {
+								element.addEventListener(
+									'click',
+									onClickNavigation,
+									true
+								);
+							} );
+						};
+
+						const onChange = () => {
+							// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
+							// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
+							// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
+							const siteLogo = bodyElement.querySelector(
+								'.wp-block-site-logo'
+							);
+
+							const blockClientId = siteLogo
+								? siteLogo.getAttribute( 'data-block' )
+								: null;
+
+							setLogoBlock( {
+								clientId: blockClientId,
+								isLoading: false,
+							} );
+
+							if ( isNavigable ) {
+								enableNavigation();
+							}
+						};
+
+						// Stop mousemove event listener to disable block tool insertion feature.
+						bodyElement.addEventListener(
 							'mousemove',
 							onMouseMove,
-							false
-						);
-						if ( navigationContainers ) {
-							navigationContainers.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
-						}
-
-						if ( siteTitles ) {
-							siteTitles.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
-						}
-					};
-
-					const onChange = () => {
-						// Remove contenteditable and inert attributes from editable elements so that users can click on navigation links.
-						bodyElement
-							.querySelectorAll(
-								'.block-editor-rich-text__editable[contenteditable="true"]'
-							)
-							.forEach( ( element ) => {
-								element.removeAttribute( 'contenteditable' );
-							} );
-
-						bodyElement
-							.querySelectorAll( '*[inert="true"]' )
-							.forEach( ( element ) => {
-								element.removeAttribute( 'inert' );
-							} );
-
-						possiblyRemoveAllListeners();
-						navigationContainers = bodyElement.querySelectorAll(
-							'.wp-block-navigation__container'
-						);
-						navigationContainers.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						siteTitles = bodyElement.querySelectorAll(
-							'.wp-block-site-title a'
-						);
-						siteTitles.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
-						// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
-						// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
-						const siteLogo = bodyElement.querySelector(
-							'.wp-block-site-logo'
+							true
 						);
 
-						const blockClientId = siteLogo
-							? siteLogo.getAttribute( 'data-block' )
-							: null;
+						const observer = new window.MutationObserver(
+							onChange
+						);
 
-						setLogoBlock( {
-							clientId: blockClientId,
-							isLoading: false,
+						observer.observe( bodyElement, {
+							attributes: true,
+							characterData: false,
+							subtree: true,
+							childList: true,
 						} );
-					};
 
-					// Stop mousemove event listener to disable block tool insertion feature.
-					bodyElement.addEventListener(
-						'mousemove',
-						onMouseMove,
-						true
-					);
-
-					const observer = new window.MutationObserver( onChange );
-
-					observer.observe( bodyElement, {
-						attributes: true,
-						characterData: false,
-						subtree: true,
-						childList: true,
-					} );
-
-					return () => {
-						observer.disconnect();
-						possiblyRemoveAllListeners();
-						setLogoBlock( {
-							clientId: null,
-							isLoading: true,
-						} );
-					};
-				}, [] ) }
-				aria-hidden
-				tabIndex={ -1 }
-				style={ {
-					width: viewportWidth,
-					height: contentHeight,
-					// This is a catch-all max-height for patterns.
-					// Reference: https://github.com/WordPress/gutenberg/pull/38175.
-					maxHeight: MAX_HEIGHT,
-					minHeight:
-						scale !== 0 && scale < 1 && minHeight
-							? minHeight / scale
-							: minHeight,
-				} }
+						return () => {
+							observer.disconnect();
+							possiblyRemoveAllListeners();
+							setLogoBlock( {
+								clientId: null,
+								isLoading: true,
+							} );
+						};
+					},
+					[ isNavigable ]
+				) }
 			>
-				<EditorStyles styles={ editorStyles } />
+				<EditorStyles styles={ settings.styles } />
 				<style>
 					{ `
 						.block-editor-block-list__block::before,
@@ -244,6 +252,7 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 						}
 
+						.wp-block-navigation-item .wp-block-navigation-item__content,
 						.wp-block-navigation .wp-block-pages-list__item__link {
 							pointer-events: all !important;
 							cursor: pointer !important;
@@ -252,8 +261,14 @@ function ScaledBlockPreview( {
 						${ additionalStyles }
 					` }
 				</style>
-				{ contentResizeListener }
 				<MemoizedBlockList renderAppender={ false } />
+				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
+				{ externalFontFamilies.length === 2 && (
+					<FontFamiliesLoader
+						fontFamilies={ externalFontFamilies }
+						onLoad={ noop }
+					/>
+				) }
 			</Iframe>
 		</DisabledProvider>
 	);

@@ -15,6 +15,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { ShippingMenuItem } from '../shipping-menu-item';
 import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
+import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 
 export function VariationActionsMenu( {
 	selection,
@@ -45,6 +46,8 @@ export function VariationActionsMenu( {
 					>
 						<MenuItem
 							href={ selection.permalink }
+							target="_blank"
+							rel="noreferrer"
 							onClick={ () => {
 								recordEvent( 'product_variations_preview', {
 									source: TRACKS_SOURCE,
@@ -54,6 +57,11 @@ export function VariationActionsMenu( {
 						>
 							{ __( 'Preview', 'woocommerce' ) }
 						</MenuItem>
+						<ToggleVisibilityMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
@@ -78,7 +86,7 @@ export function VariationActionsMenu( {
 							label={ __( 'Delete variation', 'woocommerce' ) }
 							variant="link"
 							onClick={ () => {
-								onDelete( selection.id );
+								onDelete( selection );
 								onClose();
 							} }
 							className="woocommerce-product-variations__actions--delete"

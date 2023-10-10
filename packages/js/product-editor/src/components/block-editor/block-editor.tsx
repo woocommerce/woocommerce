@@ -32,15 +32,16 @@ import {
  * Internal dependencies
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+import { ProductEditorContext } from '../../types';
 
 type BlockEditorProps = {
-	context: {
-		[ key: string ]: unknown;
-	};
-	product: Partial< Product >;
+	context: Partial< ProductEditorContext >;
+	productType: string;
+	productId: number;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
 				template?: Template[];
+				templates: Record< string, Template[] >;
 		  } )
 		| undefined;
 };
@@ -48,7 +49,8 @@ type BlockEditorProps = {
 export function BlockEditor( {
 	context,
 	settings: _settings,
-	product,
+	productType,
+	productId,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges();
 
@@ -83,16 +85,27 @@ export function BlockEditor( {
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
-		'product',
-		{ id: product.id }
+		productType,
+		{ id: productId }
 	);
 
 	useLayoutEffect( () => {
 		onChange(
-			synchronizeBlocksWithTemplate( [], _settings?.template ),
+			synchronizeBlocksWithTemplate(
+				[],
+				_settings?.templates[ productType ]
+			),
 			{}
 		);
-	}, [ product.id ] );
+	}, [ productId ] );
+
+	const editedProduct: Product = useSelect( ( select ) =>
+		select( 'core' ).getEditedEntityRecord(
+			'postType',
+			productType,
+			productId
+		)
+	);
 
 	if ( ! blocks ) {
 		return null;
@@ -100,7 +113,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
+			<BlockContextProvider value={ { ...context, editedProduct } }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

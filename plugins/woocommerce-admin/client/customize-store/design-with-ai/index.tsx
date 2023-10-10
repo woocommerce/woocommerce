@@ -19,6 +19,8 @@ import {
 } from './pages';
 import { customizeStoreStateMachineEvents } from '..';
 
+import './style.scss';
+
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
 	| typeof BusinessInfoDescription
@@ -66,7 +68,7 @@ export const DesignWithAiController = ( {
 	return (
 		<>
 			<div
-				className={ `woocommerce-design-with-ai-__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
+				className={ `woocommerce-design-with-ai__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
 			>
 				{ CurrentComponent ? (
 					<CurrentComponent

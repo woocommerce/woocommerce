@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { Product } from '@woocommerce/data';
+import { Product, ProductVariation } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
@@ -20,21 +20,25 @@ import { Tabs } from '../tabs';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
+	productType?: string;
 };
 
-export function Header( { onTabSelect }: HeaderProps ) {
+export function Header( {
+	onTabSelect,
+	productType = 'product',
+}: HeaderProps ) {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord< Product >(
+			return getEntityRecord< Product | ProductVariation >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 		},
@@ -43,9 +47,13 @@ export function Header( { onTabSelect }: HeaderProps ) {
 
 	const [ editedProductName ] = useEntityProp< string >(
 		'postType',
-		'product',
+		productType,
 		'name'
 	);
+
+	if ( ! productId ) {
+		return null;
+	}
 
 	return (
 		<div
@@ -60,20 +68,23 @@ export function Header( { onTabSelect }: HeaderProps ) {
 				<h1 className="woocommerce-product-header__title">
 					{ getHeaderTitle(
 						editedProductName,
-						lastPersistedProduct.name
+						lastPersistedProduct?.name
 					) }
 				</h1>
 
 				<div className="woocommerce-product-header__actions">
 					<SaveDraftButton
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 
 					<PreviewButton
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 
 					<PublishButton
+						productType={ productType }
 						productStatus={ lastPersistedProduct.status }
 					/>
 

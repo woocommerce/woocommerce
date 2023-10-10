@@ -9,10 +9,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { isEqual } from 'lodash';
 
-const { GlobalStylesContext, areGlobalStyleConfigsEqual } = unlock(
-	blockEditorPrivateApis
-);
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
@@ -29,10 +28,36 @@ export const VariationContainer = ( { variation, children } ) => {
 	}, [ variation, base ] );
 
 	const selectVariation = () => {
+		// Remove the hasCreatedOwnColors flag if the user is switching to a color palette
+		// hasCreatedOwnColors flag is used for visually deselecting preset color palettes if user has created their own
+		if (
+			variation.settings.color &&
+			user.settings.color &&
+			user.settings.color.palette.hasCreatedOwnColors
+		) {
+			delete user.settings.color.palette.hasCreatedOwnColors;
+			// some color palettes don't define all the possible color options, e.g headings and captions
+			// if the user selects a pre-defined color palette with some own colors defined for these,
+			// we need to delete these user customizations as the below merge will persist them since
+			// the incoming variation won't have these properties defined
+			delete user.styles.color;
+			for ( const elementKey in user.styles.elements ) {
+				if ( user.styles.elements[ elementKey ].color ) {
+					delete user.styles.elements[ elementKey ].color;
+				}
+			}
+		}
+
 		setUserConfig( () => {
 			return {
-				settings: variation.settings,
-				styles: variation.styles,
+				settings: mergeBaseAndUserConfigs(
+					user.settings,
+					variation.settings
+				),
+				styles: mergeBaseAndUserConfigs(
+					user.styles,
+					variation.styles
+				),
 			};
 		} );
 	};
@@ -43,9 +68,14 @@ export const VariationContainer = ( { variation, children } ) => {
 			selectVariation();
 		}
 	};
-
 	const isActive = useMemo( () => {
-		return areGlobalStyleConfigsEqual( user, variation );
+		if ( variation.settings.color ) {
+			return isEqual( variation.settings.color, user.settings.color );
+		}
+		return isEqual(
+			variation.settings.typography,
+			user.settings.typography
+		);
 	}, [ user, variation ] );
 
 	let label = variation?.title;
