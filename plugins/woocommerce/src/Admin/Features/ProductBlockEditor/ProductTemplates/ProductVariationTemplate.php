@@ -159,8 +159,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'property' => 'image',
-					'multiple' => false,
+					'property' => 'images',
 				],
 			]
 		);
