@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
+use Automattic\WooCommerce\Internal\Admin\Logging\PageController;
+
 use WP_List_Table;
 
 /**
@@ -19,10 +21,16 @@ class ListTable extends WP_List_Table {
 	private $file_controller;
 
 	/**
+	 * @var PageController
+	 */
+	private $page_controller;
+
+	/**
 	 * ListTable class.
 	 */
-	public function __construct( FileController $file_controller ) {
+	public function __construct( FileController $file_controller, PageController $page_controller ) {
 		$this->file_controller = $file_controller;
+		$this->page_controller = $page_controller;
 
 		parent::__construct(
 			array(
@@ -170,7 +178,20 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_source( $item ) {
-		return $item->get_source();
+		$log_file        = sanitize_title( $item->get_basename() );
+		$single_file_url = add_query_arg(
+			array(
+				'view'     => 'single_file',
+				'log_file' => $log_file,
+			),
+			$this->page_controller->get_logs_tab_url()
+		);
+
+		return sprintf(
+			'<a href="%1$s">%2$s</a>',
+			$single_file_url,
+			$item->get_source()
+		);
 	}
 
 	/**
@@ -183,7 +204,7 @@ class ListTable extends WP_List_Table {
 	public function column_created( $item ) {
 		$timestamp = $item->get_created_timestamp();
 
-		return date( 'Y-m-d H:i:s', $timestamp );
+		return date( 'Y-m-d', $timestamp );
 	}
 
 	/**
