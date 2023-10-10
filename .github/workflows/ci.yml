@@ -87,9 +87,9 @@ jobs:
       steps:
         - name: 'Check Matrix Success'
           run: |
-            echo "${{ toJson( needs.project-task-matrix ) }}}}"
-            result="${{ needs.project-test-matrix.result }}"
+            result="${{ needs.project-task-matrix.result }}"
             if [[ $result == "success" || $result == "skipped" ]]; then
+              echo "The matrix has completed successfully."
               exit 0
             else
               echo "One or more jobs in the matrix has failed."
