@@ -347,6 +347,7 @@ a.added_to_cart {
 
 	ul.woocommerce-order-overview {
 		// Display order overview items next to each other.
+		list-style: none;
 		display: flex;
 		width: 100%;
 		padding-left: 0;
