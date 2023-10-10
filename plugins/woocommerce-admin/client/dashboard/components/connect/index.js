@@ -175,7 +175,7 @@ export default compose(
 	} )
 )( Connect );
 
-export const prefetchJetpackAuthUrl = ( { redirectUrl = undefined } ) => {
+export const prefetchJetpackAuthUrl = ( redirectUrl = undefined ) => {
 	resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl(
 		formatJetpackAuthUrlQueryArgs( redirectUrl )
 	);
