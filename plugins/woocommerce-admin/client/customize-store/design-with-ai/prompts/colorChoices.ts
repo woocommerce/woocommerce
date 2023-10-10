@@ -222,10 +222,19 @@ export const colorPaletteValidator = z.object( {
 		.regex( hexColorRegex, { message: 'Invalid background color' } ),
 } );
 
-export const colorPaletteResponseValidator = z.object( {
-	default: colorPaletteNameValidator,
-	bestColors: z.array( colorPaletteNameValidator ).length( 8 ),
-} );
+export const colorPaletteResponseValidator = z
+	.object( {
+		default: colorPaletteNameValidator,
+		bestColors: z.array( colorPaletteNameValidator ).length( 8 ),
+	} )
+	.refine(
+		( response ) => {
+			const allColors = [ response.default, ...response.bestColors ];
+			const uniqueColors = new Set( allColors );
+			return uniqueColors.size === allColors.length;
+		},
+		{ message: 'Color palette names must be unique' }
+	);
 
 export const defaultColorPalette = {
 	queryId: 'default_color_palette',
