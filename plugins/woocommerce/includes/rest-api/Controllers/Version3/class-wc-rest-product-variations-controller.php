@@ -116,6 +116,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
 			'image'                 => $this->get_image( $object, $context ),
+			'images'                => $this->get_images( $object, $context ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
@@ -173,6 +174,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			} else {
 				$variation->set_image_id( '' );
 			}
+		}
+
+		// Check for featured/gallery images, upload it and set it.
+		if ( isset( $request['images'] ) ) {
+			$variation = $this->set_variation_images( $variation, $request['images'] );
 		}
 
 		// Virtual variation.
@@ -453,6 +459,118 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'post_title' => $image['name'],
 				)
 			);
+		}
+
+		return $variation;
+	}
+
+	/**
+	 * Get the images for a product variation.
+	 *
+	 * @param WC_Product_Variation $variation Product Variation instance.
+	 * @return array
+	 */
+	protected function get_images( $variation ) {
+		$images         = array();
+		$attachment_ids = array();
+
+		// Add featured image.
+		if ( $variation->get_image_id() ) {
+			$attachment_ids[] = $variation->get_image_id();
+		}
+
+		// Add gallery images.
+		$attachment_ids = array_merge( $attachment_ids, $variation->get_gallery_image_ids() );
+
+		// Build image data.
+		foreach ( $attachment_ids as $attachment_id ) {
+			$attachment_post = get_post( $attachment_id );
+			if ( is_null( $attachment_post ) ) {
+				continue;
+			}
+
+			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			if ( ! is_array( $attachment ) ) {
+				continue;
+			}
+
+			$images[] = array(
+				'id'                => (int) $attachment_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
+				'src'               => current( $attachment ),
+				'name'              => get_the_title( $attachment_id ),
+				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Set product variation images.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param WC_Product_Variation $variation Product Variation instance.
+	 * @param array      $images  Images data.
+	 * @return WC_Product_Variation
+	 */
+	protected function set_variation_images( $variation, $images ) {
+		$images = is_array( $images ) ? array_filter( $images ) : array();
+
+		if ( ! empty( $images ) ) {
+			$gallery = array();
+
+			foreach ( $images as $index => $image ) {
+				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+
+				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+
+					if ( is_wp_error( $upload ) ) {
+						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), $images ) ) {
+							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+						} else {
+							continue;
+						}
+					}
+
+					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
+				}
+
+				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					/* translators: %s: image ID */
+					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
+				}
+
+				if ( 0 === $index ) {
+					$variation->set_image_id( $attachment_id );
+				} else {
+					$gallery[] = $attachment_id;
+				}
+
+				// Set the image alt if present.
+				if ( ! empty( $image['alt'] ) ) {
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+				}
+
+				// Set the image name if present.
+				if ( ! empty( $image['name'] ) ) {
+					wp_update_post(
+						array(
+							'ID'         => $attachment_id,
+							'post_title' => $image['name'],
+						)
+					);
+				}
+			}
+
+			$variation->set_gallery_image_ids( $gallery );
+		} else {
+			$variation->set_image_id( '' );
+			$variation->set_gallery_image_ids( array() );
 		}
 
 		return $variation;
@@ -755,6 +873,61 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 							'description' => __( 'Image alternative text.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
+						),
+					),
+				),
+				'images'                => array(
+					'description' => __( 'List of images.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id'                => array(
+								'description' => __( 'Image ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'date_created'      => array(
+								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'date_created_gmt'  => array(
+								'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'date_modified'     => array(
+								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'date_modified_gmt' => array(
+								'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
+								'type'        => 'date-time',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'src'               => array(
+								'description' => __( 'Image URL.', 'woocommerce' ),
+								'type'        => 'string',
+								'format'      => 'uri',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'name'              => array(
+								'description' => __( 'Image name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'alt'               => array(
+								'description' => __( 'Image alternative text.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),
