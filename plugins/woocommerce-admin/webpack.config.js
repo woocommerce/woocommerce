@@ -34,6 +34,7 @@ const wcAdminPackages = [
 	'date',
 	'experimental',
 	'explat',
+	'expression-evaluation',
 	'navigation',
 	'notices',
 	'number',
