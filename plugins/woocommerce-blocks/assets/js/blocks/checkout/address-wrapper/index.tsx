@@ -1,12 +1,17 @@
 /**
  * External dependencies
  */
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import classnames from 'classnames';
+
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+/**
+ * Wrapper for address fields which handles the edit/preview transition. Form fields are always rendered so that
+ * validation can occur.
+ */
 export const AddressWrapper = ( {
 	isEditing = false,
 	addressCard,
@@ -16,25 +21,22 @@ export const AddressWrapper = ( {
 	addressCard: () => JSX.Element;
 	addressForm: () => JSX.Element;
 } ): JSX.Element | null => {
+	const wrapperClasses = classnames(
+		'wc-block-components-address-address-wrapper',
+		{
+			'is-editing': isEditing,
+		}
+	);
+
 	return (
-		<TransitionGroup className="address-fade-transition-wrapper">
-			{ ! isEditing && (
-				<CSSTransition
-					timeout={ 300 }
-					classNames="address-fade-transition"
-				>
-					{ addressCard() }
-				</CSSTransition>
-			) }
-			{ isEditing && (
-				<CSSTransition
-					timeout={ 300 }
-					classNames="address-fade-transition"
-				>
-					{ addressForm() }
-				</CSSTransition>
-			) }
-		</TransitionGroup>
+		<div className={ wrapperClasses }>
+			<div className="wc-block-components-address-card-wrapper">
+				{ addressCard() }
+			</div>
+			<div className="wc-block-components-address-form-wrapper">
+				{ addressForm() }
+			</div>
+		</div>
 	);
 };
 
