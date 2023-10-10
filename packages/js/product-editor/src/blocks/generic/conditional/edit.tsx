@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
+import deprecated from '@wordpress/deprecated';
 import { createElement, useMemo } from '@wordpress/element';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -22,6 +23,12 @@ export function Edit( {
 }: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
+
+	if ( mustMatch ) {
+		deprecated( '`mustMatch` attribute in woocommerce/conditional block', {
+			alternative: '`showIf` attribute in woocommerce/conditional block',
+		} );
+	}
 
 	const product = context.editedProduct;
 
