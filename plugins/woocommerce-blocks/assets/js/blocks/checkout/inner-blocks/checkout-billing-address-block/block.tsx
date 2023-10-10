@@ -80,10 +80,6 @@ const Block = ( {
 	const noticeContext = useBillingAsShipping
 		? [ noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS ]
 		: [ noticeContexts.BILLING_ADDRESS ];
-	const hasAddress = !! (
-		billingAddress.address_1 &&
-		( billingAddress.first_name || billingAddress.last_name )
-	);
 
 	return (
 		<>
@@ -93,7 +89,6 @@ const Block = ( {
 					addressFieldsConfig={ addressFieldsConfig }
 					showPhoneField={ showPhoneField }
 					requirePhoneField={ requirePhoneField }
-					hasAddress={ hasAddress }
 					forceEditing={ forceEditing }
 				/>
 			</WrapperComponent>

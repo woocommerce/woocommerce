@@ -126,34 +126,22 @@ export class CheckoutPage {
 	}
 
 	async editBillingDetails() {
-		const editButton = await this.page
-			.locator(
-				'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
-			)
-			.isVisible();
+		const editButton = this.page.locator(
+			'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
+		);
 
-		if ( editButton ) {
-			await this.page
-				.locator(
-					'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
-				)
-				.click();
+		if ( await editButton.isVisible() ) {
+			await editButton.click();
 		}
 	}
 
 	async editShippingDetails() {
-		const editButton = await this.page
-			.locator(
-				'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
-			)
-			.isVisible();
+		const editButton = this.page.locator(
+			'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
+		);
 
-		if ( editButton ) {
-			await this.page
-				.locator(
-					'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
-				)
-				.click();
+		if ( await editButton.isVisible() ) {
+			await editButton.click();
 		}
 	}
 
