@@ -22,22 +22,19 @@ class PageController {
 	/**
 	 * @var ListTable
 	 */
-	private $file_list_table;
+	private $list_table;
 
 	/**
 	 * Initialize dependencies.
 	 *
 	 * @param FileController $file_controller
-	 * @param ListTable $file_list_table
 	 *
 	 * @return void
 	 */
 	final public function init(
-		FileController $file_controller,
-		ListTable $file_list_table
+		FileController $file_controller
 	) {
 		$this->file_controller = $file_controller;
-		$this->file_list_table = $file_list_table;
 
 		$this->init_hooks();
 	}
@@ -48,7 +45,7 @@ class PageController {
 	 * @return void
 	 */
 	private function init_hooks() {
-
+		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'setup_screen_options' ) );
 	}
 
 	/**
@@ -101,8 +98,8 @@ class PageController {
 		switch ( $view ) {
 			case 'list_files':
 			default:
-				$this->file_list_table->prepare_items();
-				$this->file_list_table->display();
+				$this->get_list_table()->prepare_items();
+				$this->get_list_table()->display();
 				break;
 			case 'single_file':
 				WC_Admin_Status::status_logs_file();
@@ -116,19 +113,61 @@ class PageController {
 	 * @return array
 	 */
 	private function get_filev2_query_params() {
-		$params = filter_input_array(
+		$defaults = array(
+			'view' => 'list_files',
+		);
+		$params   = filter_input_array(
 			INPUT_GET,
 			array(
 				'view' => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
 						'regexp'  => '/^(list_files|single_file)$/',
-						'default' => 'list_files'
+						'default' => $defaults['view'],
 					),
 				),
-			)
+			),
+			false
 		);
+		$params   = wp_parse_args( $params, $defaults );
 
 		return $params;
+	}
+
+	/**
+	 * Get and cache an instance of the list table.
+	 *
+	 * @return ListTable
+	 */
+	private function get_list_table() {
+		if ( $this->list_table instanceof ListTable ) {
+			return $this->list_table;
+		}
+
+		$this->list_table = new ListTable( $this->file_controller );
+
+		return $this->list_table;
+	}
+
+	/**
+	 * Register screen options for the logging views.
+	 *
+	 * @return void
+	 */
+	private function setup_screen_options() {
+		$params = $this->get_filev2_query_params();
+
+		if ( 'list_files' === $params['view'] ) {
+			// Ensure list table columns are initialized early enough to enable column hiding.
+			$this->get_list_table()->prepare_column_headers();
+
+			add_screen_option(
+				'per_page',
+				array(
+					'default' => 20,
+					'option'  => ListTable::PER_PAGE_USER_OPTION_KEY,
+				)
+			);
+		}
 	}
 }
