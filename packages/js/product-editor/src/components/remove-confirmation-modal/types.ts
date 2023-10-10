@@ -1,6 +1,6 @@
 export type RemoveConfirmationModalProps = {
 	title: string;
 	description: React.ReactNode;
-	onRemove(): void;
+	onRemove(): Promise< void >;
 	onCancel?(): void;
 };

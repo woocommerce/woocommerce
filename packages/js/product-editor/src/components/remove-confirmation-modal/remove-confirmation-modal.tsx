@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 
 /**
@@ -10,9 +10,24 @@ import { Button, Modal } from '@wordpress/components';
  */
 import { RemoveConfirmationModalProps } from './types';
 
-export const RemoveConfirmationModal: React.FC<
-	RemoveConfirmationModalProps
-> = ( { title, description, onCancel, onRemove } ) => {
+export function RemoveConfirmationModal( {
+	title,
+	description,
+	onCancel,
+	onRemove,
+}: RemoveConfirmationModalProps ) {
+	const [ isRemoving, setIsRemoving ] = useState( false );
+
+	async function handleRemoveClick() {
+		try {
+			setIsRemoving( true );
+
+			await onRemove();
+		} finally {
+			setIsRemoving( false );
+		}
+	}
+
 	return (
 		<Modal
 			title={ title }
@@ -33,7 +48,12 @@ export const RemoveConfirmationModal: React.FC<
 			</div>
 
 			<div className="woocommerce-remove-confirmation-modal__buttons">
-				<Button isDestructive variant="primary" onClick={ onRemove }>
+				<Button
+					isDestructive
+					variant="primary"
+					isBusy={ isRemoving }
+					onClick={ handleRemoveClick }
+				>
 					{ __( 'Delete', 'woocommerce' ) }
 				</Button>
 				<Button variant="tertiary" onClick={ onCancel }>
@@ -42,4 +62,4 @@ export const RemoveConfirmationModal: React.FC<
 			</div>
 		</Modal>
 	);
-};
+}
