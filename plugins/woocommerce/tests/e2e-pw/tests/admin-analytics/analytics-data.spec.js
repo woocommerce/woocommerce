@@ -141,19 +141,7 @@ test.describe.serial( 'Analytics-related tests', () => {
 	test.beforeEach( async( { page } ) => {
 		// need to make sure the scheduled actions are run for analytics to display
 		// this really slows down the test, but analytics doesn't display properly without
-		await page.goto( '/wp-admin/admin.php?page=wc-status&tab=action-scheduler&status=pending' );
-
-		// click all of the 'run' links
-		const links = await page.locator( '[title="Process the action now as if it were run as part of a queue"]' );
-		const schedTasks = await page.locator( '.hook' );
-		let count = await schedTasks.count();
-		// there is always one scheduled task pending, but once we get down to one, we can move on
-		while ( count > 1 ) {
-			await page.locator( '.hook' ).first().hover();
-			await links.nth(0).click();
-			await page.waitForLoadState( 'networkidle' );
-			count = await schedTasks.count();
-		}
+		await page.goto( '?process-waiting-actions' );
 	} );
 
 	test.afterAll( async( { baseURL } ) => {
