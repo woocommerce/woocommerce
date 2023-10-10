@@ -68,7 +68,7 @@ Note: While we've outlined specific rules above, all other default linting rules
 
    [Reference: MD003](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md003---heading-style)
 
-3. **List Indentation**: 
+2. **List Indentation**: 
     - Indent list items with 4 spaces.
 
     ```markdown
@@ -78,17 +78,17 @@ Note: While we've outlined specific rules above, all other default linting rules
 
    [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
 
-5. **Line Length**: 
+3. **Line Length**: 
     - No specific restriction on the line length, but keep paragraphs and sentences readable.
     
     [Reference: MD013](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md013---line-length)
 
-6. **Multiple Headings with the Same Content**: 
+4. **Multiple Headings with the Same Content**: 
     - Multiple headings with the same content are permissible as long as they are not siblings.
     
     [Reference: MD024](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md024---no-multiple-headings-with-the-same-content)
 
-7. **Inline HTML**: 
+5. **Inline HTML**: 
     - Only the `video` element is allowed when using inline HTML.
 
     ```markdown
@@ -97,7 +97,7 @@ Note: While we've outlined specific rules above, all other default linting rules
 
    [Reference: MD033](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md033---inline-html)
 
-9. **Tabs and Whitespace**: 
+6. **Tabs and Whitespace**: 
     - We're flexible with the use of hard tabs and trailing whitespace. However, for consistency, we recommend using spaces over tabs and avoiding trailing whitespaces.
     
     [Reference: no-hard-tabs & whitespace](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)
