@@ -6,10 +6,19 @@ Container to only conditionally render inner blocks.
 
 ## Attributes
 
-### mustMatch
+### showIf
+
+- **Type**: `string`
+- **Required**: `Yes`
+
+An expression that must evaluate to `true` for the inner blocks to be rendered. The expression can reference properties from the product by using the `editedProduct` variable.
+
+See the [documentation for the `@woocommerce/expression-evaluation` package](../../../../../expression-evaluation/README.md) for more information on supported expressions.
+
+### mustMatch _(deprecated: use showIf instead)_
 
 - **Type**: `Record< string, Array< string > >`
-- **Required**: `Yes`
+- **Required**: `Yes` (only if `showIf` is not set )
 
 A list of requirements that must be met for the inner blocks to be rendered. The keys should reference properties from the product, and the values are possible values for that property so that the inner blocks are rendered.
 
@@ -24,9 +33,7 @@ $wrapper = $product_summary_field->get_parent()->add_block(
     'blockName'  => 'woocommerce/conditional',
     'order'      => $product_summary_field->get_order() + 5,
     'attributes' => [
-      'mustMatch' => [
-        'name' => [ 'Car', 'Bike' ]
-      ],
+      'showIf' => 'editedProduct.name === "Car" || editedProduct.name === "Bike"',
     ],
   ]
 );
