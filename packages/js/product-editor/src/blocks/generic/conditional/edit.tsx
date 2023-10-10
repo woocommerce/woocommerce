@@ -7,6 +7,7 @@ import { createElement, useMemo } from '@wordpress/element';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DisplayState } from '@woocommerce/components';
+import { evaluate } from '@woocommerce/expression-evaluation';
 
 /**
  * Internal dependencies
@@ -22,7 +23,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { mustMatch } = attributes;
+	const { mustMatch, showIf } = attributes;
 
 	if ( mustMatch ) {
 		deprecated( '`mustMatch` attribute in woocommerce/conditional block', {
@@ -30,16 +31,17 @@ export function Edit( {
 		} );
 	}
 
-	const product = context.editedProduct;
-
 	const displayBlocks = useMemo( () => {
-		for ( const [ prop, values ] of Object.entries( mustMatch ) ) {
-			if ( ! values.includes( product[ prop ] ) ) {
-				return false;
+		if ( mustMatch && context.editedProduct ) {
+			for ( const [ prop, values ] of Object.entries( mustMatch ) ) {
+				if ( ! values.includes( context.editedProduct[ prop ] ) ) {
+					return false;
+				}
 			}
 		}
-		return true;
-	}, [ mustMatch, product ] );
+
+		return evaluate( showIf, context );
+	}, [ mustMatch, showIf, context ] );
 
 	return (
 		<div { ...blockProps }>
