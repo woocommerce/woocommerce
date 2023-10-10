@@ -150,7 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" class="button button-primary button-large">
+						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large">
 							<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
 							<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
 						</button>
