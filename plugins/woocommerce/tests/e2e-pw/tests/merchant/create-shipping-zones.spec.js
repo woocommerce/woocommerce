@@ -82,9 +82,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByPlaceholder( 'List 1 postcode per line' ).fill( maynePostal );
 
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
-			await page.locator('select[name="add_method_id"]')
-				.selectOption( { label: 'Local pickup' } );
-			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
+			await page.getByLabel( 'Local pickup', { exact: true } ).check();
+			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			
 			await page.locator( '#btn-ok' ).click();
@@ -143,9 +142,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 
-			await page.locator('select[name="add_method_id"]')
-				.selectOption( { label: 'Free shipping' } );
-			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
+			await page.getByLabel( 'Free shipping', { exact: true } ).check();
+			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.locator( '#btn-ok' ).click();
@@ -200,9 +198,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.keyboard.press('Escape');
 
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
-			await page.locator('select[name="add_method_id"]')
-				.selectOption( { label: 'Flat rate' } );
-			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
+			await page.getByLabel( 'Flat rate', { exact: true } ).check();
+			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.locator( '#btn-ok' ).click();
@@ -326,10 +323,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 			await page.locator( 'text=Add shipping method' ).click();
 
-			await page
-				.locator( 'select[name=add_method_id]' )
-				.selectOption( 'flat_rate' );
-			await page.getByRole('button', { name: 'Configure shipping method' } ).last().click();
+			await page.getByLabel( 'Flat rate', { exact: true } ).check();
+			await page.getByRole('button', { name: 'Continue' } ).last().click();
+
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.locator( '#btn-ok' ).click();
