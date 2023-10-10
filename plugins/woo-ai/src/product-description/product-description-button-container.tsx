@@ -249,7 +249,7 @@ export function WriteItForMeButtonContainer() {
 		try {
 			await requestCompletion( prompt );
 			const longDescription = tinyEditor.getContent();
-			if ( ! longDescription || shortDescriptionGenerated ) {
+			if ( ! shortTinyEditor.getContent() || shortDescriptionGenerated ) {
 				const shortDescriptionPrompt =
 					buildShortDescriptionPrompt( longDescription );
 				await requestShortCompletion( shortDescriptionPrompt );
