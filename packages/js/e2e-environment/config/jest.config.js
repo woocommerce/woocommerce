@@ -58,7 +58,7 @@ const combinedConfig = {
 
 	testRunner: 'jest-circus/runner',
 
-	roots: [ '/Users/psealock/Workspace/woocommerce/plugins/woocommerce' ],
+	roots: [ testSpecs ],
 };
 
 if ( process.env.jest_test_spec ) {
