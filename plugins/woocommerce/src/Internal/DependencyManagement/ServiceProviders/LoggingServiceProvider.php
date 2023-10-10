@@ -17,7 +17,6 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		FileController::class,
-		ListTable::class,
 		PageController::class,
 	);
 
@@ -29,16 +28,9 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 	public function register() {
 		$this->share( FileController::class );
 
-		$this->share( ListTable::class )->addArguments(
-			array(
-				FileController::class,
-			)
-		);
-
 		$this->share( PageController::class )->addArguments(
 			array(
 				FileController::class,
-				ListTable::class,
 			)
 		);
 	}

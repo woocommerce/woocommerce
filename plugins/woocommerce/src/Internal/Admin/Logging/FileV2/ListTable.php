@@ -11,7 +11,7 @@ class ListTable extends WP_List_Table {
 	/**
 	 * @const string
 	 */
-	private const PER_PAGE_USER_OPTION_KEY = 'woocommerce_logging_file_list_per_page';
+	public const PER_PAGE_USER_OPTION_KEY = 'woocommerce_logging_file_list_per_page';
 
 	/**
 	 * @var FileController
@@ -21,7 +21,9 @@ class ListTable extends WP_List_Table {
 	/**
 	 * ListTable class.
 	 */
-	public function __construct() {
+	public function __construct( FileController $file_controller ) {
+		$this->file_controller = $file_controller;
+
 		parent::__construct(
 			array(
 				'singular' => 'log-file',
@@ -32,16 +34,26 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Initialize dependencies.
-	 *
-	 * @param FileController $file_controller
+	 * Render message when there are no items.
 	 *
 	 * @return void
 	 */
-	final public function init(
-		FileController $file_controller
-	) {
-		$this->file_controller = $file_controller;
+	public function no_items() {
+		esc_html_e( 'No log files found.', 'woocommerce' );
+	}
+
+	/**
+	 * Set up the column header info.
+	 *
+	 * @return void
+	 */
+	public function prepare_column_headers() {
+		$this->_column_headers = array(
+			$this->get_columns(),
+			get_hidden_columns( $this->screen ),
+			$this->get_sortable_columns(),
+			$this->get_primary_column(),
+		);
 	}
 
 	/**
@@ -87,13 +99,6 @@ class ListTable extends WP_List_Table {
 		$items       = $this->file_controller->get_files( $file_args );
 
 		$this->items = $items;
-
-		$this->_column_headers = array(
-			$this->get_columns(),
-			array(),
-			$this->get_sortable_columns(),
-			$this->get_primary_column(),
-		);
 
 		$this->set_pagination_args(
 			array(
