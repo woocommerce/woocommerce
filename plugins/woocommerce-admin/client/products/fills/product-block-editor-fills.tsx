@@ -20,10 +20,15 @@ import {
 	AboutTheEditorMenuItem,
 } from '../fills/more-menu-items';
 
-export const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
-	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
-	const [ type ] = useEntityProp( 'postType', 'product', 'type' );
-	const [ status ] = useEntityProp( 'postType', 'product', 'status' );
+export type MoreMenuFillProps = { productType?: string; onClose: () => void };
+
+export const MoreMenuFill = ( {
+	productType = 'product',
+	onClose,
+}: MoreMenuFillProps ) => {
+	const [ id ] = useEntityProp( 'postType', productType, 'id' );
+	const [ type ] = useEntityProp( 'postType', productType, 'type' );
+	const [ status ] = useEntityProp( 'postType', productType, 'status' );
 
 	const recordClick = ( optionName: string ) => {
 		recordEvent( 'product_dropdown_option_click', {

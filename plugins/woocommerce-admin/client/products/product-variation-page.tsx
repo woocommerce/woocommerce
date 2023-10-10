@@ -89,8 +89,11 @@ registerPlugin( 'wc-admin-more-menu', {
 			<WooProductMoreMenuItem>
 				{ ( { onClose }: { onClose: () => void } ) => (
 					<>
-						<DeleteVariationMenuItem onClick={ onClose } />
-						<MoreMenuFill onClose={ onClose } />
+						<DeleteVariationMenuItem onClose={ onClose } />
+						<MoreMenuFill
+							productType="product_variation"
+							onClose={ onClose }
+						/>
 					</>
 				) }
 			</WooProductMoreMenuItem>
