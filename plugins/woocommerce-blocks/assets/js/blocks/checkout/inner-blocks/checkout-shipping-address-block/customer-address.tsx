@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useCallback } from '@wordpress/element';
+import { useState, useCallback, useEffect } from '@wordpress/element';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
@@ -9,6 +9,8 @@ import type {
 	AddressField,
 	AddressFields,
 } from '@woocommerce/settings';
+import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -21,12 +23,10 @@ const CustomerAddress = ( {
 	addressFieldsConfig,
 	showPhoneField,
 	requirePhoneField,
-	hasAddress,
 }: {
 	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
 	showPhoneField: boolean;
 	requirePhoneField: boolean;
-	hasAddress: boolean;
 } ) => {
 	const {
 		defaultAddressFields,
@@ -37,8 +37,34 @@ const CustomerAddress = ( {
 		useShippingAsBilling,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-
+	const hasAddress = !! (
+		shippingAddress.address_1 &&
+		( shippingAddress.first_name || shippingAddress.last_name )
+	);
 	const [ editing, setEditing ] = useState( ! hasAddress );
+
+	// Forces editing state if store has errors.
+	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			hasValidationErrors: store.hasValidationErrors(),
+			invalidProps: Object.keys( shippingAddress )
+				.filter( ( key ) => {
+					return (
+						store.getValidationError( 'shipping_' + key ) !==
+						undefined
+					);
+				} )
+				.filter( Boolean ),
+		};
+	} );
+
+	useEffect( () => {
+		if ( invalidProps.length > 0 && editing === false ) {
+			setEditing( true );
+		}
+	}, [ editing, hasValidationErrors, invalidProps.length ] );
+
 	const addressFieldKeys = Object.keys(
 		defaultAddressFields
 	) as ( keyof AddressFields )[];
