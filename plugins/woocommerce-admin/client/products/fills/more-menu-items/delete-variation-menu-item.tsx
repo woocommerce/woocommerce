@@ -46,19 +46,33 @@ export const DeleteVariationMenuItem = ( {
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
 
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( 'core/notices' );
+
 	function handleMenuItemClick() {
 		setShowModal( true );
 	}
 
-	function handleRemove() {
-		deleteProductVariation< Promise< ProductVariation > >( {
+	async function handleRemove() {
+		return deleteProductVariation< Promise< ProductVariation > >( {
 			product_id: productId,
 			id: variationId,
 		} )
-			.catch( () => {} )
-			.finally( () => {
+			.then( () => {
+				createSuccessNotice(
+					sprintf(
+						// translators: %s is the variation name.
+						__( '%s deleted.', 'woocommerce' ),
+						name
+					)
+				);
 				setShowModal( false );
 				onClose();
+			} )
+			.catch( () => {
+				createErrorNotice(
+					__( 'Failed to delete the variation.', 'woocommerce' )
+				);
 			} );
 	}
 
