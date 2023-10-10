@@ -5,6 +5,7 @@ import { createElement } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -25,17 +26,17 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { content, isDismissible, title, type = 'info' } = attributes;
-	const productId = useEntityId( 'postType', context.postType );
+	const productId = useEntityId( 'postType', context.postType || 'product' );
+	const { dismissedNotices, dismissNotice, isResolving } = useNotice();
 	const { parent_id: parentId }: Product = useSelect( ( select ) =>
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
-			context.postType || 'product',
+			'product',
 			productId
 		)
 	);
-	const { dismissedNotices, dismissNotice } = useNotice();
 
-	if ( dismissedNotices.includes( parentId ) ) {
+	if ( dismissedNotices.includes( parentId ) || isResolving ) {
 		return null;
 	}
 
@@ -46,9 +47,8 @@ export function Edit( {
 				type={ type }
 				isDismissible={ isDismissible }
 				handleDismiss={ () => {
-					if ( isDismissible ) {
-						dismissNotice( parentId );
-					}
+					recordEvent( 'product_single_variation_notice_dismissed' );
+					dismissNotice( parentId );
 				} }
 			>
 				<p dangerouslySetInnerHTML={ sanitizeHTML( content ) } />
