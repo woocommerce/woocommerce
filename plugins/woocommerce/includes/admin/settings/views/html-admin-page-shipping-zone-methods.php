@@ -182,7 +182,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
-								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . ' ' . wc_help_tip( __( esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ), 'woocommerce' ) ) . '<span class="dashicons dashicons-yes"></span></label></div>';
+								$description = wp_kses_post( wpautop( $method->get_method_description() ) );
+								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . ' ' . wc_help_tip( __( esc_attr( $description ), 'woocommerce' ) ) . '<span class="dashicons dashicons-yes"></span></label></div>';
 							}
 							?>
 						</fieldset>
