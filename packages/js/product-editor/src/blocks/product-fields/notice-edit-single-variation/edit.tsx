@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -22,19 +24,18 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const {
-		content,
-		id: blockId,
-		isDismissible,
-		title,
-		type = 'info',
-	} = attributes;
-	const productId = useEntityId( 'postType', context.postType || 'product' );
-	const { dismissedNotices, dismissNotice } = useNotice();
-	const isDismissed = Object.values( dismissedNotices ).some( ( notice ) =>
-		notice.some( ( product ) => product === productId )
+	const { content, isDismissible, title, type = 'info' } = attributes;
+	const productId = useEntityId( 'postType', context.postType );
+	const { parent_id: parentId }: Product = useSelect( ( select ) =>
+		select( 'core' ).getEditedEntityRecord(
+			'postType',
+			context.postType || 'product',
+			productId
+		)
 	);
-	if ( isDismissed ) {
+	const { dismissedNotices, dismissNotice } = useNotice();
+
+	if ( dismissedNotices.includes( parentId ) ) {
 		return null;
 	}
 
@@ -45,8 +46,8 @@ export function Edit( {
 				type={ type }
 				isDismissible={ isDismissible }
 				handleDismiss={ () => {
-					if ( isDismissible && blockId !== '' ) {
-						dismissNotice( blockId, productId );
+					if ( isDismissible ) {
+						dismissNotice( parentId );
 					}
 				} }
 			>

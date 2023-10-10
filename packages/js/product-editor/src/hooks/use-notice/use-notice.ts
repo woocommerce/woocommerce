@@ -12,14 +12,19 @@ import { SINGLE_VARIATION_NOTICE_DISMISSED_OPTION } from '../../constants';
 export function useNotice() {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const { dismissedNotices } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+	const { dismissedNotices, isResolving } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
 		const dismissedNoticesOption = getOption(
 			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION
-		) as { [ key: string ]: [ number ] };
+		) as [ number ];
+		const resolving = ! hasFinishedResolution( 'getOption', [
+			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+		] );
 		return {
-			dismissedNotices: dismissedNoticesOption || {},
+			dismissedNotices: dismissedNoticesOption || [],
+			isResolving: resolving,
 		};
 	}, [] );
 
@@ -28,37 +33,26 @@ export function useNotice() {
 
 		const dismissedNoticesOption = ( await getOption(
 			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION
-		) ) as { [ key: string ]: [ number ] };
+		) ) as [ number ];
 
 		return {
-			dismissedNoticesOption,
+			dismissedNoticesOption: dismissedNoticesOption || [],
 		};
 	};
 
-	const dismissNotice = async ( notice: string, productId: number ) => {
+	const dismissNotice = async ( productId: number ) => {
 		const { dismissedNoticesOption } = await getOptions();
-		if ( Array.isArray( dismissedNoticesOption ) ) {
-			updateOptions( {
-				[ SINGLE_VARIATION_NOTICE_DISMISSED_OPTION ]: {
-					...dismissedNoticesOption,
-					[ notice ]: dismissedNoticesOption.hasOwnProperty(
-						productId
-					)
-						? dismissedNoticesOption[ notice ].push( productId )
-						: [ productId ],
-				},
-			} );
-		} else {
-			updateOptions( {
-				[ SINGLE_VARIATION_NOTICE_DISMISSED_OPTION ]: {
-					[ notice ]: [ productId ],
-				},
-			} );
-		}
+		updateOptions( {
+			[ SINGLE_VARIATION_NOTICE_DISMISSED_OPTION ]: [
+				...dismissedNoticesOption,
+				productId,
+			],
+		} );
 	};
 
 	return {
 		dismissedNotices,
 		dismissNotice,
+		isResolving,
 	};
 }
