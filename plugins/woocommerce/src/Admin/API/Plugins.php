@@ -603,8 +603,8 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$args = WooCommercePayments::is_account_partially_onboarded() ? [
 			'wcpay-login' => '1',
-			'_wpnonce'      => wp_create_nonce( 'wcpay-login' ),
-		]: [
+			'_wpnonce'    => wp_create_nonce( 'wcpay-login' ),
+		] : [
 			'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
 			'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
 		];
