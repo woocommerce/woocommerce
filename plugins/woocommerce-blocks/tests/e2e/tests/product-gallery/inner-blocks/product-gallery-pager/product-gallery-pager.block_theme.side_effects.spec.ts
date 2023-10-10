@@ -20,8 +20,7 @@ const blockData = {
 		},
 		editor: {
 			settings: {
-				pagerSettingsContainer:
-					'.wc-block-editor-product-gallery-pager-settings',
+				pagerSettingsContainer: 'div[aria-label="Pager"]',
 				displayModeOffOption: 'button[data-value=off]',
 				displayModeDotsOption: 'button[data-value=dots]',
 				displayModeDigitsOption: 'button[data-value=digits]',

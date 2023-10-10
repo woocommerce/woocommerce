@@ -3,6 +3,7 @@
  */
 import { Icon } from '@wordpress/icons';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
 import classNames from 'classnames';
 
 /**
@@ -97,7 +98,9 @@ export const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<ProductGalleryPagerBlockSettings context={ context } />
+				<PanelBody>
+					<ProductGalleryPagerBlockSettings context={ context } />
+				</PanelBody>
 			</InspectorControls>
 
 			<Pager pagerDisplayMode={ context.pagerDisplayMode } />

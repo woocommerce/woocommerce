@@ -5,7 +5,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
-	PanelBody,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -58,35 +57,31 @@ export const ProductGalleryPagerBlockSettings = ( {
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 
 	return (
-		<PanelBody
-			className="wc-block-editor-product-gallery-pager-settings"
-			title={ __( 'Pager', 'woo-gutenberg-products-block' ) }
+		<ToggleGroupControl
+			label={ __( 'Pager', 'woo-gutenberg-products-block' ) }
+			style={ {
+				width: '100%',
+			} }
+			onChange={ ( value: PagerDisplayModes ) => {
+				updateBlockAttributes( productGalleryClientId, {
+					pagerDisplayMode: value,
+				} );
+			} }
+			help={ getHelpText( pagerDisplayMode ) }
+			value={ pagerDisplayMode }
 		>
-			<ToggleGroupControl
-				style={ {
-					width: '100%',
-				} }
-				onChange={ ( value: PagerDisplayModes ) => {
-					updateBlockAttributes( productGalleryClientId, {
-						pagerDisplayMode: value,
-					} );
-				} }
-				help={ getHelpText( pagerDisplayMode ) }
-				value={ pagerDisplayMode }
-			>
-				<ToggleGroupControlOption
-					value={ PagerDisplayModes.OFF }
-					label={ __( 'Off', 'woo-gutenberg-products-block' ) }
-				/>
-				<ToggleGroupControlOption
-					value={ PagerDisplayModes.DOTS }
-					label={ <PagerSettingsDotIcon /> }
-				/>
-				<ToggleGroupControlOption
-					value={ PagerDisplayModes.DIGITS }
-					label={ <PagerSettingsDigitsIcon /> }
-				/>
-			</ToggleGroupControl>
-		</PanelBody>
+			<ToggleGroupControlOption
+				value={ PagerDisplayModes.OFF }
+				label={ __( 'Off', 'woo-gutenberg-products-block' ) }
+			/>
+			<ToggleGroupControlOption
+				value={ PagerDisplayModes.DOTS }
+				label={ <PagerSettingsDotIcon /> }
+			/>
+			<ToggleGroupControlOption
+				value={ PagerDisplayModes.DIGITS }
+				label={ <PagerSettingsDigitsIcon /> }
+			/>
+		</ToggleGroupControl>
 	);
 };

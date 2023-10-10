@@ -4,6 +4,7 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { useMemo } from '@wordpress/element';
 import { BlockAttributes } from '@wordpress/blocks';
+import { PanelBody } from '@wordpress/components';
 import classNames from 'classnames';
 
 /**
@@ -57,7 +58,11 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<ProductGalleryNextPreviousBlockSettings context={ context } />
+				<PanelBody>
+					<ProductGalleryNextPreviousBlockSettings
+						context={ context }
+					/>
+				</PanelBody>
 			</InspectorControls>
 			<div
 				className={ classNames(
