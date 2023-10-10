@@ -82,7 +82,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByPlaceholder( 'List 1 postcode per line' ).fill( maynePostal );
 
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
-			await page.getByLabel( 'Local pickup', { exact: true } ).check();
+			await page.getByText( 'Local pickup', { exact: true } ).click();
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			
@@ -142,7 +142,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 
-			await page.getByLabel( 'Free shipping', { exact: true } ).check();
+			await page.getByText( 'Free shipping', { exact: true } ).click();
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -198,7 +198,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.keyboard.press('Escape');
 
 			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
-			await page.getByLabel( 'Flat rate', { exact: true } ).check();
+			await page.getByText( 'Flat rate', { exact: true } ).click();
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -323,7 +323,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 			await page.locator( 'text=Add shipping method' ).click();
 
-			await page.getByLabel( 'Flat rate', { exact: true } ).check();
+			await page.getByText( 'Flat rate', { exact: true } ).click();
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 
 			await page.waitForLoadState( 'networkidle' );
