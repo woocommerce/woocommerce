@@ -67,6 +67,8 @@ class Woo_AI {
 
 		add_filter( 'jetpack_offline_mode', '__return_false' );
 		add_action( 'current_screen', array( $this, 'includes' ) );
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_custom_script_for_woocommerce') );
 	}
 
 	/**
@@ -200,4 +202,17 @@ class Woo_AI {
 		return $releases;
 	}
 
+	function enqueue_custom_script_for_woocommerce() {
+		$script_path       = '/../build/image-background-replacer.js';
+		$script_url        = plugins_url( $script_path, __FILE__ );
+	
+		// Check if on a WooCommerce product page in the admin area
+			wp_enqueue_script(
+				'woo-ai-background-image-replacer', // Handle
+				$script_url, // Script URL
+				array('wp-blocks', 'wp-element', 'wp-compose'), // Dependencies
+				'1.0.0', // Version
+				true // Load in footer
+			);
+		}
 }

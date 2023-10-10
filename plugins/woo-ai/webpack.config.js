@@ -5,6 +5,8 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
+		'image-background-replacer':
+			'./src/image-background-replacer/index.jsx',
 	},
 	module: {
 		...defaultConfig.module,
