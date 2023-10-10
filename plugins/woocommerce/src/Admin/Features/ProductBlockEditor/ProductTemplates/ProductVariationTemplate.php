@@ -341,9 +341,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 30,
 				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
+					'showIf' => 'editedProduct.manage_stock === true',
 				],
 			]
 		);
@@ -360,9 +358,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 20,
 				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ false ],
-					],
+					'showIf' => 'editedProduct.manage_stock === false',
 				],
 			]
 		);
