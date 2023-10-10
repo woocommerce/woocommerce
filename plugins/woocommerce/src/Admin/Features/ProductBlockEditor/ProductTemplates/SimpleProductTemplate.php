@@ -582,9 +582,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 30,
 				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
+					'showIf' => 'editedProduct.manage_stock === true',
 				],
 			]
 		);
@@ -601,9 +599,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 20,
 				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ false ],
-					],
+					'showIf' => 'editedProduct.manage_stock === false',
 				],
 			]
 		);
@@ -659,9 +655,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 10,
 				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
+					'showIf' => 'editedProduct.manage_stock === true',
 				],
 			]
 		);
