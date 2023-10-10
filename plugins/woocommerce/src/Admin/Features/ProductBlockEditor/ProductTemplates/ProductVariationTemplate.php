@@ -1,11 +1,12 @@
 <?php
 /**
- * SimpleProductTemplate
+ * ProductVariationTemplate
  */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductEditorHelper;
 
 /**
  * Simple Product Template.
@@ -20,6 +21,11 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		'INVENTORY' => 'inventory',
 		'SHIPPING'  => 'shipping',
 	);
+
+	/**
+	 * The option name used check whether the single variation notice has been dismissed.
+	 */
+	const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION = 'woocommerce_single_variation_notice_dismissed';
 
 	/**
 	 * SimpleProductTemplate constructor.
@@ -100,6 +106,27 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
+		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
+		if ( ! in_array( $product_id, ( array ) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array(), true ) ) ) {
+			$general_group->add_block(
+				[
+					'id'         => 'general-single-variation-notice',
+					'blockName'  => 'woocommerce/product-single-variation-notice',
+					'order'      => 10,
+					'attributes' => [
+						'content'       => sprintf(
+							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
+								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
+								'</a>'
+							),
+						'type'          => 'info',
+						'isDismissible' => true,
+						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+					],
+				]
+			);
+		}
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
