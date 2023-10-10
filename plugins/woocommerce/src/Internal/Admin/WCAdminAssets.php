@@ -260,6 +260,7 @@ class WCAdminAssets {
 			'wc-admin-layout',
 			'wc-explat',
 			'wc-experimental',
+			'wc-expression-evaluation',
 			'wc-customer-effort-score',
 			// NOTE: This should be removed when Gutenberg is updated and the notices package is removed from WooCommerce Admin.
 			'wc-notices',
