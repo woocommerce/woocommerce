@@ -85,13 +85,12 @@ jobs:
       needs: 'project-task-matrix'
       if: ${{ always() }}
       steps:
-        - name: 'Debug'
-          run: echo ${{ toJson( needs ) }}
         - name: 'Check Matrix Success'
           run: |
             result="${{ needs.project-test-matrix.result }}"
             if [[ $result == "success" || $result == "skipped" ]]; then
               exit 0
             else
+              echo "One or more jobs in the matrix has failed.""
               exit 1
             fi
