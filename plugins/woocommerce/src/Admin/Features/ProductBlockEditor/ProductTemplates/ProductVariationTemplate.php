@@ -129,9 +129,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-checkbox-field',
 				'order'      => 30,
 				'attributes' => [
-					'property' => 'status',
-					'label'    => __( 'Hide in product catalog', 'woocommerce' ),
-					'checkedValue'  => 'private',
+					'property'       => 'status',
+					'label'          => __( 'Hide in product catalog', 'woocommerce' ),
+					'checkedValue'   => 'private',
 					'uncheckedValue' => 'publish',
 				],
 			]

@@ -121,10 +121,10 @@ export const MediaUploader = ( {
 
 						{ hasDropZone && (
 							<DropZone
-								onFilesDrop={ ( files ) =>
+								onFilesDrop={ ( droppedFiles ) =>
 									uploadMedia( {
 										allowedTypes: allowedMediaTypes,
-										filesList: files,
+										filesList: droppedFiles,
 										maxUploadFileSize,
 										onError,
 										onFileChange( files ) {
