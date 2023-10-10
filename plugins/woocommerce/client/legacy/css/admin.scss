@@ -4017,17 +4017,18 @@ table.wc_shipping {
 				}
 			}
 		}
-
-		.wc-shipping-zone-method-fields-help-text {
-			font-size: 12px;
-			font-weight: 400;
-			line-height: 16px;
-			color: #757575;
-		}
 	}
 
 	.wc-backbone-modal-action-inactive {
 		display: none;
+	}
+
+	.wc-shipping-zone-method-fields-help-text,
+	.wc-shipping-class-modal-help-text {
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 16px;
+		color: #757575;
 	}
 }
 
@@ -4070,11 +4071,6 @@ table {
 
 	.wc-shipping-class-count {
 		display: none;
-	}
-
-	.wc-shipping-class-modal-help-text {
-		font-size: 12px;
-		line-height: 17px;
 	}
 }
 

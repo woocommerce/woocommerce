@@ -514,22 +514,24 @@
 
 							shippingMethodView.unblock();
 
-							method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+							if ( method.settings_html ) {
+								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
 
-							// Pop up next modal
-							$( this ).WCBackboneModal({
-								template : 'wc-modal-shipping-method-settings',
-								variable : {
-									instance_id : instance_id,
-									method      : method,
-									status	    : 'new'
-								},
-								data : {
-									instance_id : instance_id,
-									method      : method,
-									status	    : 'new'
-								}
-							});
+								// Pop up next modal
+								$( this ).WCBackboneModal({
+									template : 'wc-modal-shipping-method-settings',
+									variable : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									},
+									data : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									}
+								});
+							}
 		
 							$( document.body ).trigger( 'init_tooltips' );
 
