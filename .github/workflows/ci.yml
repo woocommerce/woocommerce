@@ -45,6 +45,7 @@ jobs:
       name: '${{ matrix.projectName }} - ${{ matrix.taskName }}'
       runs-on: 'ubuntu-20.04'
       needs: 'project-matrix'
+      if: needs.project-matrix.outputs.matrix != '[]'
       strategy:
         fail-fast: false
         matrix:
@@ -61,18 +62,18 @@ jobs:
             # install-filters: '${{ matrix.projectName }}...'
             build-filters: '${{ matrix.projectName }}'
         - name: 'Lint'
-          if: ${{ !cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success' }}
+          if: !cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success'
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.lintCommand }}'
         - name: 'Prepare Test Environment'
           id: 'prepare-test-environment'
-          if: ${{ !cancelled() && matrix.testEnvCommand && steps.setup-monorepo.conclusion == 'success' }}
+          if: !cancelled() && matrix.testEnvCommand && steps.setup-monorepo.conclusion == 'success'
           env: ${{ matrix.testEnvVars }}
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnvCommand }}'
         - name: 'Test - JS'
-          if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' )
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.jsTestCommand }}'
         - name: 'Test - PHP'
-          if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
+          if: !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' )
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.phpTestCommand }}'
     project-task-matrix-evaluation:
       # In order to add a required status check we need a consistent job that we can grab onto.
@@ -82,15 +83,12 @@ jobs:
       # results of the other jobs in the workflow.
       name: 'Evaluate Project Matrix'
       runs-on: 'ubuntu-20.04'
-      needs: [ 'project-matrix', 'project-task-matrix' ]
-      if: ${{ always() }}
+      needs: 'project-task-matrix'
+      if: always()
       steps:
         - name: 'Check Matrix Success'
-          # Matrix jobs with no matrices are marked as a "failure" by default. We need to keep
-          # this in mind when checking the results because we don't want to fail the workflow.
-          # For the sake of clarity we will mark the job as "skipped".
           run: |
-            result="${{ needs.project-matrix.outputs.matrix == '[]'  && 'skipped' || needs.project-task-matrix.result }}"
+            result="${{ needs.project-task-matrix.result }}"
             if [[ $result == "success" || $result == "skipped" ]]; then
               echo "The matrix has completed successfully."
               exit 0
