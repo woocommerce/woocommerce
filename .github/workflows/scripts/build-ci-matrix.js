@@ -233,7 +233,7 @@ function detectProjectChanges( baseRef ) {
 			// As part of the detection of source files we are going to try and identify the type of source file that was changed.
 			// This isn't necessarily going to be completely perfect but it should be good enough for our purposes.
 			phpSourceChanges = !! filePath.match(
-				/\.(?:php|html)$|composer.\(?:json|lock)$/i
+				/\.(?:php|html)$|composer\.(?:json|lock)$/i
 			);
 			jsSourceChanges = !! filePath.match(
 				/\.(?:(?:t|j)sx?|json|html)$|package\.json$/i
