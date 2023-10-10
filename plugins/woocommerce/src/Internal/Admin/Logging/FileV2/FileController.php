@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 use Automattic\Jetpack\Constants;
 use WP_Error;
 
+/**
+ * FileController class.
+ */
 class FileController {
 	/**
 	 * @var string The absolute path to the log directory.
@@ -25,8 +28,8 @@ class FileController {
 	 *     Optional. Arguments to filter and sort the files that are returned.
 	 *
 	 *     @type int    $offset   Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
-	 *     @type string $order    The sort direction. 'asc' or 'desc'.
-	 *     @type string $orderby  The property to sort the list by. 'filename', 'modified', 'size'. Defaults to 'filename'.
+	 *     @type string $order    The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
+	 *     @type string $orderby  The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
 	 *     @type int    $per_page The number of files to include in the list. Works with $offset to do pagination.
 	 *     @type string $source   Only include files from this source.
 	 * }
@@ -37,8 +40,8 @@ class FileController {
 	public function get_files( array $args = array(), bool $count_only = false ) {
 		$defaults = array(
 			'offset'   => 0,
-			'order'    => 'asc',
-			'orderby'  => 'filename',
+			'order'    => 'desc',
+			'orderby'  => 'modified',
 			'per_page' => 10,
 			'source'   => '',
 		);
@@ -70,46 +73,71 @@ class FileController {
 		);
 		$files = array_filter( $files );
 
-		$sort_callback = function( $a, $b ) use ( $args ) {
-			if ( $a === $b ) {
-				return 0;
+		$multi_sorter = function( $sort_sets, $order_sets ) {
+			$comparison = 0;
+
+			while ( ! empty( $sort_sets ) ) {
+				$set   = array_shift( $sort_sets );
+				$order = array_shift( $order_sets );
+
+				if ( 'desc' === $order ) {
+					$comparison = $set[1] <=> $set[0];
+				} else {
+					$comparison = $set[0] <=> $set[1];
+				}
+
+				if ( $comparison !== 0 ) {
+					break;
+				}
 			}
 
-			$compare = $a < $b;
-
-			if ( 'desc' === $args['order'] ) {
-				return $compare ? 1 : -1;
-			}
-
-			return $compare ? -1 : 1;
+			return $comparison;
 		};
 
 		switch ( $args['orderby'] ) {
-			case 'filename':
-				usort(
-					$files,
-					function( $a, $b ) use ( $sort_callback ) {
-						return $sort_callback( $a->get_filename(), $b->get_filename() );
-					}
-				);
+			case 'created':
+				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+					$sort_sets = array(
+						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
+						array( $a->get_source(), $b->get_source() ),
+					);
+					$order_sets = array( $args['order'], 'asc' );
+					return $multi_sorter( $sort_sets, $order_sets );
+				};
 				break;
 			case 'modified':
-				usort(
-					$files,
-					function( $a, $b ) use ( $sort_callback ) {
-						return $sort_callback( $a->get_modified_timestamp(), $b->get_modified_timestamp() );
-					}
-				);
+				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+					$sort_sets = array(
+						array( $a->get_modified_timestamp(), $b->get_modified_timestamp() ),
+						array( $a->get_source(), $b->get_source() ),
+					);
+					$order_sets = array( $args['order'], 'asc' );
+					return $multi_sorter( $sort_sets, $order_sets );
+				};
+				break;
+			case 'source':
+				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+					$sort_sets = array(
+						array( $a->get_source(), $b->get_source() ),
+						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
+					);
+					$order_sets = array( $args['order'], 'desc' );
+					return $multi_sorter( $sort_sets, $order_sets );
+				};
 				break;
 			case 'size':
-				usort(
-					$files,
-					function( $a, $b ) use ( $sort_callback ) {
-						return $sort_callback( $a->get_file_size(), $b->get_file_size() );
-					}
-				);
+				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+					$sort_sets = array(
+						array( $a->get_file_size(), $b->get_file_size() ),
+						array( $a->get_source(), $b->get_source() ),
+					);
+					$order_sets = array( $args['order'], 'asc' );
+					return $multi_sorter( $sort_sets, $order_sets );
+				};
 				break;
 		}
+
+		usort( $files, $sort_callback );
 
 		return array_slice( $files, $args['offset'], $args['per_page'] );
 	}
