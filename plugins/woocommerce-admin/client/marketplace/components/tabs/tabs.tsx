@@ -80,12 +80,20 @@ const getVisibleTabs = ( selectedTab: string ) => {
 
 	return currentVisibleTabs;
 };
-
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+
+	const onTacClick = ( tabKey: string ) => {
+		if ( tabKey === selectedTab ) {
+			return;
+		}
+		setSelectedTab( tabKey );
+		setUrlTabParam( tabKey );
+	};
+
 	const tabContent = [];
 	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
@@ -110,10 +118,7 @@ const renderTabs = (
 							'is-active': tabKey === selectedTab,
 						}
 					) }
-					onClick={ () => {
-						setSelectedTab( tabKey );
-						setUrlTabParam( tabKey );
-					} }
+					onClick={ () => onTacClick( tabKey ) }
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
