@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Button, Spinner } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import {
 	createElement,
 	Fragment,
@@ -27,6 +28,8 @@ import { useEntityProp } from '@wordpress/core-data';
 import { DownloadableFileItem, UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 
+declare const productBlockEditorSettings: Record< string, unknown >;
+
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
 	return name;
@@ -49,6 +52,13 @@ export function Edit( {
 	const [ fileItems, setFileItems ] = useState< DownloadableFileItem[] >(
 		[]
 	);
+
+	const allowedMimeTypes = useSelect( ( select ) => {
+		// const { getEditorSettings } = select( 'core/editor' );
+		// const settings = getEditorSettings();
+
+		return productBlockEditorSettings.allowedMimeTypes;
+	} );
 
 	useEffect( () => {
 		setFileItems( ( currentItems ) => {
@@ -93,7 +103,9 @@ export function Edit( {
 		} );
 	}, [ downloads ] );
 
-	function handleFileUpload( files: MediaItem[] ) {
+	function handleFileUpload( files: MediaItem | MediaItem[] ) {
+		if ( ! Array.isArray( files ) ) return;
+
 		const { uploadedFiles, items } = files.reduce< {
 			uploadedFiles: Product[ 'downloads' ];
 			items: DownloadableFileItem[];
@@ -231,7 +243,11 @@ export function Edit( {
 						</>
 					}
 					buttonText=""
-					allowedMediaTypes={ [ '*' ] }
+					allowedMediaTypes={
+						allowedMimeTypes
+							? Object.values( allowedMimeTypes )
+							: []
+					}
 					multipleSelect={ 'add' }
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }

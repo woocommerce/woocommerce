@@ -57,14 +57,11 @@ export const MediaUploader = ( {
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
 }: MediaUploaderProps ) => {
-	const getFormFileUploadAcceptedFiles = () =>
-		allowedMediaTypes.map( ( type ) => `${ type }/*` );
-
 	const multiple = Boolean( multipleSelect );
 
 	return (
 		<FormFileUpload
-			accept={ getFormFileUploadAcceptedFiles().toString() }
+			accept={ allowedMediaTypes.toString() }
 			multiple={ multiple }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
