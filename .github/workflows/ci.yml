@@ -42,7 +42,7 @@ jobs:
       # This is the actual CI job that will be ran against every project with applicable changes.
       # Note that we only run the tasks that have commands set. Our script will set them if
       # they are needed and so all the workflow needs to do is run them.
-      name: '${{ matrix.projectName }} - ${{ matrix.taskName }}'
+      name: "${{ matrix.projectName && format( '{0} - {1}', matrix.projectName, matrix.taskName ) || 'Empty Project Matrix' }}"
       runs-on: 'ubuntu-20.04'
       needs: 'project-matrix'
       if: ${{ needs.project-matrix.outputs.matrix != '[]' }}
