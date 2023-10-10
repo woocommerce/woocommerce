@@ -3954,7 +3954,13 @@ table.wc_shipping {
 
 	.wc-shipping-zone-method-input {
 		input {
-			display: none;
+			clip: rect(0 0 0 0);
+			clip-path: inset(100%);
+			height: 1px;
+			overflow: hidden;
+			position: absolute;
+			white-space: nowrap; 
+			width: 1px;
 
 			&:checked + label {
 				outline: 2px solid #3858E9;
