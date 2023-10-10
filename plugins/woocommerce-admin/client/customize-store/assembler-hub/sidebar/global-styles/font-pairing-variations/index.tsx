@@ -19,6 +19,10 @@ export const FontPairing = () => {
 			columns={ 2 }
 			gap={ 3 }
 			className="woocommerce-customize-store_font-pairing-container"
+			style={ {
+				opacity: 0,
+				animation: 'containerFadeIn 1000ms ease-in-out forwards',
+			} }
 		>
 			{ FONT_PAIRINGS.map( ( variation, index ) => (
 				<VariationContainer key={ index } variation={ variation }>

@@ -230,21 +230,26 @@ class OrdersTableQuery {
 		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
 		 * @param string             $sql The OrdersTableQuery instance.
 		 */
-		list( $this->orders, $this->found_orders, $this->max_num_pages ) = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
-		// If the filter set the orders, make sure the others values are set as well and skip running the query.
-		if ( is_array( $this->orders ) ) {
-			if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
-				$this->found_orders = count( $this->orders );
-			}
-			if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
-				if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
-					$this->args['limit'] = 10;
-				}
-				$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
-			}
-			return true;
+		$pre_query = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
+		if ( ! $pre_query || ! isset( $pre_query[0] ) || ! is_array( $pre_query[0] ) ) {
+			return false;
 		}
-		return false;
+
+		// If the filter set the orders, make sure the others values are set as well and skip running the query.
+		list( $this->orders, $this->found_orders, $this->max_num_pages ) = $pre_query;
+
+		if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
+			$this->found_orders = count( $this->orders );
+		}
+
+		if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
+			if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
+				$this->args['limit'] = 10;
+			}
+			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+		}
+
+		return true;
 	}
 
 	/**

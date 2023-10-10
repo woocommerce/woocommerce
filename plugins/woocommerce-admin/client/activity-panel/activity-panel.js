@@ -46,7 +46,6 @@ import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/task-lists';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
-import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -482,9 +481,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
-				{ isAddProductPage() && (
-					<ProductFeedbackTour currentTab={ currentTab } />
-				) }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }

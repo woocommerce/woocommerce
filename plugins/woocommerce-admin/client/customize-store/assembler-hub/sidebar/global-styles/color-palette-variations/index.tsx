@@ -1,7 +1,7 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/d5ab7238e53d0947d4bb0853464b1c58325b6130/packages/edit-site/src/components/global-styles/style-variations-container.js
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { __experimentalGrid as Grid } from '@wordpress/components';
+import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 
 /**
  * External dependencies
@@ -59,20 +59,24 @@ export const ColorPalette = () => {
 		}
 	}, [ isLoading, aiSuggestions?.defaultColorPalette ] );
 
+	if ( isLoading ) {
+		return (
+			<div className="woocommerce-customize-store_color-palette-spinner-container">
+				<Spinner />
+			</div>
+		);
+	}
+
 	return (
 		<Grid
 			columns={ 3 }
-			gap={ 4 }
 			className="woocommerce-customize-store_color-palette-container"
 		>
-			{ ! isLoading &&
-				colorPalettes?.map( ( variation, index ) => (
-					<VariationContainer key={ index } variation={ variation }>
-						<ColorPaletteVariationPreview
-							title={ variation?.title }
-						/>
-					</VariationContainer>
-				) ) }
+			{ colorPalettes?.map( ( variation, index ) => (
+				<VariationContainer key={ index } variation={ variation }>
+					<ColorPaletteVariationPreview title={ variation?.title } />
+				</VariationContainer>
+			) ) }
 		</Grid>
 	);
 };

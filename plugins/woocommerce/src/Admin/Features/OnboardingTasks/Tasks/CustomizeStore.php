@@ -18,7 +18,13 @@ class CustomizeStore extends Task {
 		parent::__construct( $task_list );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
-		add_action( 'after_switch_theme', array( $this, 'mark_task_as_complete' ) );
+
+		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
+		global $_GET;
+		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
+		if ( ! $theme_switch_via_cys_ai_loader ) {
+				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
+		}
 	}
 
 	/**

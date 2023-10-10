@@ -16,6 +16,7 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
+import { Template } from '@wordpress/blocks';
 import { Popover, SlotFillProvider } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -41,14 +42,21 @@ import { ValidationProvider } from '../../contexts/validation-context';
 
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
->;
+> & {
+	templates: Record< string, Template[] >;
+};
 
 type EditorProps = {
-	product: Product;
+	product: Pick< Product, 'id' | 'type' >;
+	productType?: string;
 	settings: ProductEditorSettings | undefined;
 };
 
-export function Editor( { product, settings }: EditorProps ) {
+export function Editor( {
+	product,
+	productType = 'product',
+	settings,
+}: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
@@ -58,7 +66,7 @@ export function Editor( { product, settings }: EditorProps ) {
 			<StrictMode>
 				<EntityProvider
 					kind="postType"
-					type="product"
+					type={ productType }
 					id={ product.id }
 				>
 					<ShortcutProvider>
@@ -69,16 +77,18 @@ export function Editor( { product, settings }: EditorProps ) {
 									header={
 										<Header
 											onTabSelect={ setSelectedTab }
+											productType={ productType }
 										/>
 									}
 									content={
 										<>
 											<BlockEditor
 												settings={ settings }
-												product={ product }
+												productType={ productType }
+												productId={ product.id }
 												context={ {
 													selectedTab,
-													postType: 'product',
+													postType: productType,
 													postId: product.id,
 												} }
 											/>
@@ -87,7 +97,6 @@ export function Editor( { product, settings }: EditorProps ) {
 										</>
 									}
 								/>
-
 								<Popover.Slot />
 							</ValidationProvider>
 						</SlotFillProvider>
@@ -96,7 +105,10 @@ export function Editor( { product, settings }: EditorProps ) {
 					WooFooterItem to actually render in the WooFooterItem.Slot defined by
 					WooCommerce Admin. And, we need to put it outside of the SlotFillProvider
 					we create in this component. */ }
-					<Footer product={ product } />
+					<Footer
+						productId={ product.id }
+						productType={ product.type }
+					/>
 				</EntityProvider>
 			</StrictMode>
 		</LayoutContextProvider>

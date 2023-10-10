@@ -572,13 +572,26 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->disable_cot_sync();
 		OrderHelper::create_order();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
-		$cot_setting = apply_filters( 'woocommerce_feature_setting', array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$features = apply_filters( 'woocommerce_get_settings_advanced', array(), 'features' );
+
+		$cot_setting = array_filter(
+			$features,
+			function( $feature ) {
+				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION === $feature['id'];
+			}
+		);
+		$cot_setting = array_values( $cot_setting )[0];
 		$this->assertEquals( $cot_setting['value'], 'no' );
 		$this->assertEquals( $cot_setting['disabled'], array( 'yes', 'no' ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
-		$sync_setting = apply_filters( 'woocommerce_feature_setting', array(), $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		$sync_setting = array_filter(
+			$features,
+			function( $feature ) {
+				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $feature['id'];
+			}
+		);
+		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
 		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
 	}
