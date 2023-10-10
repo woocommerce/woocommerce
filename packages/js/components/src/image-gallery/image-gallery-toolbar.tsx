@@ -25,6 +25,7 @@ import { ImageGalleryToolbarDropdown } from './image-gallery-toolbar-dropdown';
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
 	allowDragging?: boolean;
+	value?: number;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
@@ -44,6 +45,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	replaceItem,
 	setToolBarItem,
 	lastChild,
+	value,
 	MediaUploadComponent = MediaUpload,
 }: ImageGalleryToolbarProps ) => {
 	const moveNext = () => {
@@ -105,6 +107,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ isCoverItem && (
 					<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 						<MediaUploadComponent
+							value={ value }
 							onSelect={ ( media ) =>
 								replaceItem( childIndex, media as MediaItem )
 							}

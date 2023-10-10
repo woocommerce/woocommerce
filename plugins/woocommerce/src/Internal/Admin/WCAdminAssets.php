@@ -305,6 +305,16 @@ class WCAdminAssets {
 					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-router' ) );
 				}
 
+				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
+				$is_customize_store_page = (
+					PageController::is_admin_page() &&
+					isset( $_GET['path'] ) &&
+					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
+				);
+				if ( ! $is_customize_store_page && WC_ADMIN_APP === $script ) {
+					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-editor' ) );
+				}
+
 				wp_register_script(
 					$script,
 					self::get_url( $script_path_name . '/index', 'js' ),

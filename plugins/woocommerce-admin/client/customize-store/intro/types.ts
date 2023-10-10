@@ -10,8 +10,9 @@ export type ThemeCard = {
 	slug: string;
 	name: string;
 	description: string;
-	image: string;
-	isActive: boolean;
-	link?: string;
-	colorPalettes: ColorPalette[];
+	thumbnail_url: string;
+	is_active: boolean;
+	link_url?: string;
+	color_palettes: ColorPalette[];
+	total_palettes: number;
 };
