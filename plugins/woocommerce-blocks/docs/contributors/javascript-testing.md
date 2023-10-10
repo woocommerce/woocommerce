@@ -107,7 +107,7 @@ You will need to stop `wp-env` and start it again. In some cases, you will also 
 
 Currently, we only run e2e tests with the most recent version of WordPress. We also have the infrastructure in place to run e2e tests with the most recent version of WordPress with Gutenberg installed, but [it's currently disabled](https://github.com/woocommerce/woocommerce-blocks/blob/07605450ffa4e460543980b7011b3bf8a8e82ff4/.github/workflows/php-js-e2e-tests.yml#L10).
 
-When preparing for a new version of WordPress, it's a good practice to search for conditions in our tests that check for specific WP versions (with the variable `WP_VERSION`) or that check whether Gutenberg is installed (with the variable `GUTENBERG_EDITOR_CONTEXT`).
+When preparing for a new version of WordPress, it's a good practice to search for conditions in our tests that check for specific WP versions (with the variable `WP_VERSION`).
 
 <!-- FEEDBACK -->
 
@@ -118,4 +118,3 @@ When preparing for a new version of WordPress, it's a good practice to search fo
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/javascript-testing.md)
 
 <!-- /FEEDBACK -->
-

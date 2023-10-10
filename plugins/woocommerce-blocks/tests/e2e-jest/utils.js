@@ -42,8 +42,6 @@ export const adminPassword = config.get( 'users.admin.password' );
 export const client = HTTPClientFactory.build( BASE_URL )
 	.withBasicAuth( adminUsername, adminPassword )
 	.create();
-export const GUTENBERG_EDITOR_CONTEXT =
-	process.env.GUTENBERG_EDITOR_CONTEXT || 'core';
 export const DEFAULT_TIMEOUT = 30000;
 export const SHOP_CHECKOUT_BLOCK_PAGE = BASE_URL + 'checkout-block/';
 
@@ -446,14 +444,6 @@ export const waitForAllProductsBlockLoaded = async () => {
 		'.wc-block-grid__products:not(.is-loading-products)'
 	);
 };
-
-/**
- * Execute or skip the test suite base on the provided condition.
- *
- * @param {boolean} condition Condition to execute test suite.
- */
-export const describeOrSkip = ( condition ) =>
-	condition ? describe : describe.skip;
 
 /**
  * Get all blocks in the document that match a certain slug.
