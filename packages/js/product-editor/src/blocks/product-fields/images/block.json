@@ -12,6 +12,13 @@
 			"type": "number",
 			"__experimentalRole": "content"
 		},
+		"property": {
+			"type": "string"
+		},
+		"multiple": {
+			"type": "boolean",
+			"default": true
+		},
 		"images": {
 			"__experimentalRole": "content",
 			"type": "array",
@@ -30,5 +37,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }
