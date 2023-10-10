@@ -12,8 +12,11 @@
 			"type": "array",
 			"items": {
 				"type": "object"
-			},
-			"default": []
+			}
+		},
+		"showIf": {
+			"__experimentalRole": "content",
+			"type": "string"
 		}
 	},
 	"usesContext": [ "editedProduct" ],
