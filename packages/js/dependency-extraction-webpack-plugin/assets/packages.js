@@ -12,6 +12,7 @@ module.exports = [
 	'@woocommerce/eslint-plugin',
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
+	'@woocommerce/expression-evaluation',
 	'@woocommerce/extend-cart-checkout-block',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
