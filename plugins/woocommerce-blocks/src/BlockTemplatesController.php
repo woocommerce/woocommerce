@@ -42,8 +42,11 @@ class BlockTemplatesController {
 	public function __construct( Package $package ) {
 		$this->package = $package;
 
+		$feature_gating                                 = $package->feature();
+		$is_block_templates_controller_refactor_enabled = $feature_gating->is_block_templates_controller_refactor_enabled();
+
 		// This feature is gated for WooCommerce versions 6.0.0 and above.
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) ) {
+		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) && ! $is_block_templates_controller_refactor_enabled ) {
 			$this->init();
 		}
 	}
