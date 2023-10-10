@@ -87,6 +87,7 @@ jobs:
       steps:
         - name: 'Check Matrix Success'
           run: |
+            echo "${{ toJson( needs.project-task-matrix ) }}}}"
             result="${{ needs.project-test-matrix.result }}"
             if [[ $result == "success" || $result == "skipped" ]]; then
               exit 0
