@@ -11,6 +11,7 @@ import {
 	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { RemoveConfirmationModal } from '@woocommerce/product-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -68,6 +69,10 @@ export const DeleteVariationMenuItem = ( {
 				);
 				setShowModal( false );
 				onClose();
+
+				navigateTo( {
+					url: getNewPath( {}, `/product/${ productId }` ),
+				} );
 			} )
 			.catch( () => {
 				createErrorNotice(
