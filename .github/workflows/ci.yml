@@ -85,6 +85,8 @@ jobs:
       needs: 'project-task-matrix'
       if: ${{ always() }}
       steps:
+        - name: 'Debug'
+          run: 'echo "${{ toJson( needs ) }}"'
         - name: 'Check Matrix Success'
           run: |
             result="${{ needs.project-task-matrix.result }}"
