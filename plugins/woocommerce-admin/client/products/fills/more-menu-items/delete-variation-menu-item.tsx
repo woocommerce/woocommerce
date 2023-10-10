@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { RemoveConfirmationModal } from '@woocommerce/product-editor';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -35,6 +36,12 @@ export const DeleteVariationMenuItem = ( {
 		'attributes'
 	);
 
+	const [ status ] = useEntityProp< string >(
+		'postType',
+		'product_variation',
+		'status'
+	);
+
 	const name = useMemo(
 		() =>
 			attributes
@@ -51,6 +58,14 @@ export const DeleteVariationMenuItem = ( {
 		useDispatch( 'core/notices' );
 
 	function handleMenuItemClick() {
+		recordEvent( 'product_dropdown_option_click', {
+			selected_option: 'delete_variation',
+			product_type: 'product_variation',
+			product_id: productId,
+			variation_id: variationId,
+			product_status: status,
+		} );
+
 		setShowModal( true );
 	}
 
