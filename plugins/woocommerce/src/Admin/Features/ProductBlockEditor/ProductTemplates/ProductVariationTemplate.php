@@ -115,7 +115,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 10,
 					'attributes' => [
 						'content'       => sprintf(
-							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
 								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
 								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
 								'</a>'
@@ -207,7 +207,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 10,
 					'attributes' => [
 						'content'       => sprintf(
-							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
 								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
 								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
 								'</a>'
@@ -344,7 +344,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 10,
 					'attributes' => [
 						'content'       => sprintf(
-							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
 								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
 								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
 								'</a>'
@@ -476,7 +476,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 10,
 					'attributes' => [
 						'content'       => sprintf(
-							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
 								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
 								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
 								'</a>'
