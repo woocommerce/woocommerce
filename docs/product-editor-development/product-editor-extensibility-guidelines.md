@@ -8,11 +8,9 @@ For this reason, the new product form features tabs that correspond with these t
 
 There are several ways to extend the new product form: from a single field to a whole section containing multiple fields and tables. These extension points are tightly linked to the form structure, giving you plenty of freedom to create a great user experience.
 
-Like everything in the new product form, each extension point is a separate block. However, each existing block can be extended the same as the Block Editor, so for the sake of a consistent and smooth user experience, try to integrate your extension into an existing block before creating a new one.
-
 ## Product form tabs
 
-The new product form consists of areas displayed as tabs. Each is a separate view and may contain any number of sections. All areas serve a specific purpose, allowing merchants to quickly find the information they’re looking for (both in default Woo features and extensions).
+The new product form consists of groups displayed as tabs. Each is a separate view and may contain any number of sections. All groups serve a specific purpose, allowing merchants to quickly find the information they’re looking for (both in default Woo features and extensions).
 
 * **General**: Essential product information, including the name, image, and description. This tab is also where key features live for non-standard product types: downloads, groups, links, etc.
 
@@ -24,7 +22,7 @@ The new product form consists of areas displayed as tabs. Each is a separate vie
 
 * **Shipping**: All the information merchants need to enter to present customers with accurate shipping rates at checkout. Best for physical product details that may impact shipping (e.g. capacity or volume), additional shipping carrier settings, or custom shipping options.
 
-* **Variations**: Contains product options and variations. It is the only tab that doesn’t support extensibility in its current form (you can add your extension to the variation details page as well as provide custom update actions triggered from the table view or the bulk editor).
+* **Variations**: Contains product options and variations. Allows merchants to create variations and set up their attributes, such as color, size, or material. Best for extensions that add new types of variations or allow merchants to manage them in a different way.
 
 ## Where should your extension go?
 
@@ -32,9 +30,9 @@ Depending on the type of your extension (and your use case), you can pick an int
 
 To choose, put yourself in the merchant’s shoes: where would you go to find this feature? What is it related to? Adding your extension to a group of similar features will help merchants navigate the form and make it easier for them to find your extension.
 
-### Field 
+### Fields
 
-Field extensions are the simplest type of extension. They can add new, replace, and expand existing form fields in any section, hide fields, and change form defaults.
+Field extensions are the simplest type of extension. They can add new, replace, and expand existing form fields in any section, and hide fields.
 
 #### ✅ What they are for
 
@@ -52,31 +50,9 @@ Field extensions are the simplest type of extension. They can add new, replace, 
 * Entering custom data, f.e. color or date and time
 * Selecting from a third-party system, f.e. warranty type
 
-### Group 
+### Sections
 
-Groups add extra fields to existing form sections. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
-
-#### ✅ What they are for
-
-* Relevant features that can be crucial to merchants’ product creation flow
-* 2-5 field forms with limited functionality, f.e. dimensions or tax settings
-* Lists of items, f.e. attachments, channels, or accounts
-
-#### ❌ What they aren’t for
-
-* Simple extensions with 1-2 fields
-* Multi-step forms and complex tables
-* Read-only descriptions, setup guides, and advertisements
-
-#### Use cases
-
-* Adding extra product details, f.e. measurements under Shipping
-* Setting up social channels in the Visibility section in the General tab
-* Changing the VAT tax settings in the Pricing tab
-
-### Section
-
-Sections are significant parts of the form that may consist of multiple groups and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
+Sections are significant parts of the form that may consist of multiple fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
 #### ✅ What they are for
 
