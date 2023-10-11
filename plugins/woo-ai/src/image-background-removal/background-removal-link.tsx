@@ -17,6 +17,7 @@ import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
+import { TourSpotlight } from '../components/';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -135,6 +136,16 @@ export const BackgroundRemovalLink = () => {
 				</button>
 				<img src={ MagicIcon } alt="" />
 			</div>
+			<TourSpotlight
+				id="backgroundRemovalLink"
+				reference="#woocommerce-ai-app-remove-background-link"
+				description={ __(
+					'Effortlessly make your product images pop by removing the background using state-of-the-art AI technology. Just click the button and watch!',
+					'woocommerce'
+				) }
+				title={ __( '🆕 Remove backgrounds with AI', 'woocommerce' ) }
+				placement="left"
+			/>
 			{ displayError && (
 				<Notice onRemove={ () => setDisplayError( null ) }>
 					{ displayError }

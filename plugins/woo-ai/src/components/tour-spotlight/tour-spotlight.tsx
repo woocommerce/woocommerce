@@ -1,71 +1,73 @@
 /**
  * External dependencies
  */
-import Tour, { TourStepRendererProps } from '@automattic/tour-kit';
-import { Button } from '@wordpress/components';
+import { TourKit } from '@woocommerce/components';
+import { store as preferencesStore } from '@wordpress/preferences';
+import { useDispatch, select } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import React from 'react';
+import { Config } from '@automattic/tour-kit';
 
 type TourSpotlightProps = {
-	onDismiss: () => void;
+	id: string;
 	title: string;
 	description: string;
 	reference: string;
-	className?: string;
+	placement?: Config[ 'placement' ];
 };
 
-export default function TourSpotlight( {
-	onDismiss,
+export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
+	id,
 	title,
 	description,
 	reference,
-	className,
-}: TourSpotlightProps ) {
-	const [ showTour, setShowTour ] = useState( true );
+	placement = 'auto',
+} ) => {
+	const preferenceId = `spotlightDismissed-${ id }`;
 
-	const handleDismiss = () => {
-		setShowTour( false );
-		onDismiss();
-	};
-	// Define a configuration for the tour, passing along a handler for closing.
-	const config = {
-		steps: [
-			{
-				referenceElements: {
-					desktop: reference,
-				},
-				meta: {
-					description,
-				},
-			},
-		],
-		renderers: {
-			tourStep: ( { currentStepIndex }: TourStepRendererProps ) => {
-				return (
-					<div className={ className }>
-						<h3>{ title }</h3>
-						<p>
-							{
-								config.steps[ currentStepIndex ].meta
-									.description
-							}
-						</p>
-						<Button onClick={ handleDismiss }>
-							{ __( 'Got it', 'woocommerce' ) }
-						</Button>
-					</div>
-				);
-			},
-			tourMinimized: () => <div />,
-		},
-		closeHandler: () => handleDismiss(),
-		options: {},
-	};
+	const anchorElement = document.querySelector( reference );
+	const hasBeenDismissedBefore = select( preferencesStore ).get(
+		'woo-ai-plugin',
+		preferenceId
+	);
+	const { set } = useDispatch( preferencesStore );
+	const [ isSpotlightVisible, setIsSpotlightVisible ] =
+		useState< boolean >( true );
 
-	if ( ! showTour ) {
+	if ( ! anchorElement || hasBeenDismissedBefore || ! isSpotlightVisible ) {
 		return null;
 	}
 
-	return <Tour config={ config } />;
-}
+	return (
+		<TourKit
+			config={ {
+				steps: [
+					{
+						referenceElements: {
+							desktop: reference,
+						},
+						meta: {
+							name: `product-feedback-tour-${ id }`,
+							heading: title,
+							descriptions: {
+								desktop: description,
+							},
+							primaryButton: {
+								isHidden: true,
+							},
+						},
+					},
+				],
+				placement,
+				options: {
+					effects: {
+						liveResize: { mutation: false, resize: false },
+					},
+				},
+				closeHandler: () => {
+					setIsSpotlightVisible( false );
+					set( 'woo-ai-plugin', preferenceId, true );
+				},
+			} }
+		/>
+	);
+};
