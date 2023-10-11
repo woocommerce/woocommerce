@@ -19,7 +19,7 @@
 		font-size: 1em;
 		appearance: none;
 		border: 2px solid $input-border-gray;
-		border-radius: 2px;
+		border-radius: $universal-border-radius;
 		box-sizing: border-box;
 		height: em(24px);
 		width: em(24px);

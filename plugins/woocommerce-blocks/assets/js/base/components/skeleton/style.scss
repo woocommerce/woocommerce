@@ -11,7 +11,7 @@
 	width: 100%;
 	position: relative;
 	background: $universal-border-light;
-	border-radius: 2px;
+	border-radius: $universal-border-radius;
 
 	&:last-child {
 		width: 80%;

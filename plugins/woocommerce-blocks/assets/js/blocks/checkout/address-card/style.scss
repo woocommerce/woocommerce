@@ -3,7 +3,7 @@
 	@include font-size(regular);
 	padding: $gap;
 	margin: 0;
-	border-radius: 4px;
+	border-radius: $universal-border-radius;
 	display: flex;
 	justify-content: flex-start;
 	align-items: flex-start;
