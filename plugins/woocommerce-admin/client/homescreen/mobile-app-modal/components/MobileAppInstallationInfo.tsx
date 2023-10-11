@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { QRCodeSVG } from 'qrcode.react';
 
 export const MobileAppInstallationInfo = () => {
