@@ -145,4 +145,18 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '12345', $properties['store_id'] );
 		delete_option('woocommerce_store_id');
 	}
+
+	/**
+	 * Test that the blog_id is null when not present.
+	 */
+	public function test_blog_id_is_null_when_jetpack_not_present() {
+		$properties = \WC_Tracks::get_properties(
+			'test_event',
+			array(
+				'test_property' => 5,
+			)
+		);
+		$this->assertContains( 'blog_id', array_keys( $properties ) );
+		$this->assertNull( $properties['blog_id'] );
+	}
 }

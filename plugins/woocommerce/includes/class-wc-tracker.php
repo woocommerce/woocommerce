@@ -134,8 +134,8 @@ class WC_Tracker {
 
 		// General site info.
 		$data['url'] = home_url();
-		$data['store_id'] = self::get_store_id();
-		$data['blog_id'] = self::get_blog_id();
+		$data['store_id'] = get_option( 'woocommerce_store_id', null);
+		$data['blog_id'] = self::get_jetpack_blog_id();
 
 		/**
 		 * Filter the admin email that's sent with data.
@@ -213,24 +213,6 @@ class WC_Tracker {
 		 * @since 2.3.0
 		 */
 		return apply_filters( 'woocommerce_tracker_data', $data );
-	}
-
-	/**
-	 * Get the store ID which is set on install/update.
-	 *
-	 * @return string
-	 */
-	public static function get_store_id() {
-		return get_option( 'woocommerce_store_id', null);
-	}
-
-	/**
-	 * Get the blog ID for Jetpack sites.
-	 *
-	 * @return string
-	 */
-	public static function get_blog_id() {
-		return class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
 	}
 
 	/**
@@ -320,6 +302,19 @@ class WC_Tracker {
 		$server_data['php_curl']             = function_exists( 'curl_init' ) ? 'Yes' : 'No';
 
 		return $server_data;
+	}
+
+	/**
+	 * Get Jetpack blog_id ensuring null is returned when id is not present.
+	 *
+	 * @return string
+	 */
+	private static function get_jetpack_blog_id() {
+		if (class_exists( 'Jetpack_Options' ) ) {
+			$blog_id = Jetpack_Options::get_option( 'id' );
+			return $blog_id ? $blog_id : null;
+		}
+		return null;
 	}
 
 	/**
