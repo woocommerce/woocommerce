@@ -3,7 +3,7 @@
  * WooCommerce Product Editor Helper
  */
 
- namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 /**
  * Product Editor helper class.
