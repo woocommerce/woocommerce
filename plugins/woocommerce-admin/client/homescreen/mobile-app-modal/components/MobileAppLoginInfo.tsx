@@ -40,7 +40,9 @@ export const MobileAppLoginInfo = ( {
 								target="_blank"
 								type="external"
 								onClick={ () => {
-									recordEvent('onboarding_app_login_faq_click');
+									recordEvent(
+										'onboarding_app_login_faq_click'
+									);
 								} }
 							/>
 						),
