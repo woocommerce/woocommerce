@@ -155,16 +155,22 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
             - name: Run API tests
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_WP_LATEST_ARTIFACT }}
                   tests: hello
+                  playwright-config: ci-release.playwright.config.js
               env:
                   API_BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -331,7 +337,7 @@ jobs:
                   script: |
                       const { getVersionWPLatestMinusOne } = require( './plugins/woocommerce/tests/e2e-pw/utils/wordpress' );
                       await getVersionWPLatestMinusOne( { core, github } );
-                      
+
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -341,7 +347,7 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm run env:test
               env:
-                WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
+                  WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
             - name: Download release zip
               env:
