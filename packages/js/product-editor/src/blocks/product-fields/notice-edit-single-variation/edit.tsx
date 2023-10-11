@@ -22,7 +22,6 @@ import { useNotice } from '../../../hooks/use-notice';
 
 export function Edit( {
 	attributes,
-	context,
 }: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const {

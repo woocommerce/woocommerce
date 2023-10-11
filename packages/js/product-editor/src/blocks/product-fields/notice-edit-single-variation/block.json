@@ -34,6 +34,5 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ],
 	"templateLock": "contentOnly"
 }
