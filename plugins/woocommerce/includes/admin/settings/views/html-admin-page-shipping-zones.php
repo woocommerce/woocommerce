@@ -20,36 +20,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 	<tbody class="wc-shipping-zone-rows"></tbody>
-	<tbody>
-		<tr data-id="0" class="wc-shipping-zone-worldwide">
-			<td width="1%" class="wc-shipping-zone-worldwide"></td>
-			<td class="wc-shipping-zone-name">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
-			</td>
-			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
-			<td class="wc-shipping-zone-methods">
-				<ul>
-					<?php
-					$worldwide = new WC_Shipping_Zone( 0 );
-					$methods   = $worldwide->get_shipping_methods();
-					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
-					if ( ! empty( $methods ) ) {
-						foreach ( $methods as $method ) {
-							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
-						}
-					} else {
-						echo '<li>' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
+		<td width="1%" class="wc-shipping-zone-worldwide"></td>
+		<td class="wc-shipping-zone-name">
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
+		</td>
+		<td class="wc-shipping-zone-region"><?php _e( 'This zone is optionally used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
+		<td class="wc-shipping-zone-methods">
+			<ul>
+				<?php
+				$worldwide = new WC_Shipping_Zone( 0 );
+				$methods   = $worldwide->get_shipping_methods();
+				uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+
+				if ( ! empty( $methods ) ) {
+					foreach ( $methods as $method ) {
+						$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
-					?>
-				</ul>
-			</td>
-			<td class="shipping-zone-actions">
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-			</td>
-		</tr>
-	</tbody>
+				} else {
+					echo '<li>' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+				}
+				?>
+			</ul>
+		</td>
+		<td class="shipping-zone-actions">
+			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+		</td>
+	</tfoot>
+
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
