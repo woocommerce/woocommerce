@@ -59,9 +59,11 @@ type CustomizeStoreComponentProps = Parameters< CustomizeStoreComponent >[ 0 ];
 export const CustomizeStoreContext = createContext< {
 	sendEvent: CustomizeStoreComponentProps[ 'sendEvent' ];
 	context: Partial< CustomizeStoreComponentProps[ 'context' ] >;
+	currentState: CustomizeStoreComponentProps[ 'currentState' ];
 } >( {
 	sendEvent: () => {},
 	context: {},
+	currentState: 'assemblerHub',
 } );
 
 export type events =

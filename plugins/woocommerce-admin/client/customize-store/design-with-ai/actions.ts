@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assign, spawn } from 'xstate';
+import { assign, spawn, EventObject } from 'xstate';
 import {
 	getQuery,
 	updateQueryString,
@@ -106,6 +106,28 @@ const assignFontPairing = assign<
 	designWithAiStateMachineEvents
 >( {
 	aiSuggestions: ( context, event: unknown ) => {
+		if ( ( event as EventObject ).type === 'xstate.error' ) {
+			let fontPairing = context.aiSuggestions.fontPairing;
+			const choice = context.lookAndFeel.choice;
+
+			switch ( true ) {
+				case choice === 'Contemporary':
+					fontPairing = 'Inter + Inter';
+					break;
+				case choice === 'Classic':
+					fontPairing = 'Bodoni Moda + Overpass';
+					break;
+				case choice === 'Bold':
+					fontPairing = 'Rubik + Inter';
+					break;
+			}
+
+			return {
+				...context.aiSuggestions,
+				fontPairing,
+			};
+		}
+
 		return {
 			...context.aiSuggestions,
 			fontPairing: (

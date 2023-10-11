@@ -26,7 +26,7 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 		};
 	} );
 
-	const productId = _productId ?? values.id;
+	const productId = _productId ?? values?.id;
 
 	const { _feature_nonce } = getSetting< { _feature_nonce: string } >(
 		'admin',

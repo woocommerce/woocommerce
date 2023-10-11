@@ -3070,6 +3070,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
 
+		$orders_table_data_store = fn() => wc_get_container()->get( OrdersTableDataStore::class );
+		add_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000, 0 );
+
 		$order = wc_create_order();
 
 		assert( empty( $order->get_changes() ), 'Order was not saved properly, test cannot continue.' );
@@ -3082,12 +3085,30 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->assertTrue( $call_private->call( $this->sut, $order ) );
 
+		// count the calls to the filter to ensure it's called only once.
 		$count = 0;
 		add_filter(
 			'woocommerce_before_order_object_save',
 			function () use ( &$count ) {
 				$count++;
 			}
+		);
+
+		/**
+		 * fix for previously flaky test:
+		 * freeze time to ensure less than a second passes while the following saves happen.
+		 */
+		$current_time_called = false;
+		$datetime            = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		$now                 = $datetime->format( 'Y-m-d H:i:s' );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function( $type, $gmt ) use ( &$current_time_called, $now ) {
+					$current_time_called = true;
+					return $now;
+				},
+			)
 		);
 
 		$order->add_meta_data( 'key1', 'value' );
@@ -3100,7 +3121,11 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save_meta_data();
 		$order->delete_meta_data( 'key1' );
 		$order->save_meta_data();
+
 		$this->assertEquals( 1, $count );
+		$this->assertTrue( $current_time_called, 'current_time mock was not called' );
+
+		remove_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000 );
 		remove_all_actions( 'woocommerce_before_order_object_save' );
 	}
 

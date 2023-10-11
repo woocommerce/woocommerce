@@ -22,5 +22,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }

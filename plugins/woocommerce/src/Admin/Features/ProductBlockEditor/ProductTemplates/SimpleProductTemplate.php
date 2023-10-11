@@ -244,7 +244,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'images'   => [],
+					'property' => 'images',
 				],
 			]
 		);

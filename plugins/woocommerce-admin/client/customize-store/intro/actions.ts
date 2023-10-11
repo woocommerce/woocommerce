@@ -8,20 +8,28 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-import { customizeStoreStateMachineContext } from '../types';
-import { ThemeCard } from './types';
+import {
+	customizeStoreStateMachineContext,
+	RecommendThemesAPIResponse,
+} from '../types';
 import { events } from './';
 
-export const assignThemeCards = assign<
+export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	intro: ( context, event ) => {
-		const themeCards = (
-			event as DoneInvokeEvent< { themeCards: ThemeCard[] } >
-		 ).data.themeCards;
+		const apiResponse = (
+			event as DoneInvokeEvent< {
+				themeData: RecommendThemesAPIResponse;
+			} >
+		 ).data.themeData;
+
 		// type coercion workaround for now
-		return { ...context.intro, themeCards };
+		return {
+			...context.intro,
+			themeData: apiResponse,
+		};
 	},
 } );
 
@@ -61,16 +69,15 @@ export const assignActiveThemeHasMods = assign<
 
 export const assignCustomizeStoreCompleted = assign<
 	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+	customizeStoreStateMachineEvents
 >( {
 	intro: ( context, event ) => {
-		const customizeStoreCompleted = (
+		const customizeStoreTaskCompleted = (
 			event as DoneInvokeEvent< {
-				assignCustomizeStoreCompleted: boolean;
+				customizeStoreTaskCompleted: boolean;
 			} >
-		 ).data.assignCustomizeStoreCompleted;
-		// type coercion workaround for now
-		return { ...context.intro, customizeStoreCompleted };
+		 ).data.customizeStoreTaskCompleted;
+		return { ...context.intro, customizeStoreTaskCompleted };
 	},
 } );
 
@@ -80,5 +87,19 @@ export const assignFetchIntroDataError = assign<
 >( {
 	intro: ( context ) => {
 		return { ...context.intro, hasErrors: true };
+	},
+} );
+
+export const assignCurrentThemeIsAiGenerated = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const currentThemeIsAiGenerated = (
+			event as DoneInvokeEvent< {
+				currentThemeIsAiGenerated: boolean;
+			} >
+		 ).data.currentThemeIsAiGenerated;
+		return { ...context.intro, currentThemeIsAiGenerated };
 	},
 } );

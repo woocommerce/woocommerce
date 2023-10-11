@@ -53,14 +53,12 @@ const tabs: Tabs = {
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === DEFAULT_TAB_KEY ) {
-		navigateTo( {
-			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
-		} );
-		return;
-	}
 	navigateTo( {
-		url: getNewPath( { tab: tabKey } ),
+		url: getNewPath(
+			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
+			MARKETPLACE_PATH,
+			{}
+		),
 	} );
 };
 

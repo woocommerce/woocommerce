@@ -8,12 +8,16 @@ import { useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './content.scss';
-
-import { Product, SearchAPIProductType } from '../product-list/types';
+import {
+	Product,
+	ProductType,
+	SearchAPIProductType,
+	SearchResultType,
+} from '../product-list/types';
 import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
-import Extensions from '../extensions/extensions';
+import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
 import Themes from '../themes/themes';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
@@ -27,6 +31,7 @@ export default function Content(): JSX.Element {
 
 	// Get the content for this screen
 	useEffect( () => {
+		const abortController = new AbortController();
 		if ( [ '', 'discover' ].includes( selectedTab ) ) {
 			return;
 		}
@@ -63,7 +68,7 @@ export default function Content(): JSX.Element {
 			params.toString();
 
 		// Fetch data from WCCOM API
-		fetch( wccomSearchEndpoint )
+		fetch( wccomSearchEndpoint, { signal: abortController.signal } )
 			.then( ( response ) => response.json() )
 			.then( ( response ) => {
 				/**
@@ -97,16 +102,36 @@ export default function Content(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
+		return () => {
+			abortController.abort();
+		};
 	}, [ query.term, query.category, selectedTab, setIsLoading ] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
-				return <Extensions products={ products } />;
+				return (
+					<Products
+						products={ products }
+						categorySelector={ true }
+						type={ ProductType.extension }
+					/>
+				);
 			case 'themes':
-				return <Themes products={ products } />;
+				return (
+					<Products
+						products={ products }
+						categorySelector={ true }
+						type={ ProductType.theme }
+					/>
+				);
 			case 'search':
-				return <SearchResults products={ products } />;
+				return (
+					<SearchResults
+						products={ products }
+						type={ SearchResultType.all }
+					/>
+				);
 			case 'discover':
 				return <Discover />;
 			case 'my-subscriptions':

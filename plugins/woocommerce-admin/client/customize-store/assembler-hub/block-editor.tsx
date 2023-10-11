@@ -14,15 +14,16 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
+import { useQuery } from '@woocommerce/navigation';
+import { useContext, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { useCallback } from '@wordpress/element';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
-import { useQuery } from '@woocommerce/navigation';
+import { CustomizeStoreContext } from './';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -66,6 +67,7 @@ export const BlockEditor = ( {} ) => {
 	const settings = useSiteEditorSettings();
 	const [ blocks ] = useEditorBlocks();
 	const urlParams = useQuery();
+	const { currentState } = useContext( CustomizeStoreContext );
 
 	const scrollDirection =
 		urlParams.path === '/customize-store/assembler-hub/footer'
@@ -124,6 +126,7 @@ export const BlockEditor = ( {} ) => {
 					settings={ settings }
 					additionalStyles={ '' }
 					isNavigable={ false }
+					isScrollable={ currentState !== 'transitionalScreen' }
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }

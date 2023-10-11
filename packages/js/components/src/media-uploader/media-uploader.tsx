@@ -25,6 +25,7 @@ type MediaUploaderProps = {
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
 	multipleSelect?: boolean | string;
+	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
@@ -35,8 +36,8 @@ type MediaUploaderProps = {
 		file: File;
 	} ) => void;
 	onMediaGalleryOpen?: () => void;
-	onUpload?: ( files: MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem[] ) => void;
+	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
+	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
 };
 
@@ -48,6 +49,7 @@ export const MediaUploader = ( {
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
 	multipleSelect = false,
+	value,
 	onError = () => null,
 	onFileUploadChange = () => null,
 	onMediaGalleryOpen = () => null,
@@ -58,16 +60,21 @@ export const MediaUploader = ( {
 	const getFormFileUploadAcceptedFiles = () =>
 		allowedMediaTypes.map( ( type ) => `${ type }/*` );
 
+	const multiple = Boolean( multipleSelect );
+
 	return (
 		<FormFileUpload
 			accept={ getFormFileUploadAcceptedFiles().toString() }
-			multiple={ true }
+			multiple={ multiple }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
+					allowedTypes: allowedMediaTypes,
 					filesList: currentTarget.files as FileList,
-					onError,
-					onFileChange: onFileUploadChange,
 					maxUploadFileSize,
+					onError,
+					onFileChange( files ) {
+						onFileUploadChange( multiple ? files : files[ 0 ] );
+					},
 				} );
 			} }
 			render={ ( { openFileDialog } ) => (
@@ -94,6 +101,7 @@ export const MediaUploader = ( {
 						</div>
 
 						<MediaUploadComponent
+							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
 							// @ts-expect-error - TODO multiple also accepts string.
@@ -113,12 +121,17 @@ export const MediaUploader = ( {
 
 						{ hasDropZone && (
 							<DropZone
-								onFilesDrop={ ( files ) =>
+								onFilesDrop={ ( droppedFiles ) =>
 									uploadMedia( {
-										filesList: files,
-										onError,
-										onFileChange: onUpload,
+										allowedTypes: allowedMediaTypes,
+										filesList: droppedFiles,
 										maxUploadFileSize,
+										onError,
+										onFileChange( files ) {
+											onUpload(
+												multiple ? files : files[ 0 ]
+											);
+										},
 									} )
 								}
 							/>
