@@ -17,11 +17,13 @@ import {
 import type {
 	TransformBlock,
 	IsBlockType,
-	ProductGridLayout,
-	ProductGridLayoutTypes,
 	PostTemplateLayout,
 	PostTemplateLayoutTypes,
 } from './types';
+import {
+	LayoutOptions,
+	ProductCollectionDisplayLayout,
+} from '../product-collection/types';
 
 const VARIATION_NAME = 'woocommerce/product-query';
 
@@ -77,9 +79,7 @@ const isPostSummary: IsBlockType = ( { name, attributes } ) =>
 	attributes.__woocommerceNamespace ===
 		'woocommerce/product-collection/product-summary';
 
-const mapLayoutType = (
-	type: ProductGridLayoutTypes
-): PostTemplateLayoutTypes => {
+const mapLayoutType = ( type: LayoutOptions ): PostTemplateLayoutTypes => {
 	if ( type === 'flex' ) {
 		return 'grid';
 	}
@@ -90,7 +90,7 @@ const mapLayoutType = (
 };
 
 const mapLayoutPropertiesFromProductCollectionToPostTemplate = (
-	layout: ProductGridLayout
+	layout: ProductCollectionDisplayLayout
 ): PostTemplateLayout => {
 	const { type, columns } = layout;
 
@@ -103,7 +103,7 @@ const mapLayoutPropertiesFromProductCollectionToPostTemplate = (
 const transformProductTemplate: TransformBlock = (
 	block,
 	innerBlocks,
-	displayLayout?: ProductGridLayout
+	displayLayout?: ProductCollectionDisplayLayout
 ) => {
 	return createBlock(
 		'core/post-template',
@@ -111,7 +111,7 @@ const transformProductTemplate: TransformBlock = (
 			className: 'products-block-post-template',
 			layout: postTemplateHasSupportForGridView
 				? mapLayoutPropertiesFromProductCollectionToPostTemplate(
-						displayLayout as ProductGridLayout
+						displayLayout as ProductCollectionDisplayLayout
 				  )
 				: undefined,
 			__woocommerceNamespace:
@@ -150,7 +150,7 @@ const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
 
 const mapInnerBlocks = (
 	innerBlocks: BlockInstance[],
-	displayLayout?: ProductGridLayout
+	displayLayout?: ProductCollectionDisplayLayout
 ): BlockInstance[] => {
 	const mappedInnerBlocks = innerBlocks.map( ( innerBlock ) => {
 		const { name, attributes } = innerBlock;
