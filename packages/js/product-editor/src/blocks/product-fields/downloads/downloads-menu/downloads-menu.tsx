@@ -4,19 +4,14 @@
 import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	chevronDown,
-	chevronUp,
-	customLink,
-	media,
-	upload,
-} from '@wordpress/icons';
+import { chevronDown, chevronUp, customLink } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { DownloadsMenuProps } from './types';
 import { UploadFilesMenuItem } from '../upload-files-menu-item';
+import { MediaLibraryMenuItem } from '../media-library-menu-item';
 
 export function DownloadsMenu( {
 	allowedTypes,
@@ -52,17 +47,13 @@ export function DownloadsMenu( {
 							onUploadError={ onUploadError }
 						/>
 
-						<MenuItem
-							icon={ media }
-							iconPosition="left"
-							onClick={ onClose }
-							info={ __(
-								'Choose from uploaded media',
-								'woocommerce'
-							) }
-						>
-							{ __( 'Media Library', 'woocommerce' ) }
-						</MenuItem>
+						<MediaLibraryMenuItem
+							allowedTypes={ allowedTypes }
+							onUploadSuccess={ ( files ) => {
+								onUploadSuccess( files );
+								onClose();
+							} }
+						/>
 
 						<MenuItem
 							icon={ customLink }
