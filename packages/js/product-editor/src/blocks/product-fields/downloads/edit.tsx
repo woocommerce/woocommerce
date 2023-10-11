@@ -28,8 +28,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { DownloadableFileItem, UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 
-declare const productBlockEditorSettings: Record< string, unknown >;
-
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
 	return name;
@@ -53,11 +51,9 @@ export function Edit( {
 		[]
 	);
 
-	const allowedMimeTypes = useSelect( ( select ) => {
+	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
-		const { allowedMimeTypes } = getEditorSettings();
-
-		return allowedMimeTypes;
+		return getEditorSettings();
 	} );
 
 	useEffect( () => {

@@ -98,7 +98,7 @@ export function BlockEditor( {
 		onChange( blockInstances, {} );
 
 		updateEditorSettings( _settings ?? {} );
-	}, [ productId, productType ] );
+	}, [ productType ] );
 
 	const editedProduct: Product = useSelect( ( select ) =>
 		select( 'core' ).getEditedEntityRecord(
