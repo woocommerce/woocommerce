@@ -134,6 +134,9 @@ class WC_Tracker {
 
 		// General site info.
 		$data['url'] = home_url();
+		$data['store_id'] = self::get_store_id();
+		$data['blog_id'] = self::get_blog_id();
+
 		/**
 		 * Filter the admin email that's sent with data.
 		 *
@@ -210,6 +213,24 @@ class WC_Tracker {
 		 * @since 2.3.0
 		 */
 		return apply_filters( 'woocommerce_tracker_data', $data );
+	}
+
+	/**
+	 * Get the store ID which is set on install/update.
+	 *
+	 * @return string
+	 */
+	public static function get_store_id() {
+		return get_option( 'woocommerce_store_id', null);
+	}
+
+	/**
+	 * Get the blog ID for Jetpack sites.
+	 *
+	 * @return string
+	 */
+	public static function get_blog_id() {
+		return class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
 	}
 
 	/**

@@ -164,4 +164,18 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$data_store->delete( $note_2 );
 	}
 
+	/**
+	 * Test that maybe_set_store_id only sets an ID when it isn't already present.
+	 */
+	public function test_maybe_set_store_id() {
+
+		// simulate a store ID not being set
+		delete_option(\WC_Install::STORE_ID_OPTION);
+		$store_id = \WC_Install::maybe_set_store_id();
+		$this->assertSame( $store_id, get_option(\WC_Install::STORE_ID_OPTION) );
+
+		// simulate a store ID already being set.
+		$existing_store_id = \WC_Install::maybe_set_store_id();
+		$this->assertSame( $store_id, $existing_store_id );
+	}
 }

@@ -250,6 +250,13 @@ class WC_Install {
 	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
 
 	/**
+	 * Option name used to uniquely identify installations of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const STORE_ID_OPTION = 'woocommerce_store_id';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
@@ -438,6 +445,7 @@ class WC_Install {
 		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_set_store_id();
 
 		delete_transient( 'wc_installing' );
 
@@ -608,6 +616,20 @@ class WC_Install {
 		} else {
 			self::update_db_version();
 		}
+	}
+
+	/**
+	 * Set the Store ID if not already present.
+	 *
+	 * @since 8.2.0
+	 */
+	public static function maybe_set_store_id() {
+		$store_id = get_option( self::STORE_ID_OPTION, false );
+		if ( ! $store_id ) {
+			$store_id = wp_generate_uuid4();
+			add_option( self::STORE_ID_OPTION, $store_id );
+		}
+		return $store_id;
 	}
 
 	/**
