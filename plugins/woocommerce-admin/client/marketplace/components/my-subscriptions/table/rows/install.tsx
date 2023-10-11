@@ -9,9 +9,9 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Subscription } from './types';
-import { installProduct } from '../../utils/functions';
-import { SubscriptionsContext } from '../../contexts/subscriptions-context';
+import { Subscription } from '../../types';
+import { installProduct } from '../../../../utils/functions';
+import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 
 interface ActivationToggleProps {
 	subscription: Subscription;

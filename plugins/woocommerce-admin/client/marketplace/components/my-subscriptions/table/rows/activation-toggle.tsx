@@ -7,7 +7,7 @@ import { ToggleControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { Subscription } from '../../types';
-import Install from '../../install';
+import Install from './install';
 
 interface ActivationToggleProps {
 	subscription: Subscription;

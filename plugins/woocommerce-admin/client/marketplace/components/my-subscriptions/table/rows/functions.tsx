@@ -184,16 +184,6 @@ export function activation( subscription: Subscription ): TableRow {
 	};
 }
 
-export function install(): TableRow {
-	return {
-		display: (
-			<Button variant="primary">
-				{ __( 'Install', 'woocommerce' ) }
-			</Button>
-		),
-	};
-}
-
 export function actions(): TableRow {
 	return {
 		display: <ActionsDropdownMenu />,
