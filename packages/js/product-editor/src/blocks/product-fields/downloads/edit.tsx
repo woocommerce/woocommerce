@@ -27,6 +27,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { DownloadableFileItem, UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
+import { DownloadsMenu } from './downloads-menu';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -162,6 +163,10 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
+			<div className="wp-block-woocommerce-product-downloads-field__header">
+				<DownloadsMenu />
+			</div>
+
 			{ Boolean( fileItems.length ) ? (
 				<Sortable className="wp-block-woocommerce-product-downloads-field__table">
 					{ fileItems.map( ( fileItem ) => {
