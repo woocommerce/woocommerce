@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -32,52 +32,33 @@ export function Edit( {
 		title,
 		type = 'info',
 	} = attributes;
-	const productId = useEntityId( 'postType', context.postType || 'product' );
+	const [ parentId ] = useEntityProp< number >( 'postType', 'product_variation', 'parent_id' );
 	const { dismissedNotices, dismissNotice } = useNotice();
 	const {
-		name,
-		parentId,
+		parentName,
 		isResolving,
-	}: { name: string; parentId: number; isResolving: boolean } = useSelect(
+	}: { parentName: string; isResolving: boolean } = useSelect(
 		( select ) => {
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
-			const { parent_id: productIdentificator }: Product =
-				getEditedEntityRecord( 'postType', 'product', productId );
-
-			const isVariationResolving = ! hasFinishedResolution(
-				'getEditedEntityRecord',
-				[ 'postType', 'product', productId ]
-			);
-
-			if ( isVariationResolving ) {
-				return {
-					parentId: productIdentificator,
-					name: '',
-					isResolving: true,
-				};
-			}
-
-			const { name: parentName }: Product = getEditedEntityRecord(
+			const { name }: Product = getEditedEntityRecord(
 				'postType',
 				'product',
-				productIdentificator
+				parentId
 			);
 			const isParentResolving = ! hasFinishedResolution(
 				'getEditedEntityRecord',
-				[ 'postType', 'product', productIdentificator ]
+				[ 'postType', 'product', parentId ]
 			);
 
 			return {
-				parentId: productIdentificator || 0,
-				name: parentName || '',
-				isResolving: isParentResolving || isVariationResolving,
+				parentName: name || '',
+				isResolving: isParentResolving,
 			};
-		},
-		[ productId ]
+		}
 	);
 
-	if ( dismissedNotices.includes( parentId ) || isResolving || name === '' ) {
+	if ( dismissedNotices.includes( parentId ) || isResolving || parentName === '' ) {
 		return null;
 	}
 
@@ -104,7 +85,7 @@ export function Edit( {
 							} }
 						/>
 					),
-					parentProductName: <span>{ name }</span>,
+					parentProductName: <span>{ parentName }</span>,
 				} ) }
 			</Notice>
 		</div>
