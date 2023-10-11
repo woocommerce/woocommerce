@@ -1,15 +1,14 @@
-.woocommerce-downloads-menu {
-	&__toogle {
-		flex-direction: row-reverse;
+$media-modal-z-index: calc(z-index(".components-popover") + 10000);
+$media-modal-backdrop-z-index: calc($media-modal-z-index - 1000);
 
-		> span {
-			margin: 0 6px;
+.woocommerce-media-library-menu-item {
+	&__upload_files_modal_wrapper {
+		.media-modal {
+			z-index: $media-modal-z-index;
 		}
-	}
 
-	&__menu-content {
-		.components-menu-item__item {
-			min-width: 172px;
+		.media-modal-backdrop {
+			z-index: $media-modal-backdrop-z-index;
 		}
 	}
 }
