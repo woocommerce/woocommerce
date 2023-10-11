@@ -28,7 +28,9 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Connect, { prefetchJetpackAuthUrl } from '../../../dashboard/components/connect';
+import Connect, {
+	prefetchJetpackAuthUrl,
+} from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
@@ -61,9 +63,7 @@ export class Shipping extends Component {
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;
 
-		this.jetpackAuthRedirectUrl = getAdminLink(
-			'admin.php?page=wc-admin'
-		);
+		this.jetpackAuthRedirectUrl = getAdminLink( 'admin.php?page=wc-admin' );
 	}
 
 	componentDidMount() {
