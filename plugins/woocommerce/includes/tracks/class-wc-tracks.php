@@ -73,7 +73,7 @@ class WC_Tracks {
 	 * @return string
 	 */
 	private static function get_jetpack_blog_id() {
-		if (class_exists( 'Jetpack_Options' ) ) {
+		if ( class_exists( 'Jetpack_Options' ) ) {
 			$blog_id = Jetpack_Options::get_option( 'id' );
 			return $blog_id ? $blog_id : null;
 		}
