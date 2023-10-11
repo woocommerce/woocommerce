@@ -10,6 +10,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Inter + Inter',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -66,6 +67,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Bodoni Moda + Overpass',
 		version: 2,
+		lookAndFeel: [ 'Classic' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -126,6 +128,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Commissioner + Crimson Pro',
 		version: 2,
+		lookAndFeel: [ 'Contemporary' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -188,6 +191,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Libre Baskerville + DM Sans',
 		version: 2,
+		lookAndFeel: [ 'Classic', 'Bold' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -248,6 +252,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Libre Franklin + EB Garamond',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Classic', 'Bold' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -311,6 +316,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Montserrat + Arvo',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -374,6 +380,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Playfair Display + Fira Sans',
 		version: 2,
+		lookAndFeel: [ 'Classic' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -438,6 +445,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Rubik + Inter',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -496,6 +504,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Space Mono + Roboto',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Classic' ],
 		settings: {
 			typography: {
 				fontFamilies: {
