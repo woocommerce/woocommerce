@@ -22,11 +22,14 @@ import {
 import type {
 	TransformBlock,
 	IsBlockType,
-	ProductGridLayout,
-	ProductGridLayoutTypes,
 	PostTemplateLayout,
 	PostTemplateLayoutTypes,
 } from './types';
+import { DEFAULT_ATTRIBUTES } from '../product-collection/constants';
+import {
+	LayoutOptions,
+	ProductCollectionDisplayLayout,
+} from '../product-collection/types';
 
 const mapAttributes = ( attributes: Record< string, unknown > ) => {
 	const { query, namespace, ...restAttributes } = attributes;
@@ -106,21 +109,23 @@ const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
 	);
 };
 
-const mapLayoutType = (
-	type: PostTemplateLayoutTypes
-): ProductGridLayoutTypes => {
+const mapLayoutType = ( type: PostTemplateLayoutTypes ): LayoutOptions => {
 	if ( type === 'grid' ) {
-		return 'flex';
+		return LayoutOptions.GRID;
 	}
 	if ( type === 'default' ) {
-		return 'list';
+		return LayoutOptions.STACK;
 	}
-	return 'flex';
+	return LayoutOptions.GRID;
 };
 
 const mapLayoutPropertiesFromPostTemplateToProductCollection = (
 	layout: PostTemplateLayout
-): ProductGridLayout => {
+): ProductCollectionDisplayLayout => {
+	if ( layout === undefined ) {
+		return DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+	}
+
 	const { type, columnCount } = layout;
 
 	return {
@@ -132,7 +137,7 @@ const mapLayoutPropertiesFromPostTemplateToProductCollection = (
 const getLayoutAttribute = (
 	attributes,
 	innerBlocks: BlockInstance[]
-): ProductGridLayout => {
+): ProductCollectionDisplayLayout => {
 	// Starting from GB 16, it's not Query Loop that keeps the layout, but the Post Template block.
 	// We need to account for that and in that case, move the layout properties
 	// from Post Template to Product Collection.
