@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { help } from '@wordpress/icons';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,8 +13,6 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import { Subscription } from './types';
 import './my-subscriptions.scss';
-import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { fetchSubscriptions } from '../../../marketplace/utils/functions';
 import {
 	InstalledSubscriptionsTable,
 	AvailableSubscriptionsTable,
@@ -23,26 +21,10 @@ import {
 	installedSubscriptionRow,
 	availableSubscriptionRow,
 } from './table/table-rows';
+import { SubscriptionsContext } from '../../contexts/subscriptions-context';
 
 export default function MySubscriptions(): JSX.Element {
-	const [ subscriptions, setSubscriptions ] = useState<
-		Array< Subscription >
-	>( [] );
-	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { isLoading, setIsLoading } = marketplaceContextValue;
-
-	// Get the content for this screen
-	useEffect( () => {
-		setIsLoading( true );
-
-		fetchSubscriptions()
-			.then( ( subscriptionResponse ) => {
-				setSubscriptions( subscriptionResponse );
-			} )
-			.finally( () => {
-				setIsLoading( false );
-			} );
-	}, [] );
+	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 
 	const updateConnectionUrl = getNewPath(
 		{
