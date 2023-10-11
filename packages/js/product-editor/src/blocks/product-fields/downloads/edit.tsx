@@ -54,10 +54,10 @@ export function Edit( {
 	);
 
 	const allowedMimeTypes = useSelect( ( select ) => {
-		// const { getEditorSettings } = select( 'core/editor' );
-		// const settings = getEditorSettings();
+		const { getEditorSettings } = select( 'core/editor' );
+		const { allowedMimeTypes } = getEditorSettings();
 
-		return productBlockEditorSettings.allowedMimeTypes;
+		return allowedMimeTypes;
 	} );
 
 	useEffect( () => {
