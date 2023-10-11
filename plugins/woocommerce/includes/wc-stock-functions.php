@@ -428,11 +428,15 @@ function wc_get_low_stock_amount( WC_Product $product ) {
 /**
  * Return default stock amount. (Default: 1)
  *
+ * @since x.x.x
+ *
  * @return int
  */
 function wc_get_default_stock_amount() {
 	/**
 	 * Filters default stock amount. (Default: 1)
+	 *
+	 * @since x.x.x
 	 *
 	 * @return int
 	 */
