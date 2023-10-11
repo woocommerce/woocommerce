@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.3
 Tested up to: 6.3
 Requires PHP: 7.3
-Stable tag: 11.1.1
+Stable tag: 11.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -80,6 +80,38 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 11.3.0 - 2023-10-09 =
+
+#### Enhancements
+
+- Introduced condensed address components on checkout for customers with an existing address. ([11167](https://github.com/woocommerce/woocommerce-blocks/pull/11167))
+- Update aspect ratio, icons and default text for the Social: Follow us on social media pattern. ([11161](https://github.com/woocommerce/woocommerce-blocks/pull/11161))
+- Add horizontal padding to the Featured Category Triple pattern. ([11160](https://github.com/woocommerce/woocommerce-blocks/pull/11160))
+- Remove the "no results" placeholder and pagination and set aspect ratio on the Product Collection 3 Columns, Product Collection 4 Columns, Product Collection 5 Columns, and Product Gallery patterns. ([11145](https://github.com/woocommerce/woocommerce-blocks/pull/11145))
+- Add group and padding to the Product Collection 3 Columns, Featured Category Triple and the Social: Follow us on social media patterns. ([11144](https://github.com/woocommerce/woocommerce-blocks/pull/11144))
+- New Product Collection Patterns: add the new Product Collection 3 Columns, Product Collection 4 Columns, Product Collection 5 Columns and Product Collection: Featured Products 5 Columns patterns. ([11134](https://github.com/woocommerce/woocommerce-blocks/pull/11134))
+- Add titles and padding to the Product Collection: Featured Products 5 Columns and the Product Gallery patterns. ([11131](https://github.com/woocommerce/woocommerce-blocks/pull/11131))
+- Add default image and fixed height to the Just Arrived Full Hero pattern. ([11130](https://github.com/woocommerce/woocommerce-blocks/pull/11130))
+- Add titles and padding to the Product Collection 4 Columns, Product Collection 5 Columns, and Testimonials 3 Columns patterns. ([11129](https://github.com/woocommerce/woocommerce-blocks/pull/11129))
+- Add Add to Cart button's product price data attribute. ([11117](https://github.com/woocommerce/woocommerce-blocks/pull/11117))
+- Just Arrived Full Hero pattern: wireframe the content and adjust the pattern width. ([11115](https://github.com/woocommerce/woocommerce-blocks/pull/11115))
+- Remove opinionated styles from the Hero Product 3 Split pattern. ([11110](https://github.com/woocommerce/woocommerce-blocks/pull/11110))
+- Add the Featured Category Cover Image pattern. ([11109](https://github.com/woocommerce/woocommerce-blocks/pull/11109))
+- Add fee ID to parent cart and checkout block. ([11054](https://github.com/woocommerce/woocommerce-blocks/pull/11054))
+- Update: Adjust text of incompatibility sidebar notice and show extensions, that explicitly declared incompatibility with the Cart and Checkout blocks. ([10877](https://github.com/woocommerce/woocommerce-blocks/pull/10877))
+
+#### Bug Fixes
+
+- Fix Store Notices block breaks page editors. ([11165](https://github.com/woocommerce/woocommerce-blocks/pull/11165))
+- Ensure the Just Arrived Full Hero pattern can have an AI-selected images assigned to it and add a background dim. ([11159](https://github.com/woocommerce/woocommerce-blocks/pull/11159))
+- Testimonials 3 Columns pattern > Update the width and fix the PHP warnings that could be triggered if the content saved within the wc_blocks_patterns_content option didn't match the updated patterns dictionary. ([11158](https://github.com/woocommerce/woocommerce-blocks/pull/11158))
+- Pattern: Fetch product ID with JS to prevent unnecesary queries on every page load. ([11138](https://github.com/woocommerce/woocommerce-blocks/pull/11138))
+- Fix checkout state/country field width in the site editor. ([11133](https://github.com/woocommerce/woocommerce-blocks/pull/11133))
+- Fixed PHP notice that would appear if an API endpoint failed to load. ([11128](https://github.com/woocommerce/woocommerce-blocks/pull/11128))
+- Made error icon on checkout match text color. ([11127](https://github.com/woocommerce/woocommerce-blocks/pull/11127))
+- Fix a PHP error that was occurring when the WooCommerce Product Add-ons or the WooCommerce Product Bundles plugins were enabled. ([11082](https://github.com/woocommerce/woocommerce-blocks/pull/11082))
+- Resolved an issue where the Single Product block did not respect the WooCommerce setting for redirecting to the cart page after successful addition. ([11151](https://github.com/woocommerce/woocommerce-blocks/pull/11151))
 
 = 11.2.0 - 2023-09-25 =
 
