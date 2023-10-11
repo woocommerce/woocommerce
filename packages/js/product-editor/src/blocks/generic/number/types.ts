@@ -9,4 +9,6 @@ export interface NumberBlockAttributes extends BlockAttributes {
 	help?: string;
 	suffix?: string;
 	placeholder?: string;
+	min?: number;
+	max?: number;
 }
