@@ -20,6 +20,7 @@ const mockVariation = {
 	id: 10,
 	manage_stock: false,
 	attributes: [],
+	downloads: [],
 } as ProductVariation;
 
 describe( 'VariationActionsMenu', () => {
