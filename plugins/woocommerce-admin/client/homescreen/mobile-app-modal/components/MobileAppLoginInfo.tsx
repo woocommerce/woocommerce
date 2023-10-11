@@ -21,7 +21,7 @@ export const MobileAppLoginInfo = ( {
 					<QRCodeSVG value={ loginUrl } size={ 140 } />
 					<p>
 						{ __(
-							'The app version needs to be 15.8 or above to sign in with this link.',
+							'The app version needs to be 15.7 or above to sign in with this link.',
 							'woocommerce'
 						) }
 					</p>
