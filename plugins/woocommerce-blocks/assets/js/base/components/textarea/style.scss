@@ -2,7 +2,7 @@
 	@include font-size(regular);
 	background-color: #fff;
 	border: 1px solid $input-border-gray;
-	border-radius: 4px;
+	border-radius: $universal-border-radius;
 	color: $input-text-active;
 	font-family: inherit;
 	line-height: 1.375; // =22px when font-size is 16px.

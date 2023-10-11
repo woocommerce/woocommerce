@@ -34,7 +34,7 @@
 			white-space: nowrap;
 			width: 100%;
 			opacity: initial;
-			border-radius: 4px;
+			border-radius: $universal-border-radius;
 
 			&[aria-expanded="true"],
 			&:focus {
@@ -73,6 +73,8 @@
 			min-width: 100%;
 			overflow: auto;
 			color: $input-text-active;
+			border-bottom-left-radius: $universal-border-radius;
+			border-bottom-right-radius: $universal-border-radius;
 
 			.has-dark-controls & {
 				background-color: $select-dropdown-dark;

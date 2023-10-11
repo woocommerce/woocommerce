@@ -22,7 +22,7 @@
 	border: none;
 	box-shadow: none !important;
 	outline: 1px solid currentColor;
-	border-radius: 0 !important;
+	border-radius: $universal-border-radius;
 	&.components-button:hover:not(:disabled),
 	&.components-button:focus:not(:disabled),
 	&:focus,

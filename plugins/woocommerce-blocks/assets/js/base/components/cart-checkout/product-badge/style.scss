@@ -1,6 +1,6 @@
 .wc-block-components-product-badge {
 	@include font-size(smaller);
-	border-radius: 2px;
+	border-radius: $universal-border-radius;
 	border: 1px solid;
 	display: inline-block;
 	font-weight: 600;

@@ -16,7 +16,7 @@
 }
 .wc-block-order-confirmation-shipping-address {
 	border: 1px solid $universal-border-light;
-	border-radius: 2px;
+	border-radius: $universal-border-radius;
 	padding: $gap;
 
 	address,

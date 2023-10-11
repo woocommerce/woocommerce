@@ -12,7 +12,7 @@
 }
 
 .wc-block-components-quantity-selector {
-	border-radius: 4px;
+	border-radius: $universal-border-radius;
 	// needed so that buttons fill the container.
 	box-sizing: content-box;
 	display: flex;
@@ -21,7 +21,7 @@
 	width: 107px;
 
 	&::after {
-		border-radius: 4px;
+		border-radius: $universal-border-radius;
 		border: 1px solid currentColor;
 		bottom: 0;
 		content: "";
@@ -89,12 +89,12 @@
 	}
 
 	> .wc-block-components-quantity-selector__button--minus {
-		border-radius: 4px 0 0 4px;
+		border-radius: $universal-border-radius 0 0 $universal-border-radius;
 		order: 1;
 	}
 
 	> .wc-block-components-quantity-selector__button--plus {
-		border-radius: 0 4px 4px 0;
+		border-radius: 0 $universal-border-radius $universal-border-radius 0;
 		order: 3;
 	}
 }

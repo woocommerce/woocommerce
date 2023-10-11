@@ -47,7 +47,7 @@
 		background-color: #fff;
 		padding: em($gap-small) 0;
 		text-indent: $gap;
-		border-radius: 4px;
+		border-radius: $universal-border-radius;
 		border: 1px solid $input-border-gray;
 		width: 100%;
 		line-height: 1.375; // =22px when font-size is 16px.
