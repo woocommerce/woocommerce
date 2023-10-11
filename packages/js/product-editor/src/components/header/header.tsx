@@ -28,7 +28,7 @@ export type HeaderProps = {
 	productType?: string;
 };
 
-const RETRUN_TO_MAIN_PRODUCT = __(
+const RETURN_TO_MAIN_PRODUCT = __(
 	'Return to the main product',
 	'woocommerce'
 );
@@ -78,7 +78,7 @@ export function Header( {
 						<Tooltip
 							// @ts-expect-error className is missing in TS, should remove this when it is included.
 							className="woocommerce-product-header__back-tooltip"
-							text={ RETRUN_TO_MAIN_PRODUCT }
+							text={ RETURN_TO_MAIN_PRODUCT }
 						>
 							<div className="woocommerce-product-header__back-tooltip-wrapper">
 								<Button
