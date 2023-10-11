@@ -17,6 +17,7 @@ import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
+import ImageVariationModal from '../components/background-generator/modal';
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -42,6 +43,8 @@ export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 
+	const [ showModal, setShowModal ] = useState( false );
+
 	const [ state, setState ] = useState< 'none' | 'generating' | 'uploading' >(
 		'none'
 	);
@@ -50,6 +53,12 @@ export const BackgroundRemovalLink = () => {
 	useEffect( () => {
 		recordBgRemovalTracks( 'view_ui' );
 	}, [] );
+
+	const newOnRemoveBackgroundClick = () => {
+		console.log( 'newOnRemoveBackgroundClick' );
+		wp.media.frame.modal.close();
+		setShowModal( true );
+	};
 
 	const onRemoveBackgroundClick = async () => {
 		removeSnackbar();
@@ -128,8 +137,9 @@ export const BackgroundRemovalLink = () => {
 
 	return (
 		<>
+			{ showModal && <ImageVariationModal /> }
 			<div className="background-link_actions">
-				<button onClick={ () => onRemoveBackgroundClick() }>
+				<button onClick={ () => newOnRemoveBackgroundClick() }>
 					{ __( 'Remove background', 'woocommerce' ) }
 				</button>
 				<img src={ MagicIcon } alt="" />
