@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix global setup for release tests.
