@@ -2,10 +2,11 @@
 
 ## Table of Contents <!-- omit in toc -->
 
+
+-   [Get Cart](#get-cart)
 -   [Responses](#responses)
     -   [Cart Response](#cart-response)
     -   [Error Response](#error-response)
--   [Get Cart](#get-cart)
 -   [Add Item](#add-item)
 -   [Remove Item](#remove-item)
 -   [Update Item](#update-item)
@@ -17,6 +18,21 @@
 The cart API returns the current state of the cart for the current session or logged in user.
 
 All POST endpoints require [Nonce Tokens](nonce-tokens.md) and return the updated state of the full cart once complete.
+
+
+## Get Cart
+
+```http
+GET /cart
+```
+
+There are no parameters required for this endpoint.
+
+```sh
+curl "https://example-store.com/wp-json/wc/store/v1/cart"
+```
+
+Returns the full cart object response (see [Cart Response](#cart-response)).
 
 ## Responses
 
@@ -377,20 +393,6 @@ Some error responses indicate conflicts (error 409), for example, when an item c
 ```
 
 This allows the client to remain in sync with the cart data without additional requests, should the cart change or become outdated.
-
-## Get Cart
-
-```http
-GET /cart
-```
-
-There are no parameters required for this endpoint.
-
-```sh
-curl "https://example-store.com/wp-json/wc/store/v1/cart"
-```
-
-Returns the full cart object response (see [Cart Response](#cart-response)).
 
 ## Add Item
 
