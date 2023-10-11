@@ -49,7 +49,7 @@ export const Edit = ( {
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
-							'Account creation and guest checkout settings can be managed in the WooCommerce settings.',
+							'Account creation and guest checkout settings can be managed in your store settings.',
 							'woo-gutenberg-products-block'
 						) }
 					</p>

@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
-import { getSetting } from '@woocommerce/settings';
+import { PanelBody, ExternalLink } from '@wordpress/components';
+import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
@@ -14,19 +14,16 @@ import Block from './block';
 
 export const Edit = ( {
 	attributes,
-	setAttributes,
 }: {
 	attributes: {
-		isShippingCalculatorEnabled: boolean;
 		className: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
 		};
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const { isShippingCalculatorEnabled, className } = attributes;
+	const { className } = attributes;
 	const shippingEnabled = getSetting( 'shippingEnabled', true );
 	const blockProps = useBlockProps();
 
@@ -36,35 +33,29 @@ export const Edit = ( {
 				{ !! shippingEnabled && (
 					<PanelBody
 						title={ __(
-							'Shipping rates',
+							'Shipping Calculations',
 							'woo-gutenberg-products-block'
 						) }
 					>
-						<ToggleControl
-							label={ __(
-								'Shipping calculator',
+						<p className="wc-block-checkout__controls-text">
+							{ __(
+								'Options that control shipping can be managed in your store settings.',
 								'woo-gutenberg-products-block'
 							) }
-							help={ __(
-								'Allow customers to estimate shipping by entering their address.',
+						</p>
+						<ExternalLink
+							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
+						>
+							{ __(
+								'Manage shipping options',
 								'woo-gutenberg-products-block'
 							) }
-							checked={ isShippingCalculatorEnabled }
-							onChange={ () =>
-								setAttributes( {
-									isShippingCalculatorEnabled:
-										! isShippingCalculatorEnabled,
-								} )
-							}
-						/>
+						</ExternalLink>{ ' ' }
 					</PanelBody>
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block
-					className={ className }
-					isShippingCalculatorEnabled={ isShippingCalculatorEnabled }
-				/>
+				<Block className={ className } />
 			</Noninteractive>
 		</div>
 	);

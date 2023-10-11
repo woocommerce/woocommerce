@@ -4,14 +4,12 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, ExternalLink, ToggleControl } from '@wordpress/components';
+import { PanelBody, ExternalLink } from '@wordpress/components';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import { Attributes } from '@woocommerce/blocks/checkout/types';
-import { updateAttributeInSiblingBlock } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -34,15 +32,12 @@ type shippingAdminLink = {
 export const Edit = ( {
 	attributes,
 	setAttributes,
-	clientId,
 }: {
-	clientId: string;
 	attributes: {
 		title: string;
 		description: string;
 		showStepNumber: boolean;
 		className: string;
-		shippingCostRequiresAddress: boolean;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
@@ -59,12 +54,6 @@ export const Edit = ( {
 		return null;
 	}
 
-	const toggleAttribute = ( key: keyof Attributes ): void => {
-		const newAttributes = {} as Partial< Attributes >;
-		newAttributes[ key ] = ! ( attributes[ key ] as boolean );
-		setAttributes( newAttributes );
-	};
-
 	return (
 		<FormStepBlock
 			attributes={ attributes }
@@ -77,26 +66,24 @@ export const Edit = ( {
 			<InspectorControls>
 				<PanelBody
 					title={ __(
-						'Calculations',
+						'Shipping Calculations',
 						'woo-gutenberg-products-block'
 					) }
 				>
-					<ToggleControl
-						label={ __(
-							'Hide shipping costs until an address is entered',
+					<p className="wc-block-checkout__controls-text">
+						{ __(
+							'Options that control shipping can be managed in your store settings.',
 							'woo-gutenberg-products-block'
 						) }
-						checked={ attributes.shippingCostRequiresAddress }
-						onChange={ ( selected ) => {
-							updateAttributeInSiblingBlock(
-								clientId,
-								'shippingCostRequiresAddress',
-								selected,
-								'woocommerce/checkout-shipping-method-block'
-							);
-							toggleAttribute( 'shippingCostRequiresAddress' );
-						} }
-					/>
+					</p>
+					<ExternalLink
+						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
+					>
+						{ __(
+							'Manage shipping options',
+							'woo-gutenberg-products-block'
+						) }
+					</ExternalLink>{ ' ' }
 				</PanelBody>
 				{ globalShippingMethods.length > 0 && (
 					<PanelBody
@@ -133,11 +120,14 @@ export const Edit = ( {
 				) }
 				{ activeShippingZones.length && (
 					<PanelBody
-						title={ __( 'Zones', 'woo-gutenberg-products-block' ) }
+						title={ __(
+							'Shipping Zones',
+							'woo-gutenberg-products-block'
+						) }
 					>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
-								'You currently have the following shipping zones active.',
+								'Shipping Zones can be made managed in your store settings.',
 								'woo-gutenberg-products-block'
 							) }
 						</p>
@@ -151,24 +141,11 @@ export const Edit = ( {
 								/>
 							);
 						} ) }
-						<ExternalLink
-							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-						>
-							{ __(
-								'Manage shipping zones',
-								'woo-gutenberg-products-block'
-							) }
-						</ExternalLink>
 					</PanelBody>
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block
-					noShippingPlaceholder={ <NoShippingPlaceholder /> }
-					shippingCostRequiresAddress={
-						attributes.shippingCostRequiresAddress
-					}
-				/>
+				<Block noShippingPlaceholder={ <NoShippingPlaceholder /> } />
 			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>
