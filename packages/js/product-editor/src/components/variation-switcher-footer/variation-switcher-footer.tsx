@@ -29,7 +29,7 @@ export function VariationSwitcherFooter( {
 	variationId,
 	parentId,
 }: VariationSwitcherProps ) {
-	const { previousVariation, nextVariation } = useSelect(
+	const { previousVariation, nextVariation, numberOfVariations } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			const parentProduct = getEntityRecord< Product >(
@@ -55,6 +55,7 @@ export function VariationSwitcherFooter( {
 					];
 
 				return {
+					numberOfVariations: parentProduct.variations.length,
 					previousVariation: getEntityRecord< ProductVariation >(
 						'postType',
 						'product_variation',
@@ -87,6 +88,10 @@ export function VariationSwitcherFooter( {
 				`/product/${ parentId }/variation/${ nextVariation?.id }`
 			),
 		} );
+	}
+
+	if ( ! numberOfVariations || numberOfVariations < 2 ) {
+		return null;
 	}
 
 	return (
