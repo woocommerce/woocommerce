@@ -73,7 +73,7 @@ export function Header( {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
-				{ productType === 'product_variation' ? (
+				{ lastPersistedProduct?.parent_id > 0 ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
 							// @ts-expect-error className is missing in TS, should remove this when it is included.
@@ -108,7 +108,7 @@ export function Header( {
 				) }
 
 				<h1 className="woocommerce-product-header__title">
-					{ productType === 'product_variation' ? (
+					{ lastPersistedProduct?.parent_id > 0 ? (
 						<div className="woocommerce-product-header__variable-product-title">
 							<Icon icon={ group } />
 							<span className="woocommerce-product-header__variable-product-name">
