@@ -11,9 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<h2>
-	<?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?>
-	<a class="button button-primary wc-shipping-class-add-new" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
+<h2 class="wc-shipping-zones-heading">
+	<span><?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?></span>
+	<a class="button button-primary wc-shipping-class-add-new page-title-action" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
 </h2>
 
 <p class="wc-shipping-zone-help-text">

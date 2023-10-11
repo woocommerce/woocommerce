@@ -3949,9 +3949,14 @@ table {
 	display: none;
 }
 
-.wc-shipping-zones-heading .page-title-action {
-	display: inline-block;
-}
+.wc-shipping-zones-heading {
+	display: flex;
+
+	.page-title-action {
+		display: inline-block;
+		margin: 0 12px;
+	}
+} 
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
