@@ -13,6 +13,7 @@ import { useEffect } from '@wordpress/element';
 import { CART_STORE_KEY, VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -164,17 +165,19 @@ const Block = ( {
 	showIcon,
 	localPickupText,
 	shippingText,
-	shippingCostRequiresAddress = false,
 }: {
 	checked: string;
 	onChange: ( value: string ) => void;
 	showPrice: boolean;
 	showIcon: boolean;
-	shippingCostRequiresAddress: boolean;
 	localPickupText: string;
 	shippingText: string;
 } ): JSX.Element | null => {
 	const { shippingRates } = useShippingData();
+	const shippingCostRequiresAddress = getSetting< boolean >(
+		'shippingCostRequiresAddress',
+		false
+	);
 
 	return (
 		<RadioGroup

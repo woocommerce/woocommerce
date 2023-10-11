@@ -143,7 +143,7 @@ test.describe( 'Merchant → Cart', () => {
 			await expect( filledCartAudioButton ).toBeHidden();
 		} );
 
-		test( 'shows empty cart when changing the view and allows toggling of shipping calculator', async ( {
+		test( 'shows empty cart when changing the view', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -187,24 +187,6 @@ test.describe( 'Merchant → Cart', () => {
 					blockData.selectors.editor.block +
 						' [data-type="woocommerce/empty-cart-block"]'
 				)
-			).toBeHidden();
-
-			await editor.selectBlocks(
-				await editorUtils.getBlockByName(
-					'woocommerce/cart-order-summary-shipping-block'
-				)
-			);
-			await editor.openDocumentSettingsSidebar();
-			const shippingLabel = editorUtils.page.getByLabel(
-				'Shipping calculator'
-			);
-			await shippingLabel.check();
-			await expect(
-				editor.canvas.getByText( 'Change address' )
-			).toBeVisible();
-			await shippingLabel.uncheck();
-			await expect(
-				editor.canvas.getByText( 'Change address' )
 			).toBeHidden();
 		} );
 	} );
