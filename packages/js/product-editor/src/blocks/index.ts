@@ -3,6 +3,7 @@ export { init as initCheckbox } from './generic/checkbox';
 export { init as initCollapsible } from './generic/collapsible';
 export { init as initConditional } from './generic/conditional';
 export { init as initDescription } from './product-fields/description';
+export { init as initDownloads } from './product-fields/downloads';
 export { init as initImages } from './product-fields/images';
 export { init as initLowStockQty } from './product-fields/inventory-email';
 export { init as initSku } from './product-fields/inventory-sku';
