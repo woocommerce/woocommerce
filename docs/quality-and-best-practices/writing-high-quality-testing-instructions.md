@@ -89,50 +89,50 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 
 In this section, you will see some real examples of testing instructions that have room for improvement (before) and how we can tweak them (after).
 
-**Before**
+Before:
 
 ![Instructions needing improvement](https://user-images.githubusercontent.com/45979455/213682262-25bec5c3-154c-45ec-aa3d-d3e07f52669e.png)
 
-**After**
+After:
 
 ![Improved instructions](https://user-images.githubusercontent.com/45979455/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
 
-**Improvements**
+Improvements:
 
-![](https://user-images.githubusercontent.com/45979455/213682323-0ecc998d-69ab-4201-8daa-820b948315e8.png)
+![Changes made](https://user-images.githubusercontent.com/45979455/213682323-0ecc998d-69ab-4201-8daa-820b948315e8.png)
 
-**Before**
+Before:
 
-![](https://user-images.githubusercontent.com/45979455/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
+![Instructions needing improvement](https://user-images.githubusercontent.com/45979455/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
 
-**After**
+After:
 
-![](https://user-images.githubusercontent.com/45979455/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
+![Improved instructions](https://user-images.githubusercontent.com/45979455/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
 
-**Improvements**
+Improvements:
 
-![Screen Shot on 2023-01-11 at 13-36-29 (1)](https://user-images.githubusercontent.com/45979455/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
+![Changes made](https://user-images.githubusercontent.com/45979455/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
 
-**Before**
+Before:
 
 ![Screenshot 2023-02-02 at 16 07 29](https://user-images.githubusercontent.com/45979455/216365611-b540a814-3b8f-40f3-ae64-81018b9f97fb.png)
 
-**After**
+After:
 
 ![Screenshot 2023-02-02 at 16 22 31](https://user-images.githubusercontent.com/45979455/216366043-967e5daa-6a23-4ab8-adda-5f3082d1ebf7.png)
 
-**Improvements**
+Improvements:
 
 ![Screenshot 2023-02-02 at 16 09 24](https://user-images.githubusercontent.com/45979455/216366152-b331648d-bcef-443b-b126-de2621a20862.png)
 
-**Before**
+Before:
 
 ![Screenshot 2023-02-02 at 17 25 07](https://user-images.githubusercontent.com/45979455/216388785-8806ea74-62e6-42da-8887-c8e291e7dfe2.png)
 
-**After**
+After:
 
 ![Screenshot 2023-02-02 at 17 49 22](https://user-images.githubusercontent.com/45979455/216388842-e5ab433e-d288-4306-862f-72f6f81ab2cd.png)
 
-**Improvements**
+Improvements:
 
 ![Screenshot 2023-02-02 at 17 39 23](https://user-images.githubusercontent.com/45979455/216388874-c5b21fc3-f693-4a7e-a58a-c5d1b6606682.png)
