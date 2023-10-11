@@ -903,7 +903,12 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$activated = self::activate_helper_subscription( $product_key, $product_id );
+		$activated = false;
+		try {
+			$activated = self::activate_helper_subscription( $product_key, $product_id );
+		} catch ( Exception $e ) {
+			$activated = false;
+		}
 
 		$redirect_uri = add_query_arg(
 			array(
@@ -928,7 +933,7 @@ class WC_Helper {
 	public static function activate_helper_subscription( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
-			return false;
+			throw new Exception( __('Subscription not found', 'woocommerce') );
 		}
 		$product_id = $subscription['product_id']; 
 
@@ -970,6 +975,7 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
+			throw new Exception( $body['message'] ?? __('Unknown error', 'woocommerce') );
 		}
 
 		// Attempt to activate this plugin.
@@ -996,7 +1002,12 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$deactivated = self::deactivate_helper_subscription( $product_key );
+		$deactivated = false;
+		try {
+			$deactivated = self::deactivate_helper_subscription( $product_key );
+		} catch ( Exception $e ) {
+			$deactivated = false;
+		}
 
 		$redirect_uri = add_query_arg(
 			array(
@@ -1019,7 +1030,7 @@ class WC_Helper {
 	public static function deactivate_helper_subscription( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
-			return false;
+			throw new Exception( __('Subscription not found', 'woocommerce') );
 		}
 		$product_id = $subscription['product_id']; 
 
@@ -1058,6 +1069,9 @@ class WC_Helper {
 			 * @param array  $deactivation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
+
+			$body = json_decode( wp_remote_retrieve_body( $deactivation_response ), true );
+			throw new Exception( $body['message'] ?? __('Unknown error', 'woocommerce') );
 		}
 
 		self::_flush_subscriptions_cache();

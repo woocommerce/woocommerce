@@ -104,7 +104,16 @@ class WC_Helper_Subscriptions_API {
 	 */
 	public static function activate( $request ) {
 		$product_key = $request->get_param('product_key');
-		$success = WC_Helper::activate_helper_subscription( $product_key );
+		try {
+			$success = WC_Helper::activate_helper_subscription( $product_key );
+		} catch (Exception $e) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage()
+				),
+				400
+			);
+		}
 		if ( $success ) {
 			wp_send_json_success(
 				array(
@@ -125,7 +134,16 @@ class WC_Helper_Subscriptions_API {
 	 */
 	public static function deactivate( $request ) {
 		$product_key = $request->get_param('product_key');
-		$success = WC_Helper::deactivate_helper_subscription( $product_key );
+		try {
+			$success = WC_Helper::deactivate_helper_subscription( $product_key );
+		} catch (Exception $e) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage()
+				),
+				400
+			);
+		}
 		if ( $success ) {
 			wp_send_json_success(
 				array(
