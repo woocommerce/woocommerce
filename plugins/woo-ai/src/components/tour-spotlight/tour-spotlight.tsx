@@ -60,7 +60,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				placement,
 				options: {
 					effects: {
-						liveResize: { mutation: false, resize: false },
+						liveResize: { mutation: true, resize: true },
 					},
 				},
 				closeHandler: () => {
