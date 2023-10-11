@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Button, Spinner } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -12,6 +12,36 @@ import apiFetch from '@wordpress/api-fetch';
 import './modal.scss';
 
 /**
+ * Upload image to WordPress Media Library.
+ *
+ * @param {Blob} imageBlob - The image data as a Blob.
+ * @return {Promise<void>}
+ */
+const uploadImageToMediaLibrary = async (
+	imageBlob: Blob
+): Promise< void > => {
+	// Create FormData object and append the Blob
+	const formData = new FormData();
+	formData.append( 'file', imageBlob, 'new-image.jpg' );
+
+	try {
+		// Upload image to WordPress Media Library
+		const newMedia = await apiFetch( {
+			path: '/wp/v2/media',
+			method: 'POST',
+			headers: {
+				'Content-Disposition': 'attachment; filename=new-image.jpg',
+			},
+			body: formData,
+		} );
+
+		console.log( 'Successfully uploaded:', newMedia );
+	} catch ( error ) {
+		console.error( 'Failed to upload image:', error );
+	}
+};
+
+/**
  * Image Variation Modal Component
  *
  * @return {JSX.Element} The modal component.
@@ -19,12 +49,21 @@ import './modal.scss';
 const ImageVariationModal: React.FC = () => {
 	const [ isOpen, setIsOpen ] = useState( true );
 	const [ isLoading, setLoading ] = useState( false );
-	const [ newImage, setNewImage ] = useState< string | null >( null );
+	const [ newImage, setNewImage ] = useState< Blob | null >( null );
+	const [ newImageUrl, setNewImageUrl ] = useState< string | null >( null );
+
+	useEffect( () => {
+		if ( newImage ) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setNewImageUrl( reader.result as string );
+			};
+			reader.readAsDataURL( newImage );
+		}
+	}, [ newImage ] );
 
 	/**
 	 * Generate image variations.
-	 *
-	 * @return {Promise<void>}
 	 */
 	const generateVariations = async (): Promise< void > => {
 		setLoading( true );
@@ -37,12 +76,7 @@ const ImageVariationModal: React.FC = () => {
 				parse: false, // Do not parse the response as JSON
 			} ) ) as Blob;
 
-			// Convert Blob to Data URL for displaying in an <img> element
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setNewImage( reader.result as string );
-			};
-			reader.readAsDataURL( response );
+			setNewImage( response );
 		} catch ( error ) {
 			console.error( 'Failed to generate variations:', error );
 		}
@@ -59,8 +93,11 @@ const ImageVariationModal: React.FC = () => {
 	 * @return {void}
 	 */
 	const acceptImage = (): void => {
-		console.log( 'acceptImage' );
 		// Logic to upload newImage to media library can go here
+		// throw error if !newImage ?
+		if ( newImage ) {
+			uploadImageToMediaLibrary( newImage );
+		}
 		wp.media.frame.modal.open();
 		setIsOpen( false ); // Close the modal
 	};
@@ -81,7 +118,7 @@ const ImageVariationModal: React.FC = () => {
 					{ /* @todo: Get image URL from selected image in media library */ }
 					<img src="original_image_url" alt="Original" />
 					{ /* New Image */ }
-					{ newImage && <img src={ newImage } alt="New" /> }
+					{ newImageUrl && <img src={ newImageUrl } alt="New" /> }
 					{ /* Loading Indicator */ }
 					{ isLoading && <Spinner /> }
 				</div>

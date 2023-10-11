@@ -55,7 +55,6 @@ export const BackgroundRemovalLink = () => {
 	}, [] );
 
 	const newOnRemoveBackgroundClick = () => {
-		console.log( 'newOnRemoveBackgroundClick' );
 		wp.media.frame.modal.close();
 		setShowModal( true );
 	};
