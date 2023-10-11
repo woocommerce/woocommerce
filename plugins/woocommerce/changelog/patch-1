@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Use `async` loading strategy for the `woo-tracks` script.
