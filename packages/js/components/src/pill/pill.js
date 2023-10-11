@@ -12,7 +12,7 @@ import { Text } from '../experimental';
 export function Pill( { children, className = '' } ) {
 	return (
 		<Text
-			className={ classnames( 'woocommerce-pill', className ) }
+			className={ classnames( 'woocommerce-pill       ', className ) }
 			variant="caption"
 			as="span"
 			size="100"
