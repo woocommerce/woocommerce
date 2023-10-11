@@ -15,6 +15,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable, Tag } from '@woocommerce/components';
+import { getNewPath } from '@woocommerce/navigation';
 import {
 	useContext,
 	useState,
@@ -496,6 +497,17 @@ export const VariationsTable = forwardRef<
 									</div>
 								</Tooltip>
 							) }
+
+							<Button
+								href={ getNewPath(
+									{},
+									`/product/${ productId }/variation/${ variation.id }`,
+									{}
+								) }
+							>
+								{ __( 'Edit', 'woocommerce' ) }
+							</Button>
+
 							<VariationActionsMenu
 								selection={ variation }
 								onChange={ ( value ) =>
