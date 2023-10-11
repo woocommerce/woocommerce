@@ -6,14 +6,6 @@
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { useSelect } from '@wordpress/data';
-// @ts-ignore no types exist yet.
-import { BlockEditorProvider } from '@wordpress/block-editor';
-import { noop } from 'lodash';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 import { PanelBody } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -25,14 +17,6 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
 
 const SidebarNavigationScreenColorPaletteContent = () => {
-	const { storedSettings } = useSelect( ( select ) => {
-		const { getSettings } = unlock( select( editSiteStore ) );
-
-		return {
-			storedSettings: getSettings( false ),
-		};
-	}, [] );
-
 	// Wrap in a BlockEditorProvider to ensure that the Iframe's dependencies are
 	// loaded. This is necessary because the Iframe component waits until
 	// the block editor store's `__internalIsInitialized` is true before
@@ -43,24 +27,17 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 			className="woocommerce-customize-store_sidebar-color-content"
 			style={ {
 				opacity: 0,
-				animation: 'containerFadeIn 1000ms ease-in-out forwards',
+				animation: 'containerFadeIn 300ms ease-in-out forwards',
 			} }
 		>
-			<BlockEditorProvider
-				settings={ storedSettings }
-				onChange={ noop }
-				onInput={ noop }
+			<ColorPalette />
+			<PanelBody
+				className="woocommerce-customize-store__color-panel-container"
+				title={ __( 'or create your own', 'woocommerce' ) }
+				initialOpen={ false }
 			>
-				<ColorPalette />
-
-				<PanelBody
-					className="woocommerce-customize-store__color-panel-container"
-					title={ __( 'or create your own', 'woocommerce' ) }
-					initialOpen={ false }
-				>
-					<ColorPanel />
-				</PanelBody>
-			</BlockEditorProvider>
+				<ColorPanel />
+			</PanelBody>
 		</div>
 	);
 };

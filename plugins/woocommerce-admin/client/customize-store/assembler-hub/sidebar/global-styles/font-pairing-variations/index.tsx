@@ -21,7 +21,7 @@ export const FontPairing = () => {
 			className="woocommerce-customize-store_font-pairing-container"
 			style={ {
 				opacity: 0,
-				animation: 'containerFadeIn 1000ms ease-in-out forwards',
+				animation: 'containerFadeIn 300ms ease-in-out forwards',
 			} }
 		>
 			{ FONT_PAIRINGS.map( ( variation, index ) => (
