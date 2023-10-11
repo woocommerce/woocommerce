@@ -57,6 +57,10 @@ export function Edit( {
 		return getEditorSettings();
 	} );
 
+	const allowedTypes = allowedMimeTypes
+		? Object.values( allowedMimeTypes )
+		: [];
+
 	useEffect( () => {
 		setFileItems( ( currentItems ) => {
 			const downloadsMap = downloads.reduce<
@@ -74,16 +78,13 @@ export function Edit( {
 			>( function keepPresentDownload( items, item ) {
 				if ( item.download.id === '' ) {
 					items.push( item );
-					return items;
-				}
-				if ( item.download.id && item.download.id in downloadsMap ) {
+				} else if ( item.download.id in downloadsMap ) {
 					const download = downloadsMap[ item.download.id ];
 					delete downloadsMap[ item.download.id ];
 					items.push( {
 						...item,
 						download,
 					} );
-					return items;
 				}
 				return items;
 			}, [] );
@@ -126,7 +127,16 @@ export function Edit( {
 
 				return current;
 			},
-			{ uploadedFiles: [], items: [] }
+			{
+				uploadedFiles: [],
+				items: downloads.map(
+					( download ) => ( {
+						key: String( download.id ),
+						download,
+					} ),
+					[]
+				),
+			}
 		);
 
 		if ( uploadedFiles.length ) {
@@ -164,7 +174,11 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
-				<DownloadsMenu />
+				<DownloadsMenu
+					allowedTypes={ allowedTypes }
+					onUploadSuccess={ handleFileUpload }
+					onUploadError={ () => {} }
+				/>
 			</div>
 
 			{ Boolean( fileItems.length ) ? (
@@ -244,11 +258,7 @@ export function Edit( {
 						</>
 					}
 					buttonText=""
-					allowedMediaTypes={
-						allowedMimeTypes
-							? Object.values( allowedMimeTypes )
-							: []
-					}
+					allowedMediaTypes={ allowedTypes }
 					multipleSelect={ 'add' }
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }

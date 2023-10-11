@@ -16,8 +16,14 @@ import {
  * Internal dependencies
  */
 import { DownloadsMenuProps } from './types';
+import { UploadFilesMenuItem } from '../upload-files-menu-item';
 
-export function DownloadsMenu( {}: DownloadsMenuProps ) {
+export function DownloadsMenu( {
+	allowedTypes,
+	maxUploadFileSize,
+	onUploadSuccess,
+	onUploadError,
+}: DownloadsMenuProps ) {
 	return (
 		<Dropdown
 			position="bottom left"
@@ -36,17 +42,15 @@ export function DownloadsMenu( {}: DownloadsMenuProps ) {
 			renderContent={ ( { onClose } ) => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
-						<MenuItem
-							icon={ upload }
-							iconPosition="left"
-							onClick={ onClose }
-							info={ __(
-								'Select files from your device',
-								'woocommerce'
-							) }
-						>
-							{ __( 'Upload', 'woocommerce' ) }
-						</MenuItem>
+						<UploadFilesMenuItem
+							allowedTypes={ allowedTypes }
+							maxUploadFileSize={ maxUploadFileSize }
+							onUploadSuccess={ ( files ) => {
+								onUploadSuccess( files );
+								onClose();
+							} }
+							onUploadError={ onUploadError }
+						/>
 
 						<MenuItem
 							icon={ media }
