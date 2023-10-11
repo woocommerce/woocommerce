@@ -37,7 +37,7 @@ export function Edit( {
 		onChange: setValue,
 	} );
 
-	const id = useInstanceId( BaseControl, 'low_stock_amount' ) as string;
+	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 
 	const { error, validate } = useValidation< Product >(
 		property,
