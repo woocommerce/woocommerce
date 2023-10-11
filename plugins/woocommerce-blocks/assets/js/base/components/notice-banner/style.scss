@@ -6,7 +6,7 @@
 	padding: $gap !important;
 	gap: $gap-small;
 	margin: $gap 0;
-	border-radius: 4px;
+	border-radius: $universal-border-radius;
 	border-color: $gray-800;
 	font-weight: 400;
 	line-height: 1.5;

@@ -21,7 +21,7 @@
 	border: 1px solid $gray-900;
 	background-color: #fff;
 	padding: $gap-large $gap-larger;
-	border-radius: 3px;
+	border-radius: $universal-border-radius;
 	display: flex;
 	flex-direction: column;
 	max-width: 900px;
