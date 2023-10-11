@@ -114,13 +114,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'blockName'  => 'woocommerce/product-single-variation-notice',
 					'order'      => 10,
 					'attributes' => [
-						'content'       => sprintf(
-							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
-								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
-								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
-								'</a>'
-							),
+						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 						'type'          => 'info',
+						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
 						'isDismissible' => true,
 						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 					],
@@ -206,13 +202,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'blockName'  => 'woocommerce/product-single-variation-notice',
 					'order'      => 10,
 					'attributes' => [
-						'content'       => sprintf(
-							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
-								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
-								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
-								'</a>'
-							),
+						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 						'type'          => 'info',
+						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
 						'isDismissible' => true,
 						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 					],
@@ -343,13 +335,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'blockName'  => 'woocommerce/product-single-variation-notice',
 					'order'      => 10,
 					'attributes' => [
-						'content'       => sprintf(
-							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
-								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
-								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
-								'</a>'
-							),
+						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 						'type'          => 'info',
+						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
 						'isDismissible' => true,
 						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 					],
@@ -475,13 +463,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'blockName'  => 'woocommerce/product-single-variation-notice',
 					'order'      => 10,
 					'attributes' => [
-						'content'       => sprintf(
-							/* translators: %1$s: Main product link opening tag. %2$s: Main product link closing tag. */
-								__( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, %1$sUnisex Jacket in Beige%2$s.', 'woocommerce' ),
-								'<a href="' . admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id . '">',
-								'</a>'
-							),
+						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 						'type'          => 'info',
+						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
 						'isDismissible' => true,
 						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 					],

@@ -8,9 +8,6 @@
 	"keywords": [ "products", "notice" ],
 	"textdomain": "default",
 	"attributes": {
-		"id": {
-			"type": "string"
-		},
 		"title": {
 			"type": "string"
 		},
@@ -20,7 +17,7 @@
 		"isDismissible": {
 			"type": "boolean"
 		},
-		"name": {
+		"noticeLink": {
 			"type": "string"
 		},
 		"type": {
