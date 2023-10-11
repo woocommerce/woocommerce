@@ -99,7 +99,7 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		const response = await request.get( '/wp-json/wc/v3/system_status' );
 		const { database } = await response.json();
 		const { wc_database_version } = database;
-		const [major, minor] = UPDATE_WC.split( '.' );
+		const [ major, minor ] = UPDATE_WC.split( '.' );
 		const pattern = new RegExp( `^${ major }\.${ minor }` );
 		expect( wc_database_version ).toMatch( pattern );
 	} );
