@@ -37,7 +37,7 @@ class WC_Tracks {
 			$blog_details = array(
 				'url'            => home_url(),
 				'blog_lang'      => get_user_locale( $user_id ),
-				'blog_id'        => self::get_jetpack_blog_id(),
+				'blog_id'        => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 				'store_id'		 => get_option( 'woocommerce_store_id' , null),
 				'products_count' => self::get_products_count(),
 				'wc_version'     => WC()->version,
@@ -65,19 +65,6 @@ class WC_Tracks {
 		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : '';
 
 		return $data;
-	}
-
-	/**
-	 * Get Jetpack blog_id ensuring null is returned when id is not present.
-	 *
-	 * @return string
-	 */
-	private static function get_jetpack_blog_id() {
-		if ( class_exists( 'Jetpack_Options' ) ) {
-			$blog_id = Jetpack_Options::get_option( 'id' );
-			return $blog_id ? $blog_id : null;
-		}
-		return null;
 	}
 
 	/**
