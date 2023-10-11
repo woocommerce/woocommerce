@@ -141,12 +141,20 @@ describe( 'colorPaletteValidator', () => {
 } );
 
 describe( 'colorPaletteResponseValidator', () => {
+	const validPalette = {
+		default: 'Ancient Bronze',
+		bestColors: [
+			'Canary',
+			'Cinder',
+			'Rustic Rosewood',
+			'Lightning',
+			'Midnight Citrus',
+			'Purple Twilight',
+			'Crimson Tide',
+			'Ice',
+		],
+	};
 	it( 'should validate a correct color palette response', () => {
-		const validPalette = {
-			default: 'Ancient Bronze',
-			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
-		};
-
 		const parsedResult =
 			defaultColorPalette.responseValidation( validPalette );
 		expect( parsedResult ).toEqual( validPalette );
@@ -154,10 +162,10 @@ describe( 'colorPaletteResponseValidator', () => {
 
 	it( 'should fail if array contains invalid color', () => {
 		const invalidPalette = {
-			default: 'Ancient Bronze',
-			bestColors: Array( 7 )
-				.fill( 'Ancient Bronze' )
-				.concat( [ 'Invalid Color' ] ),
+			default: validPalette.default,
+			bestColors: validPalette.bestColors
+				.slice( 0, 7 )
+				.concat( 'Invalid Color' ),
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -195,7 +203,7 @@ describe( 'colorPaletteResponseValidator', () => {
 	} );
 	it( 'should fail if default property is missing', () => {
 		const invalidPalette = {
-			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+			bestColors: validPalette.bestColors,
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -216,7 +224,7 @@ describe( 'colorPaletteResponseValidator', () => {
 	it( 'should fail if bestColors array is not of length 8', () => {
 		const invalidPalette = {
 			default: 'Ancient Bronze',
-			bestColors: Array( 7 ).fill( 'Ancient Bronze' ),
+			bestColors: validPalette.bestColors.slice( 0, 7 ),
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -231,6 +239,23 @@ describe( 'colorPaletteResponseValidator', () => {
 		    \\"path\\": [
 		      \\"bestColors\\"
 		    ]
+		  }
+		]"
+	` );
+	} );
+
+	it( 'should fail if there are duplicate colors', () => {
+		const invalidPalette = {
+			default: 'Ancient Bronze',
+			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"custom\\",
+		    \\"message\\": \\"Color palette names must be unique\\",
+		    \\"path\\": []
 		  }
 		]"
 	` );
