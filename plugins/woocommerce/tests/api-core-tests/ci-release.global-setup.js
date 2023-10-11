@@ -7,6 +7,8 @@ const zipPath = path.resolve( 'tmp', 'woocommerce.zip' );
 const downloadURL = `https://github.com/woocommerce/woocommerce/releases/download/${ UPDATE_WC }/woocommerce.zip`;
 
 test( `Setup remote test site`, async ( { page, request } ) => {
+	test.setTimeout( 5 * 60 * 1000 );
+
 	await test.step( `Download WooCommerce build zip`, async () => {
 		const response = await request.get( downloadURL );
 		expect( response.ok() ).toBeTruthy();
