@@ -25,12 +25,10 @@ const FrontendBlock = ( {
 	showIcon,
 	shippingText,
 	localPickupText,
-	shippingCostRequiresAddress,
 }: {
 	title: string;
 	description: string;
 	showStepNumber: boolean;
-	shippingCostRequiresAddress: boolean;
 	children: JSX.Element;
 	className?: string;
 	showPrice: boolean;
@@ -92,7 +90,6 @@ const FrontendBlock = ( {
 				showIcon={ showIcon }
 				localPickupText={ localPickupText }
 				shippingText={ shippingText }
-				shippingCostRequiresAddress={ shippingCostRequiresAddress }
 			/>
 			{ children }
 		</FormStep>

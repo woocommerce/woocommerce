@@ -40,15 +40,10 @@ jest.mock( '@wordpress/compose', () => ( {
 const CartBlock = ( {
 	attributes = {
 		showRateAfterTaxName: false,
-		isShippingCalculatorEnabled: false,
 		checkoutPageId: 0,
 	},
 } ) => {
-	const {
-		showRateAfterTaxName,
-		isShippingCalculatorEnabled,
-		checkoutPageId,
-	} = attributes;
+	const { showRateAfterTaxName, checkoutPageId } = attributes;
 	return (
 		<Cart attributes={ attributes }>
 			<FilledCart>
@@ -59,11 +54,7 @@ const CartBlock = ( {
 					<OrderSummaryBlock>
 						<OrderSummaryHeadingBlock />
 						<OrderSummarySubtotalBlock />
-						<OrderSummaryShippingBlock
-							isShippingCalculatorEnabled={
-								isShippingCalculatorEnabled
-							}
-						/>
+						<OrderSummaryShippingBlock />
 						<OrderSummaryTaxesBlock
 							showRateAfterTaxName={ showRateAfterTaxName }
 						/>
