@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Modal, Button, Spinner } from '@wordpress/components';
+import { Modal, Button, Spinner, TextareaControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -51,6 +51,9 @@ const ImageVariationModal: React.FC = () => {
 	const [ isLoading, setLoading ] = useState( false );
 	const [ newImage, setNewImage ] = useState< Blob | null >( null );
 	const [ newImageUrl, setNewImageUrl ] = useState< string | null >( null );
+	const [ imagePrompt, setImagePrompt ] = useState(
+		'Sandy beach on a sunny day.'
+	);
 
 	useEffect( () => {
 		if ( newImage ) {
@@ -122,12 +125,18 @@ const ImageVariationModal: React.FC = () => {
 					{ /* Loading Indicator */ }
 					{ isLoading && <Spinner /> }
 				</div>
+				<TextareaControl
+					label="Text"
+					help="Enter some text"
+					value={ imagePrompt }
+					onChange={ ( value ) => setImagePrompt( value ) }
+				/>
 				<div>
-					<Button onClick={ generateVariations }>
+					<Button variant="primary" onClick={ generateVariations }>
 						Generate Variations
 					</Button>
 					{ newImage && (
-						<Button isDestructive onClick={ acceptImage }>
+						<Button variant="secondary" onClick={ acceptImage }>
 							Accept
 						</Button>
 					) }
