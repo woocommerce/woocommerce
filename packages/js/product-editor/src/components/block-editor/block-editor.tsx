@@ -4,7 +4,7 @@
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -89,15 +89,16 @@ export function BlockEditor( {
 		{ id: productId }
 	);
 
+	const { updateEditorSettings } = useDispatch( 'core/editor' );
+
 	useLayoutEffect( () => {
-		onChange(
-			synchronizeBlocksWithTemplate(
-				[],
-				_settings?.templates[ productType ]
-			),
-			{}
-		);
-	}, [ productId ] );
+		const template = _settings?.templates[ productType ];
+		const blockInstances = synchronizeBlocksWithTemplate( [], template );
+
+		onChange( blockInstances, {} );
+
+		updateEditorSettings( _settings ?? {} );
+	}, [ productId, productType ] );
 
 	const editedProduct: Product = useSelect( ( select ) =>
 		select( 'core' ).getEditedEntityRecord(
