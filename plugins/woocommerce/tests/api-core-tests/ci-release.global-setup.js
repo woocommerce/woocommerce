@@ -61,11 +61,10 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		await page.goto( '/wp-admin/plugin-install.php' );
 		await page.getByRole( 'button', { name: Upload_Plugin } ).click();
 		await page.getByLabel( Plugin_zip_file ).setInputFiles( zipPath );
-		const responsePromise = page.waitForResponse(
-			'**/wp-admin/update.php?action=upload-plugin'
-		);
 		await page.getByRole( 'button', { name: Install_Now } ).click();
-		const uploadResponse = await responsePromise;
+		const uploadResponse = await page.waitForResponse(
+			'**/wp-admin/update.php?action=upload-plugin'
+		);;
 		expect( uploadResponse.ok() ).toBeTruthy();
 		await expect(
 			page.getByRole( 'link', { name: Activate_Plugin } )
