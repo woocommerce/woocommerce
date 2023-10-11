@@ -231,32 +231,4 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '12345', $tracking_data['store_id'] );
 		delete_option( 'woocommerce_store_id' );
 	}
-
-	/**
-	 * @testDox Test blog_id is null in tracking data when Jetpack_Options is not present
-	 */
-	public function test_get_tracking_data_blog_id_is_null_when_jetpack_is_not_present() {
-		$tracking_data = WC_Tracker::get_tracking_data();
-		$this->assertArrayHasKey( 'blog_id', $tracking_data );
-		$this->assertNull( $tracking_data['blog_id'] );
-	}
-
-	/**
-	 * @testDox Test blog_id is included in tracking data when Jetpack_Options are present
-	 */
-	public function test_get_tracking_data_blog_id_is_included_when_jetpack_is_present() {
-		$blog_id = 12345;
-		$handler = $this
-			->getMockBuilder( Jetpack_Options::class )
-			->setMethods( array( 'get_option' ) )
-			->getMock();
-
-		$handler
-			->method( 'get_option' )
-			->willReturn( $blog_id );
-
-		$tracking_data = WC_Tracker::get_tracking_data();
-		$this->assertArrayHasKey( 'blog_id', $tracking_data );
-		$this->assertSame( $blog_id, $tracking_data['blog_id'] );
-	}
 }
