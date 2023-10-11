@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix "API on WP Latest" job in "Smoke test release" workflow.
