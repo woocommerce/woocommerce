@@ -7,6 +7,7 @@ import { createElement } from '@wordpress/element';
 import { arrowLeft, arrowRight, Icon } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { Product, ProductVariation } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
@@ -29,7 +30,12 @@ export function VariationSwitcherFooter( {
 	variationId,
 	parentId,
 }: VariationSwitcherProps ) {
-	const { previousVariation, nextVariation, numberOfVariations } = useSelect(
+	const {
+		previousVariation,
+		nextVariation,
+		numberOfVariations,
+		...variationIndexes
+	} = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			const parentProduct = getEntityRecord< Product >(
@@ -40,21 +46,23 @@ export function VariationSwitcherFooter( {
 			if ( parentProduct && parentProduct.variations ) {
 				const activeVariationIndex =
 					parentProduct.variations.indexOf( variationId );
+				const previousVariationIndex =
+					activeVariationIndex > 0
+						? activeVariationIndex - 1
+						: parentProduct.variations.length - 1;
+				const nextVariationIndex =
+					activeVariationIndex !== parentProduct.variations.length - 1
+						? activeVariationIndex + 1
+						: 0;
 				const previousVariationId =
-					parentProduct.variations[
-						activeVariationIndex > 0
-							? activeVariationIndex - 1
-							: parentProduct.variations.length - 1
-					];
+					parentProduct.variations[ previousVariationIndex ];
 				const nextVariationId =
-					parentProduct.variations[
-						activeVariationIndex !==
-						parentProduct.variations.length - 1
-							? activeVariationIndex + 1
-							: 0
-					];
+					parentProduct.variations[ nextVariationIndex ];
 
 				return {
+					activeVariationIndex,
+					nextVariationIndex,
+					previousVariationIndex,
 					numberOfVariations: parentProduct.variations.length,
 					previousVariation: getEntityRecord< ProductVariation >(
 						'postType',
@@ -73,6 +81,12 @@ export function VariationSwitcherFooter( {
 		[ variationId, parentId ]
 	);
 	function onPrevious() {
+		recordEvent( 'product_variation_switch_previous', {
+			variation_length: numberOfVariations,
+			variation_id: previousVariation?.id,
+			variation_index: variationIndexes.activeVariationIndex,
+			previous_variation_index: variationIndexes.previousVariationIndex,
+		} );
 		navigateTo( {
 			url: getNewPath(
 				{},
@@ -82,6 +96,12 @@ export function VariationSwitcherFooter( {
 	}
 
 	function onNext() {
+		recordEvent( 'product_variation_switch_next', {
+			variation_length: numberOfVariations,
+			variation_id: nextVariation?.id,
+			variation_index: variationIndexes.activeVariationIndex,
+			next_variation_index: variationIndexes.nextVariationIndex,
+		} );
 		navigateTo( {
 			url: getNewPath(
 				{},
