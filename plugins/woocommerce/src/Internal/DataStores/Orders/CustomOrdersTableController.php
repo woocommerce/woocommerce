@@ -406,22 +406,9 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_feature( $sync_status ) {
+	private function get_hpos_setting_for_feature() {
 		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
-		}
-
-		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
-		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
-		$sync_complete           = 0 === $sync_status['current_pending_count'];
-		$disabled_option         = array();
-		// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
-		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
-			$disabled_option = array( 'yes' );
-		}
-		if ( ! $sync_complete && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
-			$disabled_option = array( 'yes', 'no' );
 		}
 
 		$get_value = function() {
@@ -441,14 +428,13 @@ class CustomOrdersTableController {
 
 		$get_disabled = function() {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_status          = $this->data_synchronizer->get_sync_status();
-			$sync_complete        = 0 === $sync_status['current_pending_count'];
+			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 			if ( count( array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] ) ) > 0 ) {
 				$disabled = array( 'yes' );
 			}
-			if ( ! $sync_complete ) {
+			if ( ! $sync_complete && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
 				$disabled = array( 'yes', 'no' );
 			}
 
@@ -476,45 +462,9 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_setting_for_sync( $sync_status ) {
+	private function get_hpos_setting_for_sync() {
 		if ( 'yes' === get_transient( 'wc_installing' ) ) {
 			return array();
-		}
-
-		$sync_in_progress     = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-		$sync_enabled         = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
-		$sync_message         = '';
-		$sync_is_pending      = $sync_status['current_pending_count'] > 0;
-		$description_is_error = false;
-		if ( $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed() ) {
-			$sync_message = sprintf(
-			// translators: %d: number of pending orders.
-				_n(
-					"There's %d order pending sync. Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!",
-					'There are %d orders pending sync. Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!',
-					$sync_status['current_pending_count'],
-					'woocommerce'
-				),
-				$sync_status['current_pending_count'],
-			);
-			$description_is_error = true;
-		} elseif ( $sync_in_progress && $sync_is_pending ) {
-			$sync_message = sprintf(
-				// translators: %d: number of pending orders.
-				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
-				$sync_status['current_pending_count']
-			);
-		} elseif ( $sync_is_pending ) {
-			$sync_message = sprintf(
-				// translators: %d: number of pending orders.
-				_n(
-					"There's %d order pending sync. You can switch data storage for orders only when posts and orders table are in sync.",
-					'There are %d orders pending sync. You can switch data storage for orders only when posts and orders table are in sync.',
-					$sync_status['current_pending_count'],
-					'woocommerce'
-				),
-				$sync_status['current_pending_count'],
-			);
 		}
 
 		$get_value = function() {
@@ -522,22 +472,40 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function() {
-			$sync_status      = $this->data_synchronizer->get_sync_status();
-			$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-			$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
-			$sync_message     = array();
+			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
+			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
+			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
+			$sync_is_pending           = $orders_pending_sync_count > 0;
+			$sync_message              = array();
+
+			$is_dangerous = $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
+
+			if ( $is_dangerous ) {
+				$sync_message[] = wp_kses_data(
+					sprintf(
+					// translators: %d: number of pending orders.
+						_n(
+							"There's %d order pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>",
+							'There are %d orders pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>',
+							$orders_pending_sync_count,
+							'woocommerce'
+						),
+						$orders_pending_sync_count,
+					)
+				);
+			}
 
 			if ( ! $sync_enabled && $this->data_synchronizer->background_sync_is_enabled() ) {
 				$sync_message[] = __( 'Background sync is enabled.', 'woocommerce' );
 			}
 
-			if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
+			if ( $sync_in_progress && $sync_is_pending ) {
 				$sync_message[] = sprintf(
 					// translators: %d: number of pending orders.
 					__( 'Currently syncing orders... %d pending', 'woocommerce' ),
-					$sync_status['current_pending_count']
+					$orders_pending_sync_count
 				);
-			} elseif ( $sync_status['current_pending_count'] > 0 ) {
+			} elseif ( $sync_is_pending ) {
 				$sync_now_url = add_query_arg(
 					array(
 						self::SYNC_QUERY_ARG => true,
@@ -545,12 +513,20 @@ class CustomOrdersTableController {
 					wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 				);
 
-				$sync_message[] = wp_kses_data(
-					__(
-						'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
-						'woocommerce'
-					)
-				);
+				if ( ! $is_dangerous ) {
+					$sync_message[] = wp_kses_data(
+						sprintf(
+						// translators: %d: number of pending orders.
+							_n(
+								"There's %d order pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.",
+								'There are %d orders pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+								$orders_pending_sync_count,
+								'woocommerce'
+							),
+							$orders_pending_sync_count
+						)
+					);
+				}
 
 				$sync_message[] = sprintf(
 					'<a href="%1$s" class="button button-link">%2$s</a>',
@@ -560,10 +536,10 @@ class CustomOrdersTableController {
 						_n(
 							'Sync %s pending order',
 							'Sync %s pending orders',
-							$sync_status['current_pending_count'],
+							$orders_pending_sync_count,
 							'woocommerce'
 						),
-						number_format_i18n( $sync_status['current_pending_count'] )
+						number_format_i18n( $orders_pending_sync_count )
 					)
 				);
 			}
@@ -571,14 +547,20 @@ class CustomOrdersTableController {
 			return implode( '<br />', $sync_message );
 		};
 
+		$get_description_is_error = function() {
+			$sync_is_pending = $this->get_orders_pending_sync_count() > 0;
+
+			return $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
+		};
+
 		return array(
 			'id'                   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 			'title'                => '',
 			'type'                 => 'checkbox',
 			'desc'                 => __( 'Enable compatibility mode (synchronizes orders to the posts table).', 'woocommerce' ),
-			'value'                => $sync_enabled,
-			'desc_tip'             => $sync_message,
-			'description_is_error' => $description_is_error,
+			'value'                => $get_value,
+			'desc_tip'             => $get_sync_message,
+			'description_is_error' => $get_description_is_error,
 			'row_class'            => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 		);
 	}
@@ -588,7 +570,7 @@ class CustomOrdersTableController {
 	 *
 	 * @return bool
 	 */
-	private function changing_data_source_with_sync_pending_is_allowed() {
+	private function changing_data_source_with_sync_pending_is_allowed(): bool {
 		/**
 		 * Filter to allow changing where order data is stored, even when there are orders pending synchronization.
 		 *
@@ -601,5 +583,14 @@ class CustomOrdersTableController {
 		 * @since 8.3.0
 		 */
 		return apply_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending', false );
+	}
+
+	/**
+	 * Returns the count of orders pending synchronization.
+	 *
+	 * @return int
+	 */
+	private function get_orders_pending_sync_count(): int {
+		return $this->data_synchronizer->get_sync_status()['current_pending_count'];
 	}
 }

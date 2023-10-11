@@ -607,7 +607,7 @@ class DataSynchronizerTests extends HposTestCase {
 				$sync_setting['desc_tip'],
 				$auth_table_change_allowed_with_sync_pending ?
 				'Switching data storage while sync is incomplete is dangerous' :
-				'You can switch data storage for orders only when posts and orders table are in sync'
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>'
 			)
 		);
 		$this->assertEquals( $auth_table_change_allowed_with_sync_pending, $sync_setting['description_is_error'] );
