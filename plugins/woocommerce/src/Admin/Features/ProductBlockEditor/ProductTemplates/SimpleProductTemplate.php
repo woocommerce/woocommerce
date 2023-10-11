@@ -244,10 +244,30 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'images'   => [],
+					'property' => 'images',
 				],
 			]
 		);
+		// Downloads section.
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$general_group->add_section(
+				[
+					'id'         => 'product-downloads-section',
+					'order'      => 40,
+					'attributes' => [
+						'title'       => __( 'Downloads', 'woocommerce' ),
+						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					],
+				]
+			)->add_block(
+				[
+					'id'        => 'product-downloads',
+					'blockName' => 'woocommerce/product-downloads-field',
+					'order'     => 10,
+				]
+			);
+		}
 	}
 
 	/**

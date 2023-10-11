@@ -1,3 +1,6 @@
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
@@ -10,8 +13,9 @@ import {
 	updateQueryString,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { dispatch } from '@wordpress/data';
-import { addQueryArgs } from '@wordpress/url';
+import { dispatch, resolveSelect } from '@wordpress/data';
+import { Spinner } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -25,11 +29,7 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	Transitional,
-	events as transitionalEvents,
-	services as transitionalServices,
-} from './transitional';
+import { events as transitionalEvents } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -68,13 +68,22 @@ const redirectToWooHome = () => {
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
-const redirectToThemes = () => {
-	window.location.href = addQueryArgs( 'themes.php' );
+const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
+	window.location.href =
+		_context?.intro?.themeData?._links?.browse_all?.href ??
+		getAdminLink( 'themes.php' );
 };
 
 const markTaskComplete = async () => {
+	const currentTemplate = await resolveSelect(
+		coreStore
+		// @ts-expect-error No types for this exist yet.
+	).__experimentalGetTemplateForLink( '/' );
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
+		// we use this on the intro page to determine if this same theme was used in the last customization
+		woocommerce_admin_customize_store_completed_theme_id:
+			currentTemplate.id ?? undefined,
 	} );
 };
 
@@ -102,7 +111,6 @@ export const customizeStoreStateMachineActions = {
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
-	...transitionalServices,
 	browserPopstateHandler,
 	markTaskComplete,
 };
@@ -121,10 +129,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	context: {
 		intro: {
 			hasErrors: false,
-			themeCards: [] as ThemeCard[],
+			themeData: {
+				themes: [] as ThemeCard[],
+				_links: {
+					browse_all: {
+						href: getAdminLink( 'themes.php' ),
+					},
+				},
+			},
 			activeTheme: '',
 			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
+			currentThemeIsAiGenerated: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -189,9 +205,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						onDone: {
 							target: 'intro',
 							actions: [
-								'assignThemeCards',
+								'assignThemeData',
 								'assignActiveThemeHasMods',
 								'assignCustomizeStoreCompleted',
+								'assignCurrentThemeIsAiGenerated',
 							],
 						},
 					},
@@ -264,14 +281,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'markTaskComplete',
 						onDone: {
-							target: 'waitForSitePreview',
-						},
-					},
-				},
-				waitForSitePreview: {
-					after: {
-						// Wait for 5 seconds before redirecting to the transitional page. This is to ensure that the site preview image is refreshed.
-						5000: {
 							target: '#customizeStore.transitionalScreen',
 						},
 					},
@@ -279,8 +288,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				FINISH_CUSTOMIZATION: {
-					// Pre-fetch the site preview image for the site for transitional page.
-					actions: [ 'prefetchSitePreview' ],
 					target: '.postAssemblerHub',
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
@@ -291,7 +298,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
 			meta: {
-				component: Transitional,
+				component: AssemblerHub,
 			},
 			on: {
 				GO_BACK_TO_HOME: {
@@ -368,9 +375,12 @@ export const CustomizeStoreController = ( {
 						parentMachine={ service }
 						sendEvent={ send }
 						context={ state.context }
+						currentState={ state.value }
 					/>
 				) : (
-					<div />
+					<div className="woocommerce-customize-store__loading">
+						<Spinner />
+					</div>
 				) }
 			</div>
 		</>

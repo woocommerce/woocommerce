@@ -14,7 +14,6 @@ import {
 	ProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button, Modal, Notice } from '@wordpress/components';
 
 /**
@@ -44,6 +43,8 @@ type NewAttributeModalProps = {
 	addLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
@@ -75,6 +76,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	addLabel = __( 'Add', 'woocommerce' ),
 	onCancel,
 	onAdd,
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
@@ -102,6 +105,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
 		scrollAttributeIntoView( values.attributes.length );
+		onAddAnother();
 	};
 
 	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
@@ -164,9 +168,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		recordEvent(
-			'product_add_attributes_modal_remove_attribute_button_click'
-		);
+		onRemoveItem();
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
@@ -465,9 +467,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
-										recordEvent(
-											'product_add_attributes_modal_add_another_attribute_button_click'
-										);
 										addAnother( values, setValue );
 									} }
 								>
