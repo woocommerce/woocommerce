@@ -74,11 +74,15 @@ export function VariationsActionsMenu( {
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
-						<DownloadsMenuItem
-							selection={ selection }
-							onChange={ onChange }
-							onClose={ onClose }
-						/>
+						{ window.wcAdminFeatures[
+							'product-virtual-downloadable'
+						] && (
+							<DownloadsMenuItem
+								selection={ selection }
+								onChange={ onChange }
+								onClose={ onClose }
+							/>
+						) }
 					</MenuGroup>
 					<MenuGroup>
 						<MenuItem
