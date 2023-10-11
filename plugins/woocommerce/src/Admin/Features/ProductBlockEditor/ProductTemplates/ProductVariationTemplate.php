@@ -107,7 +107,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, ( array ) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array(), true ) ) ) {
+		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
 			$general_group->add_block(
 				[
 					'id'         => 'general-single-variation-notice',
@@ -195,7 +195,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, ( array ) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array(), true ) ) ) {
+		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
 			$pricing_group->add_block(
 				[
 					'id'         => 'pricing-single-variation-notice',
@@ -327,8 +327,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
-		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, ( array ) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array(), true ) ) ) {
+		$product_id      = ProductEditorHelper::get_parsed_route()['product_id'];
+		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
 			$inventory_group->add_block(
 				[
 					'id'         => 'inventory-single-variation-notice',
@@ -455,8 +455,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
-		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, ( array ) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array(), true ) ) ) {
+		$product_id     = ProductEditorHelper::get_parsed_route()['product_id'];
+		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
 			$shipping_group->add_block(
 				[
 					'id'         => 'shipping-single-variation-notice',
