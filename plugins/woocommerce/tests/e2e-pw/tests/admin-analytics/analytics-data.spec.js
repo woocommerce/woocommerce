@@ -2,11 +2,11 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe.serial( 'Analytics-related tests', () => {
-	let categoryIds, productIds, nowOrderIds;
+	let categoryIds, productIds, nowOrderIds, setupPage;
 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async( { baseURL } ) => {
+	test.beforeAll( async( { baseURL, browser } ) => {
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
@@ -136,13 +136,18 @@ test.describe.serial( 'Analytics-related tests', () => {
 		} ).then( ( response ) => {
 			nowOrderIds = response.data.create.map( order => order.id );
 		} );
+
+		// process the Action Scheduler tasks
+		setupPage = await browser.newPage();
+		await setupPage.waitForTimeout( 5000 ); // bad
+		await setupPage.goto( '?process-waiting-actions' );
+
 	} );
 
-	test.beforeEach( async( { page } ) => {
-		// need to make sure the scheduled actions are run for analytics to display
-		// this really slows down the test, but analytics doesn't display properly without
-		await page.goto( '?process-waiting-actions' );
-	} );
+	// test.beforeEach( async( { page } ) => {
+	// 	await page.waitForTimeout( 5000 ); // bad
+	// 	await page.goto( '?process-waiting-actions' );
+	// } );
 
 	test.afterAll( async( { baseURL } ) => {
 		const api = new wcApi( {
@@ -172,24 +177,10 @@ test.describe.serial( 'Analytics-related tests', () => {
 	test( 'downloads revenue report as CSV', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 
-		await page.getByLabel( 'Close Tour' ).click();
-
-		// click the download button and make sure the snackbar shows
+		const downloadPromise = page.waitForEvent( 'download' );
 		await page.getByRole( 'button', { name: 'Download' } ).click();
-		await expect( page.getByText( 'Your revenue report will be emailed to you.' ).first() ).toBeVisible();
-
-		// make sure the export jobs get queued up, and run them
-		await page.goto( '/wp-admin/admin.php?page=wc-status&tab=action-scheduler&status=pending' );
-		await expect( page.getByText( 'woocommerce_admin_report_export' ).first() ).toBeVisible();
-		await page.getByText( 'woocommerce_admin_report_export' ).first().hover();
-		await page.getByRole( 'link', { name: 'Run' } ).first().click();
-		await expect( page.getByText( 'woocommerce_admin_email_report_download_link' ).first() ).toBeVisible();
-		await page.getByText( 'woocommerce_admin_email_report_download_link' ).first().hover();
-		await page.getByRole( 'link', { name: 'Run' } ).first().click();
-
-		// confirm that an email was sent
-		await page.goto( '/wp-admin/admin.php?page=wpml_plugin_log' );
-		await expect( page.getByText( '[WooCommerce Core E2E Test Suite]: Your Revenue Report download is ready' ).first() ).toBeVisible();
+		const download = await downloadPromise;
+		await expect( download._suggestedFilename ).toContain( 'revenue.csv' );
 	} );
 
 	test( 'use date filter on overview page', async( { page } ) => {
