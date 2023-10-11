@@ -133,9 +133,9 @@ class WC_Tracker {
 		$data = array();
 
 		// General site info.
-		$data['url'] = home_url();
-		$data['store_id'] = get_option( 'woocommerce_store_id', null);
-		$data['blog_id'] = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
+		$data['url']      = home_url();
+		$data['store_id'] = get_option( 'woocommerce_store_id', null );
+		$data['blog_id']  = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
 
 		/**
 		 * Filter the admin email that's sent with data.
