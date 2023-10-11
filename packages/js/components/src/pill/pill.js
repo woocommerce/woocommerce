@@ -15,7 +15,7 @@ export function Pill( { children, className = '' } ) {
 			className={ classnames( 'woocommerce-pill', className ) }
 			variant="caption"
 			as="span"
-			size="12"
+			size="100"
 			lineHeight="16px"
 		>
 			{ children }

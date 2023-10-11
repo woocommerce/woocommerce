@@ -175,7 +175,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<header class="wc-backbone-modal-header">
 					<h1><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel PHP CHANGE', 'woocommerce' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article>
