@@ -30,7 +30,7 @@ import {
 } from './utils';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
-import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeControlProps = {
@@ -360,7 +360,11 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						{ attributeName: removingAttribute.name }
 					) }
 					description={
-						uiStrings.attributeRemoveConfirmationModalMessage
+						<p>
+							{
+								uiStrings.attributeRemoveConfirmationModalMessage
+							}
+						</p>
 					}
 					onRemove={ () => handleRemove( removingAttribute ) }
 					onCancel={ () => {
