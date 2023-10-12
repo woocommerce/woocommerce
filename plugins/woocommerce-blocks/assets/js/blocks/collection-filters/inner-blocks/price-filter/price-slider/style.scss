@@ -1,0 +1,216 @@
+@mixin thumb {
+	background: $white;
+	background-position: 0 0;
+	box-sizing: content-box;
+	width: 12px;
+	height: 12px;
+	border: 2px solid $gray-900;
+	border-radius: 100%;
+	padding: 0;
+	margin: 0;
+	vertical-align: top;
+	cursor: pointer;
+	z-index: 20;
+	pointer-events: auto;
+	transition: transform 0.2s ease-in-out;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	&:hover {
+		@include thumbFocus;
+	}
+}
+
+@mixin thumbFocus {
+	background: $gray-900;
+	border-color: $white;
+}
+
+
+@mixin track {
+	cursor: default;
+	height: 1px;
+	/* Required for Samsung internet based browsers */
+	outline: 0;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+@mixin reset {
+	margin: 0;
+	/* Use !important to prevent theme input styles from breaking the component.
+	Reference https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/3902
+	*/
+	padding: 0 !important;
+	border: 0 !important;
+	outline: none;
+	background: transparent;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.wp-block-woocommerce-collection-price-filter .price-slider {
+	.range {
+		--low: 0%;
+		--high: 100%;
+		--range-color: currentColor;
+		--track-background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+
+		.rtl & {
+			--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+		}
+
+		@include reset;
+		background: transparent;
+		border-radius: 4px;
+		clear: both;
+		flex-grow: 1;
+		height: 4px;
+		margin: 15px 0;
+		position: relative;
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: currentColor;
+			opacity: 0.2;
+		}
+
+		.range-bar {
+			position: relative;
+			height: 4px;
+			background: var(--track-background);
+		}
+
+		input[type="range"] {
+			@include reset;
+			width: 100%;
+			height: 0;
+			display: block;
+			pointer-events: none;
+			outline: none !important;
+			position: absolute;
+			left: 0;
+			top: 0;
+
+			&::-webkit-slider-thumb {
+				@include thumb;
+				margin: -5px 0 0 0;
+			}
+
+			&::-moz-range-thumb {
+				@include thumb;
+			}
+
+			&::-ms-thumb {
+				@include thumb;
+			}
+
+			&:focus {
+				&::-webkit-slider-thumb {
+					@include thumbFocus;
+				}
+				&::-moz-range-thumb {
+					@include thumbFocus;
+				}
+				&::-ms-thumb {
+					@include thumbFocus;
+				}
+			}
+
+			&::-webkit-slider-runnable-track {
+				@include track;
+			}
+
+			&::-moz-range-track {
+				@include track;
+			}
+
+			&::-webkit-slider-progress {
+				@include reset;
+			}
+
+			&::-moz-range-progress {
+				@include reset;
+			}
+
+			&::-moz-focus-outer {
+				border: 0;
+			}
+
+			&.min {
+				&::-webkit-slider-thumb {
+					margin-left: -2px;
+					background-position-x: left;
+				}
+				&::-moz-range-thumb {
+					background-position-x: left;
+					transform: translate(-2px, 2px);
+				}
+				&::-ms-thumb {
+					background-position-x: left;
+				}
+			}
+
+			&.max {
+				&::-webkit-slider-thumb {
+					background-position-x: right;
+					margin-left: 2px;
+				}
+				&::-moz-range-thumb {
+					background-position-x: right;
+					transform: translate(2px, 2px);
+				}
+				&::-ms-thumb {
+					background-position-x: right;
+				}
+			}
+		}
+
+		input[type="range" i] {
+			color: -internal-light-dark(rgb(16, 16, 16), rgb(255, 255, 255));
+			padding: initial;
+		}
+	}
+
+	.text {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: 16px 0;
+		gap: 8px;
+
+		input[type="text"] {
+			padding: 8px;
+			margin: 0;
+			width: auto;
+			max-width: 60px;
+			min-width: 0;
+			font-size: 0.875em;
+			border-width: 1px;
+			border-style: solid;
+			border-color: currentColor;
+			border-radius: 4px;
+		}
+	}
+
+	&.inline-input {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		.text {
+			display: contents;
+		}
+
+		.text .min {
+			order: -1;
+		}
+	}
+}
