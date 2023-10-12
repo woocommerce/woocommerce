@@ -8,8 +8,8 @@ import { useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductAttribute,
 	ProductVariation,
+	ProductVariationAttribute,
 } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { RemoveConfirmationModal } from '@woocommerce/product-editor';
@@ -30,7 +30,7 @@ export const DeleteVariationMenuItem = ( {
 
 	const variationId = useEntityId( 'postType', 'product_variation' );
 
-	const [ attributes ] = useEntityProp< ProductAttribute[] >(
+	const [ attributes ] = useEntityProp< ProductVariationAttribute[] >(
 		'postType',
 		'product_variation',
 		'attributes'
@@ -45,7 +45,9 @@ export const DeleteVariationMenuItem = ( {
 	const name = useMemo(
 		() =>
 			attributes
-				.map( ( attribute: ProductAttribute ) => attribute.name )
+				.map(
+					( attribute: ProductVariationAttribute ) => attribute.option
+				)
 				.join( ', ' ),
 		[ attributes ]
 	);
