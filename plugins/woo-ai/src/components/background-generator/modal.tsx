@@ -20,6 +20,7 @@ import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from '../../image-background-removal/image_utils';
+import { BackgroundProductGenerator } from '../background-product-generator';
 
 /**
  * Upload image to WordPress Media Library.
@@ -159,8 +160,12 @@ const ImageVariationModal: React.FC = () => {
 			title: 'Magic Background',
 			view: (
 				<div>
-					{ /* @todo: Add a canvas element for image manipulation */ }
-					<canvas id="magicCanvas"></canvas>
+					<div className="image-variation-modal__canvas-container">
+						<BackgroundProductGenerator
+							backgroundImageSrc="http://localhost:8888/wp-content/uploads/2023/10/background.jpg"
+							productImageSrc="http://localhost:8888/wp-content/uploads/2023/10/product.png"
+						/>
+					</div>
 					<TextareaControl
 						label="Prompt for Stable Diffusion"
 						value={ imagePrompt }
