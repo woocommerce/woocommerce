@@ -62,7 +62,6 @@ export const DeleteVariationMenuItem = ( {
 	function handleMenuItemClick() {
 		recordEvent( 'product_dropdown_option_click', {
 			selected_option: 'delete_variation',
-			product_type: 'product_variation',
 			product_id: productId,
 			variation_id: variationId,
 			product_status: status,
@@ -72,6 +71,13 @@ export const DeleteVariationMenuItem = ( {
 	}
 
 	async function handleRemove() {
+		recordEvent( 'product_delete_variation_modal', {
+			action: 'delete',
+			product_id: productId,
+			variation_id: variationId,
+			product_status: status,
+		} );
+
 		return deleteProductVariation< Promise< ProductVariation > >( {
 			product_id: productId,
 			id: variationId,
@@ -99,6 +105,13 @@ export const DeleteVariationMenuItem = ( {
 	}
 
 	function handleClose() {
+		recordEvent( 'product_delete_variation_modal', {
+			action: 'close',
+			product_id: productId,
+			variation_id: variationId,
+			product_status: status,
+		} );
+
 		setShowModal( false );
 	}
 
