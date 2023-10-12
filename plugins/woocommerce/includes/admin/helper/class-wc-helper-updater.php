@@ -80,7 +80,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( $transient instanceof stdClass ) {
-			$translations = self::get_translations_update_data();
+			$translations            = self::get_translations_update_data();
 			$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
 		}
 
