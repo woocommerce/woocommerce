@@ -22,9 +22,18 @@ function renderScene(
 	productPosition: { x: number; y: number },
 	productSize: { width: number; height: number },
 	scalingFactor: number,
+	hasShadow: boolean,
 	onSave?: ( dataUrl: string ) => void
 ) {
 	ctx.drawImage( background, 0, 0, backgroundSize, backgroundSize );
+
+	// Set shadow properties
+	if ( hasShadow ) {
+		ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+		ctx.shadowBlur = 15;
+		ctx.shadowOffsetX = 5;
+		ctx.shadowOffsetY = 5;
+	}
 
 	// Draw the product image
 	ctx.drawImage(
@@ -34,6 +43,14 @@ function renderScene(
 		productSize.width,
 		productSize.height
 	);
+
+	// Clear shadow properties so they don't affect other elements
+	if ( hasShadow ) {
+		ctx.shadowColor = 'transparent';
+		ctx.shadowBlur = 0;
+		ctx.shadowOffsetX = 0;
+		ctx.shadowOffsetY = 0;
+	}
 
 	// Draw other elements like box squares, etc.
 	if ( onSave ) {
@@ -53,10 +70,12 @@ export const BackgroundProductGenerator = ( {
 	onSave,
 	backgroundImageSrc,
 	productImageSrc,
+	hasShadow = true,
 }: {
 	onSave?: ( dataUrl: string ) => void;
 	backgroundImageSrc: string;
 	productImageSrc: string;
+	hasShadow?: boolean;
 } ) => {
 	const canvasRef = useRef< HTMLCanvasElement >( null );
 	const [ imgPosition, setImgPosition ] = useState( { x: 0, y: 0 } );
@@ -82,11 +101,13 @@ export const BackgroundProductGenerator = ( {
 				imgPosition,
 				imgSize,
 				scalingFactor,
+				hasShadow,
 				onSave
 			);
 		}
 	}, [
 		backgroundImage,
+		hasShadow,
 		imgPosition,
 		imgSize,
 		onSave,
@@ -171,13 +192,14 @@ export const BackgroundProductGenerator = ( {
 					productImageLoaded,
 					{ x: centerX, y: centerY },
 					{ width: productImageWidth, height: productImageHeight },
-					scalingFactor
+					scalingFactor,
+					hasShadow
 				);
 			} catch ( error ) {}
 		};
 
 		loadImagesAndDraw();
-	}, [ backgroundImageSrc, productImageSrc, scalingFactor ] );
+	}, [ backgroundImageSrc, hasShadow, productImageSrc, scalingFactor ] );
 
 	useEffect( () => {
 		if ( ! canvasRef.current ) return;
@@ -191,9 +213,17 @@ export const BackgroundProductGenerator = ( {
 			productImage,
 			imgPosition,
 			imgSize,
-			scalingFactor
+			scalingFactor,
+			hasShadow
 		);
-	}, [ backgroundImage, imgPosition, imgSize, productImage, scalingFactor ] );
+	}, [
+		backgroundImage,
+		hasShadow,
+		imgPosition,
+		imgSize,
+		productImage,
+		scalingFactor,
+	] );
 
 	const handleMouseDown = ( e: MouseEvent< HTMLCanvasElement > ) => {
 		if ( ! canvasRef.current ) return;
