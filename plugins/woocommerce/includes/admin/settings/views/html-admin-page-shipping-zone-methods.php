@@ -112,7 +112,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">
-			<strong class="wc-shipping-zone-method-type">{{ data.method_title }}</strong>
 			{{{ data.method_description }}}
 		</td>
 		<td class="shipping-zone-actions">
