@@ -8,11 +8,7 @@ import { useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './content.scss';
-import {
-	Product,
-	ProductType,
-	SearchResultType,
-} from '../product-list/types';
+import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';

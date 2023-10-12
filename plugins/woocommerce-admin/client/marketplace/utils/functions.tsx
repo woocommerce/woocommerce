@@ -63,7 +63,10 @@ async function apiFetchWithCache( params: object ): Promise< object > {
 }
 
 // Wrapper around fetch() that caches results in memory
-async function fetchJsonWithCache( url: string, abortSignal?: AbortSignal ): Promise< object > {
+async function fetchJsonWithCache(
+	url: string,
+	abortSignal?: AbortSignal
+): Promise< object > {
 	// Attempt to fetch from cache:
 	if ( fetchCache.get( url ) ) {
 		return new Promise( ( resolve ) => {
