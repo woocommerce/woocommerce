@@ -4,12 +4,11 @@
 import { useParams } from 'react-router-dom';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
-	ProductVariationAttribute,
 } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { RemoveConfirmationModal } from '@woocommerce/product-editor';
@@ -30,26 +29,16 @@ export const DeleteVariationMenuItem = ( {
 
 	const variationId = useEntityId( 'postType', 'product_variation' );
 
-	const [ attributes ] = useEntityProp< ProductVariationAttribute[] >(
+	const [ name ] = useEntityProp< string >(
 		'postType',
 		'product_variation',
-		'attributes'
+		'name'
 	);
 
 	const [ status ] = useEntityProp< string >(
 		'postType',
 		'product_variation',
 		'status'
-	);
-
-	const name = useMemo(
-		() =>
-			attributes
-				.map(
-					( attribute: ProductVariationAttribute ) => attribute.option
-				)
-				.join( ', ' ),
-		[ attributes ]
 	);
 
 	const { deleteProductVariation } = useDispatch(
