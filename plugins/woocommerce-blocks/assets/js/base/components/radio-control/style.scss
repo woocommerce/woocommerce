@@ -73,6 +73,11 @@
 		margin: inherit;
 		cursor: pointer;
 
+		&:focus {
+			outline: 2px solid $input-border-gray;
+			outline-offset: 2px;
+		}
+
 		&:checked::before {
 			background: #000;
 			border-radius: 50%;
