@@ -86,7 +86,7 @@ const renderTabs = (
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
-	const onTacClick = ( tabKey: string ) => {
+	const onTabClick = ( tabKey: string ) => {
 		if ( tabKey === selectedTab ) {
 			return;
 		}
@@ -118,7 +118,7 @@ const renderTabs = (
 							'is-active': tabKey === selectedTab,
 						}
 					) }
-					onClick={ () => onTacClick( tabKey ) }
+					onClick={ () => onTabClick( tabKey ) }
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
