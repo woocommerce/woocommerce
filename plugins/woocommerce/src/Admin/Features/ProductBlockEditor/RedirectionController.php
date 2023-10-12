@@ -64,7 +64,7 @@ class RedirectionController {
 	protected function is_product_supported( $product_id ): bool {
 		$product = $product_id ? wc_get_product( $product_id ) : null;
 		$digital_product = $product->is_downloadable() || $product->is_virtual();
-		
+
 		if ( $product && in_array( $product->get_type(), $this->supported_post_types, true ) ) {
 			if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 				return $digital_product;

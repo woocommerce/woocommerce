@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import { Button, Dropdown, MenuGroup } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
