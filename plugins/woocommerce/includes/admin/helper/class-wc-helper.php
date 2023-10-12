@@ -686,20 +686,21 @@ class WC_Helper {
 	 * @param array $args Query args.
 	 * @return string
 	 */
-	private static function _get_helper_redirect_url( $args ) {
+	private static function _get_helper_redirect_url( $args = array() ) {
 		global $current_screen;
-		if ( ! empty( $current_screen->id ) && 'woocommerce_page_wc-addons' === $current_screen->id ) {
+		if ( isset( $_GET['redirect-to-wc-admin'] ) && $current_screen->id === 'woocommerce_page_wc-addons' ) {		
 			return add_query_arg(
-				$args,
+				array(
+					'page' => 'wc-admin',
+					'tab'  => 'my-subscriptions',
+					'path' => urlencode( '/extensions' ),
+				),
 				admin_url( 'admin.php' )
 			);
 		}
+		
 		return add_query_arg(
-			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => urlencode( '/extensions' ),
-			),
+			$args,
 			admin_url( 'admin.php' )
 		);
 	}
@@ -713,13 +714,20 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$redirect_uri = self::_get_helper_redirect_url(
-			array(
-				'page'             => 'wc-addons',
-				'section'          => 'helper',
-				'wc-helper-return' => 1,
-				'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
-			)
+		$redirect_url_args = array(
+			'page'             => 'wc-addons',
+			'section'          => 'helper',
+			'wc-helper-return' => 1,
+			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
+		);
+
+		if ( isset( $_GET['redirect-to-wc-admin'] ) ) {
+			$redirect_url_args['redirect-to-wc-admin'] = 1;
+		}
+
+		$redirect_uri = add_query_arg(
+			$redirect_url_args,
+			admin_url( 'admin.php' )
 		);
 
 		$request = WC_Helper_API::post(
