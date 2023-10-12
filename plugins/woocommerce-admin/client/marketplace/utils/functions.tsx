@@ -63,7 +63,7 @@ async function apiFetchWithCache( params: object ): Promise< object > {
 }
 
 // Wrapper around fetch() that caches results in memory
-async function fetchJsonWithCache( url: string ): Promise< object > {
+async function fetchJsonWithCache( url: string, abortSignal?: AbortSignal ): Promise< object > {
 	// Attempt to fetch from cache:
 	if ( fetchCache.get( url ) ) {
 		return new Promise( ( resolve ) => {
@@ -73,7 +73,7 @@ async function fetchJsonWithCache( url: string ): Promise< object > {
 
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url )
+		fetch( url, { signal: abortSignal } )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
 					throw new Error( response.statusText );
@@ -93,7 +93,8 @@ async function fetchJsonWithCache( url: string ): Promise< object > {
 
 // Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
 async function fetchSearchResults(
-	params: URLSearchParams
+	params: URLSearchParams,
+	abortSignal?: AbortSignal
 ): Promise< Product[] > {
 	const url =
 		MARKETPLACE_HOST +
@@ -103,7 +104,7 @@ async function fetchSearchResults(
 
 	// Fetch data from WCCOM API
 	return new Promise( ( resolve, reject ) => {
-		fetchJsonWithCache( url )
+		fetchJsonWithCache( url, abortSignal )
 			.then( ( json ) => {
 				/**
 				 * Product card component expects a Product type.
@@ -114,6 +115,8 @@ async function fetchSearchResults(
 						return {
 							id: product.id,
 							title: product.title,
+							image: product.image,
+							type: product.type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,
