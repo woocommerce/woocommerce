@@ -4,13 +4,46 @@
 import {
 	Block,
 	BlockConfiguration,
+	BlockEditProps,
 	registerBlockType,
 } from '@wordpress/blocks';
+import { createElement } from '@wordpress/element';
+import { evaluate } from '@woocommerce/expression-evaluation';
+import { ComponentType } from 'react';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
 	metadata: BlockConfiguration< T >;
 	settings: Partial< BlockConfiguration< T > >;
+}
+
+function getEdit<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	T extends Record< string, object > = Record< string, object >
+>(
+	edit?: ComponentType< BlockEditProps< T > >
+): ComponentType< BlockEditProps< T > > {
+	return ( props ) => {
+		if ( ! edit ) {
+			return null;
+		}
+
+		const hideConditions = props.attributes._templateBlockHideConditions;
+		if ( hideConditions && Array.isArray( hideConditions ) ) {
+			// @ts-ignore context is added by the block editor at runtime.
+			const context = props.context;
+
+			const shouldHide = hideConditions.some( ( condition ) =>
+				evaluate( condition.expression, context )
+			);
+
+			if ( shouldHide ) {
+				return null;
+			}
+		}
+
+		return createElement( edit, props );
+	};
 }
 
 /**
@@ -27,6 +60,7 @@ export function registerWooBlockType<
 		return;
 	}
 	const { metadata, settings, name } = block;
+	const { edit } = settings;
 
 	const templateBlockAttributes = {
 		_templateBlockId: {
@@ -35,6 +69,10 @@ export function registerWooBlockType<
 		},
 		_templateBlockOrder: {
 			type: 'integer',
+			__experimentalRole: 'content',
+		},
+		_templateBlockHideConditions: {
+			type: 'array',
 			__experimentalRole: 'content',
 		},
 	};
@@ -47,5 +85,8 @@ export function registerWooBlockType<
 		},
 	};
 
-	return registerBlockType< T >( { name, ...augmentedMetadata }, settings );
+	return registerBlockType< T >(
+		{ name, ...augmentedMetadata },
+		{ ...settings, edit: getEdit< T >( edit ) }
+	);
 }
