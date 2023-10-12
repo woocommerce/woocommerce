@@ -1,0 +1,50 @@
+<?php
+/**
+ * Reset CYS API initialization for beta testing.
+ *
+ * @package WC_Beta_Tester
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+register_woocommerce_admin_test_helper_rest_route(
+	'/tools/reset-cys',
+	'tools_reset_cys'
+);
+
+/**
+ * A tool to delete all products.
+ */
+function tools_reset_cys() {
+	global $wpdb;
+
+	// Reset the home template.
+	$current_theme = wp_get_theme();
+	$template      = get_block_file_template( $current_theme->template . '//home', 'wp_template' );
+	if ( $template->id ) {
+		wp_delete_post( $template->wp_id, true );
+	}
+
+	// Reset the custom styles.
+	$stylesheet = get_stylesheet();
+	$user_data  = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( $stylesheet );
+	// wp_update_post(
+	// array(
+	// 'styles'   => array(),
+	// 'settings' => array(),
+	// ),
+	// true,
+	// false
+	// );
+
+	$wpdb->delete(
+		$wpdb->prefix . 'posts',
+		array(
+			'post_type'  => 'revision',
+			'post_title' => 'Custom Styles',
+		),
+		array( '%s', '%s' )
+	);
+
+	return true;
+}
