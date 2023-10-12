@@ -761,7 +761,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		// Product Pricing Section.
+		// Virtual section
+		$shipping_group->add_section(
+			[
+				'id'    => 'product-virtual-section',
+				'order' => 10,
+			]
+		)->add_block(
+			[
+				'id'         => 'product-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => [
+					'property' => 'virtual',
+					'label'    => __( 'This product requires shipping or pickup', 'woocommerce' ),
+				]
+			]
+		);
+		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
 				'id'         => 'product-fee-and-dimensions-section',
