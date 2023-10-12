@@ -178,7 +178,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<fieldset class="wc-shipping-zone-method-selector">
 							<legend class="screen-reader-text"><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></legend>
 							<?php
-							foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
+							$methods = WC()->shipping()->load_shipping_methods();
+							
+							$methods_placed_in_order = array();
+							$first_methods_ids = array( 'free_shipping', 'flat_rate', 'local_pickup' );
+							
+							foreach ( $first_methods_ids as $id ) {
+								foreach ( $methods as $key => $obj ) {
+									if ( $obj->id === $id ) {
+										$methods_placed_in_order[] = $obj;
+										unset( $methods[ $key ] );
+										break;
+									}
+								}
+							}
+
+							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
+
+							foreach ( $methods_placed_in_order as $method ) {
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
