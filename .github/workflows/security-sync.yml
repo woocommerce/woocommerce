@@ -1,0 +1,62 @@
+name: "Sync Public Repo Branches"
+on:
+  schedule:
+    - cron:  '17 * * * *'
+  workflow_dispatch:
+env:
+  GIT_COMMITTER_NAME: 'WooCommerce Bot'
+  GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
+  GIT_AUTHOR_NAME: 'WooCommerce Bot'
+  GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+jobs:
+  sync:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: 'repo-base'
+          token: ${{ secrets.SYNC_TOKEN }}
+          
+      - name: "Checkout security-base"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: 'security-base'
+          ref: 'security-base'
+          token: ${{ secrets.SYNC_TOKEN }}
+
+      - name: "Sync trunk, security, and all of the release branches"
+        run: |
+          cd "${GITHUB_WORKSPACE}/repo-base"
+          git remote add upstream https://github.com/woocommerce/woocommerce.git
+          git config remote.upstream.pushurl "NOT ALLOWED" # Prevents any pushes to upstream
+          git fetch upstream
+          
+          # sync trunk
+          git branch -D trunk &>/dev/null || true # if the branch already exists, delete it locally.
+          git checkout -b trunk
+          git reset --hard upstream/trunk
+          git push -f origin trunk
+          
+          # sync security branch
+          git branch -D security &>/dev/null || true # if the branch already exists, delete it locally.
+          git checkout -b security
+          git reset --hard upstream/trunk # trunk is the base of the security branch
+          rsync -av --exclude=".git" "${GITHUB_WORKSPACE}/security-base/" "${GITHUB_WORKSPACE}/repo-base/"
+          git add -A
+          git commit -a -m "Sync security-base"
+          git push -f origin security
+          
+          # sync release branches
+          RELEASEBRANCHES=($(git ls-remote --heads upstream release/* | sed -n 's/^.*refs\/heads\/\(.*$\)/\1/p'))
+          for BRANCH in "${RELEASEBRANCHES[@]}"
+          do
+            echo "Syncing $BRANCH"
+            git branch -D "$BRANCH" &>/dev/null || true # if the branch already exists, delete it locally.
+            git checkout -b "$BRANCH"
+            git reset --hard "upstream/$BRANCH"
+            git push -f origin "$BRANCH"
+          done
+

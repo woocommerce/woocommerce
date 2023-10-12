@@ -29,36 +29,12 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 
 <!-- End testing instructions -->
 
-### Changelog entry
+### IMPORTANT: Security Repo Checklist ###
 
-<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->
+Before closing this issue, please ensure the following have occurred:
 
--   [ ] Automatically create a changelog entry from the details below.
-
-<details>
-
-#### Significance
-
-<!-- Choose only one -->
-
--   [ ] Patch
--   [ ] Minor
--   [ ] Major
-
-#### Type
-
-<!-- Choose only one -->
-
--   [ ] Fix - Fixes an existing bug
--   [ ] Add - Adds functionality
--   [ ] Update - Update existing functionality
--   [ ] Dev - Development related task
--   [ ] Tweak - A minor adjustment to the codebase
--   [ ] Performance - Address performance issues
--   [ ] Enhancement - Improvement to existing functionality
-
-#### Message <!-- Add a changelog message here -->
-
-#### Comment <!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->
-
-</details>
+- [ ] This PR has been cherry-picked into the active monthly release branch
+- [ ] This PR has been cherry-picked into the active WooAF release branch
+- [ ] If this requires a fix release, this PR has been cherry-picked into the fix release branch for monthly
+- [ ] If this also requires a WooAF fix release, this PR has been cherry-picked into the WooAF fix release branch
+- [ ] This PR has been cherry-picked into trunk
