@@ -54,9 +54,32 @@ export const BackgroundRemovalLink = () => {
 		recordBgRemovalTracks( 'view_ui' );
 	}, [] );
 
-	const newOnRemoveBackgroundClick = () => {
+	const newOnRemoveBackgroundClick = async () => {
 		wp.media.frame.modal.close();
 		setShowModal( true );
+		const { url: imgUrl, filename: imgFilename } =
+			getCurrentAttachmentDetails();
+
+		if ( ! imgUrl ) {
+			setDisplayError( getErrorMessage() );
+			return;
+		}
+		const originalBlob = await fetch( imgUrl ).then( ( res ) =>
+			res.blob()
+		);
+
+		const bgRemoved = await fetchImage( {
+			imageFile: new File( [ originalBlob ], imgFilename ?? '', {
+				type: originalBlob.type,
+			} ),
+		} );
+
+		await uploadImageToLibrary( {
+			imageBlob: bgRemoved,
+			libraryFilename: `${ imgFilename }${ FILENAME_APPEND }.${ bgRemoved.type
+				.split( '/' )
+				.pop() }`,
+		} );
 	};
 
 	const onRemoveBackgroundClick = async () => {

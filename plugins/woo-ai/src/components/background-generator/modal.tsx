@@ -16,6 +16,10 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import './modal.scss';
+import {
+	uploadImageToLibrary,
+	getCurrentAttachmentDetails,
+} from '../../image-background-removal/image_utils';
 
 /**
  * Upload image to WordPress Media Library.
@@ -55,6 +59,7 @@ const uploadImageToMediaLibrary = async (
 const ImageVariationModal: React.FC = () => {
 	const [ isOpen, setIsOpen ] = useState( true );
 	const [ isLoading, setLoading ] = useState( false );
+	const [ originalImage, setOriginalImage ] = useState< string >( '' );
 	const [ newImage, setNewImage ] = useState< Blob | null >( null );
 	const [ newImageUrl, setNewImageUrl ] = useState< string | null >( null );
 	const [ imagePrompt, setImagePrompt ] = useState(
@@ -70,6 +75,14 @@ const ImageVariationModal: React.FC = () => {
 			reader.readAsDataURL( newImage );
 		}
 	}, [ newImage ] );
+
+	useEffect( () => {
+		const { url: imgUrl } = getCurrentAttachmentDetails();
+		if ( ! imgUrl ) {
+			return;
+		}
+		setOriginalImage( imgUrl );
+	}, [] );
 
 	/**
 	 * Generate image variations.
@@ -123,10 +136,7 @@ const ImageVariationModal: React.FC = () => {
 			view: (
 				<div>
 					{ /* @todo: Replace with the actual URL of the original image */ }
-					<img
-						src="https://wooai.jurassic.tube/wp-content/uploads/2023/10/DSC_6071-PhotoRoom-3-1.jpg"
-						alt="Original"
-					/>
+					<img src={ originalImage } alt="Original" />
 				</div>
 			),
 		},
