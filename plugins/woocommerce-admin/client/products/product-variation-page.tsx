@@ -33,7 +33,7 @@ productApiFetchMiddleware();
 export default function ProductPage() {
 	const { productId, variationId } = useParams();
 
-	const product = useProductVariationEntityRecord( variationId as string );
+	const variation = useProductVariationEntityRecord( variationId as string );
 
 	useEffect( () => {
 		return initBlocks();
@@ -55,28 +55,29 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	if ( ! product?.id ) {
+	if ( ! variation?.id ) {
 		return <Spinner />;
 	}
 
 	return (
 		<>
 			<Editor
-				product={ product }
+				product={ variation }
 				productType="product_variation"
 				settings={ productBlockEditorSettings || {} }
 			/>
-			{ productId && variationId && (
-				<WooFooterItem order={ 0 }>
+			<WooFooterItem order={ 0 }>
+				<>
 					<VariationSwitcherFooter
-						parentId={ parseInt( productId, 10 ) }
-						variationId={ parseInt( variationId, 10 ) }
+						parentId={ variation.parent_id }
+						variationId={ variation.id }
 					/>
+
 					<ProductMVPFeedbackModalContainer
-						productId={ product.id }
+						productId={ variation.parent_id }
 					/>
-				</WooFooterItem>
-			) }
+				</>
+			</WooFooterItem>
 		</>
 	);
 }
