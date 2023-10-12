@@ -1002,7 +1002,6 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$deactivated = false;
 		try {
 			$deactivated = self::deactivate_helper_subscription( $product_key );
 		} catch ( Exception $e ) {
