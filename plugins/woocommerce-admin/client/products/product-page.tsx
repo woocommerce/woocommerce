@@ -11,7 +11,6 @@ import {
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 } from '@woocommerce/product-editor';
-import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
@@ -24,10 +23,7 @@ import { WooFooterItem } from '@woocommerce/admin-layout';
  */
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
-import {
-	MoreMenuFill,
-	ProductHeaderFill,
-} from './fills/product-block-editor-fills';
+import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
@@ -92,9 +88,6 @@ registerPlugin( 'wc-admin-more-menu', {
 					<MoreMenuFill onClose={ onClose } />
 				) }
 			</WooProductMoreMenuItem>
-			<WooHeaderItem name="product">
-				<ProductHeaderFill />
-			</WooHeaderItem>
 		</>
 	),
 } );

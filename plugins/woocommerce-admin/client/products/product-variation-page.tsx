@@ -9,8 +9,8 @@ import {
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
+	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 } from '@woocommerce/product-editor';
-import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
@@ -21,10 +21,7 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
-import {
-	MoreMenuFill,
-	ProductHeaderFill,
-} from './fills/product-block-editor-fills';
+import { MoreMenuFill } from './fills/product-block-editor-fills';
 import { useProductVariationEntityRecord } from './hooks/use-product-variation-entity-record';
 import { DeleteVariationMenuItem } from './fills/more-menu-items';
 import './product-page.scss';
@@ -75,6 +72,9 @@ export default function ProductPage() {
 						parentId={ parseInt( productId, 10 ) }
 						variationId={ parseInt( variationId, 10 ) }
 					/>
+					<ProductMVPFeedbackModalContainer
+						productId={ product.id }
+					/>
 				</WooFooterItem>
 			) }
 		</>
@@ -97,9 +97,6 @@ registerPlugin( 'wc-admin-more-menu', {
 					</>
 				) }
 			</WooProductMoreMenuItem>
-			<WooHeaderItem name="product">
-				<ProductHeaderFill />
-			</WooHeaderItem>
 		</>
 	),
 } );
