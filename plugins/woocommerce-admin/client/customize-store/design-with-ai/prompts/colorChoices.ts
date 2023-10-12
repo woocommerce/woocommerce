@@ -5,7 +5,7 @@ import { z } from 'zod';
 /**
  * Internal dependencies
  */
-import { ColorPalette } from '../types';
+import { ColorPalette, Look } from '../types';
 
 const colorChoices: ColorPalette[] = [
 	{
@@ -14,6 +14,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#8C8369',
 		foreground: '#11163d',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Crimson Tide',
@@ -21,6 +22,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#234B57',
 		foreground: '#871C37',
 		background: '#ffffff',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Purple Twilight',
@@ -28,6 +30,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#6a5eb7',
 		foreground: '#090909',
 		background: '#fefbff',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Midnight Citrus',
@@ -35,6 +38,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#7E76A3',
 		foreground: '#1B1736',
 		background: '#ffffff',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Lemon Myrtle',
@@ -42,6 +46,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#FC9B00',
 		foreground: '#325C5D',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Green Thumb',
@@ -49,6 +54,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#4B7B4D',
 		foreground: '#164A41',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Golden Haze',
@@ -56,6 +62,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#EBB54F',
 		foreground: '#515151',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
 	},
 	{
 		name: 'Golden Indigo',
@@ -63,6 +70,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#C09F50',
 		foreground: '#405AA7',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Arctic Dawn',
@@ -70,6 +78,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#DE5853',
 		foreground: '#243156',
 		background: '#ffffff',
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Jungle Sunrise',
@@ -77,6 +86,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#ed774e',
 		foreground: '#0a271d',
 		background: '#fefbec',
+		lookAndFeel: [ 'Classic' ] as Look[],
 	},
 	{
 		name: 'Berry Grove',
@@ -84,6 +94,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#DE76DE',
 		foreground: '#1f351a',
 		background: '#fdfaf1',
+		lookAndFeel: [ 'Classic' ] as Look[],
 	},
 	{
 		name: 'Fuchsia',
@@ -91,6 +102,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#18020C',
 		foreground: '#b7127f',
 		background: '#f7edf6',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Raspberry Chocolate',
@@ -98,6 +110,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#d64d68',
 		foreground: '#241d1a',
 		background: '#eeeae6',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Canary',
@@ -105,6 +118,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#353535',
 		foreground: '#0F0F05',
 		background: '#FCFF9B',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Gumtree Sunset',
@@ -112,6 +126,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#EFB071',
 		foreground: '#476C77',
 		background: '#edf4f4',
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Ice',
@@ -119,6 +134,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#3473FE',
 		foreground: '#12123F',
 		background: '#F1F4FA',
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Cinder',
@@ -126,6 +142,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#2F2D2D',
 		foreground: '#863119',
 		background: '#f1f2f2',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Blue Lagoon',
@@ -133,6 +150,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#0496FF',
 		foreground: '#0036A3',
 		background: '#FEFDF8',
+		lookAndFeel: [ 'Bold', 'Contemporary' ] as Look[],
 	},
 	{
 		name: 'Sandalwood Oasis',
@@ -140,6 +158,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#DF9785',
 		foreground: '#ffffff',
 		background: '#2a2a16',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Rustic Rosewood',
@@ -147,6 +166,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#EE797C',
 		foreground: '#ffffff',
 		background: '#1A1A1A',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Cinnamon Latte',
@@ -154,6 +174,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#BC8034',
 		foreground: '#FFFFFF',
 		background: '#3C3F4D',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Lilac Nightshade',
@@ -161,6 +182,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#C48DDA',
 		foreground: '#ffffff',
 		background: '#000000',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Lightning',
@@ -168,6 +190,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#fefefe',
 		foreground: '#ebffd2',
 		background: '#0e1fb5',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Aquamarine Night',
@@ -175,6 +198,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#56fbb9',
 		foreground: '#ffffff',
 		background: '#091C48',
+		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
 		name: 'Charcoal',
@@ -182,6 +206,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#efefef',
 		foreground: '#dbdbdb',
 		background: '#1e1e1e',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Evergreen Twilight',
@@ -189,6 +214,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#8EE978',
 		foreground: '#ffffff',
 		background: '#181818',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 	{
 		name: 'Slate',
@@ -196,6 +222,7 @@ const colorChoices: ColorPalette[] = [
 		secondary: '#FFDF6D',
 		foreground: '#EFF2F9',
 		background: '#13161E',
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 	},
 ];
 const allowedNames: string[] = colorChoices.map( ( palette ) => palette.name );
@@ -220,6 +247,7 @@ export const colorPaletteValidator = z.object( {
 	background: z
 		.string()
 		.regex( hexColorRegex, { message: 'Invalid background color' } ),
+	lookAndFeel: z.array( z.enum( [ 'Contemporary', 'Classic', 'Bold' ] ) ),
 } );
 
 export const colorPaletteResponseValidator = z
@@ -241,7 +269,7 @@ export const defaultColorPalette = {
 
 	// make sure version is updated every time the prompt is changed
 	version: '2023-09-22',
-	prompt: ( businessDescription: string, look: string, tone: string ) => {
+	prompt: ( businessDescription: string, look: Look | '', tone: string ) => {
 		return `
             You are a WordPress theme expert designing a WooCommerce site. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
 			Do not use any palette names that are not part of the color choices provided below.
@@ -251,7 +279,13 @@ export const defaultColorPalette = {
             Business description: ${ businessDescription }
 
             Colors schemes to choose from: 
-            ${ JSON.stringify( colorChoices ) }
+            ${ JSON.stringify(
+				look
+					? colorChoices.filter( ( color ) =>
+							color.lookAndFeel.includes( look )
+					  )
+					: colorChoices
+			) }
         `;
 	},
 	responseValidation: colorPaletteResponseValidator.parse,
