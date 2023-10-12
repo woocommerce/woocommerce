@@ -74,7 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.zone_id }}">
 		<td width="1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
-			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
+			{{ data.zone_name }}
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}

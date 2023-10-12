@@ -108,7 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
-			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
+			{{{ data.title }}}
 		</td>
 		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">

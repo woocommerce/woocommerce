@@ -4103,6 +4103,13 @@ table.wc-shipping-classes {
 				border-top: 0;
 			}
 		}
+
+		.wc-shipping-zone-name,
+		.wc-shipping-zone-method-title,
+		.wc-shipping-class-name {
+			font-weight: 500;
+		}
+
 	}
 
 	tr.wc-shipping-zone-worldwide {
