@@ -20,7 +20,7 @@ function tools_reset_cys() {
 
 	// Reset the home template.
 	$current_theme = wp_get_theme();
-	$template      = get_block_file_template( $current_theme->template . '//home', 'wp_template' );
+	$template      = get_block_template( $current_theme->template . '//home', 'wp_template' );
 	if ( $template->id ) {
 		wp_delete_post( $template->wp_id, true );
 	}
