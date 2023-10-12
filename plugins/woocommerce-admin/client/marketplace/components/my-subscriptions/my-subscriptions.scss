@@ -85,7 +85,7 @@
 	border: none;
 	color: var(--wp-red-red-70, #8a2424);
 	background: var(--wp-red-red-0, #fcf0f1);
-	padding: 0 8px;
+	padding: 2px 8px;
 
 	& > svg {
 		margin-right: 2px;
@@ -94,6 +94,8 @@
 }
 
 .woocommerce-marketplace__my-subscriptions__status-popover .components-popover__content {
+	border: 1px solid $gray-400;
+	width: 300px;
 	border-radius: 2px;
 	padding: 12px;
 	color: $gray-900;
