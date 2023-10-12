@@ -43,6 +43,7 @@ export default function MySubscriptions(): JSX.Element {
 			filter: 'all',
 			'wc-helper-refresh': 1,
 			'wc-helper-nonce': getAdminSetting( 'wc_helper_nonces' ).refresh,
+			'redirect-to-wc-admin': 1,
 		},
 		''
 	);
