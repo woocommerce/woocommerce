@@ -77,15 +77,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<th></th>
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<td colspan="5">
-								<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
-							</td>
-						</tr>
-					</tfoot>
 					<tbody class="wc-shipping-zone-method-rows"></tbody>
 				</table>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"></th>
+			<td>
+				<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 			</td>
 		</tr>
 	</tbody>
