@@ -4,13 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Button, Spinner } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
 	Fragment,
 	createInterpolateElement,
-	useState,
-	useEffect,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
@@ -25,7 +23,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { DownloadableFileItem, UploadsBlockAttributes } from './types';
+import { UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
 
@@ -48,9 +46,6 @@ export function Edit( {
 		'product',
 		'downloads'
 	);
-	const [ fileItems, setFileItems ] = useState< DownloadableFileItem[] >(
-		[]
-	);
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
@@ -61,83 +56,26 @@ export function Edit( {
 		? Object.values( allowedMimeTypes )
 		: [];
 
-	useEffect( () => {
-		setFileItems( ( currentItems ) => {
-			const downloadsMap = downloads.reduce<
-				Record< string, ProductDownload >
-			>(
-				( current, download ) => ( {
-					...current,
-					[ download.id ]: download,
-				} ),
-				{}
-			);
-
-			const fileItemsInDownloads = currentItems.reduce<
-				DownloadableFileItem[]
-			>( function keepPresentDownload( items, item ) {
-				if ( item.download.id === '' ) {
-					items.push( item );
-				} else if ( item.download.id in downloadsMap ) {
-					const download = downloadsMap[ item.download.id ];
-					delete downloadsMap[ item.download.id ];
-					items.push( {
-						...item,
-						download,
-					} );
-				}
-				return items;
-			}, [] );
-
-			return Object.values( downloadsMap ).reduce<
-				DownloadableFileItem[]
-			>( function addAbsentDownload( items, download ) {
-				items.push( {
-					key: String( download.id ),
-					download,
-				} );
-				return items;
-			}, fileItemsInDownloads );
-		} );
-	}, [ downloads ] );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	function handleFileUpload( files: MediaItem | MediaItem[] ) {
 		if ( ! Array.isArray( files ) ) return;
 
-		const { uploadedFiles, items } = files.reduce< {
-			uploadedFiles: Product[ 'downloads' ];
-			items: DownloadableFileItem[];
-		} >(
-			( current, file, index ) => {
-				const download = {
-					id: file.id ? String( file.id ) : '',
-					file: file.url,
-					name: getFileName( file.url ),
-				};
-				const item = {
-					key: `_${ index }`,
-					download,
-					uploading: ! Boolean( file.id ),
-				};
-
-				if ( download.id ) {
-					current.uploadedFiles.push( download );
-				}
-				current.items.push( item );
-
-				return current;
-			},
-			{
-				uploadedFiles: [],
-				items: downloads.map(
-					( download ) => ( {
-						key: String( download.id ),
-						download,
-					} ),
-					[]
-				),
-			}
-		);
+		const uploadedFiles = files
+			.filter(
+				( file ) =>
+					! file.id ||
+					! downloads.some(
+						( download ) =>
+							download.id === String( file.id ) ||
+							download.file === file.url
+					)
+			)
+			.map( ( file ) => ( {
+				id: file.id ? String( file.id ) : '',
+				file: file.url,
+				name: getFileName( file.url ),
+			} ) );
 
 		if ( uploadedFiles.length ) {
 			if ( ! downloads.length ) {
@@ -145,17 +83,13 @@ export function Edit( {
 			}
 			setDownloads( [ ...downloads, ...uploadedFiles ] );
 		}
-
-		setFileItems( items );
 	}
 
-	function removeHandler( fileItem: DownloadableFileItem ) {
+	function removeHandler( download: ProductDownload ) {
 		return function handleRemoveClick() {
 			const otherDownloads = downloads.reduce< ProductDownload[] >(
 				function removeDownload( others, current ) {
-					if (
-						String( current.id ) === String( fileItem.download.id )
-					) {
+					if ( current.file === download.file ) {
 						return others;
 					}
 					return [ ...others, current ];
@@ -171,29 +105,35 @@ export function Edit( {
 		};
 	}
 
+	function handleUploadError( error: unknown ) {
+		createErrorNotice(
+			typeof error === 'string'
+				? error
+				: __( 'There was an error uploading files', 'woocommerce' )
+		);
+	}
+
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
 				<DownloadsMenu
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
-					onUploadError={ () => {} }
+					onUploadError={ handleUploadError }
 				/>
 			</div>
 
-			{ Boolean( fileItems.length ) ? (
+			{ Boolean( downloads.length ) ? (
 				<Sortable className="wp-block-woocommerce-product-downloads-field__table">
-					{ fileItems.map( ( fileItem ) => {
-						const nameFromUrl = getFileName(
-							fileItem.download.file
-						);
+					{ downloads.map( ( download ) => {
+						const nameFromUrl = getFileName( download.file );
+						const isUploading = download.file.startsWith( 'blob' );
 
 						return (
-							<ListItem key={ String( fileItem.key ) }>
+							<ListItem key={ download.file }>
 								<div className="wp-block-woocommerce-product-downloads-field__table-filename">
-									<span>{ fileItem.download.name }</span>
-									{ fileItem.download.name !==
-										nameFromUrl && (
+									<span>{ download.name }</span>
+									{ download.name !== nameFromUrl && (
 										<span className="wp-block-woocommerce-product-downloads-field__table-filename-description">
 											{ nameFromUrl }
 										</span>
@@ -201,7 +141,7 @@ export function Edit( {
 								</div>
 
 								<div className="wp-block-woocommerce-product-downloads-field__table-actions">
-									{ fileItem.uploading && (
+									{ isUploading && (
 										<Spinner
 											aria-label={ __(
 												'Uploading file',
@@ -215,8 +155,8 @@ export function Edit( {
 											'Remove file',
 											'woocommerce'
 										) }
-										disabled={ fileItem.uploading }
-										onClick={ removeHandler( fileItem ) }
+										disabled={ isUploading }
+										onClick={ removeHandler( download ) }
 									/>
 								</div>
 							</ListItem>
@@ -262,7 +202,7 @@ export function Edit( {
 					multipleSelect={ 'add' }
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }
-					onError={ () => null }
+					onError={ handleUploadError }
 				/>
 			) }
 		</div>

@@ -4,7 +4,7 @@
 import { Button, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { chevronDown, chevronUp, customLink } from '@wordpress/icons';
+import { chevronDown, chevronUp } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -12,6 +12,7 @@ import { chevronDown, chevronUp, customLink } from '@wordpress/icons';
 import { DownloadsMenuProps } from './types';
 import { UploadFilesMenuItem } from '../upload-files-menu-item';
 import { MediaLibraryMenuItem } from '../media-library-menu-item';
+import { InsertUrlMenuItem } from '../insert-url-menu-item';
 
 export function DownloadsMenu( {
 	allowedTypes,
@@ -55,17 +56,13 @@ export function DownloadsMenu( {
 							} }
 						/>
 
-						<MenuItem
-							icon={ customLink }
-							iconPosition="left"
-							onClick={ onClose }
-							info={ __(
-								'Import a file hosted elsewhere',
-								'woocommerce'
-							) }
-						>
-							{ __( 'Insert from URL', 'woocommerce' ) }
-						</MenuItem>
+						<InsertUrlMenuItem
+							onUploadSuccess={ ( files ) => {
+								onUploadSuccess( files );
+								onClose();
+							} }
+							onUploadError={ onUploadError }
+						/>
 					</MenuGroup>
 				</div>
 			) }
