@@ -77,7 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<th></th>
 						</tr>
 					</thead>
-					<tbody class="wc-shipping-zone-method-rows"></tbody>
+					<tbody class="wc-shipping-zone-method-rows wc-shipping-tables-tbody"></tbody>
 				</table>
 			</td>
 		</tr>

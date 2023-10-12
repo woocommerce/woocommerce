@@ -3987,15 +3987,20 @@ table.wc-shipping-classes {
 	font-size: 14px;
 	font-weight: 400;
 	line-height: 20px;
+	color: #000000;
 
 	thead tr th {
 		color: #646970;
 		vertical-align: middle;
-		padding: 8px 10px;
+		padding: 12px;
+	}
+
+	tbody tr td {
+		padding: 24px 12px;
 	}
 
 	tfoot tr td {
-		padding: 24px 10px;
+		padding: 24px 12px;
 		background-color: #F6F7F7;
 		color: #000000;
 	}
@@ -4009,8 +4014,9 @@ table.wc-shipping-classes {
 		font-size: 14px;
 		font-weight: 400;
 		line-height: 20px;
+		color: #000000;
 		vertical-align: middle;
-		padding: 24px 10px;
+		padding: 24px 12px;
 
 		li {
 			line-height: 24px;
@@ -4087,22 +4093,9 @@ table.wc-shipping-classes {
 		}
 	}
 
-	.wc-shipping-zone-method-rows {
-		tr:nth-child(even) td {
-			background: #f9f9f9;
-		}
-	}
-
-	tr.odd,
-	.wc-shipping-class-rows tr:nth-child(odd) {
+	tbody.wc-shipping-tables-tbody {
 		td {
-			background: #f9f9f9;
-		}
-	}
-
-	tbody.wc-shipping-zone-rows {
-		td {
-			border-top: 2px solid #f9f9f9;
+			border-top: 1px solid #C3C4C7;
 		}
 
 		tr:first-child {
@@ -4220,7 +4213,7 @@ table.wc-shipping-classes {
 		}
 
 		.wc-shipping-zone-method {
-			background-color: #dcdcdc;
+			background-color: #F0F0F0;
 			margin: 0 3px 3px 0;
 			padding: 5px 9px;
 			border-radius: 5px;

@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th />
 		</tr>
 	</thead>
-	<tbody class="wc-shipping-class-rows"></tbody>
+	<tbody class="wc-shipping-class-rows wc-shipping-tables-tbody"></tbody>
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-class-row-blank">

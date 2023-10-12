@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th></th>
 		</tr>
 	</thead>
-	<tbody class="wc-shipping-zone-rows"></tbody>
+	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
 	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
 		<td width="1%" class="wc-shipping-zone-worldwide"></td>
