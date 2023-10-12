@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent global attribute terms from being automatically selected

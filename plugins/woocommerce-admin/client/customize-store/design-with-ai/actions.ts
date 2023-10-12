@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assign, spawn, EventObject } from 'xstate';
+import { assign, spawn } from 'xstate';
 import {
 	getQuery,
 	updateQueryString,
@@ -18,7 +18,6 @@ import {
 	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	FontPairing,
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
@@ -105,38 +104,25 @@ const assignFontPairing = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	aiSuggestions: ( context, event: unknown ) => {
-		if ( ( event as EventObject ).type === 'xstate.error' ) {
-			let fontPairing = context.aiSuggestions.fontPairing;
-			const choice = context.lookAndFeel.choice;
+	aiSuggestions: ( context ) => {
+		let fontPairing = context.aiSuggestions.fontPairing;
+		const choice = context.lookAndFeel.choice;
 
-			switch ( true ) {
-				case choice === 'Contemporary':
-					fontPairing = 'Inter + Inter';
-					break;
-				case choice === 'Classic':
-					fontPairing = 'Bodoni Moda + Overpass';
-					break;
-				case choice === 'Bold':
-					fontPairing = 'Rubik + Inter';
-					break;
-			}
-
-			return {
-				...context.aiSuggestions,
-				fontPairing,
-			};
+		switch ( true ) {
+			case choice === 'Contemporary':
+				fontPairing = 'Inter + Inter';
+				break;
+			case choice === 'Classic':
+				fontPairing = 'Bodoni Moda + Overpass';
+				break;
+			case choice === 'Bold':
+				fontPairing = 'Rubik + Inter';
+				break;
 		}
 
 		return {
 			...context.aiSuggestions,
-			fontPairing: (
-				event as {
-					data: {
-						response: FontPairing;
-					};
-				}
-			 ).data.response.pair_name,
+			fontPairing,
 		};
 	},
 } );

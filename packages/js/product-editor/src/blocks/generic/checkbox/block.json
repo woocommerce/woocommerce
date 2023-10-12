@@ -20,6 +20,12 @@
 		},
 		"tooltip": {
 			"type": "string"
+		},
+		"checkedValue": {
+			"type": "string"
+		},
+		"uncheckedValue": {
+			"type": "string"
 		}
 	},
 	"supports": {

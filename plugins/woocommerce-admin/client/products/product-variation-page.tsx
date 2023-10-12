@@ -7,10 +7,12 @@ import {
 	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
+	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 import { useParams } from 'react-router-dom';
 
 /**
@@ -60,6 +62,14 @@ export default function ProductPage() {
 				productType="product_variation"
 				settings={ productBlockEditorSettings || {} }
 			/>
+			{ productId && variationId && (
+				<WooFooterItem order={ 0 }>
+					<VariationSwitcherFooter
+						parentId={ parseInt( productId, 10 ) }
+						variationId={ parseInt( variationId, 10 ) }
+					/>
+				</WooFooterItem>
+			) }
 		</>
 	);
 }

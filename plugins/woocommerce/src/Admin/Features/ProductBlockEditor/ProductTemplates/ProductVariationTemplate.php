@@ -103,22 +103,36 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
-				'id'         => 'variation-details',
+				'id'         => 'product-variation-details-section',
 				'order'      => 10,
 				'attributes' => [
-					'title' => __( 'Variation details', 'woocommerce' ),
+					'title'       => __( 'Variation details', 'woocommerce' ),
+					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
 				],
 			]
 		);
 		$basic_details->add_block(
 			[
-				'id'         => 'product-summary',
+				'id'         => 'product-variation-note',
 				'blockName'  => 'woocommerce/product-summary-field',
 				'order'      => 20,
 				'attributes' => [
 					'property' => 'description',
 					'label'    => __( 'Note <optional />', 'woocommerce' ),
 					'helpText' => '',
+				],
+			]
+		);
+		$basic_details->add_block(
+			[
+				'id'         => 'product-variation-visibility',
+				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 30,
+				'attributes' => [
+					'property'       => 'status',
+					'label'          => __( 'Hide in product catalog', 'woocommerce' ),
+					'checkedValue'   => 'private',
+					'uncheckedValue' => 'publish',
 				],
 			]
 		);
@@ -129,7 +143,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'         => 'product-variation-images-section',
 				'order'      => 30,
 				'attributes' => [
-					'title'       => __( 'Images', 'woocommerce' ),
+					'title'       => __( 'Image', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
@@ -141,11 +155,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$images_section->add_block(
 			[
-				'id'         => 'product-variation-images',
+				'id'         => 'product-variation-image',
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'property' => 'image',
+					'multiple' => false,
 				],
 			]
 		);
@@ -156,18 +171,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
-		$pricing_group->add_block(
-			[
-				'id'         => 'pricing-has-variations-notice',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
-				'order'      => 10,
-				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
-				],
-			]
-		);
 		// Product Pricing Section.
 		$product_pricing_section = $pricing_group->add_section(
 			[
@@ -208,8 +211,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-regular-price-field',
 				'order'      => 10,
 				'attributes' => [
-					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
+					'name'       => 'regular_price',
+					'label'      => __( 'Regular price', 'woocommerce' ),
+					'isRequired' => true,
 				],
 			]
 		);
@@ -240,48 +244,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'     => 20,
 			]
 		);
+
 		$product_pricing_section->add_block(
-			[
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => [
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => [
-						[
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						],
-						[
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						],
-						[
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						],
-					],
-				],
-			]
-		);
-		$pricing_advanced_block = $product_pricing_section->add_block(
-			[
-				'id'         => 'product-pricing-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 40,
-				'attributes' => [
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				],
-			]
-		);
-		$pricing_advanced_block->add_block(
 			[
 				'id'         => 'product-tax-class',
 				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
+				'order'      => 40,
 				'attributes' => [
 					'title'       => __( 'Tax class', 'woocommerce' ),
 					'description' => sprintf(
@@ -292,6 +260,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					),
 					'property'    => 'tax_class',
 					'options'     => [
+						[
+							'label' => __( 'Same as main product', 'woocommerce' ),
+							'value' => 'parent',
+						],
 						[
 							'label' => __( 'Standard', 'woocommerce' ),
 							'value' => '',

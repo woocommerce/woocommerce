@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes } from '@wordpress/blocks';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
 import { Icon, help } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -12,29 +11,51 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { CheckboxBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
 	context: { postType },
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: ProductEditorBlockEditProps< CheckboxBlockAttributes > ) {
+	const { property, title, label, tooltip, checkedValue, uncheckedValue } =
+		attributes;
+
 	const blockProps = useWooBlockProps( {
 		className: 'woocommerce-product-form__checkbox',
 		...attributes,
 	} );
-	const { property, title, label, tooltip } = attributes;
-	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
-		postType,
-		fallbackValue: false,
-	} );
+
+	const [ value, setValue ] = useProductEntityProp< boolean | string | null >(
+		property,
+		{
+			postType,
+			fallbackValue: false,
+		}
+	);
+
+	function isChecked() {
+		if ( checkedValue !== undefined ) {
+			return checkedValue === value;
+		}
+		return value as boolean;
+	}
+
+	function handleChange( checked: boolean ) {
+		if ( checked ) {
+			setValue( checkedValue !== undefined ? checkedValue : checked );
+		} else {
+			setValue( uncheckedValue !== undefined ? uncheckedValue : checked );
+		}
+	}
 
 	return (
 		<div { ...blockProps }>
-			<h4>{ title }</h4>
+			{ title && <h4>{ title }</h4> }
 			<div className="woocommerce-product-form__checkbox-wrapper">
 				<CheckboxControl
 					label={ label }
-					checked={ value }
-					onChange={ ( selected ) => setValue( selected ) }
+					checked={ isChecked() }
+					onChange={ handleChange }
 				/>
 				{ tooltip && (
 					<Tooltip

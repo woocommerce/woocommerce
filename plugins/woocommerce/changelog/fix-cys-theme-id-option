@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add woocommerce_admin_customize_store_completed_theme_id option to allowed list

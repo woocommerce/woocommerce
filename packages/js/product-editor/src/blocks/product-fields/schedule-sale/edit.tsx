@@ -26,6 +26,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	clientId,
+	context,
 }: ProductEditorBlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hasEdit } = useProductEdits();
@@ -36,7 +37,7 @@ export function Edit( {
 
 	const [ salePrice ] = useEntityProp< string | null >(
 		'postType',
-		'product',
+		context.postType || 'product',
 		'sale_price'
 	);
 
@@ -45,11 +46,11 @@ export function Edit( {
 
 	const [ dateOnSaleFromGmt, setDateOnSaleFromGmt ] = useEntityProp<
 		string | null
-	>( 'postType', 'product', 'date_on_sale_from_gmt' );
+	>( 'postType', context.postType || 'product', 'date_on_sale_from_gmt' );
 
 	const [ dateOnSaleToGmt, setDateOnSaleToGmt ] = useEntityProp<
 		string | null
-	>( 'postType', 'product', 'date_on_sale_to_gmt' );
+	>( 'postType', context.postType || 'product', 'date_on_sale_to_gmt' );
 
 	const today = moment().startOf( 'minute' ).toISOString();
 

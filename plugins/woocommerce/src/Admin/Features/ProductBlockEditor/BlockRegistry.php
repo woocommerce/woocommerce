@@ -43,6 +43,7 @@ class BlockRegistry {
 	const PRODUCT_FIELDS_BLOCKS = [
 		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-description-field',
+		'woocommerce/product-downloads-field',
 		'woocommerce/product-images-field',
 		'woocommerce/product-inventory-email-field',
 		'woocommerce/product-sku-field',
