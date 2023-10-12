@@ -269,7 +269,7 @@ export const defaultColorPalette = {
 
 	// make sure version is updated every time the prompt is changed
 	version: '2023-09-22',
-	prompt: ( businessDescription: string, look: string, tone: string ) => {
+	prompt: ( businessDescription: string, look: Look | '', tone: string ) => {
 		return `
             You are a WordPress theme expert designing a WooCommerce site. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
 			Do not use any palette names that are not part of the color choices provided below.
@@ -279,7 +279,13 @@ export const defaultColorPalette = {
             Business description: ${ businessDescription }
 
             Colors schemes to choose from: 
-            ${ JSON.stringify( colorChoices ) }
+            ${ JSON.stringify(
+				look
+					? colorChoices.filter( ( color ) =>
+							color.lookAndFeel.includes( look )
+					  )
+					: colorChoices
+			) }
         `;
 	},
 	responseValidation: colorPaletteResponseValidator.parse,
