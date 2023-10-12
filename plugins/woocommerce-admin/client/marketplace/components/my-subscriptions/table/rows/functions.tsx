@@ -82,7 +82,7 @@ export function productName( subscription: Subscription ): TableRow {
 	let iconElement = <Icon icon={ plugins } size={ 40 } />;
 
 	// If the product has an icon, use that instead.
-	if ( subscription.product_icon !== '' ) {
+	if ( subscription.product_icon ) {
 		iconElement = (
 			<img
 				src={ subscription.product_icon }
