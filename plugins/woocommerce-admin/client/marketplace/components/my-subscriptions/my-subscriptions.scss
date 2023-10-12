@@ -65,6 +65,13 @@
 		border-radius: 4px;
 		width: 40px;
 	}
+
+	svg {
+		border-radius: 4px;
+		padding: 8px;
+		fill: $gray-600;
+		background-color: $gray-200;
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions__product {

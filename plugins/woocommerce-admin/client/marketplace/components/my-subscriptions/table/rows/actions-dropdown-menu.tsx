@@ -14,12 +14,17 @@ export default function ActionsDropdownMenu() {
 				{
 					title: __( 'Manage in WooCommerce.com', 'woocommerce' ),
 					icon: external,
-					onClick: () => {},
+					onClick: () => {
+						window.location.href =
+							'https://woocommerce.com/my-account/my-subscriptions';
+					},
 				},
 				{
 					title: __( 'Manage in Pluins', 'woocommerce' ),
 					icon: plugins,
-					onClick: () => {},
+					onClick: () => {
+						window.location.href = '/wp-admin/plugins.php';
+					},
 				},
 			] }
 		/>
