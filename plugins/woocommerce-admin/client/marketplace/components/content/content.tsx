@@ -11,10 +11,8 @@ import './content.scss';
 import {
 	Product,
 	ProductType,
-	SearchAPIProductType,
 	SearchResultType,
 } from '../product-list/types';
-import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
@@ -61,8 +59,8 @@ export default function Content(): JSX.Element {
 		}
 
 		fetchSearchResults( params, abortController.signal )
-			.then( ( products ) => {
-				setProducts( products );
+			.then( ( productList ) => {
+				setProducts( productList );
 			} )
 			.catch( () => {
 				setProducts( [] );
