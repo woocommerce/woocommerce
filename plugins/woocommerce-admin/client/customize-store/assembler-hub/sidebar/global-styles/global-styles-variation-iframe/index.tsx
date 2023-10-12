@@ -5,7 +5,6 @@
  * External dependencies
  */
 import {
-	__unstableIframe as Iframe,
 	__unstableEditorStyles as EditorStyles,
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
@@ -19,6 +18,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  * Internal dependencies
  */
 import './style.scss';
+import Iframe from '../iframe';
 
 const { useGlobalStylesOutput } = unlock( blockEditorPrivateApis );
 
