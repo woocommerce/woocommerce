@@ -104,8 +104,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 					''           => __( 'No requirement', 'woocommerce' ),
 					'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
 					'min_amount' => __( 'A minimum order amount', 'woocommerce' ),
-					'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+					'either'     => __( 'A minimum order amount OR coupon', 'woocommerce' ),
+					'both'       => __( 'A minimum order amount AND coupon', 'woocommerce' ),
 				),
 			),
 			'min_amount'       => array(
