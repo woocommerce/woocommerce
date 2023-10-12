@@ -3885,6 +3885,22 @@ table.wc_shipping {
 	line-height: 16px;
 	color: #1e1e1e;
 
+	.button-primary,
+	.button-primary:hover,
+	.button-primary:focus {
+		background-color: #3858E9;
+		border-radius: 2px;
+		color: #FFFFFF;
+	}
+	.button-primary:focus {
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #3858E9;
+	}
+	.button-primary.disabled {
+		background-color: #3858E9 !important;
+		border-color: #3858E9 !important;
+		color: #8494EC !important;
+	}
+
 	&.wc-backbone-modal .wc-backbone-modal-content {
 		border-radius: 8px;
 		border-top: 8px solid transparent;
