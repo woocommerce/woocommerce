@@ -26,16 +26,14 @@ function tools_reset_cys() {
 	}
 
 	// Reset the custom styles.
-	$stylesheet = get_stylesheet();
-	$user_data  = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( $stylesheet );
-	// wp_update_post(
-	// array(
-	// 'styles'   => array(),
-	// 'settings' => array(),
-	// ),
-	// true,
-	// false
-	// );
+	$wpdb->delete(
+		$wpdb->prefix . 'posts',
+		array(
+			'post_type'  => 'wp_global_styles',
+			'post_title' => 'Custom Styles',
+		),
+		array( '%s', '%s' )
+	);
 
 	$wpdb->delete(
 		$wpdb->prefix . 'posts',
