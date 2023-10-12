@@ -3,7 +3,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Modal, Button, Spinner, TextareaControl } from '@wordpress/components';
+import {
+	Modal,
+	Button,
+	Spinner,
+	TextareaControl,
+	TabPanel,
+} from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -110,37 +116,63 @@ const ImageVariationModal: React.FC = () => {
 		wp.media.frame.modal.open();
 	};
 
+	const tabs = [
+		{
+			name: 'original',
+			title: 'Original Image',
+			view: (
+				<div>
+					{ /* @todo: Replace with the actual URL of the original image */ }
+					<img
+						src="https://wooai.jurassic.tube/wp-content/uploads/2023/10/DSC_6071-PhotoRoom-3-1.jpg"
+						alt="Original"
+					/>
+				</div>
+			),
+		},
+		{
+			name: 'remove-bg',
+			title: 'Remove Background',
+			view: (
+				<div>
+					{ /* @todo: Replace with the actual URL of the image with background removed */ }
+					<img
+						src="https://wooai.jurassic.tube/wp-content/uploads/2023/10/DSC_6071-PhotoRoom-5.jpg"
+						alt="Background Removed"
+					/>
+					<Button isPrimary>Accept and Add to Media Library</Button>
+				</div>
+			),
+		},
+		{
+			name: 'magic-bg',
+			title: 'Magic Background',
+			view: (
+				<div>
+					{ /* @todo: Add a canvas element for image manipulation */ }
+					<canvas id="magicCanvas"></canvas>
+					<TextareaControl
+						label="Prompt for Stable Diffusion"
+						value={ imagePrompt }
+						onChange={ ( newPrompt ) =>
+							setImagePrompt( newPrompt )
+						}
+					/>
+					<Button isPrimary>Generate Magic Background</Button>
+				</div>
+			),
+		},
+	];
+
 	return (
 		<div className="background-image-replacer">
 			<Modal
 				title="Generate Image Variations"
 				onRequestClose={ handleClose }
 			>
-				<div>
-					{ /* Original Image */ }
-					{ /* @todo: Get image URL from selected image in media library */ }
-					<img src="original_image_url" alt="Original" />
-					{ /* New Image */ }
-					{ newImageUrl && <img src={ newImageUrl } alt="New" /> }
-					{ /* Loading Indicator */ }
-					{ isLoading && <Spinner /> }
-				</div>
-				<TextareaControl
-					label="Text"
-					help="Enter some text"
-					value={ imagePrompt }
-					onChange={ ( value ) => setImagePrompt( value ) }
-				/>
-				<div>
-					<Button variant="primary" onClick={ generateVariations }>
-						Generate Variations
-					</Button>
-					{ newImage && (
-						<Button variant="secondary" onClick={ acceptImage }>
-							Accept
-						</Button>
-					) }
-				</div>
+				<TabPanel className="my-tab-panel" tabs={ tabs }>
+					{ ( tab ) => <div>{ tab.view }</div> }
+				</TabPanel>
 			</Modal>
 		</div>
 	);

@@ -139,7 +139,7 @@ export const BackgroundRemovalLink = () => {
 			{ showModal && <ImageVariationModal /> }
 			<div className="background-link_actions">
 				<button onClick={ () => newOnRemoveBackgroundClick() }>
-					{ __( 'Remove background', 'woocommerce' ) }
+					{ __( 'Generate image variations', 'woocommerce' ) }
 				</button>
 				<img src={ MagicIcon } alt="" />
 			</div>
