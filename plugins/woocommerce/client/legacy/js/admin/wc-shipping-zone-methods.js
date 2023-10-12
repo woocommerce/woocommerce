@@ -543,7 +543,9 @@
 				// Free Shipping has hidden field elements depending on data values.
 				possiblyHideFreeShippingRequirements: function( data ) {
 					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
-						const shouldHideRequirements = data.woocommerce_free_shipping_requires === '' || data.woocommerce_free_shipping_requires === 'coupon';
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null || 
+							data.woocommerce_free_shipping_requires === '' || 
+							data.woocommerce_free_shipping_requires === 'coupon';
 
 						const select = $( '#woocommerce_free_shipping_requires' );
 						const fieldset = select.closest( 'fieldset' );
