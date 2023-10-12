@@ -7,11 +7,14 @@ import {
 	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
+	__experimentalProductMVPCESFooter as FeedbackBar,
+	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -60,6 +63,14 @@ export default function ProductPage() {
 				product={ product }
 				settings={ productBlockEditorSettings || {} }
 			/>
+			<WooFooterItem>
+				<>
+					<FeedbackBar productType="product" />
+					<ProductMVPFeedbackModalContainer
+						productId={ product.id }
+					/>
+				</>
+			</WooFooterItem>
 			<BlockEditorTourWrapper />
 		</>
 	);
