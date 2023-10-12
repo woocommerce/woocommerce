@@ -87,8 +87,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 						}
 
 						$filter_classes = array( 'chosen', 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) ), 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) . '-' . $term_slug ) );
-
-						echo '<li class="' . esc_attr( implode( ' ', $filter_classes ) ) . '"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a></li>';
+						$anchor_text = apply_filters( 'woocommerce_widget_layered_nav_term_anchor_text', esc_html( $term->name ), $term, $taxonomy);
+						echo '<li class="' . esc_attr( implode( ' ', $filter_classes ) ) . '"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . $anchor_text . '</a></li>';
 					}
 				}
 			}
