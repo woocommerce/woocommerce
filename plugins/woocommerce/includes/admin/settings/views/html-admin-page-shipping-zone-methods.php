@@ -181,7 +181,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$methods = WC()->shipping()->load_shipping_methods();
 
 							$methods_placed_in_order = array();
-							$first_methods_ids =       array( 'free_shipping', 'flat_rate', 'local_pickup' );
+							$first_methods_ids       = array( 'free_shipping', 'flat_rate', 'local_pickup' );
 
 							foreach ( $first_methods_ids as $first_method_id ) {
 								foreach ( $methods as $key => $obj ) {
