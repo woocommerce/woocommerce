@@ -232,7 +232,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
-						'<a href="https://woocommerce.com/posts/how-to-take-professional-product-photos-top-tips"" target="_blank" rel="noreferrer">',
+						'<a href="https://woocommerce.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 				],
@@ -244,10 +244,30 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'images'   => [],
+					'property' => 'images',
 				],
 			]
 		);
+		// Downloads section.
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$general_group->add_section(
+				[
+					'id'         => 'product-downloads-section',
+					'order'      => 40,
+					'attributes' => [
+						'title'       => __( 'Downloads', 'woocommerce' ),
+						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					],
+				]
+			)->add_block(
+				[
+					'id'        => 'product-downloads',
+					'blockName' => 'woocommerce/product-downloads-field',
+					'order'     => 10,
+				]
+			);
+		}
 	}
 
 	/**

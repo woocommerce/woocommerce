@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import {
 	Product,
+	ProductType,
 	SearchAPIProductType,
 	SearchAPIJSONType,
 } from '../components/product-list/types';
@@ -24,6 +25,7 @@ interface ProductGroup {
 	title: string;
 	items: Product[];
 	url: string;
+	itemType: ProductType;
 }
 
 // The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
@@ -147,11 +149,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
-function fetchCategories(): Promise< CategoryAPIItem[] > {
-	let url = MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH;
+function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
+	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
 
 	if ( LOCALE.userLocale ) {
-		url = `${ url }?locale=${ LOCALE.userLocale }`;
+		url.searchParams.set( 'locale', LOCALE.userLocale );
+	}
+
+	// We don't define parent for extensions since that is provided by default
+	// This is to ensure the old marketplace continues to work when this isn't defined
+	if ( type === ProductType.theme ) {
+		url.searchParams.set( 'parent', 'themes' );
 	}
 
 	return (
@@ -170,6 +178,10 @@ const appendURLParams = (
 	url: string,
 	utmParams: Array< [ string, string ] >
 ): string => {
+	if ( ! url ) {
+		return url;
+	}
+
 	const urlObject = new URL( url );
 	if ( ! urlObject ) {
 		return url;

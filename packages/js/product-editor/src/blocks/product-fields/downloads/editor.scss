@@ -1,0 +1,77 @@
+$fixed-section-height: 224px;
+
+.wp-block-woocommerce-product-downloads-field {
+	.woocommerce-form-file-upload {
+		border: 1px dashed $gray-400;
+		height: $fixed-section-height;
+		border-radius: 2px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.woocommerce-media-uploader__label {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: $grid-unit-40;
+			margin-bottom: 0;
+
+			.woocommerce-product-form__supported-files-drop-zone-label {
+				color: $gray-700;
+				font-weight: normal;
+				margin: 0;
+			}
+		}
+	}
+
+	&__table {
+		height: $fixed-section-height;
+		overflow: auto;
+		margin: 0;
+		flex: 1 0 auto;
+	}
+
+	&__table-filename {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__table-filename-description {
+		color: $gray-700;
+	}
+
+	&__table-actions {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: $grid-unit;
+		padding-right: 2px;
+
+		.components-button.has-icon {
+			color: $gray-700;
+			width: $grid-unit-30;
+			height: $grid-unit-30;
+			min-width: inherit;
+			padding: 0;
+		}
+	}
+
+	.woocommerce-sortable {
+		&__item .woocommerce-list-item {
+			display: grid;
+			grid-template-columns: auto 88px;
+			padding: 0;
+			min-height: calc($grid-unit-80 + $grid-unit-05);
+			border: none;
+		}
+
+		&__item:not(:last-child) .woocommerce-list-item {
+			border-bottom: 1px solid $gray-200;
+		}
+
+		&__handle {
+			display: none;
+		}
+	}
+}

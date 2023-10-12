@@ -373,9 +373,37 @@ export const assembleSite = async (
 	}
 };
 
+const installAndActivateTheme = async () => {
+	const themeSlug = 'twentytwentythree';
+
+	try {
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
+			method: 'POST',
+		} );
+
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
+			method: 'POST',
+		} );
+	} catch ( error ) {
+		recordEvent(
+			'customize_your_store_ai_install_and_activate_theme_error',
+			{
+				theme: themeSlug,
+				error: error instanceof Error ? error.message : 'unknown',
+			}
+		);
+		throw error;
+	}
+};
+
 const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_customize_store_ai_suggestions: context.aiSuggestions,
+		woocommerce_customize_store_ai_suggestions: {
+			...context.aiSuggestions,
+			lookAndFeel: context.lookAndFeel.choice,
+		},
 	} );
 };
 
@@ -386,4 +414,5 @@ export const services = {
 	assembleSite,
 	updateStorePatterns,
 	saveAiResponseToOption,
+	installAndActivateTheme,
 };

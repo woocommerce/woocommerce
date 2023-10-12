@@ -8,7 +8,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -553,12 +552,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
-
-			// Temporarily hide empty addons submenu item
-			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-				wp_enqueue_script( 'wc-admin-menu', WC()->plugin_url() . '/assets/js/admin/wc-admin-menu' . $suffix . '.js', null, $version );
-			}
-
 		}
 
 		/**

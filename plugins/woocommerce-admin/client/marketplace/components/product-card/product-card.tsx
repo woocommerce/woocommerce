@@ -8,18 +8,19 @@ import { Card } from '@wordpress/components';
  * Internal dependencies
  */
 import './product-card.scss';
-import { Product } from '../product-list/types';
+import { Product, ProductType } from '../product-list/types';
 
 export interface ProductCardProps {
-	type?: string;
+	type: ProductType;
 	product: Product;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const { product } = props;
+	const { product, type } = props;
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
+	const isTheme = type === ProductType.theme;
 	let productVendor: string | JSX.Element | null = product?.vendorName;
 	if ( product?.vendorName && product?.vendorUrl ) {
 		productVendor = (
@@ -34,11 +35,22 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	}
 
 	return (
-		<Card className="woocommerce-marketplace__product-card">
+		<Card
+			className={ `woocommerce-marketplace__product-card woocommerce-marketplace__product-card--${ type }` }
+		>
 			<div className="woocommerce-marketplace__product-card__content">
+				{ isTheme && (
+					<div className="woocommerce-marketplace__product-card__image">
+						<img
+							className="woocommerce-marketplace__product-card__image-inner"
+							src={ product.image }
+							alt={ product.title }
+						/>
+					</div>
+				) }
 				<div className="woocommerce-marketplace__product-card__header">
 					<div className="woocommerce-marketplace__product-card__details">
-						{ product.icon && (
+						{ ! isTheme && product.icon && (
 							<img
 								className="woocommerce-marketplace__product-card__icon"
 								src={ product.icon }
@@ -65,11 +77,13 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						</div>
 					</div>
 				</div>
-				<p className="woocommerce-marketplace__product-card__description">
-					{ product.description }
-				</p>
+				{ ! isTheme && (
+					<p className="woocommerce-marketplace__product-card__description">
+						{ product.description }
+					</p>
+				) }
 				<div className="woocommerce-marketplace__product-card__price">
-					<span>
+					<span className="woocommerce-marketplace__product-card__price-label">
 						{
 							// '0' is a free product
 							product.price === 0
