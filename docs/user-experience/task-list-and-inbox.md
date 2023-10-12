@@ -8,7 +8,7 @@ Use the Task List and Inbox sparingly. Messages should be clear, concise, and ma
 
 ### Task List
 
-![an example of a task in the task list](_media/task-list1.png)
+![an example of a task in the task list](https://woocommerce.files.wordpress.com/2023/10/task-list1.png)
 
 Anything that **requires** action should go in the task list.
 
@@ -25,13 +25,13 @@ Anything that **requires** action should go in the task list.
 
 Examples:
 
-![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](_media/task-list-example.png)
+![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](https://woocommerce.files.wordpress.com/2023/10/task-list-example.png)
 
 ### Inbox
 
 The Inbox provides informational, useful, and supplemental content to the user, while important notices and setup tasks have their separate and relevant locations.
 
-![an example of an inbox notification](_media/inbox1.png)
+![an example of an inbox notification](https://woocommerce.files.wordpress.com/2023/10/inbox1.png)
 
 - *What appears in the Inbox*:
     - Informational notices such as non-critical reminders.
@@ -45,4 +45,4 @@ The Inbox provides informational, useful, and supplemental content to the user, 
 
 Examples:
 
-![an example of two inbox notifications listed under the "Inbox" section of the admin](_media/inbox-examples.png)
+![an example of two inbox notifications listed under the "Inbox" section of the admin](https://woocommerce.files.wordpress.com/2023/10/inbox-examples.png)
