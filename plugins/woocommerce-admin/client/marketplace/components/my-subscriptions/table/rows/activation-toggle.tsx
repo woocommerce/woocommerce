@@ -2,16 +2,24 @@
  * External dependencies
  */
 import { ToggleControl } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 
-export default function ActivationToggle( props: { checked: boolean } ) {
-	const [ value, setValue ] = useState( props.checked );
+/**
+ * Internal dependencies
+ */
+import { Subscription } from '../../types';
+import Install from './install';
 
-	return (
-		<ToggleControl
-			checked={ value }
-			onChange={ () => setValue( ( state ) => ! state ) }
-			className="woocommerce-marketplace__my-subscriptions__activation"
-		/>
-	);
+interface ActivationToggleProps {
+	subscription: Subscription;
+}
+
+export default function ActivationToggle( props: ActivationToggleProps ) {
+	if (
+		props.subscription.local.installed === false &&
+		props.subscription.maxed === false
+	) {
+		return <Install subscription={ props.subscription } />;
+	}
+
+	return <ToggleControl checked={ props.subscription.active } />;
 }

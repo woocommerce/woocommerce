@@ -72,6 +72,20 @@ async function fetchSubscriptions(): Promise< Array< Subscription > > {
 	return await apiFetch( { path: url.toString() } );
 }
 
+function installProduct( productKey: string ): Promise< void > {
+	const url = '/wc/v3/marketplace/subscriptions/install';
+	const data = new URLSearchParams();
+	data.append( 'product_key', productKey );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -95,6 +109,7 @@ export {
 	fetchDiscoverPageData,
 	fetchCategories,
 	fetchSubscriptions,
+	installProduct,
 	ProductGroup,
 	appendURLParams,
 };
