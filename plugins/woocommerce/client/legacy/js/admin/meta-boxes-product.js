@@ -178,7 +178,7 @@ jQuery( function ( $ ) {
 		$( '#tiptip_arrow' ).removeAttr( 'style' );
 		$( '.woocommerce-product-type-tip' )
 		.attr( 'tabindex', '0' )
-		.attr( 'aria-label', content)
+		.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Escape HTML tags.
 		.tipTip( {
 			attribute: 'data-tip',
 			content: content,
