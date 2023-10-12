@@ -682,6 +682,29 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get helper redirect URL.
+	 * @param array $args Query args.
+	 * @return string
+	 */
+	private static function _get_helper_redirect_url( $args ) {
+		global $current_screen;
+		if ( ! empty( $current_screen->id ) && 'woocommerce_page_wc-addons' === $current_screen->id ) {
+			return add_query_arg(
+				$args,
+				admin_url( 'admin.php' )
+			);
+		}
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => urlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Initiate a new OAuth connection.
 	 */
 	private static function _helper_auth_connect() {
@@ -690,14 +713,13 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$redirect_uri = add_query_arg(
+		$redirect_uri = self::_get_helper_redirect_url(
 			array(
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
 				'wc-helper-return' => 1,
 				'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
-			),
-			admin_url( 'admin.php' )
+			)
 		);
 
 		$request = WC_Helper_API::post(
@@ -811,13 +833,12 @@ class WC_Helper {
 		}
 
 		wp_safe_redirect(
-			add_query_arg(
+			self::_get_helper_redirect_url(
 				array(
 					'page'             => 'wc-addons',
 					'section'          => 'helper',
 					'wc-helper-status' => 'helper-connected',
-				),
-				admin_url( 'admin.php' )
+				)
 			)
 		);
 		die();
@@ -837,13 +858,12 @@ class WC_Helper {
 		 */
 		do_action( 'woocommerce_helper_disconnected' );
 
-		$redirect_uri = add_query_arg(
+		$redirect_uri = self::_get_helper_redirect_url(
 			array(
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
 				'wc-helper-status' => 'helper-disconnected',
-			),
-			admin_url( 'admin.php' )
+			)
 		);
 
 		self::disconnect();
@@ -863,14 +883,13 @@ class WC_Helper {
 
 		self::refresh_helper_subscriptions();
 
-		$redirect_uri = add_query_arg(
+		$redirect_uri = self::_get_helper_redirect_url(
 			array(
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
 				'filter'           => self::get_current_filter(),
 				'wc-helper-status' => 'helper-refreshed',
-			),
-			admin_url( 'admin.php' )
+			)
 		);
 
 		wp_safe_redirect( $redirect_uri );
