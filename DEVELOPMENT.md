@@ -6,7 +6,7 @@ This document aims to provide as much context as possible to aid in the developm
 
 Please refer to [the Getting Started section of the `README.md`](README.md#getting-started) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
 
-## Turborepo Commands
+### Turborepo Commands
 
 Our repository uses [Turborepo](https://turborepo.org) for `build` and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. This is done transparently when running these commands. When using `pnpm run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
 
