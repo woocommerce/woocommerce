@@ -70,7 +70,26 @@ Gateways need to use these methods for full 2.1+ compatibility.
 
 On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here’s a sample file configuration:
 
-https://gist.github.com/MindyPostoff/a0dbaf04de6e61467f62
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <system.webServer>
+    <handlers accessPolicy="Read, Execute, Script" />
+    <rewrite>
+    <rules>
+      <rule name="wordpress" patternSyntax="Wildcard">
+        <match url="*" />
+        <conditions>
+          <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+          <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+        </conditions>
+        <action type="Rewrite" url="index.php" />
+      </rule>
+    </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
 
 ### Pages direct to wrong place
 
