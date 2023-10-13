@@ -50,7 +50,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				return;
 			}
 
-			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
+			wpBody.style.marginTop = `${ headerElement.current.height }px`;
 		}, 200 );
 	};
 
