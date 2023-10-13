@@ -73,8 +73,10 @@ WooCommerce includes a language file (`.pot` file) that contains all of the Engl
     > - Loco Translate offers three different locations for where to create the translation. The best choice for your own translation is Custom, not just to prevent custom translations from being undone by updates, but also because it’s needed for strings in extensions like WooCommerce Subscriptions to be properly translated. Avoid the Author location since it’s inside the plugin and will be overwritten by extension updates, as well as the System location, which could be overwritten by translations from translate.wordpress.org.
     > - If you encounter any technical issues while using Loco Translate, please get in touch with [the Loco Translate support team](https://wordpress.org/support/plugin/loco-translate/).
 
-6. Save when finished.<br>
-   ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-translating-1.png)
+6. Save when finished.
+
+    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-translating-1.png)
+
     > **Note:** When a new version of WooCommerce is released and updated on your site, you need refresh the .po file to look for new strings. Use the “Sync” button to find any new string to start translating.
 
 ## Creating custom translations with PoEdit
