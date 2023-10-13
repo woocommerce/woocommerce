@@ -31,6 +31,7 @@ import {
 	ManageDownloadLimitsModal,
 	ManageDownloadLimitsModalProps,
 } from '../../../components/manage-download-limits-modal';
+import { EditDownloadsModal } from './edit-downloads-modal';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -66,6 +67,9 @@ export function Edit( {
 	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
 		Product[ 'download_expiry' ]
 	>( 'postType', 'product', 'download_expiry' );
+
+	const [ selectedDownload, setSelectedDownload ] =
+		useState< ProductDownload | null >();
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
@@ -167,6 +171,8 @@ export function Edit( {
 		);
 	}
 
+	console.log( 'selectedDownload', selectedDownload );
+
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
@@ -259,6 +265,18 @@ export function Edit( {
 												) }
 											/>
 										) }
+										{ ! isUploading && (
+											<Button
+												onClick={ () =>
+													setSelectedDownload(
+														download
+													)
+												}
+												variant="tertiary"
+											>
+												{ __( 'Edit', 'woocommerce' ) }
+											</Button>
+										) }
 										<Button
 											icon={ closeSmall }
 											label={ __(
@@ -283,6 +301,25 @@ export function Edit( {
 					initialValue={ { downloadLimit, downloadExpiry } }
 					onSubmit={ handleManageDownloadLimitsModalSubmit }
 					onClose={ handleManageDownloadLimitsModalClose }
+				/>
+			) }
+			{ selectedDownload && (
+				<EditDownloadsModal
+					downloableItem={ selectedDownload }
+					onCancel={ () => setSelectedDownload( null ) }
+					onRemove={ () => {
+						removeHandler( selectedDownload );
+						setSelectedDownload( null );
+					} }
+					onChange={ ( text: string ) => {
+						const newDownloads = downloads.map( ( obj ) =>
+							obj.id === selectedDownload.id
+								? { ...selectedDownload, name: text }
+								: obj
+						) as ProductDownload[];
+						setDownloads( newDownloads );
+					} }
+					onSave={ () => setSelectedDownload( null ) }
 				/>
 			) }
 		</div>
