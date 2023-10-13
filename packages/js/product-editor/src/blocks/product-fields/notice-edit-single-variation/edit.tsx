@@ -33,33 +33,39 @@ export function Edit( {
 		title,
 		type = 'info',
 	} = attributes;
-	const [ parentId ] = useEntityProp< number >( 'postType', 'product_variation', 'parent_id' );
+	const [ parentId ] = useEntityProp< number >(
+		'postType',
+		'product_variation',
+		'parent_id'
+	);
 	const { dismissedNotices, dismissNotice } = useNotice();
 	const {
 		parentName,
 		isResolving,
-	}: { parentName: string; isResolving: boolean } = useSelect(
-		( select ) => {
-			const { getEditedEntityRecord, hasFinishedResolution } =
-				select( 'core' );
-			const { name }: Product = getEditedEntityRecord(
-				'postType',
-				'product',
-				parentId
-			);
-			const isParentResolving = ! hasFinishedResolution(
-				'getEditedEntityRecord',
-				[ 'postType', 'product', parentId ]
-			);
+	}: { parentName: string; isResolving: boolean } = useSelect( ( select ) => {
+		const { getEditedEntityRecord, hasFinishedResolution } =
+			select( 'core' );
+		const { name }: Product = getEditedEntityRecord(
+			'postType',
+			'product',
+			parentId
+		);
+		const isParentResolving = ! hasFinishedResolution(
+			'getEditedEntityRecord',
+			[ 'postType', 'product', parentId ]
+		);
 
-			return {
-				parentName: name || '',
-				isResolving: isParentResolving,
-			};
-		}
-	);
+		return {
+			parentName: name || '',
+			isResolving: isParentResolving,
+		};
+	} );
 
-	if ( dismissedNotices.includes( parentId ) || isResolving || parentName === '' ) {
+	if (
+		dismissedNotices.includes( parentId ) ||
+		isResolving ||
+		parentName === ''
+	) {
 		return null;
 	}
 
