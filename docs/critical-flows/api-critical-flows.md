@@ -47,11 +47,11 @@ updates, additions, and re-prioritization to stay aligned with the evolving need
 | Coupons | Can delete a coupon       | `/wp-json/wc/v3/coupons/{id}`        | `tests/api-core-tests/tests/coupons/coupons.test.js` |
 | Coupons | Can add a coupon to order | `/wp-json/wc/v3/orders/{id}/coupons` | `tests/api-core-tests/tests/coupons/coupons.test.js` |
 
-## Shipping 🚚 (WIP)
+## Shipping 🚚
 
-| Route            | Flow name                | Endpoints | Test File                                                    |
-|------------------|--------------------------|-----------|--------------------------------------------------------------|
-| Shipping zones   | Can add shipping zones   |           | `tests/api-core-tests/tests/shipping/shipping-zones.test.js` |
-| Shipping methods | Can add shipping methods |           |                                                              |
-| Shipping classes | Can add shipping classes |           |                                                              |
+| Route            | Flow name                                     | Endpoints                                    | Test File                                                    |
+|------------------|-----------------------------------------------|----------------------------------------------|--------------------------------------------------------------|
+| Shipping zones   | Can create shipping zones                     | `/wp-json/wc/v3/shipping/zones`              | `tests/api-core-tests/tests/shipping/shipping-zones.test.js` |
+| Shipping methods | Can create shipping method to a shipping zone | `/wp-json/wc/v3/shipping/zones/{id}/methods` | n/a                                                          |
+| Shipping classes | Can create a product shipping class           | `/wp-json/wc/v3/products/shipping_classes`   | `tests/api-core-tests/tests/products/products-crud.test.js`  |
 
