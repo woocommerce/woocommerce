@@ -107,7 +107,7 @@ class Patterns extends AbstractRoute {
 		if ( is_wp_error( $vertical_id ) ) {
 			$response = $this->error_to_response( $vertical_id );
 		} else {
-			$populate_images = ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client() );
+			$populate_images = ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client(), $business_description );
 
 			if ( is_wp_error( $populate_images ) ) {
 				$response = $this->error_to_response( $populate_images );

@@ -249,6 +249,8 @@ class BlockPatterns {
 			return $vertical_id;
 		}
 
-		return ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client() );
+		$business_description = get_option( VerticalsSelector::STORE_DESCRIPTION_OPTION_KEY );
+
+		return ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client(), $business_description );
 	}
 }
