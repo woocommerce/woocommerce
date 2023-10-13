@@ -153,7 +153,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 20,
 				'attributes' => [
 					'property' => 'description',
-				]
+				],
 			]
 		);
 		$pricing_columns  = $basic_details->add_block(
