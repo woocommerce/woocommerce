@@ -12,7 +12,10 @@ import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
 
-const searchPlaceholder = __( 'Search for extensions', 'woocommerce' );
+const searchPlaceholder = __(
+	'Search for extensions and themes',
+	'woocommerce'
+);
 
 /**
  * Search component.
