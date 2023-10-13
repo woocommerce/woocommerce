@@ -4001,17 +4001,25 @@ table.wc-shipping-classes {
 
 	tbody tr td {
 		padding: 24px 12px;
+
+		&:last-child {
+			padding: 24px 32px 24px 12px;
+		}
 	}
 
 	tfoot tr td {
 		padding: 24px 12px;
 		background-color: #F6F7F7;
 		color: #000000;
+		vertical-align: top;
+
+		&:last-child {
+			padding: 24px 32px 24px 12px;
+		}
 	}
 
 	td,
 	th {
-		vertical-align: top;
 		background: #fff;
 		display: table-cell !important;
 		font-family: $font-sf-pro-text;
@@ -4173,6 +4181,7 @@ table.wc-shipping-classes {
 
 	.wc-shipping-zone-actions {
 		width: 13%;
+		text-align: right;
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
