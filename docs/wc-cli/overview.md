@@ -6,19 +6,19 @@ WC CLI is powered by the [WC REST API](https://woocommerce.github.io/woocommerce
 
 _If you're looking for documentation on the [WC 2.5 and 2.6's CLI go here](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below))._
 
-### What is WP-CLI?
+## What is WP-CLI?
 
 For those who have never heard before WP-CLI, here's a brief description extracted from the [official website](http://wp-cli.org/).
 
 > **WP-CLI** is a set of command-line tools for managing WordPress installations. You can update plugins, set up multisite installs and much more, without using a web browser.
 
-### WooCommerce Commands
+## WooCommerce Commands
 
 A full listing of WC-CLI commands and their accepted arguments can be found on the [commands page](https://github.com/woocommerce/woocommerce/wiki/WC-CLI-Commands).
 
 All WooCommerce-related commands are grouped into `wp wc` command. The available commands (as of WC 3.0) are:
 
-```
+```bash
 $ wp wc
 usage: wp wc customer <command>
    or: wp wc customer_download <command>
@@ -56,7 +56,7 @@ Example:
 
 `wp wc customer --help`
 
-```
+```bash
 NAME
 
   wp wc customer
@@ -76,7 +76,7 @@ SUBCOMMANDS
 
 `wp wc customer list --help`
 
-```
+```bash
 NAME
 
   wp wc customer list
@@ -168,7 +168,7 @@ llo'`
 
 `$ wp wc customer get 16 --user=1`
 
-```
+```bash
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | id                 | 16                                                                                                                                                             |
 | date_created       | 2016-12-09T20:07:35                                                                                                                                            |
@@ -190,35 +190,35 @@ llo'`
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-### Examples
+## Examples
 
 Full documentation for every command is available using `--help`. Below are some example commands to show what the CLI can do.
 
 All the examples below use user ID 1 (usually an admin account), but you should replace that with your own user account.
 
-You can also find other examples (without output) by looking at the testing files for our CLI tests: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features
+You can also find other examples (without output) by looking at [the testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features).
 
-Each command will have a `.feature` file. Here are some payment gateway commands, for example: https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/cli/features/payment_gateway.feature.
+Each command will have a `.feature` file. For example, [these some payment gateway commands](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/cli/features/payment_gateway.feature).
 
-#### Command:
+### Clearing the product/shop transients cache
 
-Clear the product/shop transients cache.
+Command: 
 
 `$ wp wc tool run clear_transients --user=1`
 
-#### Response:
+Response:
 
 `Success: Updated system_status_tool clear_transients.`
 
-#### Command:
+### Listing all system tools
 
-List all system tools.
+Command: 
 
 `$ wp wc tool list --user=1`
 
-#### Response:
+Response:
 
-```
+```bash
 +----------------------------+----------------------------------+-------------------------------+-----------------------------------------------------------------------------------+
 | id                         | name                             | action                        | description                                                                       |
 +----------------------------+----------------------------------+-------------------------------+-----------------------------------------------------------------------------------+
@@ -240,25 +240,25 @@ List all system tools.
 +----------------------------+----------------------------------+-------------------------------+-----------------------------------------------------------------------------------+
 ````
 
-#### Command:
+### Creating a customer
 
-Create a customer.
+Command:
 
 `$ wp wc customer create --email='woo@woo.local' --user=1 --billing='{"first_name":"Bob","last_name":"Tester","company":"Woo", "address_1": "123 Main St.", "city":"New York", "state:": "NY", "country":"USA"}' --shipping='{"first_name":"Bob","last_name":"Tester","company":"Woo", "address_1": "123 Main St.", "city":"New York", "state:": "NY", "country":"USA"}' --password='hunter2' --username='mrbob' --first_name='Bob' --last_name='Tester'`
 
-#### Response:
+Response:
 
 `Success: Created customer 17.`
 
-#### Command:
+### Getting a customer in CSV format
 
-Get a customer in CSV format.
+Command:
 
 `$ wp wc customer get 17 --user=1 --format=csv`
 
-#### Response:
+Response:
 
-```
+```bash
 Field,Value
 id,17
 date_created,2016-12-09T20:22:10
@@ -279,25 +279,25 @@ total_spent,0.00
 avatar_url,http://2.gravatar.com/avatar/5791d33f7d6472478c0b5fa69133f09a?s=96
 ```
 
-#### Command:
+### Adding a customer note on order 355
 
-Add a customer note on order 355.
+Command:
 
 `$ wp wc order_note create 355 --note="Great repeat customer" --customer_note=true --user=1`
 
-#### Response:
+Response:
 
 `Success: Created order_note 286.`
 
-#### Command:
+### Getting an order note
 
-Get an order note.
+Command:
 
 `$ wp wc order_note get 355 286 --user=1`
 
-#### Response:
+Response:
 
-```
+```bash
 +---------------+-----------------------+
 | Field         | Value                 |
 +---------------+-----------------------+
@@ -308,25 +308,25 @@ Get an order note.
 +---------------+-----------------------+
 ```
 
-#### Command:
+### Updating a coupon
 
-Update a coupon.
+Command:
 
 `$ wp wc shop_coupon update 45 --amount='10' --discount_type='percent' --free_shipping=true --user=1`
 
-#### Response:
+Response:
 
 `Success: Updated shop_coupon 45.`
 
-#### Command:
+### Getting a coupon
 
-Get a coupon.
+Command:
 
 `$ wp wc shop_coupon get 45 --user=1`
 
-#### Response:
+Response:
 
-```
+```bash
 +-----------------------------+---------------------+
 | Field                       | Value               |
 
@@ -358,18 +358,18 @@ Get a coupon.
 +-----------------------------+---------------------+
 ```
 
-### Frequently Asked Questions
+## Frequently Asked Questions
 
-**I get a 401 error when using commands, what do I do?**
+### I get a 401 error when using commands, what do I do?
 
 If you are getting a 401 error like `Error: Sorry, you cannot list resources. {"status":401}`, you are trying to use the command unauthenticated. The WooCommerce CLI as of 3.0 requires you to provide a proper user to run the action as. Pass in your user ID using the `--user` flag.
 
-**I am trying to update a list of X but it's not saving**
+### I am trying to update a list of X, but it's not saving
 
-Some 'lists' are actually objects. For example, if you want to set categories for a product, the REST API expects an _array of objects_: https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+Some 'lists' are actually objects. For example, if you want to set categories for a product, [the REST API expects an _array of objects_](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties).
 
 To set this you would use JSON like this:
 
-```
+```bash
 wp wc product create --name='Product Name' --categories='[ { "id" : 21 } ]' --user=admin
 ```
