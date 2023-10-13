@@ -25,8 +25,9 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number
             });
+            console.log( issue );
             core.setOutput('hasLabels', issue.data.labels.length > 0);
       - uses: actions-ecosystem/action-add-labels@v1
-        if: steps.latest-issue.hasLabels == 'false'
+        if: ${{ steps.latest-issue.outputs.hasLabels == 'false'}}
         with:
           labels: 'status: awaiting triage'
