@@ -67,7 +67,7 @@ class RedirectionController {
 
 		if ( $product && in_array( $product->get_type(), $this->supported_post_types, true ) ) {
 			if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-				return $digital_product;
+				return true;
 			}
 			return ! $digital_product;
 		}
