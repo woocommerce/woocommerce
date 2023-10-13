@@ -61,21 +61,27 @@ export function Edit( {
 	function handleFileUpload( files: MediaItem | MediaItem[] ) {
 		if ( ! Array.isArray( files ) ) return;
 
-		const uploadedFiles = files
-			.filter(
-				( file ) =>
-					! file.id ||
-					! downloads.some(
-						( download ) =>
-							download.id === String( file.id ) ||
-							download.file === file.url
-					)
-			)
-			.map( ( file ) => ( {
-				id: file.id ? String( file.id ) : '',
-				file: file.url,
-				name: getFileName( file.url ),
-			} ) );
+		const newFiles = files.filter(
+			( file ) =>
+				! downloads.some( ( download ) => download.file === file.url )
+		);
+
+		if ( newFiles.length !== files.length ) {
+			createErrorNotice(
+				files.length === 1
+					? __( 'This file has already been added', 'woocommerce' )
+					: __(
+							'Some of these files have already been added',
+							'woocommerce'
+					  )
+			);
+		}
+
+		const uploadedFiles = newFiles.map( ( file ) => ( {
+			id: file.id ? String( file.id ) : '',
+			file: file.url,
+			name: getFileName( file.url ),
+		} ) );
 
 		if ( uploadedFiles.length ) {
 			if ( ! downloads.length ) {
