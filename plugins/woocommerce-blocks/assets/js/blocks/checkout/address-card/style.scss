@@ -1,7 +1,7 @@
 .wc-block-components-address-card {
 	border: 1px solid $universal-border;
 	@include font-size(regular);
-	padding: $gap;
+	padding: em($gap);
 	margin: 0;
 	border-radius: $universal-border-radius;
 	display: flex;

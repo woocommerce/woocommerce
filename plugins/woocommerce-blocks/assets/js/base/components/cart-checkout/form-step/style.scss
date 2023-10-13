@@ -29,11 +29,11 @@
 }
 
 .wc-block-components-checkout-step__content > * {
-	margin-bottom: em($gap);
+	margin-bottom: $gap;
 }
 .wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
-	padding-bottom: em($gap-large);
+	padding-bottom: $gap;
 }
 
 .wc-block-components-checkout-step__heading {

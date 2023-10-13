@@ -6,6 +6,7 @@
 
 		.components-base-control__field {
 			@include reset-box();
+			position: relative;
 		}
 		.components-combobox-control__suggestions-container {
 			@include reset-typography();
@@ -15,7 +16,8 @@
 		input.components-combobox-control__input {
 			@include reset-typography();
 			@include font-size(regular);
-
+			padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
+			line-height: em($gap);
 			box-sizing: border-box;
 			outline: inherit;
 			border: 1px solid $input-border-gray;
@@ -24,10 +26,7 @@
 			color: $input-text-active;
 			font-family: inherit;
 			font-weight: normal;
-			height: 3em;
 			letter-spacing: inherit;
-			line-height: 1;
-			padding: em($gap-large) $gap em($gap-smallest);
 			text-align: left;
 			text-overflow: ellipsis;
 			text-transform: none;
@@ -67,7 +66,7 @@
 			background-color: $select-dropdown-light;
 			border: 1px solid $input-border-gray;
 			border-top: 0;
-			margin: 3em 0 0 0;
+			margin: 3em 0 0 -1px;
 			padding: 0;
 			max-height: 300px;
 			min-width: 100%;
@@ -110,14 +109,16 @@
 		label.components-base-control__label {
 			@include reset-typography();
 			@include font-size(regular);
-			line-height: 1.375; // =22px when font-size is 16px.
 			position: absolute;
-			transform: translateY(0.75em);
+			transform: translateY(em($gap));
+			line-height: 1.25; // =20px when font-size is 16px.
+			left: em($gap-smaller);
+			top: 0;
 			transform-origin: top left;
 			transition: all 200ms ease;
-			color: $gray-700;
+			color: $universal-body-low-emphasis;
 			z-index: 1;
-			margin: 0 0 0 #{$gap + 1px};
+			margin: 0;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			max-width: calc(100% - #{2 * $gap});
@@ -132,10 +133,16 @@
 		}
 	}
 
+	.wc-block-components-combobox-control:has(input:-webkit-autofill) {
+		label {
+			transform: translateY(em($gap-smaller)) scale(0.875);
+		}
+	}
+
 	&.is-active,
 	&:focus-within {
 		.wc-block-components-combobox-control label.components-base-control__label {
-			transform: translateY(#{$gap-smallest}) scale(0.75);
+			transform: translateY(em($gap-smaller)) scale(0.875);
 		}
 	}
 

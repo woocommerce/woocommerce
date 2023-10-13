@@ -3,7 +3,7 @@
 @import "node_modules/wordpress-components/src/combobox-control/style";
 
 .wc-block-components-country-input {
-	margin-top: em($gap-large);
+	margin-top: $gap;
 
 	// Fixes width in the editor.
 	.components-flex {
