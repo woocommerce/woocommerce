@@ -7,9 +7,14 @@ import {
 	BlockEditProps,
 	registerBlockType,
 } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { ComponentType } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -24,22 +29,34 @@ function getEdit<
 	edit?: ComponentType< BlockEditProps< T > >
 ): ComponentType< BlockEditProps< T > > {
 	return ( props ) => {
-		if ( ! edit ) {
-			return null;
-		}
+		const { _templateBlockHideConditions: hideConditions } =
+			props.attributes;
 
-		const hideConditions = props.attributes._templateBlockHideConditions;
-		if ( hideConditions && Array.isArray( hideConditions ) ) {
-			// @ts-ignore context is added by the block editor at runtime.
-			const context = props.context;
+		const productId = useEntityId( 'postType', 'product' );
+		const shouldHide = useSelect( ( select ) => {
+			if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
+				return false;
+			}
 
-			const shouldHide = hideConditions.some( ( condition ) =>
-				evaluate( condition.expression, context )
+			const editedProduct = select( 'core' ).getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
 			);
 
-			if ( shouldHide ) {
-				return null;
-			}
+			const evaluationContext = {
+				editedProduct,
+			};
+
+			console.log( '*** in useSelect ***' );
+
+			return hideConditions.some( ( condition ) =>
+				evaluate( condition.expression, evaluationContext )
+			);
+		} );
+
+		if ( ! edit || shouldHide ) {
+			return null;
 		}
 
 		return createElement( edit, props );
