@@ -37,11 +37,15 @@ The following endpoints are used for account-related functionality and are appe
 
 The URL for each endpoint can be customized in **WooCommerce > Settings > Advanced** in the Page setup section.
 
+![](https://woocommerce.com/wp-content/uploads/2014/02/endpoints.png)
+
 Ensure that they are unique to avoid conflicts. If you encounter issues with 404s, go to **Settings > Permalinks** and save to flush the rewrite rules.
 
 ## Using endpoints in menus
 
 If you want to include an endpoint in your menus, you need to use the Links section:
+
+![2014-02-26 at 14.26](https://woocommerce.com/wp-content/uploads/2014/02/2014-02-26-at-14.26.png)
 
 Enter the full URL to the endpoint and then insert that into your menu.
 
@@ -98,3 +102,5 @@ Landing on the wrong page when clicking an endpoint URL is typically caused by i
 ### How to Remove “Downloads” from My Account
 
 Sometimes the “Downloads” endpoint on the “My account” page does not need to be displayed. This can be removed by going to **WooCommerce → Settings → Advanced → Account endpoints** and clearing the Downloads endpoint field.
+
+![](https://woocommerce.com/wp-content/uploads/2023/04/Screenshot-2023-04-09-at-11.45.58-PM.png?w=650)
