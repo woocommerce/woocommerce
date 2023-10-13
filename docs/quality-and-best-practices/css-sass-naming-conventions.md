@@ -5,7 +5,7 @@ Table of Contents:
 - [Introduction](#introduction)
 - [Prefixing](#prefixing)
 - [Class names](#class-names)
-  - [Example](#example)
+    - [Example](#example)
 - [TL;DR](#tldr)
   
 ## Introduction

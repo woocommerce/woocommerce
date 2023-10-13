@@ -3,8 +3,8 @@
 Table of Contents:
 
 - [PHP](#php)
-  - [`/src`](#src)
-  - [`/includes`](#includes)
+    - [`/src`](#src)
+    - [`/includes`](#includes)
 - [JS](#js)
 - [CSS and SASS](#css-and-sass)
 
