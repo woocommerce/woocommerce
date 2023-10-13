@@ -10,7 +10,7 @@ import { Notice } from '@wordpress/components';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { FILENAME_APPEND } from './constants';
+import { FILENAME_APPEND, LINK_CONTAINER_ID } from './constants';
 import { useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId, getProductImageCount } from '../utils';
 import {
@@ -138,13 +138,18 @@ export const BackgroundRemovalLink = () => {
 			</div>
 			<TourSpotlight
 				id="backgroundRemovalLink"
-				reference="#woocommerce-ai-app-remove-background-link"
+				reference={ `#${ LINK_CONTAINER_ID }` }
 				description={ __(
 					'Effortlessly make your product images pop by removing the background using state-of-the-art AI technology. Just click the button and watch!',
 					'woocommerce'
 				) }
 				title={ __( '🆕 Remove backgrounds with AI', 'woocommerce' ) }
 				placement="left"
+				spotlightParent={
+					( document.querySelector(
+						`#${ LINK_CONTAINER_ID }`
+					) as HTMLElement ) ?? document.body
+				}
 			/>
 			{ displayError && (
 				<Notice onRemove={ () => setDisplayError( null ) }>

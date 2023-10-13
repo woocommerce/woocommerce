@@ -11,9 +11,7 @@ import { render, createRoot } from '@wordpress/element';
  */
 import { BackgroundRemovalLink } from './background-removal-link';
 import { getCurrentAttachmentDetails } from './image_utils';
-import { FILENAME_APPEND } from './constants';
-
-const linkId = 'woocommerce-ai-app-remove-background-link';
+import { FILENAME_APPEND, LINK_CONTAINER_ID } from './constants';
 
 export const init = () => {
 	const _previous = wp.media.view.Attachment.Details.prototype;
@@ -24,7 +22,9 @@ export const init = () => {
 				_previous.initialize.call( this );
 
 				setTimeout( () => {
-					const root = document.body.querySelector( `#${ linkId }` );
+					const root = document.body.querySelector(
+						`#${ LINK_CONTAINER_ID }`
+					);
 					if ( ! root ) {
 						return;
 					}
@@ -47,7 +47,7 @@ export const init = () => {
 
 				const details = dom.querySelector( '.details' );
 				const reactApp = document.createElement( 'div' );
-				reactApp.id = linkId;
+				reactApp.id = LINK_CONTAINER_ID;
 				details?.appendChild( reactApp );
 
 				return dom.innerHTML;

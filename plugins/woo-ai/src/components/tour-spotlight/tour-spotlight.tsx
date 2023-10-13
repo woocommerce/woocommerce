@@ -13,6 +13,7 @@ type TourSpotlightProps = {
 	description: string;
 	reference: string;
 	placement?: Config[ 'placement' ];
+	spotlightParent?: HTMLElement;
 };
 
 export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
@@ -21,6 +22,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	description,
 	reference,
 	placement = 'auto',
+	spotlightParent = document.body,
 } ) => {
 	const preferenceId = `spotlightDismissed-${ id }`;
 
@@ -59,8 +61,12 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				],
 				placement,
 				options: {
+					portalParentElement: spotlightParent,
 					effects: {
-						liveResize: { mutation: true, resize: true },
+						liveResize: {
+							mutation: true,
+							resize: true,
+						},
 					},
 				},
 				closeHandler: () => {
