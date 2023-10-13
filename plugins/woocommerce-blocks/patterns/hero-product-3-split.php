@@ -8,6 +8,18 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/hero-product-3-split' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-3-split' );
+
+$first_title  = $content['titles'][0]['default'] ?? '';
+$second_title = $content['titles'][1]['default'] ?? '';
+$third_title  = $content['titles'][2]['default'] ?? '';
+$fourth_title = $content['titles'][3]['default'] ?? '';
+$fifth_title  = $content['titles'][4]['default'] ?? '';
+
+$first_description  = $content['descriptions'][0]['default'] ?? '';
+$second_description = $content['descriptions'][1]['default'] ?? '';
+$third_description  = $content['descriptions'][2]['default'] ?? '';
+$fourth_description = $content['descriptions'][3]['default'] ?? '';
+$fifth_description  = $content['descriptions'][4]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"align":"full","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
@@ -20,11 +32,11 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-
 				<!-- wp:group {"style":{"spacing":{"margin":{"top":"20px","bottom":"20px"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group" style="margin-top:20px;margin-bottom:20px;">
 					<!-- wp:heading -->
-					<h2 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h2>
+					<h2 class="wp-block-heading"><?php echo esc_html( $first_title ); ?></h2>
 					<!-- /wp:heading -->
 
 					<!-- wp:paragraph -->
-					<p><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
+					<p><?php echo esc_html( $first_description ); ?></p>
 					<!-- /wp:paragraph -->
 
 					<!-- wp:buttons -->
@@ -50,23 +62,11 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-
 	<!-- wp:column {"verticalAlignment":"center","width":"30%","style":{"spacing":{"padding":{"right":"var:preset|spacing|30","left":"var:preset|spacing|30"}}}} -->
 	<div class="wp-block-column is-vertically-aligned-center" style="padding-right:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30);flex-basis:30%">
 		<!-- wp:paragraph -->
-		<p><strong><?php echo esc_html( $content['titles'][1]['default'] ); ?></strong></p>
+		<p><strong><?php echo esc_html( $second_title ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:separator {"className":"is-style-wide"} -->
-		<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" />
-		<!-- /wp:separator -->
-
-		<!-- wp:paragraph -->
-		<p><strong><?php echo esc_html( $content['titles'][2]['default'] ); ?></strong></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:paragraph -->
-		<p><?php echo esc_html( $content['descriptions'][2]['default'] ); ?></p>
+		<p><?php echo esc_html( $second_description ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:separator {"className":"is-style-wide"} -->
@@ -74,11 +74,11 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-
 		<!-- /wp:separator -->
 
 		<!-- wp:paragraph -->
-		<p><strong><?php echo esc_html( $content['titles'][3]['default'] ); ?></strong></p>
+		<p><strong><?php echo esc_html( $third_title ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php echo esc_html( $content['descriptions'][3]['default'] ); ?></p>
+		<p><?php echo esc_html( $third_description ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:separator {"className":"is-style-wide"} -->
@@ -86,11 +86,23 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-
 		<!-- /wp:separator -->
 
 		<!-- wp:paragraph -->
-		<p><strong><?php echo esc_html( $content['titles'][4]['default'] ); ?></strong></p>
+		<p><strong><?php echo esc_html( $fourth_title ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php echo esc_html( $content['descriptions'][4]['default'] ); ?></p>
+		<p><?php echo esc_html( $fourth_description ); ?></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:separator {"className":"is-style-wide"} -->
+		<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" />
+		<!-- /wp:separator -->
+
+		<!-- wp:paragraph -->
+		<p><strong><?php echo esc_html( $fifth_title ); ?></strong></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph -->
+		<p><?php echo esc_html( $fifth_description ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:column -->

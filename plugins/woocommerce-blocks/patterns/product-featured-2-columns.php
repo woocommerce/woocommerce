@@ -4,6 +4,13 @@
  * Slug: woocommerce-blocks/featured-products-2-cols
  * Categories: WooCommerce
  */
+use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-products-2-cols' );
+$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-products-2-cols' );
+
+$first_title       = $content['titles'][0]['default'] ?? '';
+$first_description = $content['descriptions'][0]['default'] ?? '';
+$first_button      = $content['buttons'][0]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|40","left":"var:preset|spacing|40"}}}} -->
@@ -27,14 +34,7 @@
 					<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"right","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0rem","top":"0"}}}} /--></div>
 				<!-- /wp:column --></div>
 			<!-- /wp:columns -->
-
 			<!-- /wp:post-template -->
-
-			<!-- wp:query-no-results -->
-			<!-- wp:paragraph {"placeholder":"Add text or blocks that will display when a query returns no results."} -->
-			<p></p>
-			<!-- /wp:paragraph -->
-			<!-- /wp:query-no-results -->
 		</div>
 		<!-- /wp:query -->
 	</div>
@@ -43,18 +43,18 @@
 	<!-- wp:column {"width":"33.33%"} -->
 	<div class="wp-block-column" style="flex-basis:33.33%">
 		<!-- wp:heading {"level":4} -->
-		<h4 class="wp-block-heading"><strong>Fan Favorites</strong></h4>
+		<h4 class="wp-block-heading"><strong><?php echo esc_html( $first_title ); ?></strong></h4>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph -->
-		<p>Get ready to start the season right. All the fan favorites in one place at the best price.</p>
+		<p><?php echo esc_html( $first_description ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:buttons -->
 		<div class="wp-block-buttons">
 			<!-- wp:button {"width":50} -->
 			<div class="wp-block-button has-custom-width wp-block-button__width-50">
-				<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button">Shop All</a>
+				<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button"><?php echo esc_html( $first_button ); ?></a>
 			</div>
 			<!-- /wp:button -->
 		</div>

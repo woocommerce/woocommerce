@@ -12,6 +12,10 @@ $images = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-categ
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-restaurant-celebration-food-chocolate-cupcake.png' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/dish-meal-food-breakfast-dessert-eat.png' );
 $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/dish-food-baking-dessert-bread-bakery.png' );
+
+$first_title  = $content['titles'][0]['default'] ?? '';
+$second_title = $content['titles'][1]['default'] ?? '';
+$third_title  = $content['titles'][2]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"0px","left":"0px"},"padding":{"right":"var:preset|spacing|30","left":"var:preset|spacing|30","top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
@@ -24,7 +28,7 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 1 out of 3.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image1 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
 				<!-- wp:heading {"textAlign":"center","level":4} -->
-				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h4>
+				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $first_title ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
@@ -45,7 +49,7 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 2 out of 3.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image2 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
 				<!-- wp:heading {"textAlign":"center","level":4} -->
-				<h4 class="wp-block-heading has-text-align-center "><?php echo esc_html( $content['titles'][1]['default'] ); ?></h4>
+				<h4 class="wp-block-heading has-text-align-center "><?php echo esc_html( $second_title ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
@@ -66,7 +70,7 @@ $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholder
 			<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in featured categories banner. 3 out of 3', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( $image3 ); ?>" data-object-fit="cover"/>
 			<div class="wp-block-cover__inner-container">
 				<!-- wp:heading {"textAlign":"center","level":4} -->
-				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $content['titles'][2]['default'] ); ?></h4>
+				<h4 class="wp-block-heading has-text-align-center"><?php echo esc_html( $third_title ); ?></h4>
 				<!-- /wp:heading -->
 				<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 				<p class="has-text-align-center has-link-color" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">

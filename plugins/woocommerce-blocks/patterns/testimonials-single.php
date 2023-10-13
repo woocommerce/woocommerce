@@ -8,6 +8,9 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/testimonials-single' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/testimonials-single' );
+
+$testimonials_title = $content['titles'][0]['default'] ?? '';
+$description        = $content['descriptions'][0]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"padding":{"right":"32px","left":"32px"}}}} -->
@@ -25,11 +28,11 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/testimonials-
 	<!-- wp:column {"layout":{"type":"constrained","justifyContent":"left"}} -->
 	<div class="wp-block-column">
 		<!-- wp:paragraph -->
-		<p><strong><?php echo esc_html( $content['titles'][0]['default'] ); ?></strong></p>
+		<p><strong><?php echo esc_html( $testimonials_title ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->
-		<p><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
+		<p><?php echo esc_html( $description ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->

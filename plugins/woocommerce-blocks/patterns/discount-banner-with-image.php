@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/discount-banner-with-image' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/discount-banner-with-image' );
+
+$description = $content['descriptions'][0]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"color":{"background":"#254094"},"spacing":{"padding":{"top":"30px","right":"30px","bottom":"30px","left":"30px"}}}} -->
@@ -25,7 +27,7 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/discount-bann
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","fontSize":"35px","lineHeight":"0"},"color":{"text":"#ffffff"},"spacing":{"margin":{"bottom":"40px"}}}} -->
-			<p class="has-text-color" style="color:#ffffff;margin-bottom:40px;font-size:35px;font-style:normal;font-weight:300;line-height:0"><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
+			<p class="has-text-color" style="color:#ffffff;margin-bottom:40px;font-size:35px;font-style:normal;font-weight:300;line-height:0"><?php echo esc_html( $description ); ?></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:buttons -->

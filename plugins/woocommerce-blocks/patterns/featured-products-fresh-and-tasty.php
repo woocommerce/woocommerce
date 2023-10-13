@@ -13,10 +13,15 @@ $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholder
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/fresh-organic-tomatoes.png' );
 $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/fresh-lettuce-washed.png' );
 $image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/russet-organic-potatoes.png' );
+
+$first_title        = $content['titles'][0]['default'] ?? '';
+$first_description  = $content['descriptions'][0]['default'] ?? '';
+$second_description = $content['descriptions'][1]['default'] ?? '';
+$third_description  = $content['descriptions'][2]['default'] ?? '';
 ?>
 
 <!-- wp:heading {"level":3,"align":"wide"} -->
-<h3 class="wp-block-heading alignwide"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
+<h3 class="wp-block-heading alignwide"><?php echo esc_html( $first_title ); ?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:columns {"verticalAlignment":null,"align":"wide"} -->
@@ -34,7 +39,7 @@ $image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholder
 			<!-- wp:column {"width":"67%","style":{"typography":{"fontWeight":"600"}},"layout":{"type":"constrained","justifyContent":"left"}} -->
 			<div class="wp-block-column" style="font-weight:600;flex-basis:67%">
 				<!-- wp:paragraph {"fontSize":"small"} -->
-				<p class="has-small-font-size"><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></p>
+				<p class="has-small-font-size"><?php echo esc_html( $first_description ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
@@ -64,7 +69,7 @@ $image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholder
 			<!-- wp:column {"width":"67%","style":{"typography":{"fontWeight":"600"}},"layout":{"type":"constrained","justifyContent":"left"}} -->
 			<div class="wp-block-column" style="font-weight:600;flex-basis:67%">
 				<!-- wp:paragraph {"fontSize":"small"} -->
-				<p class="has-small-font-size"><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
+				<p class="has-small-font-size"><?php echo esc_html( $second_description ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
@@ -94,7 +99,7 @@ $image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholder
 			<!-- wp:column {"width":"67%","style":{"typography":{"fontWeight":"600"}},"layout":{"type":"constrained","justifyContent":"left"}} -->
 			<div class="wp-block-column" style="font-weight:600;flex-basis:67%">
 				<!-- wp:paragraph {"fontSize":"small"} -->
-				<p class="has-small-font-size"><?php echo esc_html( $content['descriptions'][2]['default'] ); ?></p>
+				<p class="has-small-font-size"><?php echo esc_html( $third_description ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
