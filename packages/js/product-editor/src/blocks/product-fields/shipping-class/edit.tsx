@@ -94,6 +94,11 @@ export function Edit( {
 		context.postType,
 		'shipping_class'
 	);
+	const [ virtual ] = useEntityProp< boolean >(
+		'postType',
+		context.postType,
+		'virtual'
+	);
 
 	function handleShippingClassServerError(
 		error: ServerErrorResponse
@@ -156,6 +161,7 @@ export function Edit( {
 								shippingClasses ?? []
 							),
 						] }
+						disabled={ virtual }
 						help={ createInterpolateElement(
 							__(
 								'Manage shipping classes and rates in <Link>global settings</Link>.',

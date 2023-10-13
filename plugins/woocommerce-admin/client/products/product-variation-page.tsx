@@ -15,7 +15,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { WooFooterItem } from '@woocommerce/admin-layout';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 
 /**
@@ -36,7 +36,32 @@ export default function ProductPage() {
 	const variation = useProductVariationEntityRecord( variationId as string );
 
 	useEffect( () => {
-		return initBlocks();
+		registerPlugin( 'wc-admin-more-menu', {
+			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
+			scope: 'woocommerce-product-block-editor',
+			render: () => (
+				<>
+					<WooProductMoreMenuItem>
+						{ ( { onClose }: { onClose: () => void } ) => (
+							<>
+								<DeleteVariationMenuItem onClose={ onClose } />
+								<MoreMenuFill
+									productType="product_variation"
+									onClose={ onClose }
+								/>
+							</>
+						) }
+					</WooProductMoreMenuItem>
+				</>
+			),
+		} );
+
+		const unregisterBlocks = initBlocks();
+
+		return () => {
+			unregisterPlugin( 'wc-admin-more-menu' );
+			unregisterBlocks();
+		};
 	}, [] );
 
 	useEffect(
@@ -81,23 +106,3 @@ export default function ProductPage() {
 		</>
 	);
 }
-
-registerPlugin( 'wc-admin-more-menu', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-block-editor',
-	render: () => (
-		<>
-			<WooProductMoreMenuItem>
-				{ ( { onClose }: { onClose: () => void } ) => (
-					<>
-						<DeleteVariationMenuItem onClose={ onClose } />
-						<MoreMenuFill
-							productType="product_variation"
-							onClose={ onClose }
-						/>
-					</>
-				) }
-			</WooProductMoreMenuItem>
-		</>
-	),
-} );
