@@ -35,6 +35,15 @@ declare global {
 			'shipping-setting-tour': boolean;
 		};
 		wp: {
+			updates?: {
+				ajax: ( action, data: {
+					slug: string;
+					plugin?: string;
+					theme?: string;
+					success?: function;
+					error?: function;
+				} ) => JQuery.Promise;
+			};
 			autosave?: {
 				server: {
 					postChanged: () => boolean;

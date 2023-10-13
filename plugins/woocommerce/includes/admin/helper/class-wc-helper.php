@@ -1423,17 +1423,19 @@ class WC_Helper {
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
 				$subscription['local']['type']      = $local['_type'];
-				$subscription['local']['slug']      = $local['slug'];
+				$subscription['local']['path']      = $local['_filename'];
+				$subscription['local']['slug']      = null;
+				$subscription['local']['all']       = $local;
 
 				if ( 'plugin' == $local['_type'] ) {
-					$subscription['local']['path'] = $local['_filename'];
+					$subscription['local']['slug'] = $local['slug'];
 					if ( is_plugin_active( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					}
 				} elseif ( 'theme' == $local['_type'] ) {
-					$subscription['local']['path'] = $local['_stylesheet'];
+					$subscription['local']['slug'] = $local['_stylesheet'];
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
 						$subscription['local']['active'] = true;
 					}
