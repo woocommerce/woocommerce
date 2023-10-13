@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 import { __ } from '@wordpress/i18n';
+import { createInterpolateElement } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 
 /**
@@ -143,7 +144,19 @@ export const BackgroundRemovalLink = () => {
 					'Effortlessly make your product images pop by removing the background using state-of-the-art AI technology. Just click the button and watch!',
 					'woocommerce'
 				) }
-				title={ __( '🆕 Remove backgrounds with AI', 'woocommerce' ) }
+				title={ createInterpolateElement(
+					__(
+						'<NewBlock /> Remove backgrounds with AI',
+						'woocommerce'
+					),
+					{
+						NewBlock: (
+							<span className="woo-ai-background-removal-link__new-block">
+								NEW
+							</span>
+						),
+					}
+				) }
 				placement="left"
 				spotlightParent={
 					( document.querySelector(

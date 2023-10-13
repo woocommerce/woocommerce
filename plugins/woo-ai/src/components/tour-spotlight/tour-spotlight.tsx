@@ -9,7 +9,7 @@ import { Config } from '@automattic/tour-kit';
 
 type TourSpotlightProps = {
 	id: string;
-	title: string;
+	title: string | React.ReactElement;
 	description: string;
 	reference: string;
 	placement?: Config[ 'placement' ];
