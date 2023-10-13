@@ -11,6 +11,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 
 		const parsedResult = colorPaletteValidator.parse( validPalette );
@@ -24,6 +25,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -46,6 +48,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -69,6 +72,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: 'invalidColor',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -92,6 +96,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '11163d',
 			foreground: '#invalid_color',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -123,6 +128,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#11163d',
 			foreground: '#11163d',
 			background: '#fffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -134,6 +140,36 @@ describe( 'colorPaletteValidator', () => {
 		    \\"path\\": [
 		      \\"background\\"
 		    ]
+		  }
+		]"
+	` );
+	} );
+
+	it( 'should fail for an invalid Look and Feel', () => {
+		const invalidPalette = {
+			name: 'Ancient Bronze',
+			primary: '#11163d',
+			secondary: '#11163d',
+			foreground: '#11163d',
+			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic', 'Invalid Look' ],
+		};
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"received\\": \\"Invalid Look\\",
+		    \\"code\\": \\"invalid_enum_value\\",
+		    \\"options\\": [
+		      \\"Contemporary\\",
+		      \\"Classic\\",
+		      \\"Bold\\"
+		    ],
+		    \\"path\\": [
+		      \\"lookAndFeel\\",
+		      2
+		    ],
+		    \\"message\\": \\"Invalid enum value. Expected 'Contemporary' | 'Classic' | 'Bold', received 'Invalid Look'\\"
 		  }
 		]"
 	` );

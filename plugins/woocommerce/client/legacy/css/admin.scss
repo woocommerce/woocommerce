@@ -2870,6 +2870,10 @@ ul.wc_coupon_list_block {
 			}
 		}
 
+		.wp-locked .order-preview {
+			visibility: hidden;
+		}
+
 		.order-preview.disabled {
 			&::before {
 				content: "";
