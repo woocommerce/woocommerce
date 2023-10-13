@@ -12,6 +12,7 @@ import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 export type BackgroundRemovalParams = {
 	imageFile: File;
+	backgroundColor: string;
 };
 
 type BackgroundRemovalResponse = {
@@ -26,7 +27,7 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 
 	const fetchImage = async ( params: BackgroundRemovalParams ) => {
 		setLoading( true );
-		const { imageFile } = params;
+		const { imageFile, backgroundColor } = params;
 		const { token } = await requestJetpackToken();
 
 		if ( ! token ) {
@@ -59,6 +60,7 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 		const formData = new FormData();
 		formData.append( 'image_file', imageFile );
 		formData.append( 'token', token );
+		formData.append( 'background_color', backgroundColor ?? '255,255,255,255' );
 
 		try {
 			const response = await apiFetch( {

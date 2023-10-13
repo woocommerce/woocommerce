@@ -72,6 +72,7 @@ export const BackgroundRemovalLink = () => {
 			imageFile: new File( [ originalBlob ], imgFilename ?? '', {
 				type: originalBlob.type,
 			} ),
+			backgroundColor: '255,255,255,255',
 		} );
 
 		await uploadImageToLibrary( {
@@ -105,6 +106,7 @@ export const BackgroundRemovalLink = () => {
 				imageFile: new File( [ originalBlob ], imgFilename ?? '', {
 					type: originalBlob.type,
 				} ),
+				backgroundColor: '255,255,255,255',
 			} );
 
 			setState( 'uploading' );

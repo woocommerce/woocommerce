@@ -11,7 +11,7 @@ import {
 	TabPanel,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
+import { __experimentalRequestJetpackToken as requestJetpackToken, __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -63,10 +63,12 @@ const ImageVariationModal: React.FC = () => {
 	const [ isLoading, setLoading ] = useState( false );
 	const [ originalImage, setOriginalImage ] = useState< string >( '' );
 	const [ newImage, setNewImage ] = useState< Blob | null >( null );
+	const [ bgRemovedImage, setBgRemovedImage ] = useState< Blob | null >( null );
 	const [ newImageUrl, setNewImageUrl ] = useState< string | null >( null );
 	const [ imagePrompt, setImagePrompt ] = useState(
 		'Sandy beach on a sunny day.'
 	);
+	const { fetchImage } = useBackgroundRemoval();
 
 	useEffect( () => {
 		if ( newImage ) {
@@ -79,11 +81,28 @@ const ImageVariationModal: React.FC = () => {
 	}, [ newImage ] );
 
 	useEffect( () => {
-		const { url: imgUrl } = getCurrentAttachmentDetails();
+		const { url: imgUrl, filename } = getCurrentAttachmentDetails();
 		if ( ! imgUrl ) {
 			return;
 		}
 		setOriginalImage( imgUrl );
+		console.log( 'original', imgUrl );
+
+		fetch( imgUrl ).then( ( res ) =>
+			res.blob()
+		).then( ( originalBlob ) => {
+			console.log( 'original image blob', originalBlob );
+			const blob = fetchImage( {
+				imageFile: new File( [ originalBlob ], filename ?? '', {
+					type: originalBlob.type.length > 1 ? originalBlob.type : 'image/jpeg',
+				} ),
+				backgroundColor: '0,0,0,0',
+			} );
+			return blob;
+		} ).then( blob => {
+			console.log( 'background removed blob received' );
+			setBgRemovedImage( blob );
+		} );
 	}, [] );
 
 	/**
@@ -139,8 +158,8 @@ const ImageVariationModal: React.FC = () => {
 	const acceptImage = (): void => {
 		// Logic to upload newImage to media library can go here
 		// throw error if !newImage ?
-		if ( newImage ) {
-			uploadImageToMediaLibrary( newImage );
+		if ( bgRemovedImage ) {
+			uploadImageToMediaLibrary( bgRemovedImage );
 		}
 		wp.media.frame.modal.open();
 		setIsOpen( false ); // Close the modal
@@ -150,6 +169,7 @@ const ImageVariationModal: React.FC = () => {
 		setIsOpen( false );
 		wp.media.frame.modal.open();
 	};
+	const objectURL = bgRemovedImage ? URL.createObjectURL( bgRemovedImage ) : null;
 
 	const tabs = [
 		{
@@ -167,12 +187,15 @@ const ImageVariationModal: React.FC = () => {
 			title: 'Remove Background',
 			view: (
 				<div>
-					{ /* @todo: Replace with the actual URL of the image with background removed */ }
 					<img
-						src="https://wooai.jurassic.tube/wp-content/uploads/2023/10/DSC_6071-PhotoRoom-5.jpg"
+						src={ objectURL ?? '' }
 						alt="Background Removed"
 					/>
-					<Button isPrimary>Accept and Add to Media Library</Button>
+					<Button isPrimary
+						onClick = { () => acceptImage() }
+					>
+						Accept and Add to Media Library
+					</Button>
 				</div>
 			),
 		},
@@ -182,13 +205,11 @@ const ImageVariationModal: React.FC = () => {
 			view: (
 				<div>
 					<div className="image-variation-modal__canvas-container">
-						{ newImage && (
-							<BackgroundProductGenerator
-								className="image-variation-modal__canvas"
-								backgroundImageSrc={ newImage }
-								productImageSrc={ newImage }
-							/>
-						) }
+						{ newImage && bgRemovedImage && ( <BackgroundProductGenerator
+							className="image-variation-modal__canvas"
+							backgroundImageSrc={ newImage }
+							productImageSrc={ bgRemovedImage }
+						/> ) }
 					</div>
 					<TextareaControl
 						label="Prompt for Stable Diffusion"

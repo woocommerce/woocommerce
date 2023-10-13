@@ -42,6 +42,7 @@ describe( 'useBackgroundRemoval hook', () => {
 
 		mockRequestParams = {
 			imageFile,
+			backgroundColor: '0,0,0,0',
 		};
 		mockedRequestJetpackToken.mockResolvedValue( { token: 'fake_token' } );
 	} );
