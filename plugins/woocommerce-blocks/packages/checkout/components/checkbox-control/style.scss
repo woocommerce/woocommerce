@@ -9,6 +9,7 @@
 		position: relative;
 		cursor: pointer;
 		@include font-size(small);
+		margin-bottom: 0 !important;
 
 		input[type="checkbox"] {
 			cursor: inherit;
