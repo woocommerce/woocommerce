@@ -14,6 +14,8 @@ type TourSpotlightProps = {
 	reference: string;
 	placement?: Config[ 'placement' ];
 	spotlightParent?: HTMLElement;
+	onDismissal?: () => void;
+	onStepViewOnce?: () => void;
 };
 
 export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
@@ -23,6 +25,8 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	reference,
 	placement = 'auto',
 	spotlightParent = document.body,
+	onDismissal = () => {},
+	onStepViewOnce = () => {},
 } ) => {
 	const preferenceId = `spotlightDismissed-${ id }`;
 
@@ -70,6 +74,9 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				],
 				placement,
 				options: {
+					callbacks: {
+						onStepViewOnce,
+					},
 					portalParentElement: spotlightParent,
 					effects: {
 						liveResize: {
@@ -81,6 +88,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				closeHandler: () => {
 					setIsSpotlightVisible( false );
 					set( 'woo-ai-plugin', preferenceId, true );
+					onDismissal();
 				},
 			} }
 		/>

@@ -150,6 +150,12 @@ export const BackgroundRemovalLink = () => {
 						`#${ LINK_CONTAINER_ID }`
 					) as HTMLElement ) ?? document.body
 				}
+				onDismissal={ () =>
+					recordBgRemovalTracks( 'spotlight_dismissed' )
+				}
+				onStepViewOnce={ () =>
+					recordBgRemovalTracks( 'spotlight_displayed' )
+				}
 			/>
 			{ displayError && (
 				<Notice onRemove={ () => setDisplayError( null ) }>
