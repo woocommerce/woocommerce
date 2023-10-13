@@ -320,8 +320,16 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							chooseFontPairing: {
-								entry: [ 'assignFontPairing' ],
-								type: 'final',
+								initial: 'pending',
+								states: {
+									pending: {
+										entry: [ 'assignFontPairing' ],
+										always: {
+											target: 'success',
+										},
+									},
+									success: { type: 'final' },
+								},
 							},
 							updateStorePatterns: {
 								initial: 'pending',
