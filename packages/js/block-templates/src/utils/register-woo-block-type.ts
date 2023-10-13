@@ -29,31 +29,36 @@ function getEdit<
 	edit?: ComponentType< BlockEditProps< T > >
 ): ComponentType< BlockEditProps< T > > {
 	return ( props ) => {
+		// @ts-ignore context is added to the block props by the block editor.
+		const { context } = props;
+		const { productType } = context;
 		const { _templateBlockHideConditions: hideConditions } =
 			props.attributes;
 
-		const productId = useEntityId( 'postType', 'product' );
-		const shouldHide = useSelect( ( select ) => {
-			if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
-				return false;
-			}
+		const productId = useEntityId( 'postType', productType );
+		const shouldHide = useSelect(
+			( select ) => {
+				if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
+					return false;
+				}
 
-			const editedProduct = select( 'core' ).getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			);
+				const editedProduct = select( 'core' ).getEditedEntityRecord(
+					'postType',
+					productType,
+					productId
+				);
 
-			const evaluationContext = {
-				editedProduct,
-			};
+				const evaluationContext = {
+					...context,
+					editedProduct,
+				};
 
-			console.log( '*** in useSelect ***' );
-
-			return hideConditions.some( ( condition ) =>
-				evaluate( condition.expression, evaluationContext )
-			);
-		} );
+				return hideConditions.some( ( condition ) =>
+					evaluate( condition.expression, evaluationContext )
+				);
+			},
+			[ productType, productId, context, hideConditions ]
+		);
 
 		if ( ! edit || shouldHide ) {
 			return null;
