@@ -84,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 		<td class="shipping-zone-actions">
 			<div>
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete shipping-zone-action-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 	</tr>

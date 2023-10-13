@@ -3989,6 +3989,10 @@ table.wc-shipping-classes {
 	line-height: 20px;
 	color: #000000;
 
+	&.widefat p {
+		color: #000000;
+	}
+
 	thead tr th {
 		color: #646970;
 		vertical-align: middle;
@@ -4170,10 +4174,14 @@ table.wc-shipping-classes {
 	.shipping-zone-actions {
 		width: 13%;
 
-		a.wc-shipping-zone-delete,
-		a.wc-shipping-zone-method-delete,
-		a.wc-shipping-class-delete {
-			color: #a00;
+		a.shipping-zone-action-delete,
+		a.shipping-zone-action-delete:hover {
+			color: #D63638;
+		}
+
+		a.shipping-zone-action-edit,
+		a.shipping-zone-action-edit:hover {
+			color: #0675C4;
 		}
 	}
 
@@ -4187,11 +4195,6 @@ table.wc-shipping-classes {
 		select,
 		textarea {
 			width: 100%;
-		}
-
-		a.wc-shipping-zone-delete:hover,
-		a.wc-shipping-class-delete:hover {
-			color: red;
 		}
 	}
 
@@ -4213,7 +4216,7 @@ table.wc-shipping-classes {
 			flex-wrap: wrap;
 
 			li {
-				color: #555;
+				color: #000;
 				display: inline;
 				margin: 0;
 			}
@@ -4263,7 +4266,7 @@ table.wc-shipping-classes {
 		text-align: center;
 
 		a {
-			display: inline-block;
+			float: left;
 		}
 
 		.woocommerce-input-toggle {
