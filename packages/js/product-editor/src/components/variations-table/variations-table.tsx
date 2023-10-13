@@ -15,7 +15,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable, Tag } from '@woocommerce/components';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	useContext,
 	useState,
@@ -48,6 +48,7 @@ import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
 import HiddenIcon from '../../icons/hidden-icon';
 import { Pagination } from './pagination';
+import { MouseEvent } from 'react';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -74,6 +75,14 @@ type VariationResponseProps = {
 	update?: Partial< ProductVariation >[];
 	delete?: Partial< ProductVariation >[];
 };
+
+function getEditVariationLink( variation: ProductVariation ) {
+	return getNewPath(
+		{},
+		`/product/${ variation.parent_id }/variation/${ variation.id }`,
+		{}
+	);
+}
 
 export const VariationsTable = forwardRef<
 	HTMLDivElement,
@@ -321,6 +330,18 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
+	function editVariationClickHandler( variation: ProductVariation ) {
+		const url = getEditVariationLink( variation );
+
+		return function handleEditVariationClick(
+			event: MouseEvent< HTMLAnchorElement >
+		) {
+			event.preventDefault();
+
+			navigateTo( { url } );
+		};
+	}
+
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
 			{ ( isLoading || isGeneratingVariations ) && (
@@ -499,10 +520,9 @@ export const VariationsTable = forwardRef<
 							) }
 
 							<Button
-								href={ getNewPath(
-									{},
-									`/product/${ productId }/variation/${ variation.id }`,
-									{}
+								href={ getEditVariationLink( variation ) }
+								onClick={ editVariationClickHandler(
+									variation
 								) }
 							>
 								{ __( 'Edit', 'woocommerce' ) }
