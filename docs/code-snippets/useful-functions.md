@@ -272,6 +272,38 @@ wc_attribute_taxonomy_id_by_name( $name )
 
 ## REST Functions
 
-## Widget Functions
+### wc_rest_prepare_date_response
 
-## Webhook Functions
+Parses and formats a date for ISO8601/RFC3339.
+
+```php
+wc_rest_prepare_date_response( $date, $utc = true )
+```
+
+Pass `$utc` as `false` to get local/offset time.
+
+### wc_rest_upload_image_from_url
+
+Uploads an image from a given URL.
+
+```php
+wc_rest_upload_image_from_url( $image_url )
+```
+
+### wc_rest_urlencode_rfc3986
+
+Encodes a `$value` according to RFC 3986.
+
+```php
+wc_rest_urlencode_rfc3986( $value )
+```
+
+### wc_rest_check_post_permissions
+
+Checks permissions of posts on REST API.
+
+```php
+wc_rest_check_post_permissions( $post_type, $context = 'read', $object_id = 0 )
+```
+
+The available values for `$context` which is the request context are `read`, `create`, `edit`, `delete` and `batch`.
