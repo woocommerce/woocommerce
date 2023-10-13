@@ -761,7 +761,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		// Virtual section
+		// Virtual section.
 		$shipping_group->add_section(
 			[
 				'id'    => 'product-virtual-section',
@@ -775,7 +775,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => [
 					'property' => 'virtual',
 					'label'    => __( 'This product requires shipping or pickup', 'woocommerce' ),
-				]
+				],
 			]
 		);
 		// Product Shipping Section.
