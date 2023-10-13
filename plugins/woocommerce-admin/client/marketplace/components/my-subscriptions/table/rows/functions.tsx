@@ -5,7 +5,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { TableRow } from '@woocommerce/components/build-types/table/types';
 import { Icon, plugins } from '@wordpress/icons';
 import { gmdateI18n } from '@wordpress/date';
-import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -14,6 +13,8 @@ import { Subscription } from '../../types';
 import StatusPopover from './status-popover';
 import ActivationToggle from './activation-toggle';
 import ActionsDropdownMenu from './actions-dropdown-menu';
+import Update from './update';
+import Version from './version';
 
 function getStatus( subscription: Subscription ): {
 	text: string;
@@ -57,21 +58,21 @@ function getStatus( subscription: Subscription ): {
 	};
 }
 
-function getVersion( subscription: Subscription ): string {
+function getVersion( subscription: Subscription ): string | JSX.Element {
 	if ( subscription.local.version === subscription.version ) {
-		return subscription.local.version;
+		return <Version span={ subscription.local.version } />;
 	}
 
 	if ( subscription.local.version && subscription.version ) {
-		return subscription.local.version + ' > ' + subscription.version;
+		return <Update subscription={ subscription } />;
 	}
 
 	if ( subscription.version ) {
-		return subscription.version;
+		return <Version span={ subscription.version } />;
 	}
 
 	if ( subscription.local.version ) {
-		return subscription.local.version;
+		return <Version span={ subscription.local.version } />;
 	}
 
 	return '';

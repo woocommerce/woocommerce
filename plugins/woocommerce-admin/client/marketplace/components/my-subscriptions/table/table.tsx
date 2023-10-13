@@ -45,10 +45,19 @@ function SubscriptionsTable( props: {
 		);
 	}
 
+	const headersWithClasses = props.headers.map( ( header ) => {
+		return {
+			...header,
+			cellClassName:
+				'woocommerce-marketplace__my-subscriptions__table__header--' +
+				header.key,
+		};
+	} );
+
 	return (
 		<Table
 			className="woocommerce-marketplace__my-subscriptions__table"
-			headers={ props.headers }
+			headers={ headersWithClasses }
 			rows={ props.rows }
 		/>
 	);

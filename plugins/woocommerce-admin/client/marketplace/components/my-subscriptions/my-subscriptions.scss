@@ -104,3 +104,11 @@
 .components-base-control.woocommerce-marketplace__my-subscriptions__activation {
 	margin-bottom: 0;
 }
+
+.woocommerce-marketplace__my-subscriptions-version {
+	padding: 6px 12px;
+}
+.woocommerce-marketplace__my-subscriptions__table__header--version > span {
+	display: inline-block;
+	padding: 0 12px;
+}
