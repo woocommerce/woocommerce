@@ -1409,6 +1409,9 @@ class WC_Helper {
 				'installed' => false,
 				'active'    => false,
 				'version'   => null,
+				'type'      => null,
+				'slug'      => null,
+				'path'      => null,
 			);
 
 			$updates = WC_Helper_Updater::get_update_data();
@@ -1419,14 +1422,18 @@ class WC_Helper {
 				$local                              = array_shift( $local );
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
+				$subscription['local']['type']      = $local['_type'];
+				$subscription['local']['slug']      = $local['slug'];
 
 				if ( 'plugin' == $local['_type'] ) {
+					$subscription['local']['path'] = $local['_filename'];
 					if ( is_plugin_active( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					}
 				} elseif ( 'theme' == $local['_type'] ) {
+					$subscription['local']['path'] = $local['_stylesheet'];
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
 						$subscription['local']['active'] = true;
 					}

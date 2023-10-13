@@ -30,6 +30,9 @@ export interface SubscriptionLocal {
 	installed: boolean;
 	active: boolean;
 	version: string;
+	type: string;
+	slug: string;
+	path: string;
 }
 
 export interface SubscriptionShare {
