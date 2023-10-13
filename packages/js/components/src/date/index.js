@@ -49,7 +49,7 @@ Date.propTypes = {
 };
 
 Date.defaultProps = {
-	machineFormat: 'Y-m-d H:i:s',
+	machineFormat: 'y-m-d H:i:s',
 	screenReaderFormat: 'F j, Y',
 	visibleFormat: 'Y-m-d',
 };
