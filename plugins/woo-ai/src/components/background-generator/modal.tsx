@@ -64,6 +64,7 @@ const ImageVariationModal: React.FC = () => {
 	const [ originalImage, setOriginalImage ] = useState< string >( '' );
 	const [ newImage, setNewImage ] = useState< Blob | null >( null );
 	const [ bgRemovedImage, setBgRemovedImage ] = useState< Blob | null >( null );
+	const [ bgReplacedImage, setbgReplacedImage ] = useState< Blob | null >( null );
 	const [ newImageUrl, setNewImageUrl ] = useState< string | null >( null );
 	const [ imagePrompt, setImagePrompt ] = useState(
 		'Sandy beach on a sunny day.'
@@ -155,11 +156,11 @@ const ImageVariationModal: React.FC = () => {
 	 *
 	 * @return {void}
 	 */
-	const acceptImage = (): void => {
+	const acceptImage = ( image: Blob ): void => {
 		// Logic to upload newImage to media library can go here
 		// throw error if !newImage ?
-		if ( bgRemovedImage ) {
-			uploadImageToMediaLibrary( bgRemovedImage );
+		if ( image ) {
+			uploadImageToMediaLibrary( image );
 		}
 		wp.media.frame.modal.open();
 		setIsOpen( false ); // Close the modal
@@ -187,15 +188,21 @@ const ImageVariationModal: React.FC = () => {
 			title: 'Remove Background',
 			view: (
 				<div>
-					<img
+					<div style={ { minHeight:200 } }>
+					{ ! objectURL && ( <Spinner/> ) }
+					{ objectURL && (<img
 						src={ objectURL ?? '' }
 						alt="Background Removed"
-					/>
-					<Button isPrimary
-						onClick = { () => acceptImage() }
-					>
-						Accept and Add to Media Library
-					</Button>
+					/>) }
+					</div>
+					<div>
+						<Button isPrimary
+							disabled={ ! objectURL }
+							onClick = { () => ( bgRemovedImage ? acceptImage( bgRemovedImage ): null ) }
+						>
+							Accept and Add to Media Library
+						</Button>
+					</div>
 				</div>
 			),
 		},
@@ -205,21 +212,35 @@ const ImageVariationModal: React.FC = () => {
 			view: (
 				<div>
 					<div className="image-variation-modal__canvas-container">
+						{ isLoading && ( <Spinner/> ) }
 						{ newImage && bgRemovedImage && ( <BackgroundProductGenerator
 							className="image-variation-modal__canvas"
 							backgroundImageSrc={ newImage }
 							productImageSrc={ bgRemovedImage }
+							onSave={ ( blob ) => setbgReplacedImage( blob ) }
 						/> ) }
 					</div>
 					<TextareaControl
 						label="Prompt for Stable Diffusion"
 						value={ imagePrompt }
+						disabled={ isLoading }
 						onChange={ ( newPrompt ) =>
 							setImagePrompt( newPrompt )
 						}
 					/>
-					<Button isPrimary onClick={ generateVariations }>
+					<Button
+						isPrimary
+						onClick={ generateVariations }
+						disabled={ isLoading }
+					>
 						Generate Magic Background
+					</Button>
+					<Button
+						isPrimary
+						onClick = { () => ( bgReplacedImage ? acceptImage( bgReplacedImage ): null ) }
+						disabled={ isLoading || ! bgReplacedImage }
+					>
+						Save And Add to Media Library
 					</Button>
 				</div>
 			),
