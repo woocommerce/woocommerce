@@ -24,11 +24,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	let productVendor: string | JSX.Element | null = product?.vendorName;
 	if ( product?.vendorName && product?.vendorUrl ) {
 		productVendor = (
-			<a
-				href={ product.vendorUrl }
-				target="_blank"
-				rel="noopener noreferrer"
-			>
+			<a href={ product.vendorUrl } rel="noopener noreferrer">
 				{ product.vendorName }
 			</a>
 		);
@@ -62,7 +58,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 								<a
 									className="woocommerce-marketplace__product-card__link"
 									href={ product.url }
-									target="_blank"
 									rel="noopener noreferrer"
 								>
 									{ product.title }
