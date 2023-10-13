@@ -19,9 +19,11 @@ These flows will continually evolve as the platform evolves with flows updated, 
 -   💳 [Merchant > Dashboard](#merchant---dashboard)
 -   💳 [Merchant > Settings](#merchant---settings)
 -   💳 [Merchant > Coupons](#merchant---coupons)
+-   💳 [Merchant > Marketing](#merchant---marketing)
 -   💳 [Merchant > Analytics](#merchant---analytics)
 -   💳 [Merchant > Products](#merchant---products)
 -   💳 [Merchant > Orders](#merchant---orders)
+-   💳 [Merchant > Customers](#merchant---customers)
 -   💳 [Merchant > Email](#merchant---email)
 -   💳 [Merchant > Plugins](#merchant---plugins)
 -   💳 [Merchant > My Subscriptions](#merchant---my-subscriptions)
@@ -156,9 +158,16 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 ### Merchant - Coupons
 
-| User Type | Flow Area | Flow Name  | Test File                      |
-| --------- | --------- | ---------- | ------------------------------ |
-| Merchant  | Coupons   | Add Coupon | merchant/create-coupon.spec.js |
+| User Type | Flow Area | Flow Name             | Test File                      |
+| --------- | --------- | --------------------- | ------------------------------ |
+| Merchant  | Coupons   | Add all coupon types  | merchant/create-coupon.spec.js |
+| Merchant  | Coupons   | Add restricted coupon |                                |
+
+### Merchant - Marketing
+
+| User Type | Flow Area | Flow Name                  | Test File |
+| --------- | --------- | -------------------------- | --------- |
+| Merchant  | Marketing | Display marketing overview |           |
 
 ### Merchant - Analytics
 
@@ -224,6 +233,12 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Merchant  | Orders    | Filter orders by order status                                    | merchant/order-status-filter.spec.js   |
 | Merchant  | Orders    | Bulk change order status                                         |                                        |
 | Merchant  | Orders    | Add order notes                                                  |                                        |
+
+### Merchant - Customers
+
+| User Type | Flow Area | Flow Name             | Test File |
+| --------- | --------- | --------------------- | --------- |
+| Merchant  | Customers | Display customer list |           |
 
 ### Merchant - Email
 
