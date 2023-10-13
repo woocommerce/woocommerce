@@ -11,12 +11,12 @@ Removing  `/product/`,  `/product-category/`, or  `/shop/`  from the URLs is not
 
 You will make it harder for WordPress to detect what page you are trying to reach when you type in a product category URL. Also, understand that the standard “Page” in WordPress always has no base text in the URL. For example:
 
-- http://yoursite.com/about-page/ (this is the URL of a standard page)
-- http://yoursite.com/product-category/category-x/ (this is the URL leading to a product category)
+- `http://yoursite.com/about-page/` (this is the URL of a standard page)
+- `http://yoursite.com/product-category/category-x/` (this is the URL leading to a product category)
 
 What would happen if we remove that ‘product-category’ part?
 
--   http://yoursite.com/about-page/
--   http://yoursite.com/category-x/
+-   `http://yoursite.com/about-page/`
+-   `http://yoursite.com/category-x/`
 
 WordPress will have to do much more work to detect what page you are looking for when entering one of the above URLs. That is why we do not recommend using any SEO plugin to achieve this.
