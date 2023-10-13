@@ -20,6 +20,11 @@ declare global {
 			apiNonce: string;
 			siteSuffix: string;
 			connectionStatus: { isActive: boolean };
+			userConnectionData: {
+				currentUser: {
+					blogId: number;
+				}
+			}
 		};
 	}
 }

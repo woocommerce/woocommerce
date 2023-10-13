@@ -11,6 +11,7 @@ import {
 	TabPanel,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -90,13 +91,26 @@ const ImageVariationModal: React.FC = () => {
 	 */
 	const generateVariations = async (): Promise< void > => {
 		setLoading( true );
+		const blogId = window?.JP_CONNECTION_INITIAL_STATE?.userConnectionData?.currentUser?.blogId;
+
+		const { token } = await requestJetpackToken();
+
+		if ( ! token ) {
+			throw Error( 'Invalid token' );
+		}
+
+		const formData = new FormData();
+		formData.append( 'prompt', imagePrompt );
+		formData.append( 'token', token );
+
 		try {
 			const response = ( await apiFetch( {
 				/* @todo: Get site URL dynamically for this request. */
 				/* @todo: Get a JWT for this request using the jetpack AI JWT package. */
-				path: 'https://public-api.wordpress.com/wpcom/v2/sites/wooai.jurassic.tube/ai-image',
+				url: `https://public-api.wordpress.com/wpcom/v2/sites/${blogId}/ai-image`,
 				method: 'POST',
 				parse: false, // Do not parse the response as JSON
+				body: formData,
 			} ) ) as Blob;
 
 			setNewImage( response );
@@ -174,7 +188,11 @@ const ImageVariationModal: React.FC = () => {
 							setImagePrompt( newPrompt )
 						}
 					/>
-					<Button isPrimary>Generate Magic Background</Button>
+					<Button isPrimary
+						onClick = { generateVariations }
+					>
+						Generate Magic Background
+					</Button>
 				</div>
 			),
 		},
