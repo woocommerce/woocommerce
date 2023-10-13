@@ -11,7 +11,10 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { RemoveConfirmationModal } from '@woocommerce/product-editor';
+import {
+	RemoveConfirmationModal,
+	__experimentalUseVariationSwitcher as useVariationSwitcher,
+} from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -28,6 +31,12 @@ export const DeleteVariationMenuItem = ( {
 	const { productId } = useParams();
 
 	const variationId = useEntityId( 'postType', 'product_variation' );
+
+	const { invalidateVariationList, goToNextVariation, numberOfVariations } =
+		useVariationSwitcher( {
+			parentId: productId ? parseInt( productId, 10 ) : undefined,
+			variationId,
+		} );
 
 	const [ name ] = useEntityProp< string >(
 		'postType',
@@ -82,9 +91,14 @@ export const DeleteVariationMenuItem = ( {
 				setShowModal( false );
 				onClose();
 
-				navigateTo( {
-					url: getNewPath( {}, `/product/${ productId }` ),
-				} );
+				invalidateVariationList();
+				if ( numberOfVariations && numberOfVariations > 1 ) {
+					goToNextVariation();
+				} else {
+					navigateTo( {
+						url: getNewPath( {}, `/product/${ productId }` ),
+					} );
+				}
 			} )
 			.catch( () => {
 				createErrorNotice(
