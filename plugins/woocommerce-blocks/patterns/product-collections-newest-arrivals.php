@@ -8,6 +8,9 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collections-newest-arrivals' );
+
+$first_title  = $content['titles'][0]['default'] ?? '';
+$first_button = $content['buttons'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
@@ -18,7 +21,7 @@ $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-coll
 		<div class="wp-block-column">
 			<!-- wp:heading {"level":3} -->
 
-			<h3 class="wp-block-heading"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html( $first_title ); ?></h3>
 			<!-- /wp:heading -->
 		</div>
 		<!-- /wp:column -->
@@ -30,7 +33,7 @@ $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-coll
 				<!-- wp:button -->
 				<div class="wp-block-button">
 					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
-						<?php echo esc_html( $content['buttons'][0]['default'] ); ?>
+						<?php echo esc_html( $first_button ); ?>
 					</a>
 				</div>
 				<!-- /wp:button -->

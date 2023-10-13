@@ -7,6 +7,8 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collection-featured-products-5-columns' );
+
+$collection_title = $content['titles'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} -->
@@ -14,7 +16,7 @@ $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-coll
 
 	<!-- wp:heading {"textAlign":"center","level":3} -->
 	<h3 class="wp-block-heading has-text-align-center">
-		<?php echo esc_html( $content['titles'][0]['default'] ); ?>
+		<?php echo esc_html( $collection_title ); ?>
 	</h3>
 	<!-- /wp:heading -->
 

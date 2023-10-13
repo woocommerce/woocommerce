@@ -7,12 +7,14 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collection-3-columns' );
+
+$products_title = $content['titles'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
 	<!-- wp:heading {"level":3,"align":"wide"} -->
-	<h3 class="wp-block-heading alignwide"><?php echo esc_html( $content['titles'][0]['default'] ); ?></h3>
+	<h3 class="wp-block-heading alignwide"><?php echo esc_html( $products_title ); ?></h3>
 	<!-- /wp:heading -->
 
 	<!-- wp:woocommerce/product-collection {"query":{"perPage":3,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"taxQuery":{},"parents":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3},"align":"wide"} -->

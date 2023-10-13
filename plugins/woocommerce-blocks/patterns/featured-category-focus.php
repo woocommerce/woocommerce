@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-category-focus' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-category-focus' );
+
+$category_title = $content['titles'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"full","style":{"color":{"background":"#84bfe1"},"spacing":{"padding":{"top":"var:preset|spacing|70","right":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|70"}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
@@ -19,7 +21,7 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-cate
 	<!-- /wp:image -->
 
 	<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#000000"}},"fontSize":"large"} -->
-	<p class="has-text-align-center has-text-color has-large-font-size" style="color:#000000"><?php echo esc_html( $content['titles'][0]['default'] ); ?></p>
+	<p class="has-text-align-center has-text-color has-large-font-size" style="color:#000000"><?php echo esc_html( $category_title ); ?></p>
 	<!-- /wp:paragraph -->
 
 	<!-- wp:buttons -->
