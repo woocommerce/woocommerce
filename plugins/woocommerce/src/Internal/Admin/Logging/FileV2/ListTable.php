@@ -26,6 +26,11 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
+	 * @var array
+	 */
+	private $file_args = array();
+
+	/**
 	 * ListTable class.
 	 */
 	public function __construct( FileController $file_controller, PageController $page_controller ) {
@@ -42,12 +47,66 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Set file args for later use, since `prepare_items` can't take any parameters.
+	 *
+	 * @param array $args
+	 *
+	 * @return void
+	 */
+	public function set_file_args( $args ) {
+		if ( is_array( $args ) ) {
+			$this->file_args = $args;
+		}
+	}
+
+	/**
 	 * Render message when there are no items.
 	 *
 	 * @return void
 	 */
 	public function no_items() {
 		esc_html_e( 'No log files found.', 'woocommerce' );
+	}
+
+	/**
+	 * Get the existing log sources for the filter dropdown.
+	 *
+	 * @return array
+	 */
+	protected function get_sources_list() {
+		$sources = $this->file_controller->get_file_sources();
+		sort( $sources );
+
+		return $sources;
+	}
+
+	/**
+	 * Displays extra controls between bulk actions and pagination.
+	 *
+	 * @param string $which
+	 *
+	 * @return void
+	 */
+	protected function extra_tablenav( $which ) {
+		$all_sources    = $this->get_sources_list();
+		$current_source = filter_input( INPUT_GET, 'source', FILTER_SANITIZE_STRING ) ?? '';
+
+		?>
+		<div class="alignleft actions">
+			<?php if ( 'top' === $which ) : ?>
+				<label for="filter-by-source" class="screen-reader-text"><?php esc_html_e( 'Filter by log source', 'woocommerce' ); ?></label>
+				<select name="source" id="filter-by-source">
+					<option<?php selected( $current_source, '' ); ?> value=""><?php esc_html_e( 'All sources', 'woocommerce' ); ?></option>
+					<?php foreach ( $all_sources as $source ) : ?>
+						<option<?php selected( $current_source, $source ); ?> value="<?php echo esc_attr( $source ) ?>">
+							<?php echo esc_html( $source ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<?php submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'logs-filter-submit' ) ); ?>
+			<?php endif; ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -71,36 +130,12 @@ class ListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 		$per_page = $this->get_items_per_page( self::PER_PAGE_USER_OPTION_KEY );
-		$offset   = ( $this->get_pagenum() - 1 ) * $per_page;
-		$orderby  = filter_input(
-			INPUT_GET,
-			'orderby',
-			FILTER_VALIDATE_REGEXP,
-			array(
-				'options' => array(
-					'regexp'  => '/^(created|modified|source|size)$/',
-					'default' => 'modified'
-				),
-			)
-		);
-		$order    = filter_input(
-			INPUT_GET,
-			'order',
-			FILTER_VALIDATE_REGEXP,
-			array(
-				'options' => array(
-					'regexp'  => '/^(asc|desc)$/i',
-					'default' => 'desc'
-				),
-			)
-		);
 
-		$file_args = array(
+		$defaults = array(
 			'per_page' => $per_page,
-			'offset'   => $offset,
-			'orderby'  => $orderby,
-			'order'    => $order,
+			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
+		$file_args = wp_parse_args( $this->file_args, $defaults );
 
 		$total_items = $this->file_controller->get_files( $file_args, true );
 		$total_pages = ceil( $total_items / $per_page );

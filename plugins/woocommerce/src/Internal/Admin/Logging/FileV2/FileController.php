@@ -141,4 +141,22 @@ class FileController {
 
 		return array_slice( $files, $args['offset'], $args['per_page'] );
 	}
+
+	/**
+	 * Get a list of sources for existing log files.
+	 *
+	 * @return array
+	 */
+	public function get_file_sources() {
+		$files       = glob( $this->log_directory . '*.log' );
+		$all_sources = array_map(
+			function( $path ) {
+				$file = new File( $path );
+				return $file->get_source();
+			},
+			$files
+		);
+
+		return array_unique( $all_sources );
+	}
 }
