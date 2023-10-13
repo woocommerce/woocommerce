@@ -98,7 +98,7 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 		} );
 	} );
 
-	test.skip( 'can create Cart Block page', async ( { page } ) => {
+	test( 'can create Cart Block page', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 		await page.waitForLoadState( 'networkidle' );
@@ -135,7 +135,7 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 		).toBeVisible();
 	} );
 
-	test.skip( 'that inclusive tax is displayed properly in Cart Block page', async ( {
+	test( 'that inclusive tax is displayed properly in Cart Block page', async ( {
 		page,
 	} ) => {
 		await page.goto( pageSlug );
@@ -156,7 +156,7 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 		).toHaveText( 'Including $25.00 Nasty Tax' );
 	} );
 
-	test.skip( 'that exclusive tax is displayed properly in Cart Block page', async ( {
+	test( 'that exclusive tax is displayed properly in Cart Block page', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -298,7 +298,7 @@ test.describe( 'Shopper Cart Block Tax Rounding', () => {
 		} );
 	} );
 
-	test.skip( 'that tax rounding is present at subtotal level', async ( {
+	test( 'that tax rounding is present at subtotal level', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -335,7 +335,7 @@ test.describe( 'Shopper Cart Block Tax Rounding', () => {
 		).toContainText( '$9.71' );
 	} );
 
-	test.skip( 'that tax rounding is off at subtotal level', async ( {
+	test( 'that tax rounding is off at subtotal level', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -502,7 +502,7 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		} );
 	} );
 
-	test.skip( 'that applying taxes in cart block of 4 different levels calculates properly', async ( {
+	test( 'that applying taxes in cart block of 4 different levels calculates properly', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -561,7 +561,7 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		).toContainText( '$1.25' );
 	} );
 
-	test.skip( 'that applying taxes in Cart Block of 2 different levels (2 excluded) calculates properly', async ( {
+	test( 'that applying taxes in Cart Block of 2 different levels (2 excluded) calculates properly', async ( {
 		page,
 		baseURL,
 	} ) => {
