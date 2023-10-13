@@ -1,3 +1,5 @@
+# Payment Token API
+
 WooCommerce 2.6 introduced an API for storing and managing payment tokens for gateways. Users can also manage these tokens from their account settings and choose from saved payment tokens on checkout.
 
 This guide offers a few useful tutorials for using the new API as well as all the various methods available to you.
