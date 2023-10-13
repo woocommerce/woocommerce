@@ -104,16 +104,21 @@ const ImageVariationModal: React.FC = () => {
 		formData.append( 'token', token );
 
 		try {
-			const response = ( await apiFetch( {
+			const response = await apiFetch( {
 				/* @todo: Get site URL dynamically for this request. */
 				/* @todo: Get a JWT for this request using the jetpack AI JWT package. */
 				url: `https://public-api.wordpress.com/wpcom/v2/sites/${blogId}/ai-image`,
 				method: 'POST',
 				parse: false, // Do not parse the response as JSON
 				body: formData,
-			} ) ) as Blob;
+				credentials: 'omit',
+			} );
+	
+			const blob = await (
+				response as { blob: () => Promise< Blob > }
+			 ).blob();
 
-			setNewImage( response );
+			setNewImage( blob );
 		} catch ( error ) {
 			console.error( 'Failed to generate variations:', error );
 		}
@@ -175,11 +180,11 @@ const ImageVariationModal: React.FC = () => {
 			view: (
 				<div>
 					<div className="image-variation-modal__canvas-container">
-						<BackgroundProductGenerator
+						{ newImage && ( <BackgroundProductGenerator
 							className="image-variation-modal__canvas"
-							backgroundImageSrc="http://localhost:8888/wp-content/uploads/2023/10/background.jpg"
-							productImageSrc="http://localhost:8888/wp-content/uploads/2023/10/product.png"
-						/>
+							backgroundImageSrc={ newImage }
+							productImageSrc={ newImage }
+						/> ) }
 					</div>
 					<TextareaControl
 						label="Prompt for Stable Diffusion"
