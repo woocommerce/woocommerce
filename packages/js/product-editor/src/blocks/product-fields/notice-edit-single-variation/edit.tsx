@@ -19,10 +19,12 @@ import { Notice } from '../../../components/notice';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { NoticeBlockAttributes } from './types';
 import { useNotice } from '../../../hooks/use-notice';
+import { useConfirmUnsavedProductChanges } from '../../../hooks/use-confirm-unsaved-product-changes';
 
 export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
+	useConfirmUnsavedProductChanges( 'product_variation' );
 	const blockProps = useWooBlockProps( attributes );
 	const {
 		content,
