@@ -23,7 +23,6 @@
 		"hoverZoom": "hoverZoom",
 		"fullScreenOnClick": "fullScreenOnClick"
 	},
-	"usesContext": [ "postId" ],
 	"attributes": {
 		"thumbnailsPosition": {
 			"type": "string",
@@ -62,5 +61,6 @@
 			"default": "standard"
 		}
 	},
-	"viewScript": "wc-product-gallery-frontend"
+	"viewScript": "wc-product-gallery-frontend",
+	"example": {}
 }
