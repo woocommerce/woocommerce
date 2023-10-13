@@ -88,7 +88,7 @@ class PageController {
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
-				$args = $this->get_filev2_query_params();
+				$args = $this->get_query_params();
 				$this->render_filev2( $args );
 				break;
 			case 'WC_Log_Handler_DB':
@@ -113,8 +113,7 @@ class PageController {
 		switch ( $view ) {
 			case 'list_files':
 			default:
-				$this->get_list_table()->prepare_items();
-				$this->get_list_table()->display();
+				$this->render_file_list_page();
 				break;
 			case 'single_file':
 				WC_Admin_Status::status_logs_file();
@@ -123,14 +122,51 @@ class PageController {
 	}
 
 	/**
+	 * Render the file list view.
+	 *
+	 * @return void
+	 */
+	private function render_file_list_page() {
+		$defaults = $this->get_query_param_defaults();
+		$params   = $this->get_query_params();
+
+		$this->get_list_table()->set_file_args( $params );
+		$this->get_list_table()->prepare_items();
+		?>
+		<form id="logs-filter" method="get">
+			<input type="hidden" name="page" value="wc-status" />
+			<input type="hidden" name="tab" value="logs" />
+			<?php foreach ( $params as $key => $value ) : ?>
+				<?php if ( $value !== $defaults[ $key ] ) : ?>
+					<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<?php $this->get_list_table()->display(); ?>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Get the default values for URL query params for FileV2 views.
+	 *
+	 * @return string[]
+	 */
+	private function get_query_param_defaults() {
+		return array(
+			'view'    => 'list_files',
+			'orderby' => 'modified',
+			'order'   => 'desc',
+			'source'  => '',
+		);
+	}
+
+	/**
 	 * Get and validate URL query params for FileV2 views.
 	 *
 	 * @return array
 	 */
-	private function get_filev2_query_params() {
-		$defaults = array(
-			'view' => 'list_files',
-		);
+	private function get_query_params() {
+		$defaults = $this->get_query_param_defaults();
 		$params   = filter_input_array(
 			INPUT_GET,
 			array(
@@ -141,6 +177,21 @@ class PageController {
 						'default' => $defaults['view'],
 					),
 				),
+				'orderby' => array(
+					'filter' => FILTER_VALIDATE_REGEXP,
+					'options' => array(
+						'regexp'  => '/^(created|modified|source|size)$/',
+						'default' => $defaults['orderby']
+					),
+				),
+				'order' => array(
+					'filter' => FILTER_VALIDATE_REGEXP,
+					'options' => array(
+						'regexp'  => '/^(asc|desc)$/i',
+						'default' => $defaults['order']
+					),
+				),
+				'source' => FILTER_SANITIZE_STRING,
 			),
 			false
 		);
@@ -170,7 +221,7 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_screen_options() {
-		$params = $this->get_filev2_query_params();
+		$params = $this->get_query_params();
 
 		if ( 'list_files' === $params['view'] ) {
 			// Ensure list table columns are initialized early enough to enable column hiding.
