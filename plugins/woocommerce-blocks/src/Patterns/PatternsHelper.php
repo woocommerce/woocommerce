@@ -51,7 +51,7 @@ class PatternsHelper {
 			return array();
 		}
 
-		return self::get_random_images( $pattern['images'], $pattern['images_total'] );
+		return $pattern['images'];
 	}
 
 	/**

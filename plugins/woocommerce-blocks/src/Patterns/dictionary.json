@@ -64,7 +64,7 @@
 			"titles": [
 				{
 					"default": "Announcing our newest collection",
-					"ai_prompt": "The title of the featured category"
+					"ai_prompt": "The title of the featured category: {image.0}"
 				}
 			]
 		}
@@ -78,15 +78,15 @@
 			"titles": [
 				{
 					"default": "Cupcakes",
-					"ai_prompt": "The title of the first featured category"
+					"ai_prompt": "The title of the first featured category: {image.0}"
 				},
 				{
 					"default": "Sweet Danish",
-					"ai_prompt": "The title of the second featured category"
+					"ai_prompt": "The title of the second featured category: {image.1}"
 				},
 				{
 					"default": "Warm Bread",
-					"ai_prompt": "The title of the third featured category"
+					"ai_prompt": "The title of the third featured category: {image.2}"
 				}
 			]
 		}
@@ -118,19 +118,19 @@
 			"descriptions": [
 				{
 					"default": "Sweet Organic Lemons",
-					"ai_prompt": "The description of the first featured products"
+					"ai_prompt": "The description of the first featured products: {image.0}"
 				},
 				{
 					"default": "Fresh Organic Tomatoes",
-					"ai_prompt": "The description of the second featured products"
+					"ai_prompt": "The description of the second featured products: {image.1}"
 				},
 				{
 					"default": "Fresh Lettuce (Washed)",
-					"ai_prompt": "The description of the third featured products"
+					"ai_prompt": "The description of the third featured products: {image.2}"
 				},
 				{
 					"default": "Russet Organic Potatoes",
-					"ai_prompt": "The description of the fourth featured products"
+					"ai_prompt": "The description of the fourth featured products: {image.3}"
 				}
 			]
 		}
@@ -144,7 +144,7 @@
 			"titles": [
 				{
 					"default": "Endless Tee's",
-					"ai_prompt": "An impact phrase that advertises the displayed product"
+					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
 				},
 				{
 					"default": "Waterproof Membrane",
@@ -196,7 +196,7 @@
 			"titles": [
 				{
 					"default": "The Fall Collection",
-					"ai_prompt": "An impact phrase that advertises the displayed product"
+					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
 				},
 				{
 					"default": "Quality Materials",
@@ -248,7 +248,7 @@
 			"titles": [
 				{
 					"default": "Get cozy this fall with knit sweaters",
-					"ai_prompt": "An impact phrase that advertises the displayed product"
+					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
 				}
 			]
 		}
@@ -288,7 +288,7 @@
 			"titles": [
 				{
 					"default": "Brand New for the Holidays",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection: {image.0}"
 				}
 			],
 			"descriptions": [
@@ -320,11 +320,11 @@
 			"titles": [
 				{
 					"default": "Tech gifts under $100",
-					"ai_prompt": "An impact phrase that advertises the first product collection"
+					"ai_prompt": "An impact phrase that advertises the first product collection: {image.0}, {image.1}"
 				},
 				{
 					"default": "For the gamers",
-					"ai_prompt": "An impact phrase that advertises the second product collection"
+					"ai_prompt": "An impact phrase that advertises the second product collection: {image.2}, {image.3}"
 				}
 			],
 			"buttons": [
@@ -438,7 +438,7 @@
 			"titles": [
 				{
 					"default": "The Eden Jacket",
-					"ai_prompt": "An title that advertises the displayed product"
+					"ai_prompt": "An title that advertises the displayed product: {image.0}"
 				},
 				{
 					"default": "100% Woolen",
@@ -460,7 +460,7 @@
 			"descriptions": [
 				{
 					"default": "Perfect for any look featuring a mid-rise, relax fitting silhouette.",
-					"ai_prompt": "A description of the displayed product"
+					"ai_prompt": "A description of the displayed product: {image.0}"
 				},
 				{
 					"default": "Reflect your fashionable style.",
@@ -520,7 +520,7 @@
 			"titles": [
 				{
 					"default": "Chairs",
-					"ai_prompt": "An impact phrase that advertises a products"
+					"ai_prompt": "An impact phrase that advertises a products: {image.0}"
 				}
 			]
 		}
@@ -552,14 +552,14 @@
 				},
 				{
 					"default": "Created with love and care in Australia",
-					"ai_prompt": "An impact phrase that advertises the products"
+					"ai_prompt": "An impact phrase that advertises the products: {image.0}"
 				},
 				{
 					"default": "About us",
 					"ai_prompt": "An impact phrase that advertises the brand"
 				},
 				{
-					"default": "Marl is an independent studio and artisanal gallery",
+					"default": "Marl is an independent studio and artisanal gallery: {image.1}",
 					"ai_prompt": "An impact phrase that advertises the brand"
 				}
 			],

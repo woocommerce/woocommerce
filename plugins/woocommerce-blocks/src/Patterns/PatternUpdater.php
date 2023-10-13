@@ -33,12 +33,13 @@ class PatternUpdater {
 	/**
 	 * Creates the patterns content for the given vertical.
 	 *
-	 * @param  int    $vertical_id  The vertical id.
-	 * @param  Client $verticals_api_client  The verticals API client.
+	 * @param int    $vertical_id The vertical id.
+	 * @param Client $verticals_api_client The verticals API client.
+	 * @param string $business_description The business description.
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function create_patterns_content( $vertical_id, $verticals_api_client ) {
+	public function create_patterns_content( $vertical_id, $verticals_api_client, $business_description = '' ) {
 		if ( ! is_int( $vertical_id ) ) {
 			return new WP_Error( 'invalid_vertical_id', __( 'The vertical id is invalid.', 'woo-gutenberg-products-block' ) );
 		}
@@ -55,7 +56,7 @@ class PatternUpdater {
 			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
 		}
 
-		$patterns_with_images_and_content = $this->get_patterns_with_content( $patterns_with_images );
+		$patterns_with_images_and_content = $this->get_patterns_with_content( $patterns_with_images, $business_description );
 
 		if ( is_wp_error( $patterns_with_images_and_content ) ) {
 			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
@@ -96,13 +97,23 @@ class PatternUpdater {
 				continue;
 			}
 
-			$images = $this->get_images_for_pattern( $pattern, $vertical_images );
+			list($images, $alts) = $this->get_images_for_pattern( $pattern, $vertical_images );
 			if ( empty( $images ) ) {
 				$patterns_with_images[] = $pattern;
 				continue;
 			}
 
-			$pattern['images']      = $images;
+			$pattern['images'] = $images;
+
+			$string = wp_json_encode( $pattern );
+
+			foreach ( $alts as $i => $alt ) {
+				$alt    = empty( $alt ) ? 'the text should be related to the store description but generic enough to adapt to any image' : $alt;
+				$string = str_replace( "{image.$i}", $alt, $string );
+			}
+
+			$pattern = json_decode( $string, true );
+
 			$patterns_with_images[] = $pattern;
 		}
 
@@ -112,11 +123,12 @@ class PatternUpdater {
 	/**
 	 * Returns the patterns with AI generated content.
 	 *
-	 * @param array $patterns The array of patterns.
+	 * @param array  $patterns The array of patterns.
+	 * @param string $business_description The business description.
 	 *
 	 * @return array|WP_Error The patterns with AI generated content.
 	 */
-	public function get_patterns_with_content( array $patterns ) {
+	private function get_patterns_with_content( array $patterns, string $business_description ) {
 		$site_id = $this->ai_connection->get_site_id();
 
 		if ( is_wp_error( $site_id ) ) {
@@ -132,8 +144,8 @@ class PatternUpdater {
 		$patterns_with_content = $patterns;
 
 		$prompts = array();
-		foreach ( $patterns_with_content as $key => $pattern ) {
-			$prompt  = sprintf( 'Given the following store description: "%s", and the following JSON file representing the content of the "%s" pattern: %s.\n', get_option( VerticalsSelector::STORE_DESCRIPTION_OPTION_KEY ), $pattern['name'], wp_json_encode( $pattern['content'] ) );
+		foreach ( $patterns_with_content as $pattern ) {
+			$prompt  = sprintf( 'Given the following store description: "%s", and the following JSON file representing the content of the "%s" pattern: %s.\n', $business_description, $pattern['name'], wp_json_encode( $pattern['content'] ) );
 			$prompt .= "Replace the titles, descriptions and button texts in each 'default' key using the prompt in the corresponding 'ai_prompt' key by a text that is related to the previous store description (but not the exact text) and matches the 'ai_prompt', the length of each replacement should be similar to the 'default' text length. The response should be only a JSON string, with absolutely no intro or explanations.";
 
 			$prompts[] = $prompt;
@@ -192,21 +204,23 @@ class PatternUpdater {
 	 * @param array $pattern The array representing the pattern.
 	 * @param array $vertical_images The array of vertical images.
 	 *
-	 * @return string[]
+	 * @return array An array containing an array of the images in the first position and their alts in the second.
 	 */
 	private function get_images_for_pattern( array $pattern, array $vertical_images ): array {
+		$alts   = array();
 		$images = array();
 		if ( count( $vertical_images ) < $pattern['images_total'] ) {
-			return $images;
+			return array( $images, $alts );
 		}
 
 		foreach ( $vertical_images as $vertical_image ) {
 			if ( $pattern['images_format'] === $this->get_image_format( $vertical_image ) ) {
 				$images[] = str_replace( 'http://', 'https://', $vertical_image['guid'] );
+				$alts[]   = $vertical_image['meta']['pexels_object']['alt'] ?? '';
 			}
 		}
 
-		return $images;
+		return array( $images, $alts );
 	}
 
 	/**
