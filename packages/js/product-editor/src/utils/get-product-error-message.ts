@@ -19,7 +19,6 @@ export type WPError = {
 };
 
 export function getProductErrorMessage( error: WPError ) {
-	console.log( error );
 	switch ( error.code ) {
 		case 'variable_product_no_variation_prices':
 			return error.message;
