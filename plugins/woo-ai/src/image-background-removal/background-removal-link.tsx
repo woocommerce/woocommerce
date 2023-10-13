@@ -153,7 +153,7 @@ export const BackgroundRemovalLink = () => {
 				onDismissal={ () =>
 					recordBgRemovalTracks( 'spotlight_dismissed' )
 				}
-				onStepViewOnce={ () =>
+				onDisplayed={ () =>
 					recordBgRemovalTracks( 'spotlight_displayed' )
 				}
 			/>

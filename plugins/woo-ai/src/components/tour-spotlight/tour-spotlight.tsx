@@ -15,7 +15,7 @@ type TourSpotlightProps = {
 	placement?: Config[ 'placement' ];
 	spotlightParent?: HTMLElement;
 	onDismissal?: () => void;
-	onStepViewOnce?: () => void;
+	onDisplayed?: () => void;
 };
 
 export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
@@ -26,7 +26,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	placement = 'auto',
 	spotlightParent = document.body,
 	onDismissal = () => {},
-	onStepViewOnce = () => {},
+	onDisplayed = () => {},
 } ) => {
 	const preferenceId = `spotlightDismissed-${ id }`;
 
@@ -75,7 +75,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				placement,
 				options: {
 					callbacks: {
-						onStepViewOnce,
+						onStepViewOnce: onDisplayed,
 					},
 					portalParentElement: spotlightParent,
 					effects: {
