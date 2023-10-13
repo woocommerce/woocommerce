@@ -7,7 +7,15 @@
     }
 }
 
-.background-image-canvas {
-    width: 100%;
-    height: auto;
+
+.image-variation-modal__canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .image-variation-modal__canvas {
+        width: 50%;
+        height: 100%;
+        margin: 10px;
+    }
 }

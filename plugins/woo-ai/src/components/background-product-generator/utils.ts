@@ -1,18 +1,31 @@
 /**
  * Loads an image from a given source asynchronously.
  *
- * @param src The image source to load.
+ * @param src The image source to load, either a URL or a Blob.
  * @return A promise that resolves to the loaded image.
  */
-export const loadImage = ( src: string ): Promise< HTMLImageElement > => {
+export const loadImage = (
+	src: string | Blob
+): Promise< HTMLImageElement > => {
 	return new Promise( ( resolve, reject ) => {
 		const img = new Image();
 		img.onload = () => resolve( img );
 		img.onerror = ( error ) =>
-			reject(
-				new Error( `Failed to load image at ${ src }: ${ error }` )
-			);
-		img.src = src;
+			reject( new Error( `Failed to load image: ${ error }` ) );
+
+		// Check if src is a Blob
+		if ( src instanceof Blob ) {
+			const reader = new FileReader();
+			reader.onload = function ( event ) {
+				img.src = event?.target?.result as string;
+			};
+			reader.onerror = ( error ) =>
+				reject( new Error( `Failed to read blob: ${ error }` ) );
+			reader.readAsDataURL( src );
+		} else {
+			// If it's a string URL, proceed as before
+			img.src = src;
+		}
 	} );
 };
 

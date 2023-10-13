@@ -162,6 +162,7 @@ const ImageVariationModal: React.FC = () => {
 				<div>
 					<div className="image-variation-modal__canvas-container">
 						<BackgroundProductGenerator
+							className="image-variation-modal__canvas"
 							backgroundImageSrc="http://localhost:8888/wp-content/uploads/2023/10/background.jpg"
 							productImageSrc="http://localhost:8888/wp-content/uploads/2023/10/product.png"
 						/>

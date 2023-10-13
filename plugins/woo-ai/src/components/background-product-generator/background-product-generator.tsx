@@ -71,11 +71,13 @@ export const BackgroundProductGenerator = ( {
 	backgroundImageSrc,
 	productImageSrc,
 	hasShadow = true,
+	className = '',
 }: {
 	onSave?: ( dataUrl: string ) => void;
-	backgroundImageSrc: string;
-	productImageSrc: string;
+	backgroundImageSrc: string | Blob;
+	productImageSrc: string | Blob;
 	hasShadow?: boolean;
+	className?: string;
 } ) => {
 	const canvasRef = useRef< HTMLCanvasElement >( null );
 	const [ imgPosition, setImgPosition ] = useState( { x: 0, y: 0 } );
@@ -319,7 +321,7 @@ export const BackgroundProductGenerator = ( {
 
 	return (
 		<canvas
-			className="background-image-canvas"
+			className={ className }
 			ref={ canvasRef }
 			width={ backgroundSize }
 			height={ backgroundSize }
