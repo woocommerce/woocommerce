@@ -8,6 +8,11 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/banner' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/banner' );
+
+$banner_title       = $content['titles'][0]['default'] ?? '';
+$banner_button      = $content['buttons'][0]['default'] ?? '';
+$first_description  = $content['descriptions'][0]['default'] ?? '';
+$second_description = $content['descriptions'][1]['default'] ?? '';
 ?>
 <!-- wp:group {"align":"wide","style":{"color":{"background":"#f9eddb","text":"#443127"},"spacing":{"padding":{"right":"50px","bottom":"50px","left":"50px","top":"50px"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide has-text-color has-background" style="color:#443127;background-color:#f9eddb;padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px"><!-- wp:columns -->
@@ -22,15 +27,15 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/banner' );
 	<!-- wp:column {"verticalAlignment":"center","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","right":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30"}}}} -->
 	<div class="wp-block-column is-vertically-aligned-center" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
 		<!-- wp:paragraph {"style":{"color":{"text":"#005cc9"},"typography":{"fontSize":"18px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
-		<p class="has-text-color" style="color:#005cc9;margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:18px"><strong><?php echo esc_html( $content['descriptions'][0]['default'] ); ?></strong> </p>
+		<p class="has-text-color" style="color:#005cc9;margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:18px"><strong><?php echo esc_html( $first_description ); ?></strong> </p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"style":{"typography":{"fontSize":"48px"},"color":{"text":"#043553"},"spacing":{"margin":{"top":"0px","right":"0px","bottom":"0px","left":"0px"},"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
-		<p class="has-text-color" style="color:#043553;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;font-size:48px"><strong><?php echo esc_html( $content['titles'][0]['default'] ); ?></strong> </p>
+		<p class="has-text-color" style="color:#043553;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;font-size:48px"><strong><?php echo esc_html( $banner_title ); ?></strong> </p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"style":{"color":{"text":"#075586"},"typography":{"fontSize":"24px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
-		<p class="has-text-color" style="color:#075586;margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:24px"><?php echo esc_html( $content['descriptions'][1]['default'] ); ?></p>
+		<p class="has-text-color" style="color:#075586;margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:24px"><?php echo esc_html( $second_description ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:buttons {"style":{"spacing":{"blockGap":"0","margin":{"top":"20px","bottom":"0"}}}} -->
@@ -38,7 +43,7 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/banner' );
 			<!-- wp:button {"style":{"typography":{"fontSize":"16px"},"color":{"text":"#000000","background":"#ffffff"},"border":{"width":"0px","style":"none"}},"className":"is-style-fill"} -->
 			<div class="wp-block-button has-custom-font-size is-style-fill" style="font-size:16px">
 				<a class="wp-block-button__link has-text-color has-background wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-style:none;border-width:0px;color:#000000;background-color:#ffffff">
-					<?php echo esc_html( $content['buttons'][0]['default'] ); ?>
+					<?php echo esc_html( $banner_button ); ?>
 				</a>
 			</div>
 			<!-- /wp:button -->

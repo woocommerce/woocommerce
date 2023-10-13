@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/small-discount-banner-with-image' );
 $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/small-discount-banner-with-image' );
+
+$banner_title = $content['titles'][0]['default'] ?? '';
 ?>
 
 <!-- wp:columns {"style":{"color":{"background":"#fcf8e1"},"spacing":{"padding":{"top":"20px","right":"20px","bottom":"20px","left":"20px"}}}} -->
@@ -17,7 +19,7 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/small-discoun
 		<!-- wp:group {"style":{"spacing":{"margin":{"top":"0"},"padding":{"left":"25px","top":"25px"}}},"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group" style="margin-top:0;padding-top:25px;padding-left:25px">
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","lineHeight":"1","fontSize":"30px"}}} -->
-			<p style="font-size:30px;font-style:normal;font-weight:300;line-height:1"><em><?php echo esc_html( $content['titles'][0]['default'] ); ?></em></p>
+			<p style="font-size:30px;font-style:normal;font-weight:300;line-height:1"><em><?php echo esc_html( $banner_title ); ?></em></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"300","lineHeight":"0","fontSize":"30px"},"color":{"text":"#74227b"},"elements":{"link":{"color":{"text":"#74227b"}}}}} -->
