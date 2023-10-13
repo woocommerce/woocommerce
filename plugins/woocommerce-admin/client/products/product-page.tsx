@@ -14,7 +14,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 
@@ -36,7 +36,26 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
-		return initBlocks();
+		registerPlugin( 'wc-admin-more-menu', {
+			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
+			scope: 'woocommerce-product-block-editor',
+			render: () => (
+				<>
+					<WooProductMoreMenuItem>
+						{ ( { onClose }: { onClose: () => void } ) => (
+							<MoreMenuFill onClose={ onClose } />
+						) }
+					</WooProductMoreMenuItem>
+				</>
+			),
+		} );
+
+		const unregisterBlocks = initBlocks();
+
+		return () => {
+			unregisterPlugin( 'wc-admin-more-menu' );
+			unregisterBlocks();
+		};
 	}, [] );
 
 	useEffect(
@@ -77,17 +96,3 @@ export default function ProductPage() {
 		</>
 	);
 }
-
-registerPlugin( 'wc-admin-more-menu', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-block-editor',
-	render: () => (
-		<>
-			<WooProductMoreMenuItem>
-				{ ( { onClose }: { onClose: () => void } ) => (
-					<MoreMenuFill onClose={ onClose } />
-				) }
-			</WooProductMoreMenuItem>
-		</>
-	),
-} );
