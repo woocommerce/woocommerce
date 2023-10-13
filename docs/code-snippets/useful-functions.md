@@ -172,6 +172,22 @@ wc_order_search( $term )
 
 ## Page Functions
 
+### wc_get_page_id
+
+Gets a WooCommerce page ID by name, e.g. thankyou
+
+```php
+wc_get_page_id( $page )
+```
+
+### wc_get_endpoint_url
+
+Gets the URL for an `$endpoint`, which varies depending on permalink settings.
+
+```php
+wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' )
+```
+
 ## Product Functions
 
 ## Stock Functions
