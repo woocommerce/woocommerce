@@ -23,7 +23,7 @@ function renderScene(
 	productSize: { width: number; height: number },
 	scalingFactor: number,
 	hasShadow: boolean,
-	onSave?: ( dataUrl: string ) => void
+	onSave?: ( blob: Blob | null ) => void
 ) {
 	ctx.drawImage( background, 0, 0, backgroundSize, backgroundSize );
 
@@ -54,9 +54,11 @@ function renderScene(
 
 	// Draw other elements like box squares, etc.
 	if ( onSave ) {
-		const dataUrl = ctx.canvas.toDataURL();
-		onSave( dataUrl );
+		ctx.canvas.toBlob( ( blob ) => {
+			onSave( blob );
+		} );
 	}
+
 	drawImageControls(
 		ctx,
 		scalingFactor,
@@ -73,7 +75,7 @@ export const BackgroundProductGenerator = ( {
 	hasShadow = true,
 	className = '',
 }: {
-	onSave?: ( dataUrl: string ) => void;
+	onSave?: ( blob: Blob | null ) => void;
 	backgroundImageSrc: string | Blob;
 	productImageSrc: string | Blob;
 	hasShadow?: boolean;
@@ -92,7 +94,14 @@ export const BackgroundProductGenerator = ( {
 		useState< HTMLImageElement | null >( null );
 
 	useEffect( () => {
-		if ( onSave && canvasRef.current && backgroundImage && productImage ) {
+		if (
+			onSave &&
+			canvasRef.current &&
+			backgroundImage &&
+			productImage &&
+			! dragging &&
+			! resizing
+		) {
 			const ctx = canvasRef.current.getContext( '2d' );
 			if ( ! ctx ) return;
 
@@ -115,6 +124,8 @@ export const BackgroundProductGenerator = ( {
 		onSave,
 		productImage,
 		scalingFactor,
+		dragging,
+		resizing,
 	] );
 
 	useEffect( () => {
