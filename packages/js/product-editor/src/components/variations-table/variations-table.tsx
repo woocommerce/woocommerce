@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { MouseEvent } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
@@ -48,7 +49,6 @@ import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
 import HiddenIcon from '../../icons/hidden-icon';
 import { Pagination } from './pagination';
-import { MouseEvent } from 'react';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
