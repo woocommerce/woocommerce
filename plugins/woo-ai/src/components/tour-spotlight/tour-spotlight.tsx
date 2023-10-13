@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { TourKit } from '@woocommerce/components';
-import { store as preferencesStore } from '@wordpress/preferences';
-import { useDispatch, select } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { Config } from '@automattic/tour-kit';
 
@@ -19,7 +17,6 @@ type TourSpotlightProps = {
 };
 
 export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
-	id,
 	title,
 	description,
 	reference,
@@ -28,14 +25,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	onDismissal = () => {},
 	onDisplayed = () => {},
 } ) => {
-	const preferenceId = `spotlightDismissed-${ id }`;
-
 	const anchorElement = document.querySelector( reference );
-	const hasBeenDismissedBefore = select( preferencesStore ).get(
-		'woo-ai-plugin',
-		preferenceId
-	);
-	const { set } = useDispatch( preferencesStore );
 	const [ isSpotlightVisible, setIsSpotlightVisible ] =
 		useState< boolean >( false );
 
@@ -48,7 +38,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 		return () => clearTimeout( timeout );
 	}, [] );
 
-	if ( ! anchorElement || hasBeenDismissedBefore || ! isSpotlightVisible ) {
+	if ( ! ( anchorElement && isSpotlightVisible ) ) {
 		return null;
 	}
 
@@ -61,7 +51,7 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 							desktop: reference,
 						},
 						meta: {
-							name: `product-feedback-tour-${ id }`,
+							name: `woo-ai-feature-spotlight`,
 							heading: title,
 							descriptions: {
 								desktop: description,
@@ -87,7 +77,6 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 				},
 				closeHandler: () => {
 					setIsSpotlightVisible( false );
-					set( 'woo-ai-plugin', preferenceId, true );
 					onDismissal();
 				},
 			} }
