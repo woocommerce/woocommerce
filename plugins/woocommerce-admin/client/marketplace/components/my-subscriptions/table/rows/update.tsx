@@ -22,7 +22,12 @@ export default function Update( props: UpdateProps ) {
 		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
+	const canUpdate = props.subscription.active && props.subscription.local;
+
 	function update() {
+		if ( ! canUpdate ) {
+			return;
+		}
 		if ( ! window.wp.updates ) {
 			createWarningNotice(
 				sprintf(
@@ -48,17 +53,17 @@ export default function Update( props: UpdateProps ) {
 		}
 
 		setIsUpdating( true );
+
+		const action =
+			props.subscription.local.type === 'plugin'
+				? 'update-plugin'
+				: 'update-theme';
 		window.wp.updates
-			.ajax(
-				props.subscription.local.type === 'plugin'
-					? 'update-plugin'
-					: 'update-theme',
-				{
-					slug: props.subscription.local.slug,
-					plugin: props.subscription.local.path,
-					theme: props.subscription.local.path,
-				}
-			)
+			.ajax( action, {
+				slug: props.subscription.local.slug,
+				plugin: props.subscription.local.path,
+				theme: props.subscription.local.path,
+			} )
 			.then( () => {
 				loadSubscriptions( false );
 				createSuccessNotice(
@@ -94,12 +99,25 @@ export default function Update( props: UpdateProps ) {
 			} );
 	}
 
+	const buttonLabel = canUpdate
+		? sprintf(
+				// translators: %s is the product version.
+				__( 'Update to %s', 'woocommerce' ),
+				props.subscription.version
+		  )
+		: //TODO show renew/connect popup instead of this
+		  __( 'You need an active subscription to update.', 'woocommerce' );
+
 	return (
 		<Button
 			type="link"
 			className="woocommerce-marketplace__my-subscriptions-update"
 			onClick={ update }
 			isBusy={ isUpdating }
+			disabled={ isUpdating }
+			label={ buttonLabel }
+			showTooltip={ true }
+			tooltipPosition="top center"
 		>
 			{ isUpdating
 				? __( 'Updating', 'woocommerce' )
