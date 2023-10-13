@@ -34,7 +34,7 @@ if ( ! function_exists( 'YOUR_PREFIX_woocommerce_available_variation' ) ) {
 	function YOUR_PREFIX_woocommerce_available_variation( $args ) {
 		$args['max_qty'] = 20; // Maximum value (variations)
 		$args['min_qty'] = 2;  // Minimum value (variations)
-		
+
 		// Note: the starting value and step for variations is controlled
 		// from the 'woocommerce_quantity_input_args' filter shown above for
     // simple products
