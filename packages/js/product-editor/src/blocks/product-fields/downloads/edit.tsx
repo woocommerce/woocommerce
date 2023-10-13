@@ -32,6 +32,14 @@ function getFileName( url?: string ) {
 	return name;
 }
 
+function stringifyId< ID >( id?: ID ): string {
+	return id ? String( id ) : '';
+}
+
+function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
+	return { ...entity, id: stringifyId( entity.id ) };
+}
+
 export function Edit( {
 	attributes,
 }: BlockEditProps< UploadsBlockAttributes > ) {
@@ -77,17 +85,26 @@ export function Edit( {
 			);
 		}
 
-		const uploadedFiles = newFiles.map( ( file ) => ( {
-			id: file.id ? String( file.id ) : '',
-			file: file.url,
-			name: getFileName( file.url ),
-		} ) );
-
-		if ( uploadedFiles.length ) {
+		if ( newFiles.length ) {
 			if ( ! downloads.length ) {
 				setDownloadable( true );
 			}
-			setDownloads( [ ...downloads, ...uploadedFiles ] );
+
+			const uploadedFiles = newFiles.map( ( file ) => ( {
+				id: stringifyId( file.id ),
+				file: file.url,
+				name:
+					file.title ||
+					file.alt ||
+					file.caption ||
+					getFileName( file.url ),
+			} ) );
+
+			const stringifyIds = downloads.map( stringifyEntityId );
+
+			stringifyIds.push( ...uploadedFiles );
+
+			setDownloads( stringifyIds );
 		}
 	}
 
@@ -98,7 +115,7 @@ export function Edit( {
 					if ( current.file === download.file ) {
 						return others;
 					}
-					return [ ...others, current ];
+					return [ ...others, stringifyEntityId( current ) ];
 				},
 				[]
 			);
