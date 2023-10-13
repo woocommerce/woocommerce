@@ -91,7 +91,9 @@ const ImageVariationModal: React.FC = () => {
 	 */
 	const generateVariations = async (): Promise< void > => {
 		setLoading( true );
-		const blogId = window?.JP_CONNECTION_INITIAL_STATE?.userConnectionData?.currentUser?.blogId;
+		const blogId =
+			window?.JP_CONNECTION_INITIAL_STATE?.userConnectionData?.currentUser
+				?.blogId;
 
 		const { token } = await requestJetpackToken();
 
@@ -107,13 +109,13 @@ const ImageVariationModal: React.FC = () => {
 			const response = await apiFetch( {
 				/* @todo: Get site URL dynamically for this request. */
 				/* @todo: Get a JWT for this request using the jetpack AI JWT package. */
-				url: `https://public-api.wordpress.com/wpcom/v2/sites/${blogId}/ai-image`,
+				url: `https://public-api.wordpress.com/wpcom/v2/sites/${ blogId }/ai-image`,
 				method: 'POST',
 				parse: false, // Do not parse the response as JSON
 				body: formData,
 				credentials: 'omit',
 			} );
-	
+
 			const blob = await (
 				response as { blob: () => Promise< Blob > }
 			 ).blob();
@@ -180,11 +182,13 @@ const ImageVariationModal: React.FC = () => {
 			view: (
 				<div>
 					<div className="image-variation-modal__canvas-container">
-						{ newImage && ( <BackgroundProductGenerator
-							className="image-variation-modal__canvas"
-							backgroundImageSrc={ newImage }
-							productImageSrc={ newImage }
-						/> ) }
+						{ newImage && (
+							<BackgroundProductGenerator
+								className="image-variation-modal__canvas"
+								backgroundImageSrc={ newImage }
+								productImageSrc={ newImage }
+							/>
+						) }
 					</div>
 					<TextareaControl
 						label="Prompt for Stable Diffusion"
@@ -193,9 +197,7 @@ const ImageVariationModal: React.FC = () => {
 							setImagePrompt( newPrompt )
 						}
 					/>
-					<Button isPrimary
-						onClick = { generateVariations }
-					>
+					<Button isPrimary onClick={ generateVariations }>
 						Generate Magic Background
 					</Button>
 				</div>

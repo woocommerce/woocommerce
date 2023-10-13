@@ -175,15 +175,18 @@ export const BackgroundProductGenerator = ( {
 				let productImageWidth = productImageLoaded.naturalWidth;
 				let productImageHeight = productImageLoaded.naturalHeight;
 
-				// Scale down image if it is greater than backgroundSize, else keep it as is
+				// Scale down image if it is greater 75% of the backgroundSize, else keep it as is
+				const seventyFivePercentOfBackground = backgroundSize * 0.75;
+
 				if (
-					productImageWidth > backgroundSize ||
-					productImageHeight > backgroundSize
+					productImageWidth > seventyFivePercentOfBackground ||
+					productImageHeight > seventyFivePercentOfBackground
 				) {
 					const initialScalingFactor = Math.min(
-						( backgroundSize * 0.75 ) / productImageWidth,
-						( backgroundSize * 0.75 ) / productImageHeight
+						seventyFivePercentOfBackground / productImageWidth,
+						seventyFivePercentOfBackground / productImageHeight
 					);
+
 					productImageWidth *= initialScalingFactor;
 					productImageHeight *= initialScalingFactor;
 				}
