@@ -34,9 +34,7 @@ You can read more about BEM key concepts [here](https://en.bem.info/methodology/
 
 #### TL;DR
 
-- Follow the [WP Coding standards for CSS](https://make.wordpress.org/core/handbook/best-practices/coding-standards/css/) unless it contradicts anything here.
-- Follow [Calypso guidelines](https://wpcalypso.wordpress.com/devdocs/docs/coding-guidelines/css.md?term=css).
-- Use BEM for [class names](https://en.bem.info/methodology/naming-convention/).
-- Prefix all the things.
-
-
+* Follow the [WP Coding standards for CSS](https://make.wordpress.org/core/handbook/best-practices/coding-standards/css/) unless it contradicts anything here.
+* Follow [Calypso guidelines](https://wpcalypso.wordpress.com/devdocs/docs/coding-guidelines/css.md?term=css).
+* Use BEM for [class names](https://en.bem.info/methodology/naming-convention/).
+* Prefix all the things.
