@@ -1,32 +1,5 @@
 # WC CLI: Overview
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of Contents
-
-- [What is WP-CLI?](#what-is-wp-cli)
-- [WooCommerce Commands](#woocommerce-commands)
-- [Examples](#examples)
-  - [Command:](#command)
-  - [Response:](#response)
-  - [Command:](#command-1)
-  - [Response:](#response-1)
-  - [Command:](#command-2)
-  - [Response:](#response-2)
-  - [Command:](#command-3)
-  - [Response:](#response-3)
-  - [Command:](#command-4)
-  - [Response:](#response-4)
-  - [Command:](#command-5)
-  - [Response:](#response-5)
-  - [Command:](#command-6)
-  - [Response:](#response-6)
-  - [Command:](#command-7)
-  - [Response:](#response-7)
-- [Frequently Asked Questions](#frequently-asked-questions)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 WooCommerce CLI (WC-CLI) offers the ability to manage WooCommerce (WC) via the command-line, using WP CLI. The documentation here covers the version of WC CLI that started shipping in WC 3.0.0 and later.
 
 WC CLI is powered by the [WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/), meaning most of what is possible with the REST API can also be achieved via the command-line.
@@ -41,9 +14,9 @@ For those who have never heard before WP-CLI, here's a brief description extract
 
 ### WooCommerce Commands
 
-A full listing WC-CLI commands and their accepted arguments can be found on the [commands page](https://github.com/woocommerce/woocommerce/wiki/WC-CLI-Commands).
+A full listing of WC-CLI commands and their accepted arguments can be found on the [commands page](https://github.com/woocommerce/woocommerce/wiki/WC-CLI-Commands).
 
-All WooCommerce related commands are grouped into `wp wc` command. The available commands (as of WC 3.0) are:
+All WooCommerce-related commands are grouped into `wp wc` command. The available commands (as of WC 3.0) are:
 
 ```
 $ wp wc
@@ -184,16 +157,14 @@ Arguments like `--context`, `--fields`, `--field`, `--format` can be used on any
 
 The `--porcelain` argument can be used on any `create` or `update` command to just get back the ID of the object, instead of a response.
 
-Updating or creating some fields require passing JSON. These are fields that contain arrays of information. For example, setting [https://woocommerce.github.io/woocommerce-rest-api-docs/#customer-properties](billing information) using the customer command. This is just passing key/value pairs.
+Updating or creating some fields will require passing JSON. These are fields that contain arrays of information — for example, setting [https://woocommerce.github.io/woocommerce-rest-api-docs/#customer-properties](billing information) using the customer command. This is just passing key/value pairs.
 
 Example:
-
 
 `$ wp wc customer create --email='me@woo.local' --user=1 --billing='{"first_name":"Justin","last_name":"S","company":"Automattic"}' --password='he
 llo'`
 
 `Success: Created customer 16.`
-
 
 `$ wp wc customer get 16 --user=1`
 
@@ -271,10 +242,9 @@ List all system tools.
 
 #### Command:
 
-Create a customer
+Create a customer.
 
 `$ wp wc customer create --email='woo@woo.local' --user=1 --billing='{"first_name":"Bob","last_name":"Tester","company":"Woo", "address_1": "123 Main St.", "city":"New York", "state:": "NY", "country":"USA"}' --shipping='{"first_name":"Bob","last_name":"Tester","company":"Woo", "address_1": "123 Main St.", "city":"New York", "state:": "NY", "country":"USA"}' --password='hunter2' --username='mrbob' --first_name='Bob' --last_name='Tester'`
-
 
 #### Response:
 
@@ -282,7 +252,7 @@ Create a customer
 
 #### Command:
 
-Get a customer in CSV format
+Get a customer in CSV format.
 
 `$ wp wc customer get 17 --user=1 --format=csv`
 
@@ -392,16 +362,13 @@ Get a coupon.
 
 **I get a 401 error when using commands, what do I do?**
 
-If you are getting a 401 error, for example like
-`Error: Sorry, you cannot list resources. {"status":401}`
-
-You are trying to use the command unauthenticated. The WooCommerce CLI as of 3.0 requires you to provide a proper user to run the action as. Pass in your user ID using the `--user` flag.
+If you are getting a 401 error like `Error: Sorry, you cannot list resources. {"status":401}`, you are trying to use the command unauthenticated. The WooCommerce CLI as of 3.0 requires you to provide a proper user to run the action as. Pass in your user ID using the `--user` flag.
 
 **I am trying to update a list of X but it's not saving**
 
-Some 'lists' are objects, for example, if you want to set categories for a product the REST API expects an array of objects: https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+Some 'lists' are actually objects. For example, if you want to set categories for a product, the REST API expects an _array of objects_: https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
 
-So to set this you would use JSON like this:
+To set this you would use JSON like this:
 
 ```
 wp wc product create --name='Product Name' --categories='[ { "id" : 21 } ]' --user=admin
