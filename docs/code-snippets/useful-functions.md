@@ -190,13 +190,85 @@ wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' )
 
 ## Product Functions
 
-## Stock Functions
+### wc_get_products
+
+This function is the standard way of retrieving products based on certain parameters.
+
+```php
+wc_get_products( $args )
+```
+
+Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
+
+### wc_get_product
+
+This is the main function for returning products. It uses the `WC_Product_Factory` class.
+
+```php
+wc_get_product( $the_product = false )
+```
+
+The argument `$the_product` can be a post object or post ID of the product.
+
+### wc_get_product_ids_on_sale
+
+Returns an array containing the IDs of the products that are on sale.
+
+```php
+wc_get_product_ids_on_sale()
+```
+
+### wc_get_featured_product_ids
+
+Returns an array containing the IDs of the featured products.
+
+```php
+wc_get_featured_product_ids()
+```
+
+### wc_get_related_products
+
+Gets the related products for product based on product category and tags.
+
+```php
+wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() )
+```
 
 ## Account Functions
 
-## Term Functions
+### wc_get_account_endpoint_url
+
+Gets the account endpoint URL.
+
+```php
+wc_get_account_endpoint_url( $endpoint )
+```
 
 ## Attribute Functions
+
+### wc_get_attribute_taxonomies
+
+Gets the taxonomies of product attributes.
+
+```php
+wc_get_attribute_taxonomies()
+```
+
+### wc_attribute_taxonomy_name
+
+Gets the taxonomy name for a given product attribute.
+
+```php
+wc_attribute_taxonomy_name( $attribute_name )
+```
+
+### wc_attribute_taxonomy_id_by_name
+
+Gets a product attribute ID by name.
+
+```php
+wc_attribute_taxonomy_id_by_name( $name )
+```
 
 ## REST Functions
 
