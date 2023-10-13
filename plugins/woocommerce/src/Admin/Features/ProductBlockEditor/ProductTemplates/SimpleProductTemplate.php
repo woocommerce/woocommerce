@@ -148,9 +148,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$basic_details->add_block(
 			[
-				'id'        => 'product-summary',
-				'blockName' => 'woocommerce/product-summary-field',
-				'order'     => 20,
+				'id'         => 'product-summary',
+				'blockName'  => 'woocommerce/product-summary-field',
+				'order'      => 20,
+				'attributes' => [
+					'property' => 'description',
+				]
 			]
 		);
 		$pricing_columns  = $basic_details->add_block(
