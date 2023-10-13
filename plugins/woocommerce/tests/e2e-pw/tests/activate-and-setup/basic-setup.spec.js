@@ -1,24 +1,23 @@
 const { test, expect } = require( '@playwright/test' );
-const { lstat } = require('fs');
-const { getTranslationFor } = require( './../../test-data/data' );
+const { testWithTranslation } = require( './../../utils/translations' );
 
 test.describe( 'Store owner can finish initial store setup', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
-	test( 'can enable tax rates and calculations', async ( { page } ) => {
+	testWithTranslation( 'can enable tax rates and calculations', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
 		// Check the enable taxes checkbox
 		await page.locator( '#woocommerce_calc_taxes' ).check();
-		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
+		await page.locator( 'text=Save changes' ).click();
 		// Verify changes have been saved
 		await expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
 	} );
 
-	test( 'can configure permalink settings', async ( { page } ) => {
+	testWithTranslation( 'can configure permalink settings', async ( { page } ) => {
 		await page.goto( 'wp-admin/options-permalink.php' );
 		// Select "Post name" option in common settings section
-		await page.locator( `label >> text=${getTranslationFor('Post name')}` ).last().check();
+		await page.locator( 'label >> text=Post name' ).last().check();
 		// Select "Custom base" in product permalinks section
-		await page.locator( `label >> text=${getTranslationFor('Custom base')}` ).last().check();
+		await page.locator( 'label >> text=Custom base' ).last().check();
 		// Fill custom base slug to use
 		await page
 			.locator( '#woocommerce_permalink_structure' )
@@ -27,7 +26,7 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		// Verify that settings have been saved
 		await expect(
 			page.locator( '#setting-error-settings_updated' )
-		).toContainText( `${getTranslationFor('Permalink structure updated.')}` );
+		).toContainText( 'Permalink structure updated.' );
 		await expect( page.locator( '#permalink_structure' ) ).toHaveValue(
 			'/%postname%/'
 		);

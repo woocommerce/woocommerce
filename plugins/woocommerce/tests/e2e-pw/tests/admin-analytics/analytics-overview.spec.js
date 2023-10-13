@@ -1,7 +1,6 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
-const { getTranslationFor } = require( './../../test-data/data' );
-const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
+const { getTranslationFor, testWithTranslation } = require( './../../utils/translations' );
 
 const EXPECTED_SECTION_HEADERS = getTranslationFor( 'arrayOfExpectedSections' );
 
@@ -120,7 +119,7 @@ test.describe( 'Analytics pages', () => {
 		storageState: process.env.ADMINSTATE,
 	} );
 
-	test.beforeAll( async ( { browser } ) => {
+	testWithTranslation.beforeAll( async ( { browser } ) => {
 		page = await browser.newPage();
 
 		await test.step( `Send GET request to get the current user id`, async () => {
@@ -163,16 +162,6 @@ test.describe( 'Analytics pages', () => {
 			} );
 		} );
 	} );
-
-	// 'اختيار التحليلات المراد عرضها واسم القسم'
-	// 'اختيار المخططات والرسوم البيانية المراد عرضها'
-	// 'اختيار لوحات العناصر المتصدّرة المراد عرضها والإعدادات الأخرى'
-
-	// 'اختيار التحليلات'
-
-	// 'اختيار'
-
-
 
 	test.beforeEach( async () => {
 		await test.step( `Go to Analytics > Overview`, async () => {

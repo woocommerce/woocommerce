@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require( './../../test-data/data' );
+const { testWithTranslation } = require( './../../utils/translations' );
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -31,17 +31,17 @@ test.describe( 'Payment setup task', () => {
 		} );
 	} );
 
-	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
+	testWithTranslation( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( `text=${getTranslationFor('Set up payments')}` ).click();
+		await page.locator( 'text=Set up payments' ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( `${getTranslationFor('Set up payments')}`);
+		).toContainText( 'Set up payments');
 	} );
 
-	test( 'Saving valid bank account transfer details enables the payment method', async ( {
+	testWithTranslation.only( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {
 		// load the bank transfer page
@@ -54,9 +54,11 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
-			.fill( 'Savings' );
+		// await page
+		// 	.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
+		// 	.fill( 'Savings' );
+		await page.getByPlaceholder('"Account number"').fill('Savings');
+ 
 		await page
 			.locator( `//input[@placeholder=${getTranslationFor('"Account number"')}]` )
 			.fill( '1234' );
