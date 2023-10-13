@@ -100,21 +100,13 @@ export function BlockEditor( {
 		updateEditorSettings( _settings ?? {} );
 	}, [ productType, productId ] );
 
-	const editedProduct: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			productType,
-			productId
-		)
-	);
-
 	if ( ! blocks ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ { ...context, editedProduct } }>
+			<BlockContextProvider value={ { ...context, productType } }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

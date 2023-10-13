@@ -22,7 +22,7 @@ export function registerProductEditorBlockType<
 
 	const augmentedMetadata = {
 		...metadata,
-		usesContext: [ ...( metadata.usesContext || [] ), 'editedProduct' ],
+		usesContext: [ ...( metadata.usesContext || [] ), 'productType' ],
 	};
 
 	return registerWooBlockType( {
