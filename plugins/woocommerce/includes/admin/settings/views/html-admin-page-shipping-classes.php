@@ -157,9 +157,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '</td>';
 		}
 		?>
-		<td class="shipping-zone-actions">
+		<td class="wc-shipping-zone-actions">
 			<div>
-				<a class="wc-shipping-class-edit shipping-zone-action-edit" href="#"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-class-delete shipping-zone-action-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-class-edit wc-shipping-zone-action-edit" href="#"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-class-delete wc-shipping-zone-actions"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 	</tr>

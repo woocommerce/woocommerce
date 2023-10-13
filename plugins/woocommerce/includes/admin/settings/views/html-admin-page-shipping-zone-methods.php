@@ -114,9 +114,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="wc-shipping-zone-method-description">
 			{{{ data.method_description }}}
 		</td>
-		<td class="shipping-zone-actions">
+		<td class="wc-shipping-zone-actions">
 			<div>
-				<a class="wc-shipping-zone-method-settings shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete shipping-zone-action-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-zone-method-settings wc-shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete wc-shipping-zone-actions"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 	</tr>

@@ -4157,7 +4157,7 @@ table.wc-shipping-classes {
 			font-family: "dashicons";
 			text-align: center;
 			line-height: 1;
-			color: #999;
+			color: #000;
 			display: block;
 			width: 17px;
 			float: left;
@@ -4171,16 +4171,16 @@ table.wc-shipping-classes {
 		width: 25%;
 	}
 
-	.shipping-zone-actions {
+	.wc-shipping-zone-actions {
 		width: 13%;
 
-		a.shipping-zone-action-delete,
-		a.shipping-zone-action-delete:hover {
+		a.wc-shipping-zone-actions,
+		a.wc-shipping-zone-actions:hover {
 			color: #D63638;
 		}
 
-		a.shipping-zone-action-edit,
-		a.shipping-zone-action-edit:hover {
+		a.wc-shipping-zone-action-edit,
+		a.wc-shipping-zone-action-edit:hover {
 			color: #0675C4;
 		}
 	}
