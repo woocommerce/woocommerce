@@ -4,7 +4,7 @@
 import { TourKit } from '@woocommerce/components';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { useDispatch, select } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { Config } from '@automattic/tour-kit';
 
 type TourSpotlightProps = {
@@ -33,7 +33,16 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	);
 	const { set } = useDispatch( preferencesStore );
 	const [ isSpotlightVisible, setIsSpotlightVisible ] =
-		useState< boolean >( true );
+		useState< boolean >( false );
+
+	// Avoids showing the spotlight before the layout is ready.
+	useEffect( () => {
+		const timeout = setTimeout( () => {
+			setIsSpotlightVisible( true );
+		}, 250 );
+
+		return () => clearTimeout( timeout );
+	}, [] );
 
 	if ( ! anchorElement || hasBeenDismissedBefore || ! isSpotlightVisible ) {
 		return null;
