@@ -7,7 +7,7 @@ General interfaces for interacting with block templates are located in the
 
 ## Usage
 
-For more examples and best practices, please see the Product Editor Development Handbook.
+For more information on how to extend the product editor, please see the [Product Editor Development Handbook](../../../../../../../docs/product-editor-development/README.md).
 
 ### Adding a new group to product editor templates after an existing group
 

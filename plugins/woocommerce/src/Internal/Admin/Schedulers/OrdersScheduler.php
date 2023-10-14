@@ -40,7 +40,7 @@ class OrdersScheduler extends ImportScheduler {
 
 		// Order and refund data must be run on these hooks to ensure meta data is set.
 		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_action( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 
 		OrdersStatsDataStore::init();
@@ -210,13 +210,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @param int $order_id Post ID.
 	 *
 	 * @internal
+	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
 		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() ) {
-			return;
+			return $order_id;
 		}
 
 		self::schedule_action( 'import', array( $order_id ) );
+		return $order_id;
 	}
 
 	/**
