@@ -168,12 +168,11 @@ function getProjectPathFromAbsolutePath( absolutePath ) {
  * @property {string}  path                 The path to the project.
  * @property {boolean} phpSourceChanges     Whether or not the project has changes to PHP source files.
  * @property {boolean} jsSourceChanges      Whether or not the project has changes to JS source files.
- * @property {boolean} sourceFileChanges    A greedier indication of whether any files that might be source files have changed.
+ * @property {boolean} assetSourceChanges   Whether or not the project has changed to asset source files.
  * @property {boolean} documentationChanges Whether or not the project has documentation changes.
- * @property {boolean} phpTestFileChanges   Whether or not the project has changes to PHP test files.
- * @property {boolean} jsTestFileChanges    Whether or not the project has changes to JS test files.
- * @property {boolean} testFileChanges      A greedier indication of whether any test files have changed.
- * @property {boolean} e2eTestFileChanges   Whether or not the project has changes to e2e test files.
+ * @property {boolean} phpTestChanges   Whether or not the project has changes to PHP test files.
+ * @property {boolean} jsTestChanges    Whether or not the project has changes to JS test files.
+ * @property {boolean} e2eTestChanges   Whether or not the project has changes to e2e test files.
  */
 
 /**
@@ -213,14 +212,13 @@ function detectProjectChanges( baseRef ) {
 		}
 
 		// Keep track of the kind of changes that have occurred.
+		let phpTestChanges = false;
+		let jsTestChanges = false;
+		let e2eTestChanges = false;
 		let phpSourceChanges = false;
 		let jsSourceChanges = false;
-		let sourceFileChanges = false;
+		let assetSourceChanges = false;
 		let documentationChanges = false;
-		let phpTestFileChanges = false;
-		let jsTestFileChanges = false;
-		let testFileChanges = false;
-		let e2eTestFileChanges = false;
 
 		// Now we can look through all of the files that have changed and figure out the type of changes that have occurred.
 		const fileChanges = projectsWithChanges[ projectPath ];
@@ -229,77 +227,85 @@ function detectProjectChanges( baseRef ) {
 			if ( filePath.match( /\/changelog\//i ) ) {
 				continue;
 			}
+			
+			// As a preface, the detection of changes here is likely not absolutely perfect. We're going to be making some assumptions
+			// about file extensions and paths in order to decide whether or not something is a type of change. This should still
+			// be okay though since we have other cases where we check everything without looking at any changes to filter.
 
-			// As part of the detection of source files we are going to try and identify the type of source file that was changed.
-			// This isn't necessarily going to be completely perfect but it should be good enough for our purposes.
-			if (
-				filePath.match( /\.(?:php|html)$|composer\.(?:json|lock)$/i )
-			) {
-				phpSourceChanges = true;
-			}
-			if (
-				filePath.match( /\.(?:(?:t|j)sx?|json|html)$|package\.json$/i )
-			) {
-				jsSourceChanges = true;
-			}
-
-			// We're also going to have a greedy detection of source file changes just in case we missed something.
-			if (
-				phpSourceChanges ||
-				jsSourceChanges ||
-				filePath.match( /\.(?:ya?ml|lock|xml|csv|txt)$/i )
-			) {
-				sourceFileChanges = true;
-			}
-
-			// We also want to consider asset files to be source files.
-			if (
-				! sourceFileChanges &&
-				filePath.match(
-					/\.(?:png|jpg|gif|scss|css|ttf|svg|eot|woff)$/i
-				)
-			) {
-				sourceFileChanges = true;
-				continue;
-			}
-
-			// We can be a bit stricter with documentation changes because they are only ever going to be markdown files.
-			if ( filePath.match( /\.md$/i ) ) {
-				documentationChanges = true;
-				continue;
-			}
-
-			// For the detection of test files we are going to make some assumptions about file
-			// paths based on common practices in our community as well as the wider ecosystem.
+			// We can identify PHP test files using PSR-4 or WordPress file naming conventions. We also have
+			// a fallback to any PHP files in a "tests" directory or its children.
+			// Note: We need to check for this before we check for source files, otherwise we will
+			// consider test file changes to be PHP source file changes.
 			if (
 				filePath.match( /(?:[a-z]+Test|-test|\/tests?\/[^\.]+)\.php$/i )
 			) {
-				phpTestFileChanges = true;
+				phpTestChanges = true;
+				continue;
 			}
+
+			// We can identify JS test files using Jest file file naming conventions. We also have
+			// a fallback to any JS files in a "tests" directory or its children, but we need to
+			// avoid picking up E2E test files in the process.
+			// Note: We need to check for this before we check for source files, otherwise we will
+			// consider test file changes to be JS source file changes.
 			if (
 				filePath.match(
 					/(?:(?<!e2e[^\.]+)\.(?:spec|test)|\/tests?\/(?!e2e)[^\.]+)\.(?:t|j)sx?$/i
 				)
 			) {
-				jsTestFileChanges = true;
-			}
-			if ( phpTestFileChanges || jsTestFileChanges ) {
-				testFileChanges = true;
+				jsTestChanges = true;
+				continue;
 			}
 
-			// We're going to base this assumption about E2E test file paths on what seems to be standard elsewhere in our ecosystem.
+			// We're going to make an assumption about where E2E test files live based on what seems typical.
 			if ( filePath.match( /\/test?\/e2e/i ) ) {
-				e2eTestFileChanges = true;
+				e2eTestChanges = true;
+				continue;
+			}
+
+			// Generally speaking, PHP files and changes to Composer dependencies affect PHP source code.
+			if (
+				filePath.match( /\.(?:php|html)$|composer\.(?:json|lock)$/i )
+			) {
+				phpSourceChanges = true;
+				continue;
+			}
+
+			// JS changes should also include JSX and TS files.
+			if (
+				filePath.match( /\.(?:(?:t|j)sx?|json|html)$|package\.json$/i )
+			) {
+				jsSourceChanges = true;
+				continue;
+			}
+
+			// We should also keep an eye on asset file changes since these may affect
+			// presentation in different tests that have expectations about this data.
+			if (
+				filePath.match(
+					/\.(?:png|jpg|gif|scss|css|ttf|svg|eot|woff|xml|csv|txt|ya?ml)$/i
+				)
+			) {
+				assetSourceChanges = true;
+				continue;
+			}
+
+			// We can be a strict with documentation changes because they are only ever going to be markdown files.
+			if ( filePath.match( /\.md$/i ) ) {
+				documentationChanges = true;
 				continue;
 			}
 		}
 
 		// We only want to track a changed project when we have encountered file changes that we care about.
 		if (
-			! sourceFileChanges &&
+			! phpSourceChanges &&
+			! jsSourceChanges &&
+			! assetSourceChanges &&
 			! documentationChanges &&
-			! testFileChanges &&
-			! e2eTestFileChanges
+			! phpTestChanges &&
+			! jsSourceChanges &&
+			! e2eTestChanges
 		) {
 			continue;
 		}
@@ -309,11 +315,11 @@ function detectProjectChanges( baseRef ) {
 			path: projectPath,
 			phpSourceChanges,
 			jsSourceChanges,
-			sourceFileChanges,
+			assetSourceChanges,
 			documentationChanges,
-			phpTestFileChanges,
-			jsTestFileChanges,
-			e2eTestFileChanges,
+			phpTestChanges,
+			jsTestChanges,
+			e2eTestChanges,
 		} );
 	}
 
@@ -379,8 +385,8 @@ function cascadeProjectChanges( projectChanges ) {
 				continue;
 			}
 
-			// Only certain changes will cascade to other projects.
-			if ( ! changes.sourceFileChanges ) {
+			// Only changes to source files will impact other projects.
+			if ( ! changes.phpSourceChanges && ! changes.jsSourceChanges && ! changes.assetSourceChanges ) {
 				continue;
 			}
 
@@ -390,11 +396,11 @@ function cascadeProjectChanges( projectChanges ) {
 					path: affectedProjectPath,
 					phpSourceChanges: false,
 					jsSourceChanges: false,
-					sourceFileChanges: false,
+					assetSourceChanges: false,
 					documentationChanges: false,
-					phpTestFileChanges: false,
-					jsTestFileChanges: false,
-					e2eTestFileChanges: false,
+					phpTestChanges: false,
+					jsTestChanges: false,
+					e2eTestChanges: false,
 				};
 			}
 
@@ -405,8 +411,8 @@ function cascadeProjectChanges( projectChanges ) {
 			if ( changes.jsSourceChanges ) {
 				cascadedChanges[ affectedProjectPath ].jsSourceChanges = true;
 			}
-			if ( changes.sourceFileChanges ) {
-				cascadedChanges[ affectedProjectPath ].sourceFileChanges = true;
+			if ( changes.assetSourceChanges ) {
+				cascadedChanges[ affectedProjectPath ].assetSourceChanges = true;
 			}
 		}
 	}
@@ -623,10 +629,10 @@ function getCommandsForChanges( changes ) {
 	// Here are all of the commands that we support and the change criteria that they require to execute.
 	// We treat the command's criteria as passing if any of the properties are true.
 	const commandCriteria = {
-		[ COMMAND_TYPE.Lint ]: [ 'sourceFileChanges' ],
-		[ COMMAND_TYPE.TestPHP ]: [ 'phpSourceChanges', 'phpTestFileChanges' ],
-		[ COMMAND_TYPE.TestJS ]: [ 'jsSourceChanges', 'jsTestFileChanges' ],
-		//[ COMMAND_TYPE.E2E ]: [ 'sourceFileChanges', 'e2eTestFileChanges' ],
+		[ COMMAND_TYPE.Lint ]: [ 'phpSourceChanges', 'jsSourceChanges', 'assetSourceChanges', 'phpTestChanges', 'jsTestChanges' ],
+		[ COMMAND_TYPE.TestPHP ]: [ 'phpSourceChanges', 'phpTestChanges' ],
+		[ COMMAND_TYPE.TestJS ]: [ 'jsSourceChanges', 'jsTestChanges' ],
+		//[ COMMAND_TYPE.E2E ]: [ 'phpSourceChanges', 'jsSourceChanges', 'assetSourceChanges', 'e2eTestFileChanges' ],
 	};
 
 	// We only want the list of possible commands to contain those that
