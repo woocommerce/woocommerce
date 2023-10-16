@@ -11,10 +11,6 @@ import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { ComponentType } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -22,34 +18,14 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
-function useEvaluationContext( context: any ) {
-	const { productType } = context;
-
-	const productId = useEntityId( 'postType', productType );
-
-	const getEvaluationContext = ( select: any ) => {
-		const editedProduct = select( 'core' ).getEditedEntityRecord(
-			'postType',
-			productType,
-			productId
-		);
-
-		return {
-			...context,
-			editedProduct,
-		};
-	};
-
-	return {
-		getEvaluationContext,
-	};
-}
-
 function getEdit<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, object > = Record< string, object >
 >(
-	edit?: ComponentType< BlockEditProps< T > >
+	edit: ComponentType< BlockEditProps< T > >,
+	useEvaluationContext: ( context: any ) => {
+		getEvaluationContext: ( select: any ) => any;
+	}
 ): ComponentType< BlockEditProps< T > > {
 	return ( props ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -92,12 +68,21 @@ function getEdit<
 export function registerWooBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
->( block: BlockRepresentation< T > ): Block< T > | undefined {
+>(
+	block: BlockRepresentation< T >,
+	useEvaluationContext: ( context: any ) => {
+		getEvaluationContext: ( select: any ) => any;
+	}
+): Block< T > | undefined {
 	if ( ! block ) {
 		return;
 	}
 	const { metadata, settings, name } = block;
 	const { edit } = settings;
+
+	if ( ! edit ) {
+		return;
+	}
 
 	const templateBlockAttributes = {
 		_templateBlockId: {
@@ -124,6 +109,6 @@ export function registerWooBlockType<
 
 	return registerBlockType< T >(
 		{ name, ...augmentedMetadata },
-		{ ...settings, edit: getEdit< T >( edit ) }
+		{ ...settings, edit: getEdit< T >( edit, useEvaluationContext ) }
 	);
 }
