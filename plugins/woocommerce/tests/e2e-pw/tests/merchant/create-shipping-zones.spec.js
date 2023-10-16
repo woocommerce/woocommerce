@@ -214,7 +214,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Flat rate' } )
 			).toBeVisible();
 
-			await page.getByRole( 'link', { name: 'Flat rate' } ).click();
+			await page.locator( 'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
 			await page.getByLabel( 'Cost', { exact: true } ).fill( '10' );
 			await page.getByRole( 'button', { name: 'Save' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
@@ -280,7 +280,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		//delete created shipping zone region after confirmation it exists
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 
-		await page.locator( 'a:has-text("USA Zone") >> nth=0' ).click();
+		await page.locator( 'td:has-text("USA Zone") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
 
 		//delete
 		await page.getByRole( 'button', { name: 'Remove' } ).click();
@@ -341,12 +341,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Flat rate' } )
 			).toBeVisible();
 
-			await page.getByRole( 'link', { name: 'Flat rate' } ).click();
+			await page.locator( 'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
 			await page.locator( '#woocommerce_flat_rate_cost' ).fill( '10' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
-			await page.getByRole( 'link', { name: 'Flat rate' } ).hover();
 			await page.locator( 'text=Delete' ).waitFor();
 
 			page.on( 'dialog', ( dialog ) => dialog.accept() );

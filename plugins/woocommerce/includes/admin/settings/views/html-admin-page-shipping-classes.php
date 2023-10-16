@@ -11,9 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<h2>
-	<?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?>
-	<a class="button button-primary wc-shipping-class-add-new" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
+<h2 class="wc-shipping-zones-heading">
+	<span><?php esc_html_e( 'Shipping classes', 'woocommerce' ); ?></span>
+	<a class="button button-primary wc-shipping-class-add-new page-title-action" href="#"><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></a>
 </h2>
 
 <p class="wc-shipping-zone-help-text">
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th />
 		</tr>
 	</thead>
-	<tbody class="wc-shipping-class-rows"></tbody>
+	<tbody class="wc-shipping-class-rows wc-shipping-tables-tbody"></tbody>
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-class-row-blank">
@@ -157,9 +157,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '</td>';
 		}
 		?>
-		<td class="shipping-zone-actions">
+		<td class="wc-shipping-zone-actions">
 			<div>
-				<a class="wc-shipping-class-edit" href="#"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-class-delete"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-class-edit wc-shipping-zone-action-edit" href="#"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-class-delete wc-shipping-zone-actions"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 	</tr>
