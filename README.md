@@ -1,50 +1,64 @@
-# WooCommerce Security Repo
+# WooCommerce Monorepo
 
-This is the repository used for staging security fixes for projects within the WooCommerce monorepo. This guide primarily covers the process as it concerns a 
-WooCommerce Core release, 
-but, except for the build steps, the general process should be applicable towards other projects in the repository.
-  
-> **Warning** <br> <br>
-> The default branch for this repository is `security`, and not `trunk`, as it is within the monorepo. <br>
-> This branch will be kept in sync with `trunk`, with some exceptions, such as this README file.<br>
-> Your changes should target the specific release branch that you're targeting. [Read more below](#notes-about-the-security-and-security-base-branches).
+![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
 
-## Preparing a security fix.
+Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
-The `trunk` branch along with branches matching the pattern `release/*` are synced from the public monorepo repository. This sync happens approximately once each 
-hour, via automation. 
+We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
-1. If your target branch hasn't been synced recently, you can manually run [this action](.github/workflows/security-sync.yml).
-2. Clone this repository, or if it's already cloned, pull down your target branch and make sure it's up to date locally.
-3. Create a new branch from your target branch, for example `git checkout fix/my-fix release/7.0`.
-4. Make your changes locally and commit to your fix branch. Push that branch to origin, for example `git push origin fix/my-fix`.
-5. Create a PR against your target branch.
-6. If your fix needs to target additional release branches, if the same branch applies cleanly, you can make multiple PRs against your various target branches.
-7. Once your PR is ready to be included in the release build, *instead of merging it to the target branch*, add the label `Ready for Build`. You should only do this 
-if your PR has no conflicts with its base branch and can be merged automatically.
-8. If you'd like to test the zip that includes your fix PR, you can generate that using [this action](.github/workflows/security-build-zip.yml).
-9. The release team will build any Betas, RCs, or patch releases with your PR.
+## Getting Started
 
-## Preparing a release with security fixes.
+To get up and running within the WooCommerce Monorepo, you will need to make sure that you have installed all of the prerequisites.
 
-If you're a release lead preparing a release with a security fix, you'll follow the steps below:
+### Prerequisites
 
-For any release (beta / rc / final / or fix release):
+-   [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](.nvmrc) which helps ensure you are using the correct version of Node.
+-   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
+-   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently features a minimum PHP version of 7.4. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
+-   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
 
-1. Make sure that the release branch in this repository is up to date. This happens hourly, but you can also manually run [this 
-action](.github/workflows/security-sync.yml).
-2. Make sure that any fix PRs that need to be included in the release have the label `Ready for Build` and that they are capable of being merged automatically.
-3. Generate the release zip using [this action](.github/workflows/security-build-zip.yml).
+Once you've installed all of the prerequisites, you can run the following commands to get everything working.
 
-After a final or fix release:
+```bash
+# Ensure that you're using the correct version of Node
+nvm use
+# Install the PHP and Composer dependencies for all of the plugins, packages, and tools
+pnpm install
+# Build all of the plugins, packages, and tools in the monorepo
+pnpm run build
+```
 
-1. Cherry-pick the PRs from the security repo into the public repository's release branch.
-2. Cherry-pick the PRs from the security repo into trunk of the public repository.
+At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
 
-## Notes about the `security` and `security-base` branches
+Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
 
-Because many aspects of GitHub actions only work from the default branch, the default branch in this repository is `security`. When the `trunk` branch is synced to 
-this repository, the 
-`security` repository is generated by taking the contents of `trunk` and applying the contents of `security-base` on top of that.
+## Repository Structure
 
-If you need to persist any changes to the `security` repo, they should be applied to `security-base`.
+-   [**Plugins**](plugins): Our repository contains plugins that relate to or otherwise aid in the development of WooCommerce.
+    -   [**WooCommerce Core**](plugins/woocommerce): The core WooCommerce plugin is available in the plugins directory.
+-   [**Packages**](packages): Contained within the packages directory are all of the [PHP](packages/php) and [JavaScript](packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.
+-   [**Tools**](tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
+
+## Reporting Security Issues
+
+To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).
+
+## Support
+
+This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
+
+-   If you have a problem, you may want to start with the [self help guide](https://docs.woocommerce.com/document/woocommerce-self-service-guide/).
+-   The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/) for customers who have purchased themes or extensions.
+-   [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
+-   [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
+-   For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
+
+NOTE: Unfortunately, we are unable to honor support requests in issues on this repository; as a result, any requests submitted in this manner will be closed.
+
+## Community
+
+For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
+
+## Contributing to WooCommerce
+
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
