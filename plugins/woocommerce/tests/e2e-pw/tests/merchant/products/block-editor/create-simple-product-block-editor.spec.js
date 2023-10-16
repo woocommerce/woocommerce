@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTranslationFor } = require('../../../../test-data/data');
+const { testWithTranslation } = require( './../../../../utils/translations');
 
 const {
 	clickOnTab,
@@ -89,7 +89,7 @@ test.describe( 'General tab', () => {
 			}
 		} );
 
-		test( 'can create a simple product', async ( { page } ) => {
+		testWithTranslation.only( 'can create a simple product', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 			await clickOnTab( 'General', page );
 			await page
@@ -114,7 +114,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: getTranslationFor( 'Add' ),
+					name: 'Add' ,
 				} )
 				.click();
 

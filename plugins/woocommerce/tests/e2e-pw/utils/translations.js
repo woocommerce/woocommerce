@@ -39,6 +39,58 @@ function getTranslationFor( textToTranslate ) {
 	return returnValue;
 }
 
+class LocatorWrapper {
+	constructor( originalLocator ) {
+		this.originalLocator = originalLocator;
+	}
+
+	async filter( options ) {
+		console.log( 'Custom logic before calling the original filter method' );
+
+		// Your custom logic here
+		console.log( `Filtering with options: ${ JSON.stringify( options ) }` );
+
+		// Example: Modify options or perform checks
+		console.log( 'options=', options );
+
+		if ( options.hasText ) {
+			console.log( 'options.hasText=', options.hasText );
+			const translatedOptionName = getTranslationFor( options.hasText );
+			console.log( 'translatedOptionName=', translatedOptionName );
+			options.hasText = translatedOptionName
+				? translatedOptionName
+				: options.hasText;
+			console.log( 'options.hasText after=', options.hasText );
+			console.log( 'options after=', options );
+		}
+		console.log( 'options after=', options );
+
+		// Your custom logic here
+		console.log( `Filtering with options: ${ JSON.stringify( options ) }` );
+
+		// Assuming your custom filter logic returns an ElementHandle
+		const filterLocator = await this.originalLocator.filter( options );
+		console.log( 'filterLocator=', filterLocator );
+		console.log( 'typeof filterLocator=', typeof filterLocator );
+		console.log( 'filterLocator=', filterLocator );
+		console.log( 'typeof filterLocator.elementHandle', typeof filterLocator.elementHandle );
+
+		//const locator = this.originalLocator._page.locator(selector);
+		return filterLocator;
+	}
+
+	// Forward other methods to the original locator
+	async fill( value ) {
+		return await this.originalLocator.fill( value );
+	}
+	async blur() {
+		return await this.originalLocator.blur();
+	}
+	async click() {
+		return await this.originalLocator.click();
+	}
+}
+
 const testWithTranslation = test.extend( {
 	page: async ( { page }, use ) => {
 		console.log( 'Inside testWithTranslation' );
@@ -47,18 +99,29 @@ const testWithTranslation = test.extend( {
 		}
 
 		// Backup the original locator function
-		const originalLocator = await page.locator.bind( page );
-		const originalGetByRole = await page.getByRole.bind( page );
+		const originalLocator = page.locator.bind( page );
+		const originalGetByRole = page.getByRole.bind( page );
 		const originalGetByPlaceholder = page.getByPlaceholder.bind( page );
+		const originalGetByText = page.getByText.bind( page );
 
 		// Override the page.locator function
 		page.locator = ( selector ) => {
+			const original = originalLocator( selector );
+
+			//this overridden getByRole never seems to be called
+			original.getByRole = ( role, options ) => {
+				console.log( `Custom getByRole using role: ${ role }` );
+				console.log( `Custom getByRole using options: ${ options }` );
+
+				return original.getByRole( role, options );
+			};
+
 			// Custom logic: Check or modify the selector, log information, etc.
 			console.log( `Testwithtranslation Using selector: ${ selector }` );
 
 			const textPrefix = '=';
 			if ( selector.includes( textPrefix ) ) {
-				// Find the position of 'text='
+				// Find the position of '='
 				const textPosition = selector.indexOf( textPrefix );
 				const initialText = selector.substring(
 					0,
@@ -75,60 +138,73 @@ const testWithTranslation = test.extend( {
 				selector = translatedText
 					? initialText + translatedText
 					: initialText + extractedText;
-				
 			} else {
-				console.log('selector does not include text=');
+				console.log( 'selector does not include text=' );
 				const translatedText = getTranslationFor( selector );
 				console.log( 'translatedText=', translatedText );
-				
-				selector = translatedText
-					? translatedText
-					: selector;
+
+				selector = translatedText ? translatedText : selector;
 			}
 
 			console.log( 'selector=', selector );
 			console.log( 'return originalLocator' );
 			// Use the original locator function with possibly modified selector
-			return originalLocator( selector );
+			//return originalLocator( selector );
+
+			// Use the original locator function to get a Locator object
+			const locator = originalLocator( selector );
+
+			// Wrap the Locator object with your custom wrapper
+			return new LocatorWrapper( locator );
 		};
 
 		// Override the page.getByRole function
-		page.getByRole = async (role, options) => {
-			console.log(`Testwithtranslation Using role: ${role}`);
+		page.getByRole = function ( role, options ) {
+			console.log( `Testwithtranslation Using role: ${ role }` );
 
 			// Example: Modify options or perform checks
 			// options = yourCustomLogic(options);
-			console.log('options=',options);
+			console.log( 'options=', options );
+
+			if ( options.name ) {
+				console.log( 'options.name=', options.name );
+				const translatedOptionName = getTranslationFor( options.name );
+				console.log( 'translatedOptionName=', translatedOptionName );
+				options.name = translatedOptionName
+					? translatedOptionName
+					: options.name;
+				console.log( 'options.name after=', options.name );
+			}
+			console.log( 'options after=', options );
 
 			// Use the original getByRole function with possibly altered role or options
-			return originalGetByRole(role, options);
+			return originalGetByRole( role, options );
 		};
 
 		// Override the page.getByPlaceholder function
-		page.getByPlaceholder = async (placeholder) => {
-			console.log(`Using placeholder: ${placeholder}`);
+		page.getByPlaceholder = ( placeholder ) => {
+			console.log( `Using placeholder: ${ placeholder }` );
 
 			const translatedText = getTranslationFor( placeholder );
-				console.log( 'translatedText=', translatedText );
-				
-				placeholder = translatedText
-					? translatedText
-					: placeholder;
+			console.log( 'translatedText=', translatedText );
 
+			placeholder = translatedText ? translatedText : placeholder;
+			console.log( 'placeholder=', placeholder );
 
-			// // Override the fill method of the returned object
-			// originalPlaceholderElement.fill = async (value) => {
-			// 	console.log(`Filling placeholder "${placeholder}" with value: ${value}`);
-				
-			// 	// Add additional logic or modifications for 'fill' here...
-			// 	// ...
+			return originalGetByPlaceholder( placeholder );
+		};
 
-			// 	// You might call the original fill method or define your custom logic for fill
-			// 	return await originalPlaceholderElement.fill(value);
-			// };
+		// Override the page.getByPlaceholder function
+		page.getByText = ( text ) => {
+			console.log( `Using text: ${ text }` );
 
-			// Use the original getByPlaceholder function with possibly modified placeholder
-			return originalGetByPlaceholder(placeholder);
+			const translatedText = getTranslationFor( text );
+			console.log( 'translatedText=', translatedText );
+
+			text = translatedText ? translatedText : text;
+			console.log( 'text=', text );
+
+			return originalGetByText( text );
 		};
 
 		console.log( 'await use( page )' );
@@ -139,7 +215,7 @@ const testWithTranslation = test.extend( {
 		page.locator = originalLocator;
 		page.getByRole = originalGetByRole;
 		page.getByPlaceholder = originalGetByPlaceholder;
-
+		page.getByText = originalGetByText;
 	},
 } );
 
@@ -173,60 +249,6 @@ const expectWithTranslation = expect.extend( {
 			};
 		}
 	},
-	// async toHaveText( received, argument ) {
-	// 	// Your custom logic here
-	// 	console.log( `Expecting: ${ argument }` );
-
-	// 	// Retrieve the text content of the element
-	// 	const actualText = await received.textContent();
-
-	// 	console.log( `actualText: ${ actualText }` );
-
-	// 	const translatedValue = getTranslationFor( argument );
-	// 	console.log( `translatedValue: ${ translatedValue }` );
-	// 	console.log('received=',await received.textContent());
-	// 	console.log('received=',await received.actualValue());
-		
-
-	// 	console.log('await received.textContent()=',await received.textContent());
-
-
-	// 	// You might delegate to the original toHaveText or create your custom assertion logic
-	// 	const pass = ( await received.textContent() ) === translatedValue;
-
-	// 	if ( pass ) {
-	// 		return {
-	// 			message: () =>
-	// 				`expected ${ received } not to have text ${ argument }`,
-	// 			pass: true,
-	// 		};
-	// 	} else {
-	// 		return {
-	// 			message: () =>
-	// 				`expected ${ received } to have text ${ argument }`,
-	// 			pass: false,
-	// 		};
-	// 	}
-	// },
-	// async toBeVisible(received) {
-	// 	// Your custom logic here
-	// 	console.log(`Expecting element to be visible`);
-	
-	// 	// Using the Playwright `isVisible()` function to check visibility
-	// 	const pass = await received.isVisible();
-	
-	// 	if (pass) {
-	// 	  return {
-	// 		message: () => `expected element not to be visible`,
-	// 		pass: true,
-	// 	  };
-	// 	} else {
-	// 	  return {
-	// 		message: () => `expected element to be visible`,
-	// 		pass: false,
-	// 	  };
-	// 	}
-	//   },
 	async toContainText( received, argument ) {
 		// Your custom logic here
 		console.log( `Expecting to contain text: ${ argument }` );

@@ -41,7 +41,7 @@ test.describe( 'Payment setup task', () => {
 		).toContainText( 'Set up payments');
 	} );
 
-	testWithTranslation.only( 'Saving valid bank account transfer details enables the payment method', async ( {
+	testWithTranslation( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {
 		// load the bank transfer page
@@ -54,30 +54,19 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		// await page
-		// 	.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
-		// 	.fill( 'Savings' );
-		await page.getByPlaceholder('"Account number"').fill('Savings');
- 
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Account number"')}]` )
-			.fill( '1234' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Bank name"')}]` )
-			.fill( 'Test Bank' );
-		await page.locator( `//input[@placeholder=${getTranslationFor('"Sort code"')}]` ).fill( '12' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"IBAN"')}]` )
-			.fill( '12 3456 7890' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]` )
-			.fill( 'ABBA' );
-		await page.locator( `text=${getTranslationFor('Save')}` ).click();
+		await page.getByPlaceholder('Account name').fill('Savings');
+		await page.getByPlaceholder('Account number').fill('1234');
+		await page.getByPlaceholder('Bank name').fill('Test Bank');
+		await page.getByPlaceholder('Sort code').fill('12');
+		await page.getByPlaceholder('IBAN').fill('12 3456 7890');
+		await page.getByPlaceholder('BIC / Swift').fill('ABBA');
+		
+		await page.locator( 'text=Save' ).click();
 
 		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( `${getTranslationFor('Direct bank transfer details added successfully')}` );
+		).toContainText( 'Direct bank transfer details added successfully' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 

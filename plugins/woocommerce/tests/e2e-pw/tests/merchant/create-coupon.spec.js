@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require( './../../test-data/data' );
+const { testWithTranslation } = require( './../../utils/translations' );
 
 const couponCode = `code-${ new Date().getTime().toString() }`;
 
@@ -25,7 +25,7 @@ test.describe( 'Add New Coupon Page', () => {
 		} );
 	} );
 
-	test( 'can create new coupon', async ( { page } ) => {
+	testWithTranslation( 'can create new coupon', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon' );
 
 		await page.locator( '#title' ).fill( couponCode );
@@ -33,7 +33,7 @@ test.describe( 'Add New Coupon Page', () => {
 		// Blur then wait for the auto-save to finish
 		await page.locator( '#title' ).blur();
 		await expect(
-			page.getByRole( 'link', { name: getTranslationFor('Move to Trash') } )
+			page.getByRole( 'link', { name: 'Move to Trash' } )
 		).toBeVisible();
 
 		await page
@@ -45,10 +45,16 @@ test.describe( 'Add New Coupon Page', () => {
 		await page.locator( '#publish:not(.disabled)' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
+
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: getTranslationFor('Coupon updated.') } )
+				.filter( { hasText: 'Coupon updated.' } )
 		).toBeVisible();
+
+		// as an alternative, the following works
+		// await expect(
+		// 	page.getByText('Coupon updated.')				
+		// ).toBeVisible();
 	} );
 } );

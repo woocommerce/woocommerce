@@ -1,6 +1,7 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
+const { getTranslationFor } = require( './../../test-data/data' );
+const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
-const { getTranslationFor, testWithTranslation } = require( './../../utils/translations' );
 
 const EXPECTED_SECTION_HEADERS = getTranslationFor( 'arrayOfExpectedSections' );
 
@@ -119,7 +120,7 @@ test.describe( 'Analytics pages', () => {
 		storageState: process.env.ADMINSTATE,
 	} );
 
-	testWithTranslation.beforeAll( async ( { browser } ) => {
+	test.beforeAll( async ( { browser } ) => {
 		page = await browser.newPage();
 
 		await test.step( `Send GET request to get the current user id`, async () => {
