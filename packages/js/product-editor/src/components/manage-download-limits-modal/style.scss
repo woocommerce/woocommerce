@@ -11,6 +11,10 @@
 		}
 	}
 
+	&__input-suffix {
+		margin-right: $grid-unit-15;
+	}
+
 	&__content {
 		.components-base-control {
 			.components-input-control__container {

@@ -97,6 +97,11 @@ export function ManageDownloadLimitsModal( {
 				'woocommerce'
 			),
 		placeholder: __( 'Unlimited', 'woocommerce' ),
+		suffix: (
+			<span className="woocommerce-manage-download-limits-modal__input-suffix">
+				{ __( 'times', 'woocommerce' ) }
+			</span>
+		),
 		onBlur() {
 			validateDownloadLimit();
 		},
@@ -123,6 +128,11 @@ export function ManageDownloadLimitsModal( {
 				'woocommerce'
 			),
 		placeholder: __( 'Unlimited', 'woocommerce' ),
+		suffix: (
+			<span className="woocommerce-manage-download-limits-modal__input-suffix">
+				{ __( 'days', 'woocommerce' ) }
+			</span>
+		),
 		onBlur() {
 			validateDownloadExpiry();
 		},
