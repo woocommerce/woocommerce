@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 8.2.1 2023-10-16 =
+
+**WooCommerce**
+
+* Fix - Prevent global attribute terms from being automatically selected [#40729](https://github.com/woocommerce/woocommerce/pull/40729)
+
+
 = 8.2.0 2023-10-13 =
 
 **WooCommerce**
