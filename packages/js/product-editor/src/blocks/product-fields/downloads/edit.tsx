@@ -170,9 +170,15 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
-				<Button variant="tertiary" onClick={ handleManageLimitsClick }>
-					{ __( 'Manage limits', 'woocommerce' ) }
-				</Button>
+				{ Boolean( downloads.length ) && (
+					<Button
+						variant="tertiary"
+						onClick={ handleManageLimitsClick }
+					>
+						{ __( 'Manage limits', 'woocommerce' ) }
+					</Button>
+				) }
+
 				<DownloadsMenu
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
