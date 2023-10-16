@@ -33,8 +33,6 @@ function useEvaluationContext( context: Record< string, unknown > ) {
 		};
 	};
 
-	console.log( 'yo!' );
-
 	return {
 		getEvaluationContext,
 	};
