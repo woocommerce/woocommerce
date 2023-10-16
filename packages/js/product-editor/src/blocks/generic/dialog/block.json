@@ -15,6 +15,9 @@
 		"isOpen": {
 			"type": "boolean",
 			"default": false
+		},
+		"onClose": {
+			"type": "function"
 		}
 	},
 	"supports": {

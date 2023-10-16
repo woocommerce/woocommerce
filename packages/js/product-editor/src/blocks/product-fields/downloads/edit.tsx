@@ -54,11 +54,18 @@ export function Edit( {
 		attributes: { isOpen: true },
 	} );
 
+	const [ id ] = useEntityProp< Product[ 'id' ] >(
+		'postType',
+		'product',
+		'id'
+	);
+
 	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
 		'postType',
 		'product',
 		'downloadable'
 	);
+
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
 		'product',
@@ -164,6 +171,9 @@ export function Edit( {
 					onClick={ () => {
 						updateBlockAttributes( dialogClientId, {
 							isOpen: true,
+							onClose() {
+								alert( 'Closeing modal!!!' );
+							},
 						} );
 					} }
 				>

@@ -20,7 +20,7 @@ export function Edit( {
 	attributes,
 	setAttributes,
 }: ProductEditorBlockEditProps< DialogBlockAttributes > ) {
-	const { title, isOpen } = attributes;
+	const { title, isOpen, onClose } = attributes;
 
 	const blockProps = useWooBlockProps( {
 		...attributes,
@@ -32,6 +32,7 @@ export function Edit( {
 
 	function handleClose() {
 		setAttributes( { isOpen: false } );
+		if ( onClose ) onClose();
 	}
 
 	return (
