@@ -13,7 +13,6 @@ export const MobileAppLoginInfo = ( {
 }: {
 	loginUrl: string | undefined;
 } ) => {
-	// TODO: update the minimum app version
 	return (
 		<div>
 			{ loginUrl && (
