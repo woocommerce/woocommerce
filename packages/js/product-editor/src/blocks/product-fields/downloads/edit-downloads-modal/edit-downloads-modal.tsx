@@ -21,7 +21,7 @@ import { EditDownloadsModalProps } from './types';
 import { UnionIcon } from './union-icon';
 
 export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
-	downloableItem = { name: '', file: '' },
+	downloableItem,
 	onCancel,
 	onChange,
 	onRemove,
@@ -29,7 +29,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
-	const { file, name } = downloableItem;
+	const { file = '', name = '' } = downloableItem;
 
 	const onCopySuccess = () => {
 		createNotice(
@@ -54,7 +54,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 
 	async function handleCopyToClipboard() {
 		recordEvent( 'product_downloads_modal_copy_url_to_clipboard' );
-		await copyTextToClipboard( downloableItem?.file );
+		await copyTextToClipboard( file );
 	}
 
 	return (
@@ -62,7 +62,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			title={ sprintf(
 				/* translators: %s is the attribute name */
 				__( 'Edit %s', 'woocommerce' ),
-				downloableItem?.name
+				name
 			) }
 			onRequestClose={ (
 				event:
@@ -89,7 +89,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 					id={ 'file-name' }
 					label={ __( 'FILE NAME', 'woocommerce' ) }
 					name={ 'file-name' }
-					value={ downloableItem?.name || '' }
+					value={ name || '' }
 					onChange={ onChange }
 				/>
 			</BaseControl>
@@ -100,7 +100,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 					id={ 'file-url' }
 					label={ __( 'FILE URL', 'woocommerce' ) }
 					name={ 'file-url' }
-					value={ downloableItem?.file || '' }
+					value={ file || '' }
 					suffix={
 						<Button
 							icon={ <UnionIcon /> }
