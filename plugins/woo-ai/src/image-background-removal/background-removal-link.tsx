@@ -12,7 +12,7 @@ import { Notice } from '@wordpress/components';
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import { FILENAME_APPEND } from './constants';
 import { useFeedbackSnackbar } from '../hooks';
-import { recordTracksFactory, getPostId } from '../utils';
+import { recordTracksFactory, getPostId, getProductImageCount } from '../utils';
 import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
@@ -35,6 +35,7 @@ const recordBgRemovalTracks = recordTracksFactory(
 	'background_removal',
 	() => ( {
 		post_id: getPostId(),
+		image_count: getProductImageCount().total,
 	} )
 );
 
