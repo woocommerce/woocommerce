@@ -4102,7 +4102,12 @@ table {
 	}
 
 	.wc-shipping-class-modal-input {
-		padding: 10px 0;
+		padding: 0 0 24px 0;
+
+		input {
+			font-size: 13px;
+    		line-height: 16px;
+		}
 	}
 
 	.wc-shipping-class-count {
