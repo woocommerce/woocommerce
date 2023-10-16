@@ -711,6 +711,7 @@ function getCommandsForChanges( changes ) {
 		}
 
 		commandsForChanges.push( command );
+		console.log( `${ changes.path }: command "${ command }" added based on given changes.` );
 	}
 
 	return commandsForChanges;
