@@ -22,6 +22,29 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
+function useEvaluationContext( context: any ) {
+	const { productType } = context;
+
+	const productId = useEntityId( 'postType', productType );
+
+	const getEvaluationContext = ( select: any ) => {
+		const editedProduct = select( 'core' ).getEditedEntityRecord(
+			'postType',
+			productType,
+			productId
+		);
+
+		return {
+			...context,
+			editedProduct,
+		};
+	};
+
+	return {
+		getEvaluationContext,
+	};
+}
+
 function getEdit<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, object > = Record< string, object >
@@ -29,35 +52,27 @@ function getEdit<
 	edit?: ComponentType< BlockEditProps< T > >
 ): ComponentType< BlockEditProps< T > > {
 	return ( props ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore context is added to the block props by the block editor.
 		const { context } = props;
-		const { productType } = context;
 		const { _templateBlockHideConditions: hideConditions } =
 			props.attributes;
 
-		const productId = useEntityId( 'postType', productType );
+		const { getEvaluationContext } = useEvaluationContext( context );
+
 		const shouldHide = useSelect(
 			( select ) => {
 				if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
 					return false;
 				}
 
-				const editedProduct = select( 'core' ).getEditedEntityRecord(
-					'postType',
-					productType,
-					productId
-				);
-
-				const evaluationContext = {
-					...context,
-					editedProduct,
-				};
+				const evaluationContext = getEvaluationContext( select );
 
 				return hideConditions.some( ( condition ) =>
 					evaluate( condition.expression, evaluationContext )
 				);
 			},
-			[ productType, productId, context, hideConditions ]
+			[ getEvaluationContext, hideConditions ]
 		);
 
 		if ( ! edit || shouldHide ) {
