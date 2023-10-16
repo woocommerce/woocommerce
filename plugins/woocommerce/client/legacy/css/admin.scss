@@ -4080,9 +4080,14 @@ table {
 	display: none;
 }
 
-.wc-shipping-zones-heading .page-title-action {
-	display: inline-block;
-}
+.wc-shipping-zones-heading {
+	display: flex;
+
+	.page-title-action {
+		display: inline-block;
+		margin: 0 12px;
+	}
+} 
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
@@ -4109,14 +4114,52 @@ table {
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
+	font-family: $font-sf-pro-text;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 20px;
+	color: #000000;
+
+	&.widefat p {
+		color: #000000;
+	}
+
+	thead tr th {
+		color: #646970;
+		vertical-align: middle;
+		padding: 12px;
+	}
+
+	tbody tr td {
+		padding: 24px 12px;
+
+		&:last-child {
+			padding: 24px 32px 24px 12px;
+		}
+	}
+
+	tfoot tr td {
+		padding: 24px 12px;
+		background-color: #F6F7F7;
+		color: #000000;
+		vertical-align: top;
+
+		&:last-child {
+			padding: 24px 32px 24px 12px;
+		}
+	}
+
 	td,
 	th {
-		vertical-align: top;
-		line-height: 24px;
-		padding: 1em !important;
-		font-size: 14px;
 		background: #fff;
 		display: table-cell !important;
+		font-family: $font-sf-pro-text;
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 20px;
+		color: #000000;
+		vertical-align: middle;
+		padding: 24px 12px;
 
 		li {
 			line-height: 24px;
@@ -4129,10 +4172,6 @@ table.wc-shipping-classes {
 	}
 
 	thead {
-		th {
-			vertical-align: middle;
-		}
-
 		.wc-shipping-zone-sort {
 			text-align: center;
 		}
@@ -4197,22 +4236,9 @@ table.wc-shipping-classes {
 		}
 	}
 
-	.wc-shipping-zone-method-rows {
-		tr:nth-child(even) td {
-			background: #f9f9f9;
-		}
-	}
-
-	tr.odd,
-	.wc-shipping-class-rows tr:nth-child(odd) {
+	tbody.wc-shipping-tables-tbody {
 		td {
-			background: #f9f9f9;
-		}
-	}
-
-	tbody.wc-shipping-zone-rows {
-		td {
-			border-top: 2px solid #f9f9f9;
+			border-top: 1px solid #C3C4C7;
 		}
 
 		tr:first-child {
@@ -4220,6 +4246,13 @@ table.wc-shipping-classes {
 				border-top: 0;
 			}
 		}
+
+		.wc-shipping-zone-name,
+		.wc-shipping-zone-method-title,
+		.wc-shipping-class-name {
+			font-weight: 500;
+		}
+
 	}
 
 	tr.wc-shipping-zone-worldwide {
@@ -4243,7 +4276,7 @@ table.wc-shipping-classes {
 		&::before {
 			content: "";
 			mask: url(../images/icons/move-icon.svg);
-			background-color: #999;
+			background-color: #1E1E1E;
 			display: block;
 			width: 17px;
 			float: left;
@@ -4251,7 +4284,7 @@ table.wc-shipping-classes {
 		}
 
 		&:hover::before {
-			background-color: #333;
+			background-color: #999;
 		}
 	}
 
@@ -4263,7 +4296,7 @@ table.wc-shipping-classes {
 			font-family: "dashicons";
 			text-align: center;
 			line-height: 1;
-			color: #999;
+			color: #000;
 			display: block;
 			width: 17px;
 			float: left;
@@ -4277,13 +4310,18 @@ table.wc-shipping-classes {
 		width: 25%;
 	}
 
-	.shipping-zone-actions {
+	.wc-shipping-zone-actions {
 		width: 13%;
+		text-align: right;
 
-		a.wc-shipping-zone-delete,
-		a.wc-shipping-zone-method-delete,
-		a.wc-shipping-class-delete {
-			color: #a00;
+		a.wc-shipping-zone-actions,
+		a.wc-shipping-zone-actions:hover {
+			color: #D63638;
+		}
+
+		a.wc-shipping-zone-action-edit,
+		a.wc-shipping-zone-action-edit:hover {
+			color: #0675C4;
 		}
 	}
 
@@ -4297,11 +4335,6 @@ table.wc-shipping-classes {
 		select,
 		textarea {
 			width: 100%;
-		}
-
-		a.wc-shipping-zone-delete:hover,
-		a.wc-shipping-class-delete:hover {
-			color: red;
 		}
 	}
 
@@ -4323,14 +4356,14 @@ table.wc-shipping-classes {
 			flex-wrap: wrap;
 
 			li {
-				color: #555;
+				color: #000;
 				display: inline;
 				margin: 0;
 			}
 		}
 
 		.wc-shipping-zone-method {
-			background-color: #dcdcdc;
+			background-color: #F0F0F0;
 			margin: 0 3px 3px 0;
 			padding: 5px 9px;
 			border-radius: 5px;
@@ -4373,7 +4406,7 @@ table.wc-shipping-classes {
 		text-align: center;
 
 		a {
-			display: inline-block;
+			float: left;
 		}
 
 		.woocommerce-input-toggle {
@@ -4720,10 +4753,6 @@ img.help_tip {
 		.select2-container + span.description {
 			display: block;
 			margin-top: 8px;
-		}
-
-		table.widefat th {
-			padding-right: inherit;
 		}
 
 		.wp-list-table .woocommerce-help-tip {

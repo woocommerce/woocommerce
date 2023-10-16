@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <h2 class="wc-shipping-zones-heading">
-	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
+	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
 	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action button-primary"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
 </h2>
 <p class="wc-shipping-zone-heading-help-text"><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
@@ -19,37 +19,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th></th>
 		</tr>
 	</thead>
-	<tbody class="wc-shipping-zone-rows"></tbody>
-	<tbody>
-		<tr data-id="0" class="wc-shipping-zone-worldwide">
-			<td width="1%" class="wc-shipping-zone-worldwide"></td>
-			<td class="wc-shipping-zone-name">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
-			</td>
-			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
-			<td class="wc-shipping-zone-methods">
-				<ul>
-					<?php
-					$worldwide = new WC_Shipping_Zone( 0 );
-					$methods   = $worldwide->get_shipping_methods();
-					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
-					if ( ! empty( $methods ) ) {
-						foreach ( $methods as $method ) {
-							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
-						}
-					} else {
-						echo '<li>' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
+		<td width="1%" class="wc-shipping-zone-worldwide"></td>
+		<td class="wc-shipping-zone-name">
+			<?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?>
+		</td>
+		<td class="wc-shipping-zone-region"><?php esc_html_e( 'This zone is optionally used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
+		<td class="wc-shipping-zone-methods">
+			<ul>
+				<?php
+				$worldwide = new WC_Shipping_Zone( 0 );
+				$methods   = $worldwide->get_shipping_methods();
+				uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+
+				if ( ! empty( $methods ) ) {
+					foreach ( $methods as $method ) {
+						$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
-					?>
-				</ul>
-			</td>
-			<td class="shipping-zone-actions">
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Edit', 'woocommerce' ); ?></a>
-			</td>
-		</tr>
-	</tbody>
+				} else {
+					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+				}
+				?>
+			</ul>
+		</td>
+		<td class="wc-shipping-zone-actions">
+			<a class="wc-shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+		</td>
+	</tfoot>
+
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
@@ -74,7 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.zone_id }}">
 		<td width="1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
-			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
+			{{ data.zone_name }}
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
@@ -82,9 +82,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
 		</td>
-		<td class="shipping-zone-actions">
+		<td class="wc-shipping-zone-actions">
 			<div>
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete wc-shipping-zone-actions"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 			</div>
 		</td>
 	</tr>
