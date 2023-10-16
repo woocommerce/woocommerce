@@ -17,9 +17,6 @@
 		"isDismissible": {
 			"type": "boolean"
 		},
-		"noticeLink": {
-			"type": "string"
-		},
 		"type": {
 			"type": "string"
 		}

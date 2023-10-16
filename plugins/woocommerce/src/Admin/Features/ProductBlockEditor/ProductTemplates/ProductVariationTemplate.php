@@ -113,7 +113,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
-					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
@@ -198,7 +197,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
-					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
@@ -328,7 +326,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
-					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
@@ -453,7 +450,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
-					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],

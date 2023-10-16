@@ -7,6 +7,7 @@ import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
+import { getNewPath } from '@woocommerce/navigation';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -24,13 +25,7 @@ export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< NoticeBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const {
-		content,
-		isDismissible,
-		noticeLink: url,
-		title,
-		type = 'info',
-	} = attributes;
+	const { content, isDismissible, title, type = 'info' } = attributes;
 	const [ parentId ] = useEntityProp< number >(
 		'postType',
 		'product_variation',
@@ -82,7 +77,10 @@ export function Edit( {
 					strong: <strong />,
 					noticeLink: (
 						<Link
-							href={ url }
+							href={ getNewPath(
+								{ tab: 'variations' },
+								`/product/${ parentId }`
+							) }
 							onClick={ () => {
 								recordEvent(
 									'product_single_variation_notice_click'
