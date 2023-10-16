@@ -100,7 +100,7 @@ class RedirectionController {
 	 * feature `product_block_editor` is enabled.
 	 */
 	public function maybe_redirect_to_old_editor(): void {
-		$route = ProductEditorHelper::get_parsed_route();
+		$route = $this->get_parsed_route();
 
 		if ( 'add-product' === $route['page'] ) {
 			wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
@@ -114,10 +114,31 @@ class RedirectionController {
 	}
 
 	/**
+	 * Get the parsed WooCommerce Admin path.
+	 */
+	protected function get_parsed_route(): array {
+		if ( ! \Automattic\WooCommerce\Admin\PageController::is_admin_page() || ! isset( $_GET['path'] ) ) {
+			return array(
+				'page'       => null,
+				'product_id' => null,
+			);
+		}
+
+		$path        = esc_url_raw( wp_unslash( $_GET['path'] ) );
+		$path_pieces = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
+
+		return array(
+			'page'       => $path_pieces[1],
+			'product_id' => 'product' === $path_pieces[1] ? absint( $path_pieces[2] ) : null,
+		);
+	}
+
+
+	/**
 	 * Redirect non supported product types to legacy editor.
 	 */
 	public function redirect_non_supported_product_types(): void {
-		$route      = ProductEditorHelper::get_parsed_route();
+		$route      = $this->get_parsed_route();
 		$product_id = $route['product_id'];
 
 		if ( 'product' === $route['page'] && ! $this->is_product_supported( $product_id ) ) {
