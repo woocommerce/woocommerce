@@ -42,8 +42,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
 	} );
 
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'should show all products', async ( { frontendUtils } ) => {
+	test( 'should show all products', async ( { frontendUtils } ) => {
 		const allProductsBlock = await frontendUtils.getBlockByName(
 			'woocommerce/all-products'
 		);
@@ -60,8 +59,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		expect( products ).toHaveLength( 9 );
 	} );
 
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'should show only products that match the filter', async ( {
+	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
