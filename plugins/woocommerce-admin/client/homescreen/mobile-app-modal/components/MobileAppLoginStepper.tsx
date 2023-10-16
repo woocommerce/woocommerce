@@ -133,6 +133,8 @@ export const MobileAppLoginStepper = ( {
 		}
 	}, [
 		step,
+		isJetpackPluginInstalled,
+		wordpressAccountEmailAddress,
 		completeInstallationStepHandler,
 		sendMagicLinkHandler,
 		sendMagicLinkStatus,
