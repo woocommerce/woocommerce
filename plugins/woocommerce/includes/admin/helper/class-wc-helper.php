@@ -1425,7 +1425,6 @@ class WC_Helper {
 				$subscription['local']['type']      = $local['_type'];
 				$subscription['local']['path']      = $local['_filename'];
 				$subscription['local']['slug']      = null;
-				$subscription['local']['all']       = $local;
 
 				if ( 'plugin' == $local['_type'] ) {
 					$subscription['local']['slug'] = $local['slug'];
