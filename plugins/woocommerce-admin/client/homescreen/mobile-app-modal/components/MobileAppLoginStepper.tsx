@@ -48,6 +48,7 @@ export const MobileAppLoginStepper = ( {
 						<>
 							<MobileAppInstallationInfo />
 							<Button
+								variant="primary"
 								className="install-app-button"
 								onClick={ () => {
 									completeInstallationStepHandler();
