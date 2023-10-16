@@ -144,23 +144,21 @@ export function Edit( {
 	}
 
 	function removeHandler( download: ProductDownload ) {
-		return function handleRemoveClick() {
-			const otherDownloads = downloads.reduce< ProductDownload[] >(
-				function removeDownload( others, current ) {
-					if ( current.file === download.file ) {
-						return others;
-					}
-					return [ ...others, stringifyEntityId( current ) ];
-				},
-				[]
-			);
+		const otherDownloads = downloads.reduce< ProductDownload[] >(
+			function removeDownload( others, current ) {
+				if ( current.file === download.file ) {
+					return others;
+				}
+				return [ ...others, stringifyEntityId( current ) ];
+			},
+			[]
+		);
 
-			if ( ! otherDownloads.length ) {
-				setDownloadable( false );
-			}
+		if ( ! otherDownloads.length ) {
+			setDownloadable( false );
+		}
 
-			setDownloads( otherDownloads );
-		};
+		setDownloads( otherDownloads );
 	}
 
 	function handleUploadError( error: unknown ) {
@@ -170,8 +168,6 @@ export function Edit( {
 				: __( 'There was an error uploading files', 'woocommerce' )
 		);
 	}
-
-	console.log( 'selectedDownload', selectedDownload );
 
 	return (
 		<div { ...blockProps }>
@@ -284,9 +280,9 @@ export function Edit( {
 												'woocommerce'
 											) }
 											disabled={ isUploading }
-											onClick={ removeHandler(
-												download
-											) }
+											onClick={ () =>
+												removeHandler( download )
+											}
 										/>
 									</div>
 								</ListItem>
