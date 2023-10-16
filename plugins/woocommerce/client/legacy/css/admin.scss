@@ -4030,16 +4030,26 @@ table.wc_shipping {
 		}
 
 		fieldset {
-			margin-bottom: 18px;
+			margin-bottom: 24px;
 
 			input, 
 			select {
 				margin: 6px 0;
 				padding: 12px;
+				font-size: 13px;
+    			line-height: 16px;
 
 				&:not([type="checkbox"]) {
 					width: 100%;
 					max-width: 100%;
+				}
+				&[type="checkbox"] {
+					border-radius: 2px;
+					margin: 4px 8px 6px 0;
+
+					& + .woocommerce-help-tip {
+						margin: 6px 0 4px 8px;
+					}
 				}
 			}
 		}
