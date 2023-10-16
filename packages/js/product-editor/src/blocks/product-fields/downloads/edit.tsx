@@ -263,11 +263,17 @@ export function Edit( {
 										) }
 										{ ! isUploading && (
 											<Button
-												onClick={ () =>
+												onClick={ () => {
+													const clonedDownload =
+														JSON.parse(
+															JSON.stringify(
+																download
+															)
+														) as ProductDownload;
 													setSelectedDownload(
-														download
-													)
-												}
+														clonedDownload
+													);
+												} }
 												variant="tertiary"
 											>
 												{ __( 'Edit', 'woocommerce' ) }
@@ -308,14 +314,20 @@ export function Edit( {
 						setSelectedDownload( null );
 					} }
 					onChange={ ( text: string ) => {
+						setSelectedDownload( {
+							...selectedDownload,
+							name: text,
+						} );
+					} }
+					onSave={ () => {
 						const newDownloads = downloads.map( ( obj ) =>
 							obj.id === selectedDownload.id
-								? { ...selectedDownload, name: text }
+								? selectedDownload
 								: obj
 						) as ProductDownload[];
 						setDownloads( newDownloads );
+						setSelectedDownload( null );
 					} }
-					onSave={ () => setSelectedDownload( null ) }
 				/>
 			) }
 		</div>
