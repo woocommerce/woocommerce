@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductEditorHelper;
 
 /**
  * Simple Product Template.
@@ -106,23 +105,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
-		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
-			$general_group->add_block(
-				[
-					'id'         => 'general-single-variation-notice',
-					'blockName'  => 'woocommerce/product-single-variation-notice',
-					'order'      => 10,
-					'attributes' => [
-						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
-						'type'          => 'info',
-						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
-						'isDismissible' => true,
-						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-					],
-				]
-			);
-		}
+		$general_group->add_block(
+			[
+				'id'         => 'general-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
@@ -194,23 +190,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
-		$product_id    = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
-			$pricing_group->add_block(
-				[
-					'id'         => 'pricing-single-variation-notice',
-					'blockName'  => 'woocommerce/product-single-variation-notice',
-					'order'      => 10,
-					'attributes' => [
-						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
-						'type'          => 'info',
-						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
-						'isDismissible' => true,
-						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-					],
-				]
-			);
-		}
+		$pricing_group->add_block(
+			[
+				'id'         => 'pricing-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Pricing Section.
 		$product_pricing_section = $pricing_group->add_section(
 			[
@@ -327,23 +320,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
-		$product_id      = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
-			$inventory_group->add_block(
-				[
-					'id'         => 'inventory-single-variation-notice',
-					'blockName'  => 'woocommerce/product-single-variation-notice',
-					'order'      => 10,
-					'attributes' => [
-						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
-						'type'          => 'info',
-						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
-						'isDismissible' => true,
-						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-					],
-				]
-			);
-		}
+		$inventory_group->add_block(
+			[
+				'id'         => 'inventory-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Inventory Section.
 		$product_inventory_section       = $inventory_group->add_section(
 			[
@@ -455,23 +445,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
-		$product_id     = ProductEditorHelper::get_parsed_route()['product_id'];
-		if ( ! in_array( $product_id, (array) get_option( $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION, array() ), true ) ) {
-			$shipping_group->add_block(
-				[
-					'id'         => 'shipping-single-variation-notice',
-					'blockName'  => 'woocommerce/product-single-variation-notice',
-					'order'      => 10,
-					'attributes' => [
-						'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
-						'type'          => 'info',
-						'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/' ) . $product_id,
-						'isDismissible' => true,
-						'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-					],
-				]
-			);
-		}
+		$shipping_group->add_block(
+			[
+				'id'         => 'shipping-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'noticeLink'    => admin_url( 'admin.php?page=wc-admin&path=/product/<product_id/>' ),
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
