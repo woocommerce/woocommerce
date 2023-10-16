@@ -52,7 +52,7 @@ export function ManageDownloadLimitsModal( {
 			} ) );
 			return false;
 		}
-		setErrors( ( { downloadLimit, ...current } ) => current );
+		setErrors( ( { downloadLimit: _, ...current } ) => current );
 		return true;
 	}
 
@@ -72,7 +72,7 @@ export function ManageDownloadLimitsModal( {
 			} ) );
 			return false;
 		}
-		setErrors( ( { downloadExpiry, ...current } ) => current );
+		setErrors( ( { downloadExpiry: _, ...current } ) => current );
 		return true;
 	}
 
@@ -85,6 +85,7 @@ export function ManageDownloadLimitsModal( {
 			BaseControl,
 			'product_download_limit_field'
 		) as string,
+		type: 'number',
 		className: classNames( {
 			'has-error': errors.downloadLimit,
 		} ),
@@ -110,6 +111,7 @@ export function ManageDownloadLimitsModal( {
 			BaseControl,
 			'product_download_expiry_field'
 		) as string,
+		type: 'number',
 		className: classNames( {
 			'has-error': errors.downloadExpiry,
 		} ),
