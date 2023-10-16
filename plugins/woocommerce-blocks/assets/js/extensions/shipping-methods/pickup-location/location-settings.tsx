@@ -30,7 +30,7 @@ const LocationSettingsDescription = () => (
 				'woo-gutenberg-products-block'
 			) }
 		</p>
-		<ExternalLink href="https://woocommerce.com/document/local-pickup/">
+		<ExternalLink href="https://woocommerce.com/document/woocommerce-blocks-local-pickup/">
 			{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
 		</ExternalLink>
 	</>
