@@ -49,6 +49,9 @@ Date.propTypes = {
 };
 
 Date.defaultProps = {
+	/**
+	 * Comment for testing.
+	 */
 	machineFormat: 'Y-m-d H:i:s',
 	screenReaderFormat: 'F j, Y',
 	visibleFormat: 'Y-m-d',
