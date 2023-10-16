@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Block, BlockConfiguration } from '@wordpress/blocks';
+import { select as WPSelect } from '@wordpress/data';
 import { registerWooBlockType } from '@woocommerce/block-templates';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -14,12 +15,12 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
-function useEvaluationContext( context: any ) {
+function useEvaluationContext( context: Record< string, unknown > ) {
 	const { productType } = context;
 
 	const productId = useEntityId( 'postType', productType );
 
-	const getEvaluationContext = ( select: any ) => {
+	const getEvaluationContext = ( select: typeof WPSelect ) => {
 		const editedProduct = select( 'core' ).getEditedEntityRecord(
 			'postType',
 			productType,
@@ -32,7 +33,7 @@ function useEvaluationContext( context: any ) {
 		};
 	};
 
-	console.log( 'hi there!' );
+	console.log( 'yo!' );
 
 	return {
 		getEvaluationContext,

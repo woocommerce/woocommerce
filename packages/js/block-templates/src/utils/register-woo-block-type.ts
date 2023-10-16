@@ -7,7 +7,7 @@ import {
 	BlockEditProps,
 	registerBlockType,
 } from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
+import { useSelect, select as WPSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { ComponentType } from 'react';
@@ -18,14 +18,18 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
+type UseEvaluationContext = ( context: Record< string, unknown > ) => {
+	getEvaluationContext: (
+		select: typeof WPSelect
+	) => Record< string, unknown >;
+};
+
 function getEdit<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, object > = Record< string, object >
 >(
 	edit: ComponentType< BlockEditProps< T > >,
-	useEvaluationContext: ( context: any ) => {
-		getEvaluationContext: ( select: any ) => any;
-	}
+	useEvaluationContext: UseEvaluationContext
 ): ComponentType< BlockEditProps< T > > {
 	return ( props ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -70,9 +74,7 @@ export function registerWooBlockType<
 	T extends Record< string, any > = Record< string, any >
 >(
 	block: BlockRepresentation< T >,
-	useEvaluationContext: ( context: any ) => {
-		getEvaluationContext: ( select: any ) => any;
-	}
+	useEvaluationContext: UseEvaluationContext
 ): Block< T > | undefined {
 	if ( ! block ) {
 		return;
