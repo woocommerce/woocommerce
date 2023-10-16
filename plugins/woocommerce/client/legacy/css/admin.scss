@@ -3919,9 +3919,12 @@ table.wc_shipping {
 		
 	}
 
-	.wc-backbone-modal-main header,
+	.wc-backbone-modal-main header{
+		padding: 20px 32px;
+	}
+
 	.wc-backbone-modal-main footer {
-		padding: 12px 32px;
+		padding: 20px 32px 12px 32px;
 		
 	}
 
@@ -3960,6 +3963,7 @@ table.wc_shipping {
 			font-size: 11px;
 			font-weight: 500;
 			line-height: 16px;
+			color: #787C82;
 
 			&.wc-shipping-zone-method-modal-info-inactive {
 				display: none;
@@ -3990,7 +3994,7 @@ table.wc_shipping {
 		label {
 			display: block;
 			width: 100%;
-			padding: 16px;
+			padding: 20px 16px;
 			outline: 1px solid #DDDDDD;
 			margin: 12px 0;
 			border-radius: 4px;
