@@ -30,3 +30,4 @@ export { init as initNotice } from './product-fields/notice';
 export { init as initTaxonomy } from './generic/taxonomy';
 export { init as initText } from './generic/text';
 export { init as initNumber } from './generic/number';
+export { init as initDialog } from './generic/dialog';

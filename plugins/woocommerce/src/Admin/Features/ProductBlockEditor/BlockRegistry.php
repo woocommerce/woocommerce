@@ -27,6 +27,7 @@ class BlockRegistry {
 		'woocommerce/conditional',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
+		'woocommerce/product-dialog-field',
 		'woocommerce/product-radio-field',
 		'woocommerce/product-pricing-field',
 		'woocommerce/product-section',

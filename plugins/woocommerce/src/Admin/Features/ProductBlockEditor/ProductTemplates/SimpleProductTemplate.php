@@ -254,7 +254,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		// Downloads section.
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$general_group->add_section(
+			$downloads_limit_dialog = $general_group->add_section(
 				[
 					'id'         => 'product-downloads-section',
 					'order'      => 40,
@@ -268,6 +268,43 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'id'        => 'product-downloads',
 					'blockName' => 'woocommerce/product-downloads-field',
 					'order'     => 10,
+				]
+			)->add_block(
+				[
+					'id'        => 'product-downloads-limit-dialog',
+					'blockName' => 'woocommerce/product-dialog-field',
+					'order'     => 10,
+					'attributes' => [
+						'title' => __( 'Manage download limits', 'woocommerce' ),
+					],
+				]
+			);
+			
+			$downloads_limit_dialog->add_block(
+				[
+					'id'         => 'product-downloads-limit-dialog-download-limit-field',
+					'blockName'  => 'woocommerce/product-number-field',
+					'order'      => 10,
+					'attributes' => [
+						'property'    => 'download_limit',
+						'label'       => __( 'Download limit', 'woocommerce' ),
+						'placeholder' => __( 'Unlimited', 'woocommerce' ),
+						'help'        => __( 'Decide how many times customers can download files after purchasing the product. Leave blank for unlimited re-downloads.', 'woocommerce' ),
+					],
+				]
+			);
+
+			$downloads_limit_dialog->add_block(
+				[
+					'id'         => 'product-downloads-limit-dialog-download-expiry-field',
+					'blockName'  => 'woocommerce/product-number-field',
+					'order'      => 10,
+					'attributes' => [
+						'property'    => 'download_expiry',
+						'label'       => __( 'Expiry period', 'woocommerce' ),
+						'placeholder' => __( 'Unlimited', 'woocommerce' ),
+						'help'        => __( 'Decide how long customers can access the files after purchasing the product. Leave blank for unlimited access.', 'woocommerce' ),
+					],
 				]
 			);
 		}

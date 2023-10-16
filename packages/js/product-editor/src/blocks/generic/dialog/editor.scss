@@ -1,0 +1,8 @@
+.wp-block-woocommerce-product-dialog-field {
+	&__actions {
+		margin-top: $grid-unit-40;
+		display: flex;
+		justify-content: flex-end;
+		gap: $grid-unit;
+	}
+}
