@@ -33,32 +33,4 @@ const v1 = {
 	},
 };
 
-const v2 = {
-	attributes: Object.assign( {}, attributeDefinitions, {
-		rows: { type: 'number', default: 1 },
-	} ),
-	save( { attributes } ) {
-		const dataAttributes = {};
-		Object.keys( attributes )
-			.sort()
-			.forEach( ( key ) => {
-				dataAttributes[ key ] = attributes[ key ];
-			} );
-		const data = {
-			'data-attributes': JSON.stringify( dataAttributes ),
-		};
-		return (
-			<div
-				className={ getBlockClassName(
-					'wc-block-all-products',
-					attributes
-				) }
-				{ ...data }
-			>
-				<InnerBlocks.Content />
-			</div>
-		);
-	},
-};
-
-export default [ v2, v1 ];
+export default [ v1 ];
