@@ -1,5 +1,6 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
 const { getTranslationFor } = require( './../../test-data/data' );
+const { testWithTranslation } = require( './../../utils/translations' );
 const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
 
@@ -139,7 +140,7 @@ test.describe( 'Analytics pages', () => {
 
 		await resetSections();
 
-		await test.step( `Initialize locators`, async () => {
+		await testWithTranslation.step( `Initialize locators`, async () => {
 			const pattern = new RegExp( EXPECTED_SECTION_HEADERS.join( '|' ) );
 
 			headings_sections = page.getByRole( 'heading', {
