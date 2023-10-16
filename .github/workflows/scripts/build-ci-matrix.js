@@ -193,6 +193,10 @@ function detectProjectChanges( baseRef ) {
 	// Scan all of the changed files into the projects they belong to.
 	const projectsWithChanges = {};
 	for ( const filePath of changedFilePaths ) {
+		if ( ! filePath ) {
+			continue;
+		}
+		
 		const projectPath = getProjectPathFromAbsolutePath( filePath );
 		if ( ! projectPath ) {
 			console.log(
