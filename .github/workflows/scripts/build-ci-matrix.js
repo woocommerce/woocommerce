@@ -170,9 +170,9 @@ function getProjectPathFromAbsolutePath( absolutePath ) {
  * @property {boolean} jsSourceChanges      Whether or not the project has changes to JS source files.
  * @property {boolean} assetSourceChanges   Whether or not the project has changed to asset source files.
  * @property {boolean} documentationChanges Whether or not the project has documentation changes.
- * @property {boolean} phpTestChanges   Whether or not the project has changes to PHP test files.
- * @property {boolean} jsTestChanges    Whether or not the project has changes to JS test files.
- * @property {boolean} e2eTestChanges   Whether or not the project has changes to e2e test files.
+ * @property {boolean} phpTestChanges       Whether or not the project has changes to PHP test files.
+ * @property {boolean} jsTestChanges        Whether or not the project has changes to JS test files.
+ * @property {boolean} e2eTestChanges       Whether or not the project has changes to e2e test files.
  */
 
 /**
@@ -195,12 +195,18 @@ function detectProjectChanges( baseRef ) {
 	for ( const filePath of changedFilePaths ) {
 		const projectPath = getProjectPathFromAbsolutePath( filePath );
 		if ( ! projectPath ) {
+			console.log(
+				`${ filePath }: ignoring change because it is not part of a project.`
+			);
 			continue;
 		}
 		if ( ! projectsWithChanges[ projectPath ] ) {
 			projectsWithChanges[ projectPath ] = [];
 		}
 		projectsWithChanges[ projectPath ].push( filePath );
+		console.log(
+			`${ filePath }: marked as a change in project "${ projectPath }".`
+		);
 	}
 
 	// Scan through the projects that have changes and identify the type of changes that have occurred.
@@ -208,6 +214,7 @@ function detectProjectChanges( baseRef ) {
 	for ( const projectPath in projectsWithChanges ) {
 		// We are only interested in projects that are part of our workspace.
 		if ( ! fs.existsSync( `${ projectPath }/package.json` ) ) {
+			console.error( `${ projectPath }: no "package.json" file found.` );
 			continue;
 		}
 
@@ -225,9 +232,12 @@ function detectProjectChanges( baseRef ) {
 		for ( const filePath of fileChanges ) {
 			// Some types of changes are not interesting and should be ignored completely.
 			if ( filePath.match( /\/changelog\//i ) ) {
+				console.log(
+					`${ projectPath }: ignoring changelog file "${ filePath }".`
+				);
 				continue;
 			}
-			
+
 			// As a preface, the detection of changes here is likely not absolutely perfect. We're going to be making some assumptions
 			// about file extensions and paths in order to decide whether or not something is a type of change. This should still
 			// be okay though since we have other cases where we check everything without looking at any changes to filter.
@@ -240,6 +250,9 @@ function detectProjectChanges( baseRef ) {
 				filePath.match( /(?:[a-z]+Test|-test|\/tests?\/[^\.]+)\.php$/i )
 			) {
 				phpTestChanges = true;
+				console.log(
+					`${ projectPath }: detected PHP test file change in "${ filePath }".`
+				);
 				continue;
 			}
 
@@ -254,12 +267,18 @@ function detectProjectChanges( baseRef ) {
 				)
 			) {
 				jsTestChanges = true;
+				console.log(
+					`${ projectPath }: detected JS test file change in "${ filePath }".`
+				);
 				continue;
 			}
 
 			// We're going to make an assumption about where E2E test files live based on what seems typical.
 			if ( filePath.match( /\/test?\/e2e/i ) ) {
 				e2eTestChanges = true;
+				console.log(
+					`${ projectPath }: detected E2E test file change in "${ filePath }".`
+				);
 				continue;
 			}
 
@@ -268,6 +287,9 @@ function detectProjectChanges( baseRef ) {
 				filePath.match( /\.(?:php|html)$|composer\.(?:json|lock)$/i )
 			) {
 				phpSourceChanges = true;
+				console.log(
+					`${ projectPath }: detected PHP source file change in "${ filePath }".`
+				);
 				continue;
 			}
 
@@ -276,6 +298,9 @@ function detectProjectChanges( baseRef ) {
 				filePath.match( /\.(?:(?:t|j)sx?|json|html)$|package\.json$/i )
 			) {
 				jsSourceChanges = true;
+				console.log(
+					`${ projectPath }: detected JS source file change in "${ filePath }".`
+				);
 				continue;
 			}
 
@@ -287,12 +312,18 @@ function detectProjectChanges( baseRef ) {
 				)
 			) {
 				assetSourceChanges = true;
+				console.log(
+					`${ projectPath }: detected asset file change in "${ filePath }".`
+				);
 				continue;
 			}
 
 			// We can be a strict with documentation changes because they are only ever going to be markdown files.
 			if ( filePath.match( /\.md$/i ) ) {
 				documentationChanges = true;
+				console.log(
+					`${ projectPath }: detected documentation change in "${ filePath }".`
+				);
 				continue;
 			}
 		}
@@ -307,6 +338,7 @@ function detectProjectChanges( baseRef ) {
 			! jsSourceChanges &&
 			! e2eTestChanges
 		) {
+			console.log( `${ projectPath }: no changes detected.` );
 			continue;
 		}
 
@@ -386,9 +418,17 @@ function cascadeProjectChanges( projectChanges ) {
 			}
 
 			// Only changes to source files will impact other projects.
-			if ( ! changes.phpSourceChanges && ! changes.jsSourceChanges && ! changes.assetSourceChanges ) {
+			if (
+				! changes.phpSourceChanges &&
+				! changes.jsSourceChanges &&
+				! changes.assetSourceChanges
+			) {
 				continue;
 			}
+
+			console.log(
+				`${ changes.path }: cascading source file changes to ${ affectedProjectPath }.`
+			);
 
 			// Populate the change object for the affected project if it doesn't already exist.
 			if ( ! cascadedChanges[ affectedProjectPath ] ) {
@@ -412,7 +452,9 @@ function cascadeProjectChanges( projectChanges ) {
 				cascadedChanges[ affectedProjectPath ].jsSourceChanges = true;
 			}
 			if ( changes.assetSourceChanges ) {
-				cascadedChanges[ affectedProjectPath ].assetSourceChanges = true;
+				cascadedChanges[
+					affectedProjectPath
+				].assetSourceChanges = true;
 			}
 		}
 	}
@@ -629,7 +671,13 @@ function getCommandsForChanges( changes ) {
 	// Here are all of the commands that we support and the change criteria that they require to execute.
 	// We treat the command's criteria as passing if any of the properties are true.
 	const commandCriteria = {
-		[ COMMAND_TYPE.Lint ]: [ 'phpSourceChanges', 'jsSourceChanges', 'assetSourceChanges', 'phpTestChanges', 'jsTestChanges' ],
+		[ COMMAND_TYPE.Lint ]: [
+			'phpSourceChanges',
+			'jsSourceChanges',
+			'assetSourceChanges',
+			'phpTestChanges',
+			'jsTestChanges',
+		],
 		[ COMMAND_TYPE.TestPHP ]: [ 'phpSourceChanges', 'phpTestChanges' ],
 		[ COMMAND_TYPE.TestJS ]: [ 'jsSourceChanges', 'jsTestChanges' ],
 		//[ COMMAND_TYPE.E2E ]: [ 'phpSourceChanges', 'jsSourceChanges', 'assetSourceChanges', 'e2eTestFileChanges' ],
