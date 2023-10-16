@@ -52,7 +52,7 @@ export function BlockEditor( {
 	productType,
 	productId,
 }: BlockEditorProps ) {
-	useConfirmUnsavedProductChanges();
+	useConfirmUnsavedProductChanges( productType );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
