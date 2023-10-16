@@ -88,7 +88,11 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 
 	function renderProductGroup() {
 		if ( isLoadingProductGroup ) {
-			return <ProductLoader />;
+			return (
+				<ProductLoader
+					type={ productGroup?.itemType || ProductType.extension }
+				/>
+			);
 		}
 
 		if ( ! productGroup ) {
