@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import { store as preferencesStore } from '@wordpress/preferences';
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import {
@@ -37,6 +38,7 @@ import { translateApiErrors as getApiError } from '../utils/apiErrors';
 import { buildShortDescriptionPrompt } from '../product-short-description/product-short-description-button-container';
 
 const DESCRIPTION_MAX_LENGTH = 300;
+const preferenceId = `spotlightDismissed-shortDescriptionGenerated`;
 
 const recordDescriptionTracks = recordTracksFactory(
 	'description_completion',
@@ -57,6 +59,12 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
+
+	const hasBeenDismissedBefore = select( preferencesStore ).get(
+		'woo-ai-plugin',
+		preferenceId
+	);
+	const { set } = useDispatch( preferencesStore );
 
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
@@ -280,7 +288,7 @@ export function WriteItForMeButtonContainer() {
 					MIN_TITLE_LENGTH_FOR_DESCRIPTION
 				) }
 			/>
-			{ shortDescriptionGenerated && (
+			{ shortDescriptionGenerated && ! hasBeenDismissedBefore && (
 				<TourSpotlight
 					id="shortDescriptionGenerated"
 					reference="#postexcerpt"
@@ -292,6 +300,9 @@ export function WriteItForMeButtonContainer() {
 					// title should also be translatable.
 					title={ __( 'Short Description Generated', 'woocommerce' ) }
 					placement="top"
+					onDismissal={ () =>
+						set( 'woo-ai-plugin', preferenceId, true )
+					}
 				/>
 			) }
 		</>
