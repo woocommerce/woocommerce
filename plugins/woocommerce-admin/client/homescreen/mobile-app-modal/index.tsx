@@ -25,11 +25,10 @@ import {
 } from './components';
 import {
 	EmailSentPage,
-	JetpackInstallStepperPage,
+	MobileAppInstallPage,
 	JetpackAlreadyInstalledPage,
 } from './pages';
 import './style.scss';
-import { WrongUserConnectedPage } from './pages/WrongUserConnectedPage';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
@@ -84,25 +83,6 @@ export const MobileAppModal = () => {
 					} }
 				/>
 			);
-		} else if ( state === JetpackPluginStates.NOT_OWNER_OF_CONNECTION ) {
-			setPageContent( <WrongUserConnectedPage /> );
-		} else if (
-			state === JetpackPluginStates.NOT_INSTALLED ||
-			state === JetpackPluginStates.NOT_ACTIVATED ||
-			state === JetpackPluginStates.USERLESS_CONNECTION ||
-			( state === JetpackPluginStates.FULL_CONNECTION &&
-				isReturningFromWordpressConnection )
-		) {
-			setPageContent(
-				<JetpackInstallStepperPage
-					isReturningFromWordpressConnection={
-						isReturningFromWordpressConnection
-					}
-					isRetryingMagicLinkSend={ isRetryingMagicLinkSend }
-					sendMagicLinkHandler={ sendMagicLink }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
-				/>
-			);
 		} else if (
 			state === JetpackPluginStates.FULL_CONNECTION &&
 			jetpackConnectionData?.currentUser?.wpcomUser?.email &&
@@ -120,6 +100,9 @@ export const MobileAppModal = () => {
 					sendMagicLinkHandler={ sendMagicLink }
 				/>
 			);
+		} else {
+			// Shows the installation page by default.
+			setPageContent( <MobileAppInstallPage /> );
 		}
 	}, [
 		sendMagicLink,

@@ -25,7 +25,6 @@ import {
 	FONT_PREVIEW_LARGE_HEIGHT,
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
-	SYSTEM_FONT_SLUG,
 } from './constants';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
@@ -76,9 +75,10 @@ export const FontPairingVariationPreview = () => {
 	const ratio = width ? width / defaultWidth : 1;
 	const normalizedHeight = Math.ceil( defaultHeight * ratio );
 	const externalFontFamilies = fontFamilies.filter(
-		( { slug } ) => slug !== SYSTEM_FONT_SLUG
+		( { slug } ) => slug !== 'system-font'
 	);
 	const [ isLoaded, setIsLoaded ] = useState( ! externalFontFamilies.length );
+
 	const getFontFamilyName = ( targetFontFamily: string ) => {
 		const fontFamily = fontFamilies.find(
 			( { fontFamily: _fontFamily } ) => _fontFamily === targetFontFamily
@@ -167,7 +167,7 @@ export const FontPairingVariationPreview = () => {
 					</div>
 				</div>
 				<FontFamiliesLoader
-					fontFamilies={ externalFontFamilies }
+					fontFamilies={ fontFamilies }
 					onLoad={ handleOnLoad }
 				/>
 			</>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Small condition change in the date time picker to avoid edge case where inputControl is null.

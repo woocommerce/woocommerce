@@ -47,6 +47,8 @@ export type ScaledBlockPreviewProps = {
 	};
 	additionalStyles: string;
 	onClickNavigationItem: ( event: MouseEvent ) => void;
+	isNavigable?: boolean;
+	isScrollable?: boolean;
 };
 
 function ScaledBlockPreview( {
@@ -55,6 +57,8 @@ function ScaledBlockPreview( {
 	settings,
 	additionalStyles,
 	onClickNavigationItem,
+	isNavigable = false,
+	isScrollable = true,
 }: ScaledBlockPreviewProps ) {
 	const { setLogoBlock } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
@@ -76,140 +80,155 @@ function ScaledBlockPreview( {
 		<DisabledProvider value={ true }>
 			<Iframe
 				aria-hidden
+				scrolling={ isScrollable ? 'yes' : 'no' }
 				tabIndex={ -1 }
-				contentRef={ useRefEffect( ( bodyElement: HTMLBodyElement ) => {
-					const {
-						ownerDocument: { documentElement },
-					} = bodyElement;
+				readonly={ ! isNavigable }
+				contentRef={ useRefEffect(
+					( bodyElement: HTMLBodyElement ) => {
+						const {
+							ownerDocument: { documentElement },
+						} = bodyElement;
 
-					documentElement.classList.add(
-						'block-editor-block-preview__content-iframe'
-					);
-					documentElement.style.position = 'absolute';
-					documentElement.style.width = '100%';
+						documentElement.classList.add(
+							'block-editor-block-preview__content-iframe'
+						);
+						documentElement.style.position = 'absolute';
+						documentElement.style.width = '100%';
 
-					// Necessary for contentResizeListener to work.
-					bodyElement.style.boxSizing = 'border-box';
-					bodyElement.style.position = 'absolute';
-					bodyElement.style.width = '100%';
+						// Necessary for contentResizeListener to work.
+						bodyElement.style.boxSizing = 'border-box';
+						bodyElement.style.position = 'absolute';
+						bodyElement.style.width = '100%';
 
-					let navigationContainers: NodeListOf< HTMLDivElement >;
-					let siteTitles: NodeListOf< HTMLAnchorElement >;
-					const onClickNavigation = ( event: MouseEvent ) => {
-						event.preventDefault();
-						onClickNavigationItem( event );
-					};
+						let navigationContainers: NodeListOf< HTMLDivElement >;
+						let siteTitles: NodeListOf< HTMLAnchorElement >;
+						const onClickNavigation = ( event: MouseEvent ) => {
+							event.preventDefault();
+							onClickNavigationItem( event );
+						};
 
-					const onMouseMove = ( event: MouseEvent ) => {
-						event.stopImmediatePropagation();
-					};
+						const onMouseMove = ( event: MouseEvent ) => {
+							event.stopImmediatePropagation();
+						};
 
-					const possiblyRemoveAllListeners = () => {
-						bodyElement.removeEventListener(
+						const possiblyRemoveAllListeners = () => {
+							bodyElement.removeEventListener(
+								'mousemove',
+								onMouseMove,
+								false
+							);
+							if ( navigationContainers ) {
+								navigationContainers.forEach( ( element ) => {
+									element.removeEventListener(
+										'click',
+										onClickNavigation
+									);
+								} );
+							}
+
+							if ( siteTitles ) {
+								siteTitles.forEach( ( element ) => {
+									element.removeEventListener(
+										'click',
+										onClickNavigation
+									);
+								} );
+							}
+						};
+
+						const enableNavigation = () => {
+							// Remove contenteditable and inert attributes from editable elements so that users can click on navigation links.
+							bodyElement
+								.querySelectorAll(
+									'.block-editor-rich-text__editable[contenteditable="true"]'
+								)
+								.forEach( ( element ) => {
+									element.removeAttribute(
+										'contenteditable'
+									);
+								} );
+
+							bodyElement
+								.querySelectorAll( '*[inert="true"]' )
+								.forEach( ( element ) => {
+									element.removeAttribute( 'inert' );
+								} );
+
+							possiblyRemoveAllListeners();
+							navigationContainers = bodyElement.querySelectorAll(
+								'.wp-block-navigation__container'
+							);
+							navigationContainers.forEach( ( element ) => {
+								element.addEventListener(
+									'click',
+									onClickNavigation,
+									true
+								);
+							} );
+
+							siteTitles = bodyElement.querySelectorAll(
+								'.wp-block-site-title a'
+							);
+							siteTitles.forEach( ( element ) => {
+								element.addEventListener(
+									'click',
+									onClickNavigation,
+									true
+								);
+							} );
+						};
+
+						const onChange = () => {
+							// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
+							// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
+							// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
+							const siteLogo = bodyElement.querySelector(
+								'.wp-block-site-logo'
+							);
+
+							const blockClientId = siteLogo
+								? siteLogo.getAttribute( 'data-block' )
+								: null;
+
+							setLogoBlock( {
+								clientId: blockClientId,
+								isLoading: false,
+							} );
+
+							if ( isNavigable ) {
+								enableNavigation();
+							}
+						};
+
+						// Stop mousemove event listener to disable block tool insertion feature.
+						bodyElement.addEventListener(
 							'mousemove',
 							onMouseMove,
-							false
-						);
-						if ( navigationContainers ) {
-							navigationContainers.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
-						}
-
-						if ( siteTitles ) {
-							siteTitles.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
-						}
-					};
-
-					const onChange = () => {
-						// Remove contenteditable and inert attributes from editable elements so that users can click on navigation links.
-						bodyElement
-							.querySelectorAll(
-								'.block-editor-rich-text__editable[contenteditable="true"]'
-							)
-							.forEach( ( element ) => {
-								element.removeAttribute( 'contenteditable' );
-							} );
-
-						bodyElement
-							.querySelectorAll( '*[inert="true"]' )
-							.forEach( ( element ) => {
-								element.removeAttribute( 'inert' );
-							} );
-
-						possiblyRemoveAllListeners();
-						navigationContainers = bodyElement.querySelectorAll(
-							'.wp-block-navigation__container'
-						);
-						navigationContainers.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						siteTitles = bodyElement.querySelectorAll(
-							'.wp-block-site-title a'
-						);
-						siteTitles.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
-						// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
-						// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
-						const siteLogo = bodyElement.querySelector(
-							'.wp-block-site-logo'
+							true
 						);
 
-						const blockClientId = siteLogo
-							? siteLogo.getAttribute( 'data-block' )
-							: null;
+						const observer = new window.MutationObserver(
+							onChange
+						);
 
-						setLogoBlock( {
-							clientId: blockClientId,
-							isLoading: false,
+						observer.observe( bodyElement, {
+							attributes: true,
+							characterData: false,
+							subtree: true,
+							childList: true,
 						} );
-					};
 
-					// Stop mousemove event listener to disable block tool insertion feature.
-					bodyElement.addEventListener(
-						'mousemove',
-						onMouseMove,
-						true
-					);
-
-					const observer = new window.MutationObserver( onChange );
-
-					observer.observe( bodyElement, {
-						attributes: true,
-						characterData: false,
-						subtree: true,
-						childList: true,
-					} );
-
-					return () => {
-						observer.disconnect();
-						possiblyRemoveAllListeners();
-						setLogoBlock( {
-							clientId: null,
-							isLoading: true,
-						} );
-					};
-				}, [] ) }
+						return () => {
+							observer.disconnect();
+							possiblyRemoveAllListeners();
+							setLogoBlock( {
+								clientId: null,
+								isLoading: true,
+							} );
+						};
+					},
+					[ isNavigable ]
+				) }
 			>
 				<EditorStyles styles={ settings.styles } />
 				<style>

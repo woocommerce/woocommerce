@@ -22,10 +22,6 @@ $breakpoint-large: 1024px;
 $breakpoint-xlarge: 1500px;
 $breakpoint-huge: 1920px;
 
-// Header
-$header-height-desktop: 96px;
-$header-height-mobile: 129px;
-
 // Colours
 $gutenberg-gray-100: $gray-0;	// replaced with closest colour from _colors.native.scss
 $gutenberg-gray-300: $gray-300; // anything above gray-100 is from the default _colors.scss

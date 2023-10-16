@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-save hpos order data before clearing the order from cache

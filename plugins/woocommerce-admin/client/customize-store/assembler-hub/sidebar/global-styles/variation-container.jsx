@@ -6,10 +6,13 @@ import classnames from 'classnames';
 import { useMemo, useContext } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
-import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
+import {
+	privateApis as blockEditorPrivateApis,
+	BlockEditorProvider,
+} from '@wordpress/block-editor';
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-import { isEqual } from 'lodash';
+import { isEqual, noop } from 'lodash';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -29,12 +32,23 @@ export const VariationContainer = ( { variation, children } ) => {
 
 	const selectVariation = () => {
 		// Remove the hasCreatedOwnColors flag if the user is switching to a color palette
+		// hasCreatedOwnColors flag is used for visually deselecting preset color palettes if user has created their own
 		if (
 			variation.settings.color &&
 			user.settings.color &&
-			user.settings.color.hasCreatedOwnColors
+			user.settings.color.palette.hasCreatedOwnColors
 		) {
 			delete user.settings.color.palette.hasCreatedOwnColors;
+			// some color palettes don't define all the possible color options, e.g headings and captions
+			// if the user selects a pre-defined color palette with some own colors defined for these,
+			// we need to delete these user customizations as the below merge will persist them since
+			// the incoming variation won't have these properties defined
+			delete user.styles.color;
+			for ( const elementKey in user.styles.elements ) {
+				if ( user.styles.elements[ elementKey ].color ) {
+					delete user.styles.elements[ elementKey ].color;
+				}
+			}
 		}
 
 		setUserConfig( () => {
@@ -78,25 +92,32 @@ export const VariationContainer = ( { variation, children } ) => {
 	}
 
 	return (
-		<GlobalStylesContext.Provider value={ context }>
-			<div
-				className={ classnames(
-					'woocommerce-customize-store_global-styles-variations_item',
-					{
-						'is-active': isActive,
-					}
-				) }
-				role="button"
-				onClick={ selectVariation }
-				onKeyDown={ selectOnEnter }
-				tabIndex="0"
-				aria-label={ label }
-				aria-current={ isActive }
-			>
-				<div className="woocommerce-customize-store_global-styles-variations_item-preview">
-					{ children }
+		<BlockEditorProvider
+			onChange={ noop }
+			onInput={ noop }
+			settings={ {} }
+			useSubRegistry={ true }
+		>
+			<GlobalStylesContext.Provider value={ context }>
+				<div
+					className={ classnames(
+						'woocommerce-customize-store_global-styles-variations_item',
+						{
+							'is-active': isActive,
+						}
+					) }
+					role="button"
+					onClick={ selectVariation }
+					onKeyDown={ selectOnEnter }
+					tabIndex="0"
+					aria-label={ label }
+					aria-current={ isActive }
+				>
+					<div className="woocommerce-customize-store_global-styles-variations_item-preview">
+						{ children }
+					</div>
 				</div>
-			</div>
-		</GlobalStylesContext.Provider>
+			</GlobalStylesContext.Provider>
+		</BlockEditorProvider>
 	);
 };

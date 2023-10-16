@@ -2870,6 +2870,10 @@ ul.wc_coupon_list_block {
 			}
 		}
 
+		.wp-locked .order-preview {
+			visibility: hidden;
+		}
+
 		.order-preview.disabled {
 			&::before {
 				content: "";
@@ -7272,7 +7276,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown {
-		border-color: #007cba;
+		border-color: var(--wp-admin-theme-color, #007cba);
 
 		&::after {
 			position: absolute;
@@ -7285,7 +7289,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--below {
-		box-shadow: 0 0 0 1px #007cba, 0 2px 1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 2px 1px rgba(0, 0, 0, 0.1);
 
 		&::after {
 			top: -1px;
@@ -7293,7 +7297,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--above {
-		box-shadow: 0 0 0 1px #007cba, 0 -2px 1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 -2px 1px rgba(0, 0, 0, 0.1);
 
 		&::after {
 			bottom: -1px;
@@ -7329,7 +7333,7 @@ table.bar_chart {
 				}
 
 				&:hover {
-					color: #007cba;
+					color: var(--wp-admin-theme-color, #007cba);
 				}
 			}
 
@@ -7354,8 +7358,8 @@ table.bar_chart {
 		&.select2-container--focus .select2-selection--single,
 		&.select2-container--open .select2-selection--single,
 		&.select2-container--open .select2-selection--multiple {
-			border-color: #007cba;
-			box-shadow: 0 0 0 1px #007cba;
+			border-color: var(--wp-admin-theme-color, #007cba);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba);
 		}
 
 		.select2-selection--multiple {
@@ -7398,19 +7402,19 @@ table.bar_chart {
 .wp-admin {
 	&.wc-wp-version-gte-53 {
 		.select2-dropdown {
-			border-color: var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, #007cba);
 		}
 
 		.select2-dropdown--below {
-			box-shadow: 0 0 0 1px var(--wp-admin-theme-color), 0 2px 1px rgba(0, 0, 0, 0.1);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 2px 1px rgba(0, 0, 0, 0.1);
 		}
 
 		.select2-dropdown--above {
-			box-shadow: 0 0 0 1px var(--wp-admin-theme-color), 0 -2px 1px rgba(0, 0, 0, 0.1);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 -2px 1px rgba(0, 0, 0, 0.1);
 		}
 
 		.select2-selection--single .select2-selection__rendered:hover {
-			color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color, #007cba);
 		}
 
 		.select2-container.select2-container--focus
@@ -7419,15 +7423,15 @@ table.bar_chart {
 		.select2-selection--single,
 		.select2-container.select2-container--open
 		.select2-selection--multiple {
-			border-color: var(--wp-admin-theme-color);
-			box-shadow: 0 0 0 1px var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, #007cba);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba);
 		}
 
 		.select2-container--default
 		.select2-results__option--highlighted[aria-selected],
 		.select2-container--default
 		.select2-results__option--highlighted[data-selected] {
-			background-color: var(--wp-admin-theme-color);
+			background-color: var(--wp-admin-theme-color, #007cba);
 		}
 	}
 }

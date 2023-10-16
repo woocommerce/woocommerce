@@ -40,6 +40,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'block-templates',
 	'product-editor',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin

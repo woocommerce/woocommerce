@@ -35,6 +35,11 @@ const EditProductPage = lazy( () =>
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
 	)
 );
+const ProductVariationPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
+	)
+);
 const ProductPage = lazy( () =>
 	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
 );
@@ -266,7 +271,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
-			container: EditProductPage,
+			container: ProductVariationPage,
 			path: '/product/:productId/variation/:variationId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
