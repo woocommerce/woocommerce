@@ -327,12 +327,11 @@ export function Edit( {
 						} );
 					} }
 					onSave={ () => {
-						const newDownloads = downloads.map( (
-							obj: ProductDownload
-						) =>
-							obj.id === selectedDownload.id
-								? selectedDownload
-								: obj
+						const newDownloads = downloads.map(
+							( obj: ProductDownload ) =>
+								obj.id === selectedDownload.id
+									? selectedDownload
+									: obj
 						) as ProductDownload[];
 						setDownloads( newDownloads );
 						setSelectedDownload( null );
