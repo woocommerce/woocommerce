@@ -16,10 +16,8 @@
 	.components-checkbox-control__label {
 		margin-bottom: 0;
 	}
-}
-
-.woocommerce-product-form__checkbox-wrapper {
 	gap: $gap-smallest;
+	display: flex;
 }
 
 .woocommerce-product-form__checkbox-tooltip {
