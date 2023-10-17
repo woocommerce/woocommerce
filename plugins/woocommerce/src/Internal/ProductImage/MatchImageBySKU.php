@@ -55,7 +55,7 @@ class MatchImageBySKU {
 	 * @return array New settings configuration array.
 	 */
 	private function add_product_image_sku_setting( array $settings, string $section_id ): array {
-		if ( $section_id !== 'advanced' ) {
+		if ( 'advanced' !== $section_id ) {
 			return $settings;
 		}
 
