@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
 import {
 	installPluginFromPHPFile,
 	uninstallPluginFromPHPFile,
@@ -115,39 +114,40 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 				await pageObject.goToProductCatalogFrontend();
 			} );
 
-			// eslint-disable-next-line playwright/no-skipped-test
-			test.skip( 'Hooks are attached to the page', async ( {
-				pageObject,
-			} ) => {
-				singleOccurranceScenarios.forEach(
-					async ( { title, dataTestId, content, amount } ) => {
-						await test.step( title, async () => {
-							const hooks =
-								pageObject.locateByTestId( dataTestId );
-							await expect( hooks ).toHaveCount( amount );
-							await expect( hooks ).toHaveText( content );
-						} );
-					}
-				);
+			for ( const scenario of singleOccurranceScenarios ) {
+				test( `${ scenario.title } is attached to the page`, async ( {
+					pageObject,
+				} ) => {
+					const hooks = pageObject.locateByTestId(
+						scenario.dataTestId
+					);
 
-				multipleOccurranceScenarios.forEach(
-					async ( { title, dataTestId, content, amount } ) => {
-						await test.step( title, async () => {
-							const hooks =
-								pageObject.locateByTestId( dataTestId );
-							await expect( hooks ).toHaveCount( amount );
-							await expect( hooks.first() ).toHaveText( content );
-						} );
-					}
-				);
-			} );
+					await expect( hooks ).toHaveCount( scenario.amount );
+					await expect( hooks ).toHaveText( scenario.content );
+				} );
+			}
+
+			for ( const scenario of multipleOccurranceScenarios ) {
+				test( `${ scenario.title } is attached to the page`, async ( {
+					pageObject,
+				} ) => {
+					const hooks = pageObject.locateByTestId(
+						scenario.dataTestId
+					);
+
+					await expect( hooks ).toHaveCount( scenario.amount );
+					await expect( hooks.first() ).toHaveText(
+						scenario.content
+					);
+				} );
+			}
 		}
 	);
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { requestUtils } ) => {
 		await uninstallPluginFromPHPFile(
 			`${ __dirname }/${ compatiblityPluginFileName }`
 		);
-		await deleteAllTemplates( 'wp_template' );
+		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 } );
