@@ -208,6 +208,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		// Check if "industry" and "currency" parameters are provided in the request.
 		$industry = $request->get_param( 'industry' );
 		$currency = $request->get_param( 'currency' ) ?? 'USD';
+		$active_theme = get_stylesheet();
 
 		// Return empty response if marketplace suggestions are disabled.
 		if (
@@ -252,6 +253,16 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
 		$themes = array(
+			array(
+				'name'			 => 'Twenty Twenty-Three',
+				'price'			 => 'Free',
+				'color_palettes' => array(),
+				'total_palettes' => 0,
+				'slug'			 => 'twentytwentythree',
+				'is_active'		 => false,
+				'thumbnail_url'	 => 'https://i0.wp.com/s2.wp.com/wp-content/themes/pub/twentytwentythree/screenshot.png',
+				'link_url'		 => 'https://wordpress.com/theme/twentytwentythree/'
+			),
 			array(
 				'name'           => 'Tsubaki',
 				'price'          => 'Free',
@@ -336,6 +347,13 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'link_url'       => 'https://wordpress.com/theme/zaino/',
 			),
 		);
+
+		// if active theme is in the list, show it as enabled
+		foreach ( $themes as &$theme ){
+			if ( $active_theme === $theme['slug'] ){
+				$theme['is_active'] = true;
+			}
+		}
 
 		// To be implemented: Filter themes based on industry.
 		if ( $industry ) {
