@@ -166,12 +166,19 @@ export default compose(
 
 		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );
 		const isRequesting = isResolving( 'getJetpackAuthUrl', [ queryArgs ] );
-		const errors = jetpackAuthUrlResponse?.errors?.length
-			? jetpackAuthUrlResponse.errors[ 0 ]
-			: '';
+
+		let error;
+
+		if ( ! isResolving && ! jetpackAuthUrlResponse ) {
+			error = __( 'Error requesting connection URL.', 'woocommerce' );
+		}
+
+		if ( jetpackAuthUrlResponse?.errors?.length ) {
+			error = jetpackAuthUrlResponse?.errors[ 0 ];
+		}
 
 		return {
-			error: errors,
+			error,
 			isRequesting,
 			jetpackAuthUrl: jetpackAuthUrlResponse.url,
 		};
