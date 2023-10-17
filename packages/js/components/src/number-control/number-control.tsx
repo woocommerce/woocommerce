@@ -23,7 +23,7 @@ export type NumberProps = {
 	help?: string;
 	error?: string;
 	placeholder?: string;
-	validate?: () => void;
+	onBlur?: () => void;
 };
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -33,7 +33,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	suffix,
 	help,
 	error,
-	validate,
+	onBlur,
 	placeholder,
 }: NumberProps ) => {
 	const inputProps = useNumberInputProps( {
@@ -57,7 +57,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				id={ id }
 				suffix={ suffix }
 				placeholder={ placeholder }
-				onBlur={ validate }
+				onBlur={ onBlur }
 			/>
 		</BaseControl>
 	);

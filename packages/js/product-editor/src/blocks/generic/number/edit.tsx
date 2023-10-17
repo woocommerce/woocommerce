@@ -69,7 +69,7 @@ export function Edit( {
 				suffix={ suffix }
 				placeholder={ placeholder }
 				error={ error }
-				validate={ validate }
+				onBlur={ validate }
 			/>
 		</div>
 	);
