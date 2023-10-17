@@ -1198,7 +1198,7 @@ class WC_Helper {
 		
 		$output_plugins = array();
 		foreach ( $plugins as $filename => $data ) {
-			array_push($output_plugins, array(
+			array_push( $output_plugins, array(
 				'_filename'  => $filename,
 				'_type'      => 'plugin',
 				'slug'       => dirname( $filename ),
