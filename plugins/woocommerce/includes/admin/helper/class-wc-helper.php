@@ -1186,7 +1186,9 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get local plugins
+	 * Get locally installed plugins
+	 *
+	 * @return array
 	 */
 	public static function get_local_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -1196,7 +1198,7 @@ class WC_Helper {
 		
 		$output_plugins = array();
 		foreach ( $plugins as $filename => $data ) {
-			array_push($output_plugins, array(
+			array_push( $output_plugins, array(
 				'_filename'  => $filename,
 				'_type'      => 'plugin',
 				'slug'       => dirname( $filename ),
@@ -1208,9 +1210,10 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get local themes
+	 * Get locally installed themes.
+	 *
+	 * @return array
 	 */
-
 	public static function get_local_themes() {
 		if ( ! function_exists( 'wp_get_themes' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
@@ -1219,7 +1222,7 @@ class WC_Helper {
 
 		$output_themes = array();
 		foreach ( $themes as $theme ) {
-			array_push($output_themes, array(
+			array_push( $output_themes, array(
 				'_filename'   => $theme->get_stylesheet() . '/style.css',
 				'_stylesheet' => $theme->get_stylesheet(),
 				'_type'       => 'theme',
