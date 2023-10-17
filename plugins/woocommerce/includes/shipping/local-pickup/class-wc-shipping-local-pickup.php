@@ -104,8 +104,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 			),
 			'cost'       => array(
 				'title'       => __( 'Cost', 'woocommerce' ),
-				'type'        => 'text',
-				'placeholder' => '0',
+				'type'        => 'price',
+				'placeholder' => wc_format_localized_price( 0 ),
 				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,

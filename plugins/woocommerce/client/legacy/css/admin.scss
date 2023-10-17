@@ -4056,6 +4056,7 @@ table.wc_shipping {
 
 		fieldset {
 			margin-bottom: 24px;
+			position: relative;
 
 			input, 
 			select {
@@ -4076,7 +4077,19 @@ table.wc_shipping {
 						margin: 6px 0 4px 8px;
 					}
 				}
+
+				&.wc_input_price {
+					padding-left: 28px;
+					color: #757575;
+				}
 			}
+		}
+
+		.wc-shipping-zone-method-currency {
+			position: absolute;
+			top: 19px;
+			left: 12px;
+			color: #757575;
 		}
 	}
 

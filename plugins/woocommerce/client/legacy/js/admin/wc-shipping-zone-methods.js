@@ -409,10 +409,26 @@
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
-					const htmlWithoutTables = this.replaceHTMLTables( html );
-					const htmlWithMovedHelpTips = this.moveHTMLHelpTips( htmlWithoutTables );
-				
-					return htmlWithMovedHelpTips;
+					const formattingFunctions = [
+						this.replaceHTMLTables,
+						this.moveHTMLHelpTips,
+						this.addCurrencySymbol
+					];
+
+					return formattingFunctions.reduce( ( formattedHTML, fn ) => {
+						return fn( formattedHTML );
+					}, html );
+				},
+				addCurrencySymbol: function( html ) {
+					const htmlContent = $( html );
+					const priceInputs = htmlContent.find( '.wc_input_price' );
+					const Currency = wc.currency.CurrencyFactory();
+					const currencyConfig = Currency.getCurrencyConfig();
+					const symbol = currencyConfig.symbol;
+
+					priceInputs.before( `<div class="wc-shipping-zone-method-currency">${ symbol }</div>` );
+
+					return htmlContent.prop( 'outerHTML' );
 				},
 				moveHTMLHelpTips: function( html ) {
 					// These help tips aren't moved.
