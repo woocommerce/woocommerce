@@ -63,6 +63,33 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 
 	return (
 		<>
+			{ ! tosAccepted && (
+				<Text
+					variant="caption"
+					className="woocommerce-task__caption is-tos"
+					size="12"
+					lineHeight="16px"
+					style={ { display: 'block' } }
+				>
+					{ interpolateComponents( {
+						mixedString: __(
+							'By installing WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
+							'woocommerce'
+						),
+						components: {
+							link: (
+								<Link
+									href={ 'https://wordpress.com/tos/' }
+									target="_blank"
+									type="external"
+								>
+									<></>
+								</Link>
+							),
+						},
+					} ) }
+				</Text>
+			) }
 			<PluginInstaller
 				onComplete={ (
 					activatedPlugins: string[],
@@ -91,33 +118,6 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 				abortText={ __( "I don't charge sales tax", 'woocommerce' ) }
 				pluginSlugs={ pluginsToActivate }
 			/>
-			{ ! tosAccepted && (
-				<Text
-					variant="caption"
-					className="woocommerce-task__caption"
-					size="12"
-					lineHeight="16px"
-					style={ { display: 'block' } }
-				>
-					{ interpolateComponents( {
-						mixedString: __(
-							'By installing WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-							'woocommerce'
-						),
-						components: {
-							link: (
-								<Link
-									href={ 'https://wordpress.com/tos/' }
-									target="_blank"
-									type="external"
-								>
-									<></>
-								</Link>
-							),
-						},
-					} ) }
-				</Text>
-			) }
 		</>
 	);
 };
