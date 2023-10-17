@@ -422,10 +422,10 @@
 				addCurrencySymbol: function( html ) {
 					const htmlContent = $( html );
 					const priceInputs = htmlContent.find( '.wc_input_price' );
-					const table = $( 'table.wc-shipping-zone-settings' );
-					const symbol = table.data( 'currency' );
+					const { symbol, symbolPosition } = window.wc.ShippingCurrencyContext.getCurrencyConfig();
 
-					priceInputs.before( `<div class="wc-shipping-zone-method-currency">${ symbol }</div>` );
+					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
+					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
 
 					return htmlContent.prop( 'outerHTML' );
 				},

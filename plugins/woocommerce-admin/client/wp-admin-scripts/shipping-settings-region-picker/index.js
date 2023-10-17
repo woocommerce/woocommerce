@@ -7,6 +7,7 @@ import { render, createRoot } from '@wordpress/element';
  * Internal dependencies
  */
 import { RegionPicker } from './region-picker';
+import { ShippingCurrencyContext } from './currency-context';
 
 const shippingZoneRegionPickerRoot = document.getElementById(
 	'wc-shipping-zone-region-picker-root'
@@ -15,17 +16,24 @@ const shippingZoneRegionPickerRoot = document.getElementById(
 const options = window.shippingZoneMethodsLocalizeScript?.region_options ?? [];
 const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 
+const ShippingApp = () => (
+	<div>
+		<ShippingCurrencyContext />
+		<RegionPicker
+			options={ options }
+			initialValues={ initialValues }
+		/>
+	</div>
+);
+
 if ( shippingZoneRegionPickerRoot ) {
 	if ( createRoot ) {
 		createRoot( shippingZoneRegionPickerRoot ).render(
-			<RegionPicker options={ options } initialValues={ initialValues } />
+			<ShippingApp />
 		);
 	} else {
 		render(
-			<RegionPicker
-				options={ options }
-				initialValues={ initialValues }
-			/>,
+			<ShippingApp />,
 			shippingZoneRegionPickerRoot
 		);
 	}

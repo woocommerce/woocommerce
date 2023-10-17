@@ -4079,8 +4079,15 @@ table.wc_shipping {
 				}
 
 				&.wc_input_price {
-					padding-left: 28px;
 					color: #757575;
+
+					&.wc-shipping-currency-position-left {
+						padding-left: 28px;
+					}
+
+					&.wc-shipping-currency-position-right {
+						padding-left: 12px;
+					}
 				}
 			}
 		}
@@ -4088,8 +4095,15 @@ table.wc_shipping {
 		.wc-shipping-zone-method-currency {
 			position: absolute;
 			top: 19px;
-			left: 12px;
 			color: #757575;
+
+			&.wc-shipping-currency-position-left {
+				left: 12px;
+			}
+
+			&.wc-shipping-currency-position-right {
+				right: 12px;
+			}
 		}
 	}
 
