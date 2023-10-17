@@ -189,7 +189,7 @@ class WC_Helper_Subscriptions_API {
 	}
 
 	/**
-	 * Install a WooCommerce.com produc
+	 * Install a WooCommerce.com product.
 	 */
 	public static function install( $request ) {
 		$product_key = $request->get_param('product_key');
@@ -248,7 +248,7 @@ class WC_Helper_Subscriptions_API {
 			WC_Helper::deactivate_helper_subscription( $product_key );
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t install your subscription.', 'woocommerce' )
+					'message' => __( 'We couldn\'t install the extension.', 'woocommerce' )
 				),
 				400
 			);
@@ -256,7 +256,7 @@ class WC_Helper_Subscriptions_API {
 
 		wp_send_json(
 			array(
-				'message' => __( 'Your subscription has been installed.', 'woocommerce' )
+				'message' => __( 'The extension has been installed.', 'woocommerce' )
 			)
 		);
 	}
