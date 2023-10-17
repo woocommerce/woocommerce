@@ -1186,6 +1186,51 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get local plugins
+	 */
+	public static function get_local_plugins() {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$plugins = get_plugins();
+		
+		$output_plugins = array();
+		foreach ( $plugins as $filename => $data ) {
+			array_push($output_plugins, array(
+				'_filename' => $filename,
+				'_type' => 'plugin',
+				'slug' => dirname( $filename ),
+				'Version' => $data['Version'],
+			));
+		}
+
+		return $output_plugins;
+	}
+
+	/**
+	 * Get local themes
+	 */
+
+	public static function get_local_themes() {
+		if ( ! function_exists( 'wp_get_themes' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
+		$themes = wp_get_themes();
+
+		$output_themes = array();
+		foreach ( $themes as $theme ) {
+			array_push($output_themes, array(
+				'_filename'   => $theme->get_stylesheet() . '/style.css',
+				'_stylesheet' => $theme->get_stylesheet(),
+				'_type'       => 'theme',
+				'slug'        => $theme->get_stylesheet(),
+				'Version'     => $theme->get( 'Version' ),
+			));
+		}
+		return $output_themes;
+	}
+
+	/**
 	 * Obtain a list of data about locally installed Woo extensions.
 	 */
 	public static function get_local_woo_plugins() {
@@ -1426,7 +1471,10 @@ class WC_Helper {
 			);
 
 			$updates = WC_Helper_Updater::get_update_data();
-			$local   = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
+			$local   = wp_list_filter(
+				array_merge( self::get_local_plugins(), self::get_local_themes() ),
+				array( 'slug' => $subscription['zip_slug'] )
+			);
 
 			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
 			if ( ! empty( $local ) && ! $inactive_license ) {
