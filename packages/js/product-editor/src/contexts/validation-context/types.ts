@@ -12,7 +12,8 @@ export type ValidationContextProps< T > = {
 		validator: Validator< T >
 	): React.Ref< HTMLElement >;
 	unRegisterValidator( validatorId: string ): void;
-	validateField( name: string ): ValidatorResponse;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	validateField( name: string, value?: any ): ValidatorResponse;
 	validateAll( newData?: Partial< T > ): Promise< ValidationErrors >;
 };
 

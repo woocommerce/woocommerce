@@ -33,9 +33,10 @@ export function useValidation< T >(
 		ref,
 		error: context.errors[ validatorId ],
 		isValidating,
-		async validate() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		async validate( data: any ) {
 			setIsValidating( true );
-			return context.validateField( validatorId ).finally( () => {
+			return context.validateField( validatorId, data ).finally( () => {
 				setIsValidating( false );
 			} );
 		},
