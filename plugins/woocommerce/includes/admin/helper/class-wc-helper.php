@@ -689,7 +689,7 @@ class WC_Helper {
 	 */
 	private static function get_helper_redirect_url( $args = array() ) {
 		global $current_screen;
-		if ( isset( $_GET['redirect-to-wc-admin'] ) && $current_screen->id === 'woocommerce_page_wc-addons' ) {		
+		if ( isset( $_GET['redirect-to-wc-admin'] ) && $current_screen->id === 'woocommerce_page_wc-addons' ) {
 			return add_query_arg(
 				array(
 					'page' => 'wc-admin',
