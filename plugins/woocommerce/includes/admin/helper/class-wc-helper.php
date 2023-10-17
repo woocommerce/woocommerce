@@ -1209,9 +1209,10 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get local themes
+	 * Get locally installed themes.
+	 *
+	 * @return array
 	 */
-
 	public static function get_local_themes() {
 		if ( ! function_exists( 'wp_get_themes' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
