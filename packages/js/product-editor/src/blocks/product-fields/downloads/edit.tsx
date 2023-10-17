@@ -336,6 +336,8 @@ export function Edit( {
 						setDownloads( newDownloads );
 						setSelectedDownload( null );
 					} }
+					onUploadSuccess={ handleFileUpload }
+					onUploadError={ handleUploadError }
 				/>
 			) }
 		</div>

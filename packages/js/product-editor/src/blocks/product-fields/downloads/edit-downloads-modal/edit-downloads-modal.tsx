@@ -1,13 +1,17 @@
 /**
  * External dependencies
  */
+import { ChangeEvent } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { ImageGallery, ImageGalleryItem } from '@woocommerce/components';
+import { uploadMedia } from '@wordpress/media-utils';
 import {
 	Button,
+	FormFileUpload,
 	Modal,
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -20,18 +24,37 @@ import {
 import { EditDownloadsModalProps } from './types';
 import { UnionIcon } from './union-icon';
 
+export interface Image {
+	id: number;
+	src: string;
+	name: string;
+	alt: string;
+}
+
 export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	downloableItem,
+	maxUploadFileSize = 10000000,
 	onCancel,
 	onChange,
 	onRemove,
 	onSave,
+	onUploadSuccess,
+	onUploadError,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );
 
-	const { file = '', name = '' } = downloableItem;
+	const { allowedMimeTypes } = useSelect( ( select ) => {
+		const { getEditorSettings } = select( 'core/editor' );
+		return getEditorSettings();
+	} );
+
+	const allowedTypes = allowedMimeTypes
+		? Object.values( allowedMimeTypes )
+		: [];
+
+	const { id = 0, file = '', name = '' } = downloableItem;
 
 	const onCopySuccess = () => {
 		createNotice(
@@ -61,6 +84,20 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 		setIsCopingToClipboard( false );
 	}
 
+	function handleFormFileUploadChange(
+		event: ChangeEvent< HTMLInputElement >
+	) {
+		const filesList = event.currentTarget.files as FileList;
+
+		uploadMedia( {
+			allowedTypes,
+			filesList,
+			maxUploadFileSize,
+			onFileChange: onUploadSuccess,
+			onError: onUploadError,
+		} );
+	}
+
 	return (
 		<Modal
 			title={ sprintf(
@@ -81,6 +118,28 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			} }
 			className="woocommerce-edit-downloads-modal"
 		>
+			<div className="woocommerce-edit-downloads-modal__preview">
+				<ImageGallery allowDragging={ false }>
+					<ImageGalleryItem
+						key={ id }
+						alt={ name }
+						src={ file }
+						id={ `${ id }` }
+						isCover={ false }
+					/>
+				</ImageGallery>
+				<FormFileUpload
+					onChange={ handleFormFileUploadChange }
+					render={ ( { openFileDialog } ) => (
+						<div>
+							<p>{ name }</p>
+							<Button onClick={ openFileDialog }>
+								{ __( 'Replace', 'woocommerce' ) }
+							</Button>
+						</div>
+					) }
+				/>
+			</div>
 			<BaseControl
 				id={ 'file-name-help' }
 				className="woocommerce-edit-downloads-modal__file-name"
