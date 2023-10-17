@@ -467,8 +467,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 10,
 				'attributes' => [
-					'property' => 'virtual',
-					'label'    => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
 				],
 			]
 		);
