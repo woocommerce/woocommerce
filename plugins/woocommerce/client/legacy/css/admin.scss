@@ -4023,6 +4023,203 @@ table.wc_shipping {
 	display: table-row-group;
 }
 
+/**
+* New Shipping Settings Refresh Modal Styles
+**/
+
+.wc-backbone-modal-add-shipping-method,
+.wc-backbone-modal-shipping-method-settings,
+.wc-shipping-class-modal {
+	font-family: $font-sf-pro-text;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 16px;
+	color: #1e1e1e;
+
+	.button-primary,
+	.button-primary:hover,
+	.button-primary:focus {
+		background-color: #3858E9;
+		border-radius: 2px;
+		color: #FFFFFF;
+		border-color: #3858e9
+	}
+	.button-primary:focus {
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #3858E9;
+	}
+	.button-primary.disabled {
+		background-color: #3858E9 !important;
+		border-color: #3858E9 !important;
+		color: #8494EC !important;
+	}
+
+	&.wc-backbone-modal .wc-backbone-modal-content {
+		border-radius: 8px;
+		border-top: 8px solid transparent;
+		border-bottom: 8px solid transparent;
+		max-width: 600px;
+
+		@media screen and (max-width: 782px) {
+			border-radius: none;
+			border-top: none;
+			border-bottom: none;
+		}
+	}
+
+	.wc-backbone-modal-main article {
+		padding: 0 32px 32px 32px;
+		
+	}
+
+	.wc-backbone-modal-main header{
+		padding: 20px 32px;
+	}
+
+	.wc-backbone-modal-main footer {
+		padding: 20px 32px 12px 32px;
+		
+	}
+
+	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
+		font-weight: 400;
+	}
+
+	.wc-backbone-modal-main .wc-backbone-modal-header {
+		background-color: #fff;
+		border-bottom: none;
+		font-size: 20px;
+		line-height: 28px;
+
+		.modal-close-link {
+			border-left: none;
+
+			&:hover {
+				background-color: #fff;
+			}
+		}
+	}
+	.wc-backbone-modal-main footer {
+		box-shadow: none;
+		border-top: 1px solid #E0E0E0;
+		background-color: #fff;
+
+		.inner {
+			display: flex;
+			justify-content: space-between;
+			flex-direction: row-reverse;
+		}
+
+		.wc-shipping-zone-method-modal-info {
+			display: flex;
+			align-items: center;
+			font-size: 11px;
+			font-weight: 500;
+			line-height: 16px;
+			color: #787C82;
+
+			&.wc-shipping-zone-method-modal-info-inactive {
+				display: none;
+			}
+		}
+		
+	}
+
+	.wc-shipping-zone-method-input {
+		input {
+			clip: rect(0 0 0 0);
+			clip-path: inset(100%);
+			height: 1px;
+			overflow: hidden;
+			position: absolute;
+			white-space: nowrap; 
+			width: 1px;
+
+			&:checked + label {
+				outline: 2px solid #3858E9;
+
+				.dashicons-yes {
+					display: block;
+				}
+			}
+		}
+
+		label {
+			display: block;
+			width: 100%;
+			padding: 20px 16px;
+			outline: 1px solid #DDDDDD;
+			margin: 12px 0;
+			border-radius: 4px;
+		}
+	}
+
+	.dashicons-yes {
+		display: none;
+		color: #949494;
+		float: right;
+	}
+
+	.woocommerce-help-tip {
+		color: #949494;
+
+		&:after {
+			top: -6px;
+			font-size: 24px;
+		}
+	}
+	
+	.wc-shipping-zone-method-fields {
+
+		& > label {
+			text-transform: uppercase;
+			font-size: 11px;
+			font-weight: 500;
+			line-height: 16px;
+
+			& > .woocommerce-help-tip {
+				display: none;
+			}
+		}
+
+		fieldset {
+			margin-bottom: 24px;
+
+			input, 
+			select {
+				margin: 6px 0;
+				padding: 12px;
+				font-size: 13px;
+    			line-height: 16px;
+
+				&:not([type="checkbox"]) {
+					width: 100%;
+					max-width: 100%;
+				}
+				&[type="checkbox"] {
+					border-radius: 2px;
+					margin: 4px 8px 6px 0;
+
+					& + .woocommerce-help-tip {
+						margin: 6px 0 4px 8px;
+					}
+				}
+			}
+		}
+	}
+
+	.wc-backbone-modal-action-inactive {
+		display: none;
+	}
+
+	.wc-shipping-zone-method-fields-help-text,
+	.wc-shipping-class-modal-help-text {
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 16px;
+		color: #757575;
+	}
+}
+
 table {
 	tr,
 	tr:hover {
@@ -4039,11 +4236,6 @@ table {
 }
 
 .wc-shipping-class-modal {
-	font-family: $font-sf-pro-text;
-	font-size: 13px;
-	font-weight: 400;
-	line-height: 18px;
-
 	.edit {
 		margin: 5px 0;
 	}
@@ -4052,27 +4244,26 @@ table {
 	.edit > select {
 		width: 100%;
 		max-width: 100%;
+		padding: 12px;
 	}
 
 	.view {
-		font-weight: 600;
-	}
-
-	.wc-shipping-class-modal-action-inactive {
-		display: none;
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 16px;
 	}
 
 	.wc-shipping-class-modal-input {
-		padding: 10px 0;
+		padding: 0 0 24px 0;
+
+		input {
+			font-size: 13px;
+    		line-height: 16px;
+		}
 	}
 
 	.wc-shipping-class-count {
 		display: none;
-	}
-
-	.wc-shipping-class-modal-help-text {
-		font-size: 12px;
-		line-height: 17px;
 	}
 }
 
@@ -4477,8 +4668,6 @@ table.wc-shipping-classes {
 }
 
 .wc-modal-shipping-method-settings {
-	background: #f8f8f8;
-	padding: 1em !important;
 
 	form .form-table {
 		width: 100%;
@@ -4528,24 +4717,6 @@ table.wc-shipping-classes {
 		&:last-of-type {
 			margin-bottom: 0;
 		}
-	}
-}
-
-.wc-backbone-modal .wc-shipping-zone-method-selector {
-	p {
-		margin-top: 0;
-	}
-
-	.wc-shipping-zone-method-description {
-		margin: 0.75em 1px 0;
-		line-height: 1.5em;
-		color: #999;
-		font-style: italic;
-	}
-
-	select {
-		width: 100%;
-		cursor: pointer;
 	}
 }
 
