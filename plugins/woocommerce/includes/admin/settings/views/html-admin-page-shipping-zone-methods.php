@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_shipping_zone_before_methods_table', $zone ); ?>
 
-<table class="form-table wc-shipping-zone-settings" data-currency="<?php echo get_woocommerce_currency_symbol(); ?>">
+<table class="form-table wc-shipping-zone-settings" data-currency="<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?>">
 	<tbody>
 		<?php if ( 0 !== $zone->get_id() ) : ?>
 			<tr valign="top" class="">
