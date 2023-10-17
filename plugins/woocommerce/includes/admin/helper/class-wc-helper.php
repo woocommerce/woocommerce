@@ -1223,7 +1223,7 @@ class WC_Helper {
 
 		$output_themes = array();
 		foreach ( $themes as $theme ) {
-			array_push($output_themes, array(
+			array_push( $output_themes, array(
 				'_filename'   => $theme->get_stylesheet() . '/style.css',
 				'_stylesheet' => $theme->get_stylesheet(),
 				'_type'       => 'theme',
