@@ -19,7 +19,6 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
-import Themes from '../themes/themes';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
