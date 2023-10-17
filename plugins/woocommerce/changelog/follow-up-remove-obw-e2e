@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove onboarding.js file no longer used in e2e tests

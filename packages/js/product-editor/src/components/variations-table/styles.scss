@@ -1,5 +1,6 @@
 @import "./variations-actions-menu/styles.scss";
-@import "../../icons/hidden-with-help-icon.scss";
+@import "./downloads-menu-item/styles.scss";
+@import "./pagination/styles.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -13,6 +14,10 @@ $table-row-height: calc($grid-unit * 9);
 		display: flex;
 		align-items: center;
 		border-bottom: 1px solid $gray-200;
+
+		.variations-actions-menu__toogle:disabled {
+			cursor: not-allowed;
+		}
 	}
 
 	&__notice {
@@ -163,7 +168,7 @@ $table-row-height: calc($grid-unit * 9);
 	}
 
 	&__footer {
-		padding: $gap 0;
-		justify-content: space-between;
+		border-top: 1px solid $gray-200;
+		padding-top: $grid-unit-30;
 	}
 }

@@ -45,6 +45,7 @@ import { addFilter } from '@wordpress/hooks';
 import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
+import { PreloadFonts } from './preload-fonts';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -58,9 +59,11 @@ type CustomizeStoreComponentProps = Parameters< CustomizeStoreComponent >[ 0 ];
 export const CustomizeStoreContext = createContext< {
 	sendEvent: CustomizeStoreComponentProps[ 'sendEvent' ];
 	context: Partial< CustomizeStoreComponentProps[ 'context' ] >;
+	currentState: CustomizeStoreComponentProps[ 'currentState' ];
 } >( {
 	sendEvent: () => {},
 	context: {},
+	currentState: 'assemblerHub',
 } );
 
 export type events =
@@ -149,6 +152,7 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 					<RouterProvider>
 						<Layout />
 					</RouterProvider>
+					<PreloadFonts />
 				</GlobalStylesProvider>
 			</ShortcutProvider>
 		</CustomizeStoreContext.Provider>

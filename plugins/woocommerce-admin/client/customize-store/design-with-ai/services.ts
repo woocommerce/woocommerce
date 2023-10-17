@@ -7,7 +7,7 @@ import { __experimentalRequestJetpackToken as requestJetpackToken } from '@wooco
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { Sender, assign, createMachine } from 'xstate';
+import { Sender, assign, createMachine, actions } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
@@ -25,6 +25,8 @@ import {
 	getTemplatePatterns,
 } from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+
+const { escalate } = actions;
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
@@ -163,7 +165,13 @@ export const queryAiEndpoint = createMachine(
 				always: [
 					{
 						cond: ( context ) => context.retryCount >= 3,
-						target: 'failed',
+						target: 'querying',
+						actions: [
+							// Throw an error to be caught by the parent machine.
+							escalate( () => ( {
+								data: 'Max retries exceeded',
+							} ) ),
+						],
 					},
 					{
 						target: 'querying',
@@ -172,12 +180,6 @@ export const queryAiEndpoint = createMachine(
 						} ),
 					},
 				],
-			},
-			failed: {
-				type: 'final',
-				data: {
-					result: 'failed',
-				},
 			},
 			success: {
 				type: 'final',
@@ -371,9 +373,37 @@ export const assembleSite = async (
 	}
 };
 
+const installAndActivateTheme = async () => {
+	const themeSlug = 'twentytwentythree';
+
+	try {
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
+			method: 'POST',
+		} );
+
+		await apiFetch( {
+			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
+			method: 'POST',
+		} );
+	} catch ( error ) {
+		recordEvent(
+			'customize_your_store_ai_install_and_activate_theme_error',
+			{
+				theme: themeSlug,
+				error: error instanceof Error ? error.message : 'unknown',
+			}
+		);
+		throw error;
+	}
+};
+
 const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_customize_store_ai_suggestions: context.aiSuggestions,
+		woocommerce_customize_store_ai_suggestions: {
+			...context.aiSuggestions,
+			lookAndFeel: context.lookAndFeel.choice,
+		},
 	} );
 };
 
@@ -384,4 +414,5 @@ export const services = {
 	assembleSite,
 	updateStorePatterns,
 	saveAiResponseToOption,
+	installAndActivateTheme,
 };

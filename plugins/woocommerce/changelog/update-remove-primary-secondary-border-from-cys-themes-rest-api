@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove backround, primary_border, secondary_border from the schema from themes REST API

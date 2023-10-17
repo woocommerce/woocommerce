@@ -3,6 +3,7 @@
  */
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -76,6 +77,18 @@ const loaderSteps = [
 ];
 
 export const ApiCallLoader = () => {
+	useEffect( () => {
+		const preload = ( src: string ) => {
+			const img = new Image();
+
+			img.src = src;
+			img.onload = () => {};
+		};
+
+		// We preload the assemblingAiOptimizedStore to avoid flickering. We only need to preload it because the others are small enough to be inlined in base64.
+		preload( assemblingAiOptimizedStore );
+	}, [] );
+
 	return (
 		<Loader>
 			<Loader.Sequence interval={ 3000 }>

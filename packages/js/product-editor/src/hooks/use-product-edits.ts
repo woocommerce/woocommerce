@@ -17,10 +17,10 @@ function filterProductEdits( edits: EntityEdits ) {
 	return edits;
 }
 
-export function useProductEdits() {
+export function useProductEdits( productType = <string>'product' ) {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
@@ -30,7 +30,7 @@ export function useProductEdits() {
 
 			const _edits = getEntityRecordNonTransientEdits(
 				'postType',
-				'product',
+				productType,
 				productId
 			) as EntityEdits;
 
@@ -38,7 +38,7 @@ export function useProductEdits() {
 				edits: filterProductEdits( _edits ),
 			};
 		},
-		[ productId ]
+		[ productId, productType ]
 	);
 
 	function hasEdit( fieldName: string ) {

@@ -38,6 +38,15 @@ export function ValidationProvider< T >( {
 		};
 	}
 
+	function unRegisterValidator( validatorId: string ): void {
+		if ( validatorsRef.current[ validatorId ] ) {
+			delete validatorsRef.current[ validatorId ];
+		}
+		if ( fieldRefs.current[ validatorId ] ) {
+			delete fieldRefs.current[ validatorId ];
+		}
+	}
+
 	async function validateField(
 		validatorId: string,
 		newData?: Partial< T >
@@ -89,6 +98,7 @@ export function ValidationProvider< T >( {
 			value={ {
 				errors,
 				registerValidator,
+				unRegisterValidator,
 				validateField,
 				validateAll,
 			} }

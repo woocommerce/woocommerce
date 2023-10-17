@@ -18,7 +18,6 @@ import {
 	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	FontPairing,
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
@@ -105,16 +104,25 @@ const assignFontPairing = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	aiSuggestions: ( context, event: unknown ) => {
+	aiSuggestions: ( context ) => {
+		let fontPairing = context.aiSuggestions.fontPairing;
+		const choice = context.lookAndFeel.choice;
+
+		switch ( true ) {
+			case choice === 'Contemporary':
+				fontPairing = 'Inter + Inter';
+				break;
+			case choice === 'Classic':
+				fontPairing = 'Bodoni Moda + Overpass';
+				break;
+			case choice === 'Bold':
+				fontPairing = 'Rubik + Inter';
+				break;
+		}
+
 		return {
 			...context.aiSuggestions,
-			fontPairing: (
-				event as {
-					data: {
-						response: FontPairing;
-					};
-				}
-			 ).data.response.pair_name,
+			fontPairing,
 		};
 	},
 } );
@@ -196,6 +204,17 @@ const spawnSaveDescriptionToOption = assign<
 		),
 } );
 
+const assignAPICallLoaderError = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	apiCallLoader: () => {
+		return {
+			hasErrors: true,
+		};
+	},
+} );
+
 const logAIAPIRequestError = () => {
 	// log AI API request error
 	// eslint-disable-next-line no-console
@@ -275,6 +294,7 @@ export const actions = {
 	assignHeader,
 	assignFooter,
 	assignHomepageTemplate,
+	assignAPICallLoaderError,
 	logAIAPIRequestError,
 	updateQueryStep,
 	recordTracksStepViewed,

@@ -19,6 +19,7 @@ import { SaveDraftButtonProps } from '../../save-draft-button';
 
 export function useSaveDraft( {
 	productStatus,
+	productType = 'product',
 	disabled,
 	onClick,
 	onSaveSuccess,
@@ -30,7 +31,7 @@ export function useSaveDraft( {
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
@@ -40,7 +41,7 @@ export function useSaveDraft( {
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 
@@ -48,7 +49,7 @@ export function useSaveDraft( {
 				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -78,12 +79,12 @@ export function useSaveDraft( {
 		try {
 			await validate( { status: 'draft' } );
 
-			await editEntityRecord( 'postType', 'product', productId, {
+			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
+				productType,
 				productId,
 				{
 					throwOnError: true,

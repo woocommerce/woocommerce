@@ -68,7 +68,7 @@ export const DesignWithAiController = ( {
 	return (
 		<>
 			<div
-				className={ `woocommerce-design-with-ai-__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
+				className={ `woocommerce-design-with-ai__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
 			>
 				{ CurrentComponent ? (
 					<CurrentComponent

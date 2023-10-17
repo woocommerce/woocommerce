@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update blocks to use registerWooBlockType and useWooBlockProps from @woocommerce/block-templates. Deprecates initBlock.

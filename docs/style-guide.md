@@ -52,6 +52,56 @@ How-to guides are focused and specific, providing instructions on how to accompl
 > 
 > [Divio Framework on How-to-Guide Writing](https://documentation.divio.com/how-to-guides/)
 
+## Custom Linting Rules
+
+At WooCommerce, we're dedicated to maintaining a consistent and high-quality standard for our technical documentation. Our documents primarily adhere to the linting rules provided by `markdownlint`. To assist our contributors, we've detailed our custom configurations and exceptions below.
+
+Note: While we've outlined specific rules above, all other default linting rules from `markdownlint` apply unless otherwise stated. We've only highlighted custom configurations or exceptions here. For a complete list of `markdownlint` rules, you can refer to [this link](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md).
+
+1. **Headings Style**: 
+    - Use the ATX-style (`#`) for headers.
+
+    ```markdown
+    # This is an H1
+    ## This is an H2
+    ```
+
+   [Reference: MD003](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md003---heading-style)
+
+2. **List Indentation**: 
+    - Indent list items with 4 spaces.
+
+    ```markdown
+    - Item 1
+        - Subitem 1.1
+    ```
+
+   [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
+
+3. **Line Length**: 
+    - No specific restriction on the line length, but keep paragraphs and sentences readable.
+    
+    [Reference: MD013](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md013---line-length)
+
+4. **Multiple Headings with the Same Content**: 
+    - Multiple headings with the same content are permissible as long as they are not siblings.
+    
+    [Reference: MD024](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md024---no-multiple-headings-with-the-same-content)
+
+5. **Inline HTML**: 
+    - Only the `video` element is allowed when using inline HTML.
+
+    ```markdown
+    <video src="path_to_video.mp4" controls></video>
+    ```
+
+   [Reference: MD033](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md033---inline-html)
+
+6. **Tabs and Whitespace**: 
+    - We're flexible with the use of hard tabs and trailing whitespace. However, for consistency, we recommend using spaces over tabs and avoiding trailing whitespaces.
+    
+    [Reference: no-hard-tabs & whitespace](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)
+
 ## Formatting
 
 ### Visual style
