@@ -13,6 +13,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
 import { TaxChildProps } from '../utils';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 export const Card: React.FC< TaxChildProps > = () => {
 	return (
@@ -34,23 +35,11 @@ export const Card: React.FC< TaxChildProps > = () => {
 				// eslint-disable-next-line @wordpress/i18n-translator-comments
 				__( '100% free', 'woocommerce' ),
 			] }
-			terms={ interpolateComponents( {
-				mixedString: __(
-					'By installing WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-					'woocommerce'
-				),
-				components: {
-					link: (
-						<Link
-							href={ 'https://wordpress.com/tos/' }
-							target="_blank"
-							type="external"
-						>
-							<></>
-						</Link>
-					),
-				},
-			} ) }
+			terms={
+				<TermsOfService
+					buttonText={ __( 'Continue setup', 'woocommerce' ) }
+				/>
+			}
 			actionText={ __( 'Continue setup', 'woocommerce' ) }
 			onClick={ () => {
 				recordEvent( 'tasklist_tax_select_option', {

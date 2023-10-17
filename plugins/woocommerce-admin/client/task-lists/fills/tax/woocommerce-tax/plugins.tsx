@@ -15,6 +15,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 import { SetupStepProps } from './setup';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 const isWcConnectOptions = (
 	wcConnectOptions: unknown
@@ -64,31 +65,9 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	return (
 		<>
 			{ ! tosAccepted && (
-				<Text
-					variant="caption"
-					className="woocommerce-task__caption is-tos"
-					size="12"
-					lineHeight="16px"
-					style={ { display: 'block' } }
-				>
-					{ interpolateComponents( {
-						mixedString: __(
-							'By installing WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-							'woocommerce'
-						),
-						components: {
-							link: (
-								<Link
-									href={ 'https://wordpress.com/tos/' }
-									target="_blank"
-									type="external"
-								>
-									<></>
-								</Link>
-							),
-						},
-					} ) }
-				</Text>
+				<TermsOfService
+					buttonText={ __( 'Install & enable', 'woocommerce' ) }
+				/>
 			) }
 			<PluginInstaller
 				onComplete={ (

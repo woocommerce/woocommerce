@@ -38,34 +38,7 @@ import {
 	ShippingLayoutColumn,
 	ShippingLayoutRow,
 } from './shipping-providers/partners';
-
-const WoocommerceShippingTOS = () => (
-	<Text
-		variant="caption"
-		className="woocommerce-task__caption is-tos"
-		size="12"
-		lineHeight="16px"
-		style={ { display: 'block' } }
-	>
-		{ interpolateComponents( {
-			mixedString: __(
-				'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-			),
-			components: {
-				link: (
-					<Link
-						href={ 'https://wordpress.com/tos/' }
-						target="_blank"
-						type="external"
-					>
-						<></>
-					</Link>
-				),
-			},
-		} ) }
-	</Text>
-);
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -360,7 +333,14 @@ export class Shipping extends Component {
 						{ ! isJetpackConnected &&
 							pluginsToActivate.includes(
 								'woocommerce-services'
-							) && <WoocommerceShippingTOS /> }
+							) && (
+								<TermsOfService
+									buttonText={ __(
+										'Install & enable',
+										'woocommerce'
+									) }
+								/>
+							) }
 						<Plugins
 							onComplete={ ( _plugins, response ) => {
 								createNoticesFromResponse( response );
@@ -566,7 +546,12 @@ export class Shipping extends Component {
 									{ ! isJetpackConnected &&
 										pluginsToPromote[ 0 ].slug ===
 											'woocommerce-services' && (
-											<WoocommerceShippingTOS />
+											<TermsOfService
+												buttonText={ __(
+													'Install and enable',
+													'woocommerce'
+												) }
+											/>
 										) }
 									<Plugins
 										onComplete={ ( _plugins, response ) => {

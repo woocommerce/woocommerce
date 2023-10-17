@@ -2,11 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
+import { Plugins as PluginInstaller } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
@@ -14,6 +12,7 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 const isWcConnectOptions = (
 	wcConnectOptions: unknown
@@ -66,31 +65,9 @@ export const Plugins: React.FC< Props > = ( {
 	return (
 		<>
 			{ ! tosAccepted && (
-				<Text
-					variant="caption"
-					className="woocommerce-task__caption is-tos"
-					size="12"
-					lineHeight="16px"
-					style={ { display: 'block' } }
-				>
-					{ interpolateComponents( {
-						mixedString: __(
-							'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
-							'woocommerce'
-						),
-						components: {
-							link: (
-								<Link
-									href={ 'https://wordpress.com/tos/' }
-									target="_blank"
-									type="external"
-								>
-									<></>
-								</Link>
-							),
-						},
-					} ) }
-				</Text>
+				<TermsOfService
+					buttonText={ __( 'Install & enable', 'woocommerce' ) }
+				/>
 			) }
 			<PluginInstaller
 				onComplete={ (
