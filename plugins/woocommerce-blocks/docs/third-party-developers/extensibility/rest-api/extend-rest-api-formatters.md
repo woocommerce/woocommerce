@@ -2,7 +2,9 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [How to use them](#how-to-use-them)
+-   [Why are formatters useful?](#why-are-formatters-useful)
+-   [How to use formatters](#how-to-use-formatters)
+    -   [Real world example](#real-world-example)
 -   [MoneyFormatter](#moneyformatter)
     -   [Arguments](#arguments)
     -   [Example use and returned value](#example-use-and-returned-value)
@@ -13,11 +15,23 @@
     -   [Arguments](#arguments-2)
     -   [Example use and returned value](#example-use-and-returned-value-2)
 
-`Formatters` are utility classes that allow you to format values to so that they are compatible with the StoreAPI, values such as money, currency, or HTML.
+`Formatters` are utility classes that allow you to format values to so that they are compatible with the StoreAPI. Default formatters handle values such as monetary amounts, currency information, or HTML.
 
-## How to use them
+It is recommended that you use these formatters when you are extending the StoreAPI.
 
-To get a formatter, you can use the `get_formatter` method of the `ExtendSchema` class. This method accepts a string, which is the name of the formatter you want to use, e.g. (money, html, currency).
+## Why are formatters useful?
+
+Using the formatter utilities when returning certain types of data will ensure that your custom data is consistent and compatible with other endpoints. They also take care of any store specific settings that may affect the formatting of the data, such as currency settings.
+
+Store API includes formatters for:
+
+-   [Money](#moneyformatter)
+-   [Currency](#currencyformatter)
+-   [HTML](#htmlformatter)
+
+## How to use formatters
+
+To get a formatter, you can use the `get_formatter` method of the `ExtendSchema` class. This method accepts a string, which is the name of the formatter you want to use.
 
 ```php
 get_formatter('money'); // For the MoneyFormatter
@@ -25,19 +39,56 @@ get_formatter('html'); // For the HtmlFormatter
 get_formatter('currency'); // CurrencyFormatter
 ```
 
-This returns a `FormatterInterface` which has the `format` method.
-
-The `format` method signature is:
+This returns a `FormatterInterface` which has the `format` method. The `format` method signature is:
 
 ```php
 format( $value, array $options = [] );
 ```
 
-Only `MoneyFormatter`'s behaviour can be controlled by the `$options` parameter.
+Only `MoneyFormatter`'s behavior can be controlled by the `$options` parameter. This parameter is optional.
+
+### Real world example
+
+Let's say we're going to be returning some extra price data via the API. We want to return the price in cents, and also the currency data for the store. We can use the `MoneyFormatter` and `CurrencyFormatter` to do this.
+
+First we need to ensure we can access the formatter classes. We can do this by using the `use` keyword:
+
+```php
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\Utilities\ExtendSchema;
+
+$extend = StoreApi::container()->get( ExtendSchema::class );
+
+$my_custom_price = $extend->get_formatter( 'money' )->format( '10.00', [
+  'rounding_mode' => PHP_ROUND_HALF_DOWN,
+  'decimals'      => 2
+] );
+
+$price_response = $extend->get_formatter( 'currency' )->format( [
+	'price'         => $my_custom_price,
+] );
+```
+
+The above code would result in `$price_response` being set to:
+
+```text
+[
+    'price' => '1000'
+    'currency_code' => 'GBP'
+    'currency_symbol' => '£'
+    'currency_minor_unit' => 2
+    'currency_decimal_separator' => '.'
+    'currency_thousand_separator' => ','
+    'currency_prefix' => '£'
+    'currency_suffix' => ''
+]
+```
 
 ## MoneyFormatter
 
-The [`MoneyFormatter`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/Formatters/MoneyFormatter.php) class can be used to format a monetary value using the store settings. The store settings may be overriden by passing options to this formatter's `format` method.
+The [`MoneyFormatter`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/Formatters/MoneyFormatter.php) class can be used to format a monetary value using the store settings. The store settings may be overridden by passing options to this formatter's `format` method.
+
+Values are returned in cents to avoid floating point rounding errors, so when using this formatter you'll most likely also be returning the currency data using the [`CurrencyFormatter`](#currencyformatter) alongside it. This will allow the consumer of the API to display the value in the intended format.
 
 ### Arguments
 
@@ -61,7 +112,7 @@ returns `1044`
 
 ## CurrencyFormatter
 
-This formatter takes an array of prices, and returns the same array but with currency data added. The currency data added is:
+This formatter takes an array of prices, and returns the same array but with currency data appended to it. The currency data added is:
 
 | Key                           | Type     | Description                                                                                       |
 | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
@@ -72,6 +123,8 @@ This formatter takes an array of prices, and returns the same array but with cur
 | `currency_thousand_separator` | `string` | The string used to separate thousands in the currency, for example: &pound;10,000 or &euro;10.000 |
 | `currency_prefix`             | `string` | A string that should appear before the currency value.                                            |
 | `currency_suffix`             | `string` | A string that should appear after the currency value.                                             |
+
+This data can then be used by the client/consumer to format prices correctly according to store settings. Important: the array of prices passed to this formatted should already be in monetary format so you should use the [`MoneyFormatter`](#moneyformatter) first.
 
 ### Arguments
 
@@ -127,11 +180,13 @@ get_formatter( 'html' )->format(
 );
 ```
 
-returns
+returns:
 
 ```text
 alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
 ```
+
+This formatter should be used when returning HTML from the StoreAPI regardless of whether the HTML is user generated or not. This will ensure the consumer/client can display the HTML safely and without encoding issues.
 
 <!-- FEEDBACK -->
 
@@ -142,4 +197,3 @@ alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
 
 <!-- /FEEDBACK -->
-
