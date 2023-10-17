@@ -926,8 +926,8 @@ class WC_Helper {
 
 	/**
 	 * Activate helper subscription.
-	 * 
-	 * @throws Exception
+	 *
+	 * @throws Exception If the subscription could not be activated or found.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1026,8 +1026,8 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a product subscription.
-	 * 
-	 * @throws Exception
+	 *
+	 * @throws Exception If the subscription could not be deactivated or found.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if deactivated, false otherwise.
 	 */
