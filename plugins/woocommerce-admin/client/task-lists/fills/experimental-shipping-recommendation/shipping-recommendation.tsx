@@ -121,7 +121,7 @@ export const ShippingRecommendation: React.FC<
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>
 			) : (
-				<Connect onConnect={ redirect } />
+				<Connect />
 			),
 		},
 	];
