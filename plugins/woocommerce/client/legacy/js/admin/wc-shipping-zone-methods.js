@@ -422,9 +422,8 @@
 				addCurrencySymbol: function( html ) {
 					const htmlContent = $( html );
 					const priceInputs = htmlContent.find( '.wc_input_price' );
-					const Currency = wc.currency.CurrencyFactory();
-					const currencyConfig = Currency.getCurrencyConfig();
-					const symbol = currencyConfig.symbol;
+					const table = $( 'table.wc-shipping-zone-settings' );
+					const symbol = table.data( 'currency' );
 
 					priceInputs.before( `<div class="wc-shipping-zone-method-currency">${ symbol }</div>` );
 
