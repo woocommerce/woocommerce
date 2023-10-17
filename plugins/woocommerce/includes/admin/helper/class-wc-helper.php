@@ -683,7 +683,7 @@ class WC_Helper {
 
 	/**
 	 * Get helper redirect URL.
-	 * 
+	 *
 	 * @param array $args Query args.
 	 * @return string
 	 */

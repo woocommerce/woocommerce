@@ -78,12 +78,10 @@ class WC_Helper_Admin {
 			$connect_url_args['redirect-to-wc-admin'] = 1;
 		}
 
-		$connect_url = add_query_arg(
+		return add_query_arg(
 			$connect_url_args,
 			admin_url( 'admin.php' )
 		);
-
-		return $connect_url;
 	}
 
 	/**
