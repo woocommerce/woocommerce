@@ -1195,15 +1195,18 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		$plugins = get_plugins();
-		
+
 		$output_plugins = array();
 		foreach ( $plugins as $filename => $data ) {
-			array_push( $output_plugins, array(
-				'_filename'  => $filename,
-				'_type'      => 'plugin',
-				'slug'       => dirname( $filename ),
-				'Version'    => $data['Version'],
-			));
+			array_push(
+				$output_plugins,
+				array(
+					'_filename' => $filename,
+					'_type'     => 'plugin',
+					'slug'      => dirname( $filename ),
+					'Version'   => $data['Version'],
+				)
+			);
 		}
 
 		return $output_plugins;
@@ -1222,13 +1225,16 @@ class WC_Helper {
 
 		$output_themes = array();
 		foreach ( $themes as $theme ) {
-			array_push( $output_themes, array(
-				'_filename'   => $theme->get_stylesheet() . '/style.css',
-				'_stylesheet' => $theme->get_stylesheet(),
-				'_type'       => 'theme',
-				'slug'        => $theme->get_stylesheet(),
-				'Version'     => $theme->get( 'Version' ),
-			));
+			array_push(
+				$output_themes,
+				array(
+					'_filename'   => $theme->get_stylesheet() . '/style.css',
+					'_stylesheet' => $theme->get_stylesheet(),
+					'_type'       => 'theme',
+					'slug'        => $theme->get_stylesheet(),
+					'Version'     => $theme->get( 'Version' ),
+				)
+			);
 		}
 		return $output_themes;
 	}
@@ -1469,8 +1475,7 @@ class WC_Helper {
 		
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
-
-			$subscription['local'] = array(
+			$subscription['local']  = array(
 				'installed' => false,
 				'active'    => false,
 				'version'   => null,
@@ -1478,11 +1483,11 @@ class WC_Helper {
 
 			$updates = WC_Helper_Updater::get_update_data();
 
-			$local   = wp_list_filter(
+			$local            = wp_list_filter(
 				array_merge( $local_plugins, $local_themes ),
 				array( 'slug' => $subscription['zip_slug'] )
 			);
-			$local = array_shift( $local );
+			$local            = array_shift( $local );
 			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
 			if ( ! empty( $local ) && ! $inactive_license ) {
 				$subscription['local']['installed'] = true;
