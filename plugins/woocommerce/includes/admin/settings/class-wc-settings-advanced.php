@@ -384,18 +384,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_legacy_api_section() {
 		$legacy_api_setting_desc =
-			 'yes' === get_option( 'woocommerce_api_enabled' ) ?
-			 __( 'The legacy REST API is enabled', 'woocommerce' ) :
-			 __( 'The legacy REST API is NOT enabled', 'woocommerce' );
+			'yes' === get_option( 'woocommerce_api_enabled' ) ?
+			__( 'The legacy REST API is enabled', 'woocommerce' ) :
+			__( 'The legacy REST API is NOT enabled', 'woocommerce' );
 
 		$legacy_api_setting_tip =
-			is_plugin_active('woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php') ?
-			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.') :
+			is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ?
+			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
 			sprintf(
-				__( '⚠️ The WooCommerce Legacy REST API has been moved to a dedicated extension. <b><a target=”_blank” href="%s">Learn more about this change</a></b>', 'woocommerce'),
+				/* translators: %s is an URL */
+				__( '⚠️ The WooCommerce Legacy REST API has been moved to a dedicated extension. <b><a target=”_blank” href="%s">Learn more about this change</a></b>', 'woocommerce' ),
 				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 			);
-
 
 		$settings =
 			array(
@@ -406,13 +406,13 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'id'    => 'legacy_api_options',
 				),
 				array(
-					'title'   => __( 'Legacy API', 'woocommerce' ),
-					'desc'    => $legacy_api_setting_desc,
-					'id'      => 'woocommerce_api_enabled',
-					'type'    => 'checkbox',
-					'default' => 'no',
-					'disabled'      => true,
-					'desc_tip'      => $legacy_api_setting_tip
+					'title'    => __( 'Legacy API', 'woocommerce' ),
+					'desc'     => $legacy_api_setting_desc,
+					'id'       => 'woocommerce_api_enabled',
+					'type'     => 'checkbox',
+					'default'  => 'no',
+					'disabled' => true,
+					'desc_tip' => $legacy_api_setting_tip,
 				),
 				array(
 					'type' => 'sectionend',
