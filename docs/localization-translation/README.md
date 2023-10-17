@@ -2,7 +2,7 @@
 
 WooCommerce is already translated into several languages and is translation-ready right out of the box. All that’s needed is a translation file for your language.
 
-There are several methods to create a translation, most of which are outlined in the WordPress Codex. In most cases you can contribute to the project on [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce/).
+There are several methods to create a translation, most of which are outlined in the WordPress Codex. In most cases you can contribute to the project on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/).
 
 To create custom translations:
 
@@ -22,7 +22,7 @@ Once this has been done, the shop displays in your locale if the language file e
 
 ## Contributing your localization to core
 
-We encourage contributions to our translations. If you want to add translated strings or start a new translation, simply register at WordPress.org and submit your translations to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce/) for approval.
+We encourage contributions to our translations. If you want to add translated strings or start a new translation, simply register at WordPress.org and submit your translations to [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/) for approval.
 
 ## Translating WooCommerce into your language
 
