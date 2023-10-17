@@ -62,6 +62,7 @@ final class AssetsController {
 		$this->api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
 		$this->api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [] );
+		$this->api->register_script( 'wc-blocks-components', 'build/blocks-components.js', [] );
 
 		wp_add_inline_script(
 			'wc-blocks-middleware',
