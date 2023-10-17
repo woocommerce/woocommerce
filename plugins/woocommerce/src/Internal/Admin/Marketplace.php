@@ -57,10 +57,11 @@ class Marketplace {
 
 	/**
 	 * Enqueue update script.
+	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
-		if ('woocommerce_page_wc-admin' !== $hook_suffix ) {
+		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
 		};
 		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
