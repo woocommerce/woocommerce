@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import { Button, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -26,6 +25,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
+import { ProductEditorBlockEditProps } from '../../../types';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -42,16 +42,17 @@ function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< UploadsBlockAttributes > ) {
+	context: { postType },
+}: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
 		'postType',
-		'product',
+		postType,
 		'downloadable'
 	);
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
-		'product',
+		postType,
 		'downloads'
 	);
 
