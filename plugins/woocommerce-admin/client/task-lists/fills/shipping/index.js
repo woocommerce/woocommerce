@@ -28,9 +28,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Connect, {
-	prefetchJetpackAuthUrl,
-} from '../../../dashboard/components/connect';
+import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
@@ -68,7 +66,6 @@ export class Shipping extends Component {
 
 	componentDidMount() {
 		this.reset();
-		prefetchJetpackAuthUrl( this.jetpackAuthRedirectUrl );
 	}
 
 	reset() {

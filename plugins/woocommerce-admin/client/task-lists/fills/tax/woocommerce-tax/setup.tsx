@@ -20,7 +20,6 @@ import { Connect } from './connect';
 import { Plugins } from './plugins';
 import { StoreLocation } from '../components/store-location';
 import './setup.scss';
-import { prefetchJetpackAuthUrl } from '~/dashboard/components/connect';
 
 export type SetupProps = {
 	isPending: boolean;
@@ -77,10 +76,6 @@ export const Setup: React.FC< SetupProps > = ( {
 		}
 		setPluginsToActivate( remainingPlugins );
 	}, [ activePlugins ] );
-
-	useEffect( () => {
-		prefetchJetpackAuthUrl();
-	}, [] );
 
 	const nextStep = () => {
 		setStepIndex( stepIndex + 1 );

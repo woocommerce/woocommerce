@@ -6,27 +6,30 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { resolveSelect, withDispatch, withSelect } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
+/**
+ * Button redirecting to Jetpack auth flow.
+ *
+ * Only render this component when the user has accepted Jetpack's Terms of Service.
+ * The API endpoint used by this component sets "jetpack_tos_agreed" to true when
+ * returning the URL.
+ */
 export class Connect extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			isConnecting: false,
+			isAwaitingRedirect: false,
+			isRedirecting: false,
 		};
 
 		this.connectJetpack = this.connectJetpack.bind( this );
-		props.setIsPending( true );
+		props.setIsPending( false );
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { createNotice, error, isRequesting, onError, setIsPending } =
-			this.props;
-
-		if ( prevProps.isRequesting && ! isRequesting ) {
-			setIsPending( false );
-		}
+		const { createNotice, error, onError, isRequesting } = this.props;
 
 		if ( error && error !== prevProps.error ) {
 			if ( onError ) {
@@ -34,27 +37,31 @@ export class Connect extends Component {
 			}
 			createNotice( 'error', error );
 		}
+
+		if (
+			this.state.isAwaitingRedirect &&
+			! this.state.isRedirecting &&
+			! isRequesting &&
+			! error
+		) {
+			this.setState( { isRedirecting: true }, () => {
+				window.location = this.props.jetpackAuthUrl;
+			} );
+		}
 	}
 
-	async connectJetpack() {
-		const { jetpackAuthUrl, onConnect } = this.props;
+	connectJetpack() {
+		const { onConnect } = this.props;
 
-		this.setState(
-			{
-				isConnecting: true,
-			},
-			() => {
-				if ( onConnect ) {
-					onConnect();
-				}
-				window.location = jetpackAuthUrl;
-			}
-		);
+		if ( onConnect ) {
+			onConnect();
+		}
+
+		this.setState( { isAwaitingRedirect: true } );
 	}
 
 	render() {
-		const { error, isRequesting, onSkip, skipText, onAbort, abortText } =
-			this.props;
+		const { error, onSkip, skipText, onAbort, abortText } = this.props;
 
 		return (
 			<Fragment>
@@ -67,8 +74,7 @@ export class Connect extends Component {
 					</Button>
 				) : (
 					<Button
-						disabled={ isRequesting }
-						isBusy={ this.state.isConnecting }
+						isBusy={ this.state.isAwaitingRedirect }
 						isPrimary
 						onClick={ this.connectJetpack }
 					>
@@ -147,23 +153,27 @@ Connect.defaultProps = {
 	setIsPending: () => {},
 };
 
-const formatJetpackAuthUrlQueryArgs = ( redirectUrl ) => ( {
-	redirectUrl: redirectUrl || window.location.href,
-	from: 'woocommerce-services',
-} );
-
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getJetpackAuthUrl, isResolving, getOnboardingError } = select(
+		const { getJetpackAuthUrl, isResolving } = select(
 			ONBOARDING_STORE_NAME
 		);
 
-		const queryArgs = formatJetpackAuthUrlQueryArgs( props.redirectUrl );
+		const queryArgs = {
+			redirectUrl: props.redirectUrl || window.location.href,
+			from: 'woocommerce-services',
+		};
+
+		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );
+		const isRequesting = isResolving( 'getJetpackAuthUrl', [ queryArgs ] );
+		const errors = jetpackAuthUrlResponse?.errors?.length
+			? jetpackAuthUrlResponse.errors[ 0 ]
+			: '';
 
 		return {
-			error: getOnboardingError( 'getJetpackAuthUrl' ) || '',
-			isRequesting: isResolving( 'getJetpackAuthUrl', [ queryArgs ] ),
-			jetpackAuthUrl: getJetpackAuthUrl( queryArgs ).url,
+			error: errors,
+			isRequesting,
+			jetpackAuthUrl: jetpackAuthUrlResponse.url,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
@@ -174,9 +184,3 @@ export default compose(
 		};
 	} )
 )( Connect );
-
-export const prefetchJetpackAuthUrl = ( redirectUrl = undefined ) => {
-	resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl(
-		formatJetpackAuthUrlQueryArgs( redirectUrl )
-	);
-};
