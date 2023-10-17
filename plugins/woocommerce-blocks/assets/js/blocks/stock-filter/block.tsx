@@ -18,7 +18,7 @@ import {
 	useMemo,
 	useRef,
 } from '@wordpress/element';
-import CheckboxList from '@woocommerce/base-components/checkbox-list';
+import { CheckboxList } from '@woocommerce/blocks-components';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
 import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';

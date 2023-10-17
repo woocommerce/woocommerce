@@ -195,6 +195,7 @@ const entries = {
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
 		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.js',
 	},
 	main: {
 		// Shared blocks code

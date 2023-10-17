@@ -147,6 +147,7 @@ module.exports = {
 		'import/core-modules': [
 			'@woocommerce/block-data',
 			'@woocommerce/blocks-checkout',
+			'@woocommerce/blocks-components',
 			'@woocommerce/price-format',
 			'@woocommerce/settings',
 			'@woocommerce/shared-context',
