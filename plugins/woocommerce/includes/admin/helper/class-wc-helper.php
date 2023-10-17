@@ -1197,10 +1197,11 @@ class WC_Helper {
 		$output_plugins = array();
 		foreach ( $plugins as $filename => $data ) {
 			array_push($output_plugins, array(
-				'_filename' => $filename,
-				'_type' => 'plugin',
-				'slug' => dirname( $filename ),
-				'Version' => $data['Version'],
+				'_filename'  => $filename,
+				'_type'      => 'plugin',
+				'slug'       => dirname( $filename ),
+				'Version'    => $data['Version'],
+				'woo_owned'  => ! empty( $data['Woo'] )
 			));
 		}
 
@@ -1225,6 +1226,7 @@ class WC_Helper {
 				'_type'       => 'theme',
 				'slug'        => $theme->get_stylesheet(),
 				'Version'     => $theme->get( 'Version' ),
+				'woo_owned'   => ! empty( $theme->get( 'Woo' ) )
 			));
 		}
 		return $output_themes;
@@ -1421,6 +1423,9 @@ class WC_Helper {
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
+		$local_plugins = self::get_local_plugins();
+		$local_themes  = self::get_local_themes();
+
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
 		$auth    = WC_Helper_Options::get( 'auth' );
@@ -1462,7 +1467,14 @@ class WC_Helper {
 		);
 		
 		foreach ( $subscriptions as &$subscription ) {
-			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
+			$local   = wp_list_filter(
+				array_merge( $local_plugins, $local_themes ),
+				array( 'slug' => $subscription['zip_slug'] )
+			);
+			$local = array_shift( $local );
+			$org_product = ! empty( $local ) && isset( $local['woo_owned'] ) && $local['woo_owned'] === false;
+
+			$subscription['active'] = in_array( $site_id, $subscription['connections'] ) || $org_product;
 
 			$subscription['local'] = array(
 				'installed' => false,
@@ -1471,14 +1483,9 @@ class WC_Helper {
 			);
 
 			$updates = WC_Helper_Updater::get_update_data();
-			$local   = wp_list_filter(
-				array_merge( self::get_local_plugins(), self::get_local_themes() ),
-				array( 'slug' => $subscription['zip_slug'] )
-			);
 
 			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
 			if ( ! empty( $local ) && ! $inactive_license ) {
-				$local                              = array_shift( $local );
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
 
