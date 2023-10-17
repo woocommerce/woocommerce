@@ -42,8 +42,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- 1. Add labelFor or some kind of attribute for semantic HTML-->
 
 <script type="text/html" id="tmpl-wc-shipping-class-configure">
-<div class="wc-backbone-modal">
-		<div class="wc-backbone-modal-content wc-shipping-class-modal" data-id="{{ data.term_id }}">
+<div class="wc-backbone-modal wc-shipping-class-modal">
+		<div class="wc-backbone-modal-content" data-id="{{ data.term_id }}">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
 					<h1><?php esc_html_e( 'Add shipping class', 'woocommerce' ); ?></h1>
@@ -110,8 +110,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<footer>
 					<div class="inner">
 						<button id="btn-ok" disabled class="button button-primary button-large disabled">
-							<div class="wc-shipping-class-modal-action-{{ data.action === 'create' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
-							<div class="wc-shipping-class-modal-action-{{ data.action === 'edit' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.action === 'create' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.action === 'edit' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
 						</button>
 					</div>
 				</footer>

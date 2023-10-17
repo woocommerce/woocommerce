@@ -105,6 +105,8 @@
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
+					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onModalLoaded );
 				},
 				onUpdateZoneRegionPicker: function( event ) {
 					var value = event.detail,
@@ -326,6 +328,8 @@
 
 					event.preventDefault();
 
+					method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-shipping-method-settings',
 						variable : {
@@ -400,6 +404,77 @@
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
 				},
+				/**
+				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
+				 * markup, it needs to be manipulated here.
+				 */
+				reformatSettingsHTML: function( html ) {
+					const htmlWithoutTables = this.replaceHTMLTables( html );
+					const htmlWithMovedHelpTips = this.moveHTMLHelpTips( htmlWithoutTables );
+				
+					return htmlWithMovedHelpTips;
+				},
+				moveHTMLHelpTips: function( html ) {
+					// These help tips aren't moved.
+					const helpTipsToIgnore = [ 'woocommerce_flat_rate_cost' ];
+
+					const htmlContent = $( html );
+					const labels = htmlContent.find( 'label' );
+					labels.each( ( i ) => {
+						const label = $( labels[ i ] );
+						const helpTip = label.find( '.woocommerce-help-tip' );
+
+						if ( helpTip.length === 0 ) {
+							return;
+						}
+
+						const id = label.attr( 'for' );
+
+						if ( helpTipsToIgnore.includes( id ) ) {
+							return;
+						}
+
+						// woocommerce_free_shipping_ignore_discounts gets a helpTip appended to its label. Otherwise, add the text as the last element in the fieldset.
+						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
+							const input = htmlContent.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+							const inputLabel = fieldset.find( 'label' );
+							inputLabel.append( helpTip );
+						} else {
+							const text = helpTip.data( 'tip' );
+							const input = htmlContent.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+
+							if ( fieldset.length && fieldset.find( '.wc-shipping-zone-method-fields-help-text' ).length === 0 ) {
+								fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
+							}
+						}
+
+						// Coupon discounts doesn't get a title on Free Shipping.
+						if ( label.text().trim() === 'Coupons discounts' ) {
+							label.text( '' );
+						}
+
+					} );
+
+					return htmlContent.prop( 'outerHTML' );
+				},
+				replaceHTMLTables: function ( html ) {
+					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
+					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
+					// Removing the `table` is sufficient.
+					const htmlContent = $( html );
+					const tables = htmlContent.find( 'table.form-table' );
+
+					tables.each( ( i ) => {
+						const table = $( tables[ i ] );
+						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
+						div.html( table.html() );
+						table.replaceWith( div );
+					} );
+
+					return htmlContent.prop('outerHTML');
+				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
@@ -439,20 +514,24 @@
 
 							shippingMethodView.unblock();
 
-							// Pop up next modal
-							$( this ).WCBackboneModal({
-								template : 'wc-modal-shipping-method-settings',
-								variable : {
-									instance_id : instance_id,
-									method      : method,
-									status	    : 'new'
-								},
-								data : {
-									instance_id : instance_id,
-									method      : method,
-									status	    : 'new'
-								}
-							});
+							if ( method.settings_html ) {
+								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+
+								// Pop up next modal
+								$( this ).WCBackboneModal({
+									template : 'wc-modal-shipping-method-settings',
+									variable : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									},
+									data : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									}
+								});
+							}
 		
 							$( document.body ).trigger( 'init_tooltips' );
 
@@ -461,12 +540,62 @@
 						}, 'json' );
 					}
 				},
+				// Free Shipping has hidden field elements depending on data values.
+				possiblyHideFreeShippingRequirements: function( data ) {
+					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null || 
+							data.woocommerce_free_shipping_requires === '' || 
+							data.woocommerce_free_shipping_requires === 'coupon';
+
+						const select = $( '#woocommerce_free_shipping_requires' );
+						const fieldset = select.closest( 'fieldset' );
+						const allOtherLabelElementsAfter = fieldset.nextAll( 'label' );
+						const allOtherFieldsetElementsAfter = fieldset.nextAll( 'fieldset' );
+
+						allOtherLabelElementsAfter.each( ( i ) => {
+							$( allOtherLabelElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+
+						allOtherFieldsetElementsAfter.each( ( i ) => {
+							$( allOtherFieldsetElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+					}
+				},
+				onModalLoaded: function( event, target ) {
+					if ( target === 'wc-modal-shipping-method-settings' ) {
+						const select = $( '#woocommerce_free_shipping_requires' );
+						if ( select.length > 0 ) {
+							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
+						}
+					}
+				},
+				validateFormArguments: function( event, target, data ) {
+					if ( target === 'wc-modal-add-shipping-method' ) {
+						if ( data.add_method_id ) {
+							const nextButton = document.getElementById( 'btn-next' );
+							nextButton.disabled = false;
+							nextButton.classList.remove( 'disabled' );
+						}
+					} else if ( target === 'wc-modal-shipping-method-settings' ) {
+						event.data.view.possiblyHideFreeShippingRequirements( data );
+						const requiredFields = [ 'woocommerce_free_shipping_title', 'woocommerce_flat_rate_title', 'woocommerce_local_pickup_title' ];
+						const requiredFieldPresent = requiredFields.find( ( field ) => {
+							return data.hasOwnProperty( field ) && field;
+						} );
+						
+						if ( requiredFieldPresent ) {
+							const shouldDisable = data[ requiredFieldPresent ].length === 0;
+							const saveButton = document.getElementById( 'btn-ok' );
+							saveButton.disabled = shouldDisable;
+							saveButton.classList.toggle( 'disabled', shouldDisable );
+						} 
+					}
+				},
 				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
 					if ( target === 'wc-modal-shipping-method-settings' ) {
 						var btnData = $( '#btn-ok' ).data();
 
 						if ( ! addButtonCalled && btnData && btnData.status === 'new' ) {
-							console.log( 'delete instance_id: ' + post_data.instance_id );
 							shippingMethodView.block();
 
 							var view    = shippingMethodView,

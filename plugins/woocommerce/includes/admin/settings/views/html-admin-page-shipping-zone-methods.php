@@ -131,8 +131,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						printf(
 							/* translators: %s: shipping method title */
-							esc_html__( '%s Settings', 'woocommerce' ),
-							'{{{ data.method.method_title }}}'
+							esc_html__( 'Configure %s', 'woocommerce' ),
+							'{{{ data.method.method_title.toLowerCase() }}}'
 						);
 						?>
 					</h1>
@@ -148,7 +148,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
+						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large">
+							<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
+							<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
+						</button>
+						<div class="wc-shipping-zone-method-modal-info wc-shipping-zone-method-modal-info-{{ data.status === 'existing' ? 'inactive' : 'active' }}"><?php esc_html_e( 'STEP 2 OF 2', 'woocommerce' ); ?></div>
 					</div>
 				</footer>
 			</section>
@@ -162,32 +166,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<h1><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></h1>
+					<h1><?php esc_html_e( 'Create shipping method', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article>
 					<form action="" method="post">
-						<div class="wc-shipping-zone-method-selector">
-							<p><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></p>
+						<fieldset class="wc-shipping-zone-method-selector">
+							<legend class="screen-reader-text"><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></legend>
+							<?php
+							$methods = WC()->shipping()->load_shipping_methods();
 
-							<select name="add_method_id">
-								<?php
-								foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
-									if ( ! $method->supports( 'shipping-zones' ) ) {
-										continue;
+							$methods_placed_in_order = array();
+							$first_methods_ids       = array( 'free_shipping', 'flat_rate', 'local_pickup' );
+
+							foreach ( $first_methods_ids as $first_method_id ) {
+								foreach ( $methods as $key => $obj ) {
+									if ( $obj->id === $first_method_id ) {
+										$methods_placed_in_order[] = $obj;
+										unset( $methods[ $key ] );
+										break;
 									}
-									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '</li>';
 								}
-								?>
-							</select>
-						</div>
+							}
+
+							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
+
+							foreach ( $methods_placed_in_order as $method ) {
+								if ( ! $method->supports( 'shipping-zones' ) ) {
+									continue;
+								}
+								$description = wp_kses_post( wpautop( $method->get_method_description() ) );
+								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . ' ' . wc_help_tip( esc_html( $description ) ) . '<span class="dashicons dashicons-yes"></span></label></div>';
+							}
+							?>
+						</fieldset>
 					</form>
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-next" class="button button-primary button-large"><?php esc_html_e( 'Configure shipping method', 'woocommerce' ); ?></button>
+						<button id="btn-next" disabled class="button button-primary button-large disabled"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
+						<div class="wc-shipping-zone-method-modal-info"><?php esc_html_e( 'STEP 1 OF 2', 'woocommerce' ); ?></div>
 					</div>
 				</footer>
 			</section>
