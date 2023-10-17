@@ -143,9 +143,9 @@ export function Edit( {
 		}
 	}
 
-	function removeHandler( download: ProductDownload ) {
+	function removeDownload( download: ProductDownload ) {
 		const otherDownloads = downloads.reduce< ProductDownload[] >(
-			function removeDownload( others, current ) {
+			function removeDownload( others: ProductDownload[], current: ProductDownload ) {
 				if ( current.file === download.file ) {
 					return others;
 				}
@@ -159,6 +159,18 @@ export function Edit( {
 		}
 
 		setDownloads( otherDownloads );
+	}
+
+	function removeHandler( download: ProductDownload ) {
+		return function handleRemoveClick() {
+			removeDownload( download );
+		}
+	}
+
+	function editHandler( download: ProductDownload ) {
+		return function handleEditClick() {
+			setSelectedDownload( download );
+		}
 	}
 
 	function handleUploadError( error: unknown ) {
@@ -236,7 +248,7 @@ export function Edit( {
 
 				{ Boolean( downloads.length ) && (
 					<Sortable className="wp-block-woocommerce-product-downloads-field__table">
-						{ downloads.map( ( download ) => {
+						{ downloads.map( ( download: ProductDownload ) => {
 							const nameFromUrl = getFileName( download.file );
 							const isUploading =
 								download.file.startsWith( 'blob' );
@@ -263,17 +275,9 @@ export function Edit( {
 										) }
 										{ ! isUploading && (
 											<Button
-												onClick={ () => {
-													const clonedDownload =
-														JSON.parse(
-															JSON.stringify(
-																download
-															)
-														) as ProductDownload;
-													setSelectedDownload(
-														clonedDownload
-													);
-												} }
+												onClick={ editHandler(
+														download
+												) }
 												variant="tertiary"
 											>
 												{ __( 'Edit', 'woocommerce' ) }
@@ -286,9 +290,9 @@ export function Edit( {
 												'woocommerce'
 											) }
 											disabled={ isUploading }
-											onClick={ () =>
-												removeHandler( download )
-											}
+											onClick={ removeHandler(
+												download
+											) }
 										/>
 									</div>
 								</ListItem>
@@ -307,10 +311,10 @@ export function Edit( {
 			) }
 			{ selectedDownload && (
 				<EditDownloadsModal
-					downloableItem={ selectedDownload }
+					downloableItem={ { ...selectedDownload } }
 					onCancel={ () => setSelectedDownload( null ) }
 					onRemove={ () => {
-						removeHandler( selectedDownload );
+						removeDownload( selectedDownload );
 						setSelectedDownload( null );
 					} }
 					onChange={ ( text: string ) => {
@@ -320,7 +324,7 @@ export function Edit( {
 						} );
 					} }
 					onSave={ () => {
-						const newDownloads = downloads.map( ( obj ) =>
+						const newDownloads = downloads.map( ( obj: ProductDownload ) =>
 							obj.id === selectedDownload.id
 								? selectedDownload
 								: obj
