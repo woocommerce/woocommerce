@@ -154,7 +154,34 @@ class BlockRegistry {
 			$registry->unregister( $metadata['name'] );
 		}
 
-		return register_block_type_from_metadata( $block_json_file );
+		return register_block_type_from_metadata(
+			$block_json_file,
+			[
+				'attributes'   => array_merge(
+					$metadata['attributes'],
+					[
+						'_templateBlockId'             => [
+							'type'               => 'string',
+							'__experimentalRole' => 'content',
+						],
+						'_templateBlockOrder'          => [
+							'type'               => 'integer',
+							'__experimentalRole' => 'content',
+						],
+						'_templateBlockHideConditions' => [
+							'type'               => 'array',
+							'__experimentalRole' => 'content',
+						],
+					],
+				),
+				'uses_context' => array_merge(
+					isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : [],
+					[
+						'productType',
+					]
+				),
+			]
+		);
 	}
 
 }
