@@ -112,12 +112,22 @@ export default function Products( props: ProductsProps ): JSX.Element {
 			return <NoResults type={ props.type } />;
 		}
 
+		const productListClass = classnames(
+			showAllButton
+				? 'woocommerce-marketplace__product-list-content--collapsed'
+				: ''
+		);
+
 		return (
 			<>
 				{ props.categorySelector && (
 					<CategorySelector type={ props.type } />
 				) }
-				<ProductListContent products={ products } type={ props.type } />
+				<ProductListContent
+					products={ products }
+					type={ props.type }
+					className={ productListClass }
+				/>
 				{ showAllButton && (
 					<Button
 						className={ viewAllButonClassName }
