@@ -1127,8 +1127,11 @@ final class WooCommerce {
 	/**
 	 * Add the necessary request query variables for the Legacy REST API
 	 * (either the dedicated extension if it's installed, or the stub otherwise).
+	 *
+	 * @param array $vars The query variables array to extend.
+	 * @return array The extended query variables array.
 	 */
-	private function add_query_vars_for_legacy_rest_api_stub() {
+	private function add_query_vars_for_legacy_rest_api_stub( $vars ) {
 		$vars[] = 'wc-api-version';
 		$vars[] = 'wc-api-route';
 		$vars[] = 'wc-api';
