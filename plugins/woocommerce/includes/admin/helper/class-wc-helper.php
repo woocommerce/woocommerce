@@ -114,7 +114,7 @@ class WC_Helper {
 		$woo_themes  = self::get_local_woo_themes();
 
 		$subscriptions_list_data   = self::get_subscription_list_data();
-		$subscriptions			   = array_filter(
+		$subscriptions             = array_filter(
 			$subscriptions_list_data,
 			function( $subscription ) {
 				return ! empty( $subscription['product_key'] );
@@ -926,6 +926,7 @@ class WC_Helper {
 
 	/**
 	 * Activate helper subscription.
+	 * 
 	 * @throws Exception
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
@@ -1025,6 +1026,7 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a product subscription.
+	 * 
 	 * @throws Exception
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if deactivated, false otherwise.
