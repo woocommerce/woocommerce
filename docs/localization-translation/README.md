@@ -45,7 +45,10 @@ If you’re new to translating, check out the [translators handbook](https://mak
 
     ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/2016-02-17-at-10.00.png)
 
-5. Rename this file to `woocommerce-YOURLANG.mo` (e.g., Great Britain English should be `en_GB`).
+5. Rename this file to `woocommerce-YOURLANG.mo` (e.g., Great Britain English should be `en_GB`). The corresponding language code can be found by going to [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/) and opening the desired language. The language code is visible in the upper-right corner.
+
+    ![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-09.44.53.png)
+
 6. Upload to your site under `wp-content/languages/woocommerce/`. Once uploaded, this translation file may be used.
 
 ## Creating custom translations
