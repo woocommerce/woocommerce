@@ -89,30 +89,30 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
 			'title'            => array(
-				'title'       => __( 'Title', 'woocommerce' ),
+				'title'       => __( 'Name', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => $this->method_title,
 				'desc_tip'    => true,
 			),
 			'requires'         => array(
-				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
+				'title'   => __( 'Free shipping requires', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
 				'default' => '',
 				'options' => array(
-					''           => __( 'N/A', 'woocommerce' ),
+					''           => __( 'No requirement', 'woocommerce' ),
 					'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
 					'min_amount' => __( 'A minimum order amount', 'woocommerce' ),
-					'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+					'either'     => __( 'A minimum order amount OR coupon', 'woocommerce' ),
+					'both'       => __( 'A minimum order amount AND coupon', 'woocommerce' ),
 				),
 			),
 			'min_amount'       => array(
 				'title'       => __( 'Minimum order amount', 'woocommerce' ),
 				'type'        => 'price',
 				'placeholder' => wc_format_localized_price( 0 ),
-				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
+				'description' => __( 'Users will need to spend this amount to get free shipping.', 'woocommerce' ),
 				'default'     => '0',
 				'desc_tip'    => true,
 			),

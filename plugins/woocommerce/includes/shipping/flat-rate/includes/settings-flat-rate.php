@@ -11,7 +11,7 @@ $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</cod
 
 $settings = array(
 	'title'      => array(
-		'title'       => __( 'Method title', 'woocommerce' ),
+		'title'       => __( 'Name', 'woocommerce' ),
 		'type'        => 'text',
 		'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'     => __( 'Flat rate', 'woocommerce' ),
