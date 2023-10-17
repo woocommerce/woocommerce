@@ -61,8 +61,8 @@ class WC_Helper_Admin {
 		global $current_screen;
 
 		$connect_url_args = array(
-			'page'                 => 'wc-addons',
-			'section'              => 'helper',
+			'page'    => 'wc-addons',
+			'section' => 'helper',
 		);
 
 		// No active connection.

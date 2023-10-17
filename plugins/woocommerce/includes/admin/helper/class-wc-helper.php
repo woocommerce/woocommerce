@@ -114,7 +114,7 @@ class WC_Helper {
 		$woo_themes  = self::get_local_woo_themes();
 
 		$subscriptions_list_data   = self::get_subscription_list_data();
-		$subscriptions			   = array_filter(
+		$subscriptions             = array_filter(
 			$subscriptions_list_data,
 			function( $subscription ) {
 				return ! empty( $subscription['product_key'] );
@@ -683,10 +683,11 @@ class WC_Helper {
 
 	/**
 	 * Get helper redirect URL.
+	 * 
 	 * @param array $args Query args.
 	 * @return string
 	 */
-	private static function _get_helper_redirect_url( $args = array() ) {
+	private static function get_helper_redirect_url( $args = array() ) {
 		global $current_screen;
 		if ( isset( $_GET['redirect-to-wc-admin'] ) && $current_screen->id === 'woocommerce_page_wc-addons' ) {		
 			return add_query_arg(
@@ -698,7 +699,7 @@ class WC_Helper {
 				admin_url( 'admin.php' )
 			);
 		}
-		
+
 		return add_query_arg(
 			$args,
 			admin_url( 'admin.php' )
@@ -841,7 +842,7 @@ class WC_Helper {
 		}
 
 		wp_safe_redirect(
-			self::_get_helper_redirect_url(
+			self::get_helper_redirect_url(
 				array(
 					'page'             => 'wc-addons',
 					'section'          => 'helper',
@@ -866,7 +867,7 @@ class WC_Helper {
 		 */
 		do_action( 'woocommerce_helper_disconnected' );
 
-		$redirect_uri = self::_get_helper_redirect_url(
+		$redirect_uri = self::get_helper_redirect_url(
 			array(
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
@@ -891,7 +892,7 @@ class WC_Helper {
 
 		self::refresh_helper_subscriptions();
 
-		$redirect_uri = self::_get_helper_redirect_url(
+		$redirect_uri = self::get_helper_redirect_url(
 			array(
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
