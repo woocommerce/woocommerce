@@ -145,7 +145,10 @@ export function Edit( {
 
 	function removeDownload( download: ProductDownload ) {
 		const otherDownloads = downloads.reduce< ProductDownload[] >(
-			function removeDownload( others: ProductDownload[], current: ProductDownload ) {
+			function removeDownloadElement(
+				others: ProductDownload[],
+				current: ProductDownload
+			) {
 				if ( current.file === download.file ) {
 					return others;
 				}
@@ -164,13 +167,13 @@ export function Edit( {
 	function removeHandler( download: ProductDownload ) {
 		return function handleRemoveClick() {
 			removeDownload( download );
-		}
+		};
 	}
 
 	function editHandler( download: ProductDownload ) {
 		return function handleEditClick() {
 			setSelectedDownload( download );
-		}
+		};
 	}
 
 	function handleUploadError( error: unknown ) {
@@ -276,7 +279,7 @@ export function Edit( {
 										{ ! isUploading && (
 											<Button
 												onClick={ editHandler(
-														download
+													download
 												) }
 												variant="tertiary"
 											>
@@ -324,7 +327,9 @@ export function Edit( {
 						} );
 					} }
 					onSave={ () => {
-						const newDownloads = downloads.map( ( obj: ProductDownload ) =>
+						const newDownloads = downloads.map( (
+							obj: ProductDownload
+						) =>
 							obj.id === selectedDownload.id
 								? selectedDownload
 								: obj
