@@ -1790,7 +1790,8 @@ class WC_Order extends WC_Abstract_Order {
 		 * @since 2.2.0
 		 *
 		 * @param string $url
-		 * @param WC_Order $order
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
 		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url',
@@ -1806,7 +1807,8 @@ class WC_Order extends WC_Abstract_Order {
 				),
 				'woocommerce-cancel_order'
 			),
-			$this
+			$this,
+			$redirect
 		);
 	}
 
@@ -1823,7 +1825,8 @@ class WC_Order extends WC_Abstract_Order {
 		 * @since 2.2.0
 		 *
 		 * @param string $url
-		 * @param WC_Order $order
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
 		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url_raw',
@@ -1837,7 +1840,8 @@ class WC_Order extends WC_Abstract_Order {
 				),
 				$this->get_cancel_endpoint()
 			),
-			$this
+			$this,
+			$redirect
 		);
 	}
 
