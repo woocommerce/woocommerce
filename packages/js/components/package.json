@@ -43,6 +43,7 @@
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/date": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
+		"@woocommerce/number": "workspace:*",
 		"@wordpress/a11y": "wp-6.0",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/base-styles": "wp-6.0",
