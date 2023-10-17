@@ -106,6 +106,7 @@ export {
 export { default as TreeSelectControl } from './tree-select-control';
 export { default as PhoneNumberInput } from './phone-number-input';
 export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
+export { NumberControl as __experimentalNumberControl } from './number-control';
 // Exports below can be removed once the @woocommerce/product-editor package is released.
 export {
 	ProductSectionLayout as __experimentalProductSectionLayout,
