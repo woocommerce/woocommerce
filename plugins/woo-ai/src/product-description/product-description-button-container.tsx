@@ -38,7 +38,7 @@ import { translateApiErrors as getApiError } from '../utils/apiErrors';
 import { buildShortDescriptionPrompt } from '../product-short-description/product-short-description-button-container';
 
 const DESCRIPTION_MAX_LENGTH = 300;
-const preferenceId = `spotlightDismissed-shortDescriptionGenerated`;
+const preferenceId = 'modalDismissed-shortDescriptionGenerated';
 
 const recordDescriptionTracks = recordTracksFactory(
 	'description_completion',
