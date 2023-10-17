@@ -47,6 +47,17 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	}
 
 	/**
+	 * Get the query params for collections of attributes.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params                      = parent::get_collection_params();
+		$params['orderby']['enum'][] = 'menu_order';
+		return $params;
+	}
+
+	/**
 	 * Get a collection of attribute terms.
 	 *
 	 * @throws RouteException On error.
