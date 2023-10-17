@@ -84,7 +84,7 @@ WooCommerce includes a language file (`.pot` file) that contains all of the Engl
 
 ## Creating custom translations with PoEdit
 
-[Poedit ](https://poedit.net/) is a more advanced alternative to the [Loco Translate](https://wordpress.org/plugins/loco-translate/) plugin. Only advanced users or translators wishing to create a custom translation to WooCommerce should attempt this method.
+[Poedit ](https://poedit.net/) is a more advanced alternative to the [Loco Translate](https://wordpress.org/plugins/loco-translate/) plugin.
 
 WooCommerce comes with a `.pot` file that can be imported into PoEdit to translate.
 
