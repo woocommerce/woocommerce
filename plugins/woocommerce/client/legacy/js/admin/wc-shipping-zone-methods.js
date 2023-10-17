@@ -567,6 +567,8 @@
 						if ( select.length > 0 ) {
 							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
 						}
+					} else if ( target === 'wc-modal-add-shipping-method' ) {
+						// event.data.view
 					}
 				},
 				validateFormArguments: function( event, target, data ) {
