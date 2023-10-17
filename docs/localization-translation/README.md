@@ -4,12 +4,7 @@ WooCommerce is already translated into several languages and is translation-read
 
 There are several methods to create a translation, most of which are outlined in the WordPress Codex. In most cases you can contribute to the project on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/).
 
-To create custom translations:
-
--   For a simple approach, choose the [Loco Translate](https://wordpress.org/plugins/loco-translate/) plugin.
--   If you're more experienced, consider [Poedit ](https://poedit.net/).
-
-This document provides details on both methods.
+To create custom translations you can consider using [Poedit](https://poedit.net/).
 
 ## Set up WordPress in your language
 
@@ -55,36 +50,7 @@ If you’re new to translating, check out the [translators handbook](https://mak
 
 WooCommerce includes a language file (`.pot` file) that contains all of the English text. You can find this language file inside the plugin folder in `woocommerce/i18n/languages/`.
 
-### Creating custom translations with Loco Translate
-
-1. Install and activate the [Loco Translate](https://wordpress.org/plugins/loco-translate/) plugin.
-2. Go to the new Loco Translate menu item created in your Dashboard with five sub-sections.
-3. Go to the `Plugins` section, and select `WooCommerce`.
-
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-woocommerce.png)
-
-4. Add new languages using the `Add New Language` link.
-
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-new-language.png)
-
-5. Choose the language to add in the list, or enter the language ISO code (ex: `fr_FR`, `en_US` etc.), select the folder to add the translation files to, and click `Start Translating`.
-
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-create-language.png)
-
-    > **Note:**
-    >
-    > - Loco Translate offers three different locations for where to create the translation. The best choice for your own translation is Custom, not just to prevent custom translations from being undone by updates, but also because it’s needed for strings in extensions like WooCommerce Subscriptions to be properly translated. Avoid the Author location since it’s inside the plugin and will be overwritten by extension updates, as well as the System location, which could be overwritten by translations from translate.wordpress.org.
-    > - If you encounter any technical issues while using Loco Translate, please get in touch with [the Loco Translate support team](https://wordpress.org/support/plugin/loco-translate/).
-
-6. Save when finished.
-
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/loco-translate-translating-1.png)
-
-    > **Note:** When a new version of WooCommerce is released and updated on your site, you need refresh the .po file to look for new strings. Use the “Sync” button to find any new string to start translating.
-
 ## Creating custom translations with PoEdit
-
-[Poedit ](https://poedit.net/) is a more advanced alternative to the [Loco Translate](https://wordpress.org/plugins/loco-translate/) plugin.
 
 WooCommerce comes with a `.pot` file that can be imported into PoEdit to translate.
 
@@ -128,15 +94,21 @@ function load_custom_plugin_translation_file( $mofile, $domain ) {
 }
 ```
 
-## Translating text without a localization file
+## Other tools
 
-With the [Say what?](https://wordpress.org/plugins/say-what/) plugin, you can effortlessly translate or modify specific words without delving into a WordPress theme's `.po` file. No custom coding needed.
+There are some other third-party tools that can help with translations. The following list shows a few of them.
 
-Upon activation, the plugin prompts you to specify:
+### Loco Translate
 
-1. **Original String**: The text you aim to translate. Check the plugin source code for the precise string.
-2. **Text Domain**: Use `woocommerce`.
-3. **Replacement Text**: The text you'd like to display in place of the original.
+[Loco Translate](https://wordpress.org/plugins/loco-translate/) provides in-browser editing of WordPress translation files and integration with automatic translation services.
+
+### Say what?
+
+[Say what?](https://wordpress.org/plugins/say-what/) allows to effortlessly translate or modify specific words without delving into a WordPress theme's `.po` file.
+
+### String locator
+
+[String Locator](https://wordpress.org/plugins/string-locator/) enables quick searches within themes, plugins, or the WordPress core, displaying a list of files with the matching text and its line number.
 
 ## FAQ
 
@@ -177,8 +149,12 @@ Navigate back to the Checkout page – translations should be reflected there.
 
 ### I have translated the strings I needed, but some of them don’t show up translated on the front end. Why?
 
-If some of your translated strings don’t show up as expected on your WooCommerce site, the first thing to check is if these strings have both a Single and Plural form in the Source text section.
+If some of your translated strings don’t show up as expected on your WooCommerce site, the first thing to check is if these strings have both a Single and Plural form in the Source text section. To do so, open the corresponding translation on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/), e.g. [the translation for Product and Products](https://translate.wordpress.org/projects/wp-plugins/woocommerce/stable/de/default/?filters%5Bstatus%5D=either&filters%5Boriginal_id%5D=577764&filters%5Btranslation_id%5D=24210880).
 
-If this is the case, then it is necessary to translate both these forms for your translation to work as expected. To do this, please use the Single and Plural tabs that show up in the translation section:
+This screenshot shows that the Singular translation is available:
 
-![screenshot](https://woocommerce.com/wp-content/uploads/2023/03/Single_Plural_Loco_Translate-1.png)
+![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.06.png)
+
+While this screenshot shows that the Plural translation is not available:
+
+![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.21.png)
