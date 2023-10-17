@@ -3,20 +3,26 @@
  */
 import { useState, useEffect } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
+import { store as preferencesStore } from '@wordpress/preferences';
 import { __ } from '@wordpress/i18n';
+import { createInterpolateElement } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
+import { useDispatch, select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { FILENAME_APPEND } from './constants';
+import { FILENAME_APPEND, LINK_CONTAINER_ID } from './constants';
 import { useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId, getProductImageCount } from '../utils';
 import {
 	uploadImageToLibrary,
 	getCurrentAttachmentDetails,
 } from './image_utils';
+import { TourSpotlight } from '../components/';
+
+const preferenceId = `spotlightDismissed-backgroundRemovalLink`;
 
 const getErrorMessage = ( errorCode?: string ) => {
 	switch ( errorCode ) {
@@ -42,6 +48,11 @@ const recordBgRemovalTracks = recordTracksFactory(
 export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+	const hasBeenDismissedBefore = select( preferencesStore ).get(
+		'woo-ai-plugin',
+		preferenceId
+	);
+	const { set } = useDispatch( preferencesStore );
 
 	const [ state, setState ] = useState< 'none' | 'generating' | 'uploading' >(
 		'none'
@@ -51,6 +62,9 @@ export const BackgroundRemovalLink = () => {
 	useEffect( () => {
 		recordBgRemovalTracks( 'view_ui' );
 	}, [] );
+
+	const setSpotlightAsDismissed = () =>
+		set( 'woo-ai-plugin', preferenceId, true );
 
 	const onRemoveBackgroundClick = async () => {
 		removeSnackbar();
@@ -87,6 +101,8 @@ export const BackgroundRemovalLink = () => {
 			} );
 
 			recordBgRemovalTracks( 'complete' );
+
+			setSpotlightAsDismissed();
 			showSnackbar( {
 				label: __( 'Was the generated image helpful?', 'woocommerce' ),
 				onPositiveResponse: () => {
@@ -135,6 +151,42 @@ export const BackgroundRemovalLink = () => {
 				</button>
 				<img src={ MagicIcon } alt="" />
 			</div>
+			{ ! hasBeenDismissedBefore && (
+				<TourSpotlight
+					id="backgroundRemovalLink"
+					reference={ `#${ LINK_CONTAINER_ID }` }
+					description={ __(
+						'Effortlessly make your product images pop by removing the background using state-of-the-art AI technology. Just click the button and watch!',
+						'woocommerce'
+					) }
+					title={ createInterpolateElement(
+						__(
+							'<NewBlock /> Remove backgrounds with AI',
+							'woocommerce'
+						),
+						{
+							NewBlock: (
+								<span className="woo-ai-background-removal-link__new-block">
+									{ __( 'NEW', 'woocommerce' ) }
+								</span>
+							),
+						}
+					) }
+					placement="left"
+					spotlightParent={
+						( document.querySelector(
+							`#${ LINK_CONTAINER_ID }`
+						) as HTMLElement ) ?? document.body
+					}
+					onDismissal={ () => {
+						recordBgRemovalTracks( 'spotlight_dismissed' );
+						setSpotlightAsDismissed();
+					} }
+					onDisplayed={ () =>
+						recordBgRemovalTracks( 'spotlight_displayed' )
+					}
+				/>
+			) }
 			{ displayError && (
 				<Notice onRemove={ () => setDisplayError( null ) }>
 					{ displayError }
