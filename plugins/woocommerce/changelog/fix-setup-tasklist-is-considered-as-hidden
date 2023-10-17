@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove unnecessary APIs calls when the setup tasklist is shown

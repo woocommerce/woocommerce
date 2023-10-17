@@ -3,6 +3,8 @@ export const PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME =
 export const PRODUCT_EDITOR_FEEDBACK_CES_ACTION = 'product_editor';
 export const NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME =
 	'woocommerce_new_product_management_enabled';
+export const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION =
+	'woocommerce_single_variation_notice_dismissed';
 
 export const NUMBERS_AND_ALLOWED_CHARS = '[^-0-9%s1%s2]';
 export const NUMBERS_AND_DECIMAL_SEPARATOR = '[^-\\d\\%s]+';
@@ -62,3 +64,6 @@ export const TRACKS_SOURCE = 'product-block-editor-v1';
  * @see https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/pagination/index.js#L12
  */
 export const DEFAULT_PER_PAGE_OPTION = 25;
+
+export const DEFAULT_VARIATION_PER_PAGE_OPTION = 5;
+export const DEFAULT_VARIATION_PER_PAGE_OPTIONS = [ 5, 10, 25 ];

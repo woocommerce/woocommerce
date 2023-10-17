@@ -38,6 +38,21 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
+	 * Badge.
+	 *
+	 * @return string
+	 */
+	public function get_badge() {
+		/**
+		 * Filter WooPayments onboarding task badge.
+		 *
+		 * @param string     $badge    Badge content.
+		 * @since 8.2.0
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_badge', '' );
+	}
+
+	/**
 	 * Content.
 	 *
 	 * @return string
@@ -93,7 +108,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::is_connected();
+			$this->is_complete_result = self::is_connected() && ! self::is_account_partially_onboarded();
 		}
 
 		return $this->is_complete_result;
@@ -146,6 +161,23 @@ class WooCommercePayments extends Task {
 			$wc_payments_gateway = \WC_Payments::get_gateway();
 			return method_exists( $wc_payments_gateway, 'is_connected' )
 				? $wc_payments_gateway->is_connected()
+				: false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if WooCommerce Payments needs setup.
+	 * Errored data or payments not enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_account_partially_onboarded() {
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
+				? $wc_payments_gateway->is_account_partially_onboarded()
 				: false;
 		}
 

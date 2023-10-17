@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -235,4 +236,168 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 	}
 
+	/**
+	 * @testdox The pre-query escape hook allows replacing the order query. The callback does not return pagination information.
+	 */
+	public function test_pre_query_escape_hook_simple() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->save();
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 2, $query->orders );
+		$this->assertEquals( 2, $query->found_orders );
+		$this->assertEquals( 0, $query->max_num_pages );
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			$this->assertNull( $result );
+			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
+			$this->assertStringContainsString( 'SELECT ', $sql );
+
+			// Only return one of the orders to show that we are replacing the query result.
+			// Do not return found_orders or max_num_pages to show we're setting defaults.
+			$order_ids = array( $order1->get_id() );
+			return array( $order_ids, null, null );
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( 1, $query->max_num_pages );
+		$this->assertEquals( $order1->get_id(), $query->orders[0] );
+
+		$orders = wc_get_orders( array() );
+		$this->assertCount( 1, $orders );
+		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox The pre-query escape hook allows replacing the order query. The callback returns pagination information.
+	 */
+	public function test_pre_query_escape_hook_with_pagination() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->save();
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 2, $query->orders );
+		$this->assertEquals( 2, $query->found_orders );
+		$this->assertEquals( 0, $query->max_num_pages );
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			$this->assertNull( $result );
+			$this->assertInstanceOf( OrdersTableQuery::class, $query_object );
+			$this->assertStringContainsString( 'SELECT ', $sql );
+
+			// Only return one of the orders to show that we are replacing the query result.
+			$order_ids = array( $order1->get_id() );
+			// These are made up to show that we are actually replacing the values.
+			$found_orders  = 17;
+			$max_num_pages = 23;
+			return array( $order_ids, $found_orders, $max_num_pages );
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery( array() );
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 17, $query->found_orders );
+		$this->assertEquals( 23, $query->max_num_pages );
+		$this->assertEquals( $order1->get_id(), $query->orders[0] );
+
+		$orders = wc_get_orders( array() );
+		$this->assertCount( 1, $orders );
+		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox The pre-query escape hook uses the limit arg if it is set.
+	 */
+	public function test_pre_query_escape_hook_pass_limit() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			// Do not return found_orders or max_num_pages so as to provoke a warning.
+			$order_ids = array( $order1->get_id() );
+			return array( $order_ids, 10, null );
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit' => 5,
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 10, $query->found_orders );
+		$this->assertEquals( 2, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox A regular query will still work even if the pre-query escape hook returns null for the whole 3-tuple.
+	 */
+	public function test_pre_query_escape_hook_return_null() {
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null', 10, 3 );
+
+		// Query with no results.
+		$query = new OrdersTableQuery();
+		$this->assertNotNull( $query->orders );
+		$this->assertNotNull( $query->found_orders );
+		$this->assertNotNull( $query->max_num_pages );
+		$this->assertCount( 0, $query->orders );
+		$this->assertEquals( 0, $query->found_orders );
+		$this->assertEquals( 0, $query->max_num_pages );
+
+		// Query with 1 result.
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$query = new OrdersTableQuery();
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( null, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox A regular query with a limit will still work even if the pre-query escape hook returns null for the whole 3-tuple.
+	 */
+	public function test_pre_query_escape_hook_return_null_limit() {
+		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
+		$order1->save();
+
+		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
+			// Just return null.
+			return null;
+		};
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit' => 5,
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertEquals( 1, $query->max_num_pages );
+
+		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
 }

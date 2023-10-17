@@ -294,6 +294,15 @@ jobs:
 
                       core.setOutput( 'cherry-pick-pr', pr.data.html_url )
 
+                      // label PR
+
+                      const label = await github.rest.issues.addLabels({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: pr.data.number,
+                        labels: ["metric: code freeze exception"],
+                      });
+
             - name: Checkout trunk branch
               if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
               run: git checkout trunk

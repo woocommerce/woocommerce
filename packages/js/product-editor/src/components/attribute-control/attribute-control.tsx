@@ -30,11 +30,14 @@ import {
 } from './utils';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
-import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { RemoveConfirmationModal } from '../remove-confirmation-modal';
+import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
 	onRemove?: ( attribute: ProductAttribute ) => void;
@@ -49,6 +52,8 @@ type AttributeControlProps = {
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
 	disabledAttributeIds?: number[];
+	termsAutoSelection?: 'first' | 'all';
+	defaultVisibility?: boolean;
 	uiStrings?: {
 		notice?: string | React.ReactElement;
 		emptyStateSubtitle?: string;
@@ -68,6 +73,8 @@ type AttributeControlProps = {
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	onAdd = () => {},
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	onChange,
 	onEdit = () => {},
 	onNewModalCancel = () => {},
@@ -83,6 +90,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
 	disabledAttributeIds = [],
+	termsAutoSelection,
+	defaultVisibility = false,
 } ) => {
 	uiStrings = {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
@@ -157,6 +166,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const openEditModal = ( attribute: ProductAttribute ) => {
+		recordEvent( 'product_options_edit', {
+			source: TRACKS_SOURCE,
+			attribute: attribute.name,
+		} );
 		setCurrentAttributeId( getAttributeId( attribute ) );
 		onEditModalOpen( attribute );
 	};
@@ -167,21 +180,28 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...value,
-			...newAttributes.filter(
-				( newAttr ) =>
-					! value.find(
-						( attr ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newAttributes.filter(
+			( newAttr ) =>
+				! value.some(
+					( current: ProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( current )
+				)
+		);
+		handleChange( [ ...value, ...addedAttributesOnly ] );
 		onAdd( newAttributes );
 		closeNewModal();
 	};
 
-	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+	const handleEdit = ( updatedAttribute: EnhancedProductAttribute ) => {
+		recordEvent( 'product_options_update', {
+			source: TRACKS_SOURCE,
+			attribute: updatedAttribute.name,
+			values: updatedAttribute.terms?.map( ( term ) => term.name ),
+			default: updatedAttribute.isDefault,
+			visible: updatedAttribute.visible,
+			filter: true, // default true until attribute filter gets implemented
+		} );
+
 		const updatedAttributes = value.map( ( attr ) => {
 			if (
 				getAttributeId( attr ) === getAttributeId( updatedAttribute )
@@ -221,7 +241,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				className="woocommerce-add-attribute-list-item__add-button"
 				onClick={ () => {
 					openNewModal();
-					recordEvent( 'product_add_attributes_click' );
 				} }
 			>
 				{ uiStrings.newAttributeListItemLabel }
@@ -280,12 +299,16 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						onNewModalCancel();
 					} }
 					onAdd={ handleAdd }
+					onAddAnother={ onAddAnother }
+					onRemoveItem={ onRemoveItem }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
 					disabledAttributeIds={ disabledAttributeIds }
 					disabledAttributeMessage={
 						uiStrings.disabledAttributeMessage
 					}
+					termsAutoSelection={ termsAutoSelection }
+					defaultVisibility={ defaultVisibility }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -327,6 +350,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						handleEdit( updatedAttribute );
 					} }
 					attribute={ currentAttribute }
+					attributes={ value }
 				/>
 			) }
 			{ removingAttribute && (
@@ -336,7 +360,11 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						{ attributeName: removingAttribute.name }
 					) }
 					description={
-						uiStrings.attributeRemoveConfirmationModalMessage
+						<p>
+							{
+								uiStrings.attributeRemoveConfirmationModalMessage
+							}
+						</p>
 					}
 					onRemove={ () => handleRemove( removingAttribute ) }
 					onCancel={ () => {

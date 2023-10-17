@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
@@ -13,23 +12,19 @@ import { chevronRight } from '@wordpress/icons';
  */
 import { TRACKS_SOURCE } from '../../../constants';
 import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-status';
-
-export type InventoryMenuItemProps = {
-	variation: ProductVariation;
-	handlePrompt(
-		label?: string,
-		parser?: ( value: string ) => Partial< ProductVariation > | null
-	): void;
-	onChange( values: Partial< ProductVariation > ): void;
-	onClose(): void;
-};
+import { UpdateStockMenuItem } from '../update-stock-menu-item';
+import { VariationActionsMenuItemProps } from '../types';
+import { handlePrompt } from '../../../utils/handle-prompt';
 
 export function InventoryMenuItem( {
-	variation,
-	handlePrompt,
+	selection,
 	onChange,
 	onClose,
-}: InventoryMenuItemProps ) {
+}: VariationActionsMenuItemProps ) {
+	const ids = Array.isArray( selection )
+		? selection.map( ( { id } ) => id )
+		: selection.id;
+
 	return (
 		<Dropdown
 			position="middle right"
@@ -40,7 +35,7 @@ export function InventoryMenuItem( {
 							'product_variations_menu_inventory_click',
 							{
 								source: TRACKS_SOURCE,
-								variation_id: variation.id,
+								variation_id: ids,
 							}
 						);
 						onToggle();
@@ -55,39 +50,11 @@ export function InventoryMenuItem( {
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
-						<MenuItem
-							onClick={ () => {
-								recordEvent(
-									'product_variations_menu_inventory_select',
-									{
-										source: TRACKS_SOURCE,
-										action: 'stock_quantity_set',
-										variation_id: variation.id,
-									}
-								);
-								handlePrompt( undefined, ( value ) => {
-									const stockQuantity = Number( value );
-									if ( Number.isNaN( stockQuantity ) ) {
-										return {};
-									}
-									recordEvent(
-										'product_variations_menu_inventory_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'stock_quantity_set',
-											variation_id: variation.id,
-										}
-									);
-									return {
-										stock_quantity: stockQuantity,
-										manage_stock: true,
-									};
-								} );
-								onClose();
-							} }
-						>
-							{ __( 'Update stock', 'woocommerce' ) }
-						</MenuItem>
+						<UpdateStockMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 						<MenuItem
 							onClick={ () => {
 								recordEvent(
@@ -95,12 +62,23 @@ export function InventoryMenuItem( {
 									{
 										source: TRACKS_SOURCE,
 										action: 'manage_stock_toggle',
-										variation_id: variation.id,
+										variation_id: ids,
 									}
 								);
-								onChange( {
-									manage_stock: ! variation.manage_stock,
-								} );
+								if ( Array.isArray( selection ) ) {
+									onChange(
+										selection.map(
+											( { id, manage_stock } ) => ( {
+												id,
+												manage_stock: ! manage_stock,
+											} )
+										)
+									);
+								} else {
+									onChange( {
+										manage_stock: ! selection.manage_stock,
+									} );
+								}
 								onClose();
 							} }
 						>
@@ -113,14 +91,25 @@ export function InventoryMenuItem( {
 									{
 										source: TRACKS_SOURCE,
 										action: 'set_status_in_stock',
-										variation_id: variation.id,
+										variation_id: ids,
 									}
 								);
-								onChange( {
-									stock_status:
-										PRODUCT_STOCK_STATUS_KEYS.instock,
-									manage_stock: false,
-								} );
+								if ( Array.isArray( selection ) ) {
+									onChange(
+										selection.map( ( { id } ) => ( {
+											id,
+											stock_status:
+												PRODUCT_STOCK_STATUS_KEYS.instock,
+											manage_stock: false,
+										} ) )
+									);
+								} else {
+									onChange( {
+										stock_status:
+											PRODUCT_STOCK_STATUS_KEYS.instock,
+										manage_stock: false,
+									} );
+								}
 								onClose();
 							} }
 						>
@@ -133,14 +122,25 @@ export function InventoryMenuItem( {
 									{
 										source: TRACKS_SOURCE,
 										action: 'set_status_out_of_stock',
-										variation_id: variation.id,
+										variation_id: ids,
 									}
 								);
-								onChange( {
-									stock_status:
-										PRODUCT_STOCK_STATUS_KEYS.outofstock,
-									manage_stock: false,
-								} );
+								if ( Array.isArray( selection ) ) {
+									onChange(
+										selection.map( ( { id } ) => ( {
+											id,
+											stock_status:
+												PRODUCT_STOCK_STATUS_KEYS.outofstock,
+											manage_stock: false,
+										} ) )
+									);
+								} else {
+									onChange( {
+										stock_status:
+											PRODUCT_STOCK_STATUS_KEYS.outofstock,
+										manage_stock: false,
+									} );
+								}
 								onClose();
 							} }
 						>
@@ -156,14 +156,25 @@ export function InventoryMenuItem( {
 									{
 										source: TRACKS_SOURCE,
 										action: 'set_status_on_back_order',
-										variation_id: variation.id,
+										variation_id: ids,
 									}
 								);
-								onChange( {
-									stock_status:
-										PRODUCT_STOCK_STATUS_KEYS.onbackorder,
-									manage_stock: false,
-								} );
+								if ( Array.isArray( selection ) ) {
+									onChange(
+										selection.map( ( { id } ) => ( {
+											id,
+											stock_status:
+												PRODUCT_STOCK_STATUS_KEYS.onbackorder,
+											manage_stock: false,
+										} ) )
+									);
+								} else {
+									onChange( {
+										stock_status:
+											PRODUCT_STOCK_STATUS_KEYS.onbackorder,
+										manage_stock: false,
+									} );
+								}
 								onClose();
 							} }
 						>
@@ -179,26 +190,40 @@ export function InventoryMenuItem( {
 									{
 										source: TRACKS_SOURCE,
 										action: 'low_stock_amount_set',
-										variation_id: variation.id,
+										variation_id: ids,
 									}
 								);
-								handlePrompt( undefined, ( value ) => {
-									recordEvent(
-										'product_variations_menu_inventory_select',
-										{
-											source: TRACKS_SOURCE,
-											action: 'low_stock_amount_set',
-											variation_id: variation.id,
+								handlePrompt( {
+									onOk( value ) {
+										recordEvent(
+											'product_variations_menu_inventory_update',
+											{
+												source: TRACKS_SOURCE,
+												action: 'low_stock_amount_set',
+												variation_id: ids,
+											}
+										);
+										const lowStockAmount = Number( value );
+										if ( Number.isNaN( lowStockAmount ) ) {
+											return null;
 										}
-									);
-									const lowStockAmount = Number( value );
-									if ( Number.isNaN( lowStockAmount ) ) {
-										return null;
-									}
-									return {
-										low_stock_amount: lowStockAmount,
-										manage_stock: true,
-									};
+										if ( Array.isArray( selection ) ) {
+											onChange(
+												selection.map( ( { id } ) => ( {
+													id,
+													low_stock_amount:
+														lowStockAmount,
+													manage_stock: true,
+												} ) )
+											);
+										} else {
+											onChange( {
+												low_stock_amount:
+													lowStockAmount,
+												manage_stock: true,
+											} );
+										}
+									},
 								} );
 								onClose();
 							} }

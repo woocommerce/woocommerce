@@ -7,61 +7,185 @@ const wcPages = [
 	{
 		name: 'WooCommerce',
 		subpages: [
-			{ name: 'Home', heading: 'Home' },
-			{ name: 'Orders', heading: 'Orders' },
-			{ name: 'Customers', heading: 'Customers' },
-			{ name: 'Coupons', heading: 'Coupons' },
-			{ name: 'Reports', heading: 'Orders' },
-			{ name: 'Settings', heading: 'General' },
-			{ name: 'Status', heading: 'System status' },
+			{
+				name: 'Home',
+				heading: 'Home',
+				element:
+					'.wooocommerce-inbox-card__header > .components-truncate',
+				text: 'Inbox',
+			},
+			{
+				name: 'Orders',
+				heading: 'Orders',
+				element: '.select2-selection__placeholder',
+				text: 'Filter by registered customer',
+			},
+			{
+				name: 'Customers',
+				heading: 'Customers',
+				element: '#search-inline-input-0',
+				text: 'Move backward for selected items',
+			},
+			{
+				name: 'Coupons',
+				heading: 'Coupons',
+				element: '.woocommerce-table__empty-item',
+				text: 'No data to display',
+			},
+			{
+				name: 'Reports',
+				heading: 'Orders',
+				element: '.nav-tab-wrapper > .nav-tab-active',
+				text: 'Orders',
+			},
+			{
+				name: 'Settings',
+				heading: 'General',
+				element: '#store_address-description',
+				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
+			},
+			{
+				name: 'Status',
+				heading: 'System status',
+				element: '.nav-tab-active',
+				text: 'System status',
+			},
 		],
 	},
 	{
 		name: 'Products',
 		subpages: [
-			{ name: 'All Products', heading: 'Products' },
-			{ name: 'Add New', heading: 'Add New' },
-			{ name: 'Categories', heading: 'Product categories' },
-			{ name: 'Tags', heading: 'Product tags' },
-			{ name: 'Attributes', heading: 'Attributes' },
+			{
+				name: 'All Products',
+				heading: 'Products',
+				element: '#dropdown_product_type',
+				text: 'Filter by product type',
+			},
+			{
+				name: 'Add New',
+				heading: 'Add New',
+				element: '.duplication',
+				text: 'Copy to a new draft',
+			},
+			{
+				name: 'Categories',
+				heading: 'Product categories',
+				element: '.row-title',
+				text: 'Uncategorized',
+			},
+			{
+				name: 'Tags',
+				heading: 'Product tags',
+				element: '.no-items > td',
+				text: 'No tags found',
+			},
+			{
+				name: 'Attributes',
+				heading: 'Attributes',
+				element: '.alternate > td',
+				text: 'No attributes currently exist.',
+			},
 		],
 	},
 	// analytics is handled through a separate test
 	{
 		name: 'Marketing',
 		subpages: [
-			{ name: 'Overview', heading: 'Overview' },
-			{ name: 'Coupons', heading: 'Coupons' },
+			{
+				name: 'Overview',
+				heading: 'Overview',
+				element: '.woocommerce-marketing-card-header-description',
+				text: 'Start by adding a channel to your store',
+			},
+			{
+				name: 'Coupons',
+				heading: 'Coupons',
+				element: '.woocommerce-BlankState-cta.button-primary',
+				text: 'Create your first coupon',
+			},
 		],
 	},
 ];
 
+let productId, orderId;
+const productName = 'Simple Product Name';
+const productPrice = '15.99';
+
 for ( const currentPage of wcPages ) {
+	const randomNum = new Date().getTime().toString();
+	const customer = {
+		username: `customer${ randomNum }`,
+		password: 'password',
+		email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
+	};
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
-			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+			const response = await new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc-admin',
+			} ).post( 'onboarding/profile', {
+				skipped: true,
+			} );
 
-			if ( coreProfilerEnabled ) {
-				const response = await new wcApi( {
-					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
-					version: 'wc-admin',
-				} ).post( 'onboarding/profile', {
-					skipped: true,
+			const httpStatus = response.status;
+			const { status, message } = response.data;
+
+			expect( httpStatus ).toEqual( 200 );
+			expect( status ).toEqual( 'success' );
+			expect( message ).toEqual(
+				'Onboarding profile data has been updated.'
+			);
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			// create a simple product
+			await api
+				.post( 'products', {
+					name: productName,
+					type: 'simple',
+					regular_price: productPrice,
+				} )
+				.then( ( response ) => {
+					productId = response.data.id;
 				} );
+			// create an order
+			await api
+				.post( 'orders', {
+					line_items: [
+						{
+							product_id: productId,
+							quantity: 1,
+						},
+					],
+				} )
+				.then( ( response ) => {
+					orderId = response.data.id;
+				} );
+			// create customer
+			await api
+				.post( 'customers', customer )
+				.then( ( response ) => ( customer.id = response.data.id ) );
+		} );
 
-				const httpStatus = response.status;
-				const { status, message } = response.data;
-
-				expect( httpStatus ).toEqual( 200 );
-				expect( status ).toEqual( 'success' );
-				expect( message ).toEqual(
-					'Onboarding profile data has been updated.'
-				);
-			}
+		test.afterAll( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api.delete( `products/${ productId }`, {
+				force: true,
+			} );
+			await api.delete( `orders/${ orderId }`, { force: true } );
+			await api.delete( `customers/${ customer.id }`, { force: true } );
 		} );
 
 		test.beforeEach( async ( { page } ) => {
@@ -104,6 +228,15 @@ for ( const currentPage of wcPages ) {
 				await expect(
 					page.locator( 'h1.components-text' )
 				).toContainText( currentPage.subpages[ i ].heading );
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+					.first()
+				).toBeVisible();
+
+				await expect(
+					page.locator( currentPage.subpages[ i ].element )
+				).toContainText( currentPage.subpages[ i ].text );
 			} );
 		}
 	} );

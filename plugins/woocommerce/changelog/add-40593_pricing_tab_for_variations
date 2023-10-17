@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update variation API to adhere tax class to context, and updated variation template to use tax class field.

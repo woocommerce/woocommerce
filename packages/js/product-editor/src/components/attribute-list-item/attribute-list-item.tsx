@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { DragEventHandler } from 'react';
-import { ListItem } from '@woocommerce/components';
+import { ListItem, Tag } from '@woocommerce/components';
 import { ProductAttribute } from '@woocommerce/data';
 import { sprintf, __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
@@ -12,9 +12,8 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import HiddenIcon from '../variations-table/hidden-icon';
-import HelpIcon from './help-icon';
 import NotFilterableIcon from './not-filterable-icon';
+import HiddenIcon from '../../icons/hidden-icon';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;
@@ -48,24 +47,19 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 			onDragEnd={ onDragEnd }
 		>
 			<div>{ attribute.name }</div>
-			<div className="woocommerce-attribute-list-item__options">
+			<div>
 				{ attribute.options
 					.slice( 0, attribute.options.length > 3 ? 2 : 3 )
-					.map( ( option, index ) => (
-						<div
-							className="woocommerce-attribute-list-item__option-chip"
-							key={ index }
-						>
-							{ option }
-						</div>
+					.map( ( option ) => (
+						<Tag key={ option } label={ option } />
 					) ) }
 				{ attribute.options.length > 3 && (
-					<div className="woocommerce-attribute-list-item__option-chip">
-						{ sprintf(
+					<Tag
+						label={ sprintf(
 							__( '+ %i more', 'woocommerce' ),
 							attribute.options.length - 2
 						) }
-					</div>
+					/>
 				) }
 			</div>
 			<div className="woocommerce-attribute-list-item__actions">
@@ -78,7 +72,6 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
 							<NotFilterableIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
-							<HelpIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-help-icon" />
 						</div>
 					</Tooltip>
 				) }
@@ -91,7 +84,6 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
 							<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
-							<HelpIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-help-icon" />
 						</div>
 					</Tooltip>
 				) }

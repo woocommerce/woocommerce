@@ -99,14 +99,27 @@ class BatchProcessingController {
 	 * @param bool $unique     Whether to make the action unique.
 	 */
 	private function schedule_watchdog_action( bool $with_delay = false, bool $unique = false ): void {
-		$time = $with_delay ? time() + HOUR_IN_SECONDS : time();
-		as_schedule_single_action(
-			$time,
-			self::WATCHDOG_ACTION_NAME,
-			array(),
-			self::ACTION_GROUP,
-			$unique
-		);
+		$time = time();
+		if ( $with_delay ) {
+			/**
+			 * Modify the delay interval for the batch processor's watchdog events.
+			 *
+			 * @since 8.2.0
+			 *
+			 * @param int $delay Time, in seconds, before the watchdog process will run. Defaults to 3600 (1 hour).
+			 */
+			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );
+		}
+
+		if ( ! as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+			as_schedule_single_action(
+				$time,
+				self::WATCHDOG_ACTION_NAME,
+				array(),
+				self::ACTION_GROUP,
+				$unique
+			);
+		}
 	}
 
 	/**

@@ -57,6 +57,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		isSnoozeable,
 		time,
 		title,
+		badge,
 		level,
 		additionalInfo,
 		recordViewEvent,
@@ -174,6 +175,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				<TaskItem
 					key={ id }
 					title={ title }
+					badge={ badge }
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }
@@ -190,7 +192,16 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				/>
 			);
 		},
-		[ id, title, content, time, actionLabel, isExpandable, isComplete ]
+		[
+			id,
+			title,
+			badge,
+			content,
+			time,
+			actionLabel,
+			isExpandable,
+			isComplete,
+		]
 	);
 
 	return hasFills ? (

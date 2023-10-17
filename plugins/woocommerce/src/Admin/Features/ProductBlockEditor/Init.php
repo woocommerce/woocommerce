@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Admin\Features\TransientNotices;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
 use WP_Block_Editor_Context;
 
 /**
@@ -36,13 +36,6 @@ class Init {
 	private $redirection_controller;
 
 	/**
-	 * Simple product block template.
-	 *
-	 * @var AbstractBlockTemplate
-	 */
-	public $simple_product_template;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -50,10 +43,14 @@ class Init {
 			array_push( $this->supported_post_types, 'variable' );
 		}
 
-		$this->simple_product_template = new SimpleProductTemplate();
-		$this->redirection_controller  = new RedirectionController( $this->supported_post_types );
+		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			// Register the product block template.
+			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+			$template_registry->register( new SimpleProductTemplate() );
+			$template_registry->register( new ProductVariationTemplate() );
+
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
@@ -62,6 +59,7 @@ class Init {
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
+			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
@@ -82,12 +80,16 @@ class Init {
 		}
 		$post_type_object     = get_post_type_object( 'product' );
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
+		$template_registry    = wc_get_container()->get( BlockTemplateRegistry::class );
 
 		$editor_settings = array();
 		if ( ! empty( $post_type_object->template ) ) {
-			$editor_settings['template']                 = $post_type_object->template;
-			$editor_settings['templateLock']             = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
-			$editor_settings['__unstableResolvedAssets'] = $this->get_resolved_assets();
+			$editor_settings['template']     = $post_type_object->template;
+			$editor_settings['templateLock'] = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
+			$editor_settings['templates']    = array(
+				'product'           => $post_type_object->template,
+				'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
+			);
 		}
 
 		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );
@@ -106,6 +108,7 @@ class Init {
 			'before'
 		);
 		wp_tinymce_inline_scripts();
+		wp_enqueue_media();
 	}
 
 	/**
@@ -159,105 +162,6 @@ class Init {
 	}
 
 	/**
-	 * Get the resolved assets needed for the iframe editor.
-	 *
-	 * @return array Styles and scripts.
-	 */
-	private function get_resolved_assets() {
-		if ( function_exists( 'gutenberg_resolve_assets_override' ) ) {
-			return gutenberg_resolve_assets_override();
-		}
-
-		global $pagenow;
-
-		$script_handles = array(
-			'wp-polyfill',
-		);
-		// Note for core merge: only 'wp-edit-blocks' should be in this array.
-		$style_handles = array(
-			'wp-edit-blocks',
-		);
-
-		if ( current_theme_supports( 'wp-block-styles' ) ) {
-			$style_handles[] = 'wp-block-library-theme';
-		}
-
-		if ( 'widgets.php' === $pagenow || 'customize.php' === $pagenow ) {
-			$style_handles[] = 'wp-widgets';
-			$style_handles[] = 'wp-edit-widgets';
-		}
-
-		$block_registry = \WP_Block_Type_Registry::get_instance();
-
-		foreach ( $block_registry->get_all_registered() as $block_type ) {
-			// In older WordPress versions, like 6.0, these properties are not defined.
-			if ( isset( $block_type->style_handles ) && is_array( $block_type->style_handles ) ) {
-				$style_handles = array_merge( $style_handles, $block_type->style_handles );
-			}
-
-			if ( isset( $block_type->editor_style_handles ) && is_array( $block_type->editor_style_handles ) ) {
-				$style_handles = array_merge( $style_handles, $block_type->editor_style_handles );
-			}
-
-			if ( isset( $block_type->script_handles ) && is_array( $block_type->script_handles ) ) {
-				$script_handles = array_merge( $script_handles, $block_type->script_handles );
-			}
-		}
-
-		$style_handles = array_unique( $style_handles );
-		$done          = wp_styles()->done;
-
-		ob_start();
-
-		// We do not need reset styles for the iframed editor.
-		wp_styles()->done = array( 'wp-reset-editor-styles' );
-		wp_styles()->do_items( $style_handles );
-		wp_styles()->done = $done;
-
-		$styles = ob_get_clean();
-
-		$script_handles = array_unique( $script_handles );
-		$done           = wp_scripts()->done;
-
-		ob_start();
-
-		wp_scripts()->done = array();
-		wp_scripts()->do_items( $script_handles );
-		wp_scripts()->done = $done;
-
-		$scripts = ob_get_clean();
-
-		/*
-		 * Generate font @font-face styles for the site editor iframe.
-		 * Use the registered font families for printing.
-		 */
-		if ( class_exists( '\WP_Fonts' ) ) {
-			$wp_fonts   = wp_fonts();
-			$registered = $wp_fonts->get_registered_font_families();
-			if ( ! empty( $registered ) ) {
-				$queue = $wp_fonts->queue;
-				$done  = $wp_fonts->done;
-
-				$wp_fonts->done  = array();
-				$wp_fonts->queue = $registered;
-
-				ob_start();
-				$wp_fonts->do_items();
-				$styles .= ob_get_clean();
-
-				// Reset the Web Fonts API.
-				$wp_fonts->done  = $done;
-				$wp_fonts->queue = $queue;
-			}
-		}
-
-		return array(
-			'styles'  => $styles,
-			'scripts' => $scripts,
-		);
-	}
-
-	/**
 	 * Enqueue styles needed for the rich text editor.
 	 *
 	 * @param array $args Array of post type arguments.
@@ -265,9 +169,27 @@ class Init {
 	 */
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
-			$args['template_lock'] = 'all';
-			$args['template']      = $this->simple_product_template->get_formatted_template();
+			// Get the template from the registry.
+			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+			$template          = $template_registry->get_registered( 'simple-product' );
+
+			if ( isset( $template ) ) {
+				$args['template_lock'] = 'all';
+				$args['template']      = $template->get_formatted_template();
+			}
 		}
+		return $args;
+	}
+
+	/**
+	 * Enables variation post type in REST API.
+	 *
+	 * @param array $args Array of post type arguments.
+	 * @return array Array of post type arguments.
+	 */
+	public function enable_rest_api_for_product_variation( $args ) {
+		$args['show_in_rest'] = true;
+
 		return $args;
 	}
 
@@ -283,6 +205,7 @@ class Init {
 			array(
 				'variable_product_block_tour_shown',
 				'product_block_variable_options_notice_dismissed',
+				'variable_items_without_price_notice_dismissed',
 			)
 		);
 	}

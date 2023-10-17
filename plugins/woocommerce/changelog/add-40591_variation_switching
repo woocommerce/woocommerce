@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Move product page footer from editor to product page, and update useIsScrolled hook.

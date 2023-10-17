@@ -1,6 +1,5 @@
 name: Run API tests
 description: Runs the WooCommerce Core API tests and generates Allure report.
-permissions: {}
 
 inputs:
     report-name:
@@ -8,6 +7,9 @@ inputs:
         required: true
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
+    playwright-config:
+        description: Playwright config file to be used
+        default: playwright.config.js
 
 outputs:
     result:
@@ -23,7 +25,7 @@ runs:
           shell: bash
           run: |
               pnpm exec playwright test \
-              --config=tests/api-core-tests/playwright.config.js \
+              --config=tests/api-core-tests/${{ inputs.playwright-config }} \
               ${{ inputs.tests }}
 
         - name: Generate Test report.

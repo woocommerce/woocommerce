@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
@@ -12,10 +12,10 @@ import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
  */
 import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { MarketplaceContextType } from '../../contexts/types';
 
 export interface TabsProps {
-	selectedTab?: string | undefined;
-	setSelectedTab: ( value: string ) => void;
 	additionalClassNames?: Array< string > | undefined;
 }
 
@@ -30,6 +30,10 @@ interface Tabs {
 }
 
 const tabs: Tabs = {
+	search: {
+		name: 'search',
+		title: __( 'Search results', 'woocommerce' ),
+	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
@@ -37,6 +41,10 @@ const tabs: Tabs = {
 	extensions: {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
+	},
+	themes: {
+		name: 'themes',
+		title: __( 'Themes', 'woocommerce' ),
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
@@ -52,21 +60,42 @@ const tabs: Tabs = {
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === DEFAULT_TAB_KEY ) {
-		navigateTo( {
-			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
-		} );
-		return;
-	}
 	navigateTo( {
-		url: getNewPath( { tab: tabKey } ),
+		url: getNewPath(
+			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
+			MARKETPLACE_PATH,
+			{}
+		),
 	} );
 };
 
-const renderTabs = ( props: TabsProps ) => {
-	const { selectedTab, setSelectedTab } = props;
+const getVisibleTabs = ( selectedTab: string ) => {
+	if ( selectedTab === '' ) {
+		return tabs;
+	}
+	const currentVisibleTabs = { ...tabs };
+	if ( selectedTab !== 'search' ) {
+		delete currentVisibleTabs.search;
+	}
+
+	return currentVisibleTabs;
+};
+const renderTabs = (
+	marketplaceContextValue: MarketplaceContextType,
+	visibleTabs: Tabs
+) => {
+	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+
+	const onTabClick = ( tabKey: string ) => {
+		if ( tabKey === selectedTab ) {
+			return;
+		}
+		setSelectedTab( tabKey );
+		setUrlTabParam( tabKey );
+	};
+
 	const tabContent = [];
-	for ( const tabKey in tabs ) {
+	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
@@ -89,10 +118,7 @@ const renderTabs = ( props: TabsProps ) => {
 							'is-active': tabKey === selectedTab,
 						}
 					) }
-					onClick={ () => {
-						setSelectedTab( tabKey );
-						setUrlTabParam( tabKey );
-					} }
+					onClick={ () => onTabClick( tabKey ) }
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
@@ -104,23 +130,24 @@ const renderTabs = ( props: TabsProps ) => {
 };
 
 const Tabs = ( props: TabsProps ): JSX.Element => {
-	const { setSelectedTab, additionalClassNames } = props;
+	const { additionalClassNames } = props;
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
-	interface Query {
-		path?: string;
-		tab?: string;
-	}
-
-	const query: Query = useQuery();
+	const query: Record< string, string > = useQuery();
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
-		} else {
+		} else if ( Object.keys( query ).length > 0 ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
 	}, [ query, setSelectedTab ] );
 
+	useEffect( () => {
+		setVisibleTabs( getVisibleTabs( selectedTab ) );
+	}, [ selectedTab ] );
 	return (
 		<nav
 			className={ classNames(
@@ -128,7 +155,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( props ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs ) }
 		</nav>
 	);
 };

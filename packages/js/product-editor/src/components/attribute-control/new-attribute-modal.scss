@@ -54,7 +54,6 @@
 		display: grid;
 		grid-template-columns: 40% 55% 5%;
 		border-bottom: 1px solid $gray-300;
-		align-items: center;
 	}
 	&__table-row {
 		padding: $gap-large 0;
@@ -83,13 +82,13 @@
 	&__table-attribute-trash-column {
 		display: flex;
 		justify-content: center;
+		align-items: center;
 
 		@include breakpoint( '<782px' ) {
 			position: absolute;
 			top: 0;
 			right: 0;
 			bottom: 0;
-			align-items: center;
 		}
 
 		.components-button.has-icon {

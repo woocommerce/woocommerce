@@ -1,15 +1,19 @@
+/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { FontPairing } from './global-styles';
 
 export const SidebarNavigationScreenTypography = () => {
 	return (
@@ -23,22 +27,46 @@ export const SidebarNavigationScreenTypography = () => {
 				{
 					EditorLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'typography',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 					StyleLink: (
 						<Link
-							href={ `${ ADMIN_URL }/site-editor.php?path=%2Fwp_global_styles&canvas=edit` }
-							type="external"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_style_link_click',
+									{
+										source: 'typography',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
 						/>
 					),
 				}
 			) }
 			content={
-				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header"></div>
-				</>
+				<div className="woocommerce-customize-store_sidebar-typography-content">
+					<FontPairing />
+				</div>
 			}
 		/>
 	);

@@ -29,3 +29,6 @@ wp plugin activate filter-setter
 
 # initialize pretty permalinks
 wp rewrite structure /%postname%/
+
+# Activate our helper APIs plugin.
+wp plugin activate test-helper-apis

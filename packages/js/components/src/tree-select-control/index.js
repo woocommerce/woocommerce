@@ -234,7 +234,10 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
-					if ( includeParent && this.value !== ROOT_VALUE ) {
+					if (
+						( includeParent && this.value !== ROOT_VALUE ) ||
+						individuallySelectParent
+					) {
 						return cache.selectedValues.includes( this.value );
 					}
 					if ( this.hasChildren ) {
@@ -427,11 +430,20 @@ const TreeSelectControl = ( {
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
 		const changedValues = individuallySelectParent
-			? []
+			? [ option.value ]
 			: option.leaves
 					.filter( ( opt ) => opt.checked !== checked )
 					.map( ( opt ) => opt.value );
-		if ( includeParent && option.value !== ROOT_VALUE ) {
+		/**
+		 * If includeParent is true, we need to add the parent value to the array of
+		 * changed values. However, if for some reason includeParent AND individuallySelectParent
+		 * are both set to true, we want to avoid duplicating the parent value in the array.
+		 */
+		if (
+			includeParent &&
+			! individuallySelectParent &&
+			option.value !== ROOT_VALUE
+		) {
 			changedValues.push( option.value );
 		}
 		if ( checked ) {

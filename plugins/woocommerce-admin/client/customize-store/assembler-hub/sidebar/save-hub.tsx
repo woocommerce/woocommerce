@@ -4,33 +4,33 @@
 /**
  * External dependencies
  */
-import { useContext } from '@wordpress/element';
-
+import { useContext, useState } from '@wordpress/element';
+import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
-// @ts-ignore No types for this exist yet.
-import { Button, __experimentalHStack as HStack } from '@wordpress/components';
-import { __, sprintf, _n } from '@wordpress/i18n';
+import {
+	// @ts-ignore No types for this exist yet.
+	__experimentalHStack as HStack,
+	// @ts-ignore No types for this exist yet.
+	__experimentalUseNavigator as useNavigator,
+	Button,
+	Spinner,
+} from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
-import { check } from '@wordpress/icons';
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
-import SaveButton from '@wordpress/edit-site/build-module/components/save-button';
+import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
-
-const { useLocation } = unlock( routerPrivateApis );
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -40,72 +40,48 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 ];
 
 export const SaveHub = () => {
-	const saveNoticeId = 'site-edit-save-notice';
-	const { params } = useLocation();
+	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
-
+	const [ isResolving, setIsResolving ] = useState< boolean >( false );
+	const navigator = useNavigator();
+	const { resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
+	);
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createSuccessNotice, createErrorNotice, removeNotice } =
-		useDispatch( noticesStore );
+	const { createErrorNotice } = useDispatch( noticesStore );
 
-	const { dirtyCurrentEntity, countUnsavedChanges, isDirty, isSaving } =
-		useSelect(
-			( select ) => {
-				const {
+	const {
+		dirtyEntityRecords,
+		isDirty,
+	}: {
+		dirtyEntityRecords: {
+			key?: string | number;
+			kind: string;
+			name: string;
+			property?: string;
+			title: string;
+		}[];
+		isDirty: boolean;
+	} = useIsDirty();
+
+	const { isSaving } = useSelect(
+		( select ) => {
+			return {
+				isSaving: dirtyEntityRecords.some( ( record ) =>
 					// @ts-ignore No types for this exist yet.
-					__experimentalGetDirtyEntityRecords,
-					// @ts-ignore No types for this exist yet.
-					isSavingEntityRecord,
-				} = select( coreStore );
-				const dirtyEntityRecords =
-					__experimentalGetDirtyEntityRecords();
-				let calcDirtyCurrentEntity = null;
-
-				if ( dirtyEntityRecords.length === 1 ) {
-					// if we are on global styles
-					if (
-						params.path?.includes( 'color-palette' ) ||
-						params.path?.includes( 'fonts' )
-					) {
-						calcDirtyCurrentEntity = dirtyEntityRecords.find(
-							// @ts-ignore No types for this exist yet.
-							( record ) => record.name === 'globalStyles'
-						);
-					}
-					// if we are on pages
-					else if ( params.postId ) {
-						calcDirtyCurrentEntity = dirtyEntityRecords.find(
-							// @ts-ignore No types for this exist yet.
-							( record ) =>
-								record.name === params.postType &&
-								String( record.key ) === params.postId
-						);
-					}
-				}
-
-				return {
-					dirtyCurrentEntity: calcDirtyCurrentEntity,
-					isDirty: dirtyEntityRecords.length > 0,
-					isSaving: dirtyEntityRecords.some(
-						( record: {
-							kind: string;
-							name: string;
-							key: string;
-						} ) =>
-							isSavingEntityRecord(
-								record.kind,
-								record.name,
-								record.key
-							)
-					),
-					countUnsavedChanges: dirtyEntityRecords.length,
-				};
-			},
-			[ params.path, params.postType, params.postId ]
-		);
+					select( coreStore ).isSavingEntityRecord(
+						record.kind,
+						record.name,
+						record.key
+					)
+				),
+			};
+		},
+		[ dirtyEntityRecords ]
+	);
 
 	const {
 		// @ts-ignore No types for this exist yet.
@@ -116,14 +92,9 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	const saveCurrentEntity = async () => {
-		if ( ! dirtyCurrentEntity ) return;
-
-		removeNotice( saveNoticeId );
-		const { kind, name, key, property } = dirtyCurrentEntity;
-
-		try {
-			if ( dirtyCurrentEntity.kind === 'root' && name === 'site' ) {
+	const save = async () => {
+		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
+			if ( kind === 'root' && name === 'site' ) {
 				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
 					property,
 				] );
@@ -135,18 +106,30 @@ export const SaveHub = () => {
 							typeToPublish.name === name
 					)
 				) {
-					editEntityRecord( kind, name, key, { status: 'publish' } );
+					editEntityRecord( kind, name, key, {
+						status: 'publish',
+					} );
 				}
 
 				await saveEditedEntityRecord( kind, name, key );
+				__unstableMarkLastChangeAsPersistent();
 			}
+		}
+	};
 
-			__unstableMarkLastChangeAsPersistent();
+	const onClickSaveButton = async () => {
+		const source = `${ urlParams.path.replace(
+			'/customize-store/assembler-hub/',
+			''
+		) }`;
+		recordEvent( 'customize_your_store_assembler_hub_save_click', {
+			source,
+		} );
 
-			createSuccessNotice( __( 'Site updated.', 'woocommerce' ), {
-				type: 'snackbar',
-				id: saveNoticeId,
-			} );
+		try {
+			await save();
+			resetHighlightedBlockIndex();
+			navigator.goToParent();
 		} catch ( error ) {
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
@@ -154,69 +137,56 @@ export const SaveHub = () => {
 		}
 	};
 
+	const onDone = async () => {
+		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		setIsResolving( true );
+
+		try {
+			await save();
+			sendEvent( 'FINISH_CUSTOMIZATION' );
+		} catch ( error ) {
+			createErrorNotice(
+				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
+			);
+			setIsResolving( false );
+		}
+	};
+
 	const renderButton = () => {
+		if ( urlParams.path === '/customize-store/assembler-hub' ) {
+			return (
+				<Button
+					variant="primary"
+					onClick={ onDone }
+					className="edit-site-save-hub__button"
+					// @ts-ignore No types for this exist yet.
+					__next40pxDefaultSize
+				>
+					{ isResolving ? <Spinner /> : __( 'Done', 'woocommerce' ) }
+				</Button>
+			);
+		}
+
 		// if we have only one unsaved change and it matches current context, we can show a more specific label
-		let label = dirtyCurrentEntity
-			? __( 'Save', 'woocommerce' )
-			: sprintf(
-					// translators: %d: number of unsaved changes (number).
-					_n(
-						'Review %d change…',
-						'Review %d changes…',
-						countUnsavedChanges,
-						'woocommerce'
-					),
-					countUnsavedChanges
-			  );
+		const label = isSaving
+			? __( 'Saving', 'woocommerce' )
+			: __( 'Save', 'woocommerce' );
 
-		if ( isSaving ) {
-			label = __( 'Saving', 'woocommerce' );
-		}
-
-		if ( dirtyCurrentEntity ) {
-			return (
-				<Button
-					variant="primary"
-					onClick={ saveCurrentEntity }
-					isBusy={ isSaving }
-					disabled={ isSaving }
-					aria-disabled={ isSaving }
-					className="edit-site-save-hub__button"
-					// @ts-ignore No types for this exist yet.
-
-					__next40pxDefaultSize
-				>
-					{ label }
-				</Button>
-			);
-		}
-		const disabled = isSaving || ! isDirty;
-
-		if ( ! isSaving && ! isDirty ) {
-			return (
-				<Button
-					variant="primary"
-					onClick={ () => {
-						sendEvent( 'FINISH_CUSTOMIZATION' );
-					} }
-					className="edit-site-save-hub__button"
-					// @ts-ignore No types for this exist yet.
-					__next40pxDefaultSize
-				>
-					{ __( 'Done', 'woocommerce' ) }
-				</Button>
-			);
-		}
+		const isDisabled = ! isDirty || isSaving;
 
 		return (
-			<SaveButton
+			<Button
+				variant="primary"
+				onClick={ onClickSaveButton }
+				isBusy={ isSaving }
+				disabled={ isDisabled }
+				aria-disabled={ isDisabled }
 				className="edit-site-save-hub__button"
-				variant={ disabled ? null : 'primary' }
-				showTooltip={ false }
-				icon={ disabled && ! isSaving ? check : null }
-				defaultLabel={ label }
+				// @ts-ignore No types for this exist yet.
 				__next40pxDefaultSize
-			/>
+			>
+				{ label }
+			</Button>
 		);
 	};
 

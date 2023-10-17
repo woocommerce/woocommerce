@@ -7,8 +7,6 @@ permissions: {}
 
 jobs:
   stale:
-    if: |
-      ! contains(github.event.issue.labels.*.name, 'type: enhancement')
     runs-on: ubuntu-20.04
     permissions:
       contents: read
@@ -25,6 +23,7 @@ jobs:
           days-before-pr-close: -1
           stale-issue-label: 'status: stale'
           stale-pr-label: 'status: stale'
+          exempt-issue-labels: 'type: enhancement'
           only-issue-labels: 'needs: author feedback'
           close-issue-label: "status: can't reproduce"
           ascending: true

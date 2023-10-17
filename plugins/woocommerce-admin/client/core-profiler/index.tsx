@@ -30,10 +30,12 @@ import {
 	Extension,
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -66,6 +68,8 @@ import {
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
+import { getCountryCode } from '~/dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -418,6 +422,49 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 	} );
 };
 
+const updateStoreCurrency = async ( countryAndState: string ) => {
+	const { general: settings = {} } = await resolveSelect(
+		SETTINGS_STORE_NAME
+	).getSettings( 'general' );
+
+	const countryCode = getCountryCode( countryAndState ) as string;
+	const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+		'onboarding',
+		{}
+	);
+	const currencySettings = CurrencyFactory().getDataForCountry(
+		countryCode,
+		localeInfo,
+		currencySymbols
+	) as {
+		code: string;
+		symbolPosition: string;
+		thousandSeparator: string;
+		decimalSeparator: string;
+		precision: string;
+	};
+
+	if ( Object.keys( currencySettings ).length === 0 ) {
+		return;
+	}
+
+	return dispatch( SETTINGS_STORE_NAME ).updateAndPersistSettingsForGroup(
+		'general',
+		{
+			general: {
+				...settings,
+				woocommerce_currency: currencySettings.code,
+				woocommerce_currency_pos: currencySettings.symbolPosition,
+				woocommerce_price_thousand_sep:
+					currencySettings.thousandSeparator,
+				woocommerce_price_decimal_sep:
+					currencySettings.decimalSeparator,
+				woocommerce_price_num_decimals: currencySettings.precision,
+			},
+		}
+	);
+};
+
 const assignStoreLocation = assign( {
 	businessInfo: (
 		context: CoreProfilerStateMachineContext,
@@ -442,6 +489,9 @@ const updateBusinessInfo = async (
 	const refreshedOnboardingProfile = ( await resolveSelect(
 		OPTIONS_STORE_NAME
 	).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
+
+	await updateStoreCurrency( event.payload.storeLocation );
+
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		blogname: event.payload.storeName,
 		woocommerce_default_country: event.payload.storeLocation,
@@ -1075,9 +1125,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											context.businessInfo
 												.location as string
 										);
+									const currencyUpdate = updateStoreCurrency(
+										context.businessInfo.location as string
+									);
+
 									return Promise.all( [
 										skipped,
 										businessLocation,
+										currencyUpdate,
 									] );
 								},
 								onDone: {
@@ -1437,11 +1492,15 @@ export const CoreProfilerController = ( {
 				hasJetpackSelected: ( context ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) => plugin === 'jetpack'
+							( plugin ) =>
+								plugin === 'jetpack' ||
+								plugin === 'jetpack-boost'
 						) !== undefined ||
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								plugin.key === 'jetpack' && plugin.is_activated
+								( plugin.key === 'jetpack' ||
+									plugin.key === 'jetpack-boost' ) &&
+								plugin.is_activated
 						) !== undefined
 					);
 				},

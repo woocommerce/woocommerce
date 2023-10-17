@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -9,18 +9,30 @@ import { useEffect, useState } from '@wordpress/element';
 import ProductList from '../product-list/product-list';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { ProductType } from '../product-list/types';
 import './discover.scss';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
-	const [ isLoading, setIsLoading ] = useState( false );
+	const marketplaceContextValue = useContext( MarketplaceContext );
+	const { isLoading, setIsLoading } = marketplaceContextValue;
 
+	// Get the content for this screen
 	useEffect( () => {
 		setIsLoading( true );
 
 		fetchDiscoverPageData()
+			.then(
+				( response: Array< ProductGroup > | { success: boolean } ) => {
+					if ( ! Array.isArray( response ) ) {
+						return [];
+					}
+					return response as Array< ProductGroup >;
+				}
+			)
 			.then( ( products: Array< ProductGroup > ) => {
 				setProductGroups( products );
 			} )
@@ -30,7 +42,14 @@ export default function Discover(): JSX.Element | null {
 	}, [] );
 
 	if ( isLoading ) {
-		return <ProductLoader />;
+		return (
+			<div className="woocommerce-marketplace__discover">
+				<ProductLoader
+					placeholderCount={ 9 }
+					type={ ProductType.extension }
+				/>
+			</div>
+		);
 	}
 
 	const groupsList = productGroups.flatMap( ( group ) => group );
@@ -42,6 +61,7 @@ export default function Discover(): JSX.Element | null {
 					title={ groups.title }
 					products={ groups.items }
 					groupURL={ groups.url }
+					type={ groups.itemType }
 				/>
 			) ) }
 		</div>
