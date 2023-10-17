@@ -17,8 +17,9 @@ $first_description  = $content['descriptions'][0]['default'] ?? '';
 $second_description = $content['descriptions'][1]['default'] ?? '';
 $third_description  = $content['descriptions'][2]['default'] ?? '';
 ?>
-<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","justifyContent":"left"}} -->
-<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
+
+<!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"0px","bottom":"80px"}}},"layout":{"type":"constrained","justifyContent":"left"}} -->
+<div class="wp-block-group alignwide" style="margin-top:0px;margin-bottom:80px">
 	<!-- wp:heading {"level":3,"style":{"spacing":{"padding":{"right":"var:preset|spacing|30","left":"var:preset|spacing|30"}}}} -->
 	<h3 class="wp-block-heading" style="padding-right:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)"><?php echo esc_html( $main_header ); ?></h3>
 	<!-- /wp:heading -->
