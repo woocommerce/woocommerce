@@ -1186,7 +1186,9 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get local plugins
+	 * Get locally installed plugins
+	 *
+	 * @return array
 	 */
 	public static function get_local_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
