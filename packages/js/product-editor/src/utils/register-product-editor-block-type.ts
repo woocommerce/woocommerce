@@ -38,6 +38,12 @@ function useEvaluationContext( context: Record< string, unknown > ) {
 	};
 }
 
+function augmentUsesContext( usesContext?: string[] ) {
+	// Note: If you modify this function, also update the server-side
+	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_uses_context() function.
+	return [ ...( usesContext || [] ), 'productType' ];
+}
+
 export function registerProductEditorBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
@@ -46,7 +52,7 @@ export function registerProductEditorBlockType<
 
 	const augmentedMetadata = {
 		...metadata,
-		usesContext: [ ...( metadata.usesContext || [] ), 'productType' ],
+		usesContext: augmentUsesContext( metadata.usesContext ),
 	};
 
 	return registerWooBlockType(
