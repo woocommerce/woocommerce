@@ -1,6 +1,6 @@
 <?php
 /**
- * SimpleProductTemplate
+ * ProductVariationTemplate
  */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
@@ -20,6 +20,11 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		'INVENTORY' => 'inventory',
 		'SHIPPING'  => 'shipping',
 	);
+
+	/**
+	 * The option name used check whether the single variation notice has been dismissed.
+	 */
+	const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION = 'woocommerce_single_variation_notice_dismissed';
 
 	/**
 	 * SimpleProductTemplate constructor.
@@ -100,25 +105,52 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
+		$general_group->add_block(
+			[
+				'id'         => 'general-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
-				'id'         => 'variation-details',
+				'id'         => 'product-variation-details-section',
 				'order'      => 10,
 				'attributes' => [
-					'title' => __( 'Variation details', 'woocommerce' ),
+					'title'       => __( 'Variation details', 'woocommerce' ),
+					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
 				],
 			]
 		);
 		$basic_details->add_block(
 			[
-				'id'         => 'product-summary',
+				'id'         => 'product-variation-note',
 				'blockName'  => 'woocommerce/product-summary-field',
 				'order'      => 20,
 				'attributes' => [
 					'property' => 'description',
 					'label'    => __( 'Note <optional />', 'woocommerce' ),
 					'helpText' => '',
+				],
+			]
+		);
+		$basic_details->add_block(
+			[
+				'id'         => 'product-variation-visibility',
+				'blockName'  => 'woocommerce/product-checkbox-field',
+				'order'      => 30,
+				'attributes' => [
+					'property'       => 'status',
+					'label'          => __( 'Hide in product catalog', 'woocommerce' ),
+					'checkedValue'   => 'private',
+					'uncheckedValue' => 'publish',
 				],
 			]
 		);
@@ -129,7 +161,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'         => 'product-variation-images-section',
 				'order'      => 30,
 				'attributes' => [
-					'title'       => __( 'Images', 'woocommerce' ),
+					'title'       => __( 'Image', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
@@ -141,11 +173,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$images_section->add_block(
 			[
-				'id'         => 'product-variation-images',
+				'id'         => 'product-variation-image',
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'property' => 'image',
+					'multiple' => false,
 				],
 			]
 		);
@@ -158,13 +191,14 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$pricing_group->add_block(
 			[
-				'id'         => 'pricing-has-variations-notice',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'id'         => 'pricing-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
 			]
 		);
@@ -208,8 +242,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-regular-price-field',
 				'order'      => 10,
 				'attributes' => [
-					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
+					'name'       => 'regular_price',
+					'label'      => __( 'Regular price', 'woocommerce' ),
+					'isRequired' => true,
 				],
 			]
 		);
@@ -240,48 +275,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'     => 20,
 			]
 		);
+
 		$product_pricing_section->add_block(
-			[
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => [
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => [
-						[
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						],
-						[
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						],
-						[
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						],
-					],
-				],
-			]
-		);
-		$pricing_advanced_block = $product_pricing_section->add_block(
-			[
-				'id'         => 'product-pricing-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 40,
-				'attributes' => [
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				],
-			]
-		);
-		$pricing_advanced_block->add_block(
 			[
 				'id'         => 'product-tax-class',
 				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
+				'order'      => 40,
 				'attributes' => [
 					'title'       => __( 'Tax class', 'woocommerce' ),
 					'description' => sprintf(
@@ -292,6 +291,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					),
 					'property'    => 'tax_class',
 					'options'     => [
+						[
+							'label' => __( 'Same as main product', 'woocommerce' ),
+							'value' => 'parent',
+						],
 						[
 							'label' => __( 'Standard', 'woocommerce' ),
 							'value' => '',
@@ -317,20 +320,21 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
 		$inventory_group->add_block(
 			[
-				'id'         => 'product_variation_notice_inventory_tab',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'id'         => 'inventory-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
 			]
 		);
-		// Product Pricing Section.
+		// Product Inventory Section.
 		$product_inventory_section       = $inventory_group->add_section(
 			[
-				'id'         => 'product-inventory-section',
+				'id'         => 'product-variation-inventory-section',
 				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Inventory', 'woocommerce' ),
@@ -346,20 +350,20 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_inner_section = $product_inventory_section->add_section(
 			[
-				'id'    => 'product-inventory-inner-section',
+				'id'    => 'product-variation-inventory-inner-section',
 				'order' => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
-				'id'        => 'product-sku-field',
+				'id'        => 'product-variation-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
 			]
 		);
 		$product_inventory_inner_section->add_block(
 			[
-				'id'         => 'product-track-stock',
+				'id'         => 'product-variation-track-stock',
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => [
@@ -377,7 +381,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
 			[
-				'id'         => 'product-inventory-quantity-conditional-wrapper',
+				'id'         => 'product-variation-inventory-quantity-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 30,
 				'attributes' => [
@@ -389,14 +393,14 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_quantity_conditional->add_block(
 			[
-				'id'        => 'product-inventory-quantity',
+				'id'        => 'product-variation-inventory-quantity',
 				'blockName' => 'woocommerce/product-inventory-quantity-field',
 				'order'     => 10,
 			]
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
 			[
-				'id'         => 'product-stock-status-conditional-wrapper',
+				'id'         => 'product-variation-stock-status-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 20,
 				'attributes' => [
@@ -408,7 +412,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_stock_status_conditional->add_block(
 			[
-				'id'         => 'product-stock-status',
+				'id'         => 'product-variation-stock-status',
 				'blockName'  => 'woocommerce/product-radio-field',
 				'order'      => 10,
 				'attributes' => [
@@ -431,97 +435,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
-		$product_inventory_advanced         = $product_inventory_section->add_block(
-			[
-				'id'         => 'product-inventory-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 30,
-				'attributes' => [
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				],
-			]
-		);
-		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
-			[
-				'blockName'  => 'woocommerce/product-section',
-				'order'      => 10,
-				'attributes' => [
-					'blockGap' => 'unit-40',
-				],
-			]
-		);
-		$product_out_of_stock_conditional   = $product_inventory_advanced_wrapper->add_block(
-			[
-				'id'         => 'product-out-of-stock-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 10,
-				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
-				],
-			]
-		);
-		$product_out_of_stock_conditional->add_block(
-			[
-				'id'         => 'product-out-of-stock',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => [
-					'title'    => __( 'When out of stock', 'woocommerce' ),
-					'property' => 'backorders',
-					'options'  => [
-						[
-							'label' => __( 'Allow purchases', 'woocommerce' ),
-							'value' => 'yes',
-						],
-						[
-							'label' => __(
-								'Allow purchases, but notify customers',
-								'woocommerce'
-							),
-							'value' => 'notify',
-						],
-						[
-							'label' => __( "Don't allow purchases", 'woocommerce' ),
-							'value' => 'no',
-						],
-					],
-				],
-			]
-		);
-		$product_out_of_stock_conditional->add_block(
-			[
-				'id'        => 'product-inventory-email',
-				'blockName' => 'woocommerce/product-inventory-email-field',
-				'order'     => 20,
-			]
-		);
-
-		$product_inventory_advanced_wrapper->add_block(
-			[
-				'id'         => 'product-limit-purchase',
-				'blockName'  => 'woocommerce/product-checkbox-field',
-				'order'      => 20,
-				'attributes' => [
-					'title'    => __(
-						'Restrictions',
-						'woocommerce'
-					),
-					'label'    => __(
-						'Limit purchases to 1 item per order',
-						'woocommerce'
-					),
-					'property' => 'sold_individually',
-					'tooltip'  => __(
-						'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-						'woocommerce'
-					),
-				],
-			]
-		);
 	}
 
 	/**
@@ -531,20 +444,21 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
 		$shipping_group->add_block(
 			[
-				'id'         => 'product_variation_notice_shipping_tab',
-				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'id'         => 'shipping-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
 				'attributes' => [
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
-					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
-					'type'       => 'info',
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 				],
 			]
 		);
-		// Product Pricing Section.
+		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
-				'id'         => 'product-fee-and-dimensions-section',
+				'id'         => 'product-variation-fee-and-dimensions-section',
 				'order'      => 20,
 				'attributes' => [
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
@@ -559,14 +473,14 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_fee_and_dimensions_section->add_block(
 			[
-				'id'        => 'product-shipping-class',
+				'id'        => 'product-variation-shipping-class',
 				'blockName' => 'woocommerce/product-shipping-class-field',
 				'order'     => 10,
 			]
 		);
 		$product_fee_and_dimensions_section->add_block(
 			[
-				'id'        => 'product-shipping-dimensions',
+				'id'        => 'product-variation-shipping-dimensions',
 				'blockName' => 'woocommerce/product-shipping-dimensions-fields',
 				'order'     => 20,
 			]

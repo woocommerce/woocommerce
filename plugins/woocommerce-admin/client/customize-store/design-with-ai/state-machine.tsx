@@ -22,7 +22,7 @@ import {
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette, fontPairings } from './prompts';
+import { defaultColorPalette } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -323,32 +323,9 @@ export const designWithAiStateMachineDefinition = createMachine(
 								initial: 'pending',
 								states: {
 									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...fontPairings,
-													prompt: fontPairings.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignFontPairing',
-												],
-												target: 'success',
-											},
-											// If there's an error we don't want to block the user from proceeding.
-											onError: {
-												target: 'success',
-											},
+										entry: [ 'assignFontPairing' ],
+										always: {
+											target: 'success',
 										},
 									},
 									success: { type: 'final' },

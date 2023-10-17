@@ -69,16 +69,15 @@ export const assignActiveThemeHasMods = assign<
 
 export const assignCustomizeStoreCompleted = assign<
 	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+	customizeStoreStateMachineEvents
 >( {
 	intro: ( context, event ) => {
-		const customizeStoreCompleted = (
+		const customizeStoreTaskCompleted = (
 			event as DoneInvokeEvent< {
-				assignCustomizeStoreCompleted: boolean;
+				customizeStoreTaskCompleted: boolean;
 			} >
-		 ).data.assignCustomizeStoreCompleted;
-		// type coercion workaround for now
-		return { ...context.intro, customizeStoreCompleted };
+		 ).data.customizeStoreTaskCompleted;
+		return { ...context.intro, customizeStoreTaskCompleted };
 	},
 } );
 
@@ -88,5 +87,19 @@ export const assignFetchIntroDataError = assign<
 >( {
 	intro: ( context ) => {
 		return { ...context.intro, hasErrors: true };
+	},
+} );
+
+export const assignCurrentThemeIsAiGenerated = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const currentThemeIsAiGenerated = (
+			event as DoneInvokeEvent< {
+				currentThemeIsAiGenerated: boolean;
+			} >
+		 ).data.currentThemeIsAiGenerated;
+		return { ...context.intro, currentThemeIsAiGenerated };
 	},
 } );

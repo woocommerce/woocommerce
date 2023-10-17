@@ -1,0 +1,69 @@
+{
+	"name": "@woocommerce/expression-evaluation",
+	"version": "0.0.1",
+	"description": "Library for evaluating expressions.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"expression",
+		"evalution"
+	],
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/expression-evaluation/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"react-native": "src/index",
+	"dependencies": {
+		"@wordpress/i18n": "wp-6.0",
+		"peggy": "^3.0.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"turbo:test": "jest --config ./jest.config.json",
+		"prepare": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"lint": "eslint --output-file eslint_report.json --format json src",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint:fix": "eslint src --fix",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.17.5",
+		"@types/jest": "^27.4.1",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"concurrently": "^7.0.0",
+		"eslint": "^8.32.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^27.1.3",
+		"typescript": "^5.1.6"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	}
+}

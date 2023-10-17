@@ -10,8 +10,12 @@ import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './search.scss';
+import { MARKETPLACE_PATH } from '../constants';
 
-const searchPlaceholder = __( 'Search for extensions', 'woocommerce' );
+const searchPlaceholder = __(
+	'Search for extensions and themes',
+	'woocommerce'
+);
 
 /**
  * Search component.
@@ -40,9 +44,9 @@ function Search(): JSX.Element {
 	const runSearch = () => {
 		const term = searchTerm.trim();
 
-		// When the search term changes, we reset the category on purpose.
+		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
-			url: getNewPath( { term, category: null, tab: 'search' } ),
+			url: getNewPath( { term, tab: 'search' }, MARKETPLACE_PATH, {} ),
 		} );
 
 		return [];

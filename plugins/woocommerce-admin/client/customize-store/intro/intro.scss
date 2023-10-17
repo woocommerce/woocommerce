@@ -79,6 +79,8 @@
 
 .woocommerce-customize-store-main {
 	margin-right: 2.5rem;
+	width: 100%;
+	min-width: 820px;
 
 	p {
 		color: #2f2f2f;
@@ -104,13 +106,20 @@
 	display: flex;
 	margin: 1.25rem 0 3.375rem;
 	min-height: 248px;
-	width: 820px;
+	width: 100%;
 	align-items: center;
 
 	&.offline-banner {
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
 		background-size: auto 218px;
 		background-position-y: 29px;
+	}
+
+	&.existing-ai-theme-banner {
+		background: rgba(246, 247, 247, 1) url(../assets/images/intro-banner-existing-ai.svg) no-repeat center right;
+		background-size: auto 218px;
+		background-position-y: 29px;
+		background-position-x: 91%;
 	}
 
 	.woocommerce-customize-store-banner-content {
@@ -121,6 +130,10 @@
 			color: #3858e9;
 			text-decoration: none;
 			font-weight: 500;
+		}
+
+		button.components-button + button.components-button { // add left margin for all buttons with another button to its left
+			margin-left: 12px;
 		}
 
 		h1 {
@@ -138,21 +151,33 @@
 }
 
 .woocommerce-customize-store-theme-cards {
-	display: flex;
+	display: grid;
 	flex-wrap: wrap;
 	gap: 32px;
 	row-gap: 54px;
-	max-width: 820px;
+	grid-template-columns: repeat(2, 1fr);
+
+	@media only screen and (min-width: 1600px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
 
 	.theme-card {
-		flex-basis: 45%;
 		display: block;
 		text-decoration: none;
+
+		a {
+			&:focus {
+				box-shadow: none;
+			}
+		}
 
 		img {
 			border-radius: 4px;
 			border: 1px solid #e9e9e9;
-			width: 394px;
+			width: 100%;
+			height: 240px;
+			object-fit: cover;
+			object-position: 0 0;
 		}
 
 		.theme-card__title {
@@ -163,24 +188,34 @@
 		}
 
 		.theme-card__info {
-			margin: 24px 0 14px 0;
+			margin: 24px 0 8px 0;
 			display: flex;
 			.theme-card__color-palettes {
 				margin-left: auto;
 			}
 		}
+
 		.theme-card__color-palettes {
 			display: flex;
 			margin: 0 0 0 auto;
 			padding: 0;
 			gap: 5px;
+
 			li {
 				width: 20px;
 				height: 20px;
 				box-shadow: inset 0 0 0 1px #0003;
 				border-radius: 50%;
+				margin-bottom: 0;
+
+				&.more_palettes {
+					box-shadow: none;
+					font-size: 11px;
+					text-align: center;
+				}
 			}
 		}
+
 		.theme-card__active {
 			border-radius: 100px;
 			background: rgba(56, 88, 233, 0.2);
@@ -236,7 +271,6 @@
 		text-decoration: none !important;
 	}
 	h1 {
-		width: 320px;
 		line-height: 28px;
 		font-size: 20px;
 		color: #1e1e1e;

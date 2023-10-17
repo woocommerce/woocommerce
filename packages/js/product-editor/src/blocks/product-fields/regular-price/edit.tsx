@@ -9,8 +9,12 @@ import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement, createInterpolateElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import {
+	createElement,
+	createInterpolateElement,
+	useEffect,
+} from '@wordpress/element';
+import { sprintf, __ } from '@wordpress/i18n';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -31,7 +35,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help } = attributes;
+	const { label, help, isRequired } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -89,10 +93,19 @@ export function Edit( {
 						'woocommerce'
 					);
 				}
+			} else if ( isRequired ) {
+				/* translators: label of required field. */
+				return sprintf( __( '%s is required.', 'woocommerce' ), label );
 			}
 		},
 		[ regularPrice, salePrice ]
 	);
+
+	useEffect( () => {
+		if ( isRequired ) {
+			validateRegularPrice();
+		}
+	}, [] );
 
 	return (
 		<div { ...blockProps }>

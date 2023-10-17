@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { Look } from '~/customize-store/design-with-ai/types';
+
 export const FONT_PREVIEW_LARGE_WIDTH = 136;
 export const FONT_PREVIEW_LARGE_HEIGHT = 106;
 export const FONT_PREVIEW_WIDTH = 120;
@@ -8,8 +13,66 @@ export const SYSTEM_FONT_SLUG = 'system-font';
 // TODO: Consider creating an API endpoint for this data
 export const FONT_PAIRINGS = [
 	{
+		title: 'Inter + Inter',
+		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Inter',
+							slug: 'inter',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontStyle: 'normal',
+						fontWeight: '600',
+						lineHeight: '1.2',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontSize: 'var(--wp--preset--font-size--medium)',
+						fontStyle: 'normal',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--inter)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
 		title: 'Bodoni Moda + Overpass',
 		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -70,6 +133,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Commissioner + Crimson Pro',
 		version: 2,
+		lookAndFeel: [ 'Contemporary' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -132,6 +196,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Libre Baskerville + DM Sans',
 		version: 2,
+		lookAndFeel: [ 'Classic', 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -192,6 +257,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Libre Franklin + EB Garamond',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Classic', 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -255,6 +321,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Montserrat + Arvo',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -318,6 +385,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Playfair Display + Fira Sans',
 		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -382,6 +450,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Rubik + Inter',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -440,6 +509,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Space Mono + Roboto',
 		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {

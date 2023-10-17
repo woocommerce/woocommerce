@@ -148,9 +148,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$basic_details->add_block(
 			[
-				'id'        => 'product-summary',
-				'blockName' => 'woocommerce/product-summary-field',
-				'order'     => 20,
+				'id'         => 'product-summary',
+				'blockName'  => 'woocommerce/product-summary-field',
+				'order'      => 20,
+				'attributes' => [
+					'property' => 'description',
+				],
 			]
 		);
 		$pricing_columns  = $basic_details->add_block(
@@ -244,10 +247,30 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'images' => [],
+					'images'   => [],
+					'property' => 'images',
 				],
 			]
 		);
+		// Downloads section.
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$general_group->add_section(
+				[
+					'id'         => 'product-downloads-section',
+					'order'      => 40,
+					'attributes' => [
+						'title'       => __( 'Downloads', 'woocommerce' ),
+						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					],
+				]
+			)->add_block(
+				[
+					'id'        => 'product-downloads',
+					'blockName' => 'woocommerce/product-downloads-field',
+					'order'     => 10,
+				]
+			);
+		}
 	}
 
 	/**
@@ -741,7 +764,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				],
 			]
 		);
-		// Product Pricing Section.
+		// Virtual section.
+		$shipping_group->add_section(
+			[
+				'id'    => 'product-virtual-section',
+				'order' => 10,
+			]
+		)->add_block(
+			[
+				'id'         => 'product-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => [
+					'property' => 'virtual',
+					'label'    => __( 'This product requires shipping or pickup', 'woocommerce' ),
+				],
+			]
+		);
+		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
 				'id'         => 'product-fee-and-dimensions-section',

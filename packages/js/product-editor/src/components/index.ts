@@ -31,3 +31,6 @@ export {
 export { AttributeControl as __experimentalAttributeControl } from './attribute-control';
 export { Attributes as __experimentalAttributes } from './attributes';
 export * from './add-new-shipping-class-modal';
+export { VariationSwitcherFooter as __experimentalVariationSwitcherFooter } from './variation-switcher-footer';
+
+export * from './remove-confirmation-modal';
