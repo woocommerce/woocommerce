@@ -37,41 +37,66 @@ export function ManageDownloadLimitsModal( {
 	const [ errors, setErrors ] = useState< Record< string, string > >( {} );
 
 	function validateDownloadLimit() {
-		if ( Number.parseInt( downloadLimit, 10 ) < 1 ) {
-			const validationError = sprintf(
-				__(
-					// translators: %d is the minimum value of the number input.
-					'Download limit must be greater than or equal to %d',
-					'woocommerce'
-				),
-				DOWNLOAD_LIMIT_MIN
-			);
+		if ( downloadLimit && ! Number.isInteger( Number( downloadLimit ) ) ) {
 			setErrors( ( current ) => ( {
 				...current,
-				downloadLimit: validationError,
+				downloadLimit: __(
+					'Download limit must be an integer number',
+					'woocommerce'
+				),
 			} ) );
 			return false;
 		}
+
+		if ( Number.parseInt( downloadLimit, 10 ) < 1 ) {
+			setErrors( ( current ) => ( {
+				...current,
+				downloadLimit: sprintf(
+					__(
+						// translators: %d is the minimum value of the number input.
+						'Download limit must be greater than or equal to %d',
+						'woocommerce'
+					),
+					DOWNLOAD_LIMIT_MIN
+				),
+			} ) );
+			return false;
+		}
+
 		setErrors( ( { downloadLimit: _, ...current } ) => current );
 		return true;
 	}
 
 	function validateDownloadExpiry() {
-		if ( Number.parseInt( downloadExpiry, 10 ) < 1 ) {
-			const validationError = sprintf(
-				__(
-					// translators: %d is the minimum value of the number input.
-					'Expiry period must be greater than or equal to %d',
-					'woocommerce'
-				),
-				DOWNLOAD_EXPIRY_MIN
-			);
+		if (
+			downloadExpiry &&
+			! Number.isInteger( Number( downloadExpiry ) )
+		) {
 			setErrors( ( current ) => ( {
 				...current,
-				downloadExpiry: validationError,
+				downloadExpiry: __(
+					'Expiry period must be an integer number',
+					'woocommerce'
+				),
 			} ) );
 			return false;
 		}
+
+		if ( Number.parseInt( downloadExpiry, 10 ) < 1 ) {
+			setErrors( ( current ) => ( {
+				...current,
+				downloadExpiry: sprintf(
+					__(
+						// translators: %d is the minimum value of the number input.
+						'Expiry period must be greater than or equal to %d',
+						'woocommerce'
+					),
+					DOWNLOAD_EXPIRY_MIN
+				),
+			} ) );
+			return false;
+		}
+
 		setErrors( ( { downloadExpiry: _, ...current } ) => current );
 		return true;
 	}
