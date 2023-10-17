@@ -74,7 +74,7 @@ class WC_Helper_Admin {
 			$connect_url_args['wc-helper-nonce']   = wp_create_nonce( 'connect' );
 		}
 
-		if ( ! empty( $current_screen->id ) && 'woocommerce_page_wc-admin' === $current_screen->id ) {
+		if ( isset( $current_screen->id ) && 'woocommerce_page_wc-admin' === $current_screen->id ) {
 			$connect_url_args['redirect-to-wc-admin'] = 1;
 		}
 
