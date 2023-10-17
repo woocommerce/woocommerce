@@ -18,9 +18,10 @@ export const settings = {
 	edit: Edit,
 };
 
-export const init = () =>
-	registerWooBlockType( {
+export function init() {
+	return registerWooBlockType( {
 		name,
 		metadata: metadata as never,
 		settings: settings as never,
 	} );
+}
