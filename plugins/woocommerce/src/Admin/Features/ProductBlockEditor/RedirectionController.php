@@ -133,6 +133,7 @@ class RedirectionController {
 		);
 	}
 
+
 	/**
 	 * Redirect non supported product types to legacy editor.
 	 */

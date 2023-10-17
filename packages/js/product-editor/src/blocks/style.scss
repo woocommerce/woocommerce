@@ -5,7 +5,8 @@
 @import "product-fields/inventory-email/editor.scss";
 @import "product-fields/inventory-sku/editor.scss";
 @import "product-fields/name/editor.scss";
-@import "product-fields/notice/editor.scss";
+@import 'product-fields/notice-has-variations/editor.scss';
+@import 'product-fields/notice-edit-single-variation/editor.scss';
 @import "generic/pricing/editor.scss";
 @import "product-fields/regular-price/editor.scss";
 @import "product-fields/sale-price/editor.scss";

@@ -88,7 +88,8 @@ export default function Products( props: ProductsProps ): JSX.Element {
 	const containerClassName = classnames( baseContainerClass + label );
 	const productListTitleClassName = classnames(
 		'woocommerce-marketplace__product-list-title',
-		baseContainerClass + baseProductListTitleClass + label
+		baseContainerClass + baseProductListTitleClass + label,
+		{ 'is-loading': isLoading }
 	);
 	const viewAllButonClassName = classnames(
 		'woocommerce-marketplace__view-all-button',
@@ -97,19 +98,36 @@ export default function Products( props: ProductsProps ): JSX.Element {
 
 	function content() {
 		if ( isLoading ) {
-			return <ProductLoader />;
+			return (
+				<>
+					{ props.categorySelector && (
+						<CategorySelector type={ props.type } />
+					) }
+					<ProductLoader hasTitle={ false } type={ props.type } />
+				</>
+			);
 		}
 
 		if ( products.length === 0 ) {
 			return <NoResults type={ props.type } />;
 		}
 
+		const productListClass = classnames(
+			showAllButton
+				? 'woocommerce-marketplace__product-list-content--collapsed'
+				: ''
+		);
+
 		return (
 			<>
 				{ props.categorySelector && (
 					<CategorySelector type={ props.type } />
 				) }
-				<ProductListContent products={ products } type={ props.type } />
+				<ProductListContent
+					products={ products }
+					type={ props.type }
+					className={ productListClass }
+				/>
 				{ showAllButton && (
 					<Button
 						className={ viewAllButonClassName }
@@ -124,7 +142,9 @@ export default function Products( props: ProductsProps ): JSX.Element {
 
 	return (
 		<div className={ containerClassName }>
-			<h2 className={ productListTitleClassName }>{ title }</h2>
+			<h2 className={ productListTitleClassName }>
+				{ isLoading ? ' ' : title }
+			</h2>
 			{ content() }
 		</div>
 	);

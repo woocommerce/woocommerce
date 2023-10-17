@@ -104,6 +104,7 @@ export {
 	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
 } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
+export { default as PhoneNumberInput } from './phone-number-input';
 
 // Exports below can be removed once the @woocommerce/product-editor package is released.
 export {
