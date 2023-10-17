@@ -5,9 +5,9 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { Product } from '@woocommerce/data';
 
 export interface ProductEditorContext {
-	editedProduct: Product;
 	postId: number;
 	postType: string;
+	productType: string;
 	selectedTab: string | null;
 }
 
