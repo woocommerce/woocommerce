@@ -53,9 +53,10 @@
 .woocommerce-marketplace__my-subscriptions__product {
 	display: flex;
 	align-items: center;
+	color: $gray-700;
 
 	&-name {
-		margin-left: 12px;
+		margin-left: $grid-unit-15;
 		line-height: 18px;
 		font-weight: 600;
 		color: $gray-900;
@@ -68,14 +69,10 @@
 
 	svg {
 		border-radius: 4px;
-		padding: 8px;
+		padding: $grid-unit-10;
 		fill: $gray-600;
 		background-color: $gray-200;
 	}
-}
-
-.woocommerce-marketplace__my-subscriptions__product {
-	color: $gray-700;
 }
 
 .woocommerce-marketplace__my-subscriptions__status-warning {
@@ -97,7 +94,7 @@
 	border: 1px solid $gray-400;
 	width: 300px;
 	border-radius: 2px;
-	padding: 12px;
+	padding: $grid-unit-15; 
 	color: $gray-900;
 }
 

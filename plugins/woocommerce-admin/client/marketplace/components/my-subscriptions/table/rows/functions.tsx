@@ -5,7 +5,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { TableRow } from '@woocommerce/components/build-types/table/types';
 import { Icon, plugins } from '@wordpress/icons';
 import { gmdateI18n } from '@wordpress/date';
-import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -15,12 +14,12 @@ import StatusPopover from './status-popover';
 import ActivationToggle from './activation-toggle';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 
+// TODO: Add explanations.
 function getStatus( subscription: Subscription ): {
 	text: string;
 	warning: boolean;
 	explanation?: string;
 } {
-	// TODO add statuses for subscriptions
 	if ( subscription.active ) {
 		return {
 			text: __( 'Active', 'woocommerce' ),
