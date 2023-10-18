@@ -15,11 +15,15 @@ class PageController {
 	use AccessiblePrivateMethods;
 
 	/**
+	 * Instance of FileController.
+	 *
 	 * @var FileController
 	 */
 	private $file_controller;
 
 	/**
+	 * Instance of ListTable.
+	 *
 	 * @var ListTable
 	 */
 	private $list_table;
@@ -27,7 +31,7 @@ class PageController {
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @param FileController $file_controller
+	 * @param FileController $file_controller Instance of FileController.
 	 *
 	 * @return void
 	 */
@@ -177,7 +181,7 @@ class PageController {
 		$params   = filter_input_array(
 			INPUT_GET,
 			array(
-				'view' => array(
+				'view'    => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
 						'regexp'  => '/^(list_files|single_file)$/',
@@ -185,20 +189,20 @@ class PageController {
 					),
 				),
 				'orderby' => array(
-					'filter' => FILTER_VALIDATE_REGEXP,
+					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
 						'regexp'  => '/^(created|modified|source|size)$/',
-						'default' => $defaults['orderby']
+						'default' => $defaults['orderby'],
 					),
 				),
-				'order' => array(
-					'filter' => FILTER_VALIDATE_REGEXP,
+				'order'   => array(
+					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
 						'regexp'  => '/^(asc|desc)$/i',
-						'default' => $defaults['order']
+						'default' => $defaults['order'],
 					),
 				),
-				'source' => FILTER_SANITIZE_STRING,
+				'source'  => FILTER_SANITIZE_STRING,
 			),
 			false
 		);
@@ -252,6 +256,8 @@ class PageController {
 	private function handle_list_table_bulk_actions() {
 		$action = $this->get_list_table()->current_action();
 
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();
+
 		if ( $action ) {
 			check_admin_referer( 'bulk-log-files' );
 
@@ -264,7 +270,7 @@ class PageController {
 
 			switch ( $action ) {
 				case 'delete':
-					$deleted = $this->file_controller->delete_files( $files );
+					$deleted  = $this->file_controller->delete_files( $files );
 					$sendback = add_query_arg( 'deleted', $deleted, $sendback );
 					break;
 			}
@@ -275,7 +281,7 @@ class PageController {
 			exit;
 		} elseif ( ! empty( $_REQUEST['_wp_http_referer'] ) ) {
 			$removable_args = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'filter_action' );
-			wp_safe_redirect( remove_query_arg( $removable_args, wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+			wp_safe_redirect( remove_query_arg( $removable_args, $request_uri ) );
 			exit;
 		}
 
@@ -292,7 +298,7 @@ class PageController {
 							printf(
 								// translators: %s is a number of files.
 								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
-								number_format_i18n( $deleted )
+								esc_html( number_format_i18n( $deleted ) )
 							);
 							?>
 						</p>
@@ -302,6 +308,6 @@ class PageController {
 			);
 		}
 
-		$_SERVER['REQUEST_URI'] = remove_query_arg( array( 'deleted' ), wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$_SERVER['REQUEST_URI'] = remove_query_arg( array( 'deleted' ), $request_uri );
 	}
 }

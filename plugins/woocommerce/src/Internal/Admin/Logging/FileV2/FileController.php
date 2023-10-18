@@ -10,7 +10,9 @@ use WP_Error;
  */
 class FileController {
 	/**
-	 * @const array Default values for arguments for the get_files method.
+	 * Default values for arguments for the get_files method.
+	 *
+	 * @const array
 	 */
 	public const DEFAULTS_GET_FILES = array(
 		'offset'   => 0,
@@ -21,7 +23,9 @@ class FileController {
 	);
 
 	/**
-	 * @var string The absolute path to the log directory.
+	 * The absolute path to the log directory.
+	 *
+	 * @var string
 	 */
 	private $log_directory;
 
@@ -51,7 +55,7 @@ class FileController {
 	public function get_files( array $args = array(), bool $count_only = false ) {
 		$args = wp_parse_args( $args, self::DEFAULTS_GET_FILES );
 
-		$pattern = $args['source'] . '*' . '.log';
+		$pattern = $args['source'] . '*.log';
 		$files   = glob( $this->log_directory . $pattern );
 
 		if ( false === $files ) {
@@ -90,7 +94,7 @@ class FileController {
 					$comparison = $set[0] <=> $set[1];
 				}
 
-				if ( $comparison !== 0 ) {
+				if ( 0 !== $comparison ) {
 					break;
 				}
 			}
@@ -101,7 +105,7 @@ class FileController {
 		switch ( $args['orderby'] ) {
 			case 'created':
 				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
-					$sort_sets = array(
+					$sort_sets  = array(
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
 					);
@@ -111,7 +115,7 @@ class FileController {
 				break;
 			case 'modified':
 				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
-					$sort_sets = array(
+					$sort_sets  = array(
 						array( $a->get_modified_timestamp(), $b->get_modified_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
 					);
@@ -121,7 +125,7 @@ class FileController {
 				break;
 			case 'source':
 				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
-					$sort_sets = array(
+					$sort_sets  = array(
 						array( $a->get_source(), $b->get_source() ),
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
 					);
@@ -131,7 +135,7 @@ class FileController {
 				break;
 			case 'size':
 				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
-					$sort_sets = array(
+					$sort_sets  = array(
 						array( $a->get_file_size(), $b->get_file_size() ),
 						array( $a->get_source(), $b->get_source() ),
 					);
