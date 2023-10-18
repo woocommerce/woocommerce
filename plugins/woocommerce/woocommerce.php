@@ -35,7 +35,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 }
 
 // Initialize dependency injection.
-$GLOBALS['wc_container_PHP_CHANGE'] = new Automattic\WooCommerce\Container();
+$GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
 /**
  * Returns the main instance of WC.
@@ -60,6 +60,7 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+$GLOBALS['PHP_CHANGE'] = 'A CHANGE THAT SHOULDNT BREAK ANYTHING';
 
 // Jetpack's Rest_Authentication needs to be initialized even before plugins_loaded.
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
