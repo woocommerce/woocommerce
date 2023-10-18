@@ -132,6 +132,9 @@ class PageController {
 		$params   = $this->get_query_params();
 
 		?>
+		<h2>
+			<?php esc_html_e( 'Log files', 'woocommerce' ); ?>
+		</h2>
 		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
 			<input type="hidden" name="tab" value="logs" />
