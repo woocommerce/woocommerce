@@ -35,7 +35,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 }
 
 // Initialize dependency injection.
-$GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
+$GLOBALS['wc_container_PHP_CHANGE'] = new Automattic\WooCommerce\Container();
 
 /**
  * Returns the main instance of WC.
