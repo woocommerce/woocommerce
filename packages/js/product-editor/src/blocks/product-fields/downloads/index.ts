@@ -15,5 +15,9 @@ export const settings = {
 };
 
 export function init() {
-	return registerProductEditorBlockType( { name, metadata, settings } );
+	return registerProductEditorBlockType( {
+		name,
+		metadata: metadata as never,
+		settings: settings as never,
+	} );
 }
