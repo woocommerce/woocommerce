@@ -76,12 +76,23 @@ export const selectIndustryMapping = {
 		'woocommerce'
 	),
 };
+
+export type BusinessInfoContextProps = Pick<
+	CoreProfilerStateMachineContext,
+	'geolocatedLocation' | 'userProfile' | 'businessInfo' | 'countries'
+> & {
+	onboardingProfile: Pick<
+		CoreProfilerStateMachineContext[ 'onboardingProfile' ],
+		'industry' | 'business_choice' | 'is_store_country_set'
+	>;
+};
+
 export const BusinessInfo = ( {
 	context,
 	navigationProgress,
 	sendEvent,
 }: {
-	context: CoreProfilerStateMachineContext;
+	context: BusinessInfoContextProps;
 	navigationProgress: number;
 	sendEvent: ( event: BusinessInfoEvent ) => void;
 } ) => {

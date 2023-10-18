@@ -40,7 +40,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot( $this->prev_cot_state );
+		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		parent::tearDown();
 	}
 
@@ -125,7 +125,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	public function test_get_table_for_orders_posts() {
 		global $wpdb;
 
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 
 		$table_name = $this->sut->get_table_for_orders();
 		$this->assertEquals( $wpdb->posts, $table_name );
@@ -137,7 +137,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	public function test_get_table_for_orders_hpos() {
 		global $wpdb;
 
-		OrderHelper::toggle_cot( true );
+		OrderHelper::toggle_cot_feature_and_usage( true );
 
 		$table_name = $this->sut->get_table_for_orders();
 		$this->assertEquals( "{$wpdb->prefix}wc_orders", $table_name );
@@ -149,7 +149,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	public function test_get_table_for_order_meta_posts() {
 		global $wpdb;
 
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 
 		$table_name = $this->sut->get_table_for_order_meta();
 		$this->assertEquals( $wpdb->postmeta, $table_name );
@@ -161,7 +161,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	public function test_get_table_for_order_meta_hpos() {
 		global $wpdb;
 
-		OrderHelper::toggle_cot( true );
+		OrderHelper::toggle_cot_feature_and_usage( true );
 
 		$table_name = $this->sut->get_table_for_order_meta();
 		$this->assertEquals( "{$wpdb->prefix}wc_orders_meta", $table_name );

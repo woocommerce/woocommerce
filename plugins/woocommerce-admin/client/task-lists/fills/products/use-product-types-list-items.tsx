@@ -19,7 +19,7 @@ const useProductTypeListItems = (
 		onClick?: () => void;
 	} = {}
 ) => {
-	const { createProductByType } = useCreateProductByType();
+	const { createProductByType, isRequesting } = useCreateProductByType();
 
 	const productTypes = useMemo(
 		() =>
@@ -44,7 +44,7 @@ const useProductTypeListItems = (
 		[ createProductByType ]
 	);
 
-	return productTypes;
+	return { productTypes, isRequesting };
 };
 
 export default useProductTypeListItems;

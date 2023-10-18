@@ -6,10 +6,25 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use \WC_Cache_Helper;
+use \WC_Meta_Data;
+
 /**
  * Class OrdersTableRefundDataStore.
  */
 class OrdersTableRefundDataStore extends OrdersTableDataStore {
+
+	/**
+	 * Data stored in meta keys, but not considered "meta" for refund.
+	 *
+	 * @var string[]
+	 */
+	protected $internal_meta_keys = array(
+		'_refund_amount',
+		'_refund_reason',
+		'_refunded_by',
+		'_refunded_payment',
+	);
 
 	/**
 	 * We do not have and use all the getters and setters from OrderTableDataStore, so we only select the props we actually need.
@@ -63,57 +78,52 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			return;
 		}
 
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $refund->get_parent_id();
+		wp_cache_delete( $refund_cache_key, 'orders' );
+
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
 		$refund->set_id( 0 );
 
-		// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-		if ( ! is_a( $refund->get_data_store(), self::class ) ) {
-			return;
-		}
+		$orders_table_is_authoritative = $refund->get_data_store()->get_current_class_name() === self::class;
 
-		// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-		// Once we stop creating posts for orders, we should do the cleanup here instead.
-		wp_delete_post( $refund_id );
-	}
-
-	/**
-	 * Read a refund object from custom tables.
-	 *
-	 * @param \WC_Abstract_Order $refund Refund object.
-	 *
-	 * @return void
-	 */
-	public function read( &$refund ) {
-		parent::read( $refund );
-		$this->set_refund_props( $refund );
-	}
-
-	/**
-	 * Read multiple refund objects from custom tables.
-	 *
-	 * @param \WC_Order $refunds Refund objects.
-	 */
-	public function read_multiple( &$refunds ) {
-		parent::read_multiple( $refunds );
-		foreach ( $refunds as $refund ) {
-			$this->set_refund_props( $refund );
+		if ( $orders_table_is_authoritative ) {
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $refund_id );
+			} else {
+				$this->handle_order_deletion_with_sync_disabled( $refund_id );
+			}
 		}
 	}
 
 	/**
 	 * Helper method to set refund props.
 	 *
-	 * @param \WC_Order $refund Refund object.
+	 * @param \WC_Order_Refund $refund Refund object.
+	 * @param object           $data   DB data object.
+	 *
+	 * @since 8.0.0
 	 */
-	private function set_refund_props( $refund ) {
-		$refund->set_props(
-			array(
-				'amount'           => $refund->get_meta( '_refund_amount', true ),
-				'refunded_by'      => $refund->get_meta( '_refunded_by', true ),
-				'refunded_payment' => wc_string_to_bool( $refund->get_meta( '_refunded_payment', true ) ),
-				'reason'           => $refund->get_meta( '_refund_reason', true ),
-			)
-		);
+	protected function set_order_props_from_data( &$refund, $data ) {
+		parent::set_order_props_from_data( $refund, $data );
+		foreach ( $data->meta_data as $meta ) {
+			switch ( $meta->meta_key ) {
+				case '_refund_amount':
+					$refund->set_amount( $meta->meta_value );
+					break;
+				case '_refunded_by':
+					$refund->set_refunded_by( $meta->meta_value );
+					break;
+				case '_refunded_payment':
+					$refund->set_refunded_payment( wc_string_to_bool( $meta->meta_value ) );
+					break;
+				case '_refund_reason':
+					$refund->set_reason( $meta->meta_value );
+					break;
+			}
+		}
 	}
 
 	/**
@@ -155,8 +165,17 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 
 		$props_to_update = $this->get_props_to_update( $refund, $meta_key_to_props );
 		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value = $refund->{"get_$prop"}( 'edit' );
-			$refund->update_meta_data( $meta_key, $value );
+			$meta_object        = new WC_Meta_Data();
+			$meta_object->key   = $meta_key;
+			$meta_object->value = $refund->{"get_$prop"}( 'edit' );
+			$existing_meta      = $this->data_store_meta->get_metadata_by_key( $refund, $meta_key );
+			if ( $existing_meta ) {
+				$existing_meta   = $existing_meta[0];
+				$meta_object->id = $existing_meta->id;
+				$this->update_meta( $refund, $meta_object );
+			} else {
+				$this->add_meta( $refund, $meta_object );
+			}
 			$updated_props[] = $prop;
 		}
 

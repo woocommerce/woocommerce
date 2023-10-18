@@ -9,8 +9,6 @@ defaults:
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
-env:
-    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
 
 permissions: {}
 
@@ -28,10 +26,10 @@ jobs:
 
             - name: Get Changed Files
               id: changed-files
-              uses: tj-actions/changed-files@v32
+              uses: tj-actions/changed-files@v39
               with:
-                  files: |
-                      **/*.php
+                  path: plugins/woocommerce
+                  files: "**/*.php"
 
             - name: Setup WooCommerce Monorepo
               if: steps.changed-files.outputs.any_changed == 'true'
@@ -41,6 +39,7 @@ jobs:
 
             - name: Tool versions
               if: steps.changed-files.outputs.any_changed == 'true'
+              working-directory: plugins/woocommerce
               run: |
                   php --version
                   composer --version
@@ -48,7 +47,5 @@ jobs:
 
             - name: Run PHPCS
               if: steps.changed-files.outputs.any_changed == 'true'
-              run: |
-                  HEAD_REF=$(git rev-parse HEAD)
-                  git checkout $HEAD_REF
-                  phpcs-changed -s --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+              working-directory: plugins/woocommerce
+              run: phpcs-changed -s --git --git-base ${{ github.event.pull_request.base.sha }} ${{ steps.changed-files.outputs.all_changed_files }}

@@ -63,10 +63,10 @@ class PaymentsRemindMeLater {
 		if ( ! self::should_display_note() ) {
 			return;
 		}
-		$content = __( 'Save up to $800 in fees by managing transactions with WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies.', 'woocommerce' );
+		$content = __( 'Save up to $800 in fees by managing transactions with WooPayments. With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Save big with WooCommerce Payments', 'woocommerce' ) );
+		$note->set_title( __( 'Save big with WooPayments', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );

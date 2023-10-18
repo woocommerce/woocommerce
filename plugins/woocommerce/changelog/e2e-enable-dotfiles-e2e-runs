@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Allow e2e tests to use dotfiles for configuration (including documentation update)

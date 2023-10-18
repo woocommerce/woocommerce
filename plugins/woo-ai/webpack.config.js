@@ -23,6 +23,11 @@ module.exports = {
 	},
 	resolve: {
 		extensions: [ '.js', '.jsx', '.tsx', '.ts' ],
+		fallback: {
+			stream: false,
+			path: false,
+			fs: false,
+		},
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(

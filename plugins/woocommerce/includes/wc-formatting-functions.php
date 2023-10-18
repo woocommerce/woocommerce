@@ -233,14 +233,7 @@ function wc_trim_zeros( $price ) {
  */
 function wc_round_tax_total( $value, $precision = null ) {
 	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
-
-	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
-	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
-		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
-	} else {
-		$rounded_tax = NumberUtil::round( $value, $precision );
-	}
+	$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
 }

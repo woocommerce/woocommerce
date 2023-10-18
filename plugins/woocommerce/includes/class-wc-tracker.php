@@ -14,6 +14,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -311,7 +312,7 @@ class WC_Tracker {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
 		}
 
-		$plugins             = get_plugins();
+		$plugins             = wc_get_container()->get( LegacyProxy::class )->call_function( 'get_plugins' );
 		$active_plugins_keys = get_option( 'active_plugins', array() );
 		$active_plugins      = array();
 

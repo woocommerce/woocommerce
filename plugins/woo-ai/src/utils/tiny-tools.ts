@@ -1,19 +1,30 @@
-type TinyContent = {
-	getContent: () => string;
+export type TinyContent = {
+	getContent: ( args?: object ) => string;
 	setContent: ( str: string ) => void;
+	id: string;
+	on: ( event: string, callback: ( event: Event ) => void ) => void;
+	off: ( event: string, callback: ( event: Event ) => void ) => void;
 };
 
-declare const tinymce: { get: ( str: string ) => TinyContent };
+declare const tinymce: {
+	get: ( str: string ) => TinyContent;
+	editors: TinyContent[];
+};
 
-const getTinyContentObject = () =>
-	typeof tinymce === 'object' ? tinymce.get( 'content' ) : null;
+export const getTinyContentObject = ( editorId = 'content' ) =>
+	typeof tinymce === 'object'
+		? tinymce.editors.find(
+				( editor: { id: string } ) => editor.id === editorId
+		  )
+		: null;
 
-export const setTinyContent = ( str: string ) => {
+export const setTinyContent = ( str: string, editorId?: string ) => {
 	if ( ! str.length ) {
 		return;
 	}
 
-	const contentTinyMCE = getTinyContentObject();
+	const contentTinyMCE = getTinyContentObject( editorId );
+
 	if ( contentTinyMCE ) {
 		contentTinyMCE.setContent( str );
 	} else {
@@ -28,6 +39,6 @@ export const setTinyContent = ( str: string ) => {
 	}
 };
 
-export const getTinyContent = () => {
-	return getTinyContentObject()?.getContent();
+export const getTinyContent = ( editorId?: string, args?: object ) => {
+	return getTinyContentObject( editorId )?.getContent( args ) ?? '';
 };

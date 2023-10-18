@@ -64,6 +64,36 @@ class DocsStore {
 	}
 
 	/**
+	 * Get the doc ID from a post ID
+	 *
+	 * @param int $post_id The post ID to get the doc ID from.
+	 */
+	public static function get_doc_id_by_post_id( $post_id ) {
+		return get_post_meta( $post_id, 'docs_id', true );
+	}
+
+	/**
+	 * Add an edit URL to a docs post
+	 *
+	 * @param int    $post_id - The post ID to add the edit URL to.
+	 * @param string $edit_url  - The edit URL to add.
+	 * @return void
+	 */
+	public static function add_edit_url_to_docs_post( $post_id, $edit_url ) {
+		update_post_meta( $post_id, 'edit_url', $edit_url );
+	}
+
+	/**
+	 * Get the edit URL from a docs post
+	 *
+	 * @param int $post_id - The post ID to get the edit URL from.
+	 * @return string The edit URL.
+	 */
+	public static function get_edit_url_from_docs_post( $post_id ) {
+		return get_post_meta( $post_id, 'edit_url', true );
+	}
+
+	/**
 	 * Update a docs post
 	 *
 	 * @param array $post The post to update.
@@ -78,10 +108,9 @@ class DocsStore {
 			'tag'        => 'woocommerce_docs',
 		);
 
-		$existing_page = get_posts( $args );
+		$existing_doc = get_posts( $args );
 
-		if ( ! empty( $existing_page ) ) {
-			$post['ID'] = $existing_page[0]->ID;
+		if ( ! empty( $existing_doc ) ) {
 			return wp_update_post( $post );
 		}
 	}
@@ -89,10 +118,15 @@ class DocsStore {
 	/**
 	 * Delete a docs post
 	 *
-	 * @param int $post_id The post ID to delete.
+	 * @param int $doc_id The ID to delete from a post's entry in the manifest.
 	 */
-	public static function delete_docs_post( $post_id ) {
-		return wp_delete_post( $post_id );
+	public static function delete_docs_post( $doc_id ) {
+		$post = self::get_post( $doc_id );
+		if ( null !== $post ) {
+			return wp_delete_post( $post->ID, true );
+		} else {
+			return false;
+		}
 	}
 
 	/**

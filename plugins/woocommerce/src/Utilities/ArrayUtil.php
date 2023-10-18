@@ -253,6 +253,7 @@ class ArrayUtil {
 						return true;
 					}
 					$diff[ $key ] = $value;
+					continue;
 				}
 				$new_diff = self::deep_assoc_array_diff( $value, $array2[ $key ], $strict );
 				if ( ! empty( $new_diff ) ) {

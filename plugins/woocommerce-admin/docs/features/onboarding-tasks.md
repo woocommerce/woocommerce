@@ -153,7 +153,6 @@ $task_list = new TaskList($args);
 - `$task_list::get_tasks()`: Returns an array of tasks associated with the task list.
 - `$task_list::add_task($task)`: Adds a task to the task list.
 - `$task_list::remove_task($task_id)`: Removes a task from the task list based on its ID.
-- `$task_list::has_task($task_id)`: Checks if the task list contains a task with the specified ID.
 - `$task_list::get_task($task_id)`: Retrieves a task from the task list based on its ID.
 - `$task_list::get_viewable_tasks()`: Returns an array of viewable tasks within the task list.
 - `$task_list::is_visible()`: Checks if the task list is visible.
@@ -327,7 +326,7 @@ registerPlugin( 'my-task-plugin', {
 
 ### Task list item
 
-The items shown in the list can be customized beyond the default task list item. This can allow for custom appearance or specific `onClick` behavior for your task. For example, we're using this to install and activate WooCommerce Payments when clicking on the WooCommerce Payment task
+The items shown in the list can be customized beyond the default task list item. This can allow for custom appearance or specific `onClick` behavior for your task. For example, we're using this to install and activate WooPayments when clicking on the WooPayments task
 
 ```js
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';

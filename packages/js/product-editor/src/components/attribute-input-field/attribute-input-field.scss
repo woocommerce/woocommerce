@@ -8,3 +8,13 @@
 		margin-right: $gap-small;
 	}
 }
+
+.woocommerce-experimental-select-control__popover-menu-container {
+	.woocommerce-experimental-select-control__menu-item[disabled] {
+		pointer-events: none;
+		color: $gray-600;
+	}
+	.disabled-element-wrapper {
+		cursor: not-allowed;
+	}
+}

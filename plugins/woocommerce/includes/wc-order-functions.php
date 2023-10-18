@@ -879,7 +879,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
 	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'trash' ), true );
 
-	if ( ! $reflected_order && 'before_delete_post' === current_action() ) {
+	if ( ! $reflected_order && 'woocommerce_before_delete_order' === current_action() ) {
 		$reflected_order = true;
 	}
 
@@ -919,11 +919,9 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 add_action( 'woocommerce_order_status_completed_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold_to_cancelled', 'wc_update_total_sales_counts' );
-add_action( 'trashed_post', 'wc_update_total_sales_counts' );
-add_action( 'untrashed_post', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_trash_order', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_untrash_order', 'wc_update_total_sales_counts' );
-add_action( 'before_delete_post', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.

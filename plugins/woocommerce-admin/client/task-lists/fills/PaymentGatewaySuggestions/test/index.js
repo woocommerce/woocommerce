@@ -62,13 +62,13 @@ const paymentGatewaySuggestions = [
 	},
 	{
 		id: 'woocommerce_payments:non-us',
-		title: 'WooCommerce Payments',
+		title: 'WooPayments',
 		content:
-			'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+			'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/wcpay.svg',
 		plugins: [ 'woocommerce-payments' ],
 		description:
-			'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
+			'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 		is_visible: true,
 		recommendation_priority: 1,
 	},
@@ -86,7 +86,7 @@ const paymentGatewaySuggestions = [
 ];
 
 const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
-	( p ) => p.title !== 'WooCommerce Payments'
+	( p ) => p.title !== 'WooPayments'
 );
 
 describe( 'PaymentGatewaySuggestions', () => {
@@ -129,7 +129,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 				.querySelector(
 					'.woocommerce-recommended-payments__header-heading'
 				)
-				.textContent.includes( 'WooCommerce Payments' )
+				.textContent.includes( 'WooPayments' )
 		).toBe( true );
 	} );
 
@@ -239,7 +239,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			installedPaymentGateways: [
 				{
 					id: 'woocommerce_payments',
-					title: 'WooCommerce Payments',
+					title: 'WooPayments',
 					plugins: [ 'woocommerce-payments' ],
 					is_visible: true,
 					needs_setup: false,

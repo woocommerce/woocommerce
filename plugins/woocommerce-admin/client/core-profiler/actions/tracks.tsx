@@ -14,6 +14,7 @@ import {
 	PluginsLearnMoreLinkClicked,
 	PluginsInstallationCompletedWithErrorsEvent,
 	PluginsInstallationCompletedEvent,
+	PluginsInstallationRequestedEvent,
 } from '..';
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 import {
@@ -97,6 +98,20 @@ const recordTracksBusinessInfoCompleted = (
 	} );
 };
 
+const recordTracksPluginsInstallationRequest = (
+	_context: CoreProfilerStateMachineContext,
+	event: Extract<
+		PluginsInstallationRequestedEvent,
+		{ type: 'PLUGINS_INSTALLATION_REQUESTED' }
+	>
+) => {
+	recordEvent( 'coreprofiler_store_extensions_continue', {
+		shown: event.payload.pluginsShown || [],
+		selected: event.payload.pluginsSelected || [],
+		unselected: event.payload.pluginsUnselected || [],
+	} );
+};
+
 const recordTracksPluginsLearnMoreLinkClicked = (
 	_context: unknown,
 	_event: PluginsLearnMoreLinkClicked,
@@ -164,4 +179,5 @@ export default {
 	recordTracksPluginsLearnMoreLinkClicked,
 	recordFailedPluginInstallations,
 	recordSuccessfulPluginInstallation,
+	recordTracksPluginsInstallationRequest,
 };

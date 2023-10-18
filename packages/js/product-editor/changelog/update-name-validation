@@ -1,0 +1,5 @@
+Significance: patch
+Type: update
+Comment: Run field validation and set SKU only if field was filled
+
+

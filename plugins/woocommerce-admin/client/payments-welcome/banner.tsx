@@ -28,6 +28,8 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
 
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
+
 	const handleNoThanks = () => {
 		setNoThanksClicked( true );
 		setExitSurveyModalOpen( true );
@@ -64,7 +66,11 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				>
 					{ strings.noThanks }
 				</Button>
-				<p>{ strings.TosAndPp }</p>
+				<p>
+					{ isWooPayEligible
+						? strings.TosAndPpWooPay
+						: strings.TosAndPp }
+				</p>
 				<p>{ strings.termsAndConditions( tc_url ) }</p>
 			</CardBody>
 			<CardDivider />

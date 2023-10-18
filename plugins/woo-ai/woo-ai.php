@@ -3,7 +3,7 @@
  * Plugin Name: Woo AI
  * Plugin URI: https://github.com/woocommerce/woocommerce/
  * Description: Enable AI experiments within the WooCommerce experience. <a href="https://automattic.com/ai-guidelines" target="_blank" rel="noopener noreferrer">Learn more</a>.
- * Version: 0.2.0
+ * Version: 0.4.0
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/
  * Requires at least: 5.8
@@ -77,6 +77,11 @@ function _woo_ai_bootstrap(): void {
 		register_activation_hook( __FILE__, array( 'Woo_AI', 'activate' ) );
 
 		add_action( 'admin_init', array( 'Woo_AI', 'instance' ) );
+	}
+
+	if ( ! class_exists( 'Woo_AI_Settings' ) ) {
+		include dirname( __FILE__ ) . '/includes/class-woo-ai-settings.php';
+		add_action( 'wp_loaded', array( 'Woo_AI_Settings', 'instance' ), 10 );
 	}
 
 }

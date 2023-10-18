@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update locators in `order-emails` spec, and use the latest version of WP Mail Logging.

@@ -24,7 +24,7 @@ export const BusinessLocation = ( {
 }: {
 	sendEvent: ( event: BusinessLocationEvent ) => void;
 	navigationProgress: number;
-	context: CoreProfilerStateMachineContext;
+	context: Pick< CoreProfilerStateMachineContext, 'countries' >;
 } ) => {
 	const [ storeCountry, setStoreCountry ] = useState< CountryStateOption >( {
 		key: '',

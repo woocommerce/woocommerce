@@ -14,7 +14,8 @@
 	width: 500px;
 	max-width: 100%;
 
-	.woocommerce-experimental-select-control + .woocommerce-experimental-select-control {
+	.woocommerce-experimental-select-control
+		+ .woocommerce-experimental-select-control {
 		margin-top: 1.3em;
 	}
 
@@ -30,6 +31,10 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+
+		.components-checkbox-control .components-base-control__field {
+			margin-bottom: 0;
+		}
 	}
 
 	.woocommerce-attribute-term-field {

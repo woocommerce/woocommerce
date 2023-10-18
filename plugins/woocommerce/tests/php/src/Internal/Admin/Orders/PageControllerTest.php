@@ -24,7 +24,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 		public function setUp(): void {
 			parent::setUp();
 			$this->setup_cot();
-			$this->toggle_cot( false );
+			$this->toggle_cot_feature_and_usage( false );
 
 			$this->user_admin = $this->factory->user->create( array( 'role' => 'administrator' ) );
 			wp_set_current_user( $this->user_admin );
@@ -58,7 +58,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$screen->post_type = 'post';
 			$this->assertFalse( $controller->is_order_screen() );
 
-			$this->toggle_cot( true );
+			$this->toggle_cot_feature_and_usage( true );
 			global $pagenow, $plugin_page;
 
 			$controller  = new PageController();
@@ -89,7 +89,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$screen->base = 'post';
 			$this->assertFalse( $controller->is_order_screen( 'shop_order', 'list' ) );
 
-			$this->toggle_cot( true );
+			$this->toggle_cot_feature_and_usage( true );
 			global $pagenow, $plugin_page;
 
 			$controller     = new PageController();
@@ -124,7 +124,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$mock_filter_input = false;
 			$this->assertFalse( $controller->is_order_screen( 'shop_order', 'edit' ) );
 
-			$this->toggle_cot( true );
+			$this->toggle_cot_feature_and_usage( true );
 			global $pagenow, $plugin_page;
 
 			$controller     = new PageController();
@@ -157,7 +157,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$screen->action = '';
 			$this->assertFalse( $controller->is_order_screen( 'shop_order', 'new' ) );
 
-			$this->toggle_cot( true );
+			$this->toggle_cot_feature_and_usage( true );
 			global $pagenow, $plugin_page;
 
 			$controller     = new PageController();

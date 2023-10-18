@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-OrdersTableDataStore: capture and log errors when populating order properties

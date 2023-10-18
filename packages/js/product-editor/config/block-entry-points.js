@@ -64,7 +64,9 @@ const getBlockName = ( blockMetaData ) => {
  * @return {string} The entry point name.
  */
 const getEntryPointName = ( entryFilePath, blockMetaData ) => {
-	const filePathParts = entryFilePath.split( '/' );
+	const filePathParts = entryFilePath
+		.split( '/' )
+		.filter( ( dir ) => dir !== 'blocks' );
 	filePathParts[ filePathParts.length - 2 ] = getBlockName( blockMetaData );
 	return filePathParts
 		.join( '/' )
