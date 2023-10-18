@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { createInterpolateElement } from '@wordpress/element';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 
 export const RatePrice = ( {

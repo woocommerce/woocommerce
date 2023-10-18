@@ -10,7 +10,7 @@ import {
 } from '@wordpress/element';
 import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, mapMarker } from '@wordpress/icons';

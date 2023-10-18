@@ -11,7 +11,7 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 import classnames from 'classnames';
-import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import { Currency, isObject } from '@woocommerce/types';
 import { useDebouncedCallback } from 'use-debounce';
 
