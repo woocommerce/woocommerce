@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Redirect old subscriptions page to new page when action requests are made from the new page.
+

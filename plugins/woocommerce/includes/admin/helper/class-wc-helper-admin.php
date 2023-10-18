@@ -58,32 +58,30 @@ class WC_Helper_Admin {
 	 * @return string
 	 */
 	public static function get_connection_url() {
-		// No active connection.
-		if ( ! WC_Helper::is_site_connected() ) {
-			$connect_url = add_query_arg(
-				array(
-					'page'              => 'wc-addons',
-					'section'           => 'helper',
-					'wc-helper-connect' => 1,
-					'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
-				),
-				admin_url( 'admin.php' )
-			);
+		global $current_screen;
 
-			return $connect_url;
-		}
-
-		$connect_url = add_query_arg(
-			array(
-				'page'                 => 'wc-addons',
-				'section'              => 'helper',
-				'wc-helper-disconnect' => 1,
-				'wc-helper-nonce'      => wp_create_nonce( 'disconnect' ),
-			),
-			admin_url( 'admin.php' )
+		$connect_url_args = array(
+			'page'    => 'wc-addons',
+			'section' => 'helper',
 		);
 
-		return $connect_url;
+		// No active connection.
+		if ( WC_Helper::is_site_connected() ) {
+			$connect_url_args['wc-helper-disconnect'] = 1;
+			$connect_url_args['wc-helper-nonce']      = wp_create_nonce( 'disconnect' );
+		} else {
+			$connect_url_args['wc-helper-connect'] = 1;
+			$connect_url_args['wc-helper-nonce']   = wp_create_nonce( 'connect' );
+		}
+
+		if ( isset( $current_screen->id ) && 'woocommerce_page_wc-admin' === $current_screen->id ) {
+			$connect_url_args['redirect-to-wc-admin'] = 1;
+		}
+
+		return add_query_arg(
+			$connect_url_args,
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
