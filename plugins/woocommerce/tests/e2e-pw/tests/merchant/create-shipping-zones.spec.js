@@ -337,6 +337,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 			await page.waitForLoadState( 'networkidle' );
 
+			await page
+				.getByPlaceholder( 'e.g. Standard national' )
+				.fill( 'Flat rate' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 			
@@ -432,13 +435,20 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			method_id: 'flat_rate',
 			settings: {
 				cost: '10.00',
+				title: 'Flat rate',
 			},
 		} );
 		await api.post( `shipping/zones/${ shippingFreeId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 		await api.post( `shipping/zones/${ shippingLocalId }/methods`, {
 			method_id: 'local_pickup',
+			settings: {
+				title: 'Local pickup',
+			}
 		} );
 	} );
 
