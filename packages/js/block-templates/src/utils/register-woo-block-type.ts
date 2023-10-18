@@ -7,10 +7,15 @@ import {
 	BlockEditProps,
 	registerBlockType,
 } from '@wordpress/blocks';
-import { useSelect, select as WPSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { ComponentType } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
+// Including `@types/wordpress__data` as a devDependency causes build issues,
+// so just going type-free for now.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useSelect, select as WPSelect } from '@wordpress/data';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -41,7 +46,7 @@ function getEdit<
 		const { getEvaluationContext } = useEvaluationContext( context );
 
 		const shouldHide = useSelect(
-			( select ) => {
+			( select: typeof WPSelect ) => {
 				if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
 					return false;
 				}
