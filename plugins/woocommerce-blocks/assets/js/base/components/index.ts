@@ -1,7 +1,6 @@
 export * from './block-error-boundary';
 export * from './button';
 export * from './cart-checkout';
-export * from './chip';
 export * from './combobox';
 export * from './country-input';
 export * from './drawer';
