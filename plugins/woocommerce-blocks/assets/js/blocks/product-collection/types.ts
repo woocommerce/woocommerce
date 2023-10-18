@@ -35,11 +35,9 @@ export interface ProductCollectionQuery {
 	order: TProductCollectionOrder;
 	orderBy: TProductCollectionOrderBy;
 	pages: number;
-	parents: number[];
 	perPage: number;
 	postType: string;
 	search: string;
-	sticky: string;
 	taxQuery: Record< string, number[] >;
 	woocommerceOnSale: boolean;
 	/**

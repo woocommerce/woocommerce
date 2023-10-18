@@ -49,7 +49,6 @@ const mapAttributes = ( attributes: Record< string, unknown > ) => {
 			woocommerceOnSale: __woocommerceOnSale,
 			woocommerceHandPickedProducts: include,
 			taxQuery: {},
-			parents: [],
 			isProductCollectionBlock: true,
 			...restQuery,
 		},
