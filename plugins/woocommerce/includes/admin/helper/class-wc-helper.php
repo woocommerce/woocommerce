@@ -935,7 +935,6 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$activated = false;
 		try {
 			$activated = self::activate_helper_subscription( $product_key, $product_id );
 		} catch ( Exception $e ) {
@@ -959,6 +958,8 @@ class WC_Helper {
 
 	/**
 	 * Activate helper subscription.
+	 *
+	 * @throws Exception If the subscription could not be activated or found.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1034,7 +1035,6 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$deactivated = false;
 		try {
 			$deactivated = self::deactivate_helper_subscription( $product_key );
 		} catch ( Exception $e ) {
@@ -1058,6 +1058,10 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a product subscription.
+	 *
+	 * @throws Exception If the subscription could not be deactivated or found.
+	 * @param string $product_key Subscription product key.
+	 * @return bool True if deactivated, false otherwise.
 	 */
 	public static function deactivate_helper_subscription( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
