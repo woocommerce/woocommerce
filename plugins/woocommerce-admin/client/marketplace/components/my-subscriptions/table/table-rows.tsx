@@ -12,7 +12,7 @@ import {
 	expiry,
 	autoRenew,
 	version,
-	activation,
+	install,
 	actions,
 } from './rows/functions';
 
@@ -23,7 +23,7 @@ export function availableSubscriptionRow( item: Subscription ): TableRow[] {
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),
-		activation( item ),
+		install( item ),
 		actions(),
 	];
 }
@@ -35,7 +35,7 @@ export function installedSubscriptionRow( item: Subscription ): TableRow[] {
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),
-		activation( item ),
+		install( item ),
 		actions(),
 	];
 }

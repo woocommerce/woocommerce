@@ -13,11 +13,11 @@ import { Subscription } from '../../types';
 import { installProduct } from '../../../../utils/functions';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 
-interface ActivationToggleProps {
+interface InstallProps {
 	subscription: Subscription;
 }
 
-export default function Install( props: ActivationToggleProps ) {
+export default function Install( props: InstallProps ) {
 	const [ loading, setLoading ] = useState( false );
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
@@ -27,17 +27,19 @@ export default function Install( props: ActivationToggleProps ) {
 		setLoading( true );
 		installProduct( props.subscription.product_key )
 			.then( () => {
-				loadSubscriptions( false );
-				createSuccessNotice(
-					sprintf(
-						// translators: %s is the product name.
-						__( '%s successfully installed.', 'woocommerce' ),
-						props.subscription.product_name
-					),
-					{
-						icon: <Icon icon="yes" />,
-					}
-				);
+				loadSubscriptions( false ).then( () => {
+					createSuccessNotice(
+						sprintf(
+							// translators: %s is the product name.
+							__( '%s successfully installed.', 'woocommerce' ),
+							props.subscription.product_name
+						),
+						{
+							icon: <Icon icon="yes" />,
+						}
+					);
+					setLoading( false );
+				} );
 			} )
 			.catch( () => {
 				createWarningNotice(
@@ -55,8 +57,6 @@ export default function Install( props: ActivationToggleProps ) {
 						],
 					}
 				);
-			} )
-			.finally( () => {
 				setLoading( false );
 			} );
 	};
@@ -67,6 +67,10 @@ export default function Install( props: ActivationToggleProps ) {
 		}
 
 		return __( 'Install', 'woocommerce' );
+	}
+
+	if ( props.subscription.local.installed === true ) {
+		return null;
 	}
 
 	return (

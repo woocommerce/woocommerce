@@ -13,7 +13,7 @@ export type MarketplaceContextType = {
 export type SubscriptionsContextType = {
 	subscriptions: Subscription[];
 	setSubscriptions: ( subscriptions: Subscription[] ) => void;
-	loadSubscriptions: ( toggleLoading?: boolean ) => void;
+	loadSubscriptions: ( toggleLoading?: boolean ) => Promise< void >;
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
 };

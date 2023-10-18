@@ -11,7 +11,7 @@ import { gmdateI18n } from '@wordpress/date';
  */
 import { Subscription } from '../../types';
 import StatusPopover from './status-popover';
-import ActivationToggle from './activation-toggle';
+import Install from './install';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 
 // TODO: Add explanations.
@@ -175,8 +175,8 @@ export function version( subscription: Subscription ): TableRow {
 	};
 }
 
-export function activation( subscription: Subscription ): TableRow {
-	const displayElement = <ActivationToggle subscription={ subscription } />;
+export function install( subscription: Subscription ): TableRow {
+	const displayElement = <Install subscription={ subscription } />;
 
 	return {
 		display: displayElement,
