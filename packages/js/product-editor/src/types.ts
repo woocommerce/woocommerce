@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
-import { Product } from '@woocommerce/data';
 
 export interface ProductEditorContext {
 	postId: number;
