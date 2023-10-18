@@ -231,15 +231,33 @@ class WC_Helper_Subscriptions_API {
 
 		$product_id = $subscriptions['product_id'];
 
-		// Delete any existing state for this product.
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
-		if ( null !== $state ) {
-			WC_WCCOM_Site_Installation_State_Storage::delete_state( $state );
+		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, $product_id );
+
+		// Delete any existing state for this product to avoid conflicts with old installations.
+		if ( WC_WCCOM_Site_Installation_State::STEP_STATUS_IN_PROGRESS !== $state->get_last_step_status() ) {
+			try {
+				$installation_manager->reset_installation();
+			} catch ( Exception $e ) {
+				wp_send_json_error(
+					array(
+						'message' => $e->getMessage(),
+					),
+					400
+				);
+			}
 		}
 
-		// Run the installation.
-		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, $product_id );
-		$installation_success = $installation_manager->run_installation( 'activate_product' );
+		try {
+			$installation_success = $installation_manager->run_installation( 'activate_product' );
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				),
+				400
+			);
+		}
 
 		if ( ! $installation_success ) {
 			try {
