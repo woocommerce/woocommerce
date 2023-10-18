@@ -26,11 +26,6 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
-	 * @var array
-	 */
-	private $file_args = array();
-
-	/**
 	 * ListTable class.
 	 */
 	public function __construct( FileController $file_controller, PageController $page_controller ) {
@@ -47,25 +42,23 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Set file args for later use, since `prepare_items` can't take any parameters.
-	 *
-	 * @param array $args
-	 *
-	 * @return void
-	 */
-	public function set_file_args( $args ) {
-		if ( is_array( $args ) ) {
-			$this->file_args = $args;
-		}
-	}
-
-	/**
 	 * Render message when there are no items.
 	 *
 	 * @return void
 	 */
 	public function no_items() {
 		esc_html_e( 'No log files found.', 'woocommerce' );
+	}
+
+	/**
+	 * Retrieves the list of bulk actions available for this table.
+	 *
+	 * @return array
+	 */
+	protected function get_bulk_actions() {
+		return array(
+			'delete' => __( 'Delete permanently', 'woocommerce' ),
+		);
 	}
 
 	/**
@@ -103,7 +96,17 @@ class ListTable extends WP_List_Table {
 						</option>
 					<?php endforeach; ?>
 				</select>
-				<?php submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'logs-filter-submit' ) ); ?>
+				<?php
+				submit_button(
+					__( 'Filter', 'woocommerce' ),
+					'',
+					'filter_action',
+					false,
+					array(
+						'id' => 'logs-filter-submit',
+					)
+				);
+				?>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -129,15 +132,27 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function prepare_items() {
-		$per_page = $this->get_items_per_page( self::PER_PAGE_USER_OPTION_KEY );
+		$per_page = $this->get_items_per_page(
+			self::PER_PAGE_USER_OPTION_KEY,
+			$this->file_controller::DEFAULTS_GET_FILES['per_page']
+		);
 
 		$defaults = array(
 			'per_page' => $per_page,
 			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
-		$file_args = wp_parse_args( $this->file_args, $defaults );
+		$file_args = wp_parse_args( $this->page_controller->get_query_params(), $defaults );
 
 		$total_items = $this->file_controller->get_files( $file_args, true );
+		if ( is_wp_error( $total_items ) ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				esc_html( $total_items->get_error_message() )
+			);
+
+			return;
+		}
+
 		$total_pages = ceil( $total_items / $per_page );
 		$items       = $this->file_controller->get_files( $file_args );
 
@@ -198,9 +213,20 @@ class ListTable extends WP_List_Table {
 		<input
 			id="cb-select-<?php echo esc_attr( $item->get_key() ); ?>"
 			type="checkbox"
-			name="id[]"
-			value="<?php echo esc_attr( $item->get_key() ); ?>"
+			name="file[]"
+			value="<?php echo esc_attr( $item->get_basename() ); ?>"
 		/>
+		<label for="cb-select-<?php echo esc_attr( $item->get_key() ); ?>">
+			<span class="screen-reader-text">
+				<?php
+				printf(
+					esc_html__( 'Select the %1$s log file for %2$s', 'woocommerce' ),
+					esc_html( date( get_option( 'date_format' ), $item->get_created_timestamp() ) ),
+					esc_html( $item->get_source() )
+				);
+				?>
+			</span>
+		</label>
 		<?php
 		return ob_get_clean();
 	}

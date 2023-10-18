@@ -118,4 +118,13 @@ class File {
 
 		return filesize( $this->path );
 	}
+
+	/**
+	 * Delete the file from the filesystem.
+	 *
+	 * @return bool
+	 */
+	public function delete() {
+		return @unlink( $this->path );
+	}
 }
