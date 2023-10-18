@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { useNumberInputProps } from './use-number-input-props';
+import { useNumberInputProps } from '../../hooks/use-number-input-props';
 
 export type NumberProps = {
 	value: string;

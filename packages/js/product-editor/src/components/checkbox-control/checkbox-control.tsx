@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
 import { Icon, help } from '@wordpress/icons';
 
@@ -43,27 +43,31 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 		}
 	}
 	return (
-		<div className="woocommerce-product-form__checkbox">
+		<>
 			{ title && <h4>{ title }</h4> }
-			<CheckboxControl
-				label={ label }
-				checked={ isChecked() }
-				onChange={ handleChange }
-			/>
-			{ tooltip && (
-				<Tooltip
-					text={ <span>{ tooltip }</span> }
-					position="top center"
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore Incorrect types.
-					className={ 'woocommerce-product-form__checkbox-tooltip' }
-					delay={ 0 }
-				>
-					<span className="woocommerce-product-form__checkbox-tooltip-icon">
-						<Icon icon={ help } size={ 21.94 } fill="#949494" />
-					</span>
-				</Tooltip>
-			) }
-		</div>
+			<div className="woocommerce-product-form__checkbox">
+				<CheckboxControl
+					label={ label }
+					checked={ isChecked() }
+					onChange={ handleChange }
+				/>
+				{ tooltip && (
+					<Tooltip
+						text={ <span>{ tooltip }</span> }
+						position="top center"
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore Incorrect types.
+						className={
+							'woocommerce-product-form__checkbox-tooltip'
+						}
+						delay={ 0 }
+					>
+						<span className="woocommerce-product-form__checkbox-tooltip-icon">
+							<Icon icon={ help } size={ 21.94 } fill="#949494" />
+						</span>
+					</Tooltip>
+				) }
+			</div>
+		</>
 	);
 };

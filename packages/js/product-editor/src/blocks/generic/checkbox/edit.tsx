@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { __experimentalCheckboxControl as Checkbox } from '@woocommerce/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
@@ -11,6 +10,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { CheckboxBlockAttributes } from './types';
+import { Checkbox } from '../../../components/checkbox-control';
 
 export function Edit( {
 	attributes,

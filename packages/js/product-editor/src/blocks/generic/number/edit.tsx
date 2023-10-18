@@ -5,7 +5,6 @@ import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { __, sprintf } from '@wordpress/i18n';
-import { __experimentalNumberControl as NumberControl } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
@@ -13,6 +12,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { NumberBlockAttributes } from './types';
 import { useValidation } from '../../../contexts/validation-context';
+import { NumberControl } from '../../../components/number-control';
 
 export function Edit( {
 	attributes,
