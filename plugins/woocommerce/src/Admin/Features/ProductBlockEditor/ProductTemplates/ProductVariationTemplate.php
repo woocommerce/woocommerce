@@ -182,6 +182,26 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
+
+		// Downloads section.
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$general_group->add_section(
+				[
+					'id'         => 'product-variation-downloads-section',
+					'order'      => 40,
+					'attributes' => [
+						'title'       => __( 'Downloads', 'woocommerce' ),
+						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					],
+				]
+			)->add_block(
+				[
+					'id'        => 'product-variation-downloads',
+					'blockName' => 'woocommerce/product-downloads-field',
+					'order'     => 10,
+				]
+			);
+		}
 	}
 
 	/**
@@ -455,11 +475,30 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
+		// Virtual section.
+		$shipping_group->add_section(
+			[
+				'id'    => 'product-variation-virtual-section',
+				'order' => 20,
+			]
+		)->add_block(
+			[
+				'id'         => 'product-variation-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => [
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+				],
+			]
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
 				'id'         => 'product-variation-fee-and-dimensions-section',
-				'order'      => 20,
+				'order'      => 30,
 				'attributes' => [
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(

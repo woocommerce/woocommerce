@@ -91,7 +91,7 @@ export const ApiCallLoader = () => {
 
 	return (
 		<Loader>
-			<Loader.Sequence interval={ 3000 }>
+			<Loader.Sequence interval={ 3500 } shouldLoop={ false }>
 				{ loaderSteps.map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>

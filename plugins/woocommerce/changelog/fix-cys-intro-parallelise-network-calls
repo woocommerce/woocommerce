@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Parallelised the independent network calls on the intro screen so that they become much faster

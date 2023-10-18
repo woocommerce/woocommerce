@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Disable the rendering of the header on the variation edit page, as it has its own header.

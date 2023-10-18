@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import { Button, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
 	Fragment,
 	createInterpolateElement,
+	useState,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
@@ -26,6 +26,11 @@ import { useEntityProp } from '@wordpress/core-data';
 import { UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
+import { ProductEditorBlockEditProps } from '../../../types';
+import {
+	ManageDownloadLimitsModal,
+	ManageDownloadLimitsModalProps,
+} from '../../../components/manage-download-limits-modal';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -42,18 +47,25 @@ function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< UploadsBlockAttributes > ) {
+	context: { postType },
+}: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
 		'postType',
-		'product',
+		postType,
 		'downloadable'
 	);
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
-		'product',
+		postType,
 		'downloads'
 	);
+	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
+		Product[ 'download_limit' ]
+	>( 'postType', 'product', 'download_limit' );
+	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
+		Product[ 'download_expiry' ]
+	>( 'postType', 'product', 'download_expiry' );
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
@@ -65,6 +77,25 @@ export function Edit( {
 		: [];
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
+
+	const [ showManageDownloadLimitsModal, setShowManageDownloadLimitsModal ] =
+		useState( false );
+
+	function handleManageLimitsClick() {
+		setShowManageDownloadLimitsModal( true );
+	}
+
+	function handleManageDownloadLimitsModalClose() {
+		setShowManageDownloadLimitsModal( false );
+	}
+
+	function handleManageDownloadLimitsModalSubmit(
+		value: ManageDownloadLimitsModalProps[ 'initialValue' ]
+	) {
+		setDownloadLimit( value.downloadLimit as number );
+		setDownloadExpiry( value.downloadExpiry as number );
+		setShowManageDownloadLimitsModal( false );
+	}
 
 	function handleFileUpload( files: MediaItem | MediaItem[] ) {
 		if ( ! Array.isArray( files ) ) return;
@@ -139,6 +170,15 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
+				{ Boolean( downloads.length ) && (
+					<Button
+						variant="tertiary"
+						onClick={ handleManageLimitsClick }
+					>
+						{ __( 'Manage limits', 'woocommerce' ) }
+					</Button>
+				) }
+
 				<DownloadsMenu
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
@@ -237,6 +277,14 @@ export function Edit( {
 					</Sortable>
 				) }
 			</div>
+
+			{ showManageDownloadLimitsModal && (
+				<ManageDownloadLimitsModal
+					initialValue={ { downloadLimit, downloadExpiry } }
+					onSubmit={ handleManageDownloadLimitsModalSubmit }
+					onClose={ handleManageDownloadLimitsModalClose }
+				/>
+			) }
 		</div>
 	);
 }
