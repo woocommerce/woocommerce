@@ -21,7 +21,7 @@
 		"dotenv": "^10.0.0",
 		"figlet": "^1.6.0",
 		"glob": "^10.2.4",
-		"graphql": "^16.6.0",
+		"graphql": "^16.8.1",
 		"gray-matter": "^4.0.3",
 		"js-yaml": "^4.1.0",
 		"octokit": "^2.0.14",
