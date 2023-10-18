@@ -86,6 +86,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			
+			await page
+				.getByPlaceholder( 'e.g. Local pickup' )
+				.fill( 'Local pickup' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -145,7 +148,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByText( 'Free shipping', { exact: true } ).click();
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
-
+			
+			await page
+				.getByPlaceholder( 'e.g. Free shipping' )
+				.fill( 'Free shipping' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -202,6 +208,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.getByRole('button', { name: 'Continue' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
+			await page
+				.getByPlaceholder( 'e.g. Standard national' )
+				.fill( 'Flat rate' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
