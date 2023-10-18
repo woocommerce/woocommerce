@@ -30,7 +30,8 @@
 	"dependencies": {
 		"@woocommerce/expression-evaluation": "workspace:*",
 		"@wordpress/block-editor": "^9.8.0",
-		"@wordpress/blocks": "^12.3.0"
+		"@wordpress/blocks": "^12.3.0",
+		"@wordpress/element": "wp-6.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
