@@ -120,6 +120,40 @@ test.describe( 'Edit order', () => {
 		);
 	} );
 
+	test( 'can add and delete order notes', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.on( 'dialog', dialog => dialog.accept() );
+
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+
+		// add note to customer
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
+		await page.getByLabel('Note type').selectOption( 'Note to customer' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a note to the customer.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+	} );
+
 	test( 'can load billing details', async ( { page, baseURL } ) => {
 		let customerId = 0;
 
