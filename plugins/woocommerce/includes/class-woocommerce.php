@@ -249,6 +249,7 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+		self::add_action( 'woocommerce_init', array( $this, 'register_wp_admin_settings' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -1183,5 +1184,24 @@ final class WooCommerce {
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Register WC settings from WP-API to the REST API.
+	 *
+	 * This method used to be part of the now removed Legacy REST API.
+	 *
+	 * @since 9.0.0
+	 */
+	private function register_wp_admin_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
+		}
 	}
 }
