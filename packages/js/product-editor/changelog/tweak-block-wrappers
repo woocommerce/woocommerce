@@ -1,5 +1,5 @@
 Significance: patch
 Type: tweak
-Comment: Refactor to use components from @woocommerce/components
+Comment: Create components to use as wrappers for blocks
 
 
