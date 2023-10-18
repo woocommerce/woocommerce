@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix invalid focus state of the experimental select control

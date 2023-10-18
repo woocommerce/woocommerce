@@ -1,21 +1,19 @@
 const { UPDATE_WC, USER_KEY, USER_SECRET } = process.env;
-const { test, expect } = require( '@playwright/test' );
-const path = require( 'path' );
+const { test: setup, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
+const { downloadWooCommerceRelease } = require( './utils/plugin-utils' );
+const pluginEndpoint = '/wp-json/wp/v2/plugins/woocommerce/woocommerce';
 
-const zipPath = path.resolve( 'tmp', 'woocommerce.zip' );
-const downloadURL = `https://github.com/woocommerce/woocommerce/releases/download/${ UPDATE_WC }/woocommerce.zip`;
+let zipPath;
 
-test( `Setup remote test site`, async ( { page, request } ) => {
-	await test.step( `Download WooCommerce build zip`, async () => {
-		const response = await request.get( downloadURL );
-		expect( response.ok() ).toBeTruthy();
-		const body = await response.body();
-		fs.mkdirSync( 'tmp', { recursive: true } );
-		fs.writeFileSync( zipPath, body );
+setup( `Setup remote test site`, async ( { page, request } ) => {
+	setup.setTimeout( 5 * 60 * 1000 );
+
+	await setup.step( `Download WooCommerce build zip`, async () => {
+		zipPath = await downloadWooCommerceRelease( { request } );
 	} );
 
-	await test.step( 'Login to wp-admin', async () => {
+	await setup.step( 'Login to wp-admin', async () => {
 		const Username = 'Username or Email Address';
 		const Password = 'Password';
 		const Log_In = 'Log In';
@@ -33,75 +31,92 @@ test( `Setup remote test site`, async ( { page, request } ) => {
 		).toBeVisible();
 	} );
 
-	await test.step( `Deactivate currently installed WooCommerce version`, async () => {
-		const response = await request.put(
-			'/wp-json/wp/v2/plugins/woocommerce/woocommerce',
-			{
+	const installed = await setup.step(
+		`See if there's a WooCommerce plugin installed`,
+		async () => {
+			const response = await request.get( pluginEndpoint );
+			const isOK = response.ok();
+			const status = response.status();
+
+			// Fast-fail if response was neither OK nor 404.
+			expect( isOK || status === 404 ).toEqual( true );
+
+			return isOK;
+		}
+	);
+
+	await setup.step(
+		`Deactivate currently installed WooCommerce version`,
+		async () => {
+			if ( ! installed ) {
+				return;
+			}
+
+			const options = {
 				data: {
 					status: 'inactive',
 				},
+			};
+			const response = await request.put( pluginEndpoint, options );
+			expect( response.ok() ).toBeTruthy();
+		}
+	);
+
+	await setup.step(
+		`Delete currently installed WooCommerce version`,
+		async () => {
+			if ( ! installed ) {
+				return;
 			}
-		);
-		expect( response.ok() ).toBeTruthy();
-	} );
 
-	await test.step( `Delete currently installed WooCommerce version`, async () => {
-		const response = await request.delete(
-			'/wp-json/wp/v2/plugins/woocommerce/woocommerce'
-		);
-		expect( response.ok() ).toBeTruthy();
-	} );
+			const response = await request.delete( pluginEndpoint );
+			expect( response.ok() ).toBeTruthy();
+		}
+	);
 
-	await test.step( `Install WooCommerce ${ UPDATE_WC }`, async () => {
+	await setup.step( `Install WooCommerce ${ UPDATE_WC }`, async () => {
 		const Upload_Plugin = 'Upload Plugin';
 		const Plugin_zip_file = 'Plugin zip file';
 		const Install_Now = 'Install Now';
 		const Activate_Plugin = 'Activate Plugin';
+		const timeout = 3 * 60 * 1000;
 
 		await page.goto( '/wp-admin/plugin-install.php' );
 		await page.getByRole( 'button', { name: Upload_Plugin } ).click();
 		await page.getByLabel( Plugin_zip_file ).setInputFiles( zipPath );
 		await page.getByRole( 'button', { name: Install_Now } ).click();
-		const uploadResponse = await page.waitForResponse(
-			'**/wp-admin/update.php?action=upload-plugin'
-		);;
-		expect( uploadResponse.ok() ).toBeTruthy();
 		await expect(
 			page.getByRole( 'link', { name: Activate_Plugin } )
-		).toBeVisible();
+		).toBeVisible( { timeout } );
 	} );
 
-	await test.step( `Activate WooCommerce`, async () => {
-		const response = await request.put(
-			'/wp-json/wp/v2/plugins/woocommerce/woocommerce',
-			{
-				data: {
-					status: 'active',
-				},
-			}
-		);
+	await setup.step( `Activate WooCommerce`, async () => {
+		const options = {
+			data: {
+				status: 'active',
+			},
+		};
+		const response = await request.put( pluginEndpoint, options );
 		expect( response.ok() ).toBeTruthy();
 	} );
 
-	await test.step( `Verify WooCommerce version was installed`, async () => {
-		const response = await request.get(
-			'/wp-json/wp/v2/plugins/woocommerce/woocommerce'
-		);
+	await setup.step( `Verify WooCommerce version was installed`, async () => {
+		const response = await request.get( pluginEndpoint );
 		const { status, version } = await response.json();
 		expect( status ).toEqual( 'active' );
 		expect( version ).toEqual( UPDATE_WC );
 	} );
 
-	await test.step( `Verify WooCommerce database version`, async () => {
+	await setup.step( `Verify WooCommerce database version`, async () => {
 		const response = await request.get( '/wp-json/wc/v3/system_status' );
 		const { database } = await response.json();
 		const { wc_database_version } = database;
-		const [major, minor] = UPDATE_WC.split( '.' );
+		const [ major, minor ] = UPDATE_WC.split( '.' );
 		const pattern = new RegExp( `^${ major }\.${ minor }` );
 		expect( wc_database_version ).toMatch( pattern );
 	} );
 
-	await test.step( `Delete zip`, async () => {
+	await setup.step( `Delete zip`, async () => {
 		fs.unlinkSync( zipPath );
 	} );
 } );

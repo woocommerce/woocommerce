@@ -44,9 +44,15 @@ function Search(): JSX.Element {
 	const runSearch = () => {
 		const term = searchTerm.trim();
 
+		const newQuery: { term?: string; tab?: string } = {};
+		if ( term !== '' ) {
+			newQuery.term = term;
+			newQuery.tab = 'search';
+		}
+
 		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
-			url: getNewPath( { term, tab: 'search' }, MARKETPLACE_PATH, {} ),
+			url: getNewPath( newQuery, MARKETPLACE_PATH, {} ),
 		} );
 
 		return [];
