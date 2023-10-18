@@ -210,29 +210,20 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		if ( true === $subscriptions['expired'] ) {
+		try {
+			$activation_success = WC_Helper::activate_helper_subscription( $product_key );
+			if ( ! $activation_success ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'We couldn\'t activate your subscription.', 'woocommerce' ),
+					),
+					400
+				);
+			}
+		} catch ( Exception $e ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'This subscription has expired.', 'woocommerce' ),
-				),
-				402
-			);
-		}
-
-		if ( true === $subscriptions['maxed'] ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'All licenses for this subscription are already in use.', 'woocommerce' ),
-				),
-				402
-			);
-		}
-
-		$activation_success = WC_Helper::activate_helper_subscription( $product_key );
-		if ( ! $activation_success ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'We couldn\'t activate your subscription.', 'woocommerce' ),
+					'message' => $e->getMessage(),
 				),
 				400
 			);
@@ -251,13 +242,16 @@ class WC_Helper_Subscriptions_API {
 		$installation_success = $installation_manager->run_installation( 'activate_product' );
 
 		if ( ! $installation_success ) {
-			WC_Helper::deactivate_helper_subscription( $product_key );
-			wp_send_json_error(
-				array(
-					'message' => __( 'We couldn\'t install the extension.', 'woocommerce' ),
-				),
-				400
-			);
+			try {
+				WC_Helper::deactivate_helper_subscription( $product_key );
+			} finally {
+				wp_send_json_error(
+					array(
+						'message' => __( 'We couldn\'t install the extension.', 'woocommerce' ),
+					),
+					400
+				);
+			}
 		}
 
 		wp_send_json(
