@@ -695,7 +695,7 @@ class WC_Helper {
 				array(
 					'page' => 'wc-admin',
 					'tab'  => 'my-subscriptions',
-					'path' => urlencode( '/extensions' ),
+					'path' => rawurlencode( '/extensions' ),
 				),
 				admin_url( 'admin.php' )
 			);
