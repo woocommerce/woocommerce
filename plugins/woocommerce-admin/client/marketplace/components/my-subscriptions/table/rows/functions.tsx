@@ -10,9 +10,9 @@ import { Icon, plugins } from '@wordpress/icons';
  * Internal dependencies
  */
 import { Subscription } from '../../types';
+import Install from '../actions/install';
 import Update from '../actions/update';
 import ActionsDropdownMenu from './actions-dropdown-menu';
-import ActivationToggle from './activation-toggle';
 import StatusPopover from './status-popover';
 import Version from './version';
 
@@ -177,8 +177,8 @@ export function version( subscription: Subscription ): TableRow {
 	};
 }
 
-export function activation( subscription: Subscription ): TableRow {
-	const displayElement = <ActivationToggle subscription={ subscription } />;
+export function install( subscription: Subscription ): TableRow {
+	const displayElement = <Install subscription={ subscription } />;
 
 	return {
 		display: displayElement,
