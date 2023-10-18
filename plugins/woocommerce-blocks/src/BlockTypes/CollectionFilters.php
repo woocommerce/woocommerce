@@ -234,7 +234,6 @@ final class CollectionFilters extends AbstractBlock {
 		$mapped_params = array(
 			'orderBy'                       => 'orderby',
 			'pages'                         => 'page',
-			'parents'                       => 'parent',
 			'perPage'                       => 'per_page',
 			'woocommerceStockStatus'        => 'stock_status',
 			'woocommerceOnSale'             => 'on_sale',
