@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
 import { Icon, help } from '@wordpress/icons';
 
@@ -43,9 +43,9 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 		}
 	}
 	return (
-		<>
+		<div className="woocommerce-product-form__checkbox">
 			{ title && <h4>{ title }</h4> }
-			<div className="woocommerce-product-form__checkbox">
+			<div className="woocommerce-product-form__checkbox-wrapper">
 				<CheckboxControl
 					label={ label }
 					checked={ isChecked() }
@@ -68,6 +68,6 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 					</Tooltip>
 				) }
 			</div>
-		</>
+		</div>
 	);
 };
