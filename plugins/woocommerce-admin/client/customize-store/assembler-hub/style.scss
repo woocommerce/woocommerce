@@ -222,6 +222,10 @@
 			button.is-primary:disabled {
 				opacity: 0.5;
 			}
+
+			button .components-spinner {
+				margin-top: 0;
+			}
 		}
 	}
 

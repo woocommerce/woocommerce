@@ -178,14 +178,13 @@ export const SaveHub = () => {
 			<Button
 				variant="primary"
 				onClick={ onClickSaveButton }
-				isBusy={ isSaving }
 				disabled={ isDisabled }
 				aria-disabled={ isDisabled }
 				className="edit-site-save-hub__button"
 				// @ts-ignore No types for this exist yet.
 				__next40pxDefaultSize
 			>
-				{ label }
+				{ isSaving ? <Spinner /> : label }
 			</Button>
 		);
 	};
