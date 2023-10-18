@@ -685,6 +685,7 @@ class WC_Helper {
 	 * Get helper redirect URL.
 	 *
 	 * @param array $args Query args.
+	 * @param bool  $redirect_to_wc_admin Whether to redirect to WC Admin.
 	 * @return string
 	 */
 	private static function get_helper_redirect_url( $args = array(), $redirect_to_wc_admin = false ) {
