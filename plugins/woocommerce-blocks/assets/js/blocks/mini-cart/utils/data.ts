@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -128,15 +129,9 @@ export const getMiniCartTotalsFromLocalStorage = ():
 export const getMiniCartTotalsFromServer = async (): Promise<
 	[ CartResponseTotals, number ] | undefined
 > => {
-	return fetch( '/wp-json/wc/store/v1/cart/' )
-		.then( ( response ) => {
-			// Check if the response was successful.
-			if ( ! response.ok ) {
-				throw new Error();
-			}
-
-			return response.json();
-		} )
+	return apiFetch< CartResponse >( {
+		path: '/wc/store/v1/cart',
+	} )
 		.then( ( data: CartResponse ) => {
 			// Save server data to local storage, so we can re-fetch it faster
 			// on the next page load.
