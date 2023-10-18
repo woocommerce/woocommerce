@@ -17,6 +17,7 @@ export function Pill( { children, className = '' } ) {
 			as="span"
 			size="12"
 			lineHeight="16px"
+			change="this should fail linting due to extra spaces              "
 		>
 			{ children }
 		</Text>
