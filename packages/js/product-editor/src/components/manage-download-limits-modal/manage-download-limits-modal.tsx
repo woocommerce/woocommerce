@@ -20,8 +20,29 @@ import {
 import { ManageDownloadLimitsModalProps } from './types';
 import { useNumberInputProps } from '../../hooks/use-number-input-props';
 
-const DOWNLOAD_LIMIT_MIN = 1;
-const DOWNLOAD_EXPIRY_MIN = 1;
+const DOWNLOAD_LIMIT_MIN = 0;
+const DOWNLOAD_EXPIRY_MIN = 0;
+
+/**
+ * Download limit and download expiry currently support
+ * `-1`, `0`/`null` and a positive integer.
+ * When the value is `-1` downloads can be unlimited.
+ * When the value is `0` or `null` downloads are unabled.
+ * When the value is greater then `0` downloads are fixed
+ * to the amount set as value.
+ *
+ * @param value The amount of downloads
+ * @return A valid number as string or empty
+ */
+function getInitialValue( value: number | null ): string {
+	if ( value === null ) {
+		return '0';
+	}
+	if ( value === -1 ) {
+		return '';
+	}
+	return String( value );
+}
 
 export function ManageDownloadLimitsModal( {
 	initialValue,
@@ -29,10 +50,10 @@ export function ManageDownloadLimitsModal( {
 	onClose,
 }: ManageDownloadLimitsModalProps ) {
 	const [ downloadLimit, setDownloadLimit ] = useState< string >(
-		initialValue.downloadLimit ? String( initialValue.downloadLimit ) : ''
+		getInitialValue( initialValue.downloadLimit )
 	);
 	const [ downloadExpiry, setDownloadExpiry ] = useState< string >(
-		initialValue.downloadExpiry ? String( initialValue.downloadExpiry ) : ''
+		getInitialValue( initialValue.downloadExpiry )
 	);
 	const [ errors, setErrors ] = useState< Record< string, string > >( {} );
 
@@ -48,7 +69,7 @@ export function ManageDownloadLimitsModal( {
 			return false;
 		}
 
-		if ( Number.parseInt( downloadLimit, 10 ) < 1 ) {
+		if ( Number.parseInt( downloadLimit, 10 ) < DOWNLOAD_LIMIT_MIN ) {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadLimit: sprintf(
@@ -82,7 +103,7 @@ export function ManageDownloadLimitsModal( {
 			return false;
 		}
 
-		if ( Number.parseInt( downloadExpiry, 10 ) < 1 ) {
+		if ( Number.parseInt( downloadExpiry, 10 ) < DOWNLOAD_EXPIRY_MIN ) {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadExpiry: sprintf(
@@ -111,6 +132,7 @@ export function ManageDownloadLimitsModal( {
 			'product_download_limit_field'
 		) as string,
 		type: 'number',
+		min: DOWNLOAD_LIMIT_MIN,
 		className: classNames( {
 			'has-error': errors.downloadLimit,
 		} ),
@@ -142,6 +164,7 @@ export function ManageDownloadLimitsModal( {
 			'product_download_expiry_field'
 		) as string,
 		type: 'number',
+		min: DOWNLOAD_EXPIRY_MIN,
 		className: classNames( {
 			'has-error': errors.downloadExpiry,
 		} ),
@@ -171,12 +194,14 @@ export function ManageDownloadLimitsModal( {
 
 		if ( isDownloadLimitValid && isDownloadExpiryValid ) {
 			onSubmit( {
-				downloadLimit: downloadLimit
-					? Number.parseInt( downloadLimit, 10 )
-					: null,
-				downloadExpiry: downloadExpiry
-					? Number.parseInt( downloadExpiry, 10 )
-					: null,
+				downloadLimit:
+					downloadLimit === ''
+						? -1
+						: Number.parseInt( downloadLimit, 10 ),
+				downloadExpiry:
+					downloadExpiry === ''
+						? -1
+						: Number.parseInt( downloadExpiry, 10 ),
 			} );
 		}
 	}
