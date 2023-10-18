@@ -256,6 +256,7 @@ class PageController {
 	private function handle_list_table_bulk_actions() {
 		$action = $this->get_list_table()->current_action();
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();
 
 		if ( $action ) {
