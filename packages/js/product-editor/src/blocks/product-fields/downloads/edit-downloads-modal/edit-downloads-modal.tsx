@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -28,6 +28,8 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	onSave,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+	const [ isCopingToClipboard, setIsCopingToClipboard ] =
+		useState< boolean >( false );
 
 	const { file = '', name = '' } = downloableItem;
 
@@ -48,13 +50,15 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			textArea.select();
 			document.execCommand( 'copy' );
 			document.body.removeChild( textArea );
-			await onCopySuccess();
 		}
+		await onCopySuccess();
 	}
 
 	async function handleCopyToClipboard() {
 		recordEvent( 'product_downloads_modal_copy_url_to_clipboard' );
+		setIsCopingToClipboard( true );
 		await copyTextToClipboard( file );
+		setIsCopingToClipboard( false );
 	}
 
 	return (
@@ -70,7 +74,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 					| React.MouseEvent< Element >
 					| React.FocusEvent< Element >
 			) => {
-				if ( ! event.isPropagationStopped() ) {
+				if ( ! event.isPropagationStopped() && ! isCopingToClipboard ) {
 					recordEvent( 'product_downloads_modal_cancel' );
 					onCancel();
 				}
