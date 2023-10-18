@@ -29,6 +29,12 @@ type UseEvaluationContext = ( context: Record< string, unknown > ) => {
 	) => Record< string, unknown >;
 };
 
+function defaultUseEvaluationContext( context: Record< string, unknown > ) {
+	return {
+		getEvaluationContext: () => context,
+	};
+}
+
 function getEdit<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, object > = Record< string, object >
@@ -104,7 +110,7 @@ export function registerWooBlockType<
 	T extends Record< string, any > = Record< string, any >
 >(
 	block: BlockRepresentation< T >,
-	useEvaluationContext: UseEvaluationContext
+	useEvaluationContext?: UseEvaluationContext
 ): Block< T > | undefined {
 	if ( ! block ) {
 		return;
@@ -123,6 +129,12 @@ export function registerWooBlockType<
 
 	return registerBlockType< T >(
 		{ name, ...augmentedMetadata },
-		{ ...settings, edit: getEdit< T >( edit, useEvaluationContext ) }
+		{
+			...settings,
+			edit: getEdit< T >(
+				edit,
+				useEvaluationContext ?? defaultUseEvaluationContext
+			),
+		}
 	);
 }
