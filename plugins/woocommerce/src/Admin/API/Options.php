@@ -218,6 +218,13 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_customize_store_ai_suggestions',
 			'woocommerce_admin_customize_store_completed',
 			'woocommerce_admin_customize_store_completed_theme_id',
+			'wcpay_frt_discover_banner_settings',
+			'wcpay_multi_currency_setup_completed',
+			'woocommerce_dismissed_todo_tasks',
+			'woocommerce_remind_me_later_todo_tasks',
+			'woocommerce_deleted_todo_tasks',
+			'wcpay_fraud_protection_welcome_tour_dismissed',
+			'wcpay_capability_request_dismissed_notices',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',
