@@ -776,8 +776,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 10,
 				'attributes' => [
-					'property' => 'virtual',
-					'label'    => __( 'This product requires shipping or pickup', 'woocommerce' ),
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
 				],
 			]
 		);

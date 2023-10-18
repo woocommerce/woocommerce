@@ -22,6 +22,12 @@
 		"disabledCopy": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"checkedValue": {
+			"type": "object"
+		},
+		"uncheckedValue": {
+			"type": "object"
 		}
 	},
 	"supports": {
