@@ -2,24 +2,37 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
+/**
+ * File class.
+ *
+ * An object representation of a single log file.
+ */
 class File {
 	/**
-	 * @var string The absolute path of the file.
+	 * The absolute path of the file.
+	 *
+	 * @var string
 	 */
 	protected $path;
 
 	/**
-	 * @var string The source property of the file, derived from the filename.
+	 * The source property of the file, derived from the filename.
+	 *
+	 * @var string
 	 */
 	protected $source;
 
 	/**
-	 * @var int The date the file was created, as a Unix timestamp, derived from the filename.
+	 * The date the file was created, as a Unix timestamp, derived from the filename.
+	 *
+	 * @var int
 	 */
 	protected $created;
 
 	/**
-	 * @var string The key property of the file, derived from the filename.
+	 * The key property of the file, derived from the filename.
+	 *
+	 * @var string
 	 */
 	protected $key;
 
@@ -125,6 +138,6 @@ class File {
 	 * @return bool
 	 */
 	public function delete() {
-		return @unlink( $this->path );
+		return @unlink( $this->path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 }

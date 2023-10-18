@@ -11,22 +11,30 @@ use WP_List_Table;
  */
 class ListTable extends WP_List_Table {
 	/**
+	 * The user option key for saving the preferred number of files displayed per page.
 	 * @const string
 	 */
 	public const PER_PAGE_USER_OPTION_KEY = 'woocommerce_logging_file_list_per_page';
 
 	/**
+	 * Instance of FileController.
+	 *
 	 * @var FileController
 	 */
 	private $file_controller;
 
 	/**
+	 * Instance of PageController.
+	 *
 	 * @var PageController
 	 */
 	private $page_controller;
 
 	/**
 	 * ListTable class.
+	 *
+	 * @param FileController $file_controller Instance of FileController.
+	 * @param PageController $page_controller Instance of PageController.
 	 */
 	public function __construct( FileController $file_controller, PageController $page_controller ) {
 		$this->file_controller = $file_controller;
@@ -76,7 +84,7 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Displays extra controls between bulk actions and pagination.
 	 *
-	 * @param string $which
+	 * @param string $which The location of the tablenav being rendered. 'top' or 'bottom'.
 	 *
 	 * @return void
 	 */
@@ -91,7 +99,7 @@ class ListTable extends WP_List_Table {
 				<select name="source" id="filter-by-source">
 					<option<?php selected( $current_source, '' ); ?> value=""><?php esc_html_e( 'All sources', 'woocommerce' ); ?></option>
 					<?php foreach ( $all_sources as $source ) : ?>
-						<option<?php selected( $current_source, $source ); ?> value="<?php echo esc_attr( $source ) ?>">
+						<option<?php selected( $current_source, $source ); ?> value="<?php echo esc_attr( $source ); ?>">
 							<?php echo esc_html( $source ); ?>
 						</option>
 					<?php endforeach; ?>
@@ -137,7 +145,7 @@ class ListTable extends WP_List_Table {
 			$this->file_controller::DEFAULTS_GET_FILES['per_page']
 		);
 
-		$defaults = array(
+		$defaults  = array(
 			'per_page' => $per_page,
 			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
@@ -203,7 +211,7 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the checkbox column.
 	 *
-	 * @param File $item
+	 * @param File $item The current log file being rendered.
 	 *
 	 * @return string
 	 */
@@ -220,8 +228,9 @@ class ListTable extends WP_List_Table {
 			<span class="screen-reader-text">
 				<?php
 				printf(
+					// translators: 1. a date, 2. a slug-style name for a file.
 					esc_html__( 'Select the %1$s log file for %2$s', 'woocommerce' ),
-					esc_html( date( get_option( 'date_format' ), $item->get_created_timestamp() ) ),
+					esc_html( gmdate( get_option( 'date_format' ), $item->get_created_timestamp() ) ),
 					esc_html( $item->get_source() )
 				);
 				?>
@@ -234,7 +243,7 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the source column.
 	 *
-	 * @param File $item
+	 * @param File $item The current log file being rendered.
 	 *
 	 * @return string
 	 */
@@ -258,33 +267,33 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the created column.
 	 *
-	 * @param File $item
+	 * @param File $item The current log file being rendered.
 	 *
 	 * @return string
 	 */
 	public function column_created( $item ) {
 		$timestamp = $item->get_created_timestamp();
 
-		return date( 'Y-m-d', $timestamp );
+		return gmdate( 'Y-m-d', $timestamp );
 	}
 
 	/**
 	 * Render the modified column.
 	 *
-	 * @param File $item
+	 * @param File $item The current log file being rendered.
 	 *
 	 * @return string
 	 */
 	public function column_modified( $item ) {
 		$timestamp = $item->get_modified_timestamp();
 
-		return date( 'Y-m-d H:i:s', $timestamp );
+		return gmdate( 'Y-m-d H:i:s', $timestamp );
 	}
 
 	/**
 	 * Render the size column.
 	 *
-	 * @param File $item
+	 * @param File $item The current log file being rendered.
 	 *
 	 * @return string
 	 */
