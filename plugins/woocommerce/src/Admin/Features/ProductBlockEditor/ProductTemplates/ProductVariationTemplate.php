@@ -1,6 +1,6 @@
 <?php
 /**
- * SimpleProductTemplate
+ * ProductVariationTemplate
  */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
@@ -20,6 +20,11 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		'INVENTORY' => 'inventory',
 		'SHIPPING'  => 'shipping',
 	);
+
+	/**
+	 * The option name used check whether the single variation notice has been dismissed.
+	 */
+	const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION = 'woocommerce_single_variation_notice_dismissed';
 
 	/**
 	 * SimpleProductTemplate constructor.
@@ -100,6 +105,19 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
+		$general_group->add_block(
+			[
+				'id'         => 'general-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			[
@@ -164,6 +182,26 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
+
+		// Downloads section.
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$general_group->add_section(
+				[
+					'id'         => 'product-variation-downloads-section',
+					'order'      => 40,
+					'attributes' => [
+						'title'       => __( 'Downloads', 'woocommerce' ),
+						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					],
+				]
+			)->add_block(
+				[
+					'id'        => 'product-variation-downloads',
+					'blockName' => 'woocommerce/product-downloads-field',
+					'order'     => 10,
+				]
+			);
+		}
 	}
 
 	/**
@@ -171,6 +209,19 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
+		$pricing_group->add_block(
+			[
+				'id'         => 'pricing-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Pricing Section.
 		$product_pricing_section = $pricing_group->add_section(
 			[
@@ -287,6 +338,19 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
+		$inventory_group->add_block(
+			[
+				'id'         => 'inventory-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Inventory Section.
 		$product_inventory_section       = $inventory_group->add_section(
 			[
@@ -398,6 +462,19 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
+		$shipping_group->add_block(
+			[
+				'id'         => 'shipping-single-variation-notice',
+				'blockName'  => 'woocommerce/product-single-variation-notice',
+				'order'      => 10,
+				'attributes' => [
+					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
+					'type'          => 'info',
+					'isDismissible' => true,
+					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
+				],
+			]
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[

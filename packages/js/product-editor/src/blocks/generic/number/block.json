@@ -23,6 +23,12 @@
 		},
 		"placeholder": {
 			"type": "string"
+		},
+		"min": {
+			"type": "number"
+		},
+		"max": {
+			"type": "number"
 		}
 	},
 	"supports": {

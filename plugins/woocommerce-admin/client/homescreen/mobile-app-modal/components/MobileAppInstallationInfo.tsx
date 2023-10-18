@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { QRCodeSVG } from 'qrcode.react';
 
 export const MobileAppInstallationInfo = () => {
@@ -13,12 +12,6 @@ export const MobileAppInstallationInfo = () => {
 				}
 				size={ 140 }
 			/>
-			<p>
-				{ __(
-					'Scan the code above to download the WooCommerce mobile app, or visit woocommerce.com/mobile from your mobile device.',
-					'woocommerce'
-				) }
-			</p>
 		</div>
 	);
 };

@@ -1,3 +1,7 @@
+export type SearchAPIJSONType = {
+	products: Array< SearchAPIProductType >;
+};
+
 export type SearchAPIProductType = {
 	title: string;
 	image: string;
