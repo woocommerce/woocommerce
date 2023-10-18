@@ -9,6 +9,7 @@ $fixed-section-height: 224px;
 		display: flex;
 		justify-content: flex-end;
 		margin-bottom: $grid-unit-30;
+		gap: $grid-unit;
 	}
 
 	&__body {
