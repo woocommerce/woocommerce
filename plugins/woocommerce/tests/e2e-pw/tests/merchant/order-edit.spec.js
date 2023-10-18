@@ -5,7 +5,7 @@ const uuid = require( 'uuid' );
 test.describe( 'Edit order', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	let orderId;
+	let orderId, orderToCancel;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -21,6 +21,13 @@ test.describe( 'Edit order', () => {
 			.then( ( response ) => {
 				orderId = response.data.id;
 			} );
+		await api
+			.post( 'orders', {
+				status: 'processing',
+			} )
+			.then( ( response ) => {
+				orderToCancel = response.data.id;
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -31,6 +38,7 @@ test.describe( 'Edit order', () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ orderToCancel }`, { force: true } );
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
@@ -66,6 +74,31 @@ test.describe( 'Edit order', () => {
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
 		).toContainText( 'Order status changed from Processing to Completed.' );
+
+		// load the orders listing and confirm order is completed
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `#order-${ orderId }` ).getByRole( 'cell', { name: 'Completed' }) ).toBeVisible();
+	} );
+
+	test( 'can update order status to cancelled', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderToCancel }&action=edit` );
+
+		// update order status to Completed
+		await page.locator( '#order_status' ).selectOption( 'Cancelled' );
+		await page.locator( 'button.save_order' ).click();
+
+		// verify order status changed and note added
+		await expect( page.locator( '#order_status' ) ).toHaveValue(
+			'wc-cancelled'
+		);
+		await expect( page.getByText( 'Order status changed from Processing to Cancelled.' ) ).toBeVisible();
+
+		// load the orders listing and confirm order is cancelled
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `#order-${ orderToCancel }` ).getByRole( 'cell', { name: 'Cancelled' }) ).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
