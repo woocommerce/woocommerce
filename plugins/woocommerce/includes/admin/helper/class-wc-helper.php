@@ -673,7 +673,7 @@ class WC_Helper {
 		}
 
 		if ( ! empty( $_GET['wc-helper-deactivate'] ) ) {
-			return self::_helper_subscription_deactivate();
+			return self::helper_subscription_deactivate();
 		}
 
 		if ( ! empty( $_GET['wc-helper-deactivate-plugin'] ) ) {
@@ -912,7 +912,7 @@ class WC_Helper {
 	/**
 	 * Flush helper authentication cache.
 	 *
-	 * @since 8.3
+	 * @since 8.3.0
 	 */
 	public static function refresh_helper_subscriptions() {
 		/**
@@ -970,7 +970,7 @@ class WC_Helper {
 		if ( ! $subscription ) {
 			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
 		}
-		$product_id = $subscription['product_id']; 
+		$product_id = $subscription['product_id'];
 
 		// Activate subscription.
 		$activation_response = WC_Helper_API::post(
@@ -1028,12 +1028,12 @@ class WC_Helper {
 	/**
 	 * Deactivate a product subscription.
 	 */
-	private static function _helper_subscription_deactivate() {
+	private static function helper_subscription_deactivate() {
 		$product_key = isset( $_GET['wc-helper-product-key'] ) ? wc_clean( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
 		$product_id  = isset( $_GET['wc-helper-product-id'] ) ? absint( $_GET['wc-helper-product-id'] ) : 0;
 
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'deactivate:' . $product_key ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			self::log( 'Could not verify nonce in _helper_subscription_deactivate' );
+			self::log( 'Could not verify nonce in helper_subscription_deactivate' );
 			wp_die( 'Could not verify nonce' );
 		}
 
@@ -1070,7 +1070,7 @@ class WC_Helper {
 		if ( ! $subscription ) {
 			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
 		}
-		$product_id = $subscription['product_id']; 
+		$product_id = $subscription['product_id'];
 
 		$deactivation_response = WC_Helper_API::post(
 			'deactivate',
@@ -1448,7 +1448,7 @@ class WC_Helper {
 			array_filter(
 				$subscriptions,
 				function( $subscription ) use ( $site_id ) {
-					return in_array( $site_id, $subscription['connections'] );
+					return in_array( $site_id, $subscription['connections'], true );
 				}
 			),
 			'product_id'
@@ -1472,13 +1472,13 @@ class WC_Helper {
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
 
-				if ( 'plugin' == $local['_type'] ) {
+				if ( 'plugin' === $local['_type'] ) {
 					if ( is_plugin_active( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
 						$subscription['local']['active'] = true;
 					}
-				} elseif ( 'theme' == $local['_type'] ) {
+				} elseif ( 'theme' === $local['_type'] ) {
 					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
 						$subscription['local']['active'] = true;
 					}

@@ -129,7 +129,7 @@ class WC_Helper_Subscriptions_API {
 	/**
 	 * Activate a WooCommerce.com subscription.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request object.
 	 */
 	public static function activate( $request ) {
 		$product_key = $request->get_param( 'product_key' );
@@ -138,7 +138,7 @@ class WC_Helper_Subscriptions_API {
 		} catch ( Exception $e ) {
 			wp_send_json_error(
 				array(
-					'message' => $e->getMessage()
+					'message' => $e->getMessage(),
 				),
 				400
 			);
@@ -146,13 +146,13 @@ class WC_Helper_Subscriptions_API {
 		if ( $success ) {
 			wp_send_json_success(
 				array(
-					'message' => __( 'Your subscription has been activated.', 'woocommerce' )
+					'message' => __( 'Your subscription has been activated.', 'woocommerce' ),
 				)
 			);
 		} else {
 			wp_send_json_error(
 				array(
-					'message' => __( 'There was an error activating your subscription. Please try again.', 'woocommerce' )
+					'message' => __( 'There was an error activating your subscription. Please try again.', 'woocommerce' ),
 				),
 				400
 			);
@@ -162,7 +162,7 @@ class WC_Helper_Subscriptions_API {
 	/**
 	 * Deactivate a WooCommerce.com subscription.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request object.
 	 */
 	public static function deactivate( $request ) {
 		$product_key = $request->get_param( 'product_key' );
@@ -171,7 +171,7 @@ class WC_Helper_Subscriptions_API {
 		} catch ( Exception $e ) {
 			wp_send_json_error(
 				array(
-					'message' => $e->getMessage()
+					'message' => $e->getMessage(),
 				),
 				400
 			);
@@ -179,13 +179,13 @@ class WC_Helper_Subscriptions_API {
 		if ( $success ) {
 			wp_send_json_success(
 				array(
-					'message' => __( 'Your subscription has been deactivated.', 'woocommerce' )
+					'message' => __( 'Your subscription has been deactivated.', 'woocommerce' ),
 				)
 			);
 		} else {
 			wp_send_json_error(
 				array(
-					'message' => __( 'There was an error deactivating your subscription. Please try again.', 'woocommerce' )
+					'message' => __( 'There was an error deactivating your subscription. Please try again.', 'woocommerce' ),
 				),
 				400
 			);
@@ -195,7 +195,7 @@ class WC_Helper_Subscriptions_API {
 	/**
 	 * Install a WooCommerce.com product.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request object.
 	 */
 	public static function install( $request ) {
 		$product_key   = $request->get_param( 'product_key' );
@@ -204,7 +204,7 @@ class WC_Helper_Subscriptions_API {
 		if ( empty( $subscriptions ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t find this subscription.', 'woocommerce' )
+					'message' => __( 'We couldn\'t find this subscription.', 'woocommerce' ),
 				),
 				404
 			);
@@ -213,16 +213,16 @@ class WC_Helper_Subscriptions_API {
 		if ( true === $subscriptions['expired'] ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'This subscription has expired.', 'woocommerce' )
+					'message' => __( 'This subscription has expired.', 'woocommerce' ),
 				),
 				402
 			);
 		}
 
-		if ( $subscriptions['maxed'] === true ) {
+		if ( true === $subscriptions['maxed'] ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'All licenses for this subscription are already in use.', 'woocommerce' )
+					'message' => __( 'All licenses for this subscription are already in use.', 'woocommerce' ),
 				),
 				402
 			);
@@ -232,7 +232,7 @@ class WC_Helper_Subscriptions_API {
 		if ( ! $activation_success ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t activate your subscription.', 'woocommerce' )
+					'message' => __( 'We couldn\'t activate your subscription.', 'woocommerce' ),
 				),
 				400
 			);
@@ -254,7 +254,7 @@ class WC_Helper_Subscriptions_API {
 			WC_Helper::deactivate_helper_subscription( $product_key );
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t install the extension.', 'woocommerce' )
+					'message' => __( 'We couldn\'t install the extension.', 'woocommerce' ),
 				),
 				400
 			);
@@ -262,7 +262,7 @@ class WC_Helper_Subscriptions_API {
 
 		wp_send_json(
 			array(
-				'message' => __( 'The extension has been installed.', 'woocommerce' )
+				'message' => __( 'The extension has been installed.', 'woocommerce' ),
 			)
 		);
 	}
