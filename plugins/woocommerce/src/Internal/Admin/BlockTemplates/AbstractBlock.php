@@ -40,7 +40,18 @@ class AbstractBlock implements BlockInterface {
 	 */
 	private $attributes = [];
 
+	/**
+	 * The block hide conditions.
+	 *
+	 * @var array
+	 */
 	private $hide_conditions = [];
+
+	/**
+	 * The block hide conditions counter.
+	 *
+	 * @var int
+	 */
 	private $hide_conditions_counter = 0;
 
 	/**

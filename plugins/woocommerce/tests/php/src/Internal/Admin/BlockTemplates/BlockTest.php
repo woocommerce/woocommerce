@@ -353,6 +353,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that hide conditions can be passed in when creating a block.
+	 */
 	public function test_hide_conditions_in_constructor() {
 		$template = new BlockTemplate();
 
@@ -378,6 +381,9 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that hide conditions can be added to a block.
+	 */
 	public function test_add_hide_condition() {
 		$template = new BlockTemplate();
 
