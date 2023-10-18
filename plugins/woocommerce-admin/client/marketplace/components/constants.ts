@@ -6,4 +6,4 @@ export const MARKETPLACE_SEARCH_API_PATH =
 export const MARKETPLACE_CATEGORY_API_PATH =
 	'/wp-json/wccom-extensions/1.0/categories';
 export const MARKETPLACE_ITEMS_PER_PAGE = 60;
-export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 6;
+export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;

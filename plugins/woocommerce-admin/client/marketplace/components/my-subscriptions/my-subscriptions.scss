@@ -1,3 +1,5 @@
+@import '@wordpress/base-styles/_colors.native.scss';
+
 /* Tooltip doesn't look exactly like a standard <Tooltip> */
 .woocommerce-marketplace__my-subscriptions {
 	.components-tooltip .components-popover__content {
@@ -26,4 +28,76 @@
 			width: 15px;
 		}
 	}
+}
+
+.woocommerce-marketplace__my-subscriptions__header {
+	font-size: 20px;
+	color: $gray-900;
+	font-weight: 400;
+	margin-top: $grid-unit-40;
+}
+
+.woocommerce-marketplace__my-subscriptions__table-description {
+	display: flex;
+	align-items: center;
+	font-size: 13px;
+	margin-top: $grid-unit-05;
+}
+
+.woocommerce-marketplace__my-subscriptions__table {
+	font-size: 13px;
+	line-height: 20px;
+	margin-top: $grid-unit-30;
+}
+
+.woocommerce-marketplace__my-subscriptions__product {
+	display: flex;
+	align-items: center;
+	color: $gray-700;
+
+	&-name {
+		margin-left: $grid-unit-15;
+		line-height: 18px;
+		font-weight: 600;
+		color: $gray-900;
+	}
+
+	&-icon {
+		border-radius: 4px;
+		width: 40px;
+	}
+
+	svg {
+		border-radius: 4px;
+		padding: $grid-unit-10;
+		fill: $gray-600;
+		background-color: $gray-200;
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__status-warning {
+	display: flex;
+	align-items: center;
+	border-radius: 2px;
+	border: none;
+	color: var(--wp-red-red-70, #8a2424);
+	background: var(--wp-red-red-0, #fcf0f1);
+	padding: 2px 8px;
+
+	& > svg {
+		margin-right: 2px;
+		fill: var(--wp-red-red-70, #8a2424);
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__status-popover .components-popover__content {
+	border: 1px solid $gray-400;
+	width: 300px;
+	border-radius: 2px;
+	padding: $grid-unit-15;
+	color: $gray-900;
+}
+
+.components-base-control.woocommerce-marketplace__my-subscriptions__activation {
+	margin-bottom: 0;
 }

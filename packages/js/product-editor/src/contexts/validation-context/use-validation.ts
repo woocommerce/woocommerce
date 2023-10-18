@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useMemo, useState } from '@wordpress/element';
+import { useContext, useMemo, useState, useEffect } from '@wordpress/element';
 import { DependencyList } from 'react';
 
 /**
@@ -22,6 +22,12 @@ export function useValidation< T >(
 		() => context.registerValidator( validatorId, validator ),
 		[ validatorId, ...deps ]
 	);
+
+	useEffect( () => {
+		return () => {
+			context.unRegisterValidator( validatorId );
+		};
+	}, [] );
 
 	return {
 		ref,

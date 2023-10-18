@@ -55,6 +55,12 @@ export function Edit( {
 		'weight'
 	);
 
+	const [ virtual ] = useEntityProp< boolean >(
+		'postType',
+		context.postType,
+		'virtual'
+	);
+
 	const [ highlightSide, setHighlightSide ] = useState< HighlightSides >();
 
 	const { formatNumber, parseNumber } = useProductHelper();
@@ -84,6 +90,7 @@ export function Edit( {
 			onFocus: () => setHighlightSide( side ),
 			onBlur: () => setHighlightSide( undefined ),
 			suffix: dimensionUnit,
+			disabled: virtual,
 		};
 	}
 
@@ -178,6 +185,7 @@ export function Edit( {
 		suffix: weightUnit,
 		ref: weightRef,
 		onBlur: validateWeight,
+		disabled: virtual,
 	};
 
 	return (

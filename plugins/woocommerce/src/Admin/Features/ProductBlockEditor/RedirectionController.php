@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
@@ -63,7 +64,15 @@ class RedirectionController {
 	protected function is_product_supported( $product_id ): bool {
 		$product = $product_id ? wc_get_product( $product_id ) : null;
 		$digital_product = $product->is_downloadable() || $product->is_virtual();
-		return $product && in_array( $product->get_type(), $this->supported_post_types, true ) && ! $digital_product;
+
+		if ( $product && in_array( $product->get_type(), $this->supported_post_types, true ) ) {
+			if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+				return true;
+			}
+			return ! $digital_product;
+		}
+
+		return false;
 	}
 
 	/**
@@ -123,6 +132,7 @@ class RedirectionController {
 			'product_id' => 'product' === $path_pieces[1] ? absint( $path_pieces[2] ) : null,
 		);
 	}
+
 
 	/**
 	 * Redirect non supported product types to legacy editor.
