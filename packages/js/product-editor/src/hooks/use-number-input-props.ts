@@ -1,9 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { CurrencyContext } from '@woocommerce/currency';
-import { useCallback, useContext } from '@wordpress/element';
-import * as WooNumber from '@woocommerce/number';
+import { useProductHelper } from './use-product-helper';
 
 export type NumberInputProps = {
 	value: string;
@@ -25,31 +23,7 @@ export const useNumberInputProps = ( {
 	onFocus,
 	onKeyUp,
 }: Props ) => {
-	const context = useContext( CurrencyContext );
-	const formatNumber = useCallback(
-		( val: string ): string => {
-			const { getCurrencyConfig } = context;
-			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
-
-			return WooNumber.numberFormat(
-				{ decimalSeparator, thousandSeparator },
-				val
-			);
-		},
-		[ context ]
-	);
-	const parseNumber = useCallback(
-		( val: string ): string => {
-			const { getCurrencyConfig } = context;
-			const { decimalSeparator, thousandSeparator } = getCurrencyConfig();
-
-			return WooNumber.parseNumber(
-				{ decimalSeparator, thousandSeparator },
-				val
-			);
-		},
-		[ context ]
-	);
+	const { formatNumber, parseNumber } = useProductHelper();
 
 	const numberInputProps: NumberInputProps = {
 		value: formatNumber( value ),
