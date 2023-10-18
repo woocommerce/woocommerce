@@ -1,3 +1,7 @@
+export type SearchAPIJSONType = {
+	products: Array< SearchAPIProductType >;
+};
+
 export type SearchAPIProductType = {
 	title: string;
 	image: string;
@@ -36,4 +40,10 @@ export interface Product {
 export enum ProductType {
 	theme = 'theme',
 	extension = 'extension',
+}
+
+export enum SearchResultType {
+	theme = 'theme',
+	extension = 'extension',
+	all = 'all',
 }

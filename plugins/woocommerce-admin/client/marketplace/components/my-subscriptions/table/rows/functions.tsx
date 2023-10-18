@@ -16,12 +16,14 @@ import ActionsDropdownMenu from './actions-dropdown-menu';
 import Update from './update';
 import Version from './version';
 
+=======
+
+// TODO: Add explanations.
 function getStatus( subscription: Subscription ): {
 	text: string;
 	warning: boolean;
 	explanation?: string;
 } {
-	// TODO add statuses for subscriptions
 	if ( subscription.active ) {
 		return {
 			text: __( 'Active', 'woocommerce' ),
@@ -42,7 +44,7 @@ function getStatus( subscription: Subscription ): {
 			text: __( 'Expired', 'woocommerce' ),
 			warning: true,
 			explanation: __(
-				'To receive updates and support for this extension, you need to purchase a new subscription or consolidate your extensions to one connected account by sharing or transferring this extension to this connected account.',
+				'To get updates and support for this extension, you need to purchase a new subscription, or else share or transfer a subscription for this extension from another account.',
 				'woocommerce'
 			),
 		};

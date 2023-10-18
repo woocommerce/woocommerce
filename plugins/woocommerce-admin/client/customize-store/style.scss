@@ -1,6 +1,12 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint('<782px') {
 		padding-top: 0 !important;
+	}
+
+	.woocommerce-customize-store__loading {
+		display: grid;
+		place-items: center;
+		height: 100vh;
 	}
 }
 
@@ -71,7 +77,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 }
 
 .woocommerce-cys-design-with-ai {
-
 	.components-base-control {
 		width: 404px;
 		textarea {

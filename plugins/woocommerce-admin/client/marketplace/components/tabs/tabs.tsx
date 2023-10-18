@@ -53,14 +53,12 @@ const tabs: Tabs = {
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === DEFAULT_TAB_KEY ) {
-		navigateTo( {
-			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
-		} );
-		return;
-	}
 	navigateTo( {
-		url: getNewPath( { tab: tabKey } ),
+		url: getNewPath(
+			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
+			MARKETPLACE_PATH,
+			{}
+		),
 	} );
 };
 
@@ -75,12 +73,20 @@ const getVisibleTabs = ( selectedTab: string ) => {
 
 	return currentVisibleTabs;
 };
-
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+
+	const onTabClick = ( tabKey: string ) => {
+		if ( tabKey === selectedTab ) {
+			return;
+		}
+		setSelectedTab( tabKey );
+		setUrlTabParam( tabKey );
+	};
+
 	const tabContent = [];
 	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
@@ -105,10 +111,7 @@ const renderTabs = (
 							'is-active': tabKey === selectedTab,
 						}
 					) }
-					onClick={ () => {
-						setSelectedTab( tabKey );
-						setUrlTabParam( tabKey );
-					} }
+					onClick={ () => onTabClick( tabKey ) }
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }

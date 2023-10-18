@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { MouseEvent } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
@@ -15,6 +16,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable, Tag } from '@woocommerce/components';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	useContext,
 	useState,
@@ -73,6 +75,14 @@ type VariationResponseProps = {
 	update?: Partial< ProductVariation >[];
 	delete?: Partial< ProductVariation >[];
 };
+
+function getEditVariationLink( variation: ProductVariation ) {
+	return getNewPath(
+		{},
+		`/product/${ variation.parent_id }/variation/${ variation.id }`,
+		{}
+	);
+}
 
 export const VariationsTable = forwardRef<
 	HTMLDivElement,
@@ -320,6 +330,18 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
+	function editVariationClickHandler( variation: ProductVariation ) {
+		const url = getEditVariationLink( variation );
+
+		return function handleEditVariationClick(
+			event: MouseEvent< HTMLAnchorElement >
+		) {
+			event.preventDefault();
+
+			navigateTo( { url } );
+		};
+	}
+
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
 			{ ( isLoading || isGeneratingVariations ) && (
@@ -496,6 +518,16 @@ export const VariationsTable = forwardRef<
 									</div>
 								</Tooltip>
 							) }
+
+							<Button
+								href={ getEditVariationLink( variation ) }
+								onClick={ editVariationClickHandler(
+									variation
+								) }
+							>
+								{ __( 'Edit', 'woocommerce' ) }
+							</Button>
+
 							<VariationActionsMenu
 								selection={ variation }
 								onChange={ ( value ) =>

@@ -9,7 +9,10 @@ export default function ActionsDropdownMenu() {
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
-			label="Select a direction"
+			label={ __(
+				'See more things you can do with this subscription',
+				'woocommerce'
+			) }
 			controls={ [
 				{
 					title: __( 'Manage in WooCommerce.com', 'woocommerce' ),
@@ -20,7 +23,7 @@ export default function ActionsDropdownMenu() {
 					},
 				},
 				{
-					title: __( 'Manage in Pluins', 'woocommerce' ),
+					title: __( 'Manage in Plugins', 'woocommerce' ),
 					icon: plugins,
 					onClick: () => {
 						window.location.href = '/wp-admin/plugins.php';

@@ -20,6 +20,12 @@
 		},
 		"tooltip": {
 			"type": "string"
+		},
+		"checkedValue": {
+			"type": "string"
+		},
+		"uncheckedValue": {
+			"type": "string"
 		}
 	},
 	"supports": {
@@ -31,5 +37,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }

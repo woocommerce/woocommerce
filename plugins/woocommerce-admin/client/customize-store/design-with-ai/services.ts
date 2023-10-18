@@ -400,7 +400,10 @@ const installAndActivateTheme = async () => {
 
 const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_customize_store_ai_suggestions: context.aiSuggestions,
+		woocommerce_customize_store_ai_suggestions: {
+			...context.aiSuggestions,
+			lookAndFeel: context.lookAndFeel.choice,
+		},
 	} );
 };
 

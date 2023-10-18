@@ -15,6 +15,7 @@ import ProductLoader from '../product-loader/product-loader';
 import ProductList from '../product-list/product-list';
 import './no-results.scss';
 import { ProductType } from '../product-list/types';
+import CategorySelector from '../category-selector/category-selector';
 
 interface NoResultsProps {
 	type: ProductType;
@@ -27,8 +28,8 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 	const [ noResultsTerm, setNoResultsTerm ] = useState< string >( '' );
 	const typeLabel =
 		props.type === ProductType.theme ? 'themes' : 'extensions';
-
 	const query = useQuery();
+	const showCategorySelector = query.tab === 'search' && query.section;
 
 	useEffect( () => {
 		if ( query.term ) {
@@ -77,24 +78,30 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 			} );
 	}, [] );
 
+	function productListTitle( type: ProductType ) {
+		if ( type === ProductType.theme ) {
+			return __( 'Our favorite themes', 'woocommerce' );
+		}
+
+		return __( 'Most popular extensions', 'woocommerce' );
+	}
+
 	function renderProductGroup() {
 		if ( isLoadingProductGroup ) {
-			return <ProductLoader />;
+			return (
+				<ProductLoader
+					type={ productGroup?.itemType || ProductType.extension }
+				/>
+			);
 		}
 
 		if ( ! productGroup ) {
 			return <></>;
 		}
 
-		const title = sprintf(
-			// translators: %s: product type (themes or extensions)
-			__( 'Most popular %s', 'woocommerce' ),
-			typeLabel
-		);
-
 		return (
 			<ProductList
-				title={ title }
+				title={ productListTitle( props.type ) }
 				products={ productGroup.items }
 				groupURL={ productGroup.url }
 				type={ productGroup.itemType }
@@ -112,6 +119,7 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__no-results">
+			{ showCategorySelector && <CategorySelector type={ props.type } /> }
 			<div className="woocommerce-marketplace__no-results__content">
 				<img
 					className="woocommerce-marketplace__no-results__icon"

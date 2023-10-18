@@ -360,6 +360,13 @@ a.added_to_cart {
 			flex-grow: 1;
 			margin-bottom: 1rem;
 			border: none;
+			display: inline;
+			text-transform: uppercase;
+
+			strong {
+				text-transform: none;
+				display: block;
+			}
 		}
 	}
 

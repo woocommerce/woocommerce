@@ -210,3 +210,23 @@ export function* runDisableEmail() {
 		yield setIsEmailDisabled( response );
 	} );
 }
+
+export function* resetCustomizeYourStore() {
+	yield runCommand( 'Reset Customize Your Store', function* () {
+		const optionsToDelete = [
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'woocommerce_admin_customize_store_completed',
+			'woocommerce_admin_customize_store_completed_theme_id',
+			'wc_blocks_patterns_content',
+		];
+		yield apiFetch( {
+			method: 'DELETE',
+			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-cys',
+			method: 'POST',
+		} );
+	} );
+}

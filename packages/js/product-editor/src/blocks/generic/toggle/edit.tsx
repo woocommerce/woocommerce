@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { useEntityProp } from '@wordpress/core-data';
 import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
@@ -12,17 +11,18 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ToggleBlockAttributes } from './types';
 import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { ProductEditorBlockEditProps } from '../../../types';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function Edit( {
 	attributes,
+	context: { postType },
 }: ProductEditorBlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { label, property, disabled, disabledCopy } = attributes;
-	const [ value, setValue ] = useEntityProp< boolean >(
-		'postType',
-		'product',
-		property
-	);
+	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
+		postType,
+		fallbackValue: false,
+	} );
 
 	return (
 		<div { ...blockProps }>

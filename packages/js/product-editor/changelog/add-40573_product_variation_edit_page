@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update Editor and BlockEditor components to add support for multiple product/post types.

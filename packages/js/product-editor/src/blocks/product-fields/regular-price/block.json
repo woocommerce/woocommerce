@@ -14,6 +14,10 @@
 		},
 		"help": {
 			"type": "string"
+		},
+		"isRequired": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
@@ -25,5 +29,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
+	"usesContext": [ "postType" ],
 	"editorStyle": "file:./editor.css"
 }

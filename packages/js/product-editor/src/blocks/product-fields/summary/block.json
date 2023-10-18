@@ -8,6 +8,9 @@
 	"keywords": [ "products", "summary", "excerpt" ],
 	"textdomain": "default",
 	"attributes": {
+		"property": {
+			"type": "string"
+		},
 		"align": {
 			"type": "string"
 		},
@@ -33,6 +36,9 @@
 		"label": {
 			"type": "string"
 		},
+		"helpText": {
+			"type": "string"
+		},
 		"content": {
 			"type": "string",
 			"__experimentalRole": "content"
@@ -46,5 +52,6 @@
 		"inserter": false,
 		"lock": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }

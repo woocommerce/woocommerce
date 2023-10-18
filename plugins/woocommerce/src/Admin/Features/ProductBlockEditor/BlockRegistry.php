@@ -34,6 +34,7 @@ class BlockRegistry {
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-taxonomy-field',
 		'woocommerce/product-text-field',
+		'woocommerce/product-number-field',
 	];
 
 	/**
@@ -42,6 +43,7 @@ class BlockRegistry {
 	const PRODUCT_FIELDS_BLOCKS = [
 		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-description-field',
+		'woocommerce/product-downloads-field',
 		'woocommerce/product-images-field',
 		'woocommerce/product-inventory-email-field',
 		'woocommerce/product-sku-field',
@@ -58,6 +60,7 @@ class BlockRegistry {
 		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
+		'woocommerce/product-single-variation-notice',
 	];
 
 	/**

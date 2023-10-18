@@ -26,13 +26,121 @@ describe( 'Intro Modals', () => {
 					intro: {
 						hasErrors: false,
 						activeTheme: '',
-						themeCards: [],
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
 						activeThemeHasMods: true,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 				} }
+				currentState={ 'intro' }
+				parentMachine={ null as unknown as AnyInterpreter }
+			/>
+		);
+
+		const bannerButton = screen.getByRole( 'button', {
+			name: /Design with AI/i,
+		} );
+		fireEvent.click( bannerButton );
+
+		await waitFor( () => {
+			expect(
+				screen.getByText(
+					/Are you sure you want to start a new design?/i
+				)
+			).toBeInTheDocument();
+		} );
+
+		const modalButton = screen.getByRole( 'button', {
+			name: /Design with AI/i,
+		} );
+		fireEvent.click( modalButton );
+
+		expect( sendEventMock ).toHaveBeenCalledWith( {
+			type: 'DESIGN_WITH_AI',
+		} );
+	} );
+
+	it( 'should display StartOverWarningModal when customizeStoreTaskCompleted and currentThemeIsAiGenerated and button is clicked', async () => {
+		const sendEventMock = jest.fn();
+		render(
+			<Intro
+				sendEvent={ sendEventMock }
+				context={ {
+					intro: {
+						hasErrors: false,
+						activeTheme: '',
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
+						activeThemeHasMods: false,
+						customizeStoreTaskCompleted: true,
+						currentThemeIsAiGenerated: true,
+					},
+					themeConfiguration: {},
+				} }
+				currentState={ 'intro' }
+				parentMachine={ null as unknown as AnyInterpreter }
+			/>
+		);
+
+		const bannerButton = screen.getByRole( 'button', {
+			name: /Create a new one/i,
+		} );
+		fireEvent.click( bannerButton );
+
+		await waitFor( () => {
+			expect(
+				screen.getByText( /Are you sure you want to start over?/i )
+			).toBeInTheDocument();
+		} );
+
+		const modalButton = screen.getByRole( 'button', {
+			name: /Start again/i,
+		} );
+		fireEvent.click( modalButton );
+
+		expect( sendEventMock ).toHaveBeenCalledWith( {
+			type: 'DESIGN_WITH_AI',
+		} );
+	} );
+
+	it( 'should display StartNewDesignWarningModal when customizeStoreTaskCompleted and not currentThemeIsAiGenerated and button is clicked', async () => {
+		const sendEventMock = jest.fn();
+		render(
+			<Intro
+				sendEvent={ sendEventMock }
+				context={ {
+					intro: {
+						hasErrors: false,
+						activeTheme: '',
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
+						activeThemeHasMods: false,
+						customizeStoreTaskCompleted: true,
+						currentThemeIsAiGenerated: false,
+					},
+					themeConfiguration: {},
+				} }
+				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
 			/>
 		);

@@ -1,8 +1,10 @@
-const { GITHUB_TOKEN, UPDATE_WC } = process.env;
+const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
+const playwrightConfig = require('./playwright.config');
 
 module.exports = async ( config ) => {
+
 	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
@@ -196,6 +198,30 @@ module.exports = async ( config ) => {
 			await expect( updateCompleteMessage ).toBeVisible();
 		} else {
 			console.log( 'No DB update needed' );
+		}
+	} else {
+		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is passed
+		if (ENABLE_HPOS) {
+			let hposConfigured = false;
+			const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+			try {
+				const auth = { username: playwrightConfig.userKey, password: playwrightConfig.userSecret };
+				const hposResponse = await axios.post( playwrightConfig.use.baseURL + '/wp-json/wc/v3/settings/advanced/woocommerce_custom_orders_table_enabled', { value }, { auth } );
+				if ( hposResponse.data.value === value ) {
+					console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
+					hposConfigured = true;
+				}
+			} catch( error ) {
+				console.log( 'HPOS setup failed.');
+				console.log( error );
+				process.exit( 1 );
+			}
+			if ( ! hposConfigured ) {
+				console.error(
+					'Cannot proceed to api tests, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+				);
+				process.exit( 1 );
+			}
 		}
 	}
 };

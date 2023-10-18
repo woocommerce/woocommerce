@@ -38,20 +38,27 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export function Edit( {
 	attributes,
 	clientId,
+	context,
 }: ProductEditorBlockEditProps< ShippingDimensionsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ dimensions, setDimensions ] =
 		useEntityProp< Partial< ProductDimensions > | null >(
 			'postType',
-			'product',
+			context.postType,
 			'dimensions'
 		);
 
 	const [ weight, setWeight ] = useEntityProp< string | null >(
 		'postType',
-		'product',
+		context.postType,
 		'weight'
+	);
+
+	const [ virtual ] = useEntityProp< boolean >(
+		'postType',
+		context.postType,
+		'virtual'
 	);
 
 	const [ highlightSide, setHighlightSide ] = useState< HighlightSides >();
@@ -83,6 +90,7 @@ export function Edit( {
 			onFocus: () => setHighlightSide( side ),
 			onBlur: () => setHighlightSide( undefined ),
 			suffix: dimensionUnit,
+			disabled: virtual,
 		};
 	}
 
@@ -177,6 +185,7 @@ export function Edit( {
 		suffix: weightUnit,
 		ref: weightRef,
 		onBlur: validateWeight,
+		disabled: virtual,
 	};
 
 	return (

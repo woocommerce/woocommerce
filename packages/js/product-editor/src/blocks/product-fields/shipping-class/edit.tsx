@@ -71,6 +71,7 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
+	context,
 }: ProductEditorBlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
@@ -90,8 +91,13 @@ export function Edit( {
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
-		'product',
+		context.postType,
 		'shipping_class'
+	);
+	const [ virtual ] = useEntityProp< boolean >(
+		'postType',
+		context.postType,
+		'virtual'
 	);
 
 	function handleShippingClassServerError(
@@ -155,6 +161,7 @@ export function Edit( {
 								shippingClasses ?? []
 							),
 						] }
+						disabled={ virtual }
 						help={ createInterpolateElement(
 							__(
 								'Manage shipping classes and rates in <Link>global settings</Link>.',
