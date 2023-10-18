@@ -16,8 +16,6 @@ import ActionsDropdownMenu from './actions-dropdown-menu';
 import Update from './update';
 import Version from './version';
 
-=======
-
 // TODO: Add explanations.
 function getStatus( subscription: Subscription ): {
 	text: string;
