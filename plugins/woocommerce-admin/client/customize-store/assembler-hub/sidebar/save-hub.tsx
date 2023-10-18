@@ -159,6 +159,8 @@ export const SaveHub = () => {
 					variant="primary"
 					onClick={ onDone }
 					className="edit-site-save-hub__button"
+					disabled={ isResolving }
+					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
