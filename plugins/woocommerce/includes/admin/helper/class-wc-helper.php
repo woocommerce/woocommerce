@@ -687,9 +687,9 @@ class WC_Helper {
 	 * @param array $args Query args.
 	 * @return string
 	 */
-	private static function get_helper_redirect_url( $args = array() ) {
+	private static function get_helper_redirect_url( $args = array(), $redirect_to_wc_admin = false ) {
 		global $current_screen;
-		if ( isset( $_GET['redirect-to-wc-admin'] ) && $current_screen->id === 'woocommerce_page_wc-addons' ) {
+		if ( true === $redirect_to_wc_admin && 'woocommerce_page_wc-addons' === $current_screen->id ) {
 			return add_query_arg(
 				array(
 					'page' => 'wc-admin',
@@ -847,7 +847,8 @@ class WC_Helper {
 					'page'             => 'wc-addons',
 					'section'          => 'helper',
 					'wc-helper-status' => 'helper-connected',
-				)
+				),
+				isset( $_GET['redirect-to-wc-admin'] )
 			)
 		);
 		die();
@@ -872,7 +873,8 @@ class WC_Helper {
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
 				'wc-helper-status' => 'helper-disconnected',
-			)
+			),
+			isset( $_GET['redirect-to-wc-admin'] )
 		);
 
 		self::disconnect();
@@ -898,7 +900,8 @@ class WC_Helper {
 				'section'          => 'helper',
 				'filter'           => self::get_current_filter(),
 				'wc-helper-status' => 'helper-refreshed',
-			)
+			),
+			isset( $_GET['redirect-to-wc-admin'] )
 		);
 
 		wp_safe_redirect( $redirect_uri );
