@@ -200,8 +200,8 @@ class BlockRegistry {
 		return register_block_type_from_metadata(
 			$block_json_file,
 			[
-				'attributes'   => $this->augment_attributes( $metadata['attributes'] ),
-				'uses_context' => $this->augment_uses_context( $metadata['usesContext'] ),
+				'attributes'   => $this->augment_attributes( isset( $metadata['attributes'] ) ? $metadata['attributes'] : [] ),
+				'uses_context' => $this->augment_uses_context( isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : [] ),
 			]
 		);
 	}
