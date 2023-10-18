@@ -9,7 +9,10 @@ export default function ActionsDropdownMenu() {
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
-			label={ __( 'See more things you can do with this subscription', 'woocommerce' ) }
+			label={ __(
+				'See more things you can do with this subscription',
+				'woocommerce'
+			) }
 			controls={ [
 				{
 					title: __( 'Manage in WooCommerce.com', 'woocommerce' ),
