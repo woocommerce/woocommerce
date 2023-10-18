@@ -74,16 +74,16 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td><?php echo esc_html( $environment['version'] ); ?></td>
 		</tr>
 		<tr>
-			<td data-export-label="REST API Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce REST API package running on your site.', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				$version = wc()->api->get_rest_api_package_version();
+				$version = is_null( wc()->api ) ? null : wc()->api->get_rest_api_package_version();
 
 				if ( ! is_null( $version ) ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API is not installed on your site.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>
