@@ -911,12 +911,12 @@ class WC_Helper {
 
 	/**
 	 * Flush helper authentication cache.
-	 *
-	 * @since 8.3.0
 	 */
 	public static function refresh_helper_subscriptions() {
 		/**
 		 * Fires when Helper subscriptions are refreshed.
+		 *
+		 * @since 8.3.0
 		 */
 		do_action( 'woocommerce_helper_subscriptions_refresh' );
 
