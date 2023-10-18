@@ -14,6 +14,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -431,7 +432,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				}
 
 				$version = str_replace( 'wp_api_', '', $this->get_api_version() );
-				$payload = wc()->api->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
+				$payload = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 				break;
 
 			// Custom topics include the first hook argument.

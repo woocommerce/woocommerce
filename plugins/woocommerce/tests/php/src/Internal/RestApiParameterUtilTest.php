@@ -2,13 +2,13 @@
 
 namespace Automattic\WooCommerce\Tests\Internal;
 
-use Automattic\WooCommerce\Internal\RestApiUtil;
+use Automattic\WooCommerce\Internal\RestApiParameterUtil;
 
 /**
- * Tests for the RestApiUtil class.
+ * Tests for the RestApiParameterUtil class.
  * @package Automattic\WooCommerce\Tests\Internal
  */
-class RestApiUtilTest extends \WC_Unit_Test_Case {
+class RestApiParameterUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'adjust_create_refund_request_parameters' adjust the 'reason' parameter to null if it's somehow empty.
@@ -26,7 +26,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 			$request['reason'] = $input_reason;
 		}
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$this->assertEquals( $expected_output_reason, $request['reason'] );
 	}
@@ -49,7 +49,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 			$request['api_refund'] = $input_api_refund;
 		}
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$this->assertEquals( $expected_output_api_refund, $request['api_refund'] );
 	}
@@ -77,7 +77,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request               = new \WP_REST_Request();
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$expected = array(
 			'1' => array(
@@ -117,7 +117,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request               = new \WP_REST_Request();
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$expected = array(
 			'1' => array(
@@ -148,7 +148,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request               = new \WP_REST_Request();
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$this->assertEquals( $line_items, $request['line_items'] );
 	}
@@ -173,7 +173,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request               = new \WP_REST_Request();
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$expected = strval( 10 + 20 + 30 + 40 );
 		$this->assertEquals( $expected, $request['amount'] );
@@ -197,7 +197,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request['amount']     = '999';
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$this->assertEquals( '999', $request['amount'] );
 	}
@@ -276,7 +276,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$request               = new \WP_REST_Request();
 		$request['line_items'] = $line_items;
 
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$this->assertFalse( isset( $request['amount'] ) );
 	}

@@ -6,12 +6,13 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
+$report             = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
 $post_type_counts   = isset( $report['post_type_counts'] ) ? $report['post_type_counts'] : array();
