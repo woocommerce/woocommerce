@@ -574,3 +574,25 @@ function wc_block_theme_has_styles_for_element( $element ) {
 
 	return false;
 }
+
+/**
+ * Verify if the transients can be saved and retrieved properly.
+ *
+ * If transients are not working properly,
+ * return false.
+ *
+ * @since 7.6.0
+ * @return bool
+ */
+function wc_is_transient_functional() {
+	$current_timestamp_cache_key = '_wc_transient_test';
+	$current_timestamp           = time();
+	set_transient( $current_timestamp_cache_key, $current_timestamp );
+	$cached_timestamp = get_transient( $current_timestamp_cache_key );
+	// To avoid a potential race condition where the transient is updated with a new timestamp.
+	if ( $current_timestamp <= (int) $cached_timestamp ) {
+		return true;
+	}
+
+	return false;
+}

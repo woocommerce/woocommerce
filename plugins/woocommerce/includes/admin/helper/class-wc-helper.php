@@ -1276,6 +1276,11 @@ class WC_Helper {
 			return $data;
 		}
 
+		if ( false === wc_is_transient_functional() ) {
+			self::log( 'Could not fetch subscription data due to dysfunctional site cache. This could be due to a misconfigured object cache or database not having enough space.' );
+			return array();
+		}
+
 		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$source      = '';
 		if ( stripos( $request_uri, 'wc-addons' ) ) :
