@@ -16,6 +16,7 @@ import SearchResults from '../search-results/search-results';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
+import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );

@@ -155,12 +155,12 @@ class WC_Helper {
 			$local = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
 
 			if ( ! empty( $local ) ) {
-				$local                              = array_shift( $local );
-				if ( 'plugin' == $local['_type'] ) {
+				$local = array_shift( $local );
+				if ( 'plugin' === $local['_type'] ) {
 					// A magic update_url.
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' ) . $local['_filename'], 'upgrade-plugin_' . $local['_filename'] );
 
-				} elseif ( 'theme' == $local['_type'] ) {
+				} elseif ( 'theme' === $local['_type'] ) {
 					// Another magic update_url.
 					$subscription['update_url'] = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . $local['_stylesheet'] ), 'upgrade-theme_' . $local['_stylesheet'] );
 				}
@@ -911,6 +911,8 @@ class WC_Helper {
 
 	/**
 	 * Flush helper authentication cache.
+	 *
+	 * @since 8.3
 	 */
 	public static function refresh_helper_subscriptions() {
 		/**
@@ -966,7 +968,7 @@ class WC_Helper {
 	public static function activate_helper_subscription( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
-			throw new Exception( __('Subscription not found', 'woocommerce') );
+			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
 		}
 		$product_id = $subscription['product_id']; 
 
@@ -1008,7 +1010,7 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __('Unknown error', 'woocommerce') );
+			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
 		}
 
 		// Attempt to activate this plugin.
@@ -1066,7 +1068,7 @@ class WC_Helper {
 	public static function deactivate_helper_subscription( $product_key ) {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
-			throw new Exception( __('Subscription not found', 'woocommerce') );
+			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
 		}
 		$product_id = $subscription['product_id']; 
 
@@ -1107,7 +1109,7 @@ class WC_Helper {
 			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
 
 			$body = json_decode( wp_remote_retrieve_body( $deactivation_response ), true );
-			throw new Exception( $body['message'] ?? __('Unknown error', 'woocommerce') );
+			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
 		}
 
 		self::_flush_subscriptions_cache();
@@ -1217,7 +1219,6 @@ class WC_Helper {
 		if ( ! empty( $subscriptions ) ) {
 			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
-
 		return false;
 	}
 
@@ -1384,6 +1385,7 @@ class WC_Helper {
 
 	/**
 	 * Get subscription data for a given product key.
+	 *
 	 * @param string $product_key Subscription product key.
 	 * @return array|bool The array containing sub data or false.
 	 */
@@ -1419,26 +1421,26 @@ class WC_Helper {
 
 		// Installed products without a subscription.
 		foreach ( array_merge( $woo_plugins, $woo_themes ) as $filename => $data ) {
-			if ( in_array( $data['_product_id'], $subscriptions_product_ids ) ) {
+			if ( in_array( $data['_product_id'], $subscriptions_product_ids, true ) ) {
 				continue;
 			}
 			$subscriptions[] = array(
-				'product_key'     => '',
-				'product_id'      => $data['_product_id'],
-				'product_name'    => $data['Name'],
-				'product_url'     => $data['PluginURI'],
-				'key_type'        => '',
-				'key_type_label'  => '',
-				'lifetime'        => false,
-				'product_status'  => 'publish',
-				'connections'     => array(),
-				'expires'         => 0,
-				'expired'         => true,
-				'expiring'        => false,
-				'sites_max'       => 0,
-				'sites_active'    => 0,
-				'autorenew'       => false,
-				'maxed'           => false,
+				'product_key'    => '',
+				'product_id'     => $data['_product_id'],
+				'product_name'   => $data['Name'],
+				'product_url'    => $data['PluginURI'],
+				'key_type'       => '',
+				'key_type_label' => '',
+				'lifetime'       => false,
+				'product_status' => 'publish',
+				'connections'    => array(),
+				'expires'        => 0,
+				'expired'        => true,
+				'expiring'       => false,
+				'sites_max'      => 0,
+				'sites_active'   => 0,
+				'autorenew'      => false,
+				'maxed'          => false,
 			);
 		}
 
@@ -1451,9 +1453,9 @@ class WC_Helper {
 			),
 			'product_id'
 		);
-		
+
 		foreach ( $subscriptions as &$subscription ) {
-			$subscription['active'] = in_array( $site_id, $subscription['connections'] );
+			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
 
 			$subscription['local'] = array(
 				'installed' => false,
@@ -1464,7 +1466,7 @@ class WC_Helper {
 			$updates = WC_Helper_Updater::get_update_data();
 			$local   = wp_list_filter( array_merge( $woo_plugins, $woo_themes ), array( '_product_id' => $subscription['product_id'] ) );
 
-			$inactive_license = in_array( $subscription['product_id'], $active_product_ids ) && ! $subscription['active'];
+			$inactive_license = in_array( $subscription['product_id'], $active_product_ids, true ) && ! $subscription['active'];
 			if ( ! empty( $local ) && ! $inactive_license ) {
 				$local                              = array_shift( $local );
 				$subscription['local']['installed'] = true;
@@ -1477,7 +1479,7 @@ class WC_Helper {
 						$subscription['local']['active'] = true;
 					}
 				} elseif ( 'theme' == $local['_type'] ) {
-					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ) ) ) {
+					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
 						$subscription['local']['active'] = true;
 					}
 				}
@@ -1488,7 +1490,7 @@ class WC_Helper {
 				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
 			}
 
-			if (! empty( $updates[ $subscription['product_id'] ] )) {
+			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
 			}
 		}

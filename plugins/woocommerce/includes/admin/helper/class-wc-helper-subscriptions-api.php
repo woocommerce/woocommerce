@@ -128,12 +128,14 @@ class WC_Helper_Subscriptions_API {
 
 	/**
 	 * Activate a WooCommerce.com subscription.
+	 *
+	 * @param WP_REST_Request $request
 	 */
 	public static function activate( $request ) {
-		$product_key = $request->get_param('product_key');
+		$product_key = $request->get_param( 'product_key' );
 		try {
 			$success = WC_Helper::activate_helper_subscription( $product_key );
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			wp_send_json_error(
 				array(
 					'message' => $e->getMessage()
@@ -159,12 +161,14 @@ class WC_Helper_Subscriptions_API {
 
 	/**
 	 * Deactivate a WooCommerce.com subscription.
+	 *
+	 * @param WP_REST_Request $request
 	 */
 	public static function deactivate( $request ) {
-		$product_key = $request->get_param('product_key');
+		$product_key = $request->get_param( 'product_key' );
 		try {
 			$success = WC_Helper::deactivate_helper_subscription( $product_key );
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			wp_send_json_error(
 				array(
 					'message' => $e->getMessage()
@@ -190,9 +194,11 @@ class WC_Helper_Subscriptions_API {
 
 	/**
 	 * Install a WooCommerce.com product.
+	 *
+	 * @param WP_REST_Request $request
 	 */
 	public static function install( $request ) {
-		$product_key = $request->get_param('product_key');
+		$product_key   = $request->get_param( 'product_key' );
 		$subscriptions = WC_Helper::get_subscription( $product_key );
 
 		if ( empty( $subscriptions ) ) {
@@ -204,7 +210,7 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		if ( $subscriptions['expired'] === true ) {
+		if ( true === $subscriptions['expired'] ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'This subscription has expired.', 'woocommerce' )
@@ -236,7 +242,7 @@ class WC_Helper_Subscriptions_API {
 
 		// Delete any existing state for this product.
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
-		if ( $state !== null ) {
+		if ( null !== $state ) {
 			WC_WCCOM_Site_Installation_State_Storage::delete_state( $state );
 		}
 
