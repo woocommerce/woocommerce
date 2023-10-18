@@ -46,6 +46,7 @@ class PageController {
 	 */
 	private function init_hooks() {
 		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'setup_screen_options' ) );
+		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'handle_list_table_bulk_actions' ) );
 	}
 
 	/**
@@ -130,17 +131,20 @@ class PageController {
 		$defaults = $this->get_query_param_defaults();
 		$params   = $this->get_query_params();
 
-		$this->get_list_table()->set_file_args( $params );
-		$this->get_list_table()->prepare_items();
 		?>
-		<form id="logs-filter" method="get">
+		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
 			<input type="hidden" name="tab" value="logs" />
 			<?php foreach ( $params as $key => $value ) : ?>
 				<?php if ( $value !== $defaults[ $key ] ) : ?>
-					<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+					<input
+						type="hidden"
+						name="<?php echo esc_attr( $key ); ?>"
+						value="<?php echo esc_attr( $value ); ?>"
+					/>
 				<?php endif; ?>
 			<?php endforeach; ?>
+			<?php $this->get_list_table()->prepare_items(); ?>
 			<?php $this->get_list_table()->display(); ?>
 		</form>
 		<?php
@@ -151,12 +155,12 @@ class PageController {
 	 *
 	 * @return string[]
 	 */
-	private function get_query_param_defaults() {
+	public function get_query_param_defaults() {
 		return array(
+			'order'   => $this->file_controller::DEFAULTS_GET_FILES['order'],
+			'orderby' => $this->file_controller::DEFAULTS_GET_FILES['orderby'],
+			'source'  => $this->file_controller::DEFAULTS_GET_FILES['source'],
 			'view'    => 'list_files',
-			'orderby' => 'modified',
-			'order'   => 'desc',
-			'source'  => '',
 		);
 	}
 
@@ -165,7 +169,7 @@ class PageController {
 	 *
 	 * @return array
 	 */
-	private function get_query_params() {
+	public function get_query_params() {
 		$defaults = $this->get_query_param_defaults();
 		$params   = filter_input_array(
 			INPUT_GET,
@@ -235,5 +239,66 @@ class PageController {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Process bulk actions initiated from the log file list table.
+	 *
+	 * @return void
+	 */
+	private function handle_list_table_bulk_actions() {
+		$action = $this->get_list_table()->current_action();
+
+		if ( $action ) {
+			check_admin_referer( 'bulk-log-files' );
+
+			$sendback = remove_query_arg( array( 'deleted' ), wp_get_referer() );
+			$files    = filter_input( INPUT_GET, 'file', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+
+			if ( ! is_array( $files ) || count( $files ) < 1 ) {
+				wp_safe_redirect( $sendback );
+			}
+
+			switch ( $action ) {
+				case 'delete':
+					$deleted = $this->file_controller->delete_files( $files );
+					$sendback = add_query_arg( 'deleted', $deleted, $sendback );
+					break;
+			}
+
+			$sendback = remove_query_arg( array( 'action', 'action2' ), $sendback );
+
+			wp_safe_redirect( $sendback );
+			exit;
+		} elseif ( ! empty( $_REQUEST['_wp_http_referer'] ) ) {
+			$removable_args = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'filter_action' );
+			wp_safe_redirect( remove_query_arg( $removable_args, wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+			exit;
+		}
+
+		$deleted = filter_input( INPUT_GET, 'deleted', FILTER_VALIDATE_INT );
+
+		if ( is_numeric( $deleted ) ) {
+			add_action(
+				'admin_notices',
+				function() use ( $deleted ) {
+					?>
+					<div class="notice notice-info is-dismissible">
+						<p>
+							<?php
+							printf(
+								// translators: %s is a number of files.
+								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
+								number_format_i18n( $deleted )
+							);
+							?>
+						</p>
+					</div>
+					<?php
+				}
+			);
+		}
+
+		$_SERVER['REQUEST_URI'] = remove_query_arg( array( 'deleted' ), wp_unslash( $_SERVER['REQUEST_URI'] ) );
 	}
 }

@@ -10,6 +10,17 @@ use WP_Error;
  */
 class FileController {
 	/**
+	 * @const array Default values for arguments for the get_files method.
+	 */
+	public const DEFAULTS_GET_FILES = array(
+		'offset'   => 0,
+		'order'    => 'desc',
+		'orderby'  => 'modified',
+		'per_page' => 20,
+		'source'   => '',
+	);
+
+	/**
 	 * @var string The absolute path to the log directory.
 	 */
 	private $log_directory;
@@ -38,14 +49,7 @@ class FileController {
 	 * @return File[]|int|WP_Error
 	 */
 	public function get_files( array $args = array(), bool $count_only = false ) {
-		$defaults = array(
-			'offset'   => 0,
-			'order'    => 'desc',
-			'orderby'  => 'modified',
-			'per_page' => 10,
-			'source'   => '',
-		);
-		$args = wp_parse_args( $args, $defaults );
+		$args = wp_parse_args( $args, self::DEFAULTS_GET_FILES );
 
 		$pattern = $args['source'] . '*' . '.log';
 		$files   = glob( $this->log_directory . $pattern );
@@ -158,5 +162,27 @@ class FileController {
 		);
 
 		return array_unique( $all_sources );
+	}
+
+	/**
+	 * Delete one or more files from the filesystem.
+	 *
+	 * @param array $files An array of file basenames (filename without the path).
+	 *
+	 * @return int
+	 */
+	public function delete_files( $files ) {
+		$deleted = 0;
+
+		foreach ( $files as $basename ) {
+			$file   = new File( $this->log_directory . $basename );
+			$result = $file->delete();
+
+			if ( true === $result ) {
+				$deleted ++;
+			}
+		}
+
+		return $deleted;
 	}
 }
