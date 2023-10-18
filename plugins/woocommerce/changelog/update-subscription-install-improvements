@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Catch subscription installation errors and wait for the updated subscription list to load.
+
