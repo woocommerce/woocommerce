@@ -35,7 +35,6 @@ const mapAttributes = ( attributes ) => {
 		woocommerceOnSale,
 		woocommerceHandPickedProducts,
 		taxQuery,
-		parents,
 		isProductCollectionBlock,
 		...restQuery
 	} = query;
