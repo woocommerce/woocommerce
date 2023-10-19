@@ -907,37 +907,37 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Price filter.
 		if ( is_bool( $request['has_price'] ) ) {
 			if ( $request['has_price'] ) {
-				$args['meta_query'] = $this->add_meta_query(
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
 					$args,
 					array(
 						'relation' => 'AND',
 						array(
 							'key'     => '_price',
-							'compare' => 'EXISTS'
+							'compare' => 'EXISTS',
 						),
 						array(
-							'key' => '_price',
+							'key'     => '_price',
 							'compare' => '!=',
-							'value' => null
-						)
+							'value'   => null,
+						),
 					)
 				);
 			} else {
-				$args['meta_query'] = $this->add_meta_query(
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
 					$args,
 					array(
 						'relation' => 'OR',
 						array(
 							'key'     => '_price',
-							'compare' => 'NOT EXISTS'
+							'compare' => 'NOT EXISTS',
 						),
 						array(
-							'key' => '_price',
+							'key'     => '_price',
 							'compare' => '=',
-							'value' => null
-						)
+							'value'   => null,
+						),
 					)
-				);	
+				);
 			}
 		}
 
