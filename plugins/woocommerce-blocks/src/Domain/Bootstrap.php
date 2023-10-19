@@ -36,6 +36,7 @@ use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -129,6 +130,7 @@ class Bootstrap {
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
+		$this->container->get( TasksController::class )->init();
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -429,6 +431,12 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new ShippingController( $asset_api, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			TasksController::class,
+			function() {
+				return new TasksController();
 			}
 		);
 	}

@@ -48,36 +48,62 @@ const withSidebarNotices = createHigherOrderComponent(
 			setIsIncompatibleExtensionsNoticeDismissed( isDismissed );
 		};
 
-		const { isCart, isCheckout, isPaymentMethodsBlock, hasPaymentMethods } =
-			useSelect( ( select ) => {
-				const { getBlockParentsByBlockName, getBlockName } =
-					select( blockEditorStore );
-				const parent = getBlockParentsByBlockName( clientId, [
-					'woocommerce/cart',
-					'woocommerce/checkout',
-				] ).map( getBlockName );
-				const currentBlockName = getBlockName( clientId );
-				return {
-					isCart:
-						parent.includes( 'woocommerce/cart' ) ||
-						currentBlockName === 'woocommerce/cart',
-					isCheckout:
-						parent.includes( 'woocommerce/checkout' ) ||
-						currentBlockName === 'woocommerce/checkout',
-					isPaymentMethodsBlock:
-						currentBlockName ===
-						'woocommerce/checkout-payment-block',
-					hasPaymentMethods:
-						select(
-							PAYMENT_STORE_KEY
-						).paymentMethodsInitialized() &&
-						Object.keys(
-							select(
-								PAYMENT_STORE_KEY
-							).getAvailablePaymentMethods()
-						).length > 0,
-				};
-			} );
+		const {
+			isCart,
+			isCheckout,
+			isPaymentMethodsBlock,
+			hasPaymentMethods,
+			parentId,
+		} = useSelect( ( select ) => {
+			const { getBlockParentsByBlockName, getBlockName } =
+				select( blockEditorStore );
+
+			const parents = getBlockParentsByBlockName( clientId, [
+				'woocommerce/cart',
+				'woocommerce/checkout',
+			] ).reduce(
+				(
+					accumulator: Record< string, string >,
+					parentClientId: string
+				) => {
+					const parentName = getBlockName( parentClientId );
+					accumulator[ parentName ] = parentClientId;
+					return accumulator;
+				},
+				{}
+			);
+
+			const currentBlockName = getBlockName( clientId );
+			const parentBlockIsCart =
+				Object.keys( parents ).includes( 'woocommerce/cart' );
+			const parentBlockIsCheckout = Object.keys( parents ).includes(
+				'woocommerce/checkout'
+			);
+			const currentBlockIsCart =
+				currentBlockName === 'woocommerce/cart' || parentBlockIsCart;
+			const currentBlockIsCheckout =
+				currentBlockName === 'woocommerce/checkout' ||
+				parentBlockIsCheckout;
+			const targetParentBlock = currentBlockIsCart
+				? 'woocommerce/cart'
+				: 'woocommerce/checkout';
+
+			return {
+				isCart: currentBlockIsCart,
+				isCheckout: currentBlockIsCheckout,
+				parentId:
+					currentBlockName === targetParentBlock
+						? clientId
+						: parents[ targetParentBlock ],
+				isPaymentMethodsBlock:
+					currentBlockName === 'woocommerce/checkout-payment-block',
+				hasPaymentMethods:
+					select( PAYMENT_STORE_KEY ).paymentMethodsInitialized() &&
+					Object.keys(
+						select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods()
+					).length > 0,
+			};
+		} );
 
 		// Show sidebar notices only when a WooCommerce block is selected.
 		if (
@@ -96,10 +122,9 @@ const withSidebarNotices = createHigherOrderComponent(
 							toggleIncompatibleExtensionsNoticeDismissedStatus
 						}
 						block={
-							isCheckout
-								? 'woocommerce/checkout'
-								: 'woocommerce/cart'
+							isCart ? 'woocommerce/cart' : 'woocommerce/checkout'
 						}
+						clientId={ parentId }
 					/>
 
 					<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />

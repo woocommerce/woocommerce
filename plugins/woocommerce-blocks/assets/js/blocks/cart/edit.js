@@ -13,6 +13,9 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 import { EditorProvider, CartProvider } from '@woocommerce/base-context';
 import { previewCart } from '@woocommerce/resource-previews';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
+import { useEffect, useRef } from '@wordpress/element';
+import { getQueryArg } from '@wordpress/url';
+import { dispatch, select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -37,7 +40,7 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-cart-block',
 ];
 
-export const Edit = ( { className, attributes, setAttributes } ) => {
+export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 	const { hasDarkControls, currentView, isPreview = false } = attributes;
 	const defaultTemplate = [
 		[ 'woocommerce/filled-cart-block', {}, [] ],
@@ -48,6 +51,22 @@ export const Edit = ( { className, attributes, setAttributes } ) => {
 			'is-editor-preview': isPreview,
 		} ),
 	} );
+
+	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
+	const focus = useRef( getQueryArg( window.location.href, 'focus' ) );
+
+	useEffect( () => {
+		if (
+			focus.current === 'cart' &&
+			! select( 'core/block-editor' ).hasSelectedBlock()
+		) {
+			dispatch( 'core/block-editor' ).selectBlock( clientId );
+			dispatch( 'core/interface' ).enableComplementaryArea(
+				'core/edit-site',
+				'edit-site/block-inspector'
+			);
+		}
+	}, [ clientId ] );
 
 	return (
 		<div { ...blockProps }>

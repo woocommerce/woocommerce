@@ -31,7 +31,7 @@ export const TEMPLATES: TemplateDetails = {
 	},
 	checkout: {
 		type: TYPES.checkout,
-		title: __( 'Checkout Shortcode', 'woo-gutenberg-products-block' ),
+		title: __( 'Checkout Cart', 'woo-gutenberg-products-block' ),
 		description: __(
 			'Renders the classic checkout shortcode.',
 			'woo-gutenberg-products-block'
