@@ -25,6 +25,7 @@ import { SubscriptionsContext } from '../../contexts/subscriptions-context';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	const updateConnectionUrl = getNewPath(
 		{
@@ -54,6 +55,26 @@ export default function MySubscriptions(): JSX.Element {
 		( subscription: Subscription ) =>
 			! subscriptionsInstalled.includes( subscription )
 	);
+
+	if ( ! wccomSettings?.isConnected ) {
+		return (
+			<div className="woocommerce-marketplace__my-subscriptions--connect">
+				<div className="woocommerce-marketplace__my-subscriptions__icon" />
+				<h2 className="woocommerce-marketplace__my-subscriptions__header">
+					{ __( 'Manage your subscriptions', 'woocommerce' ) }
+				</h2>
+				<p className="woocommerce-marketplace__my-subscriptions__table-description">
+					{ __(
+						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your WooCommerce.com subscriptions will appear here.',
+						'woocommerce'
+					) }
+				</p>
+				<Button href={ wccomSettings?.connectURL } variant="primary">
+					{ __( 'Connect Account', 'woocommerce' ) }
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
