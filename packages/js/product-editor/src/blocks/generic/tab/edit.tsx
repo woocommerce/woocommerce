@@ -16,7 +16,6 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export interface TabBlockAttributes extends BlockAttributes {
 	id: string;
 	title: string;
-	order: number;
 	isSelected?: boolean;
 }
 
