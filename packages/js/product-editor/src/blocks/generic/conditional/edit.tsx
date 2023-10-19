@@ -3,6 +3,7 @@
  */
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import deprecated from '@wordpress/deprecated';
 import { createElement } from '@wordpress/element';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -26,6 +27,10 @@ export function Edit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
+	deprecated( '`woocommerce/conditional` block', {
+		alternative: '`hideConditions` attribute on any block',
+	} );
+
 	const { postType } = context;
 	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
