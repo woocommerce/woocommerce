@@ -50,29 +50,46 @@ class ClassicShortcode extends AbstractDynamicBlock {
 		}
 
 		if ( 'cart' === $attributes['shortcode'] ) {
-			return $this->render_cart();
+			return $this->render_cart( $attributes );
 		}
 
 		if ( 'checkout' === $attributes['shortcode'] ) {
-			return $this->render_checkout();
+			return $this->render_checkout( $attributes );
 		}
 
 		return "You're using the ClassicShortcode block";
 	}
 
 	/**
+	 * Get the list of classes to apply to this block.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string space-separated list of classes.
+	 */
+	protected function get_container_classes( $attributes = array() ) {
+		$classes = array( 'wp-block-group' );
+
+		if ( isset( $attributes['align'] ) ) {
+			$classes[] = "align{$attributes['align']}";
+		}
+
+		return implode( ' ', $classes );
+	}
+
+	/**
 	 * Render method for rendering the cart shortcode.
 	 *
+	 * @param array $attributes Block attributes.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_cart() {
+	protected function render_cart( $attributes ) {
 		if ( ! isset( WC()->cart ) ) {
 			return '';
 		}
 
 		ob_start();
 
-		echo '<div class="wp-block-group">';
+		echo '<div class="' . esc_attr( $this->get_container_classes( $attributes ) ) . '">';
 		WC_Shortcode_Cart::output( array() );
 		echo '</div>';
 
@@ -82,16 +99,17 @@ class ClassicShortcode extends AbstractDynamicBlock {
 	/**
 	 * Render method for rendering the checkout shortcode.
 	 *
+	 * @param array $attributes Block attributes.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_checkout() {
+	protected function render_checkout( $attributes ) {
 		if ( ! isset( WC()->cart ) ) {
 			return '';
 		}
 
 		ob_start();
 
-		echo '<div class="wp-block-group">';
+		echo '<div class="' . esc_attr( $this->get_container_classes( $attributes ) ) . '">';
 		WC_Shortcode_Checkout::output( array() );
 		echo '</div>';
 

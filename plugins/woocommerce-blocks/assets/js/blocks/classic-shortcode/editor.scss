@@ -58,8 +58,11 @@
 	pointer-events: none;
 
 	// Image based placeholders should fill horizontal width.
-	> img {
+	> img,
+	> svg {
 		width: 100%;
+		height: auto;
+		color: $universal-border-light;
 	}
 }
 
@@ -67,6 +70,7 @@
 	.components-placeholder {
 		box-shadow: none;
 		padding: 0;
+		background-color: transparent;
 	}
 }
 
@@ -79,8 +83,8 @@
 		opacity: 0.5;
 
 		* {
-			color: $gray-200 !important;
-			border-color: $gray-200 !important;
+			color: $universal-border-light !important;
+			border-color: $universal-border-light !important;
 		}
 	}
 	.wp-block-woocommerce-classic-shortcode__placeholder-copy {

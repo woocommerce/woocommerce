@@ -10,3 +10,4 @@ export * from './sanitize-html';
 export * from './is-site-editor-page';
 export * from './is-widget-editor-page';
 export * from './trim-words';
+export * from './find-block';
