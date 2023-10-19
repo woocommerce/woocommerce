@@ -4081,11 +4081,13 @@ table.wc_shipping {
 				&.wc_input_price {
 					color: #757575;
 
-					&.wc-shipping-currency-position-left {
+					&.wc-shipping-currency-position-left,
+					&.wc-shipping-currency-position-left_space {
 						padding-left: 28px;
 					}
 
-					&.wc-shipping-currency-position-right {
+					&.wc-shipping-currency-position-right,
+					&.wc-shipping-currency-position-right_space {
 						padding-left: 12px;
 					}
 				}
@@ -4097,11 +4099,13 @@ table.wc_shipping {
 			top: 19px;
 			color: #757575;
 
-			&.wc-shipping-currency-position-left {
+			&.wc-shipping-currency-position-left,
+			&.wc-shipping-currency-position-left_space {
 				left: 12px;
 			}
 
-			&.wc-shipping-currency-position-right {
+			&.wc-shipping-currency-position-right,
+			&.wc-shipping-currency-position-right_space {
 				right: 12px;
 			}
 		}
