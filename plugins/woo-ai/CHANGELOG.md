@@ -16,6 +16,7 @@
 ## [0.3](https://github.com/woocommerce/woocommerce/releases/tag/0.3) - 2023-08-18
 
 -   Patch - Fix Woo AI settings page fields persistence bug when disabling the feature.
+-   Patch - Woo AI - Fix store branding settings retrieval for use with description generation.
 -   Patch - Update `wp-env` to version 8.2.0.
 -   Minor - Adding settings screen for AI centric settings.
 -   Minor - Generating short description after long description on product editor.
