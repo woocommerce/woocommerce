@@ -92,7 +92,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'title'       => __( 'Name', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => $this->method_title,
+				'default'     => '',
+				'placeholder' => __( 'e.g. Free shipping', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'requires'         => array(

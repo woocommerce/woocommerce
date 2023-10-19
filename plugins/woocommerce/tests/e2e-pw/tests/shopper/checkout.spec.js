@@ -67,6 +67,9 @@ test.describe( 'Checkout page', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 		// enable bank transfers and COD for payment
 		await api.put( 'payment_gateways/bacs', {
