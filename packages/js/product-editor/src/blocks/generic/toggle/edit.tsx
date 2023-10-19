@@ -18,19 +18,41 @@ export function Edit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, property, disabled, disabledCopy } = attributes;
+	const {
+		label,
+		property,
+		disabled,
+		disabledCopy,
+		checkedValue,
+		uncheckedValue,
+	} = attributes;
 	const [ value, setValue ] = useProductEntityProp< boolean >( property, {
 		postType,
 		fallbackValue: false,
 	} );
 
+	function isChecked() {
+		if ( checkedValue !== undefined ) {
+			return checkedValue === value;
+		}
+		return value as boolean;
+	}
+
+	function handleChange( checked: boolean ) {
+		if ( checked ) {
+			setValue( checkedValue !== undefined ? checkedValue : checked );
+		} else {
+			setValue( uncheckedValue !== undefined ? uncheckedValue : checked );
+		}
+	}
+
 	return (
 		<div { ...blockProps }>
 			<ToggleControl
 				label={ label }
-				checked={ value }
+				checked={ isChecked() }
 				disabled={ disabled }
-				onChange={ setValue }
+				onChange={ handleChange }
 			/>
 			{ disabled && (
 				<p
