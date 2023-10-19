@@ -2435,7 +2435,7 @@ EOT;
 
 <!-- wp:woocommerce/cart-cross-sells-block -->
 <div class="wp-block-woocommerce-cart-cross-sells-block"><!-- wp:heading {"fontSize":"large"} -->
-<h2 class="wp-block-heading has-large-font-size">' . __( 'You may be interested in…', 'woo-gutenberg-products-block' ) . '</h2>
+<h2 class="wp-block-heading has-large-font-size">' . __( 'You may be interested in…', 'woocommerce' ) . '</h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/cart-cross-sells-products-block -->
@@ -2491,7 +2491,7 @@ EOT;
 
 <!-- wp:woocommerce/empty-cart-block -->
 <div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
-<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</h2>
+<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
 <!-- /wp:heading -->
 
 <!-- wp:separator {"className":"is-style-dots"} -->
@@ -2499,7 +2499,7 @@ EOT;
 <!-- /wp:separator -->
 
 <!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woo-gutenberg-products-block' ) . '</h2>
+<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
