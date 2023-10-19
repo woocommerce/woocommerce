@@ -14,7 +14,8 @@ $settings = array(
 		'title'       => __( 'Name', 'woocommerce' ),
 		'type'        => 'text',
 		'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-		'default'     => __( 'Flat rate', 'woocommerce' ),
+		'default'     => '',
+		'placeholder' => __( 'e.g. Standard national', 'woocommerce' ),
 		'desc_tip'    => true,
 	),
 	'tax_status' => array(
