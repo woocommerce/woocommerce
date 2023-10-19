@@ -11,10 +11,10 @@ $content     = PatternsHelper::get_pattern_content( 'woocommerce-blocks/discount
 $description = $content['descriptions'][0]['default'] ?? '';
 ?>
 
-<!-- wp:columns {"verticalAlignment":"center"} -->
-<div class="wp-block-columns are-vertically-aligned-center">
-	<!-- wp:column {"verticalAlignment":"center","width":"400px","style":{"color":{"background":"#254094"},"spacing":{"padding":{"top":"25px","right":"40px","bottom":"40px","left":"40px"}}}} -->
-	<div class="wp-block-column is-vertically-aligned-center has-background" style="background-color:#254094;padding-top:25px;padding-right:40px;padding-bottom:40px;padding-left:40px;flex-basis:400px">
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"470px"}} -->
+<div class="wp-block-group">
+	<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}},"color":{"background":"#254094"}},"layout":{"type":"constrained","contentSize":""}} -->
+	<div class="wp-block-group has-background" style="background-color:#254094;padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
 		<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"500","fontSize":"45px"},"color":{"text":"#ffffff"}}} -->
 		<p class="has-text-color" style="color:#ffffff;font-size:45px;font-style:normal;font-weight:500">UP TO</p>
 		<!-- /wp:paragraph -->
@@ -31,7 +31,7 @@ $description = $content['descriptions'][0]['default'] ?? '';
 		<div class="wp-block-buttons">
 			<!-- wp:button {"style":{"color":{"background":"#ff7179","text":"#ffffff"},"border":{"radius":"40px"},"spacing":{"padding":{"top":"10px","bottom":"10px","left":"30px","right":"30px"}}}} -->
 			<div class="wp-block-button">
-				<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:40px;color:#ffffff;background-color:#ff7179;padding-top:10px;padding-right:30px;padding-bottom:10px;padding-left:30px">
+				<a class="wp-block-button__link has-text-color has-background wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-radius:40px;color:#ffffff;background-color:#ff7179;padding-top:10px;padding-right:30px;padding-bottom:10px;padding-left:30px">
 					Shop now
 				</a>
 			</div>
@@ -39,7 +39,6 @@ $description = $content['descriptions'][0]['default'] ?? '';
 		</div>
 		<!-- /wp:buttons -->
 	</div>
-	<!-- /wp:column -->
+	<!-- /wp:group -->
 </div>
-<!-- /wp:columns -->
-
+<!-- /wp:group -->
