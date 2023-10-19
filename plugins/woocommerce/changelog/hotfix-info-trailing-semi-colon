@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+remove stray semi-colon from setting api
