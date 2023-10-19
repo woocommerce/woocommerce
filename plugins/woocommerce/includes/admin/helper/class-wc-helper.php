@@ -1486,6 +1486,7 @@ class WC_Helper {
 				'product_id'     => $data['_product_id'],
 				'product_name'   => $data['Name'],
 				'product_url'    => $data['PluginURI'],
+				'zip_slug'       => $data['slug'],
 				'key_type'       => '',
 				'key_type_label' => '',
 				'lifetime'       => false,
@@ -1511,6 +1512,9 @@ class WC_Helper {
 			'product_id'
 		);
 
+		// Track installed subscriptio ids to avoid duplicate entries for inactive subsriptions
+		$installed_subscription_ids = array();
+
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
 
@@ -1527,8 +1531,11 @@ class WC_Helper {
 				array( 'slug' => $subscription['zip_slug'] )
 			);
 			$local            = array_shift( $local );
-			$inactive_license = in_array( $subscription['product_id'], $active_product_ids, true ) && ! $subscription['active'];
-			if ( ! empty( $local ) && ! $inactive_license ) {
+
+			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
+			if ( ! empty( $local ) && false === $has_another_installed_subscription ) {
+				array_push( $installed_subscription_ids, $subscription['product_id'] );
+
 				$subscription['local']['installed'] = true;
 				$subscription['local']['version']   = $local['Version'];
 
