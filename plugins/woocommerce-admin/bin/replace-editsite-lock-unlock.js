@@ -1,4 +1,4 @@
-const { exec, execSync } = require("child_process");
+const { execSync } = require("child_process");
 
 // Find edit-site module directory
 const EDIT_SITE_DIR = execSync("find ../../node_modules/.pnpm -type d -name '@wordpress+edit-site@5.15.0*' -print -quit").toString().trim();
