@@ -53,13 +53,6 @@ export function BlockEditor( {
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( productType );
 
-	const blockContext = useMemo( () => {
-		return {
-			...context,
-			productType,
-		};
-	}, [ context, productType ] );
-
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
@@ -112,7 +105,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ blockContext }>
+			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }
