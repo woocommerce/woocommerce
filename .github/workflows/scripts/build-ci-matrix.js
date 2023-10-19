@@ -712,10 +712,11 @@ function getCommandsForChanges( changes ) {
 			if ( ! commandCriteriaMet ) {
 				continue;
 			}
+
+			console.log( `${ changes.path }: command "${ command }" added based on given changes.` );
 		}
 
 		commandsForChanges.push( command );
-		console.log( `${ changes.path }: command "${ command }" added based on given changes.` );
 	}
 
 	return commandsForChanges;
