@@ -53,7 +53,7 @@ const onClickCallback = ( {
  * Title shown within the block itself.
  */
 const getTitle = () => {
-	return __( 'Cart Shortcode', 'woo-gutenberg-products-block' );
+	return __( 'Classic Cart', 'woo-gutenberg-products-block' );
 };
 
 /**
