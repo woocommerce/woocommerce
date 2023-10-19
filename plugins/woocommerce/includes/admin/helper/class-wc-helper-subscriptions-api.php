@@ -231,7 +231,7 @@ class WC_Helper_Subscriptions_API {
 
 		$product_id = $subscriptions['product_id'];
 
-		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
+		$state                = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
 		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, $product_id );
 
 		// Delete any existing state for this product to avoid conflicts with old installations.
