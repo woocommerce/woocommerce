@@ -26,17 +26,17 @@ export function Edit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
-	const { productType } = context;
+	const { postType } = context;
 	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
 
-	const productId = useEntityId( 'postType', productType );
+	const productId = useEntityId( 'postType', postType );
 
 	const displayBlocks = useSelect(
 		( select ) => {
 			const product: Product = select( 'core' ).getEditedEntityRecord(
 				'postType',
-				productType,
+				postType,
 				productId
 			);
 
@@ -47,7 +47,7 @@ export function Edit( {
 			}
 			return true;
 		},
-		[ productType, productId, mustMatch ]
+		[ postType, productId, mustMatch ]
 	);
 
 	return (
