@@ -126,7 +126,7 @@ class WC_Frontend_Scripts {
 		// therefore keep the script in the footer for those cases - see see https://core.trac.wordpress.org/ticket/59599.
 		if ( version_compare( $GLOBALS['wp_version'], '6.4', '<' ) && array( 'strategy' => 'defer' ) === $in_footer ) {
 			$in_footer = array(
-				'strategy' => 'defer',
+				'strategy'  => 'defer',
 				'in_footer' => true,
 			);
 		}
