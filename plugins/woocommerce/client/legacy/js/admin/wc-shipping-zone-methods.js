@@ -498,16 +498,13 @@
 										);
 									}
 								}
-								// Trigger save if there are changes, or just re-render
-								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'rerender' );
-								} else {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'saved:methods' );
-								}
+
+								// Avoid triggering a rerender here because we don't want to show the method in the table in case merchant doesn't finish flow.
+								
+								shippingMethodView.model.set( 'methods', response.data.methods );
+
+								// Close original modal
+								closeModal();
 							}
 							var instance_id = response.data.instance_id, 
 							    method      = response.data.methods[ instance_id ];
@@ -534,9 +531,6 @@
 							}
 		
 							$( document.body ).trigger( 'init_tooltips' );
-
-							// Close original modal
-							closeModal();
 						}, 'json' );
 					}
 				},
@@ -582,6 +576,16 @@
 					if ( method.id === 'flat_rate' && shippingClassesCount === 0 ) {
 						const link = article.find( '.wc-shipping-method-add-class-costs' );
 						link.css( 'display', 'block' );
+						link.click( () => {
+							$.post( {
+								url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
+								data: {
+									wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
+									instance_id: instance_id,
+									zone_id: data.zone_id,
+								}
+							});
+						} );
 					}
 				},
 				validateFormArguments: function( event, target, data ) {
