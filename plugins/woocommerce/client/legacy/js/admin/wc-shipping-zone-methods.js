@@ -568,6 +568,7 @@
 				possiblyAddShippingClassLink: function( event ) {
 					const article = $( 'article.wc-modal-shipping-method-settings' );
 					const shippingClassesCount = article.data( 'shipping-classes-count' );
+					const status = article.data( 'status' );
 					const instance_id = article.data( 'id' );
 					const model = event.data.view.model;
 					const methods = _.indexBy( model.get( 'methods' ), 'instance_id' );
@@ -576,16 +577,19 @@
 					if ( method.id === 'flat_rate' && shippingClassesCount === 0 ) {
 						const link = article.find( '.wc-shipping-method-add-class-costs' );
 						link.css( 'display', 'block' );
-						link.click( () => {
-							$.post( {
-								url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
-								data: {
-									wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
-									instance_id: instance_id,
-									zone_id: data.zone_id,
-								}
-							});
-						} );
+						
+						if ( status === 'new' ) {
+							link.click( () => {
+								$.post( {
+									url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
+									data: {
+										wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
+										instance_id: instance_id,
+										zone_id: data.zone_id,
+									}
+								});
+							} );
+						}
 					}
 				},
 				validateFormArguments: function( event, target, data ) {
