@@ -96,11 +96,25 @@ export function usePublish( {
 							? 'product_publish_error'
 							: 'product_create_error',
 					} as WPError;
-					if ( ( error as Record< string, string > ).variations ) {
+					let isPriceError: string | undefined;
+					Object.entries( error as Record< string, string > ).forEach(
+						( [ key, value ] ) => {
+							if (
+								key.startsWith( 'regular_price' ) &&
+								value !== undefined
+							) {
+								isPriceError = value;
+							}
+						}
+					);
+					if (
+						( error as Record< string, string > ).variations ||
+						isPriceError !== undefined
+					) {
 						wpError.code = 'variable_product_no_variation_prices';
-						wpError.message = (
-							error as Record< string, string >
-						 ).variations;
+						wpError.message =
+							isPriceError ??
+							( error as Record< string, string > ).variations;
 					}
 				}
 				onPublishError( wpError );
