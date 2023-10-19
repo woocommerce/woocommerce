@@ -1512,7 +1512,7 @@ class WC_Helper {
 			'product_id'
 		);
 
-		// Track installed subscriptio ids to avoid duplicate entries for inactive subsriptions
+		// Track installed subscriptio ids to avoid duplicate entries for inactive subsriptions.
 		$installed_subscription_ids = array();
 
 		foreach ( $subscriptions as &$subscription ) {
@@ -1526,11 +1526,11 @@ class WC_Helper {
 
 			$updates = WC_Helper_Updater::get_update_data();
 
-			$local            = wp_list_filter(
+			$local = wp_list_filter(
 				array_merge( $local_plugins, $local_themes ),
 				array( 'slug' => $subscription['zip_slug'] )
 			);
-			$local            = array_shift( $local );
+			$local = array_shift( $local );
 
 			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
 			if ( ! empty( $local ) && false === $has_another_installed_subscription ) {
