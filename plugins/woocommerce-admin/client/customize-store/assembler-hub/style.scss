@@ -530,6 +530,57 @@
 .woocommerce-customize-store-tour-kit {
 	.woocommerce-tour-kit-step {
 		width: 319px;
+		box-shadow: none;
+		border: 1px solid var(--gutenberg-gray-300, #DDD);
+	}
+
+	.tour-kit-frame__container {
+		box-shadow: none;
+	}
+
+	.components-elevation {
+		display: none;
+	}
+
+	.tour-kit-frame__arrow::before {
+		box-shadow: none !important;
+	}
+
+	.tour-kit-frame__container[data-popper-placement^=left] {
+		& > .tour-kit-frame__arrow {
+			right: -5px;
+			&::before {
+				border-top: 1px solid var(--gutenberg-gray-300, #DDD);
+				border-right: 1px solid var(--gutenberg-gray-300, #DDD);
+			}
+		}
+	}
+
+	.tour-kit-frame__container[data-popper-placement^=right] {
+		& > .tour-kit-frame__arrow {
+			&::before {
+				border-bottom: 1px solid var(--gutenberg-gray-300, #DDD);
+				border-left: 1px solid var(--gutenberg-gray-300, #DDD);
+			}
+		}
+	}
+
+	.tour-kit-frame__container[data-popper-placement^=top] {
+		& > .tour-kit-frame__arrow {
+			&::before {
+				border-bottom: 1px solid var(--gutenberg-gray-300, #DDD);
+				border-right: 1px solid var(--gutenberg-gray-300, #DDD);
+			}
+		}
+	}
+
+	.tour-kit-frame__container[data-popper-placement^=bottom] {
+		& > .tour-kit-frame__arrow {
+			&::before {
+				border-top: 1px solid var(--gutenberg-gray-300, #DDD);
+				border-left: 1px solid var(--gutenberg-gray-300, #DDD);
+			}
+		}
 	}
 
 	.woocommerce-tour-kit-step__heading {
