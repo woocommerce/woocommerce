@@ -1416,7 +1416,7 @@ class WC_Helper {
 
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
-		$auth    = WC_Helper_Options::get( 'auth' );
+		$auth = WC_Helper_Options::get( 'auth' );
 		if ( empty( $auth ) ) {
 			return array();
 		}
