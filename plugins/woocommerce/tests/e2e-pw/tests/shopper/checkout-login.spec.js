@@ -62,6 +62,9 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 		// create customer and save its id
 		await api
