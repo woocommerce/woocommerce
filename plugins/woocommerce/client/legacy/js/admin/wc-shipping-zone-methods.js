@@ -567,6 +567,21 @@
 						if ( select.length > 0 ) {
 							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
 						}
+
+						event.data.view.possiblyAddShippingClassLink( event );
+					}
+				},
+				possiblyAddShippingClassLink: function( event ) {
+					const article = $( 'article.wc-modal-shipping-method-settings' );
+					const shippingClassesCount = article.data( 'shipping-classes-count' );
+					const instance_id = article.data( 'id' );
+					const model = event.data.view.model;
+					const methods = _.indexBy( model.get( 'methods' ), 'instance_id' );
+					const method = methods[ instance_id ];
+
+					if ( method.id === 'flat_rate' && shippingClassesCount === 0 ) {
+						const link = article.find( '.wc-shipping-method-add-class-costs' );
+						link.css( 'display', 'block' );
 					}
 				},
 				validateFormArguments: function( event, target, data ) {
