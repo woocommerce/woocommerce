@@ -235,7 +235,7 @@ class WC_Helper_Subscriptions_API {
 		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, $product_id );
 
 		// Delete any existing state for this product to avoid conflicts with old installations.
-		if ( WC_WCCOM_Site_Installation_State::STEP_STATUS_IN_PROGRESS !== $state->get_last_step_status() ) {
+		if ( null !== $state && WC_WCCOM_Site_Installation_State::STEP_STATUS_IN_PROGRESS !== $state->get_last_step_status() ) {
 			try {
 				$installation_manager->reset_installation();
 			} catch ( Exception $e ) {
