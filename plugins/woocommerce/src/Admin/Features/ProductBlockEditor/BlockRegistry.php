@@ -164,7 +164,7 @@ class BlockRegistry {
 		return array_merge(
 			isset( $uses_context ) ? $uses_context : [],
 			[
-				'productType',
+				'postType',
 			]
 		);
 	}

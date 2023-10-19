@@ -16,14 +16,14 @@ interface BlockRepresentation< T extends Record< string, object > > {
 }
 
 function useEvaluationContext( context: Record< string, unknown > ) {
-	const { productType } = context;
+	const { postType } = context;
 
-	const productId = useEntityId( 'postType', productType );
+	const productId = useEntityId( 'postType', postType );
 
 	const getEvaluationContext = ( select: typeof WPSelect ) => {
 		const editedProduct = select( 'core' ).getEditedEntityRecord(
 			'postType',
-			productType,
+			postType,
 			productId
 		);
 
@@ -41,7 +41,7 @@ function useEvaluationContext( context: Record< string, unknown > ) {
 function augmentUsesContext( usesContext?: string[] ) {
 	// Note: If you modify this function, also update the server-side
 	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_uses_context() function.
-	return [ ...( usesContext || [] ), 'productType' ];
+	return [ ...( usesContext || [] ), 'postType' ];
 }
 
 export function registerProductEditorBlockType<
