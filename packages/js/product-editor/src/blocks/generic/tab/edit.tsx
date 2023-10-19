@@ -26,7 +26,12 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< TabBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { id, title, order, isSelected: contextIsSelected } = attributes;
+	const {
+		id,
+		title,
+		_templateBlockOrder: order,
+		isSelected: contextIsSelected,
+	} = attributes;
 	const isSelected = context.selectedTab === id;
 	if ( isSelected !== contextIsSelected ) {
 		setAttributes( { isSelected } );
