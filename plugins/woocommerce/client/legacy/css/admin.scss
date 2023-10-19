@@ -4083,7 +4083,22 @@ table.wc_shipping {
 
 					&.wc-shipping-currency-position-left,
 					&.wc-shipping-currency-position-left_space {
-						padding-left: 28px;
+
+						&.wc-shipping-currency-size-1 {
+							padding-left: 28px;
+						}
+						&.wc-shipping-currency-size-2 {
+							padding-left: 33px;
+						}
+						&.wc-shipping-currency-size-3 {
+							padding-left: 38px;
+						}
+						&.wc-shipping-currency-size-4 {
+							padding-left: 43px;
+						}
+						&.wc-shipping-currency-size-5 {
+							padding-left: 48px;
+						}
 					}
 
 					&.wc-shipping-currency-position-right,

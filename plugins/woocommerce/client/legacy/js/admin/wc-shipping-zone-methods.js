@@ -424,6 +424,8 @@
 					const priceInputs = htmlContent.find( '.wc_input_price' );
 					const { symbol, symbolPosition } = window.wc.ShippingCurrencyContext.getCurrencyConfig();
 
+					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
+
 					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
 					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
 
