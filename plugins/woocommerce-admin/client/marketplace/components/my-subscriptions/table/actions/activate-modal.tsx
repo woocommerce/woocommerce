@@ -10,15 +10,15 @@ import { __, sprintf } from '@wordpress/i18n';
 import { MARKETPLACE_SUBSCRIPTIONS_PATH } from '../../../constants';
 import { Subscription } from '../../types';
 
-interface RenewProps {
+interface ActivateProps {
 	subscription: Subscription;
 	onClose: () => void;
 }
 
-export default function RenewModal( props: RenewProps ) {
+export default function ActivateModal( props: ActivateProps ) {
 	return (
 		<Modal
-			title={ __( 'Renew to update', 'woocommerce' ) }
+			title={ __( 'Connect to update', 'woocommerce' ) }
 			onRequestClose={ props.onClose }
 			focusOnMount={ true }
 			className="woocommerce-marketplace__header-account-modal"
@@ -29,7 +29,7 @@ export default function RenewModal( props: RenewProps ) {
 				{ sprintf(
 					// translators: %s is the product version number (e.g. 1.0.2).
 					__(
-						'Version %s is available. To enable this update you need to renew your subscription.',
+						'Version %s is available. To enable this update you need to connect your subscription to this store.',
 						'woocommerce'
 					),
 					props.subscription.version
@@ -48,7 +48,7 @@ export default function RenewModal( props: RenewProps ) {
 					href={ MARKETPLACE_SUBSCRIPTIONS_PATH }
 					className="woocommerce-marketplace__header-account-modal-button"
 				>
-					{ __( 'Renew', 'woocommerce' ) }
+					{ __( 'Connect', 'woocommerce' ) }
 				</Button>
 			</ButtonGroup>
 		</Modal>

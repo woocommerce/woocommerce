@@ -11,6 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { Subscription } from '../../types';
+import ActivateModal from './activate-modal';
 import RenewModal from './renew-modal';
 
 interface UpdateProps {
@@ -122,6 +123,10 @@ export default function Update( props: UpdateProps ) {
 	};
 
 	const modal = () => {
+		if ( ! showModal ) {
+			return null;
+		}
+
 		if ( props.subscription.expired ) {
 			return (
 				<RenewModal
@@ -129,12 +134,21 @@ export default function Update( props: UpdateProps ) {
 					onClose={ () => setShowModal( false ) }
 				/>
 			);
+		} else if ( ! props.subscription.active ) {
+			return (
+				<ActivateModal
+					subscription={ props.subscription }
+					onClose={ () => setShowModal( false ) }
+				/>
+			);
 		}
+
+		return null;
 	};
 
 	return (
 		<>
-			{ showModal && modal() }
+			{ modal() }
 			<Button
 				variant="link"
 				className="woocommerce-marketplace__my-subscriptions-update"
