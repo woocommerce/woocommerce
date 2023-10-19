@@ -19,32 +19,25 @@ $social_title = $content['titles'][0]['default'] ?? '';
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"0","bottom":"0","left":"var:preset|spacing|30","right":"var:preset|spacing|30"},"margin":{"top":"0px","bottom":"80px"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:0px;margin-bottom:80px;padding-top:0;padding-right:var(--wp--preset--spacing--30);padding-bottom:0;padding-left:var(--wp--preset--spacing--30)">
-	<!-- wp:columns {"verticalAlignment":null,"align":"wide"} -->
-	<div class="wp-block-columns alignwide">
-		<!-- wp:column {"verticalAlignment":"bottom","width":"75%","layout":{"type":"constrained"}} -->
-		<div class="wp-block-column is-vertically-aligned-bottom" style="flex-basis:75%">
-			<!-- wp:heading {"level":3,"align":"wide"} -->
-			<h3 class="wp-block-heading alignwide"><?php echo esc_html( $social_title ); ?></h3>
-			<!-- /wp:heading --></div>
-		<!-- /wp:column -->
+	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+	<div class="wp-block-group alignwide">
+		<!-- wp:heading {"level":3,"align":"wide"} -->
+		<h3 class="wp-block-heading alignwide"><?php echo esc_html( $social_title ); ?></h3>
+		<!-- /wp:heading -->
 
-		<!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
-		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%">
-			<!-- wp:social-links {"iconColor":"primary","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0"}}},"className":"has-icon-color is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
-			<ul class="wp-block-social-links has-icon-color is-style-logos-only">
-				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://twitter.com/' ); ?>","service":"twitter"} /-->
+		<!-- wp:social-links {"iconColor":"primary","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0","left":"16px"}}},"className":"has-icon-color is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
+		<ul class="wp-block-social-links has-icon-color is-style-logos-only">
+			<!-- wp:social-link {"url":"https://twitter.com/","service":"twitter"} /-->
 
-				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.instagram.com/' ); ?>","service":"instagram"} /-->
+			<!-- wp:social-link {"url":"https://www.instagram.com/","service":"instagram"} /-->
 
-				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.facebook.com/' ); ?>","service":"facebook"} /-->
+			<!-- wp:social-link {"url":"https://www.facebook.com/","service":"facebook"} /-->
 
-				<!-- wp:social-link {"url":"<?php echo esc_url( 'https://www.twitch.tv/' ); ?>","service":"twitch"} /-->
-			</ul>
-			<!-- /wp:social-links -->
-		</div>
-		<!-- /wp:column -->
+			<!-- wp:social-link {"url":"https://www.twitch.tv/","service":"twitch"} /-->
+		</ul>
+		<!-- /wp:social-links -->
 	</div>
-	<!-- /wp:columns -->
+	<!-- /wp:group -->
 
 	<!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
 	<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)">
