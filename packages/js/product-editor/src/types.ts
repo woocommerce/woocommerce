@@ -6,7 +6,6 @@ import { BlockEditProps } from '@wordpress/blocks';
 export interface ProductEditorContext {
 	postId: number;
 	postType: string;
-	productType: string;
 	selectedTab: string | null;
 }
 
