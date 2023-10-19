@@ -118,19 +118,30 @@ Loader.Subtext = ( {
 
 const LoaderSequence = ( {
 	interval,
+	shouldLoop = true,
 	children,
-}: { interval: number } & withReactChildren ) => {
+}: { interval: number; shouldLoop?: boolean } & withReactChildren ) => {
 	const [ index, setIndex ] = useState( 0 );
+	const childCount = Children.count( children );
 
 	useEffect( () => {
 		const rotateInterval = setInterval( () => {
-			setIndex(
-				( prevIndex ) => ( prevIndex + 1 ) % Children.count( children )
-			);
+			setIndex( ( prevIndex ) => {
+				const nextIndex = prevIndex + 1;
+
+				if ( shouldLoop ) {
+					return nextIndex % childCount;
+				}
+				if ( nextIndex < childCount ) {
+					return nextIndex;
+				}
+				clearInterval( rotateInterval );
+				return prevIndex;
+			} );
 		}, interval );
 
 		return () => clearInterval( rotateInterval );
-	}, [ interval, children ] );
+	}, [ interval, children, shouldLoop, childCount ] );
 
 	const childToDisplay = Children.toArray( children )[ index ];
 	return <>{ childToDisplay }</>;

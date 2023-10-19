@@ -280,6 +280,9 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-edit-product',
 			},
+			layout: {
+				header: false,
+			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'edit_products',
 		} );

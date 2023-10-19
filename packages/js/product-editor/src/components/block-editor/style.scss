@@ -145,15 +145,6 @@
 	}
 }
 
-.woocommerce-layout:has(.woocommerce-product-block-editor) {
-	.woocommerce-layout__primary {
-		margin-top: calc($gap-largest + $gap-smaller);
-	}
-	.woocommerce-layout__header {
-		display: none;
-	}
-}
-
 .wp-admin.woocommerce-feature-enabled-product-block-editor {
 	.components-modal {
 		&__frame {
