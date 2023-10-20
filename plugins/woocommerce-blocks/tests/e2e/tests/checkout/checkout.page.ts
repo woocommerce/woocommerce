@@ -332,6 +332,14 @@ export class CheckoutPage {
 		}
 	}
 
+	async syncBillingWithShipping() {
+		await this.page.getByLabel( 'Use same address for billing' ).check();
+	}
+
+	async unsyncBillingWithShipping() {
+		await this.page.getByLabel( 'Use same address for billing' ).uncheck();
+	}
+
 	getOrderId() {
 		// Get the current URL
 		const url = this.page.url();
