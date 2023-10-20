@@ -49,7 +49,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$sections = array(
 			''        => __( 'Shipping zones', 'woocommerce' ),
 			'options' => __( 'Shipping settings', 'woocommerce' ),
-			'classes' => __( 'Shipping classes', 'woocommerce' ),
+			'classes' => __( 'Classes', 'woocommerce' ),
 		);
 
 		if ( ! $this->wc_is_installing() ) {
