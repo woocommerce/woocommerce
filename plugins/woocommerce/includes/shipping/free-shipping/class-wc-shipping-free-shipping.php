@@ -95,7 +95,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$value = is_null( $value ) ? '' : $value;
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $value );
-		
+
 		if ( ! is_numeric( $value ) ) {
 			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
 		}
