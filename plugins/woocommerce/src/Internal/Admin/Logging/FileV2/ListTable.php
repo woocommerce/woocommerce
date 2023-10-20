@@ -220,12 +220,12 @@ class ListTable extends WP_List_Table {
 		ob_start();
 		?>
 		<input
-			id="cb-select-<?php echo esc_attr( $item->get_key() ); ?>"
+			id="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>"
 			type="checkbox"
 			name="file[]"
 			value="<?php echo esc_attr( $item->get_basename() ); ?>"
 		/>
-		<label for="cb-select-<?php echo esc_attr( $item->get_key() ); ?>">
+		<label for="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>">
 			<span class="screen-reader-text">
 				<?php
 				printf(
