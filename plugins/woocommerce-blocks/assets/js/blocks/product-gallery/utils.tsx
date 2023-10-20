@@ -140,6 +140,10 @@ export const moveInnerBlocksToPosition = (
 	const productGalleryBlock = getBlock( clientId );
 
 	if ( productGalleryBlock ) {
+		const previousLayout = productGalleryBlock.innerBlocks.length
+			? productGalleryBlock.innerBlocks[ 0 ].attributes.layout
+			: null;
+
 		const thumbnailsBlock = findBlock( {
 			blocks: [ productGalleryBlock ],
 			findCondition( block ) {
@@ -181,6 +185,22 @@ export const moveInnerBlocksToPosition = (
 				thumbnailsPosition,
 				clientId
 			);
+
+			setGroupBlockLayoutByThumbnailsPosition(
+				thumbnailsPosition,
+				productGalleryBlock.innerBlocks[ 0 ].clientId
+			);
+
+			if ( previousLayout ) {
+				const orientation =
+					getGroupLayoutAttributes( thumbnailsPosition ).orientation;
+				updateBlockAttributes(
+					{
+						layout: { ...previousLayout, orientation },
+					},
+					productGalleryBlock.innerBlocks[ 0 ]
+				);
+			}
 
 			if (
 				( ( thumbnailsPosition === 'bottom' ||
