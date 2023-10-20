@@ -19,7 +19,17 @@ export function Edit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, property, suffix, placeholder, help, min, max } = attributes;
+	const {
+		label,
+		property,
+		suffix,
+		placeholder,
+		help,
+		min,
+		max,
+		required,
+		tooltip,
+	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
 		fallbackValue: '',
@@ -70,6 +80,8 @@ export function Edit( {
 				placeholder={ placeholder }
 				error={ error }
 				onBlur={ validate }
+				required={ required }
+				tooltip={ tooltip }
 			/>
 		</div>
 	);
