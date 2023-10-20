@@ -47,7 +47,7 @@ export const TextControl: React.FC< TextProps > = ( {
 			id={ textControlId }
 			label={
 				<Label
-					label={ label || '' }
+					label={ label }
 					required={ required }
 					tooltip={ tooltip }
 				/>

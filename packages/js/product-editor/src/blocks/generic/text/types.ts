@@ -9,7 +9,7 @@ export interface TextBlockAttributes extends BlockAttributes {
 	help?: string;
 	tooltip?: string;
 	placeholder?: string;
-	required: boolean;
+	required?: boolean;
 	validationRegex?: string;
 	validationErrorMessage?: string;
 	minLength?: number;

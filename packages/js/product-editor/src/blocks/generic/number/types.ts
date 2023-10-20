@@ -4,7 +4,7 @@
 import { BlockAttributes } from '@wordpress/blocks';
 
 export interface NumberBlockAttributes extends BlockAttributes {
-	label: string;
+	label?: string;
 	property: string;
 	help?: string;
 	suffix?: string;
