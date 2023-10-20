@@ -53,6 +53,12 @@
 	}
 }
 
+.woocommerce-customize-store {
+	.edit-site-site-hub__view-mode-toggle-container a {
+		color: unset;
+	}
+}
+
 .woocommerce-customize-store__step-assemblerHub {
 	a {
 		text-decoration: none;
