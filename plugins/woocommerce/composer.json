@@ -97,7 +97,7 @@
 			"chg=$(git diff HEAD --relative --name-only -- '*.php'); [[ -z $chg ]] || phpcs-changed -s --git $chg"
 		],
 		"lint-branch": [
-			"sh ./bin/lint-branch.sh"
+			"bash ./bin/lint-branch.sh"
 		],
 		"phpcbf": [
 			"phpcbf -p"

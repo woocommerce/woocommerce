@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve has_price filter so it can matches when the price record does not exist or it's empty/null

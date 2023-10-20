@@ -26,6 +26,7 @@ describe( 'registerWooBlockType', () => {
 			},
 			settings: {
 				foo: 'bar',
+				edit: jest.fn(),
 			},
 		};
 
@@ -49,10 +50,15 @@ describe( 'registerWooBlockType', () => {
 						type: 'integer',
 						__experimentalRole: 'content',
 					},
+					_templateBlockHideConditions: {
+						type: 'array',
+						__experimentalRole: 'content',
+					},
 				},
 			},
 			{
 				foo: 'bar',
+				edit: expect.any( Function ),
 			}
 		);
 	} );

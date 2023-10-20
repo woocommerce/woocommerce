@@ -124,8 +124,11 @@ export function Edit( {
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).getProductVariations< Pick< ProductVariation, 'id' >[] >( {
 			product_id: productId,
+			order: 'asc',
+			orderby: 'menu_order',
 			has_price: false,
 			_fields: [ 'id' ],
+			per_page: totalCountWithoutPrice,
 		} );
 		handlePrompt( {
 			onOk( value ) {
@@ -187,8 +190,8 @@ export function Edit( {
 							update &&
 							update.find(
 								( variation ) =>
-									variation.regular_price ||
-									variation.sale_price
+									'regular_price' in variation ||
+									'sale_price' in variation
 							) )
 					) {
 						invalidateResolution(
