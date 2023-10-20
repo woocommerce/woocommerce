@@ -35,6 +35,12 @@ export function usePublish( {
 		'id'
 	);
 
+	const [ parentId ] = useEntityProp< number >(
+		'postType',
+		productType,
+		'parent_id'
+	);
+
 	const { isSaving } = useSelect(
 		( select ) => {
 			const { isSavingEntityRecord } = select( 'core' );
@@ -109,7 +115,7 @@ export function usePublish( {
 					);
 					if (
 						( error as Record< string, string > ).variations ||
-						isPriceError !== undefined
+						( parentId > 0 && isPriceError !== undefined )
 					) {
 						wpError.code = 'variable_product_no_variation_prices';
 						wpError.message =
