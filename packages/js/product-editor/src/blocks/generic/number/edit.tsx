@@ -5,21 +5,14 @@ import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
-import { useInstanceId } from '@wordpress/compose';
-import {
-	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 /**
  * Internal dependencies
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { useNumberInputProps } from '../../../hooks/use-number-input-props';
 import { NumberBlockAttributes } from './types';
 import { useValidation } from '../../../contexts/validation-context';
+import { NumberControl } from '../../../components/number-control';
 
 export function Edit( {
 	attributes,
@@ -31,13 +24,6 @@ export function Edit( {
 		postType,
 		fallbackValue: '',
 	} );
-
-	const inputProps = useNumberInputProps( {
-		value: value || '',
-		onChange: setValue,
-	} );
-
-	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 
 	const { error, validate } = useValidation< Product >(
 		property,
@@ -73,25 +59,18 @@ export function Edit( {
 		},
 		[ value ]
 	);
-
 	return (
 		<div { ...blockProps }>
-			<BaseControl
-				className={ classNames( {
-					'has-error': error,
-				} ) }
-				id={ id }
+			<NumberControl
 				label={ label }
-				help={ error || help }
-			>
-				<InputControl
-					{ ...inputProps }
-					id={ id }
-					suffix={ suffix }
-					placeholder={ placeholder }
-					onBlur={ validate }
-				/>
-			</BaseControl>
+				onChange={ setValue }
+				value={ value || '' }
+				help={ help }
+				suffix={ suffix }
+				placeholder={ placeholder }
+				error={ error }
+				onBlur={ validate }
+			/>
 		</div>
 	);
 }
