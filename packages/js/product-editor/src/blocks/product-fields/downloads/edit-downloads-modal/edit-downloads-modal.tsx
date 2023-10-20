@@ -44,6 +44,8 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );
+	const [ isFileUploading, setIsFileUploading ] =
+		useState< boolean >( false );
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
@@ -84,18 +86,19 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 		setIsCopingToClipboard( false );
 	}
 
-	function handleFormFileUploadChange(
+	async function handleFormFileUploadChange(
 		event: ChangeEvent< HTMLInputElement >
 	) {
+		setIsFileUploading( true );
 		const filesList = event.currentTarget.files as FileList;
-
-		uploadMedia( {
+		await uploadMedia( {
 			allowedTypes,
 			filesList,
 			maxUploadFileSize,
 			onFileChange: onUploadSuccess,
 			onError: onUploadError,
 		} );
+		setIsFileUploading( false );
 	}
 
 	return (
@@ -133,7 +136,11 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 					render={ ( { openFileDialog } ) => (
 						<div>
 							<p>{ name }</p>
-							<Button onClick={ openFileDialog }>
+							<Button
+								onClick={ openFileDialog }
+								isBusy={ isFileUploading }
+								disabled={ isFileUploading }
+							>
 								{ __( 'Replace', 'woocommerce' ) }
 							</Button>
 						</div>
