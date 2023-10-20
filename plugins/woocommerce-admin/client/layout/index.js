@@ -190,6 +190,17 @@ function _Layout( {
 
 	const query = getQuery();
 
+	useEffect( () => {
+		const link = document.createElement( 'link' );
+		link.rel = 'prefetch';
+		link.href = '/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
+		document.head.appendChild( link );
+
+		// Cleanup: remove the link element when the component is unmounted
+		return () => {
+			document.head.removeChild( link );
+		};
+	}, [] );
 	return (
 		<LayoutContextProvider
 			value={ getLayoutContextValue( [
