@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { Product } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	Product,
+} from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 type VariationSwitcherProps = {
@@ -17,6 +20,9 @@ export function useVariationSwitcher( {
 	parentProductType,
 }: VariationSwitcherProps ) {
 	const { invalidateResolution } = useDispatch( 'core' );
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	);
 	const variationValues = useSelect(
 		( select ) => {
 			if ( parentId === undefined ) {
@@ -68,6 +74,10 @@ export function useVariationSwitcher( {
 			parentProductType || 'product',
 			parentId,
 		] );
+		invalidateResolutionForStoreSelector( 'getProductVariations' );
+		invalidateResolutionForStoreSelector(
+			'getProductVariationsTotalCount'
+		);
 	}
 
 	function goToVariation( id: number ) {
