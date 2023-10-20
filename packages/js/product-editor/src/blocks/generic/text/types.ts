@@ -5,7 +5,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
 
 export interface TextBlockAttributes extends BlockAttributes {
 	property: string;
-	label?: string;
+	label: string;
 	help?: string;
 	tooltip?: string;
 	placeholder?: string;

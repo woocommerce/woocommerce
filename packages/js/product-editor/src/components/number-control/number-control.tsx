@@ -19,7 +19,7 @@ import { Label } from '../label/label';
 export type NumberProps = {
 	value: string;
 	onChange: ( selected: string ) => void;
-	label?: string;
+	label: string;
 	suffix?: string;
 	help?: string;
 	error?: string;
@@ -56,7 +56,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 			id={ id }
 			label={
 				<Label
-					label={ label || '' }
+					label={ label }
 					required={ required }
 					tooltip={ tooltip }
 				/>

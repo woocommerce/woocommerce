@@ -7,7 +7,7 @@ import { Icon, help as helpIcon } from '@wordpress/icons';
 import { Tooltip } from '@wordpress/components';
 
 interface LabelProps {
-	label?: string;
+	label: string;
 	required?: boolean;
 	tooltip?: string;
 }
