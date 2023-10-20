@@ -69,8 +69,15 @@ export function PublishButton( {
 			}
 		},
 		onPublishError( error ) {
-			const message = getProductErrorMessage( error );
-			createErrorNotice( message );
+			if ( Array.isArray( error ) ) {
+				error.forEach( ( err ) => {
+					const { message } = err;
+					createErrorNotice( message );
+				} );
+			} else {
+				const message = getProductErrorMessage( error );
+				createErrorNotice( message );
+			}
 		},
 	} );
 

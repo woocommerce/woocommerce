@@ -25,7 +25,7 @@ export function usePublish( {
 	...props
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: WPError ): void;
+	onPublishError?( error: WPError | WPError[] ): void;
 } ): Button.ButtonProps {
 	const { isValidating, validate } = useValidations< Product >();
 
@@ -33,12 +33,6 @@ export function usePublish( {
 		'postType',
 		productType,
 		'id'
-	);
-
-	const [ parentId ] = useEntityProp< number >(
-		'postType',
-		productType,
-		'parent_id'
 	);
 
 	const { isSaving } = useSelect(
@@ -93,34 +87,37 @@ export function usePublish( {
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
-		} catch ( error ) {
+		} catch ( errors ) {
 			if ( onPublishError ) {
-				let wpError = error as WPError;
-				if ( ! wpError.code ) {
+				let wpError = errors as WPError | WPError[];
+				const defaultCode = isPublished
+					? 'product_update_error'
+					: 'product_create_error';
+				if ( ! Array.isArray( wpError ) && ! wpError.code ) {
 					wpError = {
-						code: isPublished
-							? 'product_publish_error'
-							: 'product_create_error',
+						code: defaultCode,
 					} as WPError;
-					let isPriceError: string | undefined;
-					Object.entries( error as Record< string, string > ).forEach(
-						( [ key, value ] ) => {
-							if (
-								key.startsWith( 'regular_price' ) &&
-								value !== undefined
-							) {
-								isPriceError = value;
-							}
-						}
-					);
-					if (
-						( error as Record< string, string > ).variations ||
-						( parentId > 0 && isPriceError !== undefined )
-					) {
+					if ( ( errors as Record< string, string > ).variations ) {
 						wpError.code = 'variable_product_no_variation_prices';
-						wpError.message =
-							isPriceError ??
-							( error as Record< string, string > ).variations;
+						wpError.message = (
+							errors as Record< string, string >
+						 ).variations;
+					} else {
+						const errorMessages = Object.values(
+							errors as Record< string, string >
+						).filter(
+							( value ) => value !== undefined
+						) as string[];
+						if ( errorMessages.length > 0 ) {
+							const mappedErrors = errorMessages.map(
+								( message ) =>
+									( {
+										code: defaultCode,
+										message,
+									} as WPError )
+							);
+							wpError = mappedErrors;
+						}
 					}
 				}
 				onPublishError( wpError );
