@@ -36,13 +36,11 @@ export function useVariationSwitcher( {
 				const activeVariationIndex =
 					parentProduct.variations.indexOf( variationId );
 				const previousVariationIndex =
-					activeVariationIndex > 0
-						? activeVariationIndex - 1
-						: parentProduct.variations.length - 1;
+					activeVariationIndex > 0 ? activeVariationIndex - 1 : null;
 				const nextVariationIndex =
 					activeVariationIndex !== parentProduct.variations.length - 1
 						? activeVariationIndex + 1
-						: 0;
+						: null;
 
 				return {
 					activeVariationIndex,
@@ -50,9 +48,13 @@ export function useVariationSwitcher( {
 					previousVariationIndex,
 					numberOfVariations: parentProduct.variations.length,
 					previousVariationId:
-						parentProduct.variations[ previousVariationIndex ],
+						previousVariationIndex !== null
+							? parentProduct.variations[ previousVariationIndex ]
+							: null,
 					nextVariationId:
-						parentProduct.variations[ nextVariationIndex ],
+						nextVariationIndex !== null
+							? parentProduct.variations[ nextVariationIndex ]
+							: null,
 				};
 			}
 			return {};
@@ -68,33 +70,38 @@ export function useVariationSwitcher( {
 		] );
 	}
 
-	function goToNextVariation() {
-		if ( variationValues.nextVariationId === undefined ) {
-			return false;
-		}
+	function goToVariation( id: number ) {
 		navigateTo( {
-			url: getNewPath(
-				{},
-				`/product/${ parentId }/variation/${ variationValues.nextVariationId }`
-			),
+			url: getNewPath( {}, `/product/${ parentId }/variation/${ id }` ),
 		} );
 	}
 
-	function goToPreviousVariation() {
-		if ( variationValues.previousVariationId === undefined ) {
+	function goToNextVariation() {
+		if (
+			variationValues.nextVariationId === undefined ||
+			variationValues.nextVariationId === null
+		) {
 			return false;
 		}
-		navigateTo( {
-			url: getNewPath(
-				{},
-				`/product/${ parentId }/variation/${ variationValues.previousVariationId }`
-			),
-		} );
+		goToVariation( variationValues.nextVariationId );
+		return true;
+	}
+
+	function goToPreviousVariation() {
+		if (
+			variationValues.previousVariationId === undefined ||
+			variationValues.previousVariationId === null
+		) {
+			return false;
+		}
+		goToVariation( variationValues.previousVariationId );
+		return true;
 	}
 
 	return {
 		...variationValues,
 		invalidateVariationList,
+		goToVariation,
 		goToNextVariation,
 		goToPreviousVariation,
 	};
