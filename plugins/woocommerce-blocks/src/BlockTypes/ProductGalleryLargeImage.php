@@ -87,11 +87,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		return strtr(
 			'<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image" {directives}>
-				{visible_main_image}
-				{main_images}
-				<div class="wc-block-woocommerce-product-gallery-large-image__content">
-					{content}
+				<div class="wc-block-product-gallery-large-image__container">
+					{main_images}
 				</div>
+					{content}
 			</div>',
 			array(
 				'{visible_main_image}' => $visible_main_image,
@@ -118,9 +117,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	private function get_main_images_html( $context, $product_id ) {
 		$attributes = array(
-			'data-wc-bind--hidden' => '!selectors.woocommerce.isSelected',
-			'hidden'               => true,
-			'class'                => 'wc-block-woocommerce-product-gallery-large-image__image',
+			'data-wc-bind--style' => 'selectors.woocommerce.productGalleryLargeImage.styles',
+			'data-wc-effect'      => 'effects.woocommerce.scrollInto',
+			'class'               => 'wc-block-woocommerce-product-gallery-large-image__image',
 
 		);
 
@@ -130,23 +129,25 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		if ( $context['hoverZoom'] ) {
 			$attributes['class']              .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-			$attributes['data-wc-bind--style'] = 'selectors.woocommerce.styles';
+			$attributes['data-wc-bind--style'] = 'selectors.woocommerce.productGalleryLargeImage.styles';
 		}
 
 		$main_images = ProductGalleryUtils::get_product_gallery_images(
 			$product_id,
 			'full',
 			$attributes,
-			'wc-block-woocommerce-product-gallery-large-image__container'
+			'wc-block-product-gallery-large-image__image-element'
 		);
 
-		$visible_main_image           = array_shift( $main_images );
-		$visible_main_image_processor = new \WP_HTML_Tag_Processor( $visible_main_image );
-		$visible_main_image_processor->next_tag();
-		$visible_main_image_processor->remove_attribute( 'hidden' );
-		$visible_main_image = $visible_main_image_processor->get_updated_html();
+		$main_image_with_wrapper = array_map(
+			function( $main_image_element ) {
+				return "<div class='wc-block-product-gallery-large-image__wrapper'>" . $main_image_element . '</div>';
+			},
+			$main_images
+		);
 
-		return array( $visible_main_image, $main_images );
+		$visible_main_image = array_shift( $main_images );
+		return array( $visible_main_image, $main_image_with_wrapper );
 
 	}
 
