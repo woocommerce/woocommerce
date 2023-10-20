@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	createElement,
-	Fragment,
-	createInterpolateElement,
-	useState,
-} from '@wordpress/element';
+import { createElement, Fragment, useState } from '@wordpress/element';
 
 import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
@@ -39,6 +34,7 @@ import { useValidation } from '../../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
@@ -148,16 +144,9 @@ export function Edit( {
 			<div { ...blockProps }>
 				<BaseControl
 					id={ nameControlId }
-					label={ createInterpolateElement(
-						__( 'Name <required />', 'woocommerce' ),
-						{
-							required: (
-								<span className="woocommerce-product-form__required-input">
-									{ __( '*', 'woocommerce' ) }
-								</span>
-							),
-						}
-					) }
+					label={
+						<Label label={ __( 'Name', 'woocommerce' ) } required />
+					}
 					className={ classNames( {
 						'has-error': nameValidationError,
 					} ) }
