@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies

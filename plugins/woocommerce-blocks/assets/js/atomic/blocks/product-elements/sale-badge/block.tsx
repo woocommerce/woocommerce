@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-components';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
