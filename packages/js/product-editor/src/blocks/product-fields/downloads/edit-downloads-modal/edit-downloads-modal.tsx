@@ -65,6 +65,15 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 		);
 	};
 
+	const isImage = ( filename = '' ) => {
+		if ( ! filename ) return;
+		const imageExtensions = [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ];
+		const fileExtension = (
+			filename.split( '.' ).pop() || ''
+		).toLowerCase();
+		return imageExtensions.includes( fileExtension );
+	};
+
 	async function copyTextToClipboard( text: string ) {
 		if ( 'clipboard' in navigator ) {
 			await navigator.clipboard.writeText( text );
@@ -122,15 +131,17 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			className="woocommerce-edit-downloads-modal"
 		>
 			<div className="woocommerce-edit-downloads-modal__preview">
-				<ImageGallery allowDragging={ false }>
-					<ImageGalleryItem
-						key={ id }
-						alt={ name }
-						src={ file }
-						id={ `${ id }` }
-						isCover={ false }
-					/>
-				</ImageGallery>
+				{ isImage( file ) && (
+					<ImageGallery allowDragging={ false }>
+						<ImageGalleryItem
+							key={ id }
+							alt={ name }
+							src={ file }
+							id={ `${ id }` }
+							isCover={ false }
+						/>
+					</ImageGallery>
+				) }
 				<FormFileUpload
 					onChange={ handleFormFileUploadChange }
 					render={ ( { openFileDialog } ) => (
