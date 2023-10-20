@@ -152,7 +152,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-summary-field',
 				'order'      => 20,
 				'attributes' => [
-					'property' => 'description',
+					'property' => 'short_description',
 				],
 			]
 		);

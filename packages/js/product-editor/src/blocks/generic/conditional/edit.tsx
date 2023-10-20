@@ -2,10 +2,16 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { createElement, useMemo } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DisplayState } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -20,19 +26,29 @@ export function Edit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< ConditionalBlockAttributes > ) {
+	const { postType } = context;
 	const blockProps = useWooBlockProps( attributes );
 	const { mustMatch } = attributes;
 
-	const product = context.editedProduct;
+	const productId = useEntityId( 'postType', postType );
 
-	const displayBlocks = useMemo( () => {
-		for ( const [ prop, values ] of Object.entries( mustMatch ) ) {
-			if ( ! values.includes( product[ prop ] ) ) {
-				return false;
+	const displayBlocks = useSelect(
+		( select ) => {
+			const product: Product = select( 'core' ).getEditedEntityRecord(
+				'postType',
+				postType,
+				productId
+			);
+
+			for ( const [ prop, values ] of Object.entries( mustMatch ) ) {
+				if ( ! values.includes( product[ prop ] ) ) {
+					return false;
+				}
 			}
-		}
-		return true;
-	}, [ mustMatch, product ] );
+			return true;
+		},
+		[ postType, productId, mustMatch ]
+	);
 
 	return (
 		<div { ...blockProps }>

@@ -13,9 +13,6 @@
 		},
 		"title": {
 			"type": "string"
-		},
-		"order": {
-			"type": "number"
 		}
 	},
 	"supports": {
