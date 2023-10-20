@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2 class="wc-shipping-zones-heading">
 	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
-	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action button-primary"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action button-primary"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
-<p class="wc-shipping-zone-heading-help-text"><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text"><?php echo __( 'A shipping zone consists of one or more regions you\'d like to ship to and the shipping method(s) offered. We\'ll use your customer\'s shipping address to show them available shipping methods in their area.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>
@@ -24,9 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
 		<td width="1%" class="wc-shipping-zone-worldwide"></td>
 		<td class="wc-shipping-zone-name">
-			<?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Rest of the world', 'woocommerce' ); ?>
 		</td>
-		<td class="wc-shipping-zone-region"><?php esc_html_e( 'This zone is optionally used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
+		<td class="wc-shipping-zone-region"><?php esc_html_e( 'An optional zone you can use to set the shipping method(s) available to any regions that have not been listed above.', 'woocommerce' ); ?></td>
 		<td class="wc-shipping-zone-methods">
 			<ul>
 				<?php
