@@ -34,9 +34,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 export const getVisibleLargeImageId = async (
 	mainImageBlockLocator: Locator
 ) => {
-	const mainImage = mainImageBlockLocator.locator(
-		'img:not([hidden])'
-	) as Locator;
+	const mainImage = mainImageBlockLocator.locator( 'img' ).first() as Locator;
 
 	const mainImageContext = ( await mainImage.getAttribute(
 		'data-wc-context'

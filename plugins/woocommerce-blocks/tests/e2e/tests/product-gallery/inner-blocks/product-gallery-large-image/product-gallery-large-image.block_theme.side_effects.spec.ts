@@ -99,9 +99,7 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 
 			// img[style] is the selector because the style attribute is Interactivity API.
-			const imgElement = blockFrontend.locator(
-				'img[style]:not([hidden])'
-			);
+			const imgElement = blockFrontend.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
 			await expect( style.transform ).toBe( 'scale(1)' );
@@ -137,14 +135,18 @@ test.describe( `${ blockData.name }`, () => {
 				page: 'frontend',
 			} );
 
-			// img[style] is the selector because the style attribute is added by Interactivity API. In this case, the style attribute should not be added.
-			const imgElement = blockFrontend.locator(
-				'img[style]:not([hidden])'
+			const imgElement = blockFrontend.locator( 'img' ).first();
+			const style = await imgElement.evaluate( ( el ) => el.style );
+
+			await expect( style.transform ).toBe( '' );
+
+			await imgElement.hover();
+
+			const styleOnHover = await imgElement.evaluate(
+				( el ) => el.style
 			);
-			await expect( imgElement ).toBeHidden();
-			await expect(
-				blockFrontend.locator( 'img:not([hidden])' )
-			).toBeVisible();
+
+			await expect( styleOnHover.transform ).toBe( '' );
 		} );
 	} );
 } );

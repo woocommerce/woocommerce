@@ -16,7 +16,7 @@ interface Context {
 	};
 }
 
-interface Selectors {
+export interface ProductGallerySelectors {
 	woocommerce: {
 		isSelected: ( store: unknown ) => boolean;
 		pagerDotFillOpacity: ( store: SelectorsStore ) => number;
@@ -36,7 +36,7 @@ interface Actions {
 interface Store {
 	state: State;
 	context: Context;
-	selectors: Selectors;
+	selectors: ProductGallerySelectors;
 	actions: Actions;
 	ref?: HTMLElement;
 }
