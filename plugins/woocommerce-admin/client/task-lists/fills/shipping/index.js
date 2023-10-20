@@ -22,7 +22,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import { Text } from '@woocommerce/experimental';
 import classNames from 'classnames';
 
 /**

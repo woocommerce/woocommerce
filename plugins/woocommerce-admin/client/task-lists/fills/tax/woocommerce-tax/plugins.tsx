@@ -2,11 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
+import { Plugins as PluginInstaller } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
