@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 

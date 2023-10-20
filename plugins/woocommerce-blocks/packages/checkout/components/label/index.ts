@@ -1,6 +1,6 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import Label from '@woocommerce/base-components/label';
+import Label from '../../../components/label';
 
 export default Label;
