@@ -75,6 +75,9 @@ export function useVariationSwitcher( {
 			parentId,
 		] );
 		invalidateResolutionForStoreSelector( 'getProductVariations' );
+		invalidateResolutionForStoreSelector(
+			'getProductVariationsTotalCount'
+		);
 	}
 
 	function goToVariation( id: number ) {
