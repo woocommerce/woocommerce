@@ -65,6 +65,8 @@ export function useProductVariationsHelper() {
 		generateProductVariations: _generateProductVariations,
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	const { invalidateResolution: coreInvalidateResolution } =
+		useDispatch( 'core' );
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
@@ -75,7 +77,7 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
-			const { status: lastStatus } = await resolveSelect(
+			const { status: lastStatus, variations } = await resolveSelect(
 				'core'
 			).getEditedEntityRecord< Product >(
 				'postType',
@@ -111,6 +113,15 @@ export function useProductVariationsHelper() {
 					invalidateResolutionForStoreSelector(
 						'getProductVariations'
 					);
+					if ( variations && variations.length > 0 ) {
+						for ( const variationId of variations ) {
+							coreInvalidateResolution( 'getEntityRecord', [
+								'postType',
+								'product_variation',
+								variationId,
+							] );
+						}
+					}
 					return invalidateResolutionForStoreSelector(
 						'getProductVariationsTotalCount'
 					);
