@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { _n, sprintf } from '@wordpress/i18n';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
