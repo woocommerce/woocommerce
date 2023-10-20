@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php esc_html_e( 'Zone name', 'woocommerce' ); ?>
 					</label>
 					<p class="wc-shipping-zone-help-text">
-						<?php esc_html_e( 'This is the name of the zone for your reference.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Give your zone a name! E.g. Local, or Worldwide.', 'woocommerce' ); ?>
 					</p>
 				</th>
 				<td class="forminp">
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
 					</label>
 					<p class="wc-shipping-zone-help-text">
-						<?php esc_html_e( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'List the regions you\'d like to include in your shipping zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
 					</p>
 				</th>
 				<td>
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?>
 				</label>
 				<p class="wc-shipping-zone-help-text">
-					<?php esc_html_e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?>
+					<?php esc_html_e( 'Add the shipping methods you\'d like to make available to customers in this zone.', 'woocommerce' ); ?>
 				</p>
 			</th>
 			<td class="">
