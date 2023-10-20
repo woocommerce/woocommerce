@@ -420,14 +420,24 @@
 					}, html );
 				},
 				addCurrencySymbol: function( html ) {
+					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
+						return html;
+					}
 					const htmlContent = $( html );
-					const priceInputs = htmlContent.find( '.wc_input_price' );
-					const { symbol, symbolPosition } = window.wc.ShippingCurrencyContext.getCurrencyConfig();
+					const priceInputs = htmlContent.find( '.wc-shipping-modal-price' );
+					const config = window.wc.ShippingCurrencyContext.getCurrencyConfig();
+					const { symbol, symbolPosition } = config;
 
 					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
-
 					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
 					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
+
+					priceInputs.each( ( i ) => {
+						const priceInput = $( priceInputs[ i ] );
+						const value = priceInput.attr( 'value' );
+						const formattedValue = window.wc.ShippingCurrencyNumberFormat( config, value );
+						priceInput.attr( 'value', formattedValue );
+					} );
 
 					return htmlContent.prop( 'outerHTML' );
 				},
