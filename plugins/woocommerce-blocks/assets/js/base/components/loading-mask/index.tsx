@@ -3,12 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { Spinner } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import Spinner from '../spinner';
 
 interface LoadingMaskProps {
 	children?: React.ReactNode | React.ReactNode[];

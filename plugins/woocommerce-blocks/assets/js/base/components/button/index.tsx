@@ -4,12 +4,12 @@
 import { Button as WPButton } from 'wordpress-components';
 import type { Button as WPButtonType } from '@wordpress/components';
 import classNames from 'classnames';
-import Spinner from '@woocommerce/base-components/spinner';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import Spinner from '../../../../../packages/components/spinner';
 
 export interface ButtonProps
 	extends Omit< WPButtonType.ButtonProps, 'variant' | 'href' > {
