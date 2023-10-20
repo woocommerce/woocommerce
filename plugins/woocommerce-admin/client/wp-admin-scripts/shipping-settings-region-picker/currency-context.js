@@ -11,7 +11,7 @@ export const ShippingCurrencyContext = () => {
 	useEffect( () => {
 		window.wc.ShippingCurrencyContext =
 			window.wc.ShippingCurrencyContext || context;
-        window.wc.ShippingCurrencyNumberFormat =
+		window.wc.ShippingCurrencyNumberFormat =
 			window.wc.ShippingCurrencyNumberFormat || numberFormat;
 	}, [ context ] );
 

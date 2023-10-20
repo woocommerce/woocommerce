@@ -19,22 +19,14 @@ const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 const ShippingApp = () => (
 	<div>
 		<ShippingCurrencyContext />
-		<RegionPicker
-			options={ options }
-			initialValues={ initialValues }
-		/>
+		<RegionPicker options={ options } initialValues={ initialValues } />
 	</div>
 );
 
 if ( shippingZoneRegionPickerRoot ) {
 	if ( createRoot ) {
-		createRoot( shippingZoneRegionPickerRoot ).render(
-			<ShippingApp />
-		);
+		createRoot( shippingZoneRegionPickerRoot ).render( <ShippingApp /> );
 	} else {
-		render(
-			<ShippingApp />,
-			shippingZoneRegionPickerRoot
-		);
+		render( <ShippingApp />, shippingZoneRegionPickerRoot );
 	}
 }
