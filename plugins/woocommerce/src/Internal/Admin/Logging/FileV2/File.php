@@ -30,11 +30,11 @@ class File {
 	protected $created;
 
 	/**
-	 * The key property of the file, derived from the filename.
+	 * The hash property of the file, derived from the filename.
 	 *
 	 * @var string
 	 */
-	protected $key;
+	protected $hash;
 
 	/**
 	 * Class File
@@ -66,11 +66,11 @@ class File {
 		if ( count( $segments ) >= 5 ) {
 			$this->source  = implode( '-', array_slice( $segments, 0, -4 ) );
 			$this->created = strtotime( implode( '-', array_slice( $segments, -4, 3 ) ) );
-			$this->key     = array_slice( $segments, -1 )[0];
+			$this->hash    = array_slice( $segments, -1 )[0];
 		} else {
 			$this->source  = implode( '-', $segments );
 			$this->created = filemtime( $this->path );
-			$this->key     = $this->source;
+			$this->hash    = $this->source;
 		}
 	}
 
@@ -93,12 +93,12 @@ class File {
 	}
 
 	/**
-	 * Get the file's key property.
+	 * Get the file's hash property.
 	 *
 	 * @return string
 	 */
-	public function get_key() {
-		return $this->key;
+	public function get_hash() {
+		return $this->hash;
 	}
 
 	/**
