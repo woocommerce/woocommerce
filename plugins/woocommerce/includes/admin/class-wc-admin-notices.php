@@ -162,11 +162,11 @@ class WC_Admin_Notices {
 					'%s%s',
 					sprintf(
 						'<h4>%s</h4>',
-						esc_html__( 'The WooCommerce webhooks with Legacy REST API payload will be unsupported soon', 'woocommerce' )
+						esc_html__( 'WooCommerce webhooks that use the Legacy REST API will be unsupported soon', 'woocommerce' )
 					),
 					sprintf(
 					// translators: Placeholders are URLs.
-						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">the Legacy REST API payload webhooks currently existing in this site</a> to stop working. A separate WooCommerce extension will be available to keep the Legacy REST API enabled and these webhooks working, you can also edit these webhooks to use the current REST API to generate the payload. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. A separate WooCommerce extension will be available to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
 						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 					)
