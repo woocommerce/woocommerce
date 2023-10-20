@@ -6,6 +6,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
 export interface TextBlockAttributes extends BlockAttributes {
 	property: string;
 	label?: string;
+	help?: string;
 	placeholder?: string;
 	required: boolean;
 	validationRegex?: string;
