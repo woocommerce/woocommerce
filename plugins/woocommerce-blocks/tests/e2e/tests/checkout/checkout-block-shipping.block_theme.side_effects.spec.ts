@@ -57,7 +57,23 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 				FLAT_RATE_SHIPPING_PRICE
 			)
 		).toBe( true );
-		await page.getByLabel( 'Use same address for billing' ).uncheck();
+
+		await pageObject.syncBillingWithShipping();
+		await pageObject.fillInCheckoutWithTestData( {
+			phone: '0987654322',
+		} );
+		await pageObject.unsyncBillingWithShipping();
+		const shippingForm = page.getByRole( 'group', {
+			name: 'Shipping address',
+		} );
+		const billingForm = page.getByRole( 'group', {
+			name: 'Billing address',
+		} );
+
+		await expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
+			billingForm.getByLabel( 'Phone' ).inputValue
+		);
+
 		await pageObject.fillInCheckoutWithTestData();
 		const overrideBillingDetails = {
 			firstname: 'Juan',

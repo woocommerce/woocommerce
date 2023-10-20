@@ -34,6 +34,7 @@ const CustomerAddress = ( {
 		setShippingAddress,
 		setBillingAddress,
 		setShippingPhone,
+		setBillingPhone,
 		useShippingAsBilling,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
@@ -129,6 +130,12 @@ const CustomerAddress = ( {
 							dispatchCheckoutEvent( 'set-phone-number', {
 								step: 'shipping',
 							} );
+							if ( useShippingAsBilling ) {
+								setBillingPhone( value );
+								dispatchCheckoutEvent( 'set-phone-number', {
+									step: 'billing',
+								} );
+							}
 						} }
 					/>
 				) }
