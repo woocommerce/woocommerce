@@ -22,7 +22,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import { Text } from '@woocommerce/experimental';
 import classNames from 'classnames';
 
 /**
@@ -38,6 +37,7 @@ import {
 	ShippingLayoutColumn,
 	ShippingLayoutRow,
 } from './shipping-providers/partners';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -328,29 +328,48 @@ export class Shipping extends Component {
 							'woocommerce'
 					  ),
 				content: (
-					<Plugins
-						onComplete={ ( _plugins, response ) => {
-							createNoticesFromResponse( response );
-							recordEvent( 'tasklist_shipping_label_printing', {
-								install: true,
-								plugins_to_activate: pluginsToActivate,
-							} );
-							this.completeStep();
-						} }
-						onError={ ( errors, response ) =>
-							createNoticesFromResponse( response )
-						}
-						onSkip={ () => {
-							recordEvent( 'tasklist_shipping_label_printing', {
-								install: false,
-								plugins_to_activate: pluginsToActivate,
-							} );
-							invalidateResolutionForStoreSelector();
-							getHistory().push( getNewPath( {}, '/', {} ) );
-							onComplete();
-						} }
-						pluginSlugs={ pluginsToActivate }
-					/>
+					<>
+						{ ! isJetpackConnected &&
+							pluginsToActivate.includes(
+								'woocommerce-services'
+							) && (
+								<TermsOfService
+									buttonText={ __(
+										'Install & enable',
+										'woocommerce'
+									) }
+								/>
+							) }
+						<Plugins
+							onComplete={ ( _plugins, response ) => {
+								createNoticesFromResponse( response );
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: true,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
+								this.completeStep();
+							} }
+							onError={ ( errors, response ) =>
+								createNoticesFromResponse( response )
+							}
+							onSkip={ () => {
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: false,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
+								invalidateResolutionForStoreSelector();
+								getHistory().push( getNewPath( {}, '/', {} ) );
+								onComplete();
+							} }
+							pluginSlugs={ pluginsToActivate }
+						/>
+					</>
 				),
 				visible: pluginsToActivate.length,
 			},
@@ -522,30 +541,48 @@ export class Shipping extends Component {
 								) }
 							{ pluginsToPromote.length === 1 &&
 							pluginsToPromote[ 0 ].slug ? (
-								<Plugins
-									onComplete={ ( _plugins, response ) => {
-										createNoticesFromResponse( response );
-										recordEvent(
-											'tasklist_shipping_label_printing',
-											{
-												install: true,
-												plugins_to_activate:
-													pluginsToActivate,
-											}
-										);
-										invalidateResolutionForStoreSelector();
-										this.completeStep();
-									} }
-									onError={ ( errors, response ) =>
-										createNoticesFromResponse( response )
-									}
-									onSkip={ onShippingPluginInstalltionSkip }
-									pluginSlugs={ pluginsToActivate }
-									installText={ __(
-										'Install and enable',
-										'woocommerce'
-									) }
-								/>
+								<>
+									{ ! isJetpackConnected &&
+										pluginsToPromote[ 0 ].slug ===
+											'woocommerce-services' && (
+											<TermsOfService
+												buttonText={ __(
+													'Install and enable',
+													'woocommerce'
+												) }
+											/>
+										) }
+									<Plugins
+										onComplete={ ( _plugins, response ) => {
+											createNoticesFromResponse(
+												response
+											);
+											recordEvent(
+												'tasklist_shipping_label_printing',
+												{
+													install: true,
+													plugins_to_activate:
+														pluginsToActivate,
+												}
+											);
+											invalidateResolutionForStoreSelector();
+											this.completeStep();
+										} }
+										onError={ ( errors, response ) =>
+											createNoticesFromResponse(
+												response
+											)
+										}
+										onSkip={
+											onShippingPluginInstalltionSkip
+										}
+										pluginSlugs={ pluginsToActivate }
+										installText={ __(
+											'Install and enable',
+											'woocommerce'
+										) }
+									/>
+								</>
 							) : (
 								<Button
 									isTertiary
@@ -560,39 +597,6 @@ export class Shipping extends Component {
 									{ __( 'No Thanks', 'woocommerce' ) }
 								</Button>
 							) }
-
-							{ ! isJetpackConnected &&
-								pluginsToActivate.includes(
-									'woocommerce-services'
-								) && (
-									<Text
-										variant="caption"
-										className="woocommerce-task__caption"
-										size="12"
-										lineHeight="16px"
-										style={ { display: 'block' } }
-									>
-										{ interpolateComponents( {
-											mixedString: __(
-												'By installing WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
-												'woocommerce'
-											),
-											components: {
-												link: (
-													<Link
-														href={
-															'https://wordpress.com/tos/'
-														}
-														target="_blank"
-														type="external"
-													>
-														<></>
-													</Link>
-												),
-											},
-										} ) }
-									</Text>
-								) }
 						</>
 					),
 				},
