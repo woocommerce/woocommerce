@@ -1512,7 +1512,7 @@ class WC_Helper {
 			'product_id'
 		);
 
-		// Track installed subscriptio ids to avoid duplicate entries for inactive subsriptions.
+		// Track installed subscription ids to avoid duplicate entries for inactive subsriptions.
 		$installed_subscription_ids = array();
 
 		foreach ( $subscriptions as &$subscription ) {
