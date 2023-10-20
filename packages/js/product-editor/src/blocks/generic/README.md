@@ -26,3 +26,5 @@ See [Block Template API usage examples](../../../../../../plugins/woocommerce/sr
 ### [woocommerce/product-text-field](text/README.md)
 
 ### [woocommerce/product-toggle-field](toggle/README.md)
+
+### [woocommerce/product-number-field](number/README.md)
