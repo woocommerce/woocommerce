@@ -57,17 +57,35 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	overflow: hidden;
 
 	// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
-	#{$gallery-next-previous-outside-image} & .wc-block-woocommerce-product-gallery-large-image__container {
+	#{$gallery-next-previous-outside-image} & .wc-block-product-gallery-large-image__image-element {
 		overflow: hidden;
+		margin: 0 auto;
 		max-width: $outside-image-max-width;
+	}
+
+	.wc-block-product-gallery-large-image__wrapper {
+		flex-shrink: 0;
+		max-width: 100%;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.wc-block-product-gallery-large-image__container {
+		display: flex;
+		overflow-x: hidden;
+		scroll-snap-type: x mandatory;
+		width: fit-content;
+		height: fit-content;
+		scroll-behavior: auto;
+		align-items: center;
+	}
+
+	#{$gallery-next-previous-inside-image} & .wc-block-product-gallery-large-image__image-element {
+		width: fit-content;
+		overflow: hidden;
 		margin: 0 auto;
 	}
 
-	#{$gallery-next-previous-inside-image} & .wc-block-woocommerce-product-gallery-large-image__container {
-		overflow: unset;
-		max-width: unset;
-		margin: unset;
-	}
 
 	img {
 		display: block;
@@ -75,6 +93,7 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		margin: 0 auto;
 		z-index: 1;
 		transition: all 0.1s linear;
+		width: auto;
 
 		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
 		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
@@ -83,10 +102,6 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 
 		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
 			cursor: zoom-in;
-		}
-
-		&[hidden] {
-			display: none;
 		}
 	}
 
