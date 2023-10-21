@@ -196,6 +196,10 @@ export const VariationsTable = forwardRef<
 		);
 	}
 
+	function handleEmptyTableStateActionClick() {
+		generateProductVariations( productAttributes );
+	}
+
 	if ( ! ( isLoading || isGeneratingVariations ) && totalCount === 0 ) {
 		return (
 			<EmptyTableState
@@ -355,10 +359,6 @@ export const VariationsTable = forwardRef<
 
 			navigateTo( { url } );
 		};
-	}
-
-	function handleEmptyTableStateActionClick() {
-		generateProductVariations( productAttributes );
 	}
 
 	return (
