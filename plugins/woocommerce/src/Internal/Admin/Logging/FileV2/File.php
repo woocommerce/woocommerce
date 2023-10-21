@@ -23,6 +23,13 @@ class File {
 	protected $source;
 
 	/**
+	 * The 0-based increment of the file, if it has been rotated. Derived from the filename. Can only be 0-9.
+	 *
+	 * @var int|null
+	 */
+	protected $rotation;
+
+	/**
 	 * The date the file was created, as a Unix timestamp, derived from the filename.
 	 *
 	 * @var int
@@ -72,6 +79,12 @@ class File {
 			$this->created = filemtime( $this->path );
 			$this->hash    = $this->source;
 		}
+
+		$rotation_marker = strrpos( $this->source, '.', -1 );
+		if ( false !== $rotation_marker ) {
+			$this->rotation = substr( $this->source, -1 );
+			$this->source   = substr( $this->source, 0, $rotation_marker );
+		}
 	}
 
 	/**
@@ -90,6 +103,15 @@ class File {
 	 */
 	public function get_source() {
 		return $this->source;
+	}
+
+	/**
+	 * Get the file's rotation property.
+	 *
+	 * @return int
+	 */
+	public function get_rotation() {
+		return $this->rotation;
 	}
 
 	/**
