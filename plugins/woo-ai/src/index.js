@@ -19,8 +19,6 @@ import './index.scss';
 // This sets up loading and saving the plugin's preferences.
 setPreferencesPersistence();
 
-initBackgroundRemoval();
-
 const queryClient = new QueryClient();
 
 const renderComponent = ( Component, rootElement ) => {
@@ -63,6 +61,7 @@ const shortDescriptionButtonRoot = document.getElementById(
 );
 
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
+	initBackgroundRemoval();
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
 	renderProductCategorySuggestions();
