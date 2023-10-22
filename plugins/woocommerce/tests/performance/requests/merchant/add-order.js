@@ -15,7 +15,7 @@ import {
  */
 import {
 	base_url,
-	cot_status,
+	hpos_enabled,
 	addresses_guest_billing_first_name,
 	addresses_guest_billing_last_name,
 	addresses_guest_billing_company,
@@ -55,7 +55,7 @@ let admin_update_order_id;
 let admin_update_order_params;
 let admin_update_order_assert;
 
-if ( cot_status ) {
+if ( hpos_enabled ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
 	admin_new_order_assert = 'post_status" type="hidden" value="pending';
@@ -389,7 +389,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			if ( cot_status ) {
+			if ( hpos_enabled ) {
 				admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 				admin_update_order_params = cotOrderParams.toString();
 			} else {
@@ -427,7 +427,7 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
-			if ( cot_status ) {
+			if ( hpos_enabled ) {
 				admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			} else {
 				admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
@@ -580,7 +580,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			if ( cot_status ) {
+			if ( hpos_enabled ) {
 				admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 				admin_update_order_params = cotOrderParams.toString();
 			} else {
@@ -739,7 +739,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		if ( cot_status ) {
+		if ( hpos_enabled ) {
 			admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {
@@ -775,7 +775,7 @@ export function addOrder( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
-		if ( cot_status ) {
+		if ( hpos_enabled ) {
 			admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 		} else {
 			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
@@ -926,7 +926,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		if ( cot_status ) {
+		if ( hpos_enabled ) {
 			admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {

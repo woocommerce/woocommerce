@@ -12,7 +12,7 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	cot_status,
+	hpos_enabled,
 	admin_orders_base_url,
 	cot_admin_orders_base_url,
 	think_time_min,
@@ -31,7 +31,7 @@ import {
 // Change URL if COT is enabled and being used
 let admin_orders_base;
 let admin_search_assert;
-if ( cot_status ) {
+if ( hpos_enabled ) {
 	admin_orders_base = cot_admin_orders_base_url;
 	admin_search_assert = 'tbody id="the-list"';
 } else {

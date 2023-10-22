@@ -15,7 +15,7 @@ import {
  */
 import {
 	base_url,
-	cot_status,
+	hpos_enabled,
 	admin_orders_base_url,
 	cot_admin_orders_base_url,
 	think_time_min,
@@ -36,7 +36,7 @@ import {
 // Change URL if COT is enabled and being used
 let admin_orders_base;
 let admin_orders_completed;
-if ( cot_status ) {
+if ( hpos_enabled ) {
 	admin_orders_base = cot_admin_orders_base_url;
 	admin_orders_completed = 'status=wc-completed';
 } else {
