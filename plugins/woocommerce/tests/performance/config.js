@@ -4,7 +4,7 @@ export const base_host = __ENV.HOST || 'localhost:8086';
 
 export const admin_username = __ENV.A_USER || 'admin';
 export const admin_password = __ENV.A_PW || 'password';
-export const admin_acc_login = __ENV.A_ACC_LOGIN || false;
+export const admin_acc_login = __ENV.A_ACC_LOGIN === 'true';
 
 export const customer_username =
 	__ENV.C_USER || 'customer@woocommercecoree2etestsuite.com';
