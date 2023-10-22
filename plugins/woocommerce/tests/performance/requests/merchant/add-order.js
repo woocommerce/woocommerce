@@ -332,7 +332,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			const cotOrderParams = new URLSearchParams( [
+			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -388,7 +388,7 @@ export function addOrder( includeTests = {} ) {
 
 			if ( hpos_enabled ) {
 				admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-				admin_update_order_params = cotOrderParams.toString();
+				admin_update_order_params = hposOrderParams.toString();
 			} else {
 				admin_update_order = admin_update_order_base;
 				admin_update_order_params = orderParams.toString();
@@ -523,7 +523,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			const cotOrderParams = new URLSearchParams( [
+			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -579,7 +579,7 @@ export function addOrder( includeTests = {} ) {
 
 			if ( hpos_enabled ) {
 				admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-				admin_update_order_params = cotOrderParams.toString();
+				admin_update_order_params = hposOrderParams.toString();
 			} else {
 				admin_update_order_params = orderParams.toString();
 				admin_update_order_id = `${ admin_open_order_base }`;
@@ -682,7 +682,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		const cotOrderParams = new URLSearchParams( [
+		const hposOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -738,7 +738,7 @@ export function addOrder( includeTests = {} ) {
 
 		if ( hpos_enabled ) {
 			admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-			admin_update_order_params = cotOrderParams.toString();
+			admin_update_order_params = hposOrderParams.toString();
 		} else {
 			admin_update_order = admin_update_order_base;
 			admin_update_order_params = orderParams.toString();
@@ -869,7 +869,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		const cotOrderParams = new URLSearchParams( [
+		const hposOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -925,7 +925,7 @@ export function addOrder( includeTests = {} ) {
 
 		if ( hpos_enabled ) {
 			admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-			admin_update_order_params = cotOrderParams.toString();
+			admin_update_order_params = hposOrderParams.toString();
 		} else {
 			admin_update_order_params = orderParams.toString();
 			admin_update_order_id = `${ admin_open_order_base }`;

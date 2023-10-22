@@ -17,7 +17,7 @@ import {
 	base_url,
 	hpos_enabled,
 	admin_orders_base_url,
-	cot_admin_orders_base_url,
+	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 } from '../../config.js';
@@ -37,7 +37,7 @@ import {
 let admin_orders_base;
 let admin_orders_completed;
 if ( hpos_enabled ) {
-	admin_orders_base = cot_admin_orders_base_url;
+	admin_orders_base = hpos_admin_orders_base_url;
 	admin_orders_completed = 'status=wc-completed';
 } else {
 	admin_orders_base = admin_orders_base_url;
