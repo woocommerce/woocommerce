@@ -43,7 +43,7 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// Change URL if COT is enabled and being used
+// Change URL if HPOS is enabled and being used
 let admin_new_order_base;
 let admin_created_order_assert;
 let admin_open_order_base;

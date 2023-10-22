@@ -28,7 +28,7 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// Change URL if COT is enabled and being used
+// Change URL if HPOS is enabled and being used
 let admin_orders_base;
 let admin_search_assert;
 if ( hpos_enabled ) {

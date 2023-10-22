@@ -34,7 +34,7 @@ import {
 let heartbeat_nonce;
 let jar;
 
-// Change URL if COT is enabled and being used
+// Change URL if HPOS is enabled and being used
 let admin_orders_base;
 if ( hpos_enabled ) {
 	admin_orders_base = cot_admin_orders_base_url;

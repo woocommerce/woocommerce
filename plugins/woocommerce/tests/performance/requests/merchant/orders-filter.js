@@ -31,7 +31,7 @@ const month = date.toJSON().slice( 5, 7 );
 const year = date.toJSON().slice( 0, 4 );
 const currentDate = `${ year }${ month }`;
 
-// Change URL if COT is enabled and being used
+// Change URL if HPOS is enabled and being used
 let admin_orders_base;
 let admin_filter_month_assert;
 if ( hpos_enabled ) {
