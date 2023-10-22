@@ -13,7 +13,11 @@ import { BackgroundRemovalLink } from './background-removal-link';
 import { getCurrentAttachmentDetails } from './image_utils';
 import { FILENAME_APPEND, LINK_CONTAINER_ID } from './constants';
 
-export const init = () => {
+( () => {
+	if ( ! window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
+		return;
+	}
+
 	const _previous = wp.media.view.Attachment.Details.prototype;
 
 	wp.media.view.Attachment.Details = wp.media.view.Attachment.Details.extend(
@@ -54,4 +58,4 @@ export const init = () => {
 			},
 		}
 	);
-};
+} )();
