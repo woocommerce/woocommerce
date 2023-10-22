@@ -31,7 +31,7 @@ import {
 // Change URL if COT is enabled and being used
 let admin_orders_base;
 let admin_search_assert;
-if ( cot_status === true ) {
+if ( cot_status ) {
 	admin_orders_base = cot_admin_orders_base_url;
 	admin_search_assert = 'tbody id="the-list"';
 } else {

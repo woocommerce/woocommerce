@@ -34,7 +34,7 @@ const currentDate = `${ year }${ month }`;
 // Change URL if COT is enabled and being used
 let admin_orders_base;
 let admin_filter_month_assert;
-if ( cot_status === true ) {
+if ( cot_status ) {
 	admin_orders_base = cot_admin_orders_base_url;
 	admin_filter_month_assert = `selected='selected' value="${ currentDate }">`;
 } else {

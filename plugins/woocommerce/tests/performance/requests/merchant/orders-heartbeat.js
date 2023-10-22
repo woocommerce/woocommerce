@@ -36,7 +36,7 @@ let jar;
 
 // Change URL if COT is enabled and being used
 let admin_orders_base;
-if ( cot_status === true ) {
+if ( cot_status ) {
 	admin_orders_base = cot_admin_orders_base_url;
 } else {
 	admin_orders_base = admin_orders_base_url;
