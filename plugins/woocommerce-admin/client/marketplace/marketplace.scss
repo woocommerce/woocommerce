@@ -24,10 +24,12 @@
 	.woocommerce-store-alerts {
 		margin-left: 16px;
 		margin-right: 16px;
+		margin-top: 16px;
 
 		@media (min-width: $breakpoint-medium) {
 			margin-left: 32px;
 			margin-right: 32px;
+			margin-top: 32px;
 		}
 	}
 }
