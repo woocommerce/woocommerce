@@ -145,7 +145,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						{{{ data.method.settings_html }}}
 						<input type="hidden" name="instance_id" value="{{{ data.instance_id }}}" />
 					</form>
-					<a class="wc-shipping-method-add-class-costs" style="display:none;" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Add shipping class costs', 'woocommerce' ); ?></a>
+					<a class="wc-shipping-method-add-class-costs" style="display:none;" target="_blank" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Add shipping class costs', 'woocommerce' ); ?></a>
 				</article>
 				<footer>
 					<div class="inner">
