@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { __experimentalUseBackgroundRemoval as useBackgroundRemoval } from '@woocommerce/ai';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { __ } from '@wordpress/i18n';
@@ -58,6 +58,14 @@ export const BackgroundRemovalLink = () => {
 		'none'
 	);
 	const [ displayError, setDisplayError ] = useState< string | null >( null );
+
+	const attachmentsBrowserElementRef = useRef< HTMLElement | null >( null );
+
+	useEffect( () => {
+		attachmentsBrowserElementRef.current = document.querySelector(
+			'.attachments-browser'
+		);
+	}, [] );
 
 	useEffect( () => {
 		recordBgRemovalTracks( 'view_ui' );
@@ -174,9 +182,7 @@ export const BackgroundRemovalLink = () => {
 					) }
 					placement="left"
 					spotlightParent={
-						( document.querySelector(
-							`#${ LINK_CONTAINER_ID }`
-						) as HTMLElement ) ?? document.body
+						attachmentsBrowserElementRef.current ?? document.body
 					}
 					onDismissal={ () => {
 						recordBgRemovalTracks( 'spotlight_dismissed' );
