@@ -22,6 +22,7 @@ declare global {
 			'payment-gateway-suggestions': boolean;
 			'product-variation-management': boolean;
 			'product-virtual-downloadable': boolean;
+			'product-external-affiliate': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
