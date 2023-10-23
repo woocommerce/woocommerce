@@ -87,9 +87,10 @@ const ProductTemplateEdit = ( {
 		},
 		queryContext = [ { page: 1 } ],
 		templateSlug,
-		displayLayout: { type: layoutType, columns } = {
+		displayLayout: { type: layoutType, columns, shrinkColumns } = {
 			type: 'flex',
 			columns: 3,
+			shrinkColumns: false,
 		},
 	},
 	__unstableLayoutClassNames,
@@ -203,15 +204,21 @@ const ProductTemplateEdit = ( {
 			} ) ),
 		[ products ]
 	);
+
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
+	let customClassName = '';
+	if ( hasLayoutFlex ) {
+		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
+		const staticGrid = `is-flex-container columns-${ columns }`;
+
+		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
+	}
+
 	const blockProps = useBlockProps( {
 		className: classnames(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
-			{
-				'is-flex-container': hasLayoutFlex,
-				[ `columns-${ columns }` ]: hasLayoutFlex,
-			}
+			customClassName
 		),
 	} );
 
