@@ -238,15 +238,9 @@ const reset = async ( cKey, cSecret ) => {
 };
 
 /**
- * Convert Cart and Checkout pages to shortcode unless DEFAULT_CART_CHECKOUT_BLOCKS is set to true.
+ * Convert Cart and Checkout pages to shortcode.
  */
 const maybeUseCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
-	const { DEFAULT_CART_CHECKOUT_BLOCKS } = process.env;
-
-	if ( DEFAULT_CART_CHECKOUT_BLOCKS === 'true' ) {
-		return;
-	}
-
 	/**
 	 * @typedef {Object} WPPage
 	 * @property {number} id
