@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { FormStep } from '@woocommerce/base-components/cart-checkout';
+import { FormStep } from '@woocommerce/blocks-components';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
