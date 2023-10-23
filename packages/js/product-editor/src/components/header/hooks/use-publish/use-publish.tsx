@@ -89,17 +89,17 @@ export function usePublish( {
 			}
 		} catch ( errors ) {
 			if ( onPublishError ) {
-				let wpError = errors as WPError | WPError[];
+				let wpErrors = errors as WPError | WPError[];
 				const defaultCode = isPublished
 					? 'product_update_error'
 					: 'product_create_error';
-				if ( ! Array.isArray( wpError ) && ! wpError.code ) {
-					wpError = {
+				if ( ! Array.isArray( wpErrors ) && ! wpErrors.code ) {
+					wpErrors = {
 						code: defaultCode,
 					} as WPError;
 					if ( ( errors as Record< string, string > ).variations ) {
-						wpError.code = 'variable_product_no_variation_prices';
-						wpError.message = (
+						wpErrors.code = 'variable_product_no_variation_prices';
+						wpErrors.message = (
 							errors as Record< string, string >
 						 ).variations;
 					} else {
@@ -119,11 +119,11 @@ export function usePublish( {
 										message,
 									} as WPError )
 							);
-							wpError = mappedErrors;
+							wpErrors = mappedErrors;
 						}
 					}
 				}
-				onPublishError( wpError );
+				onPublishError( wpErrors );
 			}
 		}
 	}
