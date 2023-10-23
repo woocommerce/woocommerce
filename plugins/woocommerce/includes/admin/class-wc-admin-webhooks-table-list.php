@@ -317,7 +317,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		$args['paginate'] = true;
 
-		if ( 'true' === sanitize_key( wp_unslash( $_REQUEST['legacy'] ) ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'true' === sanitize_key( wp_unslash( $_REQUEST['legacy'] ?? null ) ) ) {
 			$args['api_version'] = -1;
 		}
 
