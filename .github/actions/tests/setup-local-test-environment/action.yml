@@ -25,5 +25,5 @@ runs:
           working-directory: plugins/woocommerce
           shell: bash
           run: |
-              pnpm env:dev --filter=woocommerce
-              pnpm env:performance-init --filter=woocommerce
+              pnpm env:dev --filter=@woocommerce/plugin-woocommerce
+              pnpm env:performance-init --filter=@woocommerce/plugin-woocommerce

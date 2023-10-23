@@ -26,7 +26,7 @@ jobs:
 
             - name: Load docker images and start containers
               working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm env:test --filter=@woocommerce/plugin-woocommerce
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -81,7 +81,7 @@ jobs:
 
             - name: Load docker images and start containers
               working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm env:test --filter=@woocommerce/plugin-woocommerce
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests

@@ -20,7 +20,7 @@
 	"scripts": {
 		"build-storybook": "build-storybook  -c ./.storybook",
 		"preinstall": "npx only-allow pnpm",
-		"build-woocommerce": "pnpm --filter=woocommerce run build",
+		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce run build",
 		"storybook": "pnpm run build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
 	},

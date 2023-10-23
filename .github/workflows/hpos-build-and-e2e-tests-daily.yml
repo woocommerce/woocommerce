@@ -29,7 +29,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                 ENABLE_HPOS: 1
-              run: pnpm env:test:cot --filter=woocommerce
+              run: pnpm env:test:cot --filter=@woocommerce/plugin-woocommerce
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -85,7 +85,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                 ENABLE_HPOS: 1
-              run: pnpm env:test:cot --filter=woocommerce
+              run: pnpm env:test:cot --filter=@woocommerce/plugin-woocommerce
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests

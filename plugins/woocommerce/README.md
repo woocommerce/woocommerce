@@ -16,7 +16,7 @@ Please make sure you follow the [repository's getting started guide](../../READM
 
 ```bash
 # Make sure that WooCommerce Core and all of its dependencies are built
-pnpm run --filter=woocommerce build 
+pnpm run --filter=@woocommerce/plugin-woocommerce build 
 # Make sure you're in the WooCommerce Core directory
 cd plugins/woocommerce
 # Start the development environment
