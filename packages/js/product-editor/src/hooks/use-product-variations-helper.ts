@@ -122,6 +122,11 @@ export function useProductVariationsHelper() {
 							] );
 						}
 					}
+					coreInvalidateResolution( 'getEntityRecord', [
+						'postType',
+						'product',
+						productId,
+					] );
 					return invalidateResolutionForStoreSelector(
 						'getProductVariationsTotalCount'
 					);
