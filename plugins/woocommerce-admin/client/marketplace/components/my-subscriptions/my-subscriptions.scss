@@ -113,3 +113,33 @@
 .woocommerce-marketplace__my-subscriptions-update.components-button.is-link {
 	text-decoration: none;
 }
+
+.woocommerce-marketplace__my-subscriptions--connect {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 495px;
+	padding: $grid-unit-80 $grid-unit-40;
+	margin: 0 auto;
+
+	.woocommerce-marketplace__my-subscriptions__icon {
+		width: 80px;
+		height: 80px;
+		background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzI5NzBfMTA0MzcpIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNzQuMTMyNSAwTDY4LjQ0ODEgMy4yOTQ4NEw2Mi43NTc5IDBMNTcuMDczNCAzLjI5NDg0TDUxLjM4MzIgMEw0NS42OTMxIDMuMjk0ODRMNDAuMDA4NiAwTDM0LjMxODQgMy4yOTQ4NEwyOC42MzM5IDBMMjIuOTQzNyAzLjI5NDg0TDE3LjI1MzYgMEwxMS41NjM0IDMuMjk0ODRMNS44NzMxOCAwTDAgMy40MDIwNlY3Ni41OTc5TDUuODY3NDcgODBMMTEuNTU3NiA3Ni43MDFMMTcuMjQyMSA4MEwyMi45MzIzIDc2LjcwMUwyOC42MTY4IDgwTDM0LjMwNjkgNzYuNzAxTDM5Ljk5NzEgODBMNDUuNjgxNiA3Ni43MDFMNTEuMzcxOCA4MEw1Ny4wNTYzIDc2LjcwMUw2Mi43NDY1IDgwTDY4LjQzNjYgNzYuNzAxTDc0LjEzMjUgODBMODAgNzYuNTk3OVYzLjQwMjA2TDc0LjEzMjUgMFoiIGZpbGw9IiNGMEYwRjAiLz4KPHBhdGggZD0iTTcxLjE5OTIgMTQuNzk5Nkg4LjM5OTE3VjE4Ljc5OTZINzEuMTk5MlYxNC43OTk2WiIgZmlsbD0iI0RERERERCIvPgo8cGF0aCBkPSJNNzEuMTk5MiAyNS4xOTk1SDguMzk5MTdWMjkuMTk5NUg3MS4xOTkyVjI1LjE5OTVaIiBmaWxsPSIjREREREREIi8+CjxwYXRoIGQ9Ik03MS4xOTkyIDM1LjU5OTZIOC4zOTkxN1YzOS41OTk2SDcxLjE5OTJWMzUuNTk5NloiIGZpbGw9IiNEREREREQiLz4KPHBhdGggZD0iTTY4IDUzLjYwMDFINDkuMkM0Ny40MzI3IDUzLjYwMDEgNDYgNTUuMDMyOCA0NiA1Ni44MDAxVjYwLjgwMDFDNDYgNjIuNTY3NCA0Ny40MzI3IDY0LjAwMDEgNDkuMiA2NC4wMDAxSDY4QzY5Ljc2NzMgNjQuMDAwMSA3MS4yIDYyLjU2NzQgNzEuMiA2MC44MDAxVjU2LjgwMDFDNzEuMiA1NS4wMzI4IDY5Ljc2NzMgNTMuNjAwMSA2OCA1My42MDAxWiIgZmlsbD0iI0RERERERCIvPgo8L2c+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzI5NzBfMTA0MzciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==);
+	}
+
+	.woocommerce-marketplace__my-subscriptions__header {
+		margin-top: $grid-unit-20;
+		margin-bottom: $grid-unit-10;
+		font-size: 20px;
+	}
+
+	.woocommerce-marketplace__my-subscriptions__description {
+		text-align: center;
+		font-size: 13px;
+		line-height: 20px;
+		font-weight: 400;
+		color: var(--gutenberg-gray-700);
+		margin-bottom: $grid-unit-30;
+	}
+}
