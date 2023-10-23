@@ -107,7 +107,7 @@ export const updateReleaseBranchChangelogs = async (
 
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 		execSync(
-			`pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${ version }`,
+			`pnpm --filter=@woocommerce/plugin-woocommerce run changelog write --add-pr-num -n -vvv --use-version ${ version }`,
 			{
 				cwd: tmpRepoPath,
 				stdio: 'inherit',
