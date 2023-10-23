@@ -25,7 +25,7 @@ type AttributeListItemProps = {
 	onRemoveClick?: ( attribute: ProductAttribute ) => void;
 };
 
-const NOT_VISIBLE_TEXT = __( 'Not visible', 'woocommerce' );
+const VISIBLE_TEXT = __( 'Visible in product details', 'woocommerce' );
 const NOT_FILTERABLE_CUSTOM_ATTR_TEXT = __(
 	'Custom attribute. Customers can’t filter or search by it to find this product',
 	'woocommerce'
@@ -80,7 +80,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
-						text={ NOT_VISIBLE_TEXT }
+						text={ VISIBLE_TEXT }
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
 							<SeenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
