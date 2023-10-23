@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce-docs",
+	"name": "@woocommerce/plugin-woocommerce-docs",
 	"version": "1.0.0",
 	"description": "WooCommerce Docs Plugin",
 	"main": "index.js",
