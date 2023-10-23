@@ -77,7 +77,7 @@ class ProductGallery extends AbstractBlock {
 
 		$gallery_dialog = strtr(
 			'
-		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!selectors.woocommerce.isDialogOpen">
+		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!selectors.woocommerce.isDialogOpen" data-wc-effect="effects.woocommerce.keyboardAccess">
 			<dialog data-wc-bind--open="selectors.woocommerce.isDialogOpen">
 			<div class="wc-block-product-gallery-dialog__header">
 			<div class="wc-block-product-galler-dialog__header-right">
