@@ -109,7 +109,10 @@ export function usePublish( {
 							( value ) => value !== undefined
 						) as string[];
 						if ( errorMessages.length > 0 ) {
-							const mappedErrors = errorMessages.map(
+							const uniqueErrorMessages = [
+								...new Set( errorMessages ),
+							];
+							const mappedErrors = uniqueErrorMessages.map(
 								( message ) =>
 									( {
 										code: defaultCode,
