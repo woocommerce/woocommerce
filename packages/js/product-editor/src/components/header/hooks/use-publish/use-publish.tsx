@@ -87,24 +87,23 @@ export function usePublish( {
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
-		} catch ( errors ) {
+		} catch ( error ) {
 			if ( onPublishError ) {
-				let wpError = errors as WPError;
-				const defaultCode = isPublished
-					? 'product_update_error'
-					: 'product_create_error';
-				if ( ! Array.isArray( wpError ) && ! wpError.code ) {
+				let wpError = error as WPError;
+				if ( ! wpError.code ) {
 					wpError = {
-						code: defaultCode,
+						code: isPublished
+							? 'product_publish_error'
+							: 'product_create_error',
 					} as WPError;
-					if ( ( errors as Record< string, string > ).variations ) {
+					if ( ( error as Record< string, string > ).variations ) {
 						wpError.code = 'variable_product_no_variation_prices';
 						wpError.message = (
-							errors as Record< string, string >
+							error as Record< string, string >
 						 ).variations;
 					} else {
 						const errorMessage = Object.values(
-							errors as Record< string, string >
+							error as Record< string, string >
 						).find( ( value ) => value !== undefined ) as
 							| string
 							| undefined;
