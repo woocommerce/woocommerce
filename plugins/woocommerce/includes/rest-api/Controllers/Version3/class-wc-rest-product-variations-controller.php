@@ -119,7 +119,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
-			'name'                  => wc_get_formatted_variation( $object, true, false, true ),
+			'name'                  => wc_get_formatted_variation( $object, true, false, false ),
 			'parent_id'             => $object->get_parent_id(),
 		);
 
