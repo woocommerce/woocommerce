@@ -1,9 +1,9 @@
 {
-	"name": "woocommerce/client/legacy",
+	"name": "@woocommerce/shortcode-assets",
+	"private": true,
 	"version": "1.0.0",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
-	"private": true,
 	"main": "Gruntfile.js",
 	"scripts": {
 		"turbo:build": "grunt assets",

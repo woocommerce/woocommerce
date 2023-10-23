@@ -37,7 +37,7 @@
 				"build:feature-config",
 				"^turbo:build",
 				"@woocommerce/admin-library#turbo:build",
-				"woocommerce/client/legacy#turbo:build"
+				"@woocommerce/shortcode-assets#turbo:build"
 			],
 			"outputs": [],
 			"inputs": [
@@ -47,7 +47,7 @@
 			"outputMode": "new-only"
 		},
 
-		"woocommerce/client/legacy#turbo:build": {
+		"@woocommerce/shortcode-assets#turbo:build": {
 			"dependsOn": [ 
 				"^turbo:build" 
 			],
