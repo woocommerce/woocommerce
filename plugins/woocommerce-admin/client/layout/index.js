@@ -192,10 +192,10 @@ function _Layout( {
 
 	useEffect( () => {
 		const wpbody = document.getElementById( 'wpbody' );
-		if ( ! showHeader ) {
-			wpbody.classList.add( 'no-header' );
+		if ( showHeader ) {
+			wpbody?.classList.remove( 'no-header' );
 		} else {
-			wpbody.classList.remove( 'no-header' );
+			wpbody?.classList.add( 'no-header' );
 		}
 	}, [ showHeader ] );
 
