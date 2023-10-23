@@ -68,6 +68,7 @@ class Marketplace {
 			return;
 		}
 
+		// Enqueue WordPress updates script to enable plugin and theme installs and updates.
 		wp_enqueue_script( 'updates' );
 	}
 }
