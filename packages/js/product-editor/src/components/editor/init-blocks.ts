@@ -18,11 +18,35 @@ import {
  */
 import * as productBlocks from '../../blocks';
 
+function removeUnneededBlockEditFilters() {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	window.wp.hooks.removeFilter(
+		'editor.BlockEdit',
+		'woocommerce/product-collection'
+	);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	window.wp.hooks.removeFilter(
+		'editor.BlockEdit',
+		'woocommerce/add/sidebar-compatibility-notice'
+	);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	window.wp.hooks.removeFilter(
+		'editor.BlockEdit',
+		'woocommerce/with-view-switcher'
+	);
+}
+
 export function initBlocks() {
 	const coreBlocks = __experimentalGetCoreBlocks();
 	const blocks = coreBlocks.filter( ( block: BlockInstance ) => {
 		return ! getBlockType( block.name );
 	} );
+
+	removeUnneededBlockEditFilters();
+
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore An argument is allowed to specify which blocks to register.
 	registerCoreBlocks( blocks );
