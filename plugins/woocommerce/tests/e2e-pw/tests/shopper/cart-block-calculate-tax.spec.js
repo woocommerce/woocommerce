@@ -394,6 +394,8 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
 			value: 'excl',
 		} );
+
+		// add product
 		await api
 			.post( 'products', {
 				name: productName,
@@ -403,6 +405,36 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
+
+		// create shipping zone
+		await api
+			.post( 'shipping/zones', {
+				name: 'All',
+			} )
+			.then( ( response ) => {
+				shippingZoneId = response.data.id;
+			} );
+
+		// set shipping zone location
+		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+			{
+				code: 'US',
+			},
+		] );
+
+		// set shipping zone method
+		await api
+			.post( `shipping/zones/${ shippingZoneId }/methods`, {
+				method_id: 'free_shipping',
+			} )
+			.then( ( response ) => {
+				shippingMethodId = response.data.id;
+			} );
+
+		// confirm that we allow shipping to any country
+		await api.put( 'settings/general/woocommerce_allowed_countries', {
+			value: 'all',
+		} );
 		await api
 			.post( 'taxes', {
 				country: 'US',
@@ -487,7 +519,9 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
-
+		await api.delete( `shipping/zones/${ shippingZoneId }`, {
+			force: true,
+		} );
 		await api.delete( `taxes/${ countryTaxId }`, {
 			force: true,
 		} );
@@ -515,22 +549,23 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
 			value: 'itemized',
 		} );
+		// workaround to fill shipping details since there is an issue with showing
+		// shipping calculator on the cart block-based experience for logged out user
+		await page.goto( '/cart/' ); // we will use the old cart for this purpose
+		await page.locator( '.shipping-calculator-button' ).click();
+		await page.getByLabel( 'Town / City' ).fill( 'Sacramento' );
+		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
+		await page
+			.getByRole( 'button', { name: 'Update', exact: true } )
+			.click();
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+			'Shipping costs updated.'
+		);
+
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
-		// Set shipping details for taxing purposes
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
-		await page.getByRole( 'combobox' ).first().fill( 'United States (US)' );
-		await page.getByLabel( 'City' ).fill( 'Sacramento' );
-		await page.getByLabel( 'State', { exact: true } ).fill( 'California' );
-		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-
 		await expect(
 			page.locator(
 				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
@@ -578,18 +613,6 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
-		// Set shipping details for taxing purposes
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
-		await page.getByRole( 'combobox' ).first().fill( 'United States (US)' );
-		await page.getByLabel( 'City' ).fill( 'Los Angeles' );
-		await page.getByLabel( 'State', { exact: true } ).fill( 'California' );
-		await page.getByLabel( 'ZIP Code' ).fill( '10010' );
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-
 		await expect(
 			page.locator(
 				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
