@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import { useContext, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { Subscription } from '../../types';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
+import { Subscription } from '../../types';
 
 interface UpdateProps {
 	subscription: Subscription;
@@ -110,7 +110,7 @@ export default function Update( props: UpdateProps ) {
 
 	return (
 		<Button
-			type="link"
+			variant="link"
 			className="woocommerce-marketplace__my-subscriptions-update"
 			onClick={ update }
 			isBusy={ isUpdating }
