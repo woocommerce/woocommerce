@@ -1,4 +1,5 @@
 {
+	"private": true,
 	"name": "@woocommerce/plugin-woocommerce-beta-tester",
 	"description": "Setting up the local beta tester scripts.",
 	"license": "GPL-2.0",

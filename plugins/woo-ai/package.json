@@ -1,5 +1,6 @@
 {
 	"name": "@woocommerce/plugin-woo-ai",
+	"private": true,
 	"description": "Implementing WooCommerce AI Experiments.",
 	"license": "GPL-2.0",
 	"repository": {
