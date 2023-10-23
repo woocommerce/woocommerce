@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { RadioControlOption } from '@woocommerce/base-components/radio-control/types';
+import {
+	RadioControl,
+	RadioControlOptionType,
+} from '@woocommerce/blocks-components';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
-/**
- * Internal dependencies
- */
-import RadioControl from '../../radio-control';
 
 interface LocalPickupSelectProps {
 	title?: string | undefined;
@@ -17,7 +16,7 @@ interface LocalPickupSelectProps {
 	renderPickupLocation: (
 		location: CartShippingPackageShippingRate,
 		pickupLocationsCount: number
-	) => RadioControlOption;
+	) => RadioControlOptionType;
 	packageCount: number;
 }
 /**

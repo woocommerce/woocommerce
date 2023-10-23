@@ -166,7 +166,7 @@ const getBlockEntries = ( relativePath ) => {
 const entries = {
 	styling: {
 		// Packages styles
-		'packages-style': glob.sync( './packages/**/index.js' ),
+		'packages-style': glob.sync( './packages/**/index.{t,j}s' ),
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
@@ -195,7 +195,7 @@ const entries = {
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
 		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.js',
+		blocksComponents: './packages/components/index.ts',
 	},
 	main: {
 		// Shared blocks code

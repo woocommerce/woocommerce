@@ -27,19 +27,24 @@ jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
 	);
 } );
 
-jest.mock(
-	'@woocommerce/base-components/radio-control-accordion',
-	() =>
-		( { onChange } ) =>
-			(
-				<>
-					<span>Payment method options</span>
-					<button onClick={ () => onChange( 'credit-card' ) }>
-						Select new payment
-					</button>
-				</>
-			)
-);
+jest.mock( '@woocommerce/blocks-components', () => {
+	const originalModule = jest.requireActual(
+		'@woocommerce/blocks-components'
+	);
+
+	return {
+		__esModule: true,
+		...originalModule,
+		RadioControlAccordion: ( { onChange } ) => (
+			<>
+				<span>Payment method options</span>
+				<button onClick={ () => onChange( 'credit-card' ) }>
+					Select new payment
+				</button>
+			</>
+		),
+	};
+} );
 
 const originalSelect = jest.requireActual( '@wordpress/data' ).select;
 const selectMock = jest

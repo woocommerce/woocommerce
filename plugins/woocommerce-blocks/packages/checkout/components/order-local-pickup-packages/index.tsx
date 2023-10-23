@@ -7,12 +7,12 @@ import {
 	CartShippingPackageShippingRate,
 } from '@woocommerce/type-defs/cart';
 import { Component } from '@wordpress/element';
-import { RadioControlOption } from '@woocommerce/base-components/radio-control/types';
 
 /**
  * Internal dependencies
  */
 import { createSlotFill } from '../../slot';
+import type { RadioControlOption } from '../../../../packages/components/radio-control/types';
 
 const slotName = '__experimentalOrderLocalPickupPackages';
 const {

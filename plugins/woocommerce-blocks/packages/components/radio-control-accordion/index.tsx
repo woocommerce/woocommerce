@@ -7,7 +7,7 @@ import { withInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import RadioControlOption from '../radio-control/option';
+import { RadioControlOption } from '../radio-control';
 
 interface RadioControlAccordionProps {
 	className?: string;
