@@ -30,7 +30,7 @@ If you've ever wanted to contribute to the WooCommerce platform as a developer p
 
 Visit the WooCommerce home repository on GitHub to learn the first steps to environment set up and platform contribution expectations.
 
-### [Developer tools](/getting-started/developer-tools.md)
+### [Developer tools](docs/getting-started/developer-tools.md)
 
 Check out our guide to learn more about developer tools, libraries, and utilities. 
 
