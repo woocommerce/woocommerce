@@ -142,7 +142,7 @@ This function is the standard way of retrieving orders based on certain paramete
 wc_get_orders( $args )
 ```
 
-[Args and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query)
+[Arguments and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query)
 
 ### wc_get_order
 
@@ -198,7 +198,7 @@ This function is the standard way of retrieving products based on certain parame
 wc_get_products( $args )
 ```
 
-[Args and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query)
+[Arguments and usage](https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query)
 
 ### wc_get_product
 
