@@ -44,5 +44,8 @@ function tools_reset_cys() {
 		array( '%s', '%s' )
 	);
 
+	// Flush the cache in case of any related cached data.
+	wp_cache_flush();
+
 	return true;
 }
