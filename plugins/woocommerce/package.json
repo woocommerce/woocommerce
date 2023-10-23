@@ -120,6 +120,8 @@
 		"ie 9"
 	],
 	"dependencies": {
+		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/shortcode-assets": "workspace:*",
 		"@wordpress/browserslist-config": "wp-6.0"
 	},
 	"devDependencies": {
