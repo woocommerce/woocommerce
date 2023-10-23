@@ -1,13 +1,16 @@
 /**
  * External dependencies
  */
-import { Button, ButtonGroup, Modal } from '@wordpress/components';
+import { Button, ButtonGroup, Icon, Modal } from '@wordpress/components';
+import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_SUBSCRIPTIONS_PATH } from '../../../constants';
+import { useDispatch } from '@wordpress/data';
+import { activateProduct } from '~/marketplace/utils/functions';
+import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { Subscription } from '../../types';
 
 interface ActivateProps {
@@ -16,6 +19,50 @@ interface ActivateProps {
 }
 
 export default function ActivateModal( props: ActivateProps ) {
+	const [ isConnecting, setIsConnecting ] = useState( false );
+	const { createWarningNotice, createSuccessNotice } =
+		useDispatch( 'core/notices' );
+	const { loadSubscriptions } = useContext( SubscriptionsContext );
+
+	const connect = () => {
+		setIsConnecting( true );
+		activateProduct( props.subscription.product_key )
+			.then( () => {
+				loadSubscriptions( false ).then( () => {
+					createSuccessNotice(
+						sprintf(
+							// translators: %s is the product name.
+							__( '%s successfully connected.', 'woocommerce' ),
+							props.subscription.product_name
+						),
+						{
+							icon: <Icon icon="yes" />,
+						}
+					);
+					setIsConnecting( false );
+					props.onClose();
+				} )
+			} )
+			.catch( () => {
+				createWarningNotice(
+					sprintf(
+						// translators: %s is the product name.
+						__( '%s couldn’t be connected.', 'woocommerce' ),
+						props.subscription.product_name
+					),
+					{
+						actions: [
+							{
+								label: __( 'Try again', 'woocommerce' ),
+								onClick: connect,
+							},
+						],
+					}
+				);
+				setIsConnecting( false );
+				props.onClose();
+			} );
+	};
 	return (
 		<Modal
 			title={ __( 'Connect to update', 'woocommerce' ) }
@@ -45,7 +92,9 @@ export default function ActivateModal( props: ActivateProps ) {
 				</Button>
 				<Button
 					variant="primary"
-					href={ MARKETPLACE_SUBSCRIPTIONS_PATH }
+					onClick={ connect }
+					isBusy={ isConnecting }
+					disabled={ isConnecting }
 					className="woocommerce-marketplace__header-account-modal-button"
 				>
 					{ __( 'Connect', 'woocommerce' ) }

@@ -107,21 +107,6 @@ export default function Update( props: UpdateProps ) {
 			} );
 	}
 
-	const buttonLabel = () => {
-		if ( ! canUpdate ) {
-			return __(
-				'You need an active subscription to update.',
-				'woocommerce'
-			);
-		}
-
-		return sprintf(
-			// translators: %s is the product version.
-			__( 'Update to %s', 'woocommerce' ),
-			props.subscription.version
-		);
-	};
-
 	const modal = () => {
 		if ( ! showModal ) {
 			return null;
@@ -155,7 +140,11 @@ export default function Update( props: UpdateProps ) {
 				onClick={ update }
 				isBusy={ isUpdating }
 				disabled={ isUpdating }
-				label={ buttonLabel() }
+				label={ sprintf(
+					// translators: %s is the product version.
+					__( 'Update to %s', 'woocommerce' ),
+					props.subscription.version
+				) }
 				showTooltip={ true }
 				tooltipPosition="top center"
 			>
