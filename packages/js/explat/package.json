@@ -2,12 +2,6 @@
 	"name": "@woocommerce/explat",
 	"version": "2.3.0",
 	"description": "WooCommerce component and utils for A/B testing.",
-	"author": "Automattic",
-	"license": "GPL-2.0-or-later",
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"keywords": [
 		"wordpress",
 		"woocommerce",
@@ -15,19 +9,39 @@
 		"explat"
 	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/explat/README.md",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
+	"license": "GPL-2.0-or-later",
+	"author": "Automattic",
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"types": "build-types",
 	"react-native": "src/index",
-	"publishConfig": {
-		"access": "public"
+	"types": "build-types",
+	"scripts": {
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"changelog": "composer exec -- changelogger",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint:fix": "eslint src --fix",
+		"prepack": "pnpm run clean && pnpm run build",
+		"prepare": "composer install",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
+		"test": "pnpm test:js",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"turbo:test": "jest --config ./jest.config.json"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
 	},
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.3",
@@ -55,25 +69,11 @@
 		"typescript": "^5.1.6",
 		"wireit": "^0.14.1"
 	},
-	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"turbo:test": "jest --config ./jest.config.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix",
-			"pnpm test-staged"
-		]
+	"publishConfig": {
+		"access": "public"
 	}
 }

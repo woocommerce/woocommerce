@@ -1,14 +1,14 @@
 {
 	"name": "@woocommerce/shortcode-assets",
-	"private": true,
 	"version": "1.0.0",
-	"author": "Automattic",
+	"private": true,
 	"license": "GPL-2.0-or-later",
+	"author": "Automattic",
 	"main": "Gruntfile.js",
 	"scripts": {
-		"turbo:build": "grunt assets",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
+		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build",
+		"turbo:build": "grunt assets"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.18",

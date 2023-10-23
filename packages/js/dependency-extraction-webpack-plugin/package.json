@@ -2,30 +2,34 @@
 	"name": "@woocommerce/dependency-extraction-webpack-plugin",
 	"version": "2.2.0",
 	"description": "WooCommerce Dependency Extraction Webpack Plugin",
-	"author": "Automattic",
-	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"woocommerce"
 	],
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin/README.md",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
+	"license": "GPL-2.0-or-later",
+	"author": "Automattic",
 	"main": "src/index.js",
+	"scripts": {
+		"changelog": "composer exec -- changelogger",
+		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint:fix": "eslint src --fix",
+		"prepare": "composer install"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix"
+		]
+	},
 	"dependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "^3.3.0"
-	},
-	"publishConfig": {
-		"access": "public"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
@@ -40,15 +44,11 @@
 		"webpack-cli": "^3.3.12",
 		"wireit": "^0.14.1"
 	},
-	"scripts": {
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix"
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"eslint --fix"
-		]
+	"publishConfig": {
+		"access": "public"
 	}
 }

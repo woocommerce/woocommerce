@@ -8,10 +8,6 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"files": [
@@ -22,6 +18,20 @@
 		"installFiles",
 		"CHANGELOG.md"
 	],
+	"scripts": {
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm run build",
+		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@jest/globals": "^27.5.1",
 		"@wordpress/deprecated": "wp-6.0",
@@ -49,21 +59,11 @@
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/e2e-utils": "^0.1.6"
 	},
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"scripts": {
-		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
-		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
 	}
 }

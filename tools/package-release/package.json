@@ -2,20 +2,29 @@
 	"name": "package-release",
 	"version": "0.1.0",
 	"description": "A tool to Monorepo JS packages.",
+	"homepage": "https://github.com/woocommerce/woocommerce",
+	"repository": "woocommerce/woocommerce",
+	"license": "GPLv2",
 	"author": "Automattic",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"bin": {
 		"package-release": "./bin/run"
 	},
-	"homepage": "https://github.com/woocommerce/woocommerce",
-	"license": "GPLv2",
-	"main": "dist/index.js",
-	"repository": "woocommerce/woocommerce",
 	"files": [
 		"/bin",
 		"/dist",
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json"
 	],
+	"scripts": {
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint . --ext .ts --config .eslintrc",
+		"prepack": "pnpm build && oclif manifest",
+		"postpack": "shx rm -f oclif.manifest.json",
+		"posttest": "pnpm lint",
+		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json"
+	},
 	"dependencies": {
 		"@oclif/core": "^1",
 		"@oclif/plugin-help": "^5",
@@ -34,6 +43,10 @@
 		"typescript": "^5.1.6",
 		"wireit": "^0.14.1"
 	},
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"oclif": {
 		"bin": "package-release",
 		"dirname": "package-release",
@@ -48,18 +61,5 @@
 				"description": "Releases JS packages"
 			}
 		}
-	},
-	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint . --ext .ts --config .eslintrc",
-		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint",
-		"prepack": "pnpm build && oclif manifest"
-	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
-	"types": "dist/index.d.ts"
+	}
 }

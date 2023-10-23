@@ -2,33 +2,53 @@
 	"name": "@woocommerce/components",
 	"version": "12.2.0",
 	"description": "UI components for WooCommerce.",
-	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"keywords": [
 		"wordpress",
 		"woocommerce",
 		"components"
 	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/components/README.md",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
-	"main": "build/index.js",
-	"module": "build-module/index.js",
-	"react-native": "src/index",
+	"license": "GPL-3.0-or-later",
+	"author": "Automattic",
 	"sideEffects": [
 		"build-style/**",
 		"src/**/*.scss"
 	],
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
 	"types": "build-types",
+	"scripts": {
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build:css": "webpack",
+		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"changelog": "composer exec -- changelogger",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm run clean && pnpm run build",
+		"prepare": "composer install",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
+		"test": "pnpm test:js",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test:update-snapshots": "pnpm run test -- --updateSnapshot",
+		"turbo:build": "pnpm run build:js && pnpm run build:css",
+		"turbo:test": "jest --config ./jest.config.json"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	},
 	"dependencies": {
 		"@automattic/calypso-color-schemes": "^2.1.1",
 		"@automattic/interpolate-components": "^1.2.0",
@@ -86,17 +106,6 @@
 		"react-dates": "^21.8.0",
 		"react-transition-group": "^4.4.2"
 	},
-	"peerDependencies": {
-		"@types/react": "^17.0.2",
-		"@types/react-dom": "^17.0.2",
-		"@wordpress/data": "wp-6.0",
-		"lodash": "^4.17.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
 		"@babel/runtime": "^7.17.2",
@@ -148,28 +157,19 @@
 		"webpack-cli": "^3.3.12",
 		"wireit": "^0.14.1"
 	},
-	"scripts": {
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
-		"turbo:test": "jest --config ./jest.config.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build:css": "webpack",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
-		"prepack": "pnpm run clean && pnpm run build",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
-		"test:update-snapshots": "pnpm run test -- --updateSnapshot",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	"peerDependencies": {
+		"@types/react": "^17.0.2",
+		"@types/react-dom": "^17.0.2",
+		"@wordpress/data": "wp-6.0",
+		"lodash": "^4.17.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix",
-			"pnpm test-staged"
-		]
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

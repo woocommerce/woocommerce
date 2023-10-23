@@ -2,33 +2,52 @@
 	"name": "@woocommerce/experimental",
 	"version": "3.2.0",
 	"description": "WooCommerce experimental components.",
-	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"keywords": [
 		"wordpress",
 		"woocommerce",
 		"experimental"
 	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/experimental/README.md",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
-	"main": "build/index.js",
-	"module": "build-module/index.js",
-	"types": "build-types",
-	"react-native": "src/index",
+	"license": "GPL-3.0-or-later",
+	"author": "Automattic",
 	"sideEffects": [
 		"build-style/**",
 		"src/**/*.scss"
 	],
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"types": "build-types",
+	"scripts": {
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build:css": "webpack",
+		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"changelog": "composer exec -- changelogger",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint:fix": "eslint src --fix",
+		"prepack": "pnpm run clean && pnpm run build",
+		"prepare": "composer install",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
+		"test": "pnpm test:js",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"turbo:build": "pnpm run build:js && pnpm run build:css",
+		"turbo:test": "jest --config ./jest.config.json"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	},
 	"dependencies": {
 		"@woocommerce/components": "workspace:*",
 		"@wordpress/components": "^19.5.0",
@@ -42,9 +61,6 @@
 		"moment": "^2.29.1",
 		"react-transition-group": "^4.4.2",
 		"react-visibility-sensor": "^5.1.1"
-	},
-	"publishConfig": {
-		"access": "public"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
@@ -83,27 +99,11 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
-	"scripts": {
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
-		"turbo:test": "jest --config ./jest.config.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build:css": "webpack",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix",
-			"pnpm test-staged"
-		]
+	"publishConfig": {
+		"access": "public"
 	}
 }
