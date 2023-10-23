@@ -146,7 +146,7 @@ class Options extends \WC_REST_Data_Controller {
 	 */
 	public function get_option_permissions( $request ) {
 		$permissions = self::get_default_option_permissions();
-		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '6.3.0' );
+		return apply_filters( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ) );
 	}
 
 	/**
