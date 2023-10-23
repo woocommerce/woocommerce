@@ -3,7 +3,6 @@
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
@@ -100,21 +99,13 @@ export function BlockEditor( {
 		updateEditorSettings( _settings ?? {} );
 	}, [ productType, productId ] );
 
-	const editedProduct: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			productType,
-			productId
-		)
-	);
-
 	if ( ! blocks ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ { ...context, editedProduct } }>
+			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

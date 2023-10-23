@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add conditional visibility support to registered blocks.

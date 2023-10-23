@@ -1802,6 +1802,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
+		/**
+		 * Filter the URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url',
 			wp_nonce_url(
@@ -1815,7 +1824,9 @@ class WC_Order extends WC_Abstract_Order {
 					$this->get_cancel_endpoint()
 				),
 				'woocommerce-cancel_order'
-			)
+			),
+			$this,
+			$redirect
 		);
 	}
 
@@ -1826,6 +1837,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
+		/**
+		 * Filter the raw URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url_raw',
 			add_query_arg(
@@ -1837,7 +1857,9 @@ class WC_Order extends WC_Abstract_Order {
 					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
 				),
 				$this->get_cancel_endpoint()
-			)
+			),
+			$this,
+			$redirect
 		);
 	}
 
