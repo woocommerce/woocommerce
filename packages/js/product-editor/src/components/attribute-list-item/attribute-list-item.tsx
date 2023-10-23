@@ -13,7 +13,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import NotFilterableIcon from './not-filterable-icon';
-import HiddenIcon from '../../icons/hidden-icon';
+import SeenIcon from '../../icons/seen-icon';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;
@@ -83,7 +83,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						text={ NOT_VISIBLE_TEXT }
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
-							<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
+							<SeenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
 						</div>
 					</Tooltip>
 				) }
