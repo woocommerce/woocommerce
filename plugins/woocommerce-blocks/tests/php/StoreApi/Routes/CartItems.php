@@ -82,6 +82,7 @@ class CartItems extends ControllerTestCase {
 				0 => array(
 					'key'       => $this->keys[0],
 					'id'        => $this->products[0]->get_id(),
+					'type'      => $this->products[0]->get_type(),
 					'name'      => $this->products[0]->get_name(),
 					'sku'       => $this->products[0]->get_sku(),
 					'permalink' => $this->products[0]->get_permalink(),
@@ -113,6 +114,7 @@ class CartItems extends ControllerTestCase {
 			array(
 				'key'       => $this->keys[0],
 				'id'        => $this->products[0]->get_id(),
+				'type'      => $this->products[0]->get_type(),
 				'name'      => $this->products[0]->get_name(),
 				'sku'       => $this->products[0]->get_sku(),
 				'permalink' => $this->products[0]->get_permalink(),
@@ -256,6 +258,7 @@ class CartItems extends ControllerTestCase {
 
 		$this->assertArrayHasKey( 'key', $data );
 		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'type', $data );
 		$this->assertArrayHasKey( 'quantity', $data );
 		$this->assertArrayHasKey( 'name', $data );
 		$this->assertArrayHasKey( 'sku', $data );
