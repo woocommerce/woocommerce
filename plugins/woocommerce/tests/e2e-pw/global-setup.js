@@ -5,6 +5,9 @@ const { site } = require( './utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
 
+/**
+ * @param {import('@playwright/test').FullConfig} config
+ */
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
