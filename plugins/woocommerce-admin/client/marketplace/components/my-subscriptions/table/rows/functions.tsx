@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { TableRow } from '@woocommerce/components/build-types/table/types';
-import { Icon, plugins } from '@wordpress/icons';
 import { gmdateI18n } from '@wordpress/date';
+import { __, sprintf } from '@wordpress/i18n';
+import { Icon, plugins } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { Subscription } from '../../types';
-import StatusPopover from './status-popover';
-import ActivationToggle from './activation-toggle';
+import Update from '../actions/update';
 import ActionsDropdownMenu from './actions-dropdown-menu';
-import Update from './update';
+import ActivationToggle from './activation-toggle';
+import StatusPopover from './status-popover';
 import Version from './version';
 
 // TODO: Add explanations.

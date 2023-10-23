@@ -11,12 +11,14 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { Subscription } from '../../types';
+import RenewModal from './renew-modal';
 
 interface UpdateProps {
 	subscription: Subscription;
 }
 
 export default function Update( props: UpdateProps ) {
+	const [ showModal, setShowModal ] = useState( false );
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
@@ -30,6 +32,7 @@ export default function Update( props: UpdateProps ) {
 
 	function update() {
 		if ( ! canUpdate ) {
+			setShowModal( true );
 			return;
 		}
 		if ( ! window.wp.updates ) {
@@ -118,20 +121,34 @@ export default function Update( props: UpdateProps ) {
 		);
 	};
 
+	const modal = () => {
+		if ( props.subscription.expired ) {
+			return (
+				<RenewModal
+					subscription={ props.subscription }
+					onClose={ () => setShowModal( false ) }
+				/>
+			);
+		}
+	};
+
 	return (
-		<Button
-			variant="link"
-			className="woocommerce-marketplace__my-subscriptions-update"
-			onClick={ update }
-			isBusy={ isUpdating }
-			disabled={ isUpdating }
-			label={ buttonLabel() }
-			showTooltip={ true }
-			tooltipPosition="top center"
-		>
-			{ isUpdating
-				? __( 'Updating', 'woocommerce' )
-				: __( 'Update', 'woocommerce' ) }
-		</Button>
+		<>
+			{ showModal && modal() }
+			<Button
+				variant="link"
+				className="woocommerce-marketplace__my-subscriptions-update"
+				onClick={ update }
+				isBusy={ isUpdating }
+				disabled={ isUpdating }
+				label={ buttonLabel() }
+				showTooltip={ true }
+				tooltipPosition="top center"
+			>
+				{ isUpdating
+					? __( 'Updating', 'woocommerce' )
+					: __( 'Update', 'woocommerce' ) }
+			</Button>
+		</>
 	);
 }
