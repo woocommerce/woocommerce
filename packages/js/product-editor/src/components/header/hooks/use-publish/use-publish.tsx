@@ -25,7 +25,7 @@ export function usePublish( {
 	...props
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: WPError | WPError[] ): void;
+	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const { isValidating, validate } = useValidations< Product >();
 
@@ -89,41 +89,32 @@ export function usePublish( {
 			}
 		} catch ( errors ) {
 			if ( onPublishError ) {
-				let wpErrors = errors as WPError | WPError[];
+				let wpError = errors as WPError;
 				const defaultCode = isPublished
 					? 'product_update_error'
 					: 'product_create_error';
-				if ( ! Array.isArray( wpErrors ) && ! wpErrors.code ) {
-					wpErrors = {
+				if ( ! Array.isArray( wpError ) && ! wpError.code ) {
+					wpError = {
 						code: defaultCode,
 					} as WPError;
 					if ( ( errors as Record< string, string > ).variations ) {
-						wpErrors.code = 'variable_product_no_variation_prices';
-						wpErrors.message = (
+						wpError.code = 'variable_product_no_variation_prices';
+						wpError.message = (
 							errors as Record< string, string >
 						 ).variations;
 					} else {
-						const errorMessages = Object.values(
+						const errorMessage = Object.values(
 							errors as Record< string, string >
-						).filter(
-							( value ) => value !== undefined
-						) as string[];
-						if ( errorMessages.length > 0 ) {
-							const uniqueErrorMessages = [
-								...new Set( errorMessages ),
-							];
-							const mappedErrors = uniqueErrorMessages.map(
-								( message ) =>
-									( {
-										code: defaultCode,
-										message,
-									} as WPError )
-							);
-							wpErrors = mappedErrors;
+						).find( ( value ) => value !== undefined ) as
+							| string
+							| undefined;
+						if ( errorMessage !== undefined ) {
+							wpError.code = 'product_form_field_error';
+							wpError.message = errorMessage;
 						}
 					}
 				}
-				onPublishError( wpErrors );
+				onPublishError( wpError );
 			}
 		}
 	}
