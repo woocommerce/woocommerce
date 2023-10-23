@@ -7,7 +7,7 @@
 ![Unit Tests](https://github.com/woocommerce/woocommerce-blocks/workflows/E2E%20tests/badge.svg?branch=trunk)
 ![E2E Tests](https://github.com/woocommerce/woocommerce-blocks/workflows/Unit%20Tests/badge.svg?branch=trunk)
 
-This is the feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
+This is the feature plugin for WooCommerce + the Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
@@ -40,15 +40,15 @@ If you want to see what we're working on for future versions, or want to help ou
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.
 
-> Note: The plugin follows a policy of supporting the "L0" strategy for version support. What this means is that the plugin will require the most recent version of WordPress, and the most recent version of WooCommerce core at the time of a release. You can read more about [this policy here](https://developer.woocommerce.com/?p=9998).
+> Note: The plugin follows a policy of supporting the "L0" strategy for version support. What this means is that the plugin will require the most recent version of WordPress. It will also require the most recent version of WooCommerce core at the time of a release. You can read more about [this policy here](https://developer.woocommerce.com/?p=9998).
 
-1. Make sure you have the latest available versions of WordPress and WooCommerce on your site.
+1.Ensure you have the latest available versions of WordPress and WooCommerce installed on your site.
 2. The plugin version is available on WordPress.org. [Download the plugin version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
 3. Activate the plugin.
 
 ## Installing the development version
 
-1. Make sure you have the latest versions of WordPress and WooCommerce on your site.
+1. Ensure you have the latest versions of WordPress and WooCommerce installed on your site.
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
 3. Make sure you're using Node.js v16.15. If you use a Node version management tool such as `nvm` or `n`, you can do so by running `nvm use` or `n auto`, respectively.
 4. `npm install` to install the dependencies.
@@ -59,7 +59,7 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
     3. `npm start` (development build + watching for changes).
 7. Activate the plugin.
 
-The source code is in the `assets/` folder and the compiled code is built into `build/`.
+The source code is in the `assets/` folder, and the compiled code is stored into `build/`.
 
 ## Getting started with block development
 
@@ -78,4 +78,4 @@ Other useful docs to explore:
 
 ## Long-term vision
 
-WooCommerce Blocks are the easiest, most flexible way to build your store user interface and showcase your products.
+WooCommerce Blocks are the easiest, most flexible way to build your store's user interface and showcase your products.
