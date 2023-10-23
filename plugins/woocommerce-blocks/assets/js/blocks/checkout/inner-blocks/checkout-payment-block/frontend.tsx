@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
-import { FormStep } from '@woocommerce/base-components/cart-checkout';
+import { FormStep } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
