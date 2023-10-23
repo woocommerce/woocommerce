@@ -2951,6 +2951,15 @@ importers:
 
   plugins/woocommerce:
     dependencies:
+      '@woocommerce/admin-library':
+        specifier: workspace:*
+        version: link:../woocommerce-admin
+      '@woocommerce/block-library':
+        specifier: workspace:*
+        version: link:../woocommerce-blocks
+      '@woocommerce/shortcode-assets':
+        specifier: workspace:*
+        version: link:client/legacy
       '@wordpress/browserslist-config':
         specifier: wp-6.3
         version: 5.18.2

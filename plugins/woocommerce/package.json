@@ -171,6 +171,9 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.0",
+		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/shortcode-assets": "workspace:*",
+		"@woocommerce/block-library": "workspace:*"
 	}
 }

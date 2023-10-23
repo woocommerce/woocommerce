@@ -95,8 +95,9 @@ allure-results
 changes.json
 .env
 
-# Turborepo
+# Build Cache
 .turbo
+.wireit
 
 # Support .gitkeep Files
 !.gitkeep
