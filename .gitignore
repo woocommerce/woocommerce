@@ -44,6 +44,7 @@ build-style/
 build-style.js
 build-types/
 dist/
+oclif.manifest.json
 
 # Project files
 node_modules/
