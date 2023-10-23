@@ -168,6 +168,19 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: path.resolve(
+						__dirname,
+						'bin/modified-editsite-lock-unlock.js'
+					), // Replace with the path to your custom script
+					to: require.resolve(
+						'@wordpress/edit-site/build-module/lock-unlock.js'
+					), // Replace with the destination path
+				},
+			],
+		} ),
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
