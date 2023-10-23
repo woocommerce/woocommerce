@@ -120,7 +120,7 @@
 			"packages": [
 				"@woocommerce/block-templates",
 				"@woocommerce/product-editor",
-				"woocommerce/client/admin",
+				"@woocommerce/admin-library",
 				"@woocommerce/components"
 			],
 			"isIgnored": true
