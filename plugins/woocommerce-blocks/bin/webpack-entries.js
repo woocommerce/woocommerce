@@ -227,6 +227,8 @@ const entries = {
 			'./assets/js/extensions/google-analytics/index.ts',
 		'wc-shipping-method-pickup-location':
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
+		'wc-blocks-jetpack-woocommerce-analytics':
+			'./assets/js/extensions/jetpack/woocommerce-analytics/index.ts',
 	},
 	editor: {
 		'wc-blocks-classic-template-revert-button':

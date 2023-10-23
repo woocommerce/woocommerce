@@ -50,6 +50,7 @@ class CartItemSchema extends ItemSchema {
 		return [
 			'key'                  => $cart_item['key'],
 			'id'                   => $product->get_id(),
+			'type'                 => $product->get_type(),
 			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
 			'quantity_limits'      => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
 			'name'                 => $this->prepare_html_response( $product->get_title() ),
