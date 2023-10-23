@@ -22,7 +22,11 @@ export default function Update( props: UpdateProps ) {
 		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
-	const canUpdate = props.subscription.active && props.subscription.local;
+	const canUpdate =
+		props.subscription.active &&
+		props.subscription.local &&
+		props.subscription.local.slug &&
+		props.subscription.local.path;
 
 	function update() {
 		if ( ! canUpdate ) {
@@ -99,14 +103,20 @@ export default function Update( props: UpdateProps ) {
 			} );
 	}
 
-	const buttonLabel = canUpdate
-		? sprintf(
-				// translators: %s is the product version.
-				__( 'Update to %s', 'woocommerce' ),
-				props.subscription.version
-		  )
-		: //TODO show renew/connect popup instead of this
-		  __( 'You need an active subscription to update.', 'woocommerce' );
+	const buttonLabel = () => {
+		if ( ! canUpdate ) {
+			return __(
+				'You need an active subscription to update.',
+				'woocommerce'
+			);
+		}
+
+		return sprintf(
+			// translators: %s is the product version.
+			__( 'Update to %s', 'woocommerce' ),
+			props.subscription.version
+		);
+	};
 
 	return (
 		<Button
@@ -115,7 +125,7 @@ export default function Update( props: UpdateProps ) {
 			onClick={ update }
 			isBusy={ isUpdating }
 			disabled={ isUpdating }
-			label={ buttonLabel }
+			label={ buttonLabel() }
 			showTooltip={ true }
 			tooltipPosition="top center"
 		>
