@@ -22,7 +22,8 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.4.1",
 		"typescript": "^5.1.6",
-		"uglify-js": "^3.5.3"
+		"uglify-js": "^3.5.3",
+		"wireit": "^0.14.1"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
