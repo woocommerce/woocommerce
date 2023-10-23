@@ -31,7 +31,8 @@
 		"eslint": "^8.55.0",
 		"glob": "^7.2.3",
 		"lodash": "^4.17.21",
-		"mkdirp": "^1.0.4"
+		"mkdirp": "^1.0.4",
+		"wireit": "^0.14.1"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

@@ -46,7 +46,8 @@
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
-		"webpack": "^5.89.0"
+		"webpack": "^5.89.0",
+		"wireit": "^0.14.1"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

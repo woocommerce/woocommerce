@@ -27,5 +27,8 @@
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-product-editor-block-extensionv#readme",
 	"publishConfig": {
 		"access": "public"
+	},
+	"devDependencies": {
+		"wireit": "^0.14.1"
 	}
 }

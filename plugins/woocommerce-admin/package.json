@@ -238,7 +238,8 @@
 		"webpack-dev-server": "^4.15.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-merge": "^5.10.0",
-		"webpack-rtl-plugin": "^2.0.0"
+		"webpack-rtl-plugin": "^2.0.0",
+		"wireit": "^0.14.1"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.3"

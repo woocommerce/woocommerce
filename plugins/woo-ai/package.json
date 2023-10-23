@@ -26,7 +26,8 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.5.1",
 		"typescript": "^5.3.3",
-		"uglify-js": "^3.17.4"
+		"uglify-js": "^3.17.4",
+		"wireit": "^0.14.1"
 	},
 	"dependencies": {
 		"@automattic/tour-kit": "^1.1.1",
