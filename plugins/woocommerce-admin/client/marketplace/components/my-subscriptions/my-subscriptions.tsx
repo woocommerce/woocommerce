@@ -1,27 +1,27 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Button, Tooltip } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
-import { help } from '@wordpress/icons';
+import { Button, Tooltip } from '@wordpress/components';
 import { useContext } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { help } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '../../../utils/admin-settings';
-import { Subscription } from './types';
+import { SubscriptionsContext } from '../../contexts/subscriptions-context';
 import './my-subscriptions.scss';
 import {
-	InstalledSubscriptionsTable,
 	AvailableSubscriptionsTable,
+	InstalledSubscriptionsTable,
 } from './table/table';
 import {
-	installedSubscriptionRow,
 	availableSubscriptionRow,
+	installedSubscriptionRow,
 } from './table/table-rows';
-import { SubscriptionsContext } from '../../contexts/subscriptions-context';
+import { Subscription } from './types';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -63,7 +63,7 @@ export default function MySubscriptions(): JSX.Element {
 				<h2 className="woocommerce-marketplace__my-subscriptions__header">
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
 				</h2>
-				<p className="woocommerce-marketplace__my-subscriptions__table-description">
+				<p className="woocommerce-marketplace__my-subscriptions__description">
 					{ __(
 						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your WooCommerce.com subscriptions will appear here.',
 						'woocommerce'
