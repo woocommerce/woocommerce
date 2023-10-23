@@ -47,7 +47,7 @@ import {
 import { VariationActionsMenu } from './variation-actions-menu';
 import { useSelection } from '../../hooks/use-selection';
 import { VariationsActionsMenu } from './variations-actions-menu';
-import SeenIcon from '../../icons/seen-icon';
+import HiddenIcon from '../../icons/hidden-icon';
 import { Pagination } from './pagination';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
@@ -514,7 +514,7 @@ export const VariationsTable = forwardRef<
 									text={ NOT_VISIBLE_TEXT }
 								>
 									<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
-										<SeenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
+										<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
 									</div>
 								</Tooltip>
 							) }
