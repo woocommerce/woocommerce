@@ -1,7 +1,24 @@
 const { test, expect } = require( '@playwright/test' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.get( 'webhooks' ).then( ( response ) => {
+			let ids = response.data.map( webhook => webhook.id );
+
+			api.post( 'webhooks/batch', {
+				delete: ids,
+			} );
+		} );
+	} );
 
 	const WEBHOOKS_SCREEN_URI = 'wp-admin/admin.php?page=wc-settings&tab=advanced&section=webhooks';
 
