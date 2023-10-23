@@ -203,13 +203,13 @@ The priority argument is set during the [add_action](https://developer.wordpress
 
 In the example below, blue text is the name of the hook we’re modifying, green text is the name of our custom function, and red is the priority we set.
 
-![](https://woocommerce.com/wp-content/uploads/2012/04/priority-markup.png)
+![Setting priority for the hooked function](https://woocommerce.com/wp-content/uploads/2012/04/priority-markup.png)
 
 ## Examples
 
 ### Change Return to Shop button redirect URL
 
-In this example, the code is set to redirect the “Return to Shop” button found in the cart to a category that lists products for sale at http://example.url/category/specials/.
+In this example, the code is set to redirect the “Return to Shop” button found in the cart to a category that lists products for sale at `http://example.url/category/specials/`.
 
 ```php
 /**
