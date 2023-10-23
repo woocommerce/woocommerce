@@ -1,5 +1,5 @@
 const { expect } = require( '@playwright/test' );
-const { getTranslationFor } = require( './../test-data/data' );
+const { getTranslationFor } = require('./translations');
 
 const SETTINGS_URL =
 	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';

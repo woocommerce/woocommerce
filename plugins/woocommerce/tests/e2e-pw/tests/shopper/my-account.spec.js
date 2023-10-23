@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-const { customer, getTranslationFor } = require( '../../test-data/data' );
+const { customer } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const pages = getTranslationFor('pages');
 

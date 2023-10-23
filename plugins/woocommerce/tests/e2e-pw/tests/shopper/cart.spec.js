@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 const productName = 'Cart product test';
 const productPrice = '13.99';

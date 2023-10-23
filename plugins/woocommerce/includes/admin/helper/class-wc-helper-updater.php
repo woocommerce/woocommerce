@@ -68,17 +68,21 @@ class WC_Helper_Updater {
 				$item['package'] = 'woocommerce-com-expired-' . $plugin['_product_id'];
 			}
 
-			if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
-				$transient->response[ $filename ] = (object) $item;
-				unset( $transient->no_update[ $filename ] );
-			} else {
-				$transient->no_update[ $filename ] = (object) $item;
-				unset( $transient->response[ $filename ] );
+			if ( $transient instanceof stdClass ) {
+				if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
+					$transient->response[ $filename ] = (object) $item;
+					unset( $transient->no_update[ $filename ] );
+				} else {
+					$transient->no_update[ $filename ] = (object) $item;
+					unset( $transient->response[ $filename ] );
+				}
 			}
 		}
 
-		$translations = self::get_translations_update_data();
-		$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
+		if ( $transient instanceof stdClass ) {
+			$translations            = self::get_translations_update_data();
+			$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
+		}
 
 		return $transient;
 	}

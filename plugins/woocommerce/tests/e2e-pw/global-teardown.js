@@ -1,6 +1,6 @@
 const { chromium } = require( '@playwright/test' );
 const { admin } = require( './test-data/data' );
-const { getTranslationFor } = require( './test-data/data' );
+const { getTranslationFor } = require('./utils/translations');
 
 module.exports = async ( config ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;

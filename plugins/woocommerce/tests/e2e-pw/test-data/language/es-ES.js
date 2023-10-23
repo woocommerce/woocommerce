@@ -37,7 +37,9 @@ const es_ES = {
     '/British Columbia, V0N 2J0.*/': /Columbia Británica, V0N 2J0.*/,
     'Canada': 'Canadá',
     '/Canada.*/': /Canadá.*/,
+    'Cancelled': 'Cancelado',
     'Cash on delivery': 'Contra reembolso',
+    'Change status to completed': 'Cambiar estado a completado',
     '"Choose countries / regions…"': '"Seleccionar países/regiones…"',
     'Choose which': 'Elige qué',
     'Choose which analytics to display and the section name':
@@ -48,6 +50,7 @@ const es_ES = {
     'Click here to login': 'Haz clic aquí para acceder',
     'Close': 'Cerrar',
     'Close Tour': 'Cerrar el recorrido',
+    'Completed': 'Completado',
     'Continue': 'Seguir',
     'continue': 'Continuar',
     '"Continue"': '"Seguir"',
@@ -165,6 +168,8 @@ const es_ES = {
         'El estado del pedido cambió de Pendiente de pago a Procesando.',
     'Order status changed from Processing to Completed.':
         'El estado del pedido cambió de Procesando a Completado.',
+    'Order status changed from Processing to Cancelled.': 
+        'El estado del pedido cambió de Procesando a Cancelado.',
     'Order Total': 'Total del pedido',
     'Order updated.': 'Pedido actualizado.',
     'Other': 'Otro',
@@ -202,6 +207,7 @@ const es_ES = {
     'Please select some product options before adding this product to your cart.':
         'Elige las opciones del producto antes de añadir este producto a tu carrito.',
     'Post name': 'Nombre de la entrada',
+    'Processing':'Procesando',
     'Product': 'Producto',
     'Product Left Surround/Quotes': '“',
 	'Product Right Surround/Quotes': '”',

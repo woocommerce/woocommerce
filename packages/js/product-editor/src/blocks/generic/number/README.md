@@ -43,6 +43,20 @@ Suffix that can be used for a unit of measure, as an example.
 
 Placeholder text that appears in the field when it's empty.
 
+### min
+
+- **Type:** `Number`
+- **Required:** `No`
+
+The minimum numeric value that can be entered in the field.
+
+### max
+
+- **Type:** `Number`
+- **Required:** `No`
+
+The maximum numeric value that can be entered in the field.
+
 ## Usage
 
 Here's a snippet that adds a field similar to the previous screenshot:

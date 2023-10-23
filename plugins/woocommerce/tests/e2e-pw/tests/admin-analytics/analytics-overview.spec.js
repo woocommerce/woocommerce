@@ -1,5 +1,5 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
 

@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Merchant > Order Action emails received', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

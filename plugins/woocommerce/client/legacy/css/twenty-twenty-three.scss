@@ -978,20 +978,6 @@ ul.wc-tabs {
 		margin-bottom: var(--wp--style--block-gap);
 	}
 
-	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
-	}
-
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
 		address {

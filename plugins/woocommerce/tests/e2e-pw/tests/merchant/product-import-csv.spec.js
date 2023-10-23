@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const path = require( 'path' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(

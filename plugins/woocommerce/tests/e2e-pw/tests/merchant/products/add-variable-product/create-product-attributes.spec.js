@@ -6,7 +6,7 @@ const {
 	deleteProductsAddedByTests,
 	productAttributes,
 } = utils;
-const { getTranslationFor } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require('../../../../utils/translations');
 
 
 let productId;

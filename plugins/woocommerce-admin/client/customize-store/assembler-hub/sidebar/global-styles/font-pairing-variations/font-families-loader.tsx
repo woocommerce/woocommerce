@@ -38,12 +38,6 @@ export const FontFamiliesLoader = ( {
 					`${ fontFamily }:${ FONT_AXIS }`,
 				] ),
 				[ 'display', 'swap' ],
-				[
-					'text', // optimise the fonts fetched by subsetting to only the characters used in the display
-					`${ fontFamilies
-						.map( ( { fontFamily } ) => fontFamily )
-						.join( ' ' ) }`,
-				],
 			] ),
 		[ fontFamilies ]
 	);

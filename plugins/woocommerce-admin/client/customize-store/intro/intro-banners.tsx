@@ -23,9 +23,9 @@ export const BaseIntroBanner = ( {
 	bannerTitle: string;
 	bannerText: string;
 	bannerClass: string;
-	buttonIsLink: boolean;
-	bannerButtonOnClick: () => void;
-	bannerButtonText: string;
+	buttonIsLink?: boolean;
+	bannerButtonOnClick?: () => void;
+	bannerButtonText?: string;
 	children?: React.ReactNode;
 } ) => {
 	return (
@@ -38,12 +38,16 @@ export const BaseIntroBanner = ( {
 			<div className={ `woocommerce-customize-store-banner-content` }>
 				<h1>{ bannerTitle }</h1>
 				<p>{ bannerText }</p>
-				<Button
-					onClick={ () => bannerButtonOnClick() }
-					variant={ buttonIsLink ? 'link' : 'primary' }
-				>
-					{ bannerButtonText }
-				</Button>
+				{ bannerButtonText ? (
+					<Button
+						onClick={ () =>
+							bannerButtonOnClick && bannerButtonOnClick()
+						}
+						variant={ buttonIsLink ? 'link' : 'primary' }
+					>
+						{ bannerButtonText }
+					</Button>
+				) : null }
 				{ children }
 			</div>
 		</div>
@@ -58,13 +62,11 @@ export const NetworkOfflineBanner = () => {
 				'woocommerce'
 			) }
 			bannerText={ __(
-				"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection and try again.",
+				"Unfortunately, the [AI Store designer] isn't available right now as we can't detect your network. Please check your internet connection.",
 				'woocommerce'
 			) }
 			bannerClass="offline-banner"
-			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {} }
-			bannerButtonText={ __( 'Retry', 'woocommerce' ) }
 		/>
 	);
 };

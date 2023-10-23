@@ -354,6 +354,68 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hide conditions can be passed in when creating a block.
+	 */
+	public function test_hide_conditions_in_constructor() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'blockName'      => 'test-block-name',
+				'hideConditions' => [
+					[
+						'expression' => 'foo === bar',
+					],
+				],
+			]
+		);
+
+		$this->assertSame(
+			[
+				'k0' => [
+					'expression' => 'foo === bar',
+				],
+			],
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are set correctly in the constructor.'
+		);
+	}
+
+	/**
+	 * Test that hide conditions can be added to a block.
+	 */
+	public function test_add_hide_condition() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$condition_1_key = $block->add_hide_condition( 'editedProduct.manage_stock === true' );
+
+		$condition_2_key = $block->add_hide_condition( 'true' );
+
+		$condition_3_key = $block->add_hide_condition( 'foo > 10' );
+
+		$block->remove_hide_condition( $condition_2_key );
+
+		$this->assertSame(
+			[
+				$condition_1_key => [
+					'expression' => 'editedProduct.manage_stock === true',
+				],
+				$condition_3_key => [
+					'expression' => 'foo > 10',
+				],
+			],
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are added correctly.'
+		);
+	}
+
+	/**
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
 	public function test_get_formatted_template() {
@@ -369,6 +431,8 @@ class BlockTest extends WC_Unit_Test_Case {
 				],
 			]
 		);
+
+		$block->add_hide_condition( 'foo === bar' );
 
 		$block->add_block(
 			[
@@ -394,10 +458,15 @@ class BlockTest extends WC_Unit_Test_Case {
 			[
 				'test-block-name',
 				[
-					'attr-1'              => 'value-1',
-					'attr-2'              => 'value-2',
-					'_templateBlockId'    => 'test-block-id',
-					'_templateBlockOrder' => 10,
+					'attr-1'                       => 'value-1',
+					'attr-2'                       => 'value-2',
+					'_templateBlockId'             => 'test-block-id',
+					'_templateBlockOrder'          => 10,
+					'_templateBlockHideConditions' => [
+						[
+							'expression' => 'foo === bar',
+						],
+					],
 				],
 				[
 					[

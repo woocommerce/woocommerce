@@ -12,11 +12,14 @@ import { ProductNameSuggestions } from './product-name';
 import { ProductCategorySuggestions } from './product-category';
 import { WriteShortDescriptionButtonContainer } from './product-short-description';
 import setPreferencesPersistence from './utils/preferencesPersistence';
+import { init as initBackgroundRemoval } from './image-background-removal';
 
 import './index.scss';
 
 // This sets up loading and saving the plugin's preferences.
 setPreferencesPersistence();
+
+initBackgroundRemoval();
 
 const queryClient = new QueryClient();
 

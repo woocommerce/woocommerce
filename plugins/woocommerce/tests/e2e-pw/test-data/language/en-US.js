@@ -37,7 +37,9 @@ const en_US = {
     '/British Columbia, V0N 2J0.*/': /British Columbia, V0N 2J0.*/,
     'Canada': 'Canada',
     '/Canada.*/': /Canada.*/,
+    'Cancelled': 'Cancelled',
     'Cash on delivery': 'Cash on delivery',
+    'Change status to completed': 'Change status to completed',
     '"Choose countries / regions…"': '"Choose countries / regions…"',
     'Choose which': 'Choose which',
     'Choose which analytics to display and the section name':
@@ -48,6 +50,7 @@ const en_US = {
     'Click here to login': 'Click here to login',
     'Close': 'Close',
     'Close Tour': 'Close Tour',
+    'Completed': 'Completed',
     'Continue': 'Continue',
     'continue': 'Continue',
     '"Continue"': '"Continue"',
@@ -164,6 +167,8 @@ const en_US = {
         'Order status changed from Pending payment to Processing.',
     'Order status changed from Processing to Completed.':
         'Order status changed from Processing to Completed.',
+    'Order status changed from Processing to Cancelled.': 
+        'Order status changed from Processing to Cancelled.',
     'Order Total': 'Order Total',
     'Order updated.': 'Order updated.',
     'Other': 'Other',
@@ -200,6 +205,7 @@ const en_US = {
     'Please select some product options before adding this product to your cart.':
         'Please select some product options before adding this product to your cart.',
     'Post name': 'Post name',
+    'Processing':'Processing',
     'Product': 'Product',
     'Product Left Surround/Quotes': '“',
 	'Product Right Surround/Quotes': '”',

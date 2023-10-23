@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
   
 test.describe( 'Coupons page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

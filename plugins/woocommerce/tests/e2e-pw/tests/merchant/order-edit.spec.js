@@ -1,12 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Edit order', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	let orderId;
+	let orderId, orderToCancel;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -22,6 +22,13 @@ test.describe( 'Edit order', () => {
 			.then( ( response ) => {
 				orderId = response.data.id;
 			} );
+		await api
+			.post( 'orders', {
+				status: 'processing',
+			} )
+			.then( ( response ) => {
+				orderToCancel = response.data.id;
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -32,6 +39,7 @@ test.describe( 'Edit order', () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ orderToCancel }`, { force: true } );
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
@@ -67,6 +75,30 @@ test.describe( 'Edit order', () => {
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
 		).toContainText( `${getTranslationFor('Order status changed from Processing to Completed.')}` );
+		// load the orders listing and confirm order is completed
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `#order-${ orderId }` ).getByRole( 'cell', { name: getTranslationFor( 'Completed' ) }) ).toBeVisible();
+	} );
+
+	test( 'can update order status to cancelled', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderToCancel }&action=edit` );
+
+		// update order status to Completed
+		await page.locator( '#order_status' ).selectOption( getTranslationFor( 'Cancelled' ) );
+		await page.locator( 'button.save_order' ).click();
+
+		// verify order status changed and note added
+		await expect( page.locator( '#order_status' ) ).toHaveValue(
+			'wc-cancelled'
+		);
+		await expect( page.getByText( getTranslationFor( 'Order status changed from Processing to Cancelled.' ) ) ).toBeVisible();
+
+		// load the orders listing and confirm order is cancelled
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `#order-${ orderToCancel }` ).getByRole( 'cell', { name: getTranslationFor( 'Cancelled' ) }) ).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
@@ -86,6 +118,40 @@ test.describe( 'Edit order', () => {
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);
+	} );
+
+	test( 'can add and delete order notes', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.on( 'dialog', dialog => dialog.accept() );
+
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+
+		// add note to customer
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
+		await page.getByLabel('Note type').selectOption( 'Note to customer' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a note to the customer.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
 	} );
 
 	test( 'can load billing details', async ( { page, baseURL } ) => {

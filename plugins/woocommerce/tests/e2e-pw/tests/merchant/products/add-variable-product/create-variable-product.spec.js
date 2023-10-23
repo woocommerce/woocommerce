@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils, api } = require( '../../../../utils' );
-const { getTranslationFor } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require('../../../../utils/translations');
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 const variableProductName = 'Variable Product with Three Variations';

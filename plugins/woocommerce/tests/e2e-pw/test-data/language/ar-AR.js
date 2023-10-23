@@ -43,7 +43,9 @@ const ar_AR = {
 	'/British Columbia, V0N 2J0.*/': /كولومبيا البريطانية, V0N 2J0.*/,
 	'Canada': 'كندا',
 	'/Canada.*/': /كندا.*/,
+	'Cancelled': 'ملغي',
 	'Cash on delivery': 'الدفع نقدًا عند الاستلام',
+	'Change status to completed': 'تغيير الحالة إلى مكتمل',
 	'"Choose countries / regions…"': '"اختيار الدول / المناطق…"',
 	'Choose which': 'اختيار',
 	'Choose which analytics to display and the section name':
@@ -54,6 +56,7 @@ const ar_AR = {
 	'Click here to login': 'أنقر هنا لتسجيل الدخول',
 	'Close': 'إغلاق',
 	'Close Tour': 'إغلاق الجولة',
+	'Completed': 'مُكتمل',
 	'Continue': 'متابعة', 
 	'continue': 'استمرار',
 	'"Continue"': '"متابعة"',
@@ -172,6 +175,8 @@ const ar_AR = {
 		'تغيّرت حالة الطلب من بانتظار الدفع إلى قيد التنفيذ.',
 	'Order status changed from Processing to Completed.':
 		'تغيّرت حالة الطلب من قيد التنفيذ إلى مُكتمل.',
+	'Order status changed from Processing to Cancelled.': 
+        'تغيّرت حالة الطلب من قيد التنفيذ إلى ملغي.',
 	'Order Total': 'مجموع الطلب',
 	'Order updated.': 'تم تحديث الطلب.',
 	'Other': 'المزيد', 
@@ -208,6 +213,7 @@ const ar_AR = {
 	'Please select some product options before adding this product to your cart.':
 		'الرجاء تحديد بعض خيارات المنتج قبل إضافة هذا المنتج إلى سلة مشترياتك.',
 	'Post name': 'عنوان المقالة', 
+	'Processing':'قيد التنفيذ',
 	'Product': 'المنتج',
 	'Product Left Surround/Quotes': '“',
 	'Product Right Surround/Quotes': '”',
