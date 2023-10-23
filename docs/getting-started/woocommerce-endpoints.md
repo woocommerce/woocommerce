@@ -37,7 +37,7 @@ The following endpoints are used for account-related functionality and are appe
 
 The URL for each endpoint can be customized in **WooCommerce > Settings > Advanced** in the Page setup section.
 
-![](https://woocommerce.com/wp-content/uploads/2014/02/endpoints.png)
+![Endpoints](https://woocommerce.com/wp-content/uploads/2014/02/endpoints.png)
 
 Ensure that they are unique to avoid conflicts. If you encounter issues with 404s, go to **Settings > Permalinks** and save to flush the rewrite rules.
 
@@ -103,4 +103,4 @@ Landing on the wrong page when clicking an endpoint URL is typically caused by i
 
 Sometimes the “Downloads” endpoint on the “My account” page does not need to be displayed. This can be removed by going to **WooCommerce → Settings → Advanced → Account endpoints** and clearing the Downloads endpoint field.
 
-![](https://woocommerce.com/wp-content/uploads/2023/04/Screenshot-2023-04-09-at-11.45.58-PM.png?w=650)
+![Account endpoints](https://woocommerce.com/wp-content/uploads/2023/04/Screenshot-2023-04-09-at-11.45.58-PM.png?w=650)
