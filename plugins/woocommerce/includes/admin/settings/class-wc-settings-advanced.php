@@ -62,8 +62,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Cart page', 'woocommerce' ),
-					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
+					'desc'     => __( 'Page to show the Cart', 'woocommerce' ),
 					'id'       => 'woocommerce_cart_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => '',
@@ -82,8 +81,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 				array(
 					'title'    => __( 'Checkout page', 'woocommerce' ),
-					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
+					'desc'     => __( 'Page to show the Checkout', 'woocommerce' ),
 					'id'       => 'woocommerce_checkout_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => wc_get_page_id( 'checkout' ),
