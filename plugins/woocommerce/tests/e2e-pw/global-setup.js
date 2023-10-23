@@ -58,7 +58,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `/wp-admin` );
+			await adminPage.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
 			await adminPage
 				.locator( 'input[name="log"]' )
 				.fill( admin.username );
@@ -139,7 +139,9 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
+			await customerPage.goto( `/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
 			await customerPage
 				.locator( 'input[name="log"]' )
 				.fill( customer.username );
