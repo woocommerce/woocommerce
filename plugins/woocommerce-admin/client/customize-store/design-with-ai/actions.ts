@@ -276,12 +276,43 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = () => {
-	window.location.href = getNewPath(
-		{},
-		'/customize-store/assembler-hub',
-		{}
-	);
+function attachIframeListeners( iframe: HTMLIFrameElement ) {
+	const iframeDocument: Document | undefined =
+		iframe.contentDocument || iframe.contentWindow?.document;
+
+	// Intercept external link clicks
+	iframeDocument?.addEventListener( 'click', function ( event: MouseEvent ) {
+		if ( event.target instanceof HTMLElement ) {
+			const anchor = event.target?.closest( 'a' );
+			if ( anchor && anchor.target === '_blank' ) {
+				event.preventDefault();
+				window.open( anchor.href, '_blank' ); // Open in new tab in parent
+			} else if ( anchor ) {
+				event.preventDefault();
+				window.location.href = anchor.href; // Navigate parent to new URL
+			}
+		}
+	} );
+}
+
+const redirectToAssemblerHub = async () => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = document.createElement( 'iframe' );
+	iframe.style.display = 'none';
+	iframe.src = assemblerUrl; // Replace with the URL of the page you want to load
+
+	iframe.onload = () => {
+		// Hide loading UI
+		attachIframeListeners( iframe );
+		// Make iframe fullscreen
+		setTimeout( () => {
+			iframe.style.display = 'block';
+			iframe.classList.add( 'fullscreen-iframe' );
+		}, 6000 );
+		window.history?.pushState( {}, '', assemblerUrl );
+	};
+
+	document.body.appendChild( iframe );
 };
 
 export const actions = {
