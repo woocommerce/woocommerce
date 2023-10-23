@@ -25,6 +25,7 @@ export enum LayoutOptions {
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
 	columns: number;
+	shrinkColumns?: boolean;
 }
 
 export interface ProductCollectionQuery {
