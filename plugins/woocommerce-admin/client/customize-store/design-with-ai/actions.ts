@@ -307,7 +307,7 @@ const redirectToAssemblerHub = async () => {
 		// Make iframe fullscreen
 		setTimeout( () => {
 			iframe.style.display = 'block';
-			iframe.classList.add( 'fullscreen-iframe' );
+			iframe.classList.add( 'cys-fullscreen-iframe' );
 		}, 6000 );
 		window.history?.pushState( {}, '', assemblerUrl );
 	};
