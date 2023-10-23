@@ -38,6 +38,7 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.5.1",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.3.3"
+		"typescript": "^5.3.3",
+		"wireit": "^0.14.1"
 	}
 }

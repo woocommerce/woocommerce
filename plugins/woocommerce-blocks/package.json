@@ -252,6 +252,7 @@
 		"webpack": "5.88.2",
 		"webpack-bundle-analyzer": "4.7.0",
 		"webpack-cli": "5.1.4",
+		"wireit": "^0.14.1",
 		"wp-types": "3.63.0",
 		"zenhub-api": "0.2.0"
 	},

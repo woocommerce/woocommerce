@@ -239,6 +239,15 @@
 			"pinVersion": "~29.1.1"
 		},
 		{
+			"dependencies": [
+				"wireit"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.14.1"
+		},
+		{
 			"label": "Only manage versions for these dependencies",
 			"dependencies": [
 				"@types/node",

@@ -66,7 +66,8 @@
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",
-		"webpack-cli": "^3.3.12"
+		"webpack-cli": "^3.3.12",
+		"wireit": "^0.14.1"
 	},
 	"scripts": {
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
