@@ -66,10 +66,10 @@ Here are some examples of the commands you will make use of.
 
 ```bash
 # Add a changelog entry for WooCommerce Core
-pnpm --filter=woocommerce run changelog add
+pnpm --filter=@woocommerce/plugin-woocommerce run changelog add
 
 # Create the woocommerce.zip file
-pnpm --filter=woocommerce run build:zip
+pnpm --filter=@woocommerce/plugin-woocommerce run build:zip
 ```
 
 ## Plugin Development Environments

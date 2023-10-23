@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce",
+	"name": "@woocommerce/plugin-woocommerce",
 	"title": "WooCommerce",
 	"version": "8.3.0",
 	"homepage": "https://woo.com/",
