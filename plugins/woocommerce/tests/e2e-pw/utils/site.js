@@ -237,6 +237,182 @@ const reset = async ( cKey, cSecret ) => {
 	await deleteAllTaxRates();
 };
 
+/**
+ * Set up cart and checkout shortcode pages
+ */
+const setupCartCheckoutShortcodePages = async ( baseURL, userAgent, admin ) => {
+	const { APIRequestContext } = require( '@playwright/test' );
+
+	/**
+	 * @typedef {Object} WPPage
+	 * @property {number} id
+	 * @property {string} slug
+	 * @property {{raw: string}} content
+	 */
+
+	/**
+	 * Construct an API request context.
+	 * @returns {Promise<APIRequestContext>}
+	 */
+	async function createRequestContext() {
+		const { request } = require( '@playwright/test' );
+		const { encodeCredentials } = require( './plugin-utils' );
+		const basicAuth = encodeCredentials( admin.username, admin.password );
+		const Authorization = `Basic ${ basicAuth }`;
+		const extraHTTPHeaders = {
+			Authorization,
+		};
+		const options = {
+			baseURL,
+			userAgent,
+			extraHTTPHeaders,
+		};
+
+		return request.newContext( options );
+	}
+
+	/**
+	 * Create shortcode versions of the cart and checkout pages, except when those pages already exist.
+	 * @param {APIRequestContext} request
+	 * @returns {Promise<[WPPage, WPPage]>}
+	 */
+	async function createWPPages( request ) {
+		/**
+		 * @returns {Promise<WPPage[]>}
+		 */
+		async function listPages() {
+			const response = await request.get( '/wp-json/wp/v2/pages', {
+				params: { context: 'edit' },
+				data: {
+					_fields: [ 'id', 'slug', 'content' ],
+				},
+				failOnStatusCode: true,
+			} );
+
+			return response.json();
+		}
+
+		/**
+		 * @param {WPPage[]} pages
+		 * @returns {(WPPage|undefined)}
+		 */
+		function findExistingShortcodeCartPage( pages ) {
+			const match = pages.find( ( page ) =>
+				page.content.raw.includes( '[woocommerce_cart]' )
+			);
+
+			const message = match
+				? 'Shortcode version of Cart page already exists.'
+				: 'No shortcode version of Cart page found.';
+			console.log( message );
+
+			return match;
+		}
+
+		/**
+		 * @param {WPPage[]} pages
+		 * @returns {(WPPage|undefined)}
+		 */
+		function findExistingShortcodeCheckoutPage( pages ) {
+			const match = pages.find( ( page ) =>
+				page.content.raw.includes( '[woocommerce_checkout]' )
+			);
+
+			const message = match
+				? 'Shortcode version of Checkout page already exists.'
+				: 'No shortcode version of Checkout page found.';
+			console.log( message );
+
+			return match;
+		}
+
+		/**
+		 * @returns {Promise<WPPage>}
+		 */
+		async function createNewShortcodeCartPage() {
+			const response = await request.post( '/wp-json/wp/v2/pages', {
+				data: {
+					slug: 'cart-sc',
+					status: 'publish',
+					title: {
+						raw: 'Cart (shortcode)',
+					},
+					content: {
+						raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
+					},
+				},
+				failOnStatusCode: true,
+			} );
+
+			console.log( 'New shortcode Cart page created.' );
+
+			return response.json();
+		}
+
+		/**
+		 * @returns {Promise<WPPage>}
+		 */
+		async function createNewShortcodeCheckoutPage() {
+			const response = await request.post( '/wp-json/wp/v2/pages', {
+				data: {
+					slug: 'checkout-sc',
+					status: 'publish',
+					title: {
+						raw: 'Checkout (shortcode)',
+					},
+					content: {
+						raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
+					},
+				},
+				failOnStatusCode: true,
+			} );
+
+			console.log( 'New shortcode Checkout page created.' );
+
+			return response.json();
+		}
+
+		const pages = await listPages();
+
+		const cart =
+			findExistingShortcodeCartPage( pages ) ||
+			( await createNewShortcodeCartPage() );
+
+		const checkout =
+			findExistingShortcodeCheckoutPage( pages ) ||
+			( await createNewShortcodeCheckoutPage() );
+
+		return [ cart, checkout ];
+	}
+
+	/**
+	 * Set the WC Cart and Checkout pages to the shortcode versions.
+	 * @param {APIRequestContext} request
+	 * @param {WPPage} cart
+	 * @param {WPPage} checkout
+	 */
+	async function setWCPages( request, cart, checkout ) {
+		await request.put(
+			'/wp-json/wc/v3/settings/advanced/woocommerce_cart_page_id',
+			{ data: { value: `${ cart.id }` }, failOnStatusCode: true }
+		);
+
+		console.log( `WC Cart page set to ID ${ cart.id }` );
+
+		await request.put(
+			'/wp-json/wc/v3/settings/advanced/woocommerce_checkout_page_id',
+			{ data: { value: `${ checkout.id }` }, failOnStatusCode: true }
+		);
+
+		console.log( `WC Checkout page set to ID ${ checkout.id }` );
+	}
+
+	const request = await createRequestContext();
+	const [ cart, checkout ] = await createWPPages( request );
+	await setWCPages( request, cart, checkout );
+};
+
 module.exports = {
 	reset,
+	setupCartCheckoutShortcodePages,
 };

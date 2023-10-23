@@ -219,6 +219,8 @@ module.exports = async ( config ) => {
 		}
 	}
 
+	await site.setupCartCheckoutShortcodePages( baseURL, userAgent, admin );
+
 	await adminContext.close();
 	await customerContext.close();
 	await browser.close();
