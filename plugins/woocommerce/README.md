@@ -47,11 +47,11 @@ This directory contains the React-based admin interface.
 
 ```bash
 # Build the React-based admin client.
-pnpm run --filter=woocommerce/client/admin build 
+pnpm run --filter=@woocommerce/admin-library build 
 # Lint the React-based admin client.
-pnpm run --filter=woocommerce/client/admin lint 
+pnpm run --filter=@woocommerce/admin-library lint 
 # Test the React-based admin client.
-pnpm run --filter=woocommerce/client/admin test 
+pnpm run --filter=@woocommerce/admin-library test 
 ```
 
 #### Helper Scripts
@@ -60,13 +60,13 @@ Here is a collection of scripts that can help when developing the React-based ad
 
 ```bash
 # Create a develoment build of the React-based admin client.
-pnpm --filter=woocommerce/client/admin dev 
+pnpm --filter=@woocommerce/admin-library dev 
 # Create and watch a development build of the React-based admin client.
-pnpm --filter=woocommerce/client/admin start 
+pnpm --filter=@woocommerce/admin-library start 
 # Watch the tests of the React-based admin client.
-pnpm --filter=woocommerce/client/admin test:watch 
+pnpm --filter=@woocommerce/admin-library test:watch 
 # Run a type check over the React-based admin client's TypeScript files.
-pnpm --filter=woocommerce/client/admin ts:check 
+pnpm --filter=@woocommerce/admin-library ts:check 
 ```
 
 ## Documentation

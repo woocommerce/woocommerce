@@ -36,7 +36,7 @@
 			"dependsOn": [
 				"build:feature-config",
 				"^turbo:build",
-				"woocommerce/client/admin#turbo:build",
+				"@woocommerce/admin-library#turbo:build",
 				"woocommerce/client/legacy#turbo:build"
 			],
 			"outputs": [],
@@ -63,7 +63,7 @@
 			"outputMode": "new-only"
 		},
 
-		"woocommerce/client/admin#turbo:build": {
+		"@woocommerce/admin-library#turbo:build": {
 			"dependsOn": [ 
 				"build:feature-config", 
 				"^turbo:build"
