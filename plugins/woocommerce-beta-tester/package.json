@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce-beta-tester",
+	"name": "@woocommerce/plugin-woocommerce-beta-tester",
 	"description": "Setting up the local beta tester scripts.",
 	"license": "GPL-2.0",
 	"repository": {
