@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import RadioControl, {
+import {
+	RadioControl,
 	RadioControlOptionLayout,
-} from '@woocommerce/base-components/radio-control';
+} from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
 
