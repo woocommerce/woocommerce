@@ -2,12 +2,12 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [List Cart Items](#list-cart-items)
--   [Single Cart Item](#single-cart-item)
--   [Add Cart Item](#add-cart-item)
--   [Edit Single Cart Item](#edit-single-cart-item)
--   [Delete Single Cart Item](#delete-single-cart-item)
--   [Delete All Cart Items](#delete-all-cart-items)
+- [List Cart Items](#list-cart-items)
+- [Single Cart Item](#single-cart-item)
+- [Add Cart Item](#add-cart-item)
+- [Edit Single Cart Item](#edit-single-cart-item)
+- [Delete Single Cart Item](#delete-single-cart-item)
+- [Delete All Cart Items](#delete-all-cart-items)
 
 ## List Cart Items
 
@@ -29,6 +29,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 		"key": "c74d97b01eae257e44aa9d5bade97baf",
 		"id": 16,
 		"quantity": 1,
+		"type": "simple",
 		"quantity_limits": {
 			"minimum": 1,
 			"maximum": 1,
@@ -108,6 +109,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 		"key": "e03e407f41901484125496b5ec69a76f",
 		"id": 29,
 		"quantity": 1,
+		"type": "variation",
 		"quantity_limits": {
 			"minimum": 1,
 			"maximum": 9999,

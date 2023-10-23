@@ -19,6 +19,12 @@ abstract class ItemSchema extends ProductSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'type'                 => [
+				'description' => __( 'The item type.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'id'                   => [
 				'description' => __( 'The item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
