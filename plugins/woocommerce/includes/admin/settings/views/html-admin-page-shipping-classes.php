@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </h2>
 
 <p class="wc-shipping-zone-help-text">
-	<?php esc_html_e( 'Shipping classes can be used to group products of similar type and can be used by some Shipping Methods (such as "Flat rate shipping") to provide different rates to different classes of product.', 'woocommerce' ); ?>
+	<?php esc_html_e( 'Use shipping classes to customize the shipping rates for different groups of products, such as heavy items that require higher postage fees.', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/product-shipping-classes/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 </p>
 
 <table class="wc-shipping-classes widefat">
