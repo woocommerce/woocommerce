@@ -11,8 +11,9 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { Subscription } from '../../types';
-import ActivateModal from './activate-modal';
+import ConnectModal from './connect-modal';
 import RenewModal from './renew-modal';
+import SubscribeModal from './subscribe-modal';
 
 interface UpdateProps {
 	subscription: Subscription;
@@ -112,7 +113,14 @@ export default function Update( props: UpdateProps ) {
 			return null;
 		}
 
-		if ( props.subscription.expired ) {
+		if ( props.subscription.product_key === '' ) {
+			return (
+				<SubscribeModal
+					onClose={ () => setShowModal( false ) }
+					subscription={ props.subscription }
+				/>
+			);
+		} else if ( props.subscription.expired ) {
 			return (
 				<RenewModal
 					subscription={ props.subscription }
@@ -121,7 +129,7 @@ export default function Update( props: UpdateProps ) {
 			);
 		} else if ( ! props.subscription.active ) {
 			return (
-				<ActivateModal
+				<ConnectModal
 					subscription={ props.subscription }
 					onClose={ () => setShowModal( false ) }
 				/>

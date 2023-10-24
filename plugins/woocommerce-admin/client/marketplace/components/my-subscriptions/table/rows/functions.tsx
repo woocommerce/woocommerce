@@ -10,8 +10,10 @@ import { Icon, plugins } from '@wordpress/icons';
  * Internal dependencies
  */
 import { Subscription } from '../../types';
+import ConnectButton from '../actions/connect-button';
 import Install from '../actions/install';
 import RenewButton from '../actions/renew-button';
+import SubscribeButton from '../actions/subscribe-button';
 import Update from '../actions/update';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import StatusPopover from './status-popover';
@@ -178,24 +180,26 @@ export function version( subscription: Subscription ): TableRow {
 	};
 }
 
-export function install( subscription: Subscription ): TableRow {
-	if ( subscription.expired ) {
-		return {
-			display: (
-				<RenewButton />
-			)
-		};
+export function actions( subscription: Subscription ): TableRow {
+	let actionButton = null;
+	if ( subscription.product_key === '' ) {
+		actionButton = <SubscribeButton subscription={ subscription } />;
+	} else if ( subscription.expired ) {
+		actionButton = <RenewButton subscription={ subscription } />;
+	} else if ( subscription.local.installed === false ) {
+		actionButton = <Install subscription={ subscription } />;
+	} else if ( subscription.active === false ) {
+		actionButton = (
+			<ConnectButton subscription={ subscription } variant="link" />
+		);
 	}
-
 	return {
 		display: (
-			<Install subscription={ subscription } />
-		),
-	};
-}
+			<div className="woocommerce-marketplace__my-subscriptions__actions">
+				{ actionButton }
 
-export function actions(): TableRow {
-	return {
-		display: <ActionsDropdownMenu />,
+				<ActionsDropdownMenu />
+			</div>
+		),
 	};
 }

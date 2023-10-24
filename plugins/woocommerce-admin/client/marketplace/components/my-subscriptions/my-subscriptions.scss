@@ -110,7 +110,7 @@
 	padding: 0 12px;
 }
 
-.woocommerce-marketplace__my-subscriptions-update.components-button.is-link {
+.woocommerce-marketplace__my-subscriptions__table .components-button.is-link {
 	text-decoration: none;
 	padding: 6px 12px;
 }
@@ -142,5 +142,17 @@
 		font-weight: 400;
 		color: var(--gutenberg-gray-700);
 		margin-bottom: $grid-unit-30;
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__table__header--actions {
+	text-align: right;
+}
+.woocommerce-marketplace__my-subscriptions__actions {
+	display: flex;
+	justify-content: end;
+
+	.components-button {
+		margin-right: $grid-unit-10;
 	}
 }

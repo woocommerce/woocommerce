@@ -7,13 +7,12 @@ import { TableRow } from '@woocommerce/components/build-types/table/types';
  */
 import { Subscription } from '../types';
 import {
+	actions,
+	autoRenew,
+	expiry,
 	productName,
 	status,
-	expiry,
-	autoRenew,
 	version,
-	install,
-	actions,
 } from './rows/functions';
 
 export function availableSubscriptionRow( item: Subscription ): TableRow[] {
@@ -23,8 +22,7 @@ export function availableSubscriptionRow( item: Subscription ): TableRow[] {
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),
-		install( item ),
-		actions(),
+		actions( item ),
 	];
 }
 
@@ -35,7 +33,6 @@ export function installedSubscriptionRow( item: Subscription ): TableRow[] {
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),
-		install( item ),
-		actions(),
+		actions( item ),
 	];
 }

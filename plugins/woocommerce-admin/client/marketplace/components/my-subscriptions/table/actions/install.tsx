@@ -69,13 +69,9 @@ export default function Install( props: InstallProps ) {
 		return __( 'Install', 'woocommerce' );
 	}
 
-	if ( props.subscription.local.installed === true ) {
-		return null;
-	}
-
 	return (
 		<Button
-			variant="primary"
+			variant="link"
 			isBusy={ loading }
 			disabled={ loading }
 			onClick={ install }
