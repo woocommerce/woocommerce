@@ -80,6 +80,26 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Sanitize the cost field.
+	 *
+	 * @since 8.3.0
+	 * @param string $value Unsanitized value.
+	 * @throws Exception Last error triggered.
+	 * @return string
+	 */
+	public function sanitize_cost( $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $value );
+
+		if ( ! is_numeric( $value ) ) {
+			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Init form fields.
 	 */
 	public function init_form_fields() {
@@ -103,12 +123,14 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				),
 			),
 			'cost'       => array(
-				'title'       => __( 'Cost', 'woocommerce' ),
-				'type'        => 'text',
-				'placeholder' => '0',
-				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
+				'title'             => __( 'Cost', 'woocommerce' ),
+				'type'              => 'text',
+				'class'             => 'wc-shipping-modal-price',
+				'placeholder'       => wc_format_localized_price( 0 ),
+				'description'       => __( 'Optional cost for local pickup.', 'woocommerce' ),
+				'default'           => '',
+				'desc_tip'          => true,
+				'sanitize_callback' => array( $this, 'sanitize_cost' ),
 			),
 		);
 	}

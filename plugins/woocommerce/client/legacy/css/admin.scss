@@ -4064,6 +4064,7 @@ table.wc_shipping {
 
 		fieldset {
 			margin-bottom: 24px;
+			position: relative;
 
 			input, 
 			select {
@@ -4084,6 +4085,51 @@ table.wc_shipping {
 						margin: 6px 0 4px 8px;
 					}
 				}
+
+				&.wc-shipping-modal-price {
+					color: #757575;
+
+					&.wc-shipping-currency-position-left,
+					&.wc-shipping-currency-position-left_space {
+
+						&.wc-shipping-currency-size-1 {
+							padding-left: 28px;
+						}
+						&.wc-shipping-currency-size-2 {
+							padding-left: 33px;
+						}
+						&.wc-shipping-currency-size-3 {
+							padding-left: 38px;
+						}
+						&.wc-shipping-currency-size-4 {
+							padding-left: 43px;
+						}
+						&.wc-shipping-currency-size-5 {
+							padding-left: 48px;
+						}
+					}
+
+					&.wc-shipping-currency-position-right,
+					&.wc-shipping-currency-position-right_space {
+						padding-left: 12px;
+					}
+				}
+			}
+		}
+
+		.wc-shipping-zone-method-currency {
+			position: absolute;
+			top: 19px;
+			color: #757575;
+
+			&.wc-shipping-currency-position-left,
+			&.wc-shipping-currency-position-left_space {
+				left: 12px;
+			}
+
+			&.wc-shipping-currency-position-right,
+			&.wc-shipping-currency-position-right_space {
+				right: 12px;
 			}
 		}
 	}

@@ -409,10 +409,37 @@
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
-					const htmlWithoutTables = this.replaceHTMLTables( html );
-					const htmlWithMovedHelpTips = this.moveHTMLHelpTips( htmlWithoutTables );
-				
-					return htmlWithMovedHelpTips;
+					const formattingFunctions = [
+						this.replaceHTMLTables,
+						this.moveHTMLHelpTips,
+						this.addCurrencySymbol
+					];
+
+					return formattingFunctions.reduce( ( formattedHTML, fn ) => {
+						return fn( formattedHTML );
+					}, html );
+				},
+				addCurrencySymbol: function( html ) {
+					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
+						return html;
+					}
+					const htmlContent = $( html );
+					const priceInputs = htmlContent.find( '.wc-shipping-modal-price' );
+					const config = window.wc.ShippingCurrencyContext.getCurrencyConfig();
+					const { symbol, symbolPosition } = config;
+
+					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
+					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
+					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
+
+					priceInputs.each( ( i ) => {
+						const priceInput = $( priceInputs[ i ] );
+						const value = priceInput.attr( 'value' );
+						const formattedValue = window.wc.ShippingCurrencyNumberFormat( config, value );
+						priceInput.attr( 'value', formattedValue );
+					} );
+
+					return htmlContent.prop( 'outerHTML' );
 				},
 				moveHTMLHelpTips: function( html ) {
 					// These help tips aren't moved.
