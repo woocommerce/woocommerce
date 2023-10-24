@@ -89,6 +89,9 @@ class File {
 			}
 
 			$this->source = substr( $this->source, 0, $rotation_marker );
+			if ( count( $segments ) < 5 ) {
+				$this->hash = $this->source;
+			}
 		}
 	}
 
