@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
+use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
 use Automattic\WooCommerce\Blocks\Verticals\Client;
 use Automattic\WooCommerce\Blocks\Verticals\VerticalsSelector;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -104,13 +105,24 @@ class Patterns extends AbstractRoute {
 		$business_description = sanitize_text_field( wp_unslash( $request['business_description'] ) );
 		$vertical_id          = ( new VerticalsSelector() )->get_vertical_id( $business_description );
 
+		if ( empty( $business_description ) ) {
+			$business_description = get_option( 'woo_ai_describe_store_description' );
+		}
+
 		if ( is_wp_error( $vertical_id ) ) {
 			$response = $this->error_to_response( $vertical_id );
 		} else {
-			$populate_images = ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client(), $business_description );
+			$vertical_images   = ( new Client() )->get_vertical_images( $vertical_id );
+			$populate_patterns = ( new PatternUpdater() )->generate_content( $vertical_images, $business_description );
 
-			if ( is_wp_error( $populate_images ) ) {
-				$response = $this->error_to_response( $populate_images );
+			if ( is_wp_error( $populate_patterns ) ) {
+				$response = $this->error_to_response( $populate_patterns );
+			}
+
+			$populate_products = ( new ProductUpdater() )->generate_content( $vertical_images, $business_description );
+
+			if ( is_wp_error( $populate_products ) ) {
+				$response = $this->error_to_response( $populate_products );
 			}
 		}
 

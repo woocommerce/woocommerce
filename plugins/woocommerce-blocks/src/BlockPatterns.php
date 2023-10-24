@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
+use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
 use Automattic\WooCommerce\Blocks\Verticals\Client;
 use Automattic\WooCommerce\Blocks\Verticals\VerticalsSelector;
 
@@ -249,8 +250,10 @@ class BlockPatterns {
 			return $vertical_id;
 		}
 
+		$vertical_images      = ( new Client() )->get_vertical_images( $vertical_id );
 		$business_description = get_option( VerticalsSelector::STORE_DESCRIPTION_OPTION_KEY );
 
-		return ( new PatternUpdater() )->create_patterns_content( $vertical_id, new Client(), $business_description );
+		( new PatternUpdater() )->generate_content( $vertical_images, $business_description );
+		( new ProductUpdater() )->generate_content( $vertical_images, $business_description );
 	}
 }
