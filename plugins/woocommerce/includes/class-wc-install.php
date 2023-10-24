@@ -769,9 +769,9 @@ class WC_Install {
 		 * @since 2.1.0
 		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
 		 */
-		$cart_shortcode = apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( false ), '8.3.0', 'woocommerce_create_pages' );
+		$cart_shortcode = apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( '' ), '8.3.0', 'woocommerce_create_pages' );
 
-		$cart_page_content = ! $cart_shortcode ? self::get_cart_block_content() : '<!-- wp:shortcode -->[' . $cart_shortcode . ']<!-- /wp:shortcode -->';
+		$cart_page_content = empty( $cart_shortcode ) ? self::get_cart_block_content() : '<!-- wp:shortcode --> [' . $cart_shortcode . ']<!-- /wp:shortcode -->';
 
 		/**
 		 * Determines the checkout shortcode tag used on the checkout page.
@@ -779,9 +779,9 @@ class WC_Install {
 		 * @since 2.1.0
 		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
 		 */
-		$checkout_shortcode = apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( false ), '8.3.0','woocommerce_create_pages' );
+		$checkout_shortcode = apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( '' ), '8.3.0', 'woocommerce_create_pages' );
 
-		$checkout_page_content = ! $checkout_shortcode ? self::get_checkout_block_content() : '<!-- wp:shortcode -->[' . $checkout_shortcode . ']<!-- /wp:shortcode -->';
+		$checkout_page_content = empty( $checkout_shortcode ) ? self::get_checkout_block_content() : '<!-- wp:shortcode --> [' . $checkout_shortcode . ']<!-- /wp:shortcode -->';
 
 		/**
 		 * Determines the my account shortcode tag used on the my account page.
