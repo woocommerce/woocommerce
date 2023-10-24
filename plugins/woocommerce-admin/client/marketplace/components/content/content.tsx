@@ -29,19 +29,19 @@ export default function Content(): JSX.Element {
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
-
 		// we are recording both the new and legacy events here for now
 		// they're separate methods to make it easier to remove the legacy one later
 		const marketplaceViewProps = {
-			view: selectedTab || '',
-			search_term: query?.term || '',
-			product_type: query?.section || '',
-			category: query?.category || '',
+			view: query?.tab,
+			search_term: query?.term,
+			product_type: query?.section,
+			category: query?.category,
 		};
+
 		recordMarketplaceView( marketplaceViewProps );
 		recordLegacyTabView( marketplaceViewProps );
 
-		if ( [ '', 'discover' ].includes( selectedTab ) ) {
+		if ( query.tab && [ '', 'discover' ].includes( query.tab ) ) {
 			return;
 		}
 
@@ -59,9 +59,9 @@ export default function Content(): JSX.Element {
 				'category',
 				query.category === '_all' ? '' : query.category
 			);
-		} else if ( selectedTab === 'themes' ) {
+		} else if ( query?.tab === 'themes' ) {
 			params.append( 'category', 'themes' );
-		} else if ( selectedTab === 'search' ) {
+		} else if ( query?.tab === 'search' ) {
 			params.append( 'category', 'extensions-themes' );
 		}
 
@@ -86,7 +86,7 @@ export default function Content(): JSX.Element {
 	}, [
 		query.term,
 		query.category,
-		selectedTab,
+		query?.tab,
 		setIsLoading,
 		query?.section,
 	] );
