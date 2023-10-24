@@ -111,7 +111,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			'title'            => array(
 				'title'       => __( 'Name', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'description' => __( 'Your customers will see the name of this shipping method during checkout.', 'woocommerce' ),
 				'default'     => '',
 				'placeholder' => __( 'e.g. Free shipping', 'woocommerce' ),
 				'desc_tip'    => true,
@@ -134,7 +134,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'type'              => 'text',
 				'class'             => 'wc-shipping-modal-price',
 				'placeholder'       => wc_format_localized_price( 0 ),
-				'description'       => __( 'Users will need to spend this amount to get free shipping.', 'woocommerce' ),
+				'description'.      => __( 'Customers will need to spend this amount to get free shipping.', 'woocommerce' ),
 				'default'           => '0',
 				'desc_tip'          => true,
 				'sanitize_callback' => array( $this, 'sanitize_cost' ),

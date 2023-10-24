@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php esc_html_e( 'Zone name', 'woocommerce' ); ?>
 					</label>
 					<p class="wc-shipping-zone-help-text">
-						<?php esc_html_e( 'This is the name of the zone for your reference.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Give your zone a name! E.g. Local, or Worldwide.', 'woocommerce' ); ?>
 					</p>
 				</th>
 				<td class="forminp">
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
 					</label>
 					<p class="wc-shipping-zone-help-text">
-						<?php esc_html_e( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
+						<?php esc_html_e( 'List the regions you\'d like to include in your shipping zone. Customers will be matched against these regions.', 'woocommerce' ); ?>
 					</p>
 				</th>
 				<td>
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?>
 				</label>
 				<p class="wc-shipping-zone-help-text">
-					<?php esc_html_e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?>
+					<?php esc_html_e( 'Add the shipping methods you\'d like to make available to customers in this zone.', 'woocommerce' ); ?>
 				</p>
 			</th>
 			<td class="">
@@ -131,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						printf(
 							/* translators: %s: shipping method title */
-							esc_html__( 'Configure %s', 'woocommerce' ),
+							esc_html__( 'Set up %s', 'woocommerce' ),
 							'{{{ data.method.method_title.toLowerCase() }}}'
 						);
 						?>
@@ -140,11 +140,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
-				<article class="wc-modal-shipping-method-settings">
+				<article class="wc-modal-shipping-method-settings" data-id="{{{ data.instance_id }}}" data-status="{{{ data.status }}}"  data-shipping-classes-count="<?php echo count( WC()->shipping()->get_shipping_classes() ); ?>">
 					<form action="" method="post">
 						{{{ data.method.settings_html }}}
 						<input type="hidden" name="instance_id" value="{{{ data.instance_id }}}" />
 					</form>
+					<a class="wc-shipping-method-add-class-costs" style="display:none;" target="_blank" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Add shipping class costs', 'woocommerce' ); ?></a>
 				</article>
 				<footer>
 					<div class="inner">
