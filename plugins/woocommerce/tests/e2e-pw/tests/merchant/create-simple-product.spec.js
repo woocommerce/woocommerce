@@ -58,24 +58,12 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.locator( '#title' ).fill( virtualProductName );
 		await page.locator( '#_regular_price' ).fill( productPrice );
 		await page.locator( '#_virtual' ).click();
+		await page.getByRole( 'button', { name: 'Save Draft' } ).click();
+		await expect( page.locator( '#sample-permalink' ) ).toBeVisible();
 		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
-		// When running in parallel, clicking the publish button sometimes saves products as a draft
-		if (
-			(
-				await page.locator( '#post-status-display' ).innerText()
-			 ).includes( 'Draft' )
-		) {
-			await page.locator( '#publish' ).click();
-			await page.waitForLoadState( 'networkidle' );
-		}
-
-		await expect(
-			page
-				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Product published.' } )
-		).toBeVisible();
+		await expect( page.getByText( 'Product published.' ) ).toBeVisible();
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
