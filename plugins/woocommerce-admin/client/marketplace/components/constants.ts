@@ -8,6 +8,3 @@ export const MARKETPLACE_CATEGORY_API_PATH =
 export const MARKETPLACE_ITEMS_PER_PAGE = 60;
 export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;
 export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
-export const MARKETPLACE_SUBSCRIPTIONS_PATH =
-	MARKETPLACE_HOST +
-	'/my-account/my-subscriptions/?utm_source=subscriptionsscreen&utm_medium=product&utm_campaign=wc-admin&utm_content=renew';
