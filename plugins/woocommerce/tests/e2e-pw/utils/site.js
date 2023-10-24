@@ -242,6 +242,7 @@ const reset = async ( cKey, cSecret ) => {
  */
 const maybeUseCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 	/**
+	 * A WordPress page.
 	 * @typedef {Object} WPPage
 	 * @property {number} id
 	 * @property {string} slug
