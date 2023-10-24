@@ -7,8 +7,8 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_SUBSCRIPTIONS_PATH } from '../../../constants';
 import { Subscription } from '../../types';
+import RenewButton from './renew-button';
 
 interface RenewProps {
 	subscription: Subscription;
@@ -43,13 +43,10 @@ export default function RenewModal( props: RenewProps ) {
 				>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
-				<Button
+				<RenewButton
+					subscription={ props.subscription }
 					variant="primary"
-					href={ MARKETPLACE_SUBSCRIPTIONS_PATH }
-					className="woocommerce-marketplace__header-account-modal-button"
-				>
-					{ __( 'Renew', 'woocommerce' ) }
-				</Button>
+				/>
 			</ButtonGroup>
 		</Modal>
 	);
