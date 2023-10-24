@@ -25,7 +25,7 @@ export default function Install( props: InstallProps ) {
 
 	const install = () => {
 		setLoading( true );
-		installProduct( props.subscription.product_key )
+		installProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
 					createSuccessNotice(

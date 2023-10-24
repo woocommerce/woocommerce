@@ -2,6 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -185,8 +186,38 @@ async function fetchSubscriptions(): Promise< Array< Subscription > > {
 	return await apiFetch( { path: url.toString() } );
 }
 
-function installProduct( productKey: string ): Promise< void > {
-	const url = '/wc/v3/marketplace/subscriptions/install';
+function installProduct( subscription: Subscription ): Promise< void > {
+	return connectProduct( subscription.product_key ).then( () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( ! window.wp.updates ) {
+				reject( __( 'Please reload and try again', 'woocommerce' ) );
+				return;
+			}
+
+			const action =
+				subscription.local.type === 'theme'
+					? 'install-theme'
+					: 'install-plugin';
+
+			window.wp.updates.ajax( action, {
+				// The slug prefix is required for the install to use WCCOM install filters.
+				slug: 'woocommerce-com-' + subscription.zip_slug,
+				success: resolve,
+				error: () => {
+					// If install fails disconnect the product
+					return disconnectProduct( subscription.product_key ).then(
+						() => {
+							reject();
+						}
+					);
+				},
+			} );
+		} );
+	} );
+}
+
+function connectProduct( productKey: string ): Promise< void > {
+	const url = '/wc/v3/marketplace/subscriptions/activate';
 	const data = new URLSearchParams();
 	data.append( 'product_key', productKey );
 	return apiFetch( {
@@ -199,8 +230,8 @@ function installProduct( productKey: string ): Promise< void > {
 	} );
 }
 
-function connectProduct( productKey: string ): Promise< void > {
-	const url = '/wc/v3/marketplace/subscriptions/activate';
+function disconnectProduct( productKey: string ): Promise< void > {
+	const url = '/wc/v3/marketplace/subscriptions/deactivate';
 	const data = new URLSearchParams();
 	data.append( 'product_key', productKey );
 	return apiFetch( {
