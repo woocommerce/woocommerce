@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/testimonials-3-columns' );
 
 $main_header        = $content['titles'][0]['default'] ?? '';
-$first_title        = $content['titles'][1]['default'] ?? '';
-$second_title       = $content['titles'][2]['default'] ?? '';
-$third_title        = $content['titles'][3]['default'] ?? '';
+$first_review       = $content['titles'][1]['default'] ?? '';
+$second_review      = $content['titles'][2]['default'] ?? '';
+$third_review       = $content['titles'][3]['default'] ?? '';
 $first_description  = $content['descriptions'][0]['default'] ?? '';
 $second_description = $content['descriptions'][1]['default'] ?? '';
 $third_description  = $content['descriptions'][2]['default'] ?? '';
@@ -29,7 +29,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 		<!-- wp:column -->
 		<div class="wp-block-column">
 			<!-- wp:paragraph -->
-			<p><strong><?php echo esc_html( $first_title ); ?></strong></p>
+			<p><strong><?php echo esc_html( $first_review ); ?></strong></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
@@ -46,7 +46,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 		<div class="wp-block-column">
 			<!-- wp:paragraph -->
 
-			<p><strong><?php echo esc_html( $second_title ); ?></strong></p>
+			<p><strong><?php echo esc_html( $second_review ); ?></strong></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
@@ -62,7 +62,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 		<!-- wp:column -->
 		<div class="wp-block-column">
 			<!-- wp:paragraph -->
-			<p><strong><?php echo esc_html( $third_title ); ?></strong></p>
+			<p><strong><?php echo esc_html( $third_review ); ?></strong></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
