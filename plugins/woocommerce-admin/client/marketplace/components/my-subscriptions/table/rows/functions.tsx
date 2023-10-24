@@ -11,6 +11,7 @@ import { Icon, plugins } from '@wordpress/icons';
  */
 import { Subscription } from '../../types';
 import Install from '../actions/install';
+import RenewButton from '../actions/renew-button';
 import Update from '../actions/update';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import StatusPopover from './status-popover';
@@ -178,10 +179,18 @@ export function version( subscription: Subscription ): TableRow {
 }
 
 export function install( subscription: Subscription ): TableRow {
-	const displayElement = <Install subscription={ subscription } />;
+	if ( subscription.expired ) {
+		return {
+			display: (
+				<RenewButton />
+			)
+		};
+	}
 
 	return {
-		display: displayElement,
+		display: (
+			<Install subscription={ subscription } />
+		),
 	};
 }
 

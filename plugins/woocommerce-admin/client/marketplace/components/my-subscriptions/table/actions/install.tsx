@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
-import { useContext, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import { useContext, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { Subscription } from '../../types';
-import { installProduct } from '../../../../utils/functions';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
+import { installProduct } from '../../../../utils/functions';
+import { Subscription } from '../../types';
 
 interface InstallProps {
 	subscription: Subscription;
