@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </h2>
 
 <p class="wc-shipping-zone-help-text">
-	<?php esc_html_e( 'Use shipping classes to customize the shipping rates for different groups of products, such as heavy items that require higher postage fees.', 'woocommerce' );?> <a target="_blank" href="https://woocommerce.com/document/product-shipping-classes/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+	<?php esc_html_e( 'Use shipping classes to customize the shipping rates for different groups of products, such as heavy items that require higher postage fees.', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/product-shipping-classes/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 </p>
 
 <table class="wc-shipping-classes widefat">
