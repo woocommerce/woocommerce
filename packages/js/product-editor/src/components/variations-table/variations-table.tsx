@@ -13,6 +13,7 @@ import {
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
+	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -52,6 +53,7 @@ import HiddenIcon from '../../icons/hidden-icon';
 import { Pagination } from './pagination';
 import { EmptyTableState } from './table-empty-state';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
+import { VariationsFilter } from './variations-filter';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -79,6 +81,8 @@ type VariationResponseProps = {
 	delete?: Partial< ProductVariation >[];
 };
 
+type AttributeFilters = { attribute: string; terms: string[] };
+
 function getEditVariationLink( variation: ProductVariation ) {
 	return getNewPath(
 		{},
@@ -105,6 +109,7 @@ export const VariationsTable = forwardRef<
 	const [ perPage, setPerPage ] = useState(
 		DEFAULT_VARIATION_PER_PAGE_OPTION
 	);
+	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const [ isUpdating, setIsUpdating ] = useState< Record< string, boolean > >(
 		{}
 	);
@@ -118,6 +123,11 @@ export const VariationsTable = forwardRef<
 	} = useSelection();
 
 	const productId = useEntityId( 'postType', 'product' );
+	const [ attributes ] = useEntityProp< ProductAttribute[] >(
+		'postType',
+		'product',
+		'attributes'
+	);
 	const requestParams = useMemo(
 		() => ( {
 			product_id: productId,
@@ -125,8 +135,9 @@ export const VariationsTable = forwardRef<
 			per_page: perPage,
 			order: 'asc',
 			orderby: 'menu_order',
+			attributes: filters,
 		} ),
-		[ productId, currentPage, perPage ]
+		[ productId, currentPage, perPage, filters ]
 	);
 
 	const context = useContext( CurrencyContext );
@@ -386,6 +397,36 @@ export const VariationsTable = forwardRef<
 		};
 	}
 
+	function variationsFilterHandler( attribute: ProductAttribute ) {
+		return function handleVariationsFilter( options: string[] ) {
+			setFilters( ( current ) => {
+				let isPresent = false;
+				const newFilter = current.reduce< AttributeFilters[] >(
+					( prev, item ) => {
+						if ( item.attribute === attribute.slug ) {
+							isPresent = true;
+							if ( options.length === 0 ) {
+								return prev;
+							}
+							return [ ...prev, { ...item, terms: options } ];
+						}
+						return [ ...prev, item ];
+					},
+					[]
+				);
+
+				if ( ! isPresent ) {
+					newFilter.push( {
+						attribute: attribute.slug,
+						terms: options,
+					} );
+				}
+
+				return newFilter;
+			} );
+		};
+	}
+
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
 			{ ( isLoading || isGeneratingVariations ) && (
@@ -429,7 +470,7 @@ export const VariationsTable = forwardRef<
 						/>
 					</div>
 					<div className="woocommerce-product-variations__filters">
-						{ hasSelection( variationIds ) && (
+						{ hasSelection( variationIds ) ? (
 							<>
 								<Button
 									variant="tertiary"
@@ -446,6 +487,18 @@ export const VariationsTable = forwardRef<
 									{ __( 'Clear selection', 'woocommerce' ) }
 								</Button>
 							</>
+						) : (
+							attributes
+								.filter( ( attribute ) => attribute.variation )
+								.map( ( attribute ) => (
+									<VariationsFilter
+										key={ attribute.id }
+										attribute={ attribute }
+										onFilter={ variationsFilterHandler(
+											attribute
+										) }
+									/>
+								) )
 						) }
 					</div>
 					<div>
