@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { MouseEvent } from 'react';
+import { MouseEvent, useEffect } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
@@ -176,10 +176,16 @@ export const VariationsTable = forwardRef<
 		updateProductVariation,
 		deleteProductVariation,
 		batchUpdateProductVariations,
-		invalidateResolution,
+		invalidateResolutionForStore,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 	const { invalidateResolution: coreInvalidateResolution } =
 		useDispatch( 'core' );
+
+	useEffect( () => {
+		if ( isGeneratingVariations ) {
+			setFilters( [] );
+		}
+	}, [ isGeneratingVariations ] );
 
 	const { generateProductVariations } = useProductVariationsHelper();
 
@@ -279,9 +285,6 @@ export const VariationsTable = forwardRef<
 					source: TRACKS_SOURCE,
 				} );
 				createSuccessNotice( getSnackbarText( response, 'delete' ) );
-				invalidateResolution( 'getProductVariations', [
-					requestParams,
-				] );
 				coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product',
@@ -292,6 +295,7 @@ export const VariationsTable = forwardRef<
 					'product_variation',
 					variationId,
 				] );
+				return invalidateResolutionForStore();
 			} )
 			.finally( () => {
 				setIsUpdating( ( prevState ) => ( {
@@ -337,14 +341,10 @@ export const VariationsTable = forwardRef<
 			{ product_id: productId },
 			{ update }
 		)
-			.then( ( response: VariationResponseProps ) =>
-				invalidateResolution( 'getProductVariations', [
-					requestParams,
-				] ).then( () => response )
-			)
 			.then( ( response: VariationResponseProps ) => {
 				createSuccessNotice( getSnackbarText( response ) );
 				onVariationTableChange( 'update', update );
+				return invalidateResolutionForStore();
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -361,9 +361,9 @@ export const VariationsTable = forwardRef<
 			}
 		)
 			.then( ( response: VariationResponseProps ) => {
-				invalidateResolution( 'getProductVariations', [
-					requestParams,
-				] );
+				createSuccessNotice( getSnackbarText( response ) );
+				onVariationTableChange( 'delete' );
+
 				coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product',
@@ -376,11 +376,7 @@ export const VariationsTable = forwardRef<
 						variationId,
 					] );
 				} );
-				return response;
-			} )
-			.then( ( response: VariationResponseProps ) => {
-				createSuccessNotice( getSnackbarText( response ) );
-				onVariationTableChange( 'delete' );
+				return invalidateResolutionForStore();
 			} )
 			.catch( () => {
 				createErrorNotice(

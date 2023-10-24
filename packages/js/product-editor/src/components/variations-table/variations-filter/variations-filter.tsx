@@ -1,15 +1,10 @@
 /**
  * External dependencies
  */
-import {
-	ChangeEvent,
-	FormEvent,
-	KeyboardEvent,
-	MouseEvent,
-	useMemo,
-} from 'react';
+import { FormEvent, KeyboardEvent, useEffect } from 'react';
 import { ProductAttribute } from '@woocommerce/data';
-import { createElement, useState } from '@wordpress/element';
+import { useDebounce } from '@wordpress/compose';
+import { createElement, useState, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Icon,
@@ -29,7 +24,6 @@ import {
  * Internal dependencies
  */
 import { VariationsFilterProps } from './types';
-import { useDebounce } from '@wordpress/compose';
 
 export function VariationsFilter( {
 	initialValues,
@@ -40,6 +34,8 @@ export function VariationsFilter( {
 		useState< ProductAttribute[ 'options' ] >( initialValues );
 	const [ search, setSearch ] = useState( '' );
 	const isDisabled = selection.length === 0;
+
+	useEffect( () => setSelection( initialValues ), [ initialValues ] );
 
 	function isOptionChecked( option: string ) {
 		return selection.includes( option );
