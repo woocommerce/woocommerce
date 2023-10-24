@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
@@ -20,7 +21,7 @@ class File {
 	 *
 	 * @var string
 	 */
-	protected $source;
+	protected $source = '';
 
 	/**
 	 * The 0-based increment of the file, if it has been rotated. Derived from the filename. Can only be 0-9.
@@ -32,16 +33,16 @@ class File {
 	/**
 	 * The date the file was created, as a Unix timestamp, derived from the filename.
 	 *
-	 * @var int
+	 * @var int|false
 	 */
-	protected $created;
+	protected $created = false;
 
 	/**
 	 * The hash property of the file, derived from the filename.
 	 *
 	 * @var string
 	 */
-	protected $hash;
+	protected $hash = '';
 
 	/**
 	 * Class File
@@ -65,7 +66,7 @@ class File {
 	 *
 	 * @return void
 	 */
-	protected function parse_filename() {
+	protected function parse_filename(): void {
 		$info     = pathinfo( $this->path );
 		$filename = $info['filename'];
 		$segments = explode( '-', $filename );
@@ -82,8 +83,12 @@ class File {
 
 		$rotation_marker = strrpos( $this->source, '.', -1 );
 		if ( false !== $rotation_marker ) {
-			$this->rotation = substr( $this->source, -1 );
-			$this->source   = substr( $this->source, 0, $rotation_marker );
+			$rotation = substr( $this->source, -1 );
+			if ( is_numeric( $rotation ) ) {
+				$this->rotation = intval( $rotation );
+			}
+
+			$this->source = substr( $this->source, 0, $rotation_marker );
 		}
 	}
 
@@ -92,7 +97,7 @@ class File {
 	 *
 	 * @return string
 	 */
-	public function get_basename() {
+	public function get_basename(): string {
 		return basename( $this->path );
 	}
 
@@ -101,16 +106,16 @@ class File {
 	 *
 	 * @return string
 	 */
-	public function get_source() {
+	public function get_source(): string {
 		return $this->source;
 	}
 
 	/**
 	 * Get the file's rotation property.
 	 *
-	 * @return int
+	 * @return int|null
 	 */
-	public function get_rotation() {
+	public function get_rotation(): ?int {
 		return $this->rotation;
 	}
 
@@ -119,14 +124,14 @@ class File {
 	 *
 	 * @return string
 	 */
-	public function get_hash() {
+	public function get_hash(): string {
 		return $this->hash;
 	}
 
 	/**
 	 * Get the file's created property.
 	 *
-	 * @return int
+	 * @return int|false
 	 */
 	public function get_created_timestamp() {
 		return $this->created;
@@ -151,15 +156,15 @@ class File {
 			return false;
 		}
 
-		return filesize( $this->path );
+		return @filesize( $this->path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 
 	/**
 	 * Delete the file from the filesystem.
 	 *
-	 * @return bool
+	 * @return bool True on success, false on failure.
 	 */
-	public function delete() {
+	public function delete(): bool {
 		return @unlink( $this->path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 }

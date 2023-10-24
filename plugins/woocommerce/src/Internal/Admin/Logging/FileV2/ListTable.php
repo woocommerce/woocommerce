@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
@@ -55,7 +56,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function no_items() {
+	public function no_items(): void {
 		esc_html_e( 'No log files found.', 'woocommerce' );
 	}
 
@@ -64,7 +65,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	protected function get_bulk_actions() {
+	protected function get_bulk_actions(): array {
 		return array(
 			'delete' => __( 'Delete permanently', 'woocommerce' ),
 		);
@@ -75,8 +76,12 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	protected function get_sources_list() {
+	protected function get_sources_list(): array {
 		$sources = $this->file_controller->get_file_sources();
+		if ( is_wp_error( $sources ) ) {
+			return array();
+		}
+
 		sort( $sources );
 
 		return $sources;
@@ -89,7 +94,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function extra_tablenav( $which ): void {
 		$all_sources    = $this->get_sources_list();
 		$current_source = filter_input( INPUT_GET, 'source', FILTER_SANITIZE_STRING ) ?? '';
 
@@ -126,7 +131,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function prepare_column_headers() {
+	public function prepare_column_headers(): void {
 		$this->_column_headers = array(
 			$this->get_columns(),
 			get_hidden_columns( $this->screen ),
@@ -140,7 +145,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function prepare_items() {
+	public function prepare_items(): void {
 		$per_page = $this->get_items_per_page(
 			self::PER_PAGE_USER_OPTION_KEY,
 			$this->file_controller::DEFAULTS_GET_FILES['per_page']
@@ -181,7 +186,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	public function get_columns() {
+	public function get_columns(): array {
 		$columns = array(
 			'cb'       => '<input type="checkbox" />',
 			'source'   => __( 'Source', 'woocommerce' ),
@@ -198,7 +203,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	protected function get_sortable_columns() {
+	protected function get_sortable_columns(): array {
 		$sortable = array(
 			'source'   => array( 'source' ),
 			'created'  => array( 'created' ),
@@ -216,7 +221,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_cb( $item ) {
+	public function column_cb( $item ): string {
 		ob_start();
 		?>
 		<input
@@ -248,7 +253,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_source( $item ) {
+	public function column_source( $item ): string {
 		$log_file        = sanitize_title( $item->get_basename() );
 		$single_file_url = add_query_arg(
 			array(
@@ -280,7 +285,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_created( $item ) {
+	public function column_created( $item ): string {
 		$timestamp = $item->get_created_timestamp();
 
 		return gmdate( 'Y-m-d', $timestamp );
@@ -293,7 +298,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_modified( $item ) {
+	public function column_modified( $item ): string {
 		$timestamp = $item->get_modified_timestamp();
 
 		return gmdate( 'Y-m-d H:i:s', $timestamp );
@@ -306,7 +311,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	public function column_size( $item ) {
+	public function column_size( $item ): string {
 		$size = $item->get_file_size();
 
 		return size_format( $size );

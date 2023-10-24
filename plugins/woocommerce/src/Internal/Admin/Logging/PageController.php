@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
@@ -37,7 +38,7 @@ class PageController {
 	 */
 	final public function init(
 		FileController $file_controller
-	) {
+	): void {
 		$this->file_controller = $file_controller;
 
 		$this->init_hooks();
@@ -48,7 +49,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'setup_screen_options' ) );
 		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'handle_list_table_bulk_actions' ) );
 	}
@@ -58,7 +59,7 @@ class PageController {
 	 *
 	 * @return string
 	 */
-	public function get_logs_tab_url() {
+	public function get_logs_tab_url(): string {
 		return add_query_arg(
 			array(
 				'page' => 'wc-status',
@@ -73,7 +74,7 @@ class PageController {
 	 *
 	 * @return string
 	 */
-	public function get_default_handler() {
+	public function get_default_handler(): string {
 		$handler = Constants::get_constant( 'WC_LOG_HANDLER' );
 
 		if ( is_null( $handler ) || ! class_exists( $handler ) ) {
@@ -88,7 +89,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	public function render() {
+	public function render(): void {
 		$handler = $this->get_default_handler();
 
 		switch ( $handler ) {
@@ -112,7 +113,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function render_filev2( array $args = array() ) {
+	private function render_filev2( array $args = array() ): void {
 		$view = $args['view'] ?? '';
 
 		switch ( $view ) {
@@ -131,7 +132,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function render_file_list_page() {
+	private function render_file_list_page(): void {
 		$defaults = $this->get_query_param_defaults();
 		$params   = $this->get_query_params();
 
@@ -162,7 +163,7 @@ class PageController {
 	 *
 	 * @return string[]
 	 */
-	public function get_query_param_defaults() {
+	public function get_query_param_defaults(): array {
 		return array(
 			'order'   => $this->file_controller::DEFAULTS_GET_FILES['order'],
 			'orderby' => $this->file_controller::DEFAULTS_GET_FILES['orderby'],
@@ -176,7 +177,7 @@ class PageController {
 	 *
 	 * @return array
 	 */
-	public function get_query_params() {
+	public function get_query_params(): array {
 		$defaults = $this->get_query_param_defaults();
 		$params   = filter_input_array(
 			INPUT_GET,
@@ -216,7 +217,7 @@ class PageController {
 	 *
 	 * @return ListTable
 	 */
-	private function get_list_table() {
+	private function get_list_table(): ListTable {
 		if ( $this->list_table instanceof ListTable ) {
 			return $this->list_table;
 		}
@@ -231,7 +232,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function setup_screen_options() {
+	private function setup_screen_options(): void {
 		$params = $this->get_query_params();
 
 		if ( 'list_files' === $params['view'] ) {
@@ -253,7 +254,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function handle_list_table_bulk_actions() {
+	private function handle_list_table_bulk_actions(): void {
 		$action = $this->get_list_table()->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

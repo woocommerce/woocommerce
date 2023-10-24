@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
@@ -153,10 +154,17 @@ class FileController {
 	/**
 	 * Get a list of sources for existing log files.
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_file_sources() {
-		$files       = glob( $this->log_directory . '*.log' );
+		$files = glob( $this->log_directory . '*.log' );
+		if ( false === $files ) {
+			return new WP_Error(
+				'wc_log_directory_error',
+				__( 'Could not access the log file directory.', 'woocommerce' )
+			);
+		}
+
 		$all_sources = array_map(
 			function( $path ) {
 				$file = new File( $path );
@@ -175,7 +183,7 @@ class FileController {
 	 *
 	 * @return int
 	 */
-	public function delete_files( $files ) {
+	public function delete_files( $files ): int {
 		$deleted = 0;
 
 		foreach ( $files as $basename ) {
