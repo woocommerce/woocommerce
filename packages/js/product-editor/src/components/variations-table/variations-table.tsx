@@ -213,7 +213,11 @@ export const VariationsTable = forwardRef<
 		generateProductVariations( productAttributes );
 	}
 
-	if ( ! ( isLoading || isGeneratingVariations ) && totalCount === 0 ) {
+	if (
+		! ( isLoading || isGeneratingVariations ) &&
+		totalCount === 0 &&
+		filters.length === 0
+	) {
 		return (
 			<EmptyTableState
 				onActionClick={ handleEmptyTableStateActionClick }
@@ -455,7 +459,7 @@ export const VariationsTable = forwardRef<
 				</Notice>
 			) }
 
-			{ totalCount > 0 && (
+			{ ( filters.length > 0 || totalCount > 0 ) && (
 				<div className="woocommerce-product-variations__header">
 					<div className="woocommerce-product-variations__selection">
 						<CheckboxControl
