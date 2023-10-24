@@ -15,6 +15,10 @@ import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
+import {
+	recordMarketplaceView,
+	recordLegacyTabView,
+} from '../../utils/tracking';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -25,6 +29,18 @@ export default function Content(): JSX.Element {
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
+
+		// we are recording both the new and legacy events here for now
+		// they're separate methods to make it easier to remove the legacy one later
+		const marketplaceViewProps = {
+			view: selectedTab || '',
+			search_term: query?.term || '',
+			product_type: query?.section || '',
+			category: query?.category || '',
+		};
+		recordMarketplaceView( marketplaceViewProps );
+		recordLegacyTabView( marketplaceViewProps );
+
 		if ( [ '', 'discover' ].includes( selectedTab ) ) {
 			return;
 		}
@@ -67,7 +83,13 @@ export default function Content(): JSX.Element {
 		return () => {
 			abortController.abort();
 		};
-	}, [ query.term, query.category, selectedTab, setIsLoading ] );
+	}, [
+		query.term,
+		query.category,
+		selectedTab,
+		setIsLoading,
+		query?.section,
+	] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
