@@ -183,7 +183,7 @@ class FileController {
 	 *
 	 * @return int
 	 */
-	public function delete_files( $files ): int {
+	public function delete_files( array $files ): int {
 		$deleted = 0;
 
 		foreach ( $files as $basename ) {
