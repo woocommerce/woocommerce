@@ -217,16 +217,16 @@
         },
         {
             "name": "automattic/jetpack-connection",
-            "version": "v1.58.1",
+            "version": "v1.58.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-connection.git",
-                "reference": "f578d8fe7ef6fdb9ecd60c64645cac8bc6809a89"
+                "reference": "9b12984bc9fcc075844b4f2e3fe27176e42cdf14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/f578d8fe7ef6fdb9ecd60c64645cac8bc6809a89",
-                "reference": "f578d8fe7ef6fdb9ecd60c64645cac8bc6809a89",
+                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/9b12984bc9fcc075844b4f2e3fe27176e42cdf14",
+                "reference": "9b12984bc9fcc075844b4f2e3fe27176e42cdf14",
                 "shasum": ""
             },
             "require": {
@@ -274,9 +274,9 @@
             ],
             "description": "Everything needed to connect to the Jetpack infrastructure",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-connection/tree/v1.58.1"
+                "source": "https://github.com/Automattic/jetpack-connection/tree/v1.58.2"
             },
-            "time": "2023-10-10T18:50:27+00:00"
+            "time": "2023-10-19T23:36:12+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
