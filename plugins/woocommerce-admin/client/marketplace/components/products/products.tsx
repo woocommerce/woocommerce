@@ -21,6 +21,7 @@ import {
 	MARKETPLACE_ITEMS_PER_PAGE,
 	MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
 } from '../constants';
+import { recordMarketplaceView } from '../../utils/tracking';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -57,6 +58,11 @@ export default function Products( props: ProductsProps ): JSX.Element {
 	const showAllButton = query.tab === 'search' && ! query.section;
 
 	function showSection( section: ProductType ) {
+		recordMarketplaceView( {
+			view: 'search',
+			search_term: query?.term,
+			product_type: section,
+		} );
 		navigateTo( {
 			url: getNewPath( { section } ),
 		} );
