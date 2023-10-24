@@ -32,12 +32,12 @@ import { VariationsFilterProps } from './types';
 import { useDebounce } from '@wordpress/compose';
 
 export function VariationsFilter( {
+	initialValues,
 	attribute,
 	onFilter,
 }: VariationsFilterProps ) {
-	const [ selection, setSelection ] = useState<
-		ProductAttribute[ 'options' ]
-	>( [] );
+	const [ selection, setSelection ] =
+		useState< ProductAttribute[ 'options' ] >( initialValues );
 	const [ search, setSearch ] = useState( '' );
 	const isDisabled = selection.length === 0;
 

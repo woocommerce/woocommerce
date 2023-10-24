@@ -497,6 +497,13 @@ export const VariationsTable = forwardRef<
 								.map( ( attribute ) => (
 									<VariationsFilter
 										key={ attribute.id }
+										initialValues={
+											filters.find(
+												( filter ) =>
+													filter.attribute ===
+													attribute.slug
+											)?.terms ?? []
+										}
 										attribute={ attribute }
 										onFilter={ variationsFilterHandler(
 											attribute
