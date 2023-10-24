@@ -322,11 +322,8 @@ const handleOnboardingProfileOption = assign( {
 } );
 
 const getMarketingOptInExperimentAssignment = async () => {
-	const momentDate = moment().utc();
-	const year = momentDate.format( 'YYYY' );
-	const month = momentDate.format( 'MM' );
 	return loadExperimentAssignment(
-		`woocommerce_core_profiler_email_marketing_opt_in_${ year }_${ month }`
+		`woocommerce_core_profiler_email_marketing_opt_in_2023_Q4_V1`
 	);
 };
 
