@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add support to downloads block to use the context postType

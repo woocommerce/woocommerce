@@ -159,6 +159,8 @@ export const SaveHub = () => {
 					variant="primary"
 					onClick={ onDone }
 					className="edit-site-save-hub__button"
+					disabled={ isResolving }
+					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
@@ -178,14 +180,13 @@ export const SaveHub = () => {
 			<Button
 				variant="primary"
 				onClick={ onClickSaveButton }
-				isBusy={ isSaving }
 				disabled={ isDisabled }
 				aria-disabled={ isDisabled }
 				className="edit-site-save-hub__button"
 				// @ts-ignore No types for this exist yet.
 				__next40pxDefaultSize
 			>
-				{ label }
+				{ isSaving ? <Spinner /> : label }
 			</Button>
 		);
 	};

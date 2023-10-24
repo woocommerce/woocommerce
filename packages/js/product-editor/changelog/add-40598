@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Export RemoveConfirmationModal to be used outside of the product editor package

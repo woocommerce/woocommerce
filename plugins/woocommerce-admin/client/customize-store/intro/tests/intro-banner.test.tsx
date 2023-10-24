@@ -48,9 +48,7 @@ describe( 'Intro Banners', () => {
 		);
 
 		expect(
-			screen.getByText(
-				/Please check your internet connection and try again./i
-			)
+			screen.getByText( /Please check your internet connection./i )
 		).toBeInTheDocument();
 	} );
 

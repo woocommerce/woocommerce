@@ -1,0 +1,21 @@
+.woocommerce-edit-downloads-modal {
+	&__buttons {
+		display: flex;
+		justify-content: space-between;
+		padding-top: $gap + $gap-large;
+		button:not(.is-destructive) {
+			flex-grow: 1;
+			&:not(:first-child) {
+				margin-left: 10px;
+			}
+		}
+	}
+
+	&__file-url {
+		padding-bottom: $gap-large;
+	}
+
+	.components-input-control__suffix {
+		cursor: pointer;
+	}
+}
