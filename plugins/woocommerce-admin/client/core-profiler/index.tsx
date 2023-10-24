@@ -41,7 +41,6 @@ import {
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
 import CurrencyFactory from '@woocommerce/currency';
-import moment from 'moment';
 
 /**
  * Internal dependencies
