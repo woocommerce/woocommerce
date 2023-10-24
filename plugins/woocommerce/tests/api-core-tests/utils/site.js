@@ -250,21 +250,8 @@ const maybeUseCartCheckoutShortcodes = async ( config ) => {
 	 */
 
 	const { request: apiRequest } = require( '@playwright/test' );
-	const { baseURL, userAgent } = config.projects[ 0 ].use;
+	const { baseURL, userAgent, extraHTTPHeaders } = config.projects[ 0 ].use;
 
-	const encodeCredentials = ( username, password ) => {
-		return Buffer.from( `${ username }:${ password }` ).toString(
-			'base64'
-		);
-	};
-
-	const username = process.env.USER_KEY ?? 'admin';
-	const password = process.env.USER_SECRET ?? 'password';
-	const basicAuth = encodeCredentials( username, password );
-	const Authorization = `Basic ${ basicAuth }`;
-	const extraHTTPHeaders = {
-		Authorization,
-	};
 	const options = {
 		baseURL,
 		userAgent,
