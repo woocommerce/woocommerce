@@ -10,6 +10,8 @@ const BundleAnalyzerPlugin =
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const NormalModuleReplacementPlugin =
+	require( 'webpack' ).NormalModuleReplacementPlugin;
 
 /**
  * Internal dependencies
@@ -172,19 +174,10 @@ const webpackConfig = {
 		// The modified version checks for the WP version and replaces the consent string with the correct one.
 		// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
 		// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884a
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: path.resolve(
-						__dirname,
-						'bin/modified-editsite-lock-unlock.js'
-					), // Replace with the path to your custom script
-					to: require.resolve(
-						'@wordpress/edit-site/build-module/lock-unlock.js'
-					), // Replace with the destination path
-				},
-			],
-		} ),
+		new NormalModuleReplacementPlugin(
+			/@wordpress\/edit-site\/build-module\/lock-unlock\.js/,
+			path.resolve( __dirname, 'bin/modified-editsite-lock-unlock.js' )
+		),
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
