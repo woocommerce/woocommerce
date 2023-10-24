@@ -384,8 +384,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		 */
 		$active_theme = get_stylesheet();
 
-		foreach ( $filtered_response['themes'] as &$theme ){
-			if ( $theme['slug'] == $active_theme ){
+		foreach ( $filtered_response['themes'] as &$theme ) {
+			if ( $theme['slug'] === $active_theme ) {
 				$theme['is_active'] = true;
 			} else {
 				$theme['is_active'] = false;
