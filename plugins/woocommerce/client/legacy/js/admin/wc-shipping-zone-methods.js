@@ -498,16 +498,13 @@
 										);
 									}
 								}
-								// Trigger save if there are changes, or just re-render
-								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'rerender' );
-								} else {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'saved:methods' );
-								}
+
+								// Avoid triggering a rerender here because we don't want to show the method in the table in case merchant doesn't finish flow.
+								
+								shippingMethodView.model.set( 'methods', response.data.methods );
+
+								// Close original modal
+								closeModal();
 							}
 							var instance_id = response.data.instance_id, 
 							    method      = response.data.methods[ instance_id ];
@@ -534,9 +531,6 @@
 							}
 		
 							$( document.body ).trigger( 'init_tooltips' );
-
-							// Close original modal
-							closeModal();
 						}, 'json' );
 					}
 				},
@@ -567,6 +561,22 @@
 						if ( select.length > 0 ) {
 							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
 						}
+
+						event.data.view.possiblyAddShippingClassLink( event );
+					}
+				},
+				possiblyAddShippingClassLink: function( event ) {
+					const article = $( 'article.wc-modal-shipping-method-settings' );
+					const shippingClassesCount = article.data( 'shipping-classes-count' );
+					const status = article.data( 'status' );
+					const instance_id = article.data( 'id' );
+					const model = event.data.view.model;
+					const methods = _.indexBy( model.get( 'methods' ), 'instance_id' );
+					const method = methods[ instance_id ];
+
+					if ( method.id === 'flat_rate' && shippingClassesCount === 0 ) {
+						const link = article.find( '.wc-shipping-method-add-class-costs' );
+						link.css( 'display', 'block' );
 					}
 				},
 				validateFormArguments: function( event, target, data ) {

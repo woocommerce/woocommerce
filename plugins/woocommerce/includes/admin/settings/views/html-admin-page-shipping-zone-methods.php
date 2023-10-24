@@ -140,11 +140,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
-				<article class="wc-modal-shipping-method-settings">
+				<article class="wc-modal-shipping-method-settings" data-id="{{{ data.instance_id }}}" data-status="{{{ data.status }}}"  data-shipping-classes-count="<?php echo count( WC()->shipping()->get_shipping_classes() ); ?>">
 					<form action="" method="post">
 						{{{ data.method.settings_html }}}
 						<input type="hidden" name="instance_id" value="{{{ data.instance_id }}}" />
 					</form>
+					<a class="wc-shipping-method-add-class-costs" style="display:none;" target="_blank" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ); ?>"><?php esc_html_e( 'Add shipping class costs', 'woocommerce' ); ?></a>
 				</article>
 				<footer>
 					<div class="inner">
