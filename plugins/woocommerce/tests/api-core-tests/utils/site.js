@@ -237,6 +237,81 @@ const reset = async ( cKey, cSecret ) => {
 	await deleteAllTaxRates();
 };
 
+/**
+ * Convert Cart and Checkout pages to shortcode.
+ * @param {import('@playwright/test').FullConfig} config
+ */
+const maybeUseCartCheckoutShortcodes = async ( config ) => {
+	/**
+	 * A WordPress page.
+	 * @typedef {Object} WPPage
+	 * @property {number} id
+	 * @property {string} slug
+	 */
+
+	const { request: apiRequest } = require( '@playwright/test' );
+	const { baseURL, userAgent } = config.projects[ 0 ].use;
+
+	const encodeCredentials = ( username, password ) => {
+		return Buffer.from( `${ username }:${ password }` ).toString(
+			'base64'
+		);
+	};
+
+	const username = process.env.USER_KEY ?? 'admin';
+	const password = process.env.USER_SECRET ?? 'password';
+	const basicAuth = encodeCredentials( username, password );
+	const Authorization = `Basic ${ basicAuth }`;
+	const extraHTTPHeaders = {
+		Authorization,
+	};
+	const options = {
+		baseURL,
+		userAgent,
+		extraHTTPHeaders,
+	};
+	const request = await apiRequest.newContext( options );
+
+	// List all pages
+	const response_list = await request.get( '/wp-json/wp/v2/pages', {
+		data: {
+			_fields: [ 'id', 'slug' ],
+		},
+		failOnStatusCode: true,
+	} );
+
+	/**
+	 * @type {WPPage[]}
+	 */
+	const list = await response_list.json();
+
+	// Find the cart and checkout pages
+	const cart = list.find( ( page ) => page.slug === 'cart' );
+	const checkout = list.find( ( page ) => page.slug === 'checkout' );
+
+	// Convert their contents to shortcodes
+	await request.put( `/wp-json/wp/v2/pages/${ cart.id }`, {
+		data: {
+			content: {
+				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
+			},
+		},
+		failOnStatusCode: true,
+	} );
+	console.log( 'Cart page converted to shortcode.' );
+
+	await request.put( `/wp-json/wp/v2/pages/${ checkout.id }`, {
+		data: {
+			content: {
+				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
+			},
+		},
+		failOnStatusCode: true,
+	} );
+	console.log( 'Checkout page converted to shortcode.' );
+};
+
 module.exports = {
 	reset,
+	maybeUseCartCheckoutShortcodes,
 };

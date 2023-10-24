@@ -1,10 +1,15 @@
 const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
-const playwrightConfig = require('./playwright.config');
+const playwrightConfig = require( './playwright.config' );
+const { site } = require( './utils' );
 
+
+/**
+ *
+ * @param {import('@playwright/test').FullConfig} config
+ */
 module.exports = async ( config ) => {
-
 	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
@@ -223,5 +228,7 @@ module.exports = async ( config ) => {
 				process.exit( 1 );
 			}
 		}
+
+		await site.maybeUseCartCheckoutShortcodes( config );
 	}
 };
