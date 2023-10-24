@@ -170,7 +170,7 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
-		// Workaround for Gutenber private API consent string differences between WP 6.3 and 6.4+
+		// Workaround for Gutenberg private API consent string differences between WP 6.3 and 6.4+
 		// The modified version checks for the WP version and replaces the consent string with the correct one.
 		// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
 		// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884a
