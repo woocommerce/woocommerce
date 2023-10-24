@@ -92,7 +92,6 @@
 					$tr.find( '.edit' ).hide();
 					$tr.find( '.wc-shipping-class-edit' ).on( 'click', { view: this }, this.onEditRow );
 					$tr.find( '.wc-shipping-class-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-					// $tr.find( '.wc-shipping-class-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
 				},
 				configureNewShippingClass: function( event ) {
 					event.preventDefault();
