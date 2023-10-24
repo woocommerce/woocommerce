@@ -463,7 +463,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
 												<?php
-												if ( in_array( $key, $disabled_values ) ) {
+												if ( in_array( $key, $disabled_values, true ) ) {
 													echo 'disabled'; }
 												?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
