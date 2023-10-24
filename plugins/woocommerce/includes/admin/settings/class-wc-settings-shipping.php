@@ -48,8 +48,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function get_own_sections() {
 		$sections = array(
 			''        => __( 'Shipping zones', 'woocommerce' ),
-			'options' => __( 'Shipping options', 'woocommerce' ),
-			'classes' => __( 'Shipping classes', 'woocommerce' ),
+			'options' => __( 'Shipping settings', 'woocommerce' ),
+			'classes' => __( 'Classes', 'woocommerce' ),
 		);
 
 		if ( ! $this->wc_is_installing() ) {
@@ -109,7 +109,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => __( 'Shipping options', 'woocommerce' ),
+					'title' => __( 'Shipping settings', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'shipping_options',
 				),
