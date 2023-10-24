@@ -199,7 +199,7 @@ function installProduct( productKey: string ): Promise< void > {
 	} );
 }
 
-function activateProduct( productKey: string ): Promise< void > {
+function connectProduct( productKey: string ): Promise< void > {
 	const url = '/wc/v3/marketplace/subscriptions/activate';
 	const data = new URLSearchParams();
 	data.append( 'product_key', productKey );
@@ -234,11 +234,11 @@ const appendURLParams = (
 
 export {
 	ProductGroup,
-	activateProduct,
 	appendURLParams,
+	connectProduct,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
 	fetchSubscriptions,
-	installProduct
+	installProduct,
 };
