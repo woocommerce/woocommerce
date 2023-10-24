@@ -229,6 +229,6 @@ module.exports = async ( config ) => {
 			}
 		}
 
-		await site.maybeUseCartCheckoutShortcodes( config );
+		await site.useCartCheckoutShortcodes( config );
 	}
 };

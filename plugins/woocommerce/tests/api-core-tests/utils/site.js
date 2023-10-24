@@ -241,7 +241,7 @@ const reset = async ( cKey, cSecret ) => {
  * Convert Cart and Checkout pages to shortcode.
  * @param {import('@playwright/test').FullConfig} config
  */
-const maybeUseCartCheckoutShortcodes = async ( config ) => {
+const useCartCheckoutShortcodes = async ( config ) => {
 	/**
 	 * A WordPress page.
 	 * @typedef {Object} WPPage
@@ -300,5 +300,5 @@ const maybeUseCartCheckoutShortcodes = async ( config ) => {
 
 module.exports = {
 	reset,
-	maybeUseCartCheckoutShortcodes,
+	useCartCheckoutShortcodes,
 };

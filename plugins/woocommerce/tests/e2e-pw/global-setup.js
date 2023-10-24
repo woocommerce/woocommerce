@@ -224,7 +224,7 @@ module.exports = async ( config ) => {
 		}
 	}
 
-	await site.maybeUseCartCheckoutShortcodes( baseURL, userAgent, admin );
+	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();
