@@ -764,6 +764,26 @@ class WC_Install {
 		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
 		/**
+		 * Determines the cart shortcode tag used for the cart page.
+		 *
+		 * @since 2.1.0
+		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
+		 */
+		$cart_shortcode = apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( false ), '8.3.0', 'woocommerce_create_pages' );
+
+		$cart_page_content = ! $cart_shortcode ? self::get_cart_block_content() : '<!-- wp:shortcode -->[' . $cart_shortcode . ']<!-- /wp:shortcode -->';
+
+		/**
+		 * Determines the checkout shortcode tag used on the checkout page.
+		 *
+		 * @since 2.1.0
+		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
+		 */
+		$checkout_shortcode = apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( false ), '8.3.0','woocommerce_create_pages' );
+
+		$checkout_page_content = ! $checkout_shortcode ? self::get_checkout_block_content() : '<!-- wp:shortcode -->[' . $checkout_shortcode . ']<!-- /wp:shortcode -->';
+
+		/**
 		 * Determines the my account shortcode tag used on the my account page.
 		 *
 		 * @since 2.1.0
@@ -786,12 +806,12 @@ class WC_Install {
 				'cart'           => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-					'content' => self::get_cart_block_content(),
+					'content' => $cart_page_content,
 				),
 				'checkout'       => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-					'content' => self::get_checkout_block_content(),
+					'content' => $checkout_page_content,
 				),
 				'myaccount'      => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
