@@ -134,7 +134,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'type'              => 'text',
 				'class'             => 'wc-shipping-modal-price',
 				'placeholder'       => wc_format_localized_price( 0 ),
-				'description'.      => __( 'Customers will need to spend this amount to get free shipping.', 'woocommerce' ),
+				'description'       => __( 'Customers will need to spend this amount to get free shipping.', 'woocommerce' ),
 				'default'           => '0',
 				'desc_tip'          => true,
 				'sanitize_callback' => array( $this, 'sanitize_cost' ),
