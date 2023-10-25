@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: tweak
 
-Escape the default 'thank you' text instead of the filtered message.
+ensure item name filtering via `woocommerce_order_item_name` works in `includes/admin/meta-boxes/views/html-order-item.php`
