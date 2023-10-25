@@ -94,8 +94,8 @@ class PageController {
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
-				$args = $this->get_query_params();
-				$this->render_filev2( $args );
+				$params = $this->get_query_params();
+				$this->render_filev2( $params );
 				break;
 			case 'WC_Log_Handler_DB':
 				WC_Admin_Status::status_logs_db();
@@ -109,17 +109,17 @@ class PageController {
 	/**
 	 * Render the views for the FileV2 log handler.
 	 *
-	 * @param array $args Args for rendering the views.
+	 * @param array $params Args for rendering the views.
 	 *
 	 * @return void
 	 */
-	private function render_filev2( array $args = array() ): void {
-		$view = $args['view'] ?? '';
+	private function render_filev2( array $params = array() ): void {
+		$view = $params['view'] ?? '';
 
 		switch ( $view ) {
 			case 'list_files':
 			default:
-				$this->render_file_list_page();
+				$this->render_file_list_page( $params );
 				break;
 			case 'single_file':
 				WC_Admin_Status::status_logs_file();
@@ -130,11 +130,12 @@ class PageController {
 	/**
 	 * Render the file list view.
 	 *
+	 * @param array $params Args for rendering the views.
+	 *
 	 * @return void
 	 */
-	private function render_file_list_page(): void {
+	private function render_file_list_page( array $params = array() ): void {
 		$defaults = $this->get_query_param_defaults();
-		$params   = $this->get_query_params();
 
 		?>
 		<h2>
