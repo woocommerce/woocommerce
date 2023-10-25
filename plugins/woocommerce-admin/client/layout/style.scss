@@ -46,9 +46,8 @@
 	}
 
 	#wpbody {
-		display: block;
-
 		&.no-header {
+			display: block;
 			margin-top: 0;
 
 			.woocommerce-layout__primary {
