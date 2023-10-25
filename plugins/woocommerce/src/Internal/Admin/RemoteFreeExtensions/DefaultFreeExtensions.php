@@ -50,7 +50,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'mailpoet:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
 					self::get_plugin( 'klaviyo' ),
-					self::get_plugin( 'creative-mail-by-constant-contact' ),
 				),
 			),
 			array(
@@ -175,13 +174,6 @@ class DefaultFreeExtensions {
 				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=klaviyo_settings',
-				'is_built_by_wc' => false,
-			),
-			'creative-mail-by-constant-contact' => array(
-				'name'           => __( 'Creative Mail for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
 			),
 			'codistoconnect'                    => array(
