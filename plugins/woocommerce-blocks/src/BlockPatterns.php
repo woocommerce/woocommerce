@@ -52,7 +52,8 @@ class BlockPatterns {
 		$this->patterns_path = $package->get_path( 'patterns' );
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_patterns_content_update' ), 10, 2 );
+		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
+		add_action( 'upgrader_process_complete', array( $this, 'schedule_on_plugin_update' ), 10, 2 );
 		add_action( 'woocommerce_update_patterns_content', array( $this, 'update_patterns_content' ) );
 	}
 
@@ -211,7 +212,36 @@ class BlockPatterns {
 	 * @param string $option The option name.
 	 * @param string $value The option value.
 	 */
-	public function schedule_patterns_content_update( $option, $value ) {
+	public function schedule_on_option_update( $option, $value ) {
+		$this->schedule_patterns_content_update( $value );
+	}
+
+	/**
+	 * Update the patterns content when the WooCommerce Blocks plugin is updated.
+	 *
+	 * @param \WP_Upgrader $upgrader_object  WP_Upgrader instance.
+	 * @param array        $options  Array of bulk item update data.
+	 */
+	public function schedule_on_plugin_update( $upgrader_object, $options ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] ) {
+			foreach ( $options['plugins'] as $plugin ) {
+				if ( str_contains( $plugin, 'woocommerce-gutenberg-products-block.php' ) || str_contains( $plugin, 'woocommerce.php' ) ) {
+					$business_description = get_option( 'woo_ai_describe_store_description' );
+
+					if ( $business_description ) {
+						$this->schedule_patterns_content_update( $business_description );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Update the patterns content when the store description is changed.
+	 *
+	 * @param string $business_description The business description.
+	 */
+	public function schedule_patterns_content_update( $business_description ) {
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			return;
 		}
@@ -224,7 +254,7 @@ class BlockPatterns {
 
 		require_once $action_scheduler;
 
-		as_schedule_single_action( time(), 'woocommerce_update_patterns_content', array( $value ) );
+		as_schedule_single_action( time(), 'woocommerce_update_patterns_content', array( $business_description ) );
 	}
 
 	/**
