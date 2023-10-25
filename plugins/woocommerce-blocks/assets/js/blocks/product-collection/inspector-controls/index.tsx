@@ -38,7 +38,6 @@ import KeywordControl from './keyword-control';
 import AttributesControl from './attributes-control';
 import TaxonomyControls from './taxonomy-controls';
 import HandPickedProductsControl from './hand-picked-products-control';
-import AuthorControl from './author-control';
 import LayoutOptionsControl from './layout-options-control';
 
 const ProductCollectionInspectorControls = (
@@ -99,7 +98,6 @@ const ProductCollectionInspectorControls = (
 					<KeywordControl { ...queryControlProps } />
 					<AttributesControl { ...queryControlProps } />
 					<TaxonomyControls { ...queryControlProps } />
-					<AuthorControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />
