@@ -24,7 +24,6 @@ import {
 	useState,
 	createElement,
 	useRef,
-	useMemo,
 	Fragment,
 	forwardRef,
 } from '@wordpress/element';
@@ -128,17 +127,6 @@ export const VariationsTable = forwardRef<
 		'product',
 		'attributes'
 	);
-	const requestParams = useMemo(
-		() => ( {
-			product_id: productId,
-			page: currentPage,
-			per_page: perPage,
-			order: 'asc',
-			orderby: 'menu_order',
-			attributes: filters,
-		} ),
-		[ productId, currentPage, perPage, filters ]
-	);
 
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
@@ -151,6 +139,16 @@ export const VariationsTable = forwardRef<
 					hasFinishedResolution,
 					isGeneratingVariations: getIsGeneratingVariations,
 				} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+				const requestParams = {
+					product_id: productId,
+					page: currentPage,
+					per_page: perPage,
+					order: 'asc',
+					orderby: 'menu_order',
+					attributes: filters,
+				};
+
 				return {
 					isLoading: ! hasFinishedResolution(
 						'getProductVariations',
@@ -169,7 +167,7 @@ export const VariationsTable = forwardRef<
 						),
 				};
 			},
-			[ requestParams ]
+			[ productId, currentPage, perPage, filters ]
 		);
 
 	const {
