@@ -37,10 +37,10 @@ export function Edit( {
 		postType,
 		fallbackValue: false,
 	} );
-	const productId = useEntityId( 'postType', 'product' );
+	const productId = useEntityId( 'postType', postType );
 	const [ parentId ] = useEntityProp< number >(
 		'postType',
-		'product_variation',
+		postType,
 		'parent_id'
 	);
 
