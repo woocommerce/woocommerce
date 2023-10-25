@@ -34,3 +34,5 @@ export const Textarea = ( {
 		value={ value }
 	/>
 );
+
+export default Textarea;

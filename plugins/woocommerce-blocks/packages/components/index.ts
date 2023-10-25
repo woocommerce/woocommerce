@@ -11,3 +11,4 @@ export {
 export type { RadioControlOption as RadioControlOptionType } from './radio-control/types';
 export { default as RadioControlAccordion } from './radio-control-accordion';
 export { default as Spinner } from './spinner';
+export { default as Textarea } from './textarea';
