@@ -32,11 +32,15 @@ export const DeleteVariationMenuItem = ( {
 
 	const variationId = useEntityId( 'postType', 'product_variation' );
 
-	const { invalidateVariationList, goToNextVariation, numberOfVariations } =
-		useVariationSwitcher( {
-			parentId: productId ? parseInt( productId, 10 ) : undefined,
-			variationId,
-		} );
+	const {
+		invalidateVariationList,
+		goToNextVariation,
+		goToPreviousVariation,
+		numberOfVariations,
+	} = useVariationSwitcher( {
+		parentId: productId ? parseInt( productId, 10 ) : undefined,
+		variationId,
+	} );
 
 	const [ name ] = useEntityProp< string >(
 		'postType',
@@ -93,7 +97,10 @@ export const DeleteVariationMenuItem = ( {
 
 				invalidateVariationList();
 				if ( numberOfVariations && numberOfVariations > 1 ) {
-					goToNextVariation();
+					if ( ! goToNextVariation() ) {
+						// This would only happen when deleting the last variation.
+						goToPreviousVariation();
+					}
 				} else {
 					navigateTo( {
 						url: getNewPath( {}, `/product/${ productId }` ),

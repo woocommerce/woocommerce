@@ -367,9 +367,7 @@ const LogoEdit = ( {
 
 export const SidebarNavigationScreenLogo = () => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
-	const {
-		logoBlock: { clientId, isLoading: isLogoBlockLoading },
-	} = useContext( LogoBlockContext );
+	const { logoBlockIds } = useContext( LogoBlockContext );
 
 	const {
 		attributes,
@@ -381,7 +379,7 @@ export const SidebarNavigationScreenLogo = () => {
 		( select ) => {
 			const logoBlocks =
 				// @ts-ignore No types for this exist yet.
-				select( blockEditorStore ).getBlocksByClientId( clientId );
+				select( blockEditorStore ).getBlocksByClientId( logoBlockIds );
 
 			const _isAttributesLoading =
 				! logoBlocks.length || logoBlocks[ 0 ] === null;
@@ -398,7 +396,7 @@ export const SidebarNavigationScreenLogo = () => {
 				isAttributesLoading: _isAttributesLoading,
 			};
 		},
-		[ clientId ]
+		[ logoBlockIds ]
 	);
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
@@ -441,16 +439,16 @@ export const SidebarNavigationScreenLogo = () => {
 	// @ts-ignore No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const setAttributes = ( newAttributes: LogoAttributes ) => {
-		if ( ! clientId ) {
+		if ( ! logoBlockIds.length ) {
 			return;
 		}
-		updateBlockAttributes( clientId, newAttributes );
+		logoBlockIds.forEach( ( clientId ) =>
+			updateBlockAttributes( clientId, newAttributes )
+		);
 	};
-
 	const isLoading =
 		siteLogoId === undefined ||
 		isRequestingMediaItem ||
-		isLogoBlockLoading ||
 		isAttributesLoading;
 
 	return (

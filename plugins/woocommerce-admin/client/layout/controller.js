@@ -16,6 +16,7 @@ import {
 	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
+import { ProductPageSkeleton } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -207,6 +208,7 @@ export const getPages = () => {
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {
 			container: ProductPage,
+			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},
@@ -272,6 +274,10 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
 			container: ProductVariationPage,
+			fallback: ProductPageSkeleton,
+			layout: {
+				header: false,
+			},
 			path: '/product/:productId/variation/:variationId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -279,9 +285,6 @@ export const getPages = () => {
 			],
 			navArgs: {
 				id: 'woocommerce-edit-product',
-			},
-			layout: {
-				header: false,
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'edit_products',
@@ -451,8 +454,19 @@ export const Controller = ( { ...props } ) => {
 
 	window.wpNavMenuUrlUpdate( query );
 	window.wpNavMenuClassChange( page, url );
+
+	function getFallback() {
+		return page.fallback ? (
+			<page.fallback />
+		) : (
+			<div className="woocommerce-layout__loading">
+				<Spinner />
+			</div>
+		);
+	}
+
 	return (
-		<Suspense fallback={ <Spinner /> }>
+		<Suspense fallback={ getFallback() }>
 			<page.container
 				params={ params }
 				path={ url }
