@@ -36,19 +36,7 @@ export function PublishButton( {
 			const isPublished = productStatus === 'publish';
 
 			if ( isPublished ) {
-				let propsToRecord = savedProduct as Pick<
-					Product,
-					'type' | 'id'
-				> &
-					Partial< Product >;
-				if ( savedProduct.parent_id > 0 ) {
-					const { description, ...rest } = savedProduct;
-					propsToRecord = {
-						...rest,
-						note: description,
-					};
-				}
-				recordProductEvent( 'product_update', propsToRecord );
+				recordProductEvent( 'product_update', savedProduct );
 			}
 
 			const noticeContent = isPublished

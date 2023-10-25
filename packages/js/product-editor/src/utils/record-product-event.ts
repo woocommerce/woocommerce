@@ -44,6 +44,11 @@ export function recordProductEvent(
 		product_type: type,
 	};
 
+	if ( product.parent_id > 0 ) {
+		product.note = product.description;
+		delete product.description;
+	}
+
 	for ( const productValueKey of Object.keys( product ) ) {
 		if ( potentialTrackableProductValueKeys.includes( productValueKey ) ) {
 			const eventPropKey =
