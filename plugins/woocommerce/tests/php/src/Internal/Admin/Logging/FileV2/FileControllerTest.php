@@ -19,8 +19,22 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 */
 	private $handler;
 
-
+	/**
+	 * "System Under Test", an instance of the class to be tested.
+	 *
+	 * @var FileController
+	 */
 	private $sut;
+
+	/**
+	 * Set up to do before running any of these tests.
+	 *
+	 * @return void
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		self::delete_all_log_files();
+	}
 
 	/**
 	 * Set up before each test.
@@ -40,13 +54,20 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		// Delete all created log files.
+		self::delete_all_log_files();
+		parent::tearDown();
+	}
+
+	/**
+	 * Delete all existing log files.
+	 *
+	 * @return void
+	 */
+	private static function delete_all_log_files(): void {
 		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		foreach ( $files as $file ) {
 			@unlink( $file );
 		}
-
-		parent::tearDown();
 	}
 
 	/**
