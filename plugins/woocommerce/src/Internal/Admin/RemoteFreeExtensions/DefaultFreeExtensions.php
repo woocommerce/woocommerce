@@ -76,6 +76,7 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'mailpoet' ),
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
+						self::get_plugin( 'tiktok-for-business' ),
 					)
 				),
 			),
