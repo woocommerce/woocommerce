@@ -42,7 +42,7 @@ export function useSelection() {
 		};
 	}
 
-	function onSelectAll( itemIds: string[] ) {
+	function onSelectAllPage( itemIds: string[] ) {
 		return function onChange( isChecked: boolean ) {
 			const selection = itemIds.reduce< Selection >(
 				( current, id ) => ( {
@@ -66,7 +66,8 @@ export function useSelection() {
 		hasSelection,
 		isSelected,
 		onSelectItem,
-		onSelectAll,
+		onSelectAllPage,
+		onSelectAll: onSelectAllPage,
 		onClearSelection,
 	};
 }
