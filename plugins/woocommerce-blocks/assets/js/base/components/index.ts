@@ -30,5 +30,4 @@ export * from './sort-select';
 export * from './state-input';
 export * from './summary';
 export * from './tabs';
-export * from './textarea';
 export * from './title';
