@@ -74,6 +74,11 @@ class WC_Helper_Plugin_Info {
 		$results = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! empty( $results ) ) {
 			$response = (object) $results;
+
+			$product = array_shift( $products );
+			if ( ! is_null( $product ) && isset( $product['package'] ) ) {
+				$response->download_link = $product['package'];
+			}
 		}
 
 		return $response;
