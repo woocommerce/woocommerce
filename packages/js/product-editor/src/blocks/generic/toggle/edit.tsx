@@ -5,6 +5,10 @@ import { createElement } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -33,6 +37,12 @@ export function Edit( {
 		postType,
 		fallbackValue: false,
 	} );
+	const productId = useEntityId( 'postType', 'product' );
+	const [ parentId ] = useEntityProp< number >(
+		'postType',
+		'product_variation',
+		'parent_id'
+	);
 
 	function isChecked() {
 		if ( checkedValue !== undefined ) {
@@ -45,6 +55,7 @@ export function Edit( {
 		recordEvent( 'product_toggle_click', {
 			block_id: _templateBlockId,
 			source: TRACKS_SOURCE,
+			product_id: parentId > 0 ? parentId : productId,
 		} );
 		if ( checked ) {
 			setValue( checkedValue !== undefined ? checkedValue : checked );
