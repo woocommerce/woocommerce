@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { formatShippingAddress } from '@woocommerce/base-utils';
+import {
+	formatShippingAddress,
+	isAddressComplete,
+} from '@woocommerce/base-utils';
 import { useEditorContext } from '@woocommerce/base-context';
 import { ShippingAddress as ShippingAddressType } from '@woocommerce/settings';
 import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
@@ -28,17 +31,15 @@ export const ShippingAddress = ( {
 	setIsShippingCalculatorOpen,
 	shippingAddress,
 }: ShippingAddressProps ): JSX.Element | null => {
+	const addressComplete = isAddressComplete( shippingAddress );
 	const { isEditor } = useEditorContext();
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
 	);
-	const hasFormattedAddress = !! formatShippingAddress( shippingAddress );
-
-	// If we don't have formatted address, and we're not in the editor, don't show anything.
-	if ( ! hasFormattedAddress && ! isEditor ) {
+	// If the address is incomplete, and we're not in the editor, don't show anything.
+	if ( ! addressComplete && ! isEditor ) {
 		return null;
 	}
-
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	return (
 		<>
