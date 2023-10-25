@@ -6,7 +6,7 @@
  * External dependencies
  */
 import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useContext } from '@wordpress/element';
+import { useCallback, useContext, useRef } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
@@ -28,6 +28,7 @@ import {
 	FontFamily,
 } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
+import { iframeIsLoaded, isIframe } from '../utils';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -75,6 +76,15 @@ function ScaledBlockPreview( {
 
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
+
+	const iframeRef = useRef( null );
+	const iframeOnload = useCallback( ( event ) => {
+		if ( isIframe( window ) ) {
+			if ( iframeRef.current === event.target ) {
+				iframeIsLoaded();
+			}
+		}
+	}, [] );
 
 	return (
 		<DisabledProvider value={ true }>
@@ -229,6 +239,8 @@ function ScaledBlockPreview( {
 					},
 					[ isNavigable ]
 				) }
+				onLoad={ iframeOnload }
+				ref={ iframeRef }
 			>
 				<EditorStyles styles={ settings.styles } />
 				<style>

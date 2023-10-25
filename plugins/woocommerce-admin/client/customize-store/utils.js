@@ -2,6 +2,22 @@ export function sendMessageToParent( message ) {
 	window.parent.postMessage( message, '*' );
 }
 
+export function isIframe( windowObject ) {
+	return windowObject.document !== windowObject.parent.document;
+}
+
+export function iframeIsLoaded() {
+	window.parent.postMessage( { type: 'iframe-loaded' }, '*' );
+}
+
+export function onIframeLoad( callback ) {
+	window.addEventListener( 'message', ( event ) => {
+		if ( event.data.type === 'iframe-loaded' ) {
+			callback();
+		}
+	} );
+}
+
 /**
  * Attach a listener to the window object to listen for messages from the parent window.
  *
@@ -28,8 +44,7 @@ export function attachListenersParent() {
  * @param {*} url
  */
 export function navigateOrParent( windowObject, url ) {
-	if ( windowObject.document === window.parent.document ) {
-		// Not iframe
+	if ( isIframe( windowObject ) ) {
 		windowObject.location.href = url;
 	} else {
 		windowObject.parent.postMessage( { type: 'navigate', url }, '*' );

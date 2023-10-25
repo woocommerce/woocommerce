@@ -30,7 +30,7 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
-import { attachIframeListeners } from '../utils';
+import { attachIframeListeners, onIframeLoad } from '../utils';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -281,17 +281,24 @@ const recordTracksStepCompleted = (
 const redirectToAssemblerHub = async () => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
 	const iframe = document.createElement( 'iframe' );
-	iframe.style.display = 'none';
-	iframe.src = assemblerUrl; // Replace with the URL of the page you want to load
+	iframe.classList.add( 'cys-fullscreen-iframe' );
+	iframe.src = assemblerUrl;
+
+	const showIframe = () => {
+		const loader = document.getElementsByClassName(
+			'woocommerce-onboarding-loader'
+		);
+		if ( loader[ 0 ] ) {
+			( loader[ 0 ] as HTMLElement ).style.display = 'none';
+		}
+		iframe.style.opacity = '1';
+	};
 
 	iframe.onload = () => {
 		// Hide loading UI
 		attachIframeListeners( iframe );
-		// Make iframe fullscreen
-		setTimeout( () => {
-			iframe.style.display = 'block';
-			iframe.classList.add( 'cys-fullscreen-iframe' );
-		}, 4000 );
+		onIframeLoad( showIframe );
+		setTimeout( showIframe, 15000 );
 		window.history?.pushState( {}, '', assemblerUrl );
 	};
 

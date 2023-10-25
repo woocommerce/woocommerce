@@ -166,6 +166,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 }
 
 .cys-fullscreen-iframe {
+	display: block;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -173,4 +174,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	height: 100%;
 	border: none;
 	z-index: 9999;
+	transition: opacity 1.2s linear;
+	opacity: 0;
 }
