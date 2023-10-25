@@ -4032,6 +4032,21 @@ table.wc_shipping {
 			margin: 12px 0;
 			border-radius: 4px;
 		}
+
+		.wc-shipping-zone-method-input-help-text {
+			position: absolute;
+    		bottom: -30px;
+			height: 30px;
+			display: none;
+		}
+
+		input:checked ~ .wc-shipping-zone-method-input-help-text {
+			display: block;
+		}
+	}
+
+	.wc-shipping-zone-method-selector {
+		position: relative;
 	}
 
 	.dashicons-yes {
@@ -4145,6 +4160,10 @@ table.wc_shipping {
 		line-height: 16px;
 		color: #757575;
 	}
+}
+
+.wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
+	padding: 0 32px 50px 32px;
 }
 
 table {
