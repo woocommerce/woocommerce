@@ -249,68 +249,6 @@ export const COLOR_PALETTES = [
 		wpcom_category: 'Neutral',
 	},
 	{
-		title: 'Lemon Myrtle',
-		version: 2,
-		settings: {
-			color: {
-				palette: {
-					theme: [
-						{
-							color: '#3E7172',
-							name: 'Primary',
-							slug: 'primary',
-						},
-						{
-							color: '#FC9B00',
-							name: 'Secondary',
-							slug: 'secondary',
-						},
-						{
-							color: '#325C5D',
-							name: 'Foreground',
-							slug: 'foreground',
-						},
-						{
-							color: '#ffffff',
-							name: 'Background',
-							slug: 'background',
-						},
-						{
-							color: '#E3F2EF',
-							name: 'Tertiary',
-							slug: 'tertiary',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			color: {
-				background: 'var(--wp--preset--color--background)',
-				text: 'var(--wp--preset--color--foreground)',
-			},
-			elements: {
-				button: {
-					color: {
-						background: 'var(--wp--preset--color--primary)',
-						text: 'var(--wp--preset--color--foreground)',
-					},
-				},
-				link: {
-					color: {
-						text: 'var(--wp--preset--color--secondary)',
-					},
-					':hover': {
-						color: {
-							text: 'var(--wp--preset--color--foreground)',
-						},
-					},
-				},
-			},
-		},
-		wpcom_category: 'Neutral',
-	},
-	{
 		title: 'Green Thumb',
 		version: 2,
 		settings: {
