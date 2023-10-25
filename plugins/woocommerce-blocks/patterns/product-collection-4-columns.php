@@ -26,7 +26,7 @@ $products_title = $content['titles'][0]['default'] ?? '';
 
 		<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
 
-		<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+		<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true} /-->
 		<!-- /wp:woocommerce/product-template -->
 	</div>
 	<!-- /wp:woocommerce/product-collection -->
