@@ -101,6 +101,16 @@ export function usePublish( {
 						wpError.message = (
 							error as Record< string, string >
 						 ).variations;
+					} else {
+						const errorMessage = Object.values(
+							error as Record< string, string >
+						).find( ( value ) => value !== undefined ) as
+							| string
+							| undefined;
+						if ( errorMessage !== undefined ) {
+							wpError.code = 'product_form_field_error';
+							wpError.message = errorMessage;
+						}
 					}
 				}
 				onPublishError( wpError );

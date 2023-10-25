@@ -42,3 +42,5 @@ export {
 
 export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
 export { NumberControl as __experimentalNumberControl } from './number-control';
+
+export * from './product-page-skeleton';

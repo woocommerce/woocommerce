@@ -22,6 +22,7 @@
 		"payment-gateway-suggestions": true,
 		"product-variation-management": true,
 		"product-virtual-downloadable": true,
+		"product-external-affiliate": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"settings": false,

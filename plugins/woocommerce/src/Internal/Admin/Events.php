@@ -156,7 +156,7 @@ class Events {
 			MerchantEmailNotifications::run();
 		}
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
+		if ( Features::is_enabled( 'core-profiler' ) ) {
 			( new MailchimpScheduler() )->run();
 		}
 	}
