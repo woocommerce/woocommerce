@@ -18,6 +18,7 @@ const potentialTrackableProductValueKeys = [
 	'description',
 	'manage_stock',
 	'menu_order',
+	'note',
 	'purchase_note',
 	'sale_price',
 	'short_description',
