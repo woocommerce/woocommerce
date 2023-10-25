@@ -117,6 +117,7 @@ export const VariationsTable = forwardRef<
 		areAllSelected,
 		isSelected,
 		hasSelection,
+		onSelectAllPage,
 		onSelectAll,
 		onSelectItem,
 		onClearSelection,
@@ -478,6 +479,18 @@ export const VariationsTable = forwardRef<
 										selectionCount
 									) }
 								</span>
+								<Button
+									variant="tertiary"
+									onClick={ () =>
+										onSelectAllPage( variationIds )( true )
+									}
+								>
+									{ sprintf(
+										// translators: %d the variations amount in the current page
+										__( 'Select page (%d)', 'woocommerce' ),
+										perPage
+									) }
+								</Button>
 								<Button
 									variant="tertiary"
 									onClick={ () =>
