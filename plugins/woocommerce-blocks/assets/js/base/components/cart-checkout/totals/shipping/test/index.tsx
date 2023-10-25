@@ -295,4 +295,48 @@ describe( 'TotalsShipping', () => {
 			screen.queryByText( 'Add an address for shipping options' )
 		).not.toBeInTheDocument();
 	} );
+	it( 'does show the calculator button when default rates are available and has formatted address', () => {
+		baseContextHooks.useStoreCart.mockReturnValue( {
+			cartItems: mockPreviewCart.items,
+			cartTotals: [ mockPreviewCart.totals ],
+			cartCoupons: mockPreviewCart.coupons,
+			cartFees: mockPreviewCart.fees,
+			cartNeedsShipping: mockPreviewCart.needs_shipping,
+			shippingRates: mockPreviewCart.shipping_rates,
+			shippingAddress: {
+				...shippingAddress,
+				city: '',
+				state: 'California',
+				country: 'US',
+				postcode: '',
+			},
+			billingAddress: mockPreviewCart.billing_address,
+			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
+			isLoadingRates: false,
+		} );
+		render(
+			<SlotFillProvider>
+				<TotalsShipping
+					currency={ {
+						code: 'USD',
+						symbol: '$',
+						position: 'left',
+						precision: 2,
+					} }
+					values={ {
+						total_shipping: '0',
+						total_shipping_tax: '0',
+					} }
+					showCalculator={ true }
+					showRateSelector={ true }
+					isCheckout={ false }
+					className={ '' }
+				/>
+			</SlotFillProvider>
+		);
+		expect( screen.queryByText( 'Change address' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Add an address for shipping options' )
+		).not.toBeInTheDocument();
+	} );
 } );
