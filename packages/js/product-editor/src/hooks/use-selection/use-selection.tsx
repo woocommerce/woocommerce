@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -10,6 +10,16 @@ import { Selection } from './types';
 
 export function useSelection() {
 	const [ selectedItems, setSelectedItems ] = useState< Selection >( {} );
+
+	const selectionCount = useMemo(
+		function getSelectionCount() {
+			const selectedValues = Object.values( selectedItems ).filter(
+				( value ) => value
+			);
+			return selectedValues.length;
+		},
+		[ selectedItems ]
+	);
 
 	function isSelected( itemId: string ) {
 		return Boolean( selectedItems[ itemId ] );
@@ -51,6 +61,7 @@ export function useSelection() {
 
 	return {
 		selectedItems,
+		selectionCount,
 		areAllSelected,
 		hasSelection,
 		isSelected,
