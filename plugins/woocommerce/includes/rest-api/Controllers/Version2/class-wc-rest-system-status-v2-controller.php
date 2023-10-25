@@ -1390,7 +1390,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
 
 				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $block_present && ( $values['block'] === 'woocommerce/checkout' || $values['block'] === 'woocommerce/cart' ) ) {
+				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
 					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
 				}
 			}
