@@ -262,7 +262,7 @@ class ListTable extends WP_List_Table {
 			),
 			$this->page_controller->get_logs_tab_url()
 		);
-		$rotation = '';
+		$rotation        = '';
 		if ( ! is_null( $item->get_rotation() ) ) {
 			$rotation = sprintf(
 				' &ndash; <span class="post-state">%d</span>',
