@@ -305,6 +305,12 @@ export const VariationsTable = forwardRef<
 				} ) );
 				onVariationTableChange( 'delete' );
 			} );
+
+		recordEvent( 'product_variations_delete', {
+			source: TRACKS_SOURCE,
+			product_id: productId,
+			variation_id: variationId,
+		} );
 	}
 
 	function handleVariationChange(
@@ -335,9 +341,17 @@ export const VariationsTable = forwardRef<
 				} ) );
 				onVariationTableChange( 'update', [ variation ] );
 			} );
+
+		recordEvent( 'product_variations_change', {
+			source: TRACKS_SOURCE,
+			product_id: productId,
+			variation_id: variationId,
+		} );
 	}
 
 	function handleUpdateAll( update: Partial< ProductVariation >[] ) {
+		const now = Date.now();
+
 		batchUpdateProductVariations< { update: [] } >(
 			{ product_id: productId },
 			{ update }
@@ -351,10 +365,20 @@ export const VariationsTable = forwardRef<
 				createErrorNotice(
 					__( 'Failed to update variations.', 'woocommerce' )
 				);
+			} )
+			.finally( () => {
+				recordEvent( 'product_variations_update_all', {
+					source: TRACKS_SOURCE,
+					product_id: productId,
+					variations_count: update.length,
+					request_time: Date.now() - now,
+				} );
 			} );
 	}
 
 	function handleDeleteAll( values: Partial< ProductVariation >[] ) {
+		const now = Date.now();
+
 		batchUpdateProductVariations< { delete: [] } >(
 			{ product_id: productId },
 			{
@@ -383,6 +407,14 @@ export const VariationsTable = forwardRef<
 				createErrorNotice(
 					__( 'Failed to delete variations.', 'woocommerce' )
 				);
+			} )
+			.finally( () => {
+				recordEvent( 'product_variations_delete_all', {
+					source: TRACKS_SOURCE,
+					product_id: productId,
+					variations_count: values.length,
+					request_time: Date.now() - now,
+				} );
 			} );
 	}
 
@@ -395,6 +427,12 @@ export const VariationsTable = forwardRef<
 			event.preventDefault();
 
 			navigateTo( { url } );
+
+			recordEvent( 'product_variations_edit', {
+				source: TRACKS_SOURCE,
+				product_id: productId,
+				variation_id: variation.id,
+			} );
 		};
 	}
 
@@ -433,6 +471,8 @@ export const VariationsTable = forwardRef<
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);
 
+		const now = Date.now();
+
 		const allExistingVariations = await getProductVariations<
 			ProductVariation[]
 		>( {
@@ -441,6 +481,13 @@ export const VariationsTable = forwardRef<
 		} );
 
 		onSelectAll( allExistingVariations )( true );
+
+		recordEvent( 'product_variations_select_all', {
+			source: TRACKS_SOURCE,
+			product_id: productId,
+			variations_count: allExistingVariations.length,
+			request_time: Date.now() - now,
+		} );
 	}
 
 	return (
