@@ -45,9 +45,9 @@ export function attachListenersParent() {
  */
 export function navigateOrParent( windowObject, url ) {
 	if ( isIframe( windowObject ) ) {
-		windowObject.location.href = url;
-	} else {
 		windowObject.parent.postMessage( { type: 'navigate', url }, '*' );
+	} else {
+		windowObject.location.href = url;
 	}
 }
 
