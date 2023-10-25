@@ -4,6 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import { ToggleBlockAttributes } from './types';
 import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { TRACKS_SOURCE } from '../../../constants';
 
 export function Edit( {
 	attributes,
@@ -19,6 +21,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const {
+		_templateBlockId,
 		label,
 		property,
 		disabled,
@@ -39,6 +42,10 @@ export function Edit( {
 	}
 
 	function handleChange( checked: boolean ) {
+		recordEvent( 'product_toggle_click', {
+			block_id: _templateBlockId,
+			source: TRACKS_SOURCE,
+		} );
 		if ( checked ) {
 			setValue( checkedValue !== undefined ? checkedValue : checked );
 		} else {
