@@ -27,7 +27,7 @@ export default function ConnectButton( props: ConnectProps ) {
 
 	const connect = () => {
 		setIsConnecting( true );
-		connectProduct( props.subscription.product_key )
+		connectProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
 					createSuccessNotice(

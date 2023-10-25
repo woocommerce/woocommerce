@@ -41,23 +41,26 @@ export default function Install( props: InstallProps ) {
 					setLoading( false );
 				} );
 			} )
-			.catch( () => {
-				createWarningNotice(
-					sprintf(
+			.catch( ( error ) => {
+				loadSubscriptions( false ).then( () => {
+					let errorMessage = sprintf(
 						// translators: %s is the product name.
 						__( '%s couldn’t be installed.', 'woocommerce' ),
 						props.subscription.product_name
-					),
-					{
+					);
+					if ( error?.success === false && error?.data.message ) {
+						errorMessage += ' ' + error.data.message;
+					}
+					createWarningNotice( errorMessage, {
 						actions: [
 							{
 								label: __( 'Try again', 'woocommerce' ),
 								onClick: install,
 							},
 						],
-					}
-				);
-				setLoading( false );
+					} );
+					setLoading( false );
+				} );
 			} );
 	};
 

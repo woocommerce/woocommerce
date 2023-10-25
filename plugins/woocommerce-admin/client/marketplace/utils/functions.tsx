@@ -186,8 +186,42 @@ async function fetchSubscriptions(): Promise< Array< Subscription > > {
 	return await apiFetch( { path: url.toString() } );
 }
 
+function connectProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function disconnectProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === false ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/deactivate';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
-	return connectProduct( subscription.product_key ).then( () => {
+	return connectProduct( subscription ).then( () => {
 		return new Promise( ( resolve, reject ) => {
 			if ( ! window.wp.updates ) {
 				reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -203,44 +237,19 @@ function installProduct( subscription: Subscription ): Promise< void > {
 				// The slug prefix is required for the install to use WCCOM install filters.
 				slug: 'woocommerce-com-' + subscription.zip_slug,
 				success: resolve,
-				error: () => {
+				error: ( error: { [ 'errorMessage' ]: string } ) => {
 					// If install fails disconnect the product
-					return disconnectProduct( subscription.product_key ).then(
-						() => {
-							reject();
-						}
-					);
+					return disconnectProduct( subscription ).finally( () => {
+						reject( {
+							success: false,
+							data: {
+								message: error.errorMessage,
+							},
+						} );
+					} );
 				},
 			} );
 		} );
-	} );
-}
-
-function connectProduct( productKey: string ): Promise< void > {
-	const url = '/wc/v3/marketplace/subscriptions/activate';
-	const data = new URLSearchParams();
-	data.append( 'product_key', productKey );
-	return apiFetch( {
-		path: url.toString(),
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: data,
-	} );
-}
-
-function disconnectProduct( productKey: string ): Promise< void > {
-	const url = '/wc/v3/marketplace/subscriptions/deactivate';
-	const data = new URLSearchParams();
-	data.append( 'product_key', productKey );
-	return apiFetch( {
-		path: url.toString(),
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: data,
 	} );
 }
 
