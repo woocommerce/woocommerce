@@ -6,6 +6,7 @@ import {
 	getQuery,
 	updateQueryString,
 	getNewPath,
+	navigateTo,
 } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
@@ -29,6 +30,7 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
+import { attachIframeListeners } from '../utils';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -275,25 +277,6 @@ const recordTracksStepCompleted = (
 		step,
 	} );
 };
-
-function attachIframeListeners( iframe: HTMLIFrameElement ) {
-	const iframeDocument: Document | undefined =
-		iframe.contentDocument || iframe.contentWindow?.document;
-
-	// Intercept external link clicks
-	iframeDocument?.addEventListener( 'click', function ( event: MouseEvent ) {
-		if ( event.target instanceof HTMLElement ) {
-			const anchor = event.target?.closest( 'a' );
-			if ( anchor && anchor.target === '_blank' ) {
-				event.preventDefault();
-				window.open( anchor.href, '_blank' ); // Open in new tab in parent
-			} else if ( anchor ) {
-				event.preventDefault();
-				window.location.href = anchor.href; // Navigate parent to new URL
-			}
-		}
-	} );
-}
 
 const redirectToAssemblerHub = async () => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
