@@ -484,7 +484,11 @@ export const VariationsTable = forwardRef<
 										onSelectAll( variationIds )( true )
 									}
 								>
-									{ __( 'Select all', 'woocommerce' ) }
+									{ sprintf(
+										// translators: %d the total existing variations amount
+										__( 'Select all (%d)', 'woocommerce' ),
+										totalCount
+									) }
 								</Button>
 								<Button
 									variant="tertiary"
