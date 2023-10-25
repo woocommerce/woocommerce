@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix sidebar title back button z-index

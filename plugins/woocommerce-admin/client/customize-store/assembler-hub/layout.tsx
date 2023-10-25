@@ -53,13 +53,7 @@ const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 const ANIMATION_DURATION = 0.5;
 
 export const Layout = () => {
-	const [ logoBlock, setLogoBlock ] = useState< {
-		clientId: string | null;
-		isLoading: boolean;
-	} >( {
-		clientId: null,
-		isLoading: true,
-	} );
+	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
 	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
@@ -97,8 +91,8 @@ export const Layout = () => {
 	return (
 		<LogoBlockContext.Provider
 			value={ {
-				logoBlock,
-				setLogoBlock,
+				logoBlockIds,
+				setLogoBlockIds,
 			} }
 		>
 			<HighlightedBlockContextProvider>
