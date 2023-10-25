@@ -218,15 +218,6 @@ export const COLOR_PALETTES = [
 					color: {
 						background: 'var(--wp--preset--color--secondary)',
 					},
-					spacing: {
-						padding: {
-							bottom: 'var(--wp--preset--spacing--40)',
-							top: 'var(--wp--preset--spacing--40)',
-						},
-					},
-					typography: {
-						lineHeight: '1',
-					},
 					variations: {
 						outline: {
 							border: {
@@ -234,12 +225,6 @@ export const COLOR_PALETTES = [
 							},
 							color: {
 								text: 'var(--wp--preset--color--primary)',
-							},
-							spacing: {
-								padding: {
-									bottom: '14px',
-									top: '14px',
-								},
 							},
 						},
 					},
@@ -302,15 +287,6 @@ export const COLOR_PALETTES = [
 					color: {
 						background: 'var(--wp--preset--color--secondary)',
 					},
-					spacing: {
-						padding: {
-							bottom: 'var(--wp--preset--spacing--40)',
-							top: 'var(--wp--preset--spacing--40)',
-						},
-					},
-					typography: {
-						lineHeight: '1',
-					},
 					variations: {
 						outline: {
 							border: {
@@ -318,12 +294,6 @@ export const COLOR_PALETTES = [
 							},
 							color: {
 								text: 'var(--wp--preset--color--primary)',
-							},
-							spacing: {
-								padding: {
-									bottom: '14px',
-									top: '14px',
-								},
 							},
 						},
 					},
@@ -1098,4 +1068,143 @@ export const COLOR_PALETTES = [
 		},
 		wpcom_category: 'Dark',
 	},
-];
+].map( ( color ) => {
+	// Add base styles settings for elements to ensure that the colors are applied correctly since default TT3 theme does not have right styles.
+	return {
+		...color,
+		styles: {
+			...color.styles,
+			blocks: {
+				'core/button': {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+					},
+					variations: {
+						outline: {
+							border: {
+								color: 'var(--wp--preset--color--secondary)',
+							},
+							color: {
+								text: 'var(--wp--preset--color--secondary)',
+							},
+						},
+					},
+				},
+				'core/heading': {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+					elements: {
+						link: {
+							color: {
+								text: 'var(--wp--preset--color--foreground)',
+							},
+						},
+					},
+				},
+				'core/post-date': {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+				'core/post-title': {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+					elements: {
+						link: {
+							':hover': {
+								color: {
+									text: 'var(--wp--preset--color--primary)',
+								},
+							},
+							color: {
+								text: 'var(--wp--preset--color--foreground)',
+							},
+						},
+					},
+				},
+				'core/pullquote': {
+					border: {
+						color: 'var(--wp--preset--color--foreground)',
+						style: 'solid',
+						width: '1px 0',
+					},
+				},
+				'core/quote': {
+					border: {
+						color: 'var(--wp--preset--color--foreground)',
+						style: 'solid',
+						width: '0 0 0 5px',
+					},
+				},
+				'core/separator': {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+				'core/site-title': {
+					elements: {
+						link: {
+							':hover': {
+								color: {
+									text: 'var(--wp--preset--color--foreground)',
+								},
+							},
+							color: {
+								text: 'var(--wp--preset--color--foreground)',
+							},
+						},
+					},
+				},
+				...color.styles.blocks,
+			},
+			elements: {
+				button: {
+					':active': {
+						color: {
+							background: 'var(--wp--preset--color--foreground)',
+							text: 'var(--wp--preset--color--background)',
+						},
+					},
+					':focus': {
+						color: {
+							background: 'var(--wp--preset--color--foreground)',
+							text: 'var(--wp--preset--color--background)',
+						},
+						outline: {
+							color: 'var(--wp--preset--color--primary)',
+							offset: '2px',
+							style: 'dotted',
+							width: '1px',
+						},
+					},
+					':hover': {
+						color: {
+							background: 'var(--wp--preset--color--secondary)',
+							text: 'var(--wp--preset--color--background)',
+						},
+					},
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					':hover': {
+						color: {
+							text: 'var(--wp--preset--color--primary)',
+						},
+						typography: {
+							textDecoration: 'none',
+						},
+					},
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+				...color.styles.elements,
+			},
+		},
+	};
+} );
