@@ -25,6 +25,8 @@ import {
  */
 import { VariationsFilterProps } from './types';
 
+const MIN_OPTIONS_COUNT_FOR_SEARCHING = 10;
+
 export function VariationsFilter( {
 	initialValues,
 	attribute,
@@ -137,7 +139,8 @@ export function VariationsFilter( {
 					onSubmit={ submitHandler( onClose ) }
 					onReset={ resetHandler() }
 				>
-					{ attribute.options.length >= 5 && (
+					{ attribute.options.length >
+						MIN_OPTIONS_COUNT_FOR_SEARCHING && (
 						<div className="woocommerce-product-variations-filter__form-header">
 							<label
 								aria-label={ __(
