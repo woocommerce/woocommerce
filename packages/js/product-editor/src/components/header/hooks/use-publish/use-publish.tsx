@@ -80,6 +80,8 @@ export function usePublish( {
 						}
 					);
 				}
+			} else {
+				await validate();
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
