@@ -16,12 +16,12 @@ interface MarketplaceViewProps {
  */
 function recordMarketplaceView( props: MarketplaceViewProps ) {
 	// The category prop changes to a blank string on first viewing all products after a search.
-	// This is undesirable and causes a duplicate event that will artifically inflate event counts.
+	// This is undesirable and causes a duplicate event that will artificially inflate event counts.
 	if ( props.category === '' ) {
 		return;
 	}
 
-	const view = props.view || null;
+	const view = props.view || 'discover';
 	const search_term = props.search_term || null;
 	const product_type = props.product_type || null;
 	const category = props.category || null;
@@ -33,11 +33,13 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 		...( category && { category } ),
 	};
 
-	if (
-		view &&
-		[ 'extensions', 'themes', 'search' ].includes( view ) &&
-		! category
-	) {
+	// User sees the default extensions or themes view
+	if ( view && [ 'extensions', 'themes' ].includes( view ) && ! category ) {
+		eventProps.category = '_all';
+	}
+
+	// User clicks the `View All` button on search results
+	if ( view && view === 'search' && product_type && ! category ) {
 		eventProps.category = '_all';
 	}
 
@@ -51,44 +53,37 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
  * @param props The props object containing view, search_term, section, and category.
  */
 function recordLegacyTabView( props: MarketplaceViewProps ) {
-	// We skip blank views (initial mount) and product_type will artificially inflate legacy event counts.
-	if ( ! props.view || props.product_type ) {
+	// product_type will artificially inflate legacy event counts.
+	if ( props.product_type ) {
 		return;
 	}
 	let oldEventName = 'extensions_view';
-	const section = props.view || null;
+	const view = props.view || '_featured';
 	const search_term = props.search_term || null;
 	const category = props.category || null;
 
 	const oldEventProps = {
-		...( section && { section } ),
+		// legacy event refers to "section" instead of "view"
+		...( view && { section: view } ),
 		...( search_term && { search_term } ),
 		version: '2',
 	};
 
-	switch ( section ) {
-		case 'discover':
-			oldEventName = 'extensions_view';
-			oldEventProps.section = '_featured';
-			break;
+	switch ( view ) {
 		case 'extensions':
-			oldEventName = 'extensions_view';
 			oldEventProps.section = category || '_all';
 			break;
 		case 'themes':
-			oldEventName = 'extensions_view';
 			oldEventProps.section = 'themes';
 			break;
 		case 'search':
 			oldEventName = 'extensions_view_search';
-			oldEventProps.section = section;
+			oldEventProps.section = view;
 			oldEventProps.search_term = search_term || '';
 			break;
 		case 'my-subscriptions':
 			oldEventName = 'subscriptions_view';
 			oldEventProps.section = 'helper';
-			break;
-		default:
 			break;
 	}
 
