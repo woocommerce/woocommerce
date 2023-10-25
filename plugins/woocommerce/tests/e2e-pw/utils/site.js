@@ -240,7 +240,7 @@ const reset = async ( cKey, cSecret ) => {
 /**
  * Convert Cart and Checkout pages to shortcode.
  */
-const maybeUseCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
+const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 	/**
 	 * A WordPress page.
 	 * @typedef {Object} WPPage
@@ -304,5 +304,5 @@ const maybeUseCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 
 module.exports = {
 	reset,
-	maybeUseCartCheckoutShortcodes,
+	useCartCheckoutShortcodes,
 };

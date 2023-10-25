@@ -241,7 +241,7 @@ const reset = async ( cKey, cSecret ) => {
  * Convert Cart and Checkout pages to shortcode.
  * @param {import('@playwright/test').FullConfig} config
  */
-const maybeUseCartCheckoutShortcodes = async ( config ) => {
+const useCartCheckoutShortcodes = async ( config ) => {
 	/**
 	 * A WordPress page.
 	 * @typedef {Object} WPPage
@@ -250,21 +250,8 @@ const maybeUseCartCheckoutShortcodes = async ( config ) => {
 	 */
 
 	const { request: apiRequest } = require( '@playwright/test' );
-	const { baseURL, userAgent } = config.projects[ 0 ].use;
+	const { baseURL, userAgent, extraHTTPHeaders } = config.projects[ 0 ].use;
 
-	const encodeCredentials = ( username, password ) => {
-		return Buffer.from( `${ username }:${ password }` ).toString(
-			'base64'
-		);
-	};
-
-	const username = process.env.USER_KEY ?? 'admin';
-	const password = process.env.USER_SECRET ?? 'password';
-	const basicAuth = encodeCredentials( username, password );
-	const Authorization = `Basic ${ basicAuth }`;
-	const extraHTTPHeaders = {
-		Authorization,
-	};
 	const options = {
 		baseURL,
 		userAgent,
@@ -313,5 +300,5 @@ const maybeUseCartCheckoutShortcodes = async ( config ) => {
 
 module.exports = {
 	reset,
-	maybeUseCartCheckoutShortcodes,
+	useCartCheckoutShortcodes,
 };
