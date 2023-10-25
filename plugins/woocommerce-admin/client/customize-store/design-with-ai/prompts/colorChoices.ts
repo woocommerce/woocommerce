@@ -41,14 +41,6 @@ const colorChoices: ColorPalette[] = [
 		lookAndFeel: [ 'Bold' ] as Look[],
 	},
 	{
-		name: 'Lemon Myrtle',
-		primary: '#3E7172',
-		secondary: '#FC9B00',
-		foreground: '#325C5D',
-		background: '#ffffff',
-		lookAndFeel: [ 'Contemporary' ] as Look[],
-	},
-	{
 		name: 'Green Thumb',
 		primary: '#164A41',
 		secondary: '#4B7B4D',
