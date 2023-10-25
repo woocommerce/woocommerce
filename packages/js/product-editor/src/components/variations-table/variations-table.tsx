@@ -27,7 +27,7 @@ import {
 	Fragment,
 	forwardRef,
 } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, resolveSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -113,15 +113,18 @@ export const VariationsTable = forwardRef<
 		{}
 	);
 	const {
-		selectionCount,
+		selectedItems,
 		areAllSelected,
 		isSelected,
 		hasSelection,
-		onSelectAllPage,
 		onSelectAll,
 		onSelectItem,
 		onClearSelection,
-	} = useSelection();
+	} = useSelection< ProductVariation >( {
+		getId( item ) {
+			return String( item.id );
+		},
+	} );
 
 	const productId = useEntityId( 'postType', 'product' );
 	const [ attributes ] = useEntityProp< ProductAttribute[] >(
@@ -233,8 +236,6 @@ export const VariationsTable = forwardRef<
 
 	// this prevents a weird jump from happening while changing pages.
 	const variations = latestVariations || lastVariations.current;
-
-	const variationIds = variations.map( ( { id } ) => id );
 
 	function getSnackbarText(
 		response: VariationResponseProps | ProductVariation,
@@ -427,6 +428,21 @@ export const VariationsTable = forwardRef<
 		};
 	}
 
+	async function handleSelectAllVariations() {
+		const { getProductVariations } = resolveSelect(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		);
+
+		const allExistingVariations = await getProductVariations<
+			ProductVariation[]
+		>( {
+			product_id: productId,
+			per_page: 100,
+		} );
+
+		onSelectAll( allExistingVariations )( true );
+	}
+
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
 			{ ( isLoading || isGeneratingVariations ) && (
@@ -460,42 +476,40 @@ export const VariationsTable = forwardRef<
 					<div className="woocommerce-product-variations__selection">
 						<CheckboxControl
 							value="all"
-							checked={ areAllSelected( variationIds ) }
+							checked={ areAllSelected( variations ) }
 							// @ts-expect-error Property 'indeterminate' does not exist
 							indeterminate={
-								! areAllSelected( variationIds ) &&
-								hasSelection( variationIds )
+								! areAllSelected( variations ) &&
+								hasSelection( variations )
 							}
-							onChange={ onSelectAll( variationIds ) }
+							onChange={ onSelectAll( variations ) }
 						/>
 					</div>
 					<div className="woocommerce-product-variations__filters">
-						{ hasSelection( variationIds ) ? (
+						{ hasSelection( variations ) ? (
 							<>
 								<span>
 									{ sprintf(
 										// translators: %d is the amount of selected variations
 										__( '%d selected', 'woocommerce' ),
-										selectionCount
+										selectedItems.length
 									) }
 								</span>
 								<Button
 									variant="tertiary"
 									onClick={ () =>
-										onSelectAllPage( variationIds )( true )
+										onSelectAll( variations )( true )
 									}
 								>
 									{ sprintf(
 										// translators: %d the variations amount in the current page
 										__( 'Select page (%d)', 'woocommerce' ),
-										perPage
+										variations.length
 									) }
 								</Button>
 								<Button
 									variant="tertiary"
-									onClick={ () =>
-										onSelectAll( variationIds )( true )
-									}
+									onClick={ handleSelectAllVariations }
 								>
 									{ sprintf(
 										// translators: %d the total existing variations amount
@@ -533,10 +547,8 @@ export const VariationsTable = forwardRef<
 					</div>
 					<div>
 						<VariationsActionsMenu
-							selection={ variations.filter( ( variation ) =>
-								isSelected( variation.id )
-							) }
-							disabled={ ! hasSelection( variationIds ) }
+							selection={ selectedItems }
+							disabled={ ! hasSelection( variations ) }
 							onChange={ handleUpdateAll }
 							onDelete={ handleDeleteAll }
 						/>
@@ -550,8 +562,8 @@ export const VariationsTable = forwardRef<
 						<div className="woocommerce-product-variations__selection">
 							<CheckboxControl
 								value={ variation.id }
-								checked={ isSelected( variation.id ) }
-								onChange={ onSelectItem( variation.id ) }
+								checked={ isSelected( variation ) }
+								onChange={ onSelectItem( variation ) }
 							/>
 						</div>
 						<div className="woocommerce-product-variations__attributes">
