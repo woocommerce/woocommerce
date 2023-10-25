@@ -186,7 +186,7 @@ describe( 'colorPaletteResponseValidator', () => {
 			'Lightning',
 			'Midnight Citrus',
 			'Purple Twilight',
-			'Golden Haze',
+			'Fuchsia',
 			'Charcoal',
 		],
 	};
