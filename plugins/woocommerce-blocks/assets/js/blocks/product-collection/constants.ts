@@ -40,7 +40,6 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	postType: 'product',
 	order: 'asc',
 	orderBy: 'title',
-	author: '',
 	search: '',
 	exclude: [],
 	inherit: null,

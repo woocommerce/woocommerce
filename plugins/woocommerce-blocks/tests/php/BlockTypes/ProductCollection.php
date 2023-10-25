@@ -29,7 +29,6 @@ class ProductCollection extends \WP_UnitTestCase {
 					'postType'                 => 'product',
 					'order'                    => 'desc',
 					'orderBy'                  => 'date',
-					'author'                   => '',
 					'search'                   => '',
 					'exclude'                  => array(),
 					'sticky'                   => '',

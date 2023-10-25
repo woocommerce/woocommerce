@@ -77,7 +77,6 @@ const ProductTemplateEdit = ( {
 			offset = 0,
 			order,
 			orderBy,
-			author,
 			search,
 			exclude,
 			inherit,
@@ -155,9 +154,6 @@ const ProductTemplateEdit = ( {
 			if ( perPage ) {
 				query.per_page = perPage;
 			}
-			if ( author ) {
-				query.author = author;
-			}
 			if ( search ) {
 				query.search = search;
 			}
@@ -186,7 +182,6 @@ const ProductTemplateEdit = ( {
 			order,
 			orderBy,
 			clientId,
-			author,
 			search,
 			postType,
 			exclude,
