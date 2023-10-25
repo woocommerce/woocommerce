@@ -113,6 +113,7 @@ export const VariationsTable = forwardRef<
 		{}
 	);
 	const {
+		selectionCount,
 		areAllSelected,
 		isSelected,
 		hasSelection,
@@ -470,6 +471,13 @@ export const VariationsTable = forwardRef<
 					<div className="woocommerce-product-variations__filters">
 						{ hasSelection( variationIds ) ? (
 							<>
+								<span>
+									{ sprintf(
+										// translators: %d is the amount of selected variations
+										__( '%d selected', 'woocommerce' ),
+										selectionCount
+									) }
+								</span>
 								<Button
 									variant="tertiary"
 									onClick={ () =>
