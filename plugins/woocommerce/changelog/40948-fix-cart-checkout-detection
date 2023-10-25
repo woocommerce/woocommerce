@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix detection of cart and checkout classic-shortcode blocks in the system status report.
