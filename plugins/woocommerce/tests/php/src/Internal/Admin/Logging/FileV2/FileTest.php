@@ -7,6 +7,8 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use WC_Unit_Test_Case;
 
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose
+
 /**
  * FileTest class.
  */
@@ -20,7 +22,7 @@ class FileTest extends WC_Unit_Test_Case {
 		// Delete all created log files.
 		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		foreach ( $files as $file ) {
-			@unlink( $file );
+			unlink( $file );
 		}
 
 		parent::tearDown();
@@ -108,3 +110,5 @@ class FileTest extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $files );
 	}
 }
+
+// phpcs:enable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose

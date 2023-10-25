@@ -66,7 +66,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	private static function delete_all_log_files(): void {
 		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		foreach ( $files as $file ) {
-			@unlink( $file );
+			unlink( $file );
 		}
 	}
 
@@ -76,6 +76,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	public function test_get_files_with_files(): void {
 		$this->handler->handle( time(), 'debug', '1', array() ); // No source defaults to "log" as source.
 		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing' ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_wp_debug_backtrace_summary -- Unit test.
 		$this->handler->handle( time(), 'debug', wp_debug_backtrace_summary(), array( 'source' => 'unit-testing' ) ); // Increase file size.
 
 		$files = $this->sut->get_files();
@@ -86,13 +87,23 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$second_file = array_shift( $files );
 		$this->assertInstanceOf( 'Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File', $second_file );
 
-		$files = $this->sut->get_files( array( 'orderby' => 'source', 'order' => 'asc' ) );
+		$files      = $this->sut->get_files(
+			array(
+				'orderby' => 'source',
+				'order'   => 'asc',
+			)
+		);
 		$first_file = array_shift( $files );
 		$this->assertEquals( 'log', $first_file->get_source() );
 		$second_file = array_shift( $files );
 		$this->assertEquals( 'unit-testing', $second_file->get_source() );
 
-		$files = $this->sut->get_files( array( 'orderby' => 'size', 'order' => 'desc' ) );
+		$files      = $this->sut->get_files(
+			array(
+				'orderby' => 'size',
+				'order'   => 'desc',
+			)
+		);
 		$first_file = array_shift( $files );
 		$this->assertEquals( 'unit-testing', $first_file->get_source() );
 	}
