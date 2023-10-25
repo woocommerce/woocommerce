@@ -875,7 +875,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 								'value'   => $attribute['terms'],
 							),
 						);
-					} 
+					}
 				}
 			}
 		}
@@ -1033,7 +1033,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'type'        => 'string',
 						'description' => __( 'Attribute term.', 'woocommerce' ),
 					),
-					'terms'      => array(
+					'terms'     => array(
 						'type'        => 'array',
 						'description' => __( 'Attribute terms.', 'woocommerce' ),
 					),
