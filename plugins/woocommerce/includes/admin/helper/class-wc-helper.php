@@ -1380,6 +1380,7 @@ class WC_Helper {
 				'_product_id' => absint( $product_id ),
 				'_file_id'    => $file_id,
 				'_type'       => 'theme',
+				'slug'        => dirname( $theme->get_stylesheet() ),
 			);
 
 			$woo_themes[ $data['_filename'] ] = $data;
@@ -1485,7 +1486,7 @@ class WC_Helper {
 				'product_key'    => '',
 				'product_id'     => $data['_product_id'],
 				'product_name'   => $data['Name'],
-				'product_url'    => $data['PluginURI'],
+				'product_url'    => $data['PluginURI'] ?? '',
 				'zip_slug'       => $data['slug'],
 				'key_type'       => '',
 				'key_type_label' => '',
