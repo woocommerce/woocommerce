@@ -11,25 +11,30 @@ import { BaseQueryParams } from './types/query-params';
 import { fetchWithHeaders } from './controls';
 
 function replacer( _: string, value: unknown ) {
-	if ( Array.isArray( value ) ) {
-		return [ ...value ].sort();
-	}
-	if ( typeof value === 'object' ) {
-		return Object.entries( value as {} )
-			.sort()
-			.reduce(
-				( current, [ propKey, propVal ] ) => ( {
-					...current,
-					[ propKey ]: propVal,
-				} ),
-				{}
-			);
+	if ( value ) {
+		if ( Array.isArray( value ) ) {
+			return [ ...value ].sort();
+		}
+		if ( typeof value === 'object' ) {
+			return Object.entries( value )
+				.sort()
+				.reduce(
+					( current, [ propKey, propVal ] ) => ( {
+						...current,
+						[ propKey ]: propVal,
+					} ),
+					{}
+				);
+		}
 	}
 	return value;
 }
 
 export function getResourceName( prefix: string, ...identifier: unknown[] ) {
-	const identifierString = JSON.stringify( identifier, replacer );
+	const identifierString = JSON.stringify( identifier, replacer ).replace(
+		/\\"/g,
+		'"'
+	);
 	return `${ prefix }:${ identifierString }`;
 }
 
