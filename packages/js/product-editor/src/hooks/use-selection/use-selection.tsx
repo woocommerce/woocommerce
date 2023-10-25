@@ -6,68 +6,67 @@ import { useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Selection } from './types';
+import { Selection, UseSelectionProps } from './types';
 
-export function useSelection() {
-	const [ selectedItems, setSelectedItems ] = useState< Selection >( {} );
+export function useSelection< T >( { getId }: UseSelectionProps< T > ) {
+	const [ selection, setSelection ] = useState< Selection< T > >( {} );
 
-	const selectionCount = useMemo(
-		function getSelectionCount() {
-			const selectedValues = Object.values( selectedItems ).filter(
+	const selectedItems = useMemo(
+		function getSelectedItems() {
+			return Object.values( selection ).filter(
 				( value ) => value
-			);
-			return selectedValues.length;
+			) as T[];
 		},
-		[ selectedItems ]
+		[ selection ]
 	);
 
-	function isSelected( itemId: string ) {
-		return Boolean( selectedItems[ itemId ] );
+	function isSelected( item: T ) {
+		return Boolean( selection[ getId( item ) ] );
 	}
 
-	function areAllSelected( itemIds: string[] ) {
-		return itemIds.every( ( itemId ) => isSelected( itemId ) );
+	function areAllSelected( items: T[] ) {
+		return items.every( ( item ) => isSelected( item ) );
 	}
 
-	function hasSelection( itemIds: string[] ) {
-		return itemIds.some( ( itemId ) => isSelected( itemId ) );
+	function hasSelection( items: T[] ) {
+		return items.some( ( item ) => isSelected( item ) );
 	}
 
-	function onSelectItem( itemId: string ) {
+	function onSelectItem( item: T ) {
 		return function onChange( isChecked: boolean ) {
-			setSelectedItems( ( currentSelection ) => ( {
+			setSelection( ( currentSelection ) => ( {
 				...currentSelection,
-				[ itemId ]: isChecked,
+				[ getId( item ) ]: isChecked ? item : undefined,
 			} ) );
 		};
 	}
 
-	function onSelectAllPage( itemIds: string[] ) {
+	function onSelectAll( items: T[] ) {
 		return function onChange( isChecked: boolean ) {
-			const selection = itemIds.reduce< Selection >(
-				( current, id ) => ( {
-					...current,
-					[ id ]: isChecked,
-				} ),
-				{}
-			);
-			setSelectedItems( selection );
+			setSelection( ( currentSelection ) => {
+				const newSelection = items.reduce< Selection< T > >(
+					( current, item ) => ( {
+						...current,
+						[ getId( item ) ]: isChecked ? item : undefined,
+					} ),
+					currentSelection
+				);
+				return newSelection;
+			} );
 		};
 	}
 
 	function onClearSelection() {
-		setSelectedItems( {} );
+		setSelection( {} );
 	}
 
 	return {
 		selectedItems,
-		selectionCount,
 		areAllSelected,
 		hasSelection,
 		isSelected,
 		onSelectItem,
-		onSelectAllPage,
-		onSelectAll: onSelectAllPage,
+		onSelectAll,
 		onClearSelection,
 	};
 }
