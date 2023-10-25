@@ -10,6 +10,8 @@ There are several ways to extend the new product form: from a single field to a 
 
 ## Product form tabs
 
+![Product form tabs](https://woocommerce.files.wordpress.com/2023/10/product-form-tabs.gif)
+
 The new product form consists of groups displayed as tabs. Each is a separate view and may contain any number of sections. All groups serve a specific purpose, allowing merchants to quickly find the information they’re looking for (both in default Woo features and extensions).
 
 * **General**: Essential product information, including the name, image, and description. This tab is also where key features live for non-standard product types: downloads, groups, links, etc.
@@ -32,7 +34,7 @@ To choose, put yourself in the merchant’s shoes: where would you go to find th
 
 ### Fields
 
-Field extensions are the simplest type of extension. They can add new, replace, and expand existing form fields in any section, and hide fields.
+Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 
 #### ✅ What they are for
 
@@ -44,6 +46,8 @@ Field extensions are the simplest type of extension. They can add new, replace, 
 * Multi-field or multi-step forms
 * Complex tables
 
+Field extensions should always be logically related to the form area they are in. For example, if you’re building a dropshipping plugin, your warehouse selection field should live in the first section of the Inventory group. To ensure an excellent experience for our merchants, we do not recommend placing it in a separate group, subgroup, or section.
+
 #### Use cases
 
 * Adding extra product details, f.e. volume under Shipping
@@ -52,12 +56,38 @@ Field extensions are the simplest type of extension. They can add new, replace, 
 
 ### Sections
 
-Sections are significant parts of the form that may consist of multiple fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
+Sections add extra fields to existing form sections. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
+
+#### ✅ What they are for
+
+* Relevant features that can be crucial to merchants’ product creation flow
+* 2-5 field forms with simple functionality, e.g., dimensions or tax settings
+* Lists of items, e.g., attachments, channels, or accounts
+
+#### ❌ What they aren’t for
+
+* Simple extensions with 1-2 fields
+* Multi-step forms and complex tables
+* Read-only descriptions, setup guides, and advertisements
+
+#### 💡Example
+
+If you’re developing an extension that allows merchants to upload 360 images or videos, you could add it as a field or a button in the Images section in the General tab. This way, merchants can create the perfect product gallery without jumping between multiple tabs.
+
+#### Other use cases include
+
+* Adding extra product details, e.g., measurements under Shipping
+* Setting up social channels in the Visibility section in the General tab
+* Changing the VAT tax settings in the Pricing tab
+
+# Subgroups
+
+Subgroups are significant parts of the form that may consist of multiple groups and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
 #### ✅ What they are for
 
 * Complex forms with multiple fields, tables, and list items
-* Standalone features that that doesn’t build off of anything else
+* Standalone features that don’t build off of anything else
 * Extensions that rely on user-created items, such as tags or attributes
 
 #### ❌ What they aren’t for
@@ -66,7 +96,11 @@ Sections are significant parts of the form that may consist of multiple fields. 
 * Read-only descriptions, setup guides, and advertisements
 * Multi-step setup wizards and external content
 
-#### Use cases
+#### 💡Example
+
+If you’re working on a plugin that allows merchants to offer discounts based on the number of purchased items, you may consider adding a new section in the Pricing tab. This will give you enough space to present the information in a legible, easy-to-navigate manner.
+
+#### Other use cases include
 
 * Adding product labels with a robust interactive preview
 * Managing product warranty options
