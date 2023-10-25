@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../../test-data/data' ); 
-const {getTranslationFor } = require( '../../utils/translations' );
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const billingEmail = 'marge-test-account@example.com';
 

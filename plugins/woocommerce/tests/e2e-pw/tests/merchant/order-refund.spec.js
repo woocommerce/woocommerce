@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require('../../utils/translations');
-const {	LANGUAGE } = process.env;
+const { getTranslationFor } = require( './../../utils/translations' );
+const { LANGUAGE } = process.env;
 
 test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
@@ -85,17 +85,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		);
 		await expect( page.locator( '#refund_amount' ) ).toHaveValue( '9.99' );
 
-		if (LANGUAGE === 'ar_AR') {
-			await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-				'مبلغ مُستردّ $9.99 يدويًا'
-			);
-		} else {
-			await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-				`${ getTranslationFor('Refund') } ${ currencySymbol }9.99 ${
-					getTranslationFor('manually')
-				}`
-			);
-		}
+		await expect( page.locator( '.do-manual-refund' ) ).toContainText(
+			getTranslationFor( 'Refund $9.99 manually' )
+		);
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
@@ -123,7 +115,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 		// Verify system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			getTranslationFor('Order status changed from Completed to Refunded.')
+			getTranslationFor(
+				'Order status changed from Completed to Refunded.'
+			)
 		);
 	} );
 
@@ -133,7 +127,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.getByRole( 'row', { name: getTranslationFor( '/Refund #\d+/' ) } ).hover();
+		await page
+			.getByRole( 'row', { name: getTranslationFor( '/Refund #d+/' ) } )
+			.hover();
 		await page.locator( '.delete_refund' ).click();
 
 		// Verify the refunded row item is no longer showing
@@ -228,7 +224,9 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify stock reduction system note was added
 		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
-			getTranslationFor('/Stock levels reduced: Product with stock \(#\d+\) 10→8/')
+			getTranslationFor(
+				'/Stock levels reduced: Product with stock (#d+) 10→8/'
+			)
 		);
 
 		// Click the Refund button
@@ -252,7 +250,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify restock system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			getTranslationFor('/Item #\d+ stock increased from 8 to 10./')
+			getTranslationFor( '/Item #d+ stock increased from 8 to 10./' )
 		);
 	} );
 } );

@@ -3,7 +3,7 @@ const { getTranslationFor } = require('../../utils/translations');
 const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
 
-const EXPECTED_SECTION_HEADERS = getTranslationFor( 'arrayOfExpectedSections' );
+const EXPECTED_SECTION_HEADERS = getTranslationFor( 'expectedSections' );
 
 let /**
 	 * @type {number}
@@ -163,16 +163,6 @@ test.describe( 'Analytics pages', () => {
 			} );
 		} );
 	} );
-
-	// 'اختيار التحليلات المراد عرضها واسم القسم'
-	// 'اختيار المخططات والرسوم البيانية المراد عرضها'
-	// 'اختيار لوحات العناصر المتصدّرة المراد عرضها والإعدادات الأخرى'
-
-	// 'اختيار التحليلات'
-
-	// 'اختيار'
-
-
 
 	test.beforeEach( async () => {
 		await test.step( `Go to Analytics > Overview`, async () => {

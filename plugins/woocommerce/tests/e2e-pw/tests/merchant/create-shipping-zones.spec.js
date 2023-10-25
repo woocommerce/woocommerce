@@ -470,20 +470,11 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( getTranslationFor( 'Local pickup' ) );
 
-		// handle RTL
-		if ( LANGUAGE === 'ar_AR' ) {
-			await expect(
-				page.locator(
-					'td[data-title="الإجمالي"] > strong > .amount > bdi'
-				)
-			).toContainText( '25.99' );
-		} else {
-			await expect(
-				page.locator(
-					'td[data-title="Total"] > strong > .amount > bdi'
-				)
-			).toContainText( '25.99' );
-		}
+		await expect(
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
+		).toContainText( '25.99' );
 	} );
 
 	test( 'allows customer to benefit from a free Free shipping if in BC', async ( {
@@ -503,20 +494,11 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( `${ getTranslationFor( 'Free shipping' ) }` );
 
-		// handle RTL
-		if ( LANGUAGE === 'ar_AR' ) {
-			await expect(
-				page.locator(
-					'td[data-title="الإجمالي"] > strong > .amount > bdi'
-				)
-			).toContainText( '25.99' );
-		} else {
-			await expect(
-				page.locator(
-					'td[data-title="Total"] > strong > .amount > bdi'
-				)
-			).toContainText( '25.99' );
-		}
+		await expect(
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
+		).toContainText( '25.99' );
 	} );
 
 	test( 'allows customer to pay for a Flat rate shipping method', async ( {
@@ -540,19 +522,10 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( '10.00' );
 
-		// handle RTL
-		if ( LANGUAGE === 'ar_AR' ) {
-			await expect(
-				page.locator(
-					'td[data-title="الإجمالي"] > strong > .amount > bdi'
-				)
-			).toContainText( '35.99' );
-		} else {
-			await expect(
-				page.locator(
-					'td[data-title="Total"] > strong > .amount > bdi'
-				)
-			).toContainText( '35.99' );
-		}
+		await expect(
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
+		).toContainText( '35.99' );
 	} );
 } );

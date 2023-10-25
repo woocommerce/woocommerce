@@ -111,10 +111,14 @@ test.describe( 'General tab', () => {
 				.first()
 				.fill( productData.salePrice );
 
+			// There is a bug where the Add button is not being translated:
+			// https://github.com/woocommerce/woocommerce/issues/40965
+			// Once that is resolved, we can update the 'button' below to:
+			// name: getTranslationFor( 'Add' ), 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: getTranslationFor( 'Add' ),
+					name: 'Add',
 				} )
 				.click();
 
@@ -123,6 +127,10 @@ test.describe( 'General tab', () => {
 			);
 			const textContent = await element.innerText();
 
+			// There is a bug where the Snackbar is not being translated:
+			// https://github.com/woocommerce/woocommerce/issues/40968
+			// Once that is resolved, we can update the test below to:
+			// name: getTranslationFor( /Product added/ ), 
 			await expect( textContent ).toMatch( /Product added/ );
 
 			const title = await page.locator(
@@ -155,10 +163,15 @@ test.describe( 'General tab', () => {
 				)
 				.first()
 				.fill( productData.productPrice );
+			
+			// There is a bug where the Add button is not being translated:
+			// https://github.com/woocommerce/woocommerce/issues/40965
+			// Once that is resolved, we can update the 'button' below to:
+			// name: getTranslationFor( 'Add' ), 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: getTranslationFor( 'Add' ),
+					name: 'Add',
 				} )
 				.click();
 
