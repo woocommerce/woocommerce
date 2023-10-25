@@ -1070,6 +1070,8 @@ export const COLOR_PALETTES = [
 	},
 ].map( ( color ) => {
 	// Add base styles settings for elements to ensure that the colors are applied correctly since default TT3 theme does not have right styles.
+	// These styles are referenced in the theme.json file of the creatio-2 theme.
+	// https://github.com/Automattic/themes/blob/trunk/creatio-2/theme.json
 	return {
 		...color,
 		styles: {
