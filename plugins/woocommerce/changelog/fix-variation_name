@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Invalidate variation requests after new product variations are generated.
