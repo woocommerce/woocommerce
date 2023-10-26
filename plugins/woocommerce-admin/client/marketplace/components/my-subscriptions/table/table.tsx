@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Table, TablePlaceholder } from '@woocommerce/components';
 import {
 	TableHeader,
 	TableRow,
 } from '@woocommerce/components/build-types/table/types';
+import { __ } from '@wordpress/i18n';
 
 const tableHeadersDefault = [
 	{
@@ -70,10 +70,6 @@ export function InstalledSubscriptionsTable( props: {
 	const headers = [
 		...tableHeadersDefault,
 		{
-			key: 'activated',
-			label: __( 'Activated', 'woocommerce' ),
-		},
-		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),
 		},
@@ -94,10 +90,6 @@ export function AvailableSubscriptionsTable( props: {
 } ) {
 	const headers = [
 		...tableHeadersDefault,
-		{
-			key: 'install',
-			label: __( 'Install', 'woocommerce' ),
-		},
 		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),

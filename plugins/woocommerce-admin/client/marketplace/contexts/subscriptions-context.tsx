@@ -13,7 +13,7 @@ import { fetchSubscriptions } from '../utils/functions';
 export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	subscriptions: [],
 	setSubscriptions: () => {},
-	loadSubscriptions: () => {},
+	loadSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
 } );
@@ -31,7 +31,7 @@ export function SubscriptionsContextProvider( props: {
 			setIsLoading( true );
 		}
 
-		fetchSubscriptions()
+		return fetchSubscriptions()
 			.then( ( subscriptionResponse ) => {
 				setSubscriptions( subscriptionResponse );
 			} )
@@ -42,12 +42,14 @@ export function SubscriptionsContextProvider( props: {
 			} );
 	};
 
-	useEffect( () => loadSubscriptions( true ), [] );
+	useEffect( () => {
+		loadSubscriptions( true );
+	}, [] );
 
 	const contextValue = {
 		subscriptions,
 		setSubscriptions,
-		loadSubscriptions,
+		loadSubscriptions: () => loadSubscriptions(),
 		isLoading,
 		setIsLoading,
 	};
