@@ -75,7 +75,7 @@ function ResizableFrame( {
 	/** The default (unresized) width/height of the frame, based on the space availalbe in the viewport. */
 	defaultSize,
 	innerContentStyle,
-	duringGuideTour = false,
+	isHandleVisibleByDefault = false,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -192,7 +192,9 @@ function ResizableFrame( {
 		if ( isResizing ) {
 			return 'active';
 		}
-		return shouldShowHandle || duringGuideTour ? 'visible' : 'hidden';
+		return shouldShowHandle || isHandleVisibleByDefault
+			? 'visible'
+			: 'hidden';
 	} )();
 
 	const resizeHandler = (
@@ -220,10 +222,10 @@ function ResizableFrame( {
 			whileFocus="active"
 			whileHover="active"
 			children={
-				duringGuideTour &&
+				isHandleVisibleByDefault &&
 				! hasHandlerDragged && (
 					<Popover
-						className="components-tooltip"
+						className="woocommerce-assembler-hub__resizable-frame__drag-handler"
 						position="middle right"
 					>
 						{ __( 'Drag to resize', 'woocommerce' ) }
@@ -273,7 +275,7 @@ function ResizableFrame( {
 			handleComponent={ {
 				left: (
 					<>
-						{ duringGuideTour ? (
+						{ isHandleVisibleByDefault ? (
 							<div>{ resizeHandler }</div>
 						) : (
 							<Tooltip

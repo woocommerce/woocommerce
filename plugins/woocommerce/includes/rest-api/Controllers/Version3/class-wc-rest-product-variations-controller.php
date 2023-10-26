@@ -119,7 +119,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
-			'name'                  => preg_replace( '/' . preg_quote( $object->get_title() . ' - ', '/' ) . '/', '', $object->get_name(), 1 ),
+			'name'                  => wc_get_formatted_variation( $object, true, false, false ),
 			'parent_id'             => $object->get_parent_id(),
 		);
 
@@ -906,13 +906,39 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Price filter.
 		if ( is_bool( $request['has_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_price',
-					'compare' => $request['has_price'] ? 'EXISTS' : 'NOT EXISTS',
-				)
-			);
+			if ( $request['has_price'] ) {
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+					$args,
+					array(
+						'relation' => 'AND',
+						array(
+							'key'     => '_price',
+							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => '_price',
+							'compare' => '!=',
+							'value'   => null,
+						),
+					)
+				);
+			} else {
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+					$args,
+					array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_price',
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'     => '_price',
+							'compare' => '=',
+							'value'   => null,
+						),
+					)
+				);
+			}
 		}
 
 		// Filter product based on stock_status.

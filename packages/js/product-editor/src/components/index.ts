@@ -39,3 +39,8 @@ export {
 	ManageDownloadLimitsModal as __experimentalManageDownloadLimitsModal,
 	ManageDownloadLimitsModalProps,
 } from './manage-download-limits-modal';
+
+export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
+export { NumberControl as __experimentalNumberControl } from './number-control';
+
+export * from './product-page-skeleton';

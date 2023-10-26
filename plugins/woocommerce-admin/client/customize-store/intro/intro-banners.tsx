@@ -10,6 +10,7 @@ import { getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { Intro } from '.';
+import { navigateOrParent } from '../utils';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -190,10 +191,9 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				window.location.href = getNewPath(
-					{},
-					'/customize-store/assembler-hub',
-					{}
+				navigateOrParent(
+					window,
+					getNewPath( {}, '/customize-store/assembler-hub', {} )
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }

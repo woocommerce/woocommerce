@@ -82,16 +82,26 @@ class CustomizeStore extends Task {
 	}
 
 	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store' );
+	}
+
+
+	/**
 	 * Possibly add site editor scripts.
 	 */
 	public function possibly_add_site_editor_scripts() {
-		$is_customize_store_pages = (
+		$is_assembler_hub = (
 			isset( $_GET['page'] ) &&
 			'wc-admin' === $_GET['page'] &&
 			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
+			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' )
 		);
-		if ( ! $is_customize_store_pages ) {
+		if ( ! $is_assembler_hub ) {
 			return;
 		}
 

@@ -10,7 +10,48 @@
 	"license": "GPL-3.0+",
 	"config": {
 		"wp_org_slug": "woocommerce",
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"ci": {
+			"name": "WP: latest",
+			"customCommands": {
+				"lint": "lint:php:changes:branch ${baseRef}",
+				"test:php": "test:php:env"
+			},
+			"testEnvCommand": "env:test",
+			"testEnvConfig": {
+				"wpVersion": "latest"
+			},
+			"additionalTasks": [
+				{
+					"name": "PHP 8.0",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"phpVersion": "8.0"
+					}
+				},
+				{
+					"name": "WP: nightly",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "nightly"
+					}
+				},
+				{
+					"name": "WP: latest-1",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-1"
+					}
+				},
+				{
+					"name": "WP: latest-2",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-2"
+					}
+				}
+			]
+		}
 	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
@@ -19,8 +60,7 @@
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm lint:php",
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",

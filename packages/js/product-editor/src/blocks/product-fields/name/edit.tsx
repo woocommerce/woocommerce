@@ -92,7 +92,7 @@ export function Edit( {
 		'name',
 		async function nameValidator() {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
-				return __( 'This field is required.', 'woocommerce' );
+				return __( 'Name field is required.', 'woocommerce' );
 			}
 
 			if ( name.length > 120 ) {

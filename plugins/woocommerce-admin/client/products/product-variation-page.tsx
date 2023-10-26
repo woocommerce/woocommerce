@@ -10,9 +10,9 @@ import {
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
+	ProductPageSkeleton,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
@@ -81,7 +81,7 @@ export default function ProductPage() {
 	);
 
 	if ( ! variation?.id ) {
-		return <Spinner />;
+		return <ProductPageSkeleton />;
 	}
 
 	return (
