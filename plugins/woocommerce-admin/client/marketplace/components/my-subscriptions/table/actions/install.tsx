@@ -18,13 +18,14 @@ interface InstallProps {
 }
 
 export default function Install( props: InstallProps ) {
-	const [ loading, setLoading ] = useState( false );
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { loadSubscriptions, isInstalling, addInstalling, removeInstalling } =
+		useContext( SubscriptionsContext );
+	const loading = isInstalling( props.subscription.product_key );
 
 	const install = () => {
-		setLoading( true );
+		addInstalling( props.subscription.product_key );
 		installProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
@@ -38,7 +39,7 @@ export default function Install( props: InstallProps ) {
 							icon: <Icon icon="yes" />,
 						}
 					);
-					setLoading( false );
+					removeInstalling( props.subscription.product_key );
 				} );
 			} )
 			.catch( ( error ) => {
@@ -59,7 +60,7 @@ export default function Install( props: InstallProps ) {
 							},
 						],
 					} );
-					setLoading( false );
+					removeInstalling( props.subscription.product_key );
 				} );
 			} );
 	};
