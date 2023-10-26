@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix - Fatal error in class-wc-helper-updater.php when transient parameter is null

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update logic of deleting variation to go to previous variation if the last one is deleted.
