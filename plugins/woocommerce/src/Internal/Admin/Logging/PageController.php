@@ -326,7 +326,5 @@ class PageController {
 				}
 			);
 		}
-
-		$_SERVER['REQUEST_URI'] = remove_query_arg( array( 'deleted' ), $request_uri );
 	}
 }
