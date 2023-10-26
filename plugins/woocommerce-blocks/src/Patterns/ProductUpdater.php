@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
+use Automattic\WooCommerce\Blocks\AI\Connection;
+use WP_Error;
 /**
  * Pattern Images class.
  */
@@ -10,12 +12,14 @@ class ProductUpdater {
 	/**
 	 * Generate AI content and assign AI-managed images to Products.
 	 *
-	 * @param array  $vertical_images The vertical images.
-	 * @param string $business_description The business description.
+	 * @param Connection $ai_connection The AI connection.
+	 * @param string     $token The JWT token.
+	 * @param array      $images The array of images.
+	 * @param string     $business_description The business description.
 	 *
-	 * @return bool|\WP_Error True if the content was generated successfully, WP_Error otherwise.
+	 * @return bool|WP_Error True if the content was generated successfully, WP_Error otherwise.
 	 */
-	public function generate_content( $vertical_images, $business_description ) {
+	public function generate_content( $ai_connection, $token, $images, $business_description ) {
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
 		}
@@ -67,18 +71,13 @@ class ProductUpdater {
 
 		$dummy_products_to_update = [];
 		foreach ( $dummy_products as $dummy_product ) {
-			$current_product_hash     = $this->get_hash_for_product( $dummy_product );
-			$ai_modified_product_hash = $this->get_hash_for_ai_modified_product( $dummy_product );
+			if ( ! $dummy_product instanceof \WC_Product ) {
+				continue;
+			}
 
-			$date_created  = $dummy_product->get_date_created()->date( 'Y-m-d H:i:s' );
-			$date_modified = $dummy_product->get_date_modified()->date( 'Y-m-d H:i:s' );
+			$should_update_dummy_product = $this->should_update_dummy_product( $dummy_product );
 
-			$timestamp_created  = strtotime( $date_created );
-			$timestamp_modified = strtotime( $date_modified );
-
-			$dummy_product_not_modified = abs( $timestamp_modified - $timestamp_created ) < 60;
-
-			if ( $current_product_hash === $ai_modified_product_hash || $dummy_product_not_modified ) {
+			if ( $should_update_dummy_product ) {
 				$dummy_products_to_update[] = $dummy_product;
 			}
 		}
@@ -87,50 +86,91 @@ class ProductUpdater {
 			return true;
 		}
 
-		$ai_selected_products_images = $this->get_images_information( $vertical_images );
+		$ai_selected_products_images = $this->get_images_information( $images );
 		$products_information_list   = $this->assign_ai_selected_images_to_dummy_products_information_list( $ai_selected_products_images );
 
-		$responses = $this->generate_product_content( $products_information_list );
+		$response = $this->generate_product_content( $ai_connection, $token, $products_information_list );
 
-		foreach ( $responses as $key => $response ) {
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
+		if ( is_wp_error( $response ) ) {
+			$error_msg = $response;
+		} elseif ( empty( $response ) || ! isset( $response['completion'] ) ) {
+			$error_msg = new \WP_Error( 'missing_completion_key', __( 'The response from the AI service is empty or missing the completion key.', 'woo-gutenberg-products-block' ) );
+		}
 
-			if ( empty( $response ) ) {
-				return new \WP_Error( 'empty_response', __( 'The response from the AI service was empty.', 'woo-gutenberg-products-block' ) );
-			}
+		if ( isset( $error_msg ) ) {
+			$this->update_dummy_products( $dummy_products_to_update, $products_information_list );
 
-			if ( ! isset( $response['completion'] ) ) {
+			return $error_msg;
+		}
+
+		$product_content = json_decode( $response['completion'], true );
+
+		if ( is_null( $product_content ) ) {
+			$this->update_dummy_products( $dummy_products_to_update, $products_information_list );
+
+			return new \WP_Error( 'invalid_json', __( 'The response from the AI service is not a valid JSON.', 'woo-gutenberg-products-block' ) );
+		}
+
+		// This is required to allow the usage of the media_sideload_image function outside the context of /wp-admin/.
+		// See https://developer.wordpress.org/reference/functions/media_sideload_image/ for more details.
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$this->update_dummy_products( $dummy_products_to_update, $product_content );
+
+		return true;
+	}
+
+	/**
+	 * Update the dummy products with the content from the information list.
+	 *
+	 * @param array $dummy_products_to_update The dummy products to update.
+	 * @param array $products_information_list The products information list.
+	 */
+	public function update_dummy_products( $dummy_products_to_update, $products_information_list ) {
+		$i = 0;
+		foreach ( $dummy_products_to_update as $dummy_product ) {
+			if ( ! isset( $products_information_list[ $i ] ) ) {
 				continue;
 			}
 
-			$product_content = json_decode( $response['completion'], true );
+			$this->update_product_content( $dummy_product, $products_information_list[ $i ] );
+			++$i;
+		}
+	}
 
-			if ( is_null( $product_content ) ) {
-				continue;
-			}
+	/**
+	 * Verify if the dummy product should have its content generated and managed by AI.
+	 *
+	 * @param \WC_Product $dummy_product The dummy product.
+	 *
+	 * @return bool
+	 */
+	public function should_update_dummy_product( $dummy_product ): bool {
+		$current_product_hash     = $this->get_hash_for_product( $dummy_product );
+		$ai_modified_product_hash = $this->get_hash_for_ai_modified_product( $dummy_product );
 
-			// This is required to allow the usage of the media_sideload_image function outside the context of /wp-admin/.
-			// See https://developer.wordpress.org/reference/functions/media_sideload_image/ for more details.
-			require_once ABSPATH . 'wp-admin/includes/media.php';
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			require_once ABSPATH . 'wp-admin/includes/image.php';
+		$date_created  = $dummy_product->get_date_created();
+		$date_modified = $dummy_product->get_date_modified();
 
-			$i = 0;
-			foreach ( $dummy_products_to_update as $dummy_product ) {
-				$this->update_product_content( $dummy_product, $product_content[ $i ] );
-				++$i;
-			}
+		if ( ! $date_created instanceof \WC_DateTime || ! $date_modified instanceof \WC_DateTime ) {
+			return false;
 		}
 
-		$update_option = update_option( 'last_business_description_with_ai_content_generated', $business_description );
+		$formatted_date_created  = $dummy_product->get_date_created()->date( 'Y-m-d H:i:s' );
+		$formatted_date_modified = $dummy_product->get_date_modified()->date( 'Y-m-d H:i:s' );
 
-		if ( ! $update_option ) {
-			return new \WP_Error( 'update_option_failed', __( 'The option last_business_description_with_ai_content_generated could not be updated.', 'woo-gutenberg-products-block' ) );
+		$timestamp_created  = strtotime( $formatted_date_created );
+		$timestamp_modified = strtotime( $formatted_date_modified );
+
+		$dummy_product_not_modified = abs( $timestamp_modified - $timestamp_created ) < 60;
+
+		if ( $current_product_hash === $ai_modified_product_hash || $dummy_product_not_modified ) {
+			return true;
 		}
 
-		return $update_option;
+		return false;
 	}
 
 	/**
@@ -233,10 +273,11 @@ class ProductUpdater {
 		if ( ! isset( $ai_generated_product_content['image']['src'] ) || ! isset( $ai_generated_product_content['image']['alt'] ) || ! isset( $ai_generated_product_content['title'] ) || ! isset( $ai_generated_product_content['description'] ) ) {
 			return;
 		}
-		// Since the media_sideload_image function can take longer to complete
-		// the process of downloading the external image and uploading it
-		// to the media library, we need to ensure the request doesn't timeout.
+		// Since the media_sideload_image function is expensive and can take longer to complete
+		// the process of downloading the external image and uploading it to the media library,
+		// here we are increasing the time limit and the memory limit to avoid any issues.
 		set_time_limit( 60 );
+		wp_raise_memory_limit();
 
 		$product_image_id = media_sideload_image( $ai_generated_product_content['image']['src'], $product->get_id(), $ai_generated_product_content['image']['alt'], 'id' );
 
@@ -303,39 +344,32 @@ class ProductUpdater {
 	/**
 	 * Get the images information.
 	 *
-	 * @param array $vertical_images The vertical images.
+	 * @param array $images The array of images.
 	 *
 	 * @return array
 	 */
-	public function get_images_information( $vertical_images ) {
-		if ( is_wp_error( $vertical_images ) ) {
+	public function get_images_information( $images ) {
+		if ( is_wp_error( $images ) ) {
 			return [
-				'src' => esc_url( 'images/block-placeholders/product-image-gallery.svg' ),
+				'src' => 'images/block-placeholders/product-image-gallery.svg',
 				'alt' => 'The placeholder for a product image.',
 			];
 		}
 
 		$count              = 0;
 		$placeholder_images = [];
-		foreach ( $vertical_images as $vertical_image ) {
+		foreach ( $images as $image ) {
 			if ( $count >= 6 ) {
 				break;
 			}
 
-			if ( isset( $vertical_image['meta']['pexels_object']['src']['large'] ) ) {
-				$src = $vertical_image['meta']['pexels_object']['src']['large'];
-				$alt = $vertical_image['meta']['pexels_object']['alt'] ?? 'The placeholder for a product image.';
-			} elseif ( isset( $vertical_image['guid'] ) ) {
-				$src = $vertical_image['guid'];
-				$alt = $vertical_image['meta']['pexels_object']['alt'] ?? 'The placeholder for a product image.';
-			} else {
-				$src = 'images/pattern-placeholders/white-texture-floor-wall-gray-tile.jpg';
-				$alt = 'The placeholder for a product image.';
+			if ( ! isset( $image['title'] ) || ! isset( $image['thumbnails']['medium'] ) ) {
+				continue;
 			}
 
 			$placeholder_images[] = [
-				'src' => esc_url( $src ),
-				'alt' => esc_attr( $alt ),
+				'src' => esc_url( $image['thumbnails']['medium'] ),
+				'alt' => esc_attr( $image['title'] ),
 			];
 
 			++ $count;
@@ -347,33 +381,21 @@ class ProductUpdater {
 	/**
 	 * Generate the product content.
 	 *
-	 * @param array $products_default_content The default content for the products.
+	 * @param Connection $ai_connection The AI connection.
+	 * @param string     $token The JWT token.
+	 * @param array      $products_default_content The default content for the products.
 	 *
 	 * @return array|int|string|\WP_Error
 	 */
-	public function generate_product_content( $products_default_content ) {
-		$ai_connection = new \Automattic\WooCommerce\Blocks\AI\Connection();
-
-		$site_id = $ai_connection->get_site_id();
-
-		if ( is_wp_error( $site_id ) ) {
-			return $site_id;
-		}
-
-		$token = $ai_connection->get_jwt_token( $site_id );
-
-		if ( is_wp_error( $token ) ) {
-			return $token;
-		}
-
+	public function generate_product_content( $ai_connection, $token, $products_default_content ) {
 		$store_description = get_option( 'woo_ai_describe_store_description' );
 
 		if ( ! $store_description ) {
 			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate the content for your site.', 'woo-gutenberg-products-block' ) );
 		}
 
-		$prompt = [ sprintf( 'Given the following store description: "%1s" and the assigned value for the alt property in the json bellow, generate new titles and descriptions for each one of the products listed bellow and assign them as the new values for the json: %2s. Each one of the titles should be unique and no numbers are allowed. The response should be only a JSON string, with no intro or explanations.', $store_description, wp_json_encode( $products_default_content ) ) ];
+		$prompt = sprintf( 'Given the following business description: "%1s" and the assigned value for the alt property in the json bellow, generate new titles and descriptions for each one of the products listed bellow and assign them as the new values for the json: %2s. Each one of the titles should be unique and must be limited to 29 characters. The response should be only a JSON string, with no intro or explanations.', $store_description, wp_json_encode( $products_default_content ) );
 
-		return $ai_connection->fetch_ai_responses( $token, $prompt, 60 );
+		return $ai_connection->fetch_ai_response( $token, $prompt, 60 );
 	}
 }

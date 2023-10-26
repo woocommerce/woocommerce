@@ -594,15 +594,15 @@
 			"descriptions": [
 				{
 					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed.",
-					"ai_prompt": "A description of the first testimonial"
+					"ai_prompt": "A description of the first testimonial. The testimonial must have less than 200 characters."
 				},
 				{
 					"default": "Great couch. color as advertise. seat is nice and firm. Easy to put together. Versatile. Bought one for my mother in law as well. And she loves hers!",
-					"ai_prompt": "A description of the second testimonial"
+					"ai_prompt": "A description of the second testimonial. The testimonial must have less than 200 characters."
 				},
 				{
 					"default": "I got the kind sofa. The look and feel is high quality, and I enjoy that it is a medium level of firmness. Assembly took a little longer than I expected, and it came in 4 boxes.",
-					"ai_prompt": "A description of the third testimonial"
+					"ai_prompt": "A description of the third testimonial. The testimonial must have less than 200 characters."
 				}
 			]
 		}
@@ -622,7 +622,7 @@
 			"descriptions": [
 				{
 					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...\n\n~ Anna W.",
-					"ai_prompt": "A description of the testimonial"
+					"ai_prompt": "A description of the testimonial. The testimonial must have less than 200 characters."
 				}
 			]
 		}

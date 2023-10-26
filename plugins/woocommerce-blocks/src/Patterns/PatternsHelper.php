@@ -76,20 +76,6 @@ class PatternsHelper {
 	}
 
 	/**
-	 * Returns an array of random images.
-	 *
-	 * @param array $images The pattern images.
-	 * @param int   $images_total The total number of images needed for the pattern.
-	 *
-	 * @return array The random images.
-	 */
-	private static function get_random_images( array $images, int $images_total ): array {
-		shuffle( $images );
-
-		return array_slice( $images, 0, $images_total );
-	}
-
-	/**
 	 * Get the Patterns Dictionary.
 	 *
 	 * @param string|null $pattern_slug The pattern slug.
