@@ -26,8 +26,8 @@ module.exports = {
 			inserter: false,
 		},
 		npmDevDependencies: [
-			'@types/wordpress__block-editor',
-			'@types/wordpress__blocks',
+			'@types/wordpress__block-editor@^7.0.0',
+			'@types/wordpress__blocks@^11.0.9',
 			'@woocommerce/dependency-extraction-webpack-plugin',
 			'@woocommerce/eslint-plugin',
 			'@wordpress/prettier-config',
