@@ -6,7 +6,6 @@ import {
 	getQuery,
 	updateQueryString,
 	getNewPath,
-	navigateTo,
 } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
