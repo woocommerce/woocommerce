@@ -38,6 +38,7 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { navigateOrParent, attachParentListeners } from './utils';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -65,7 +66,8 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
+	const url = getNewPath( {}, '/', {} );
+	navigateOrParent( window, url );
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -359,6 +361,12 @@ export const CustomizeStoreController = ( {
 			setCurrentComponent( () => currentNodeMeta?.component );
 		}
 	}, [ CurrentComponent, currentNodeMeta?.component ] );
+
+	// Run listeners for parent window.
+	useEffect( () => {
+		const removeListener = attachParentListeners();
+		return removeListener;
+	}, [] );
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
