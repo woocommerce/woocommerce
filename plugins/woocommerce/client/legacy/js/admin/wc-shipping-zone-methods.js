@@ -443,7 +443,7 @@
 				},
 				moveHTMLHelpTips: function( html ) {
 					// These help tips aren't moved.
-					const helpTipsToIgnore = [ 'woocommerce_flat_rate_cost' ];
+					const helpTipsToRetain = [ 'woocommerce_flat_rate_cost', 'woocommerce_flat_rate_no_class_cost', 'woocommerce_flat_rate_class_cost_' ];
 
 					const htmlContent = $( html );
 					const labels = htmlContent.find( 'label' );
@@ -457,7 +457,9 @@
 
 						const id = label.attr( 'for' );
 
-						if ( helpTipsToIgnore.includes( id ) ) {
+						if ( helpTipsToRetain.some( ( tip ) => id.includes( tip ) ) ) {
+							const helpTip = htmlContent.find( `label[for=${ id }] span.woocommerce-help-tip` );
+							helpTip.addClass( 'wc-shipping-visible-help-text' );
 							return;
 						}
 

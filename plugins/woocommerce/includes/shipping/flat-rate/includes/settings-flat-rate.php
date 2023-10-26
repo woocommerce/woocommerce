@@ -48,7 +48,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'type'        => 'title',
 		'default'     => '',
 		/* translators: %s: URL for link. */
-		'description' => sprintf( __( 'These costs can optionally be added based on the <a target="_blank" href="%s">product shipping class</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
+		'description' => sprintf( __( 'These costs can optionally be added based on the <a target="_blank" href="%s">product shipping class</a>. Advanced Costs allows you to create formulas to determine costs. <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">Learn more</a>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
