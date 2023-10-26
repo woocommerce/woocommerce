@@ -4219,8 +4219,9 @@ table {
 
 .wc-shipping-zones-heading {
 	display: flex;
+	align-items: center;
 
-	.page-title-action {
+	.button-primary {
 		display: inline-block;
 		margin: 0 12px;
 	}
