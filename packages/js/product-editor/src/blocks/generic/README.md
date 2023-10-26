@@ -7,10 +7,6 @@ for more information on how to use these blocks.
 
 ## Blocks list
 
-### [woocommerce/product-checkbox-field](checkbox/README.md)
-
-### [woocommerce/product-collapsible](collapsible/README.md)
-
 ### [woocommerce/conditional](conditional/README.md)
 
 > ⚠️ **Note:** `woocommerce/conditional` is deprecated. Use conditional visibility
@@ -18,6 +14,12 @@ support in the Block Template API instead, through the `hideConditions` attribut
 any block and the `BlockInterface::add_hide_condition()` method.
 
 See [Block Template API usage examples](../../../../../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md) for more information.
+
+### [woocommerce/product-checkbox-field](checkbox/README.md)
+
+### [woocommerce/product-collapsible](collapsible/README.md)
+
+### [woocommerce/product-number-field](number/README.md)
 
 ### [woocommerce/product-pricing-field](pricing/README.md)
 
@@ -27,4 +29,4 @@ See [Block Template API usage examples](../../../../../../plugins/woocommerce/sr
 
 ### [woocommerce/product-toggle-field](toggle/README.md)
 
-### [woocommerce/product-number-field](number/README.md)
+
