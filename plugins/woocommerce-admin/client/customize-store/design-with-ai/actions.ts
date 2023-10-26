@@ -298,7 +298,9 @@ const redirectToAssemblerHub = async () => {
 		// Hide loading UI
 		attachIframeListeners( iframe );
 		onIframeLoad( showIframe );
-		setTimeout( showIframe, 30000 );
+
+		// Ceiling wait time set to 60 seconds
+		setTimeout( showIframe, 60 * 1000 );
 		window.history?.pushState( {}, '', assemblerUrl );
 	};
 

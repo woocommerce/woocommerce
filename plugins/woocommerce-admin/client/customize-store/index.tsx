@@ -38,7 +38,7 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachListenersParent } from './utils';
+import { navigateOrParent, attachParentListeners } from './utils';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -364,7 +364,7 @@ export const CustomizeStoreController = ( {
 
 	// Run listeners for parent window.
 	useEffect( () => {
-		const removeListener = attachListenersParent();
+		const removeListener = attachParentListeners();
 		return removeListener;
 	}, [] );
 

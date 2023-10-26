@@ -6,7 +6,7 @@ export function isIframe( windowObject ) {
 	return windowObject.document !== windowObject.parent.document;
 }
 
-export function iframeIsLoaded() {
+export function editorIsLoaded() {
 	window.parent.postMessage( { type: 'iframe-loaded' }, '*' );
 }
 
@@ -23,7 +23,7 @@ export function onIframeLoad( callback ) {
  *
  * @return {() => void} Remove listener function
  */
-export function attachListenersParent() {
+export function attachParentListeners() {
 	const listener = ( event ) => {
 		if ( event.data.type === 'navigate' ) {
 			window.location.href = event.data.url;
