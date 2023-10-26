@@ -32,6 +32,8 @@ class PageController {
 	/**
 	 * Initialize dependencies.
 	 *
+	 * @internal
+	 *
 	 * @param FileController $file_controller Instance of FileController.
 	 *
 	 * @return void

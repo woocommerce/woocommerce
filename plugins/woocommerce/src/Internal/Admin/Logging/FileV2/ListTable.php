@@ -97,7 +97,7 @@ class ListTable extends WP_List_Table {
 	protected function extra_tablenav( $which ): void {
 		$all_sources = $this->get_sources_list();
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		$current_source = $this->file_controller->sanitize_source( wp_unslash( $_GET['source'] ?? '' ) );
 
 		?>
