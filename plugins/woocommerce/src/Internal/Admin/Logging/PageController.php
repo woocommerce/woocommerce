@@ -204,7 +204,12 @@ class PageController {
 						'default' => $defaults['order'],
 					),
 				),
-				'source'  => FILTER_SANITIZE_STRING,
+				'source'  => array(
+					'filter'  => FILTER_CALLBACK,
+					'options' => function( $source ) {
+						return $this->file_controller->sanitize_source( wp_unslash( $source ) );
+					},
+				),
 			),
 			false
 		);
@@ -265,7 +270,18 @@ class PageController {
 			check_admin_referer( 'bulk-log-files' );
 
 			$sendback = remove_query_arg( array( 'deleted' ), wp_get_referer() );
-			$files    = filter_input( INPUT_GET, 'file', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+
+			// Multiple file[] params will be filtered separately, but assigned to $files as an array.
+			$files = filter_input(
+				INPUT_GET,
+				'file',
+				FILTER_CALLBACK,
+				array(
+					'options' => function( $file ) {
+						return sanitize_file_name( wp_unslash( $file ) );
+					},
+				)
+			);
 
 			if ( ! is_array( $files ) || count( $files ) < 1 ) {
 				wp_safe_redirect( $sendback );
