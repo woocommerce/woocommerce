@@ -116,7 +116,7 @@ const assignFontPairing = assign<
 				fontPairing = 'Bodoni Moda + Overpass';
 				break;
 			case choice === 'Bold':
-				fontPairing = 'Rubik + Inter';
+				fontPairing = 'Plus Jakarta Sans + Plus Jakarta Sans';
 				break;
 		}
 
