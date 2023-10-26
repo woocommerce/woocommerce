@@ -136,7 +136,7 @@ class Homescreen {
 
 			// Method creation has no default title, use the REST API to add a title.
 			$instance_id = $zone->add_shipping_method( 'free_shipping' );
-			$request = new WP_REST_Request( 'POST', '/wc/v2/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+			$request = new \WP_REST_Request( 'POST', '/wc/v2/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
 			$request->set_body_params(
 				array(
 					'settings' => array(
