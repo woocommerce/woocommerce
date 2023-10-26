@@ -64,6 +64,7 @@
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.1",
 		"dompurify": "^2.3.6",
+		"downshift": "^8.2.2",
 		"lodash": "^4.17.21",
 		"moment": "^2.29.4",
 		"prop-types": "^15.8.1",
