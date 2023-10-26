@@ -148,6 +148,20 @@
 				padding: 0 16px;
 				overflow-x: hidden;
 				flex: 1;
+
+				&::-webkit-scrollbar-thumb {
+					background-color: #c1c1c1;
+				}
+
+				&::-webkit-scrollbar-track-piece:start {
+					background: transparent;
+					margin-top: 250px;
+				}
+
+				&::-webkit-scrollbar-track-piece:end {
+					background: transparent;
+					margin-bottom: 400px;
+				}
 			}
 		}
 
