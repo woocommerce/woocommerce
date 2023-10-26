@@ -102,4 +102,16 @@
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<exclude-pattern>tests/php/src</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting">
+		<exclude-pattern>tests/php/src</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>tests/php/src</exclude-pattern>
+	</rule>
 </ruleset>

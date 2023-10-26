@@ -22,6 +22,9 @@ use WP_User;
  * Class SourceAttributionController
  *
  * @since x.x.x
+ *
+ * phpcs:disable WordPress.PHP.DisallowShortTernary
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 class SourceAttributionController implements RegisterHooksInterface {
 
@@ -56,8 +59,9 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy              $proxy  The legacy proxy.
-	 * @param WC_Logger_Interface|null $logger The logger object. If not provided, it will be obtained from the proxy.
+	 * @param LegacyProxy         $proxy      The legacy proxy.
+	 * @param FeaturesController  $controller The feature controller.
+	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
 	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
 		$this->proxy              = $proxy;
@@ -183,13 +187,40 @@ class SourceAttributionController implements RegisterHooksInterface {
 			true
 		);
 
+		/**
+		 * Filter the lifetime of the cookie used for source tracking.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param int $lifetime The lifetime of the cookie in months.
+		 */
+		$lifetime = (int) apply_filters( 'wc_order_source_attribution_cookie_lifetime_months', 6 );
+
+		/**
+		 * Filter the session length for source tracking.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param int $session_length The session length in minutes.
+		 */
+		$session_length = (int) apply_filters( 'wc_order_source_attribution_session_length_minutes', 30 );
+
+		/**
+		 * Filter to allow tracking.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param bool $allow_tracking True to allow tracking, false to disable.
+		 */
+		$allow_tracking = wc_bool_to_string( apply_filters( 'wc_order_source_attribution_allow_tracking', true ) );
+
 		// Pass parameters to Order Source Attribution JS.
 		$params = array(
-			'lifetime'      => (int) apply_filters( 'wc_order_source_attribution_cookie_lifetime_months', 6 ),
-			'session'       => (int) apply_filters( 'wc_order_source_attribution_session_length_minutes', 30 ),
+			'lifetime'      => $lifetime,
+			'session'       => $session_length,
 			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 			'prefix'        => $this->field_prefix,
-			'allowTracking' => wc_bool_to_string( apply_filters( 'wc_order_source_attribution_allow_tracking', true ) ),
+			'allowTracking' => $allow_tracking,
 		);
 
 		wp_localize_script( 'woocommerce-order-source-attribution-js', 'wc_order_attribute_source_params', $params );
@@ -295,7 +326,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 	/**
 	 * Save source data for an Order object.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param array    $source_data The source data.
+	 * @param WC_Order $order       The order object.
 	 *
 	 * @return void
 	 */
