@@ -411,6 +411,7 @@
 				reformatSettingsHTML: function( html ) {
 					const formattingFunctions = [
 						this.replaceHTMLTables,
+						this.moveAdvancedCostsHelpTip,
 						this.moveHTMLHelpTips,
 						this.addCurrencySymbol
 					];
@@ -418,6 +419,18 @@
 					return formattingFunctions.reduce( ( formattedHTML, fn ) => {
 						return fn( formattedHTML );
 					}, html );
+				},
+				moveAdvancedCostsHelpTip: function( html ) {
+					const htmlContent = $( html );
+					const advancedCostsHelpTip = htmlContent.find( '#wc-shipping-advanced-costs-help-text' );
+					advancedCostsHelpTip.addClass( 'wc-shipping-zone-method-fields-help-text' );
+					
+
+					const input = htmlContent.find( '#woocommerce_flat_rate_cost' );
+					const fieldset = input.closest( 'fieldset' );
+					advancedCostsHelpTip.appendTo( fieldset );
+
+					return htmlContent.prop( 'outerHTML' );
 				},
 				addCurrencySymbol: function( html ) {
 					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
