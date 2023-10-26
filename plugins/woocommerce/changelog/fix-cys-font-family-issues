@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix CYS font not loaded in sidebar panel iframes and incorrect text optimization during google font loading
