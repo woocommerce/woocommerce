@@ -192,7 +192,11 @@ function _Layout( {
 	}
 
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
-	const { header: showHeader = true, footer: showFooter = true } = layout;
+	const {
+		header: showHeader = true,
+		footer: showFooter = true,
+		showPluginArea = true,
+	} = layout;
 
 	const query = getQuery();
 
@@ -248,11 +252,15 @@ function _Layout( {
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
-				<PluginArea scope="woocommerce-admin" />
-				{ window.wcAdminFeatures.navigation && (
-					<PluginArea scope="woocommerce-navigation" />
+				{ showPluginArea && (
+					<>
+						<PluginArea scope="woocommerce-admin" />
+						{ window.wcAdminFeatures.navigation && (
+							<PluginArea scope="woocommerce-navigation" />
+						) }
+						<PluginArea scope="woocommerce-tasks" />
+					</>
 				) }
-				<PluginArea scope="woocommerce-tasks" />
 			</SlotFillProvider>
 		</LayoutContextProvider>
 	);
