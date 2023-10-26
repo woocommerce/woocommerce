@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Exclude some metadata from being considered in HPOS verify tool.
