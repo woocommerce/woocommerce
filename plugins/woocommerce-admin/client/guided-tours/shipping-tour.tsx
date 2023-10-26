@@ -132,7 +132,6 @@ const spotlitElementsSelectors: Array< NonEmptySelectorArray > = [
 ];
 
 const TourFloaterWrapper = ( { step }: { step: number } ) => {
-	console.log('wrapping');
 	const thisRef = useRef< HTMLDivElement >( null );
 	useLayoutEffect( () => {
 		// this moves the element to the correct place which is right before the table element
@@ -252,7 +251,7 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										'Specify the areas you\'d like to ship to! Give each zone a name, select the region(s) you\'d like to include, and add available shipping methods. Your shipping regions can be as specific as a zip code, or as broad as a country.',
+										"Specify the areas you'd like to ship to! Give each zone a name, select the region(s) you'd like to include, and add available shipping methods. Your shipping regions can be as specific as a zip code, or as broad as a country.",
 										'woocommerce'
 									) }
 								</span>
@@ -287,7 +286,7 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										'Add one or more shipping methods that you\'d like to make available to customers in your zones.',
+										"Add one or more shipping methods that you'd like to make available to customers in your zones.",
 										'woocommerce'
 									) }
 								</span>
