@@ -14,6 +14,7 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { TextBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { TextControl } from '../../../components/text-control';
+import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
@@ -36,6 +37,7 @@ export function Edit( {
 		postType,
 		fallbackValue: '',
 	} );
+	const { hasEdit } = useProductEdits();
 	const { error, validate } = useValidation< Product >(
 		property,
 		async function validator() {
@@ -87,7 +89,11 @@ export function Edit( {
 				value={ value }
 				label={ label }
 				onChange={ setValue }
-				onBlur={ validate }
+				onBlur={ () => {
+					if ( hasEdit( property ) ) {
+						validate();
+					}
+				} }
 				error={ error }
 				help={ help }
 				placeholder={ placeholder }
