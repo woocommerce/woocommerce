@@ -1,12 +1,4 @@
 <?php
-/**
- * Order source attribution meta.
- *
- * @since x.x.x
- *
- * phpcs:disable Generic.Commenting.DocComment.MissingShort
- */
-
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Traits;
@@ -21,6 +13,8 @@ use WP_Post;
  * Trait SourceAttributionMeta
  *
  * @since x.x.x
+ *
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 trait SourceAttributionMeta {
 
@@ -53,11 +47,13 @@ trait SourceAttributionMeta {
 	private $field_prefix = '';
 
 	/**
+	 * Get the device type based on the other meta fields.
+	 *
 	 * @since x.x.x
 	 *
-	 * @param array $values
+	 * @param array $values The meta values.
 	 *
-	 * @return void
+	 * @return string The device type.
 	 */
 	protected function get_device_type( array $values ): string {
 		$detector = new MobileDetect( array(), $values['user_agent'] );
@@ -267,7 +263,7 @@ trait SourceAttributionMeta {
 			$values['device_type'] = $this->get_device_type( $values );
 		}
 
-		// Set the origin label
+		// Set the origin label.
 		if ( array_key_exists( 'type', $values ) && array_key_exists( 'utm_source', $values ) ) {
 			$values['origin'] = $this->get_origin_label( $values['type'], $values['utm_source'] );
 		}

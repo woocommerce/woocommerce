@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * Class VersionUtil
  *
  * @since x.x.x
+ *
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 class VersionUtil {
 
@@ -19,8 +21,9 @@ class VersionUtil {
 	 * Init this class instance.
 	 *
 	 * @since x.x.x
+	 * @internal
 	 *
-	 * @param LegacyProxy $proxy
+	 * @param LegacyProxy $proxy The legacy proxy instance.
 	 *
 	 * @return void
 	 */

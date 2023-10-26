@@ -35,8 +35,8 @@ class CustomerHistory {
 	 */
 	private function display_customer_history( int $customer_id ) {
 		// Calculate the data needed for the template.
-		$order_count   = wc_get_customer_order_count( $customer_id );
-		$total_spent   = wc_get_customer_total_spent( $customer_id );
+		$order_count = wc_get_customer_order_count( $customer_id );
+		$total_spent = wc_get_customer_total_spent( $customer_id );
 
 		$args = array(
 			'order_count'   => $order_count,
