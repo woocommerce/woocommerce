@@ -1,0 +1,25 @@
+<html>
+<head>
+    <title>Template <?php echo $this->get_template_display_name(); ?></title>
+    <style>
+        <?php $this->render("show_variables_css"); ?>
+    </style>
+</head>
+
+<body>
+    <h2>Variables passed to <?php echo $this->get_template_display_name(); ?> template:</h2>
+
+    <?php $variable_names = $this->get_variable_names(); if(empty($variable_names)) { ?>
+        <p><i>No variables were passed to the template!</i></p>
+    <?php } else { ?>
+        <table>
+            <thead><tr><th>Name</th><th>Value</th></tr></thead>
+            <?php foreach($variable_names as $name) { ?>
+                <?php echo "<tr><td>{$name}</td><td>{$this->get_variable($name)}</td></tr>"; ?>
+
+            <?php } ?>
+        </table>
+    <p><?php echo count($variable_names); ?> variables passed to the template.</p>
+    <?php } ?>
+</body>
+</html>
