@@ -417,8 +417,6 @@ final class WooCommerce {
 				return defined( 'DOING_AJAX' );
 			case 'cron':
 				return defined( 'DOING_CRON' );
-			case 'rest-api':
-				return $this->is_rest_api_request();
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
