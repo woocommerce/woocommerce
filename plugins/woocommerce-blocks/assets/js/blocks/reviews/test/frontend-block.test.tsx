@@ -7,7 +7,9 @@ jest.mock( '../utils', () => ( {
 
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
-	getSetting: jest.fn().mockReturnValue( true ),
+	getSetting: jest
+		.fn()
+		.mockImplementation( ( setting, defaultValue ) => defaultValue ),
 } ) );
 
 /**
