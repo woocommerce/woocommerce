@@ -1,6 +1,6 @@
-# Validation data store
+# Validation Store <!-- omit in toc -->
 
-See also [third-party developers' validation documentation](../../third-party-developers/extensibility/data-store/validation.md).
+See also [third-party developers' Validation Store documentation](../../third-party-developers/extensibility/data-store/validation.md).
 
 The `wc/store/validation` store contains information about the current validity, visibility, and associated error message of _something_.
 

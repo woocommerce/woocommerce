@@ -1,4 +1,6 @@
-# Checkout data store
+# Checkout Store <!-- omit in toc -->
+
+See also [third-party developers' Checkout Store documentation](../../third-party-developers/extensibility/data-store/checkout.md).
 
 The checkout data store is used to track the status of the **checkout** (not including payment), it stores things like the order ID, the customer ID, the order notes, whether the "use shipping as billing" box is checked etc.
 
@@ -24,20 +26,19 @@ The initial state of the checkout store is:
 
 ## Properties
 
-- `redirectUrl` - Set when the checkout is completed. The payment method being used can set this, and it will be sent back to the block in the checkout response.
-- `status` - one of:
-    - `PRISTINE` (Checkout is in its initialized state.)
-    - `IDLE` (When checkout state has changed but there is no activity happening.)
-    - `COMPLETE` (After the `AFTER_PROCESSING` event emitters have completed. This status triggers the checkout redirect.)
-    - `BEFORE_PROCESSING` (This is the state before checkout processing begins after the checkout button has been pressed/submitted.)
-    - `PROCESSING` (After `BEFORE_PROCESSING` status emitters have finished successfully. Payment processing is started on this checkout status.)
-  `AFTER_PROCESSING` (After server side checkout processing is completed this status is set.)
-- `calculatingCount` - This is used to track when a request is being made to the server, for example to update the shipping method selection or to update the customer's address. When the request begins, `calculatingCount` increases, and when it completes, `calculatingCount` decreases.
-- `orderNotes` - the value of the order notes textarea.
-- `useShippingAsBilling` - Whether the `Use same address for billing` checkbox is checked.
-- `shouldCreateAccount` - whether the `Create account` checkbox is checked.
-- `extensionData` - data added to the data store by extensions.
-
+-   `redirectUrl` - Set when the checkout is completed. The payment method being used can set this, and it will be sent back to the block in the checkout response.
+-   `status` - one of:
+    -   `PRISTINE` (Checkout is in its initialized state.)
+    -   `IDLE` (When checkout state has changed but there is no activity happening.)
+    -   `COMPLETE` (After the `AFTER_PROCESSING` event emitters have completed. This status triggers the checkout redirect.)
+    -   `BEFORE_PROCESSING` (This is the state before checkout processing begins after the checkout button has been pressed/submitted.)
+    -   `PROCESSING` (After `BEFORE_PROCESSING` status emitters have finished successfully. Payment processing is started on this checkout status.)
+        `AFTER_PROCESSING` (After server side checkout processing is completed this status is set.)
+-   `calculatingCount` - This is used to track when a request is being made to the server, for example to update the shipping method selection or to update the customer's address. When the request begins, `calculatingCount` increases, and when it completes, `calculatingCount` decreases.
+-   `orderNotes` - the value of the order notes textarea.
+-   `useShippingAsBilling` - Whether the `Use same address for billing` checkbox is checked.
+-   `shouldCreateAccount` - whether the `Create account` checkbox is checked.
+-   `extensionData` - data added to the data store by extensions.
 
 ## Observers
 
