@@ -28,6 +28,7 @@
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
 		"@types/prop-types": "^15.7.4",
+		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/product-editor": "workspace:*",
