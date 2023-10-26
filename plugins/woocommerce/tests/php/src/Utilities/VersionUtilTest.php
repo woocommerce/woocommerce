@@ -10,7 +10,7 @@ use WC_Unit_Test_Case;
  *
  * @since x.x.x
  */
-class VersionUtiilTest extends WC_Unit_Test_Case {
+class VersionUtilTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The system under test.
@@ -32,7 +32,7 @@ class VersionUtiilTest extends WC_Unit_Test_Case {
 	}
 
 	public function test_wp_version_at_least() {
-		// Store the current wp_version
+		// Store the current wp_version.
 		$original_wp_version = $GLOBALS['wp_version'];
 
 		// Set a fake wp_version to test.
@@ -43,7 +43,7 @@ class VersionUtiilTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->wp_version_at_least( '5.6' ) );
 		$this->assertTrue( $this->sut->wp_version_at_least( '5.5' ) );
 
-		// Restore the original wp_version
+		// Restore the original wp_version.
 		$GLOBALS['wp_version'] = $original_wp_version;
 	}
 }
