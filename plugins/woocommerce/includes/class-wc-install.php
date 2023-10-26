@@ -621,7 +621,7 @@ class WC_Install {
 	/**
 	 * Set the Store ID if not already present.
 	 *
-	 * @since 8.2.0
+	 * @since 8.4.0
 	 */
 	public static function maybe_set_store_id() {
 		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
