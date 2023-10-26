@@ -4,7 +4,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore createRoot included for future compatibility
 // eslint-disable-next-line @woocommerce/dependency-group
-import { render, createRoot } from '@wordpress/element';
+import { render, createRoot, unmountComponentAtNode } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -34,6 +34,22 @@ export const init = () => {
 						render( <BackgroundRemovalLink />, root );
 					}
 				}, 0 );
+			},
+			dispose() {
+				// Call the original dispose method if it exists to ensure any cleanup it does is executed
+				if ( typeof _previous.dispose === 'function' ) {
+					_previous.dispose.call( this );
+				}
+
+				// Get the DOM node where your TourSpotlight component is rendered
+				const spotlightElement = document.querySelector(
+					'.woocommerce-tour-kit'
+				);
+
+				// If the element exists, unmount the TourSpotlight component from it
+				if ( spotlightElement ) {
+					unmountComponentAtNode( spotlightElement );
+				}
 			},
 			template( view: { id: number } ) {
 				const previousHtml = _previous.template.call( this, view );
