@@ -21,6 +21,15 @@
 	.woocommerce-layout__main {
 		padding-right: 0;
 	}
+
+	.edit-site-site-icon__image {
+		background: transparent;
+		border-radius: 4px;
+		height: auto;
+		-o-object-fit: cover;
+		object-fit: cover;
+		width: 100%;
+	}
 }
 
 body.woocommerce-customize-store.js.is-fullscreen-mode {
@@ -157,4 +166,17 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		padding: 0;
 		height: initial;
 	}
+}
+
+.cys-fullscreen-iframe {
+	display: block;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+	z-index: 9999;
+	transition: opacity 1.2s linear;
+	opacity: 0;
 }

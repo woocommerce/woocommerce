@@ -237,6 +237,72 @@ const reset = async ( cKey, cSecret ) => {
 	await deleteAllTaxRates();
 };
 
+/**
+ * Convert Cart and Checkout pages to shortcode.
+ */
+const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
+	/**
+	 * A WordPress page.
+	 * @typedef {Object} WPPage
+	 * @property {number} id
+	 * @property {string} slug
+	 */
+
+	const { request: apiRequest } = require( '@playwright/test' );
+	const { encodeCredentials } = require( './plugin-utils' );
+
+	const basicAuth = encodeCredentials( admin.username, admin.password );
+	const Authorization = `Basic ${ basicAuth }`;
+	const extraHTTPHeaders = {
+		Authorization,
+	};
+	const options = {
+		baseURL,
+		userAgent,
+		extraHTTPHeaders,
+	};
+	const request = await apiRequest.newContext( options );
+
+	// List all pages
+	const response_list = await request.get( '/wp-json/wp/v2/pages', {
+		data: {
+			_fields: [ 'id', 'slug' ],
+		},
+		failOnStatusCode: true,
+	} );
+
+	/**
+	 * @type {WPPage[]}
+	 */
+	const list = await response_list.json();
+
+	// Find the cart and checkout pages
+	const cart = list.find( ( page ) => page.slug === 'cart' );
+	const checkout = list.find( ( page ) => page.slug === 'checkout' );
+
+	// Convert their contents to shortcodes
+	await request.put( `/wp-json/wp/v2/pages/${ cart.id }`, {
+		data: {
+			content: {
+				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
+			},
+		},
+		failOnStatusCode: true,
+	} );
+	console.log( 'Cart page converted to shortcode.' );
+
+	await request.put( `/wp-json/wp/v2/pages/${ checkout.id }`, {
+		data: {
+			content: {
+				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
+			},
+		},
+		failOnStatusCode: true,
+	} );
+	console.log( 'Checkout page converted to shortcode.' );
+};
+
 module.exports = {
 	reset,
+	useCartCheckoutShortcodes,
 };

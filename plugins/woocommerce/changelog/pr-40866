@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add notices about the webhooks using legacy REST API payload going unsupported in WooCommerce 9.0
