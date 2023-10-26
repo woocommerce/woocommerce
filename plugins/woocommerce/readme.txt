@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix detection of cart and checkout classic-shortcode blocks in the system status report. [#40948](https://github.com/woocommerce/woocommerce/pull/40948)
 * Fix - add enhancement exclusion to stalebot config [#40391](https://github.com/woocommerce/woocommerce/pull/40391)
 * Fix - Adds condition to ensure WooCommerce is not listed as a Woo extension in the Helper list. Restores the `woocommerce_show_addons_page` filter as a means of controlling whether the addons page is added as a WooCommerce submenu item. Hides a temporary extra addons submenu item using a better method borrowed from Jetpack. [#40549](https://github.com/woocommerce/woocommerce/pull/40549)
 * Fix - Always generate address metadata indexes for HPOS orders. [#40332](https://github.com/woocommerce/woocommerce/pull/40332)
