@@ -8,10 +8,7 @@ import { Button, Popover } from '@wordpress/components';
 import { UseComboboxPropGetters } from 'downshift';
 import { ThumbsUpSVG } from './thumbs-up';
 
-interface Suggestions {
-	name: string;
-	description: string;
-}
+type Suggestions = string;
 
 interface AIPopoverProps {
 	getMenuProps: UseComboboxPropGetters< Suggestions >[ 'getMenuProps' ];
@@ -39,7 +36,7 @@ export function AIPopover( {
 			<ul style={ { width: boundingRect?.width } } { ...getMenuProps() }>
 				{ items.map( ( item, index ) => (
 					<li
-						key={ item.name }
+						key={ item }
 						className={ classNames( {
 							'woocommerce-product-form-name-ai-suggestions__highlighted':
 								highlightedIndex === index,
@@ -49,10 +46,10 @@ export function AIPopover( {
 						<div className="woocommerce-product-form-name-ai-suggestions__item">
 							<div>
 								<p className="woocommerce-product-form-name-ai-suggestions__item-name">
-									{ item.name }
+									{ item }
 								</p>
 								<p className="woocommerce-product-form-name-ai-suggestions__item-description">
-									{ item.description }
+									{ item }
 								</p>
 							</div>
 							<div>

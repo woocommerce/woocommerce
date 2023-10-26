@@ -116,6 +116,11 @@ export function Edit( {
 	};
 
 	const suggestions = [
+		'Stay Cool and Stylish with our Unisex Beige Linen Jacket',
+		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 2',
+		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 3',
+	];
+	const suggestions2 = [ // TODO not working when object, for some reason
 		{
 			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket',
 			description: 'Engaging • Highlights benefits • Good SEO',
@@ -138,9 +143,15 @@ export function Edit( {
 		highlightedIndex,
 	} = useCombobox( {
 		items: suggestions,
-		selectedItem: suggestions.find( ( item ) => item.name === name ),
-		itemToString: ( item ) => item?.name || '',
-		// onInputValueChange: ( { inputValue } ) => setName( inputValue || '' ),
+		selectedItem: suggestions.find( ( item ) => item === name ),
+		itemToString: ( item ) => item || '',
+		inputValue: name,
+		onInputValueChange: ( { inputValue } ) => setName( inputValue || '' ),
+		onSelectedItemChange: ( { selectedItem } ) => {
+			if ( selectedItem ) {
+				setName( selectedItem );
+			}
+		},
 	} );
 	const ref = useRef< HTMLDivElement >( null );
 
@@ -169,11 +180,6 @@ export function Edit( {
 					</Button>
 				</span>
 			) );
-
-	const nameControlId = useInstanceId(
-		BaseControl,
-		'product_name'
-	) as string;
 
 	const inputProps = getInputProps( {
 		onblur: () => {
@@ -222,7 +228,6 @@ export function Edit( {
 									target: { value: name },
 								} );
 							}
-							setName( name );
 						} }
 					/>
 				</BaseControl>
