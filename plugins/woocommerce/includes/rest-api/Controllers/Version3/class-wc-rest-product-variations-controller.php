@@ -1091,7 +1091,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
+		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 99 );
 		wc_set_time_limit( 0 );
 
 		$response          = array();
