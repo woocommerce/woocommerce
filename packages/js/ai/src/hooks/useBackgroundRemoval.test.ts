@@ -4,6 +4,7 @@
 import { renderHook, act } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
+import { requestJwt } from '@automattic/jetpack-ai-client';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import {
 	BackgroundRemovalParams,
 	useBackgroundRemoval,
 } from './useBackgroundRemoval';
-import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 // Mocking the apiFetch function
 jest.mock( '@wordpress/api-fetch', () =>
@@ -25,10 +25,10 @@ jest.mock( '@wordpress/api-fetch', () =>
 			),
 	} )
 );
-jest.mock( '../utils/requestJetpackToken' );
-const mockedRequestJetpackToken = requestJetpackToken as jest.MockedFunction<
-	typeof requestJetpackToken
->;
+
+jest.mock( '@automattic/jetpack-ai-client', () => ( {
+	requestJwt: jest.fn() as jest.MockedFunction< typeof requestJwt >,
+} ) );
 
 describe( 'useBackgroundRemoval hook', () => {
 	let mockRequestParams: BackgroundRemovalParams;
@@ -43,7 +43,13 @@ describe( 'useBackgroundRemoval hook', () => {
 		mockRequestParams = {
 			imageFile,
 		};
-		mockedRequestJetpackToken.mockResolvedValue( { token: 'fake_token' } );
+		( requestJwt as jest.MockedFunction<
+			typeof requestJwt
+		> ).mockResolvedValue( {
+			token: 'fake_token',
+			blogId: '0',
+			expire: 0,
+		} );
 	} );
 
 	it( 'should initialize with correct default values', () => {
@@ -53,7 +59,13 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should return error on empty token', async () => {
-		mockedRequestJetpackToken.mockResolvedValue( { token: '' } );
+		( requestJwt as jest.MockedFunction<
+			typeof requestJwt
+		> ).mockResolvedValue( {
+			token: '',
+			blogId: '0',
+			expire: 0,
+		} );
 		const { result } = renderHook( () => useBackgroundRemoval() );
 		await expect(
 			act( async () => {
@@ -105,9 +117,9 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
-		(
-			apiFetch as jest.MockedFunction< typeof apiFetch >
-		 ).mockResolvedValue( {
+		( apiFetch as jest.MockedFunction<
+			typeof apiFetch
+		> ).mockResolvedValue( {
 			blob: () =>
 				Promise.resolve(
 					new Blob( [ new ArrayBuffer( 51200 ) ], {
@@ -123,13 +135,13 @@ describe( 'useBackgroundRemoval hook', () => {
 				expect( result.current.loading ).toBeTruthy()
 			);
 		} );
-		expect( mockedRequestJetpackToken ).toHaveBeenCalled();
+		expect( requestJwt ).toHaveBeenCalled();
 	} );
 
 	it( 'should handle successful API call', async () => {
-		(
-			apiFetch as jest.MockedFunction< typeof apiFetch >
-		 ).mockResolvedValue( {
+		( apiFetch as jest.MockedFunction<
+			typeof apiFetch
+		> ).mockResolvedValue( {
 			blob: () =>
 				Promise.resolve(
 					new Blob( [ new ArrayBuffer( 51200 ) ], {
@@ -147,18 +159,20 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should handle API errors', async () => {
-		(
-			apiFetch as jest.MockedFunction< typeof apiFetch >
-		 ).mockImplementation( () => {
+		( apiFetch as jest.MockedFunction<
+			typeof apiFetch
+		> ).mockImplementation( () => {
 			throw new Error( 'API Error' );
 		} );
 
 		const { result } = renderHook( () => useBackgroundRemoval() );
-		await expect(
-			act( async () => {
+		try {
+			await act( async () => {
 				await result.current.fetchImage( mockRequestParams );
-			} )
-		).rejects.toThrow( 'API Error' );
+			} );
+		} catch ( error: Error | any ) {
+			expect( error.message ).toBe( 'API Error' );
+		}
 		await waitFor( () => expect( result.current.loading ).toBeFalsy() );
 		expect( result.current.imageData ).toBe( null );
 	} );

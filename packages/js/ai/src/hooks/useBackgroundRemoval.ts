@@ -62,16 +62,17 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 
 		try {
 			const response = await apiFetch( {
-				url: 'https://public-api.wordpress.com/wpcom/v2/ai-background-removal',
+				url:
+					'https://public-api.wordpress.com/wpcom/v2/ai-background-removal',
 				method: 'POST',
 				body: formData,
 				parse: false,
 				credentials: 'omit',
 			} );
 
-			const blob = await (
-				response as { blob: () => Promise< Blob > }
-			 ).blob();
+			const blob = await ( response as {
+				blob: () => Promise< Blob >;
+			} ).blob();
 			setImageData( blob );
 			return blob;
 		} catch ( err ) {

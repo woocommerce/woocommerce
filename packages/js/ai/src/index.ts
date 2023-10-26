@@ -11,7 +11,6 @@ export {
  * Utils
  */
 export {
-	requestJetpackToken as __experimentalRequestJetpackToken,
 	getCompletion as __experimentalgetCompletion,
 	createExtendedError,
 } from './utils';
