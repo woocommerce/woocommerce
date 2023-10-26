@@ -130,7 +130,7 @@ export const SidebarNavigationScreenHomepage = () => {
 								orientation="vertical"
 								category={ 'homepage' }
 								isDraggable={ false }
-								showTitlesAsTooltip={ true }
+								showTitlesAsTooltip={ false }
 							/>
 						) }
 					</div>
