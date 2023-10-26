@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEffect, useState } from 'react';
-import { WooFooterItem } from '@woocommerce/admin-layout';
 
 function useFocusedBlock() {
 	const [ focusedElement, setFocusedElement ] = useState< Element | null >();
@@ -46,15 +45,10 @@ export function BlockInspector() {
 		useFocusedBlock();
 
 	return (
-		<WooFooterItem>
-			<>
-				<div>Block Inspector</div>
-				<div>
-					<div>Block name: { blockName }</div>
-					<div>Template block id: { templateBlockId }</div>
-					<div>Template block order: { templateBlockOrder }</div>
-				</div>
-			</>
-		</WooFooterItem>
+		<div>
+			<div>Block name: { blockName }</div>
+			<div>Template block id: { templateBlockId }</div>
+			<div>Template block order: { templateBlockOrder }</div>
+		</div>
 	);
 }

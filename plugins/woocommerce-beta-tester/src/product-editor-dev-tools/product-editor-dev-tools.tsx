@@ -6,7 +6,7 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { BlockInspector } from './block-inspector';
+import { ProductEditorDevToolsBar } from './product-editor-dev-tools-bar';
 import { ProductEditorDevToolsMenu } from './product-editor-dev-tools-menu';
 
 export function ProductEditorDevTools() {
@@ -22,7 +22,11 @@ export function ProductEditorDevTools() {
 				} }
 			/>
 
-			{ shouldShowDevTools && <BlockInspector /> }
+			{ shouldShowDevTools && (
+				<ProductEditorDevToolsBar
+					onClose={ () => setShouldShowDevTools( false ) }
+				/>
+			) }
 		</>
 	);
 }

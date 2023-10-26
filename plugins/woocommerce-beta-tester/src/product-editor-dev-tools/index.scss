@@ -1,0 +1,16 @@
+.woocommerce-product-editor-dev-tools-bar {
+	background-color: black;
+	color: white;
+}
+
+.woocommerce-product-editor-dev-tools-bar__header {
+	display: flex;
+
+	.components-button {
+		color: white;
+	}
+}
+
+.woocommerce-product-editor-dev-tools-bar__tabs {
+	flex: 1;
+}
