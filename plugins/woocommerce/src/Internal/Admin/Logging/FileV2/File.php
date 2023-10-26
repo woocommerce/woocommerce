@@ -77,7 +77,7 @@ class File {
 			$this->hash    = array_slice( $segments, -1 )[0];
 		} else {
 			$this->source  = implode( '-', $segments );
-			$this->created = filemtime( $this->path );
+			$this->created = filectime( $this->path );
 			$this->hash    = $this->source;
 		}
 
