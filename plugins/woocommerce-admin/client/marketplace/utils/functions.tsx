@@ -228,14 +228,9 @@ function installProduct( subscription: Subscription ): Promise< void > {
 				return;
 			}
 
-			const action =
-				subscription.local.type === 'theme'
-					? 'install-theme'
-					: 'install-plugin';
-
-			window.wp.updates.ajax( action, {
+			window.wp.updates.ajax( 'install-' + subscription.product_type, {
 				// The slug prefix is required for the install to use WCCOM install filters.
-				slug: 'woocommerce-com-' + subscription.zip_slug,
+				slug: 'woocommerce-com-' + subscription.product_slug,
 				success: resolve,
 				error: ( error: { [ 'errorMessage' ]: string } ) => {
 					// If install fails disconnect the product
