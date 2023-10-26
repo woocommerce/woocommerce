@@ -201,4 +201,15 @@ class FileController {
 
 		return $deleted;
 	}
+
+	/**
+	 * Sanitize the source property of a log file.
+	 *
+	 * @param string $source The source property of a log file.
+	 *
+	 * @return string
+	 */
+	public function sanitize_source( string $source ): string {
+		return sanitize_file_name( $source );
+	}
 }

@@ -96,7 +96,7 @@ class ListTable extends WP_List_Table {
 	 */
 	protected function extra_tablenav( $which ): void {
 		$all_sources    = $this->get_sources_list();
-		$current_source = filter_input( INPUT_GET, 'source', FILTER_SANITIZE_STRING ) ?? '';
+		$current_source = $this->file_controller->sanitize_source( wp_unslash( $_GET['source'] ?? '' ) );
 
 		?>
 		<div class="alignleft actions">
