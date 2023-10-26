@@ -67,7 +67,7 @@ class ListTable extends WP_List_Table {
 	 */
 	protected function get_bulk_actions(): array {
 		return array(
-			'delete' => __( 'Delete permanently', 'woocommerce' ),
+			'delete' => esc_html__( 'Delete permanently', 'woocommerce' ),
 		);
 	}
 
@@ -191,10 +191,10 @@ class ListTable extends WP_List_Table {
 	public function get_columns(): array {
 		$columns = array(
 			'cb'       => '<input type="checkbox" />',
-			'source'   => __( 'Source', 'woocommerce' ),
-			'created'  => __( 'Date created', 'woocommerce' ),
-			'modified' => __( 'Date modified', 'woocommerce' ),
-			'size'     => __( 'File size', 'woocommerce' ),
+			'source'   => esc_html__( 'Source', 'woocommerce' ),
+			'created'  => esc_html__( 'Date created', 'woocommerce' ),
+			'modified' => esc_html__( 'Date modified', 'woocommerce' ),
+			'size'     => esc_html__( 'File size', 'woocommerce' ),
 		);
 
 		return $columns;
