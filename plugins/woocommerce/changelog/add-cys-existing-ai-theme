@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Save ai generated theme ID to options and use it to determine if the intro page should warn about existing AI theme
