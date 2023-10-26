@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import SortSelect from '@woocommerce/base-components/sort-select';
+import { SortSelect } from '@woocommerce/blocks-components';
 import type { ChangeEventHandler } from 'react';
 
 /**
