@@ -33,7 +33,8 @@ export function PublishButton( {
 		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			const isPublished = productStatus === 'publish';
+			const isPublished =
+				productType === 'product' ? productStatus === 'publish' : true;
 
 			if ( isPublished ) {
 				recordProductEvent( 'product_update', savedProduct );

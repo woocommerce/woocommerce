@@ -22,7 +22,7 @@ const TaxHeader = ( { task, goToTask } ) => {
 				<h1>{ __( 'Add your tax rates', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						'Set up tax rates manually or use WooCommerce and Jetpack to automate your sales tax calculations for you.',
+						'Set up tax rates manually or use WooCommerce Tax to automate your sales tax calculations for you.',
 						'woocommerce'
 					) }
 				</p>

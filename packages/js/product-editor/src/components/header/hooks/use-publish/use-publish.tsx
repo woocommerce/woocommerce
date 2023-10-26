@@ -52,7 +52,8 @@ export function usePublish( {
 
 	const isBusy = isSaving || isValidating;
 
-	const isPublished = productStatus === 'publish';
+	const isPublished =
+		productType === 'product' ? productStatus === 'publish' : true;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -62,17 +63,25 @@ export function usePublish( {
 		}
 
 		try {
-			await validate( {
-				status: 'publish',
-			} );
-
-			// The publish button click not only change the status of the product
-			// but also save all the pending changes. So even if the status is
-			// publish it's possible to save the product too.
-			if ( ! isPublished ) {
-				await editEntityRecord( 'postType', productType, productId, {
+			if ( productType === 'product' ) {
+				await validate( {
 					status: 'publish',
 				} );
+				// The publish button click not only change the status of the product
+				// but also save all the pending changes. So even if the status is
+				// publish it's possible to save the product too.
+				if ( ! isPublished ) {
+					await editEntityRecord(
+						'postType',
+						productType,
+						productId,
+						{
+							status: 'publish',
+						}
+					);
+				}
+			} else {
+				await validate();
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
