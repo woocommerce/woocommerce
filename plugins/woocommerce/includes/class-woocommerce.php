@@ -417,8 +417,10 @@ final class WooCommerce {
 				return defined( 'DOING_AJAX' );
 			case 'cron':
 				return defined( 'DOING_CRON' );
+			case 'rest-api':
+				return $this->is_rest_api_request();
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
 	}
 
@@ -588,7 +590,7 @@ final class WooCommerce {
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
 		$in_post_editor = doing_action( 'load-post.php' ) || doing_action( 'load-post-new.php' );
 
-		if ( $this->is_request( 'frontend' ) || $in_post_editor ) {
+		if ( $this->is_request( 'frontend' ) || $this->is_rest_api_request() || $in_post_editor ) {
 			$this->frontend_includes();
 		}
 
