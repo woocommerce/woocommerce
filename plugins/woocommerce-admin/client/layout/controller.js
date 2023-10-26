@@ -340,6 +340,7 @@ export const getPages = () => {
 				footer: false,
 				showNotices: false,
 				showStoreAlerts: false,
+				showPluginArea: false,
 			},
 			capability: 'manage_woocommerce',
 		} );
