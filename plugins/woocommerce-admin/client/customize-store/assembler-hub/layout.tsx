@@ -56,7 +56,8 @@ export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
-	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
+	const { shouldTourBeShown, isResizeHandleVisible, ...onboardingTourProps } =
+		useOnboardingTour();
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -179,9 +180,9 @@ export const Layout = () => {
 														isReady={
 															! isEditorLoading
 														}
-														duringGuideTour={
-															shouldTourBeShown &&
-															! onboardingTourProps.showWelcomeTour
+														isHandleVisibleByDefault={
+															! onboardingTourProps.showWelcomeTour &&
+															isResizeHandleVisible
 														}
 														isFullWidth={ false }
 														defaultSize={ {
@@ -211,7 +212,7 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ shouldTourBeShown && (
+						{ ! isEditorLoading && shouldTourBeShown && (
 							<OnboardingTour { ...onboardingTourProps } />
 						) }
 					</EntityProvider>
