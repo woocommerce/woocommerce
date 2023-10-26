@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { updateQueryString } from '@woocommerce/navigation';
 
@@ -13,6 +12,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
 import { TaxChildProps } from '../utils';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 export const Card: React.FC< TaxChildProps > = () => {
 	return (
@@ -31,43 +31,14 @@ export const Card: React.FC< TaxChildProps > = () => {
 						strong: <strong />,
 					},
 				} ),
-				interpolateComponents( {
-					mixedString: __(
-						'Powered by {{link}}Jetpack{{/link}}',
-						'woocommerce'
-					),
-					components: {
-						link: (
-							<Link
-								type="external"
-								href="https://woocommerce.com/products/jetpack/?utm_medium=product"
-								target="_blank"
-							>
-								<></>
-							</Link>
-						),
-					},
-				} ),
 				// eslint-disable-next-line @wordpress/i18n-translator-comments
 				__( '100% free', 'woocommerce' ),
 			] }
-			terms={ interpolateComponents( {
-				mixedString: __(
-					'By installing WooCommerce Tax and Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
-					'woocommerce'
-				),
-				components: {
-					link: (
-						<Link
-							href={ 'https://wordpress.com/tos/' }
-							target="_blank"
-							type="external"
-						>
-							<></>
-						</Link>
-					),
-				},
-			} ) }
+			terms={
+				<TermsOfService
+					buttonText={ __( 'Continue setup', 'woocommerce' ) }
+				/>
+			}
 			actionText={ __( 'Continue setup', 'woocommerce' ) }
 			onClick={ () => {
 				recordEvent( 'tasklist_tax_select_option', {

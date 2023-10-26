@@ -167,6 +167,8 @@ export const VariationsTable = forwardRef<
 		batchUpdateProductVariations,
 		invalidateResolution,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	const { invalidateResolution: coreInvalidateResolution } =
+		useDispatch( 'core' );
 
 	const { generateProductVariations } = useProductVariationsHelper();
 
@@ -265,6 +267,16 @@ export const VariationsTable = forwardRef<
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
 				] );
+				coreInvalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product',
+					productId,
+				] );
+				coreInvalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product_variation',
+					variationId,
+				] );
 			} )
 			.finally( () => {
 				setIsUpdating( ( prevState ) => ( {
@@ -333,11 +345,24 @@ export const VariationsTable = forwardRef<
 				delete: values.map( ( { id } ) => id ),
 			}
 		)
-			.then( ( response: VariationResponseProps ) =>
+			.then( ( response: VariationResponseProps ) => {
 				invalidateResolution( 'getProductVariations', [
 					requestParams,
-				] ).then( () => response )
-			)
+				] );
+				coreInvalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product',
+					productId,
+				] );
+				values.forEach( ( { id: variationId } ) => {
+					coreInvalidateResolution( 'getEntityRecord', [
+						'postType',
+						'product_variation',
+						variationId,
+					] );
+				} );
+				return response;
+			} )
 			.then( ( response: VariationResponseProps ) => {
 				createSuccessNotice( getSnackbarText( response ) );
 				onVariationTableChange( 'delete' );

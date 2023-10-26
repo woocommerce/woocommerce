@@ -53,6 +53,12 @@
 	}
 }
 
+.woocommerce-customize-store {
+	.edit-site-site-hub__view-mode-toggle-container a {
+		color: unset;
+	}
+}
+
 .woocommerce-customize-store__step-assemblerHub {
 	a {
 		text-decoration: none;
@@ -84,6 +90,7 @@
 		padding-bottom: 0;
 		gap: 0;
 		width: 348px;
+		z-index: 2;
 	}
 
 	.edit-site-sidebar-navigation-screen-patterns__group-header {
@@ -445,7 +452,7 @@
 	/* Layout sidebar */
 	.block-editor-block-patterns-list__item {
 		.block-editor-block-preview__container {
-			border-radius: 2px;
+			border-radius: 4px;
 			border: 1.5px solid transparent;
 		}
 

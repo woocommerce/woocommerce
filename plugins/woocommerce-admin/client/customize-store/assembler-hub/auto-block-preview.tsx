@@ -61,7 +61,7 @@ function ScaledBlockPreview( {
 	isNavigable = false,
 	isScrollable = true,
 }: ScaledBlockPreviewProps ) {
-	const { setLogoBlock } = useContext( LogoBlockContext );
+	const { setLogoBlockIds } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
 	) as [ FontFamily[] ];
@@ -192,18 +192,18 @@ function ScaledBlockPreview( {
 							// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
 							// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
 							// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
-							const siteLogo = bodyElement.querySelector(
+							const siteLogos = bodyElement.querySelectorAll(
 								'.wp-block-site-logo'
 							);
 
-							const blockClientId = siteLogo
-								? siteLogo.getAttribute( 'data-block' )
-								: null;
-
-							setLogoBlock( {
-								clientId: blockClientId,
-								isLoading: false,
-							} );
+							const logoBlockIds = Array.from( siteLogos )
+								.map( ( siteLogo ) => {
+									return siteLogo.getAttribute(
+										'data-block'
+									);
+								} )
+								.filter( Boolean ) as string[];
+							setLogoBlockIds( logoBlockIds );
 
 							if ( isNavigable ) {
 								enableNavigation();
@@ -231,10 +231,7 @@ function ScaledBlockPreview( {
 						return () => {
 							observer.disconnect();
 							possiblyRemoveAllListeners();
-							setLogoBlock( {
-								clientId: null,
-								isLoading: true,
-							} );
+							setLogoBlockIds( [] );
 						};
 					},
 					[ isNavigable ]
