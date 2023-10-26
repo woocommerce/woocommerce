@@ -134,7 +134,7 @@ class WC_Tracker {
 
 		// General site info.
 		$data['url']      = home_url();
-		$data['store_id'] = get_option( 'woocommerce_store_id', null );
+		$data['store_id'] = get_option( \WC_Install::STORE_ID_OPTION, null );
 		$data['blog_id']  = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
 
 		/**

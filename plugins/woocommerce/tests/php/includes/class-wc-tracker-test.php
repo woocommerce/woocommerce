@@ -225,10 +225,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test store_id is included in tracking data.
 	 */
 	public function test_get_tracking_data_store_id() {
-		update_option( 'woocommerce_store_id', '12345' );
+		update_option( \WC_Install::STORE_ID_OPTION, '12345' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'store_id', $tracking_data );
 		$this->assertEquals( '12345', $tracking_data['store_id'] );
-		delete_option( 'woocommerce_store_id' );
+		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 }

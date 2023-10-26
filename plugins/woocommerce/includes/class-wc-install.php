@@ -624,12 +624,9 @@ class WC_Install {
 	 * @since 8.2.0
 	 */
 	public static function maybe_set_store_id() {
-		$store_id = get_option( self::STORE_ID_OPTION, false );
-		if ( ! $store_id ) {
-			$store_id = wp_generate_uuid4();
-			add_option( self::STORE_ID_OPTION, $store_id );
+		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
+			add_option( self::STORE_ID_OPTION, wp_generate_uuid4());
 		}
-		return $store_id;
 	}
 
 	/**
