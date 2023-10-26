@@ -176,17 +176,11 @@ const LogoSettings = ( {
 	const isWideAligned = [ 'wide', 'full' ].includes( align );
 	const isResizable = ! isWideAligned && isLargeViewport;
 
-	const { maxWidth } = useSelect( ( select ) => {
-		// @ts-ignore No types for this exist yet.
-		const settings = select( blockEditorStore ).getSettings();
-		return {
-			maxWidth: settings.maxWidth,
-		};
-	}, [] );
+	const maxWidth = 200;
 
 	// Set the default width to a responsible size.
 	// Note that this width is also set in the attached frontend CSS file.
-	const defaultWidth = 120;
+	const defaultWidth = 60;
 
 	const currentWidth = width || defaultWidth;
 	const ratio = naturalWidth / naturalHeight;
@@ -218,7 +212,7 @@ const LogoSettings = ( {
 					setAttributes( { width: newWidth } )
 				}
 				min={ minWidth }
-				max={ maxWidthBuffer }
+				max={ maxWidth }
 				initialPosition={ Math.min( defaultWidth, maxWidthBuffer ) }
 				value={ currentWidth }
 				disabled={ ! isResizable }
