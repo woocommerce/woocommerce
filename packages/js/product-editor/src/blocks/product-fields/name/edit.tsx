@@ -7,12 +7,14 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
+	useRef,
 } from '@wordpress/element';
 
 import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { useCombobox } from 'downshift';
 import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -39,6 +41,7 @@ import { useValidation } from '../../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { AIPopover } from './ai-popover';
 
 export function Edit( {
 	attributes,
@@ -112,6 +115,35 @@ export function Edit( {
 		setSku( cleanForSlug( name ) );
 	};
 
+	const suggestions = [
+		{
+			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket',
+			description: 'Engaging • Highlights benefits • Good SEO',
+		},
+		{
+			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket 2',
+			description: 'Engaging • Highlights benefits • Good SEO',
+		},
+		{
+			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket 3',
+			description: 'Engaging • Highlights benefits • Good SEO',
+		},
+	];
+
+	const {
+		isOpen,
+		getInputProps,
+		getItemProps,
+		getMenuProps,
+		highlightedIndex,
+	} = useCombobox( {
+		items: suggestions,
+		selectedItem: suggestions.find( ( item ) => item.name === name ),
+		itemToString: ( item ) => item?.name || '',
+		// onInputValueChange: ( { inputValue } ) => setName( inputValue || '' ),
+	} );
+	const ref = useRef< HTMLDivElement >( null );
+
 	const help =
 		nameValidationError ??
 		( productId &&
@@ -143,11 +175,21 @@ export function Edit( {
 		'product_name'
 	) as string;
 
+	const inputProps = getInputProps( {
+		onblur: () => {
+			if ( hasEdit( 'name' ) ) {
+				setSkuIfEmpty();
+				validateName();
+			}
+		},
+		autoFocus: attributes.autoFocus,
+	} );
+
 	return (
 		<>
-			<div { ...blockProps }>
+			<div { ...blockProps } ref={ ref }>
 				<BaseControl
-					id={ nameControlId }
+					id={ inputProps.id }
 					label={ createInterpolateElement(
 						__( 'Name <required />', 'woocommerce' ),
 						{
@@ -164,27 +206,35 @@ export function Edit( {
 					help={ help }
 				>
 					<InputControl
-						id={ nameControlId }
 						ref={ nameRef }
 						name="name"
 						// eslint-disable-next-line jsx-a11y/no-autofocus
-						autoFocus={ attributes.autoFocus }
 						placeholder={ __(
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
 						) }
-						onChange={ setName }
-						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
-						autoComplete="off"
+						// value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						data-1p-ignore
-						onBlur={ () => {
-							if ( hasEdit( 'name' ) ) {
-								setSkuIfEmpty();
-								validateName();
+						{ ...inputProps }
+						onChange={ ( name: any ) => {
+							if ( inputProps.onChange ) {
+								inputProps.onChange( {
+									target: { value: name },
+								} );
 							}
+							setName( name );
 						} }
 					/>
 				</BaseControl>
+				{ isOpen && (
+					<AIPopover
+						getItemProps={ getItemProps }
+						getMenuProps={ getMenuProps }
+						highlightedIndex={ highlightedIndex }
+						items={ suggestions }
+						widthRef={ ref }
+					/>
+				) }
 
 				{ showProductLinkEditModal && (
 					<EditProductLinkModal

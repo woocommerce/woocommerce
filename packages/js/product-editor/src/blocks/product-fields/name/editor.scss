@@ -35,3 +35,25 @@
 		}
 	}
 }
+
+.woocommerce-product-form-name-ai-suggestions {
+	&__item {
+		border-bottom: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: $gray-400;
+		margin: 0 $gap-smaller 0 $gap-smaller;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		&-name {
+			margin: $gap-smaller;
+		}
+		&-description {
+			margin: $gap-smaller;
+			color: $gray-400;
+		}
+	}
+	&__highlighted {
+		font-weight: bold;
+	}
+}
