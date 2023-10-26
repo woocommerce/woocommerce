@@ -3,7 +3,7 @@
  */
 import { FormEvent, KeyboardEvent, useEffect } from 'react';
 import { ProductAttribute } from '@woocommerce/data';
-import { useDebounce } from '@wordpress/compose';
+import { useDebounce, useInstanceId } from '@wordpress/compose';
 import { createElement, useState, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -113,6 +113,12 @@ export function VariationsFilter( {
 		[ attribute, search ]
 	);
 
+	const searchInputId = useInstanceId( InputControl, 'search' ) as string;
+	const optionCheckboxId = useInstanceId(
+		CheckboxControl,
+		'checkbox'
+	) as string;
+
 	return (
 		<Dropdown
 			className="woocommerce-product-variations-filter"
@@ -143,12 +149,14 @@ export function VariationsFilter( {
 						MIN_OPTIONS_COUNT_FOR_SEARCHING && (
 						<div className="woocommerce-product-variations-filter__form-header">
 							<label
+								htmlFor={ searchInputId }
 								aria-label={ __(
 									'Search options',
 									'woocommerce'
 								) }
 							>
 								<InputControl
+									id={ searchInputId }
 									type="search"
 									value={ search }
 									suffix={ <Icon icon={ searchIcon } /> }
@@ -160,19 +168,19 @@ export function VariationsFilter( {
 					) }
 					<div className="woocommerce-product-variations-filter__form-body">
 						{ options.length > 0 ? (
-							<ul
-								className="woocommerce-product-variations-filter__form-list"
-								role="combobox"
-							>
+							<ul className="woocommerce-product-variations-filter__form-list">
 								{ options.map( ( option ) => (
 									<li
 										key={ option }
 										value={ option }
 										className="woocommerce-product-variations-filter__form-list-item"
-										role="option"
 									>
-										<label className="woocommerce-product-variations-filter__form-list-item-label">
+										<label
+											htmlFor={ `${ optionCheckboxId }-${ option }` }
+											className="woocommerce-product-variations-filter__form-list-item-label"
+										>
 											<CheckboxControl
+												id={ `${ optionCheckboxId }-${ option }` }
 												checked={ isOptionChecked(
 													option
 												) }
