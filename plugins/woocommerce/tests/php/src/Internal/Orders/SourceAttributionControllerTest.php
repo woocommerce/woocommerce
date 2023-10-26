@@ -16,17 +16,6 @@ class SourceAttributionControllerTest extends WP_UnitTestCase {
 	protected SourceAttributionController $attribution_fields_class;
 
 	/**
-	 * This method is called before the first test of this test class is run.
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @return void
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-	}
-
-	/**
 	 * Sets up the fixture, for example, open a network connection.
 	 *
 	 * This method is called before each test.

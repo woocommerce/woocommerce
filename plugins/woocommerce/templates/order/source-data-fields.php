@@ -1,14 +1,15 @@
 <?php
-declare( strict_types=1 );
 /**
  * Display the Source Data metabox.
  *
  * This template is used to display the order source data metabox on the edit order screen.
  *
- * @see Automattic\WooCommerce\Internal\Orders\SourceAttributionController
+ * @see     Automattic\WooCommerce\Internal\Orders\SourceAttributionController
  * @package WooCommerce\Templates
- * @version 8.2.0
+ * @version 8.4.0
  */
+
+declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 

@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
  * Class TrackingController
  *
  * @since x.x.x
+ *
+ * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 class TrackingController implements RegisterHooksInterface {
 
@@ -24,6 +26,8 @@ class TrackingController implements RegisterHooksInterface {
 
 	/**
 	 * WCCOMTracking init.
+	 *
+	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
 	 */
