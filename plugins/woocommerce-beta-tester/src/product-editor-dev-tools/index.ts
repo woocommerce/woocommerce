@@ -6,12 +6,12 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { DevToolsMenu } from './dev-tools-menu';
+import { ProductEditorDevTools } from './product-editor-dev-tools';
 
 export function registerProductEditorDevTools() {
 	registerPlugin( 'woocommerce-product-editor-dev-tools', {
 		// @ts-expect-error: 'scope' does exist
 		scope: 'woocommerce-product-block-editor',
-		render: DevToolsMenu,
+		render: ProductEditorDevTools,
 	} );
 }

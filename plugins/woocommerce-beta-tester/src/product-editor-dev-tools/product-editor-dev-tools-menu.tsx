@@ -10,7 +10,7 @@ import { __experimentalWooProductMoreMenuItem as WooProductMoreMenuItem } from '
  */
 import { BlockInspectorMenuItem } from './block-inspector-menu-item';
 
-export function DevToolsMenu() {
+export function ProductEditorDevToolsMenu() {
 	return (
 		<WooProductMoreMenuItem>
 			{ ( { onClose }: { onClose: () => void } ) => (
