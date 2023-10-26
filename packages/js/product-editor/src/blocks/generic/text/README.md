@@ -33,7 +33,7 @@ Help text that appears below the field.
 - **Type:** `Boolean`
 - **Required:** `No`
 
-Shows a red asterisk next to the label, indicating that the field is required.
+Indicates and enforces that the field is required.
 
 ### tooltip
 
