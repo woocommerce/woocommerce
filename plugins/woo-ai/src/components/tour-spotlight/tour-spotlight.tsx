@@ -25,7 +25,26 @@ export const TourSpotlight: React.FC< TourSpotlightProps > = ( {
 	onDismissal = () => {},
 	onDisplayed = () => {},
 } ) => {
-	const anchorElement = document.querySelector( reference );
+	// If the anchor element goes away, we want to hide the spotlight.
+	const [ anchorElement, setAnchorElement ] = useState< HTMLElement | null >(
+		document.querySelector( reference ) as HTMLElement
+	);
+	useEffect( () => {
+		// Create a mutation observer to monitor the DOM for changes
+		const observer = new MutationObserver( () => {
+			// Update anchorElement state if the DOM or reference prop changes
+			setAnchorElement(
+				document.querySelector( reference ) as HTMLElement
+			);
+		} );
+
+		// Start observing the document with the configured parameters
+		observer.observe( document, { childList: true, subtree: true } );
+
+		// Clean up the observer when the component is unmounted or when the reference prop changes
+		return () => observer.disconnect();
+	}, [ reference ] );
+
 	const [ isSpotlightVisible, setIsSpotlightVisible ] =
 		useState< boolean >( false );
 
