@@ -54,7 +54,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Product   | Variable Product info updates depending on variation | shopper/product-variable.spec.js |
 | Shopper   | Product   | Add Variable Product to Cart                         | shopper/product-variable.spec.js |
 | Shopper   | Product   | Display up-sell product                              |                                  |
-| Shopper   | Product   | Display releated products                            |                                  |
+| Shopper   | Product   | Display related products                            |                                  |
 | Shopper   | Product   | Display reviews                                      |                                  |
 | Shopper   | Product   | Add review                                           |                                  |
 | Shopper   | Product   | View product images                                  |                                  |
@@ -72,7 +72,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Cart      | Display shipping options by address        | shopper/calculate-shipping.spec.js |
 | Shopper   | Cart      | View empty cart                            |                                    |
 | Shopper   | Cart      | Display correct tax                        |                                    |
-| Shopper   | Cart      | Respect coupon usage contraints            |                                    |
+| Shopper   | Cart      | Respect coupon usage constraints            |                                    |
 | Shopper   | Cart      | Display cross-sell products                |                                    |
 | Shopper   | Cart      | Proceed to checkout                        |                                    |
 
@@ -90,7 +90,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Checkout  | View checkout                            |                                         |
 | Shopper   | Checkout  | Receive warnings when form is incomplete |                                         |
 | Shopper   | Checkout  | Add billing address                      |                                         |
-| Shopper   | Checkout  | Respect coupon usage contraints          |                                         |
+| Shopper   | Checkout  | Respect coupon usage constraints          |                                         |
 | Shopper   | Checkout  | Display correct tax in checkout          |                                         |
 | Shopper   | Checkout  | View order confirmation page             |                                         |
 
