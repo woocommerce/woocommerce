@@ -995,6 +995,8 @@ class WC_Countries {
 						),
 						'postcode' => array(
 							'required' => false,
+							// Hidden for stores within Chile. @see https://github.com/woocommerce/woocommerce/issues/36546
+							'hidden' => 'CL' === $this->get_base_country(),
 						),
 						'state'    => array(
 							'label' => __( 'Region', 'woocommerce' ),
