@@ -1475,7 +1475,7 @@ class WC_Helper {
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
 		$auth    = WC_Helper_Options::get( 'auth' );
-		$site_id = absint( $auth['site_id'] );
+		$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
 
 		// Installed products without a subscription.
 		foreach ( array_merge( $woo_plugins, $woo_themes ) as $filename => $data ) {

@@ -234,7 +234,7 @@ class WC_Helper_Subscriptions_API {
 			if ( is_wp_error( $success ) ) {
 				wp_send_json_error(
 					array(
-						'message' => $success->get_error_message(),
+						'message' => __( 'There was an error activating this plugin.', 'woocommerce' )
 					),
 					400
 				);
@@ -245,7 +245,7 @@ class WC_Helper_Subscriptions_API {
 			if ( $subscription['local']['slug'] !== $theme->get_stylesheet() ) {
 				wp_send_json_error(
 					array(
-						'message' => __( 'There was an error activating this theme. Please activate it manually.', 'woocommerce' )
+						'message' => __( 'There was an error activating this theme.', 'woocommerce' )
 					),
 					400
 				);
