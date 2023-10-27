@@ -33,14 +33,12 @@ export function useAIProductField() {
 			// eslint-disable-next-line no-console
 			console.debug( 'Streaming error encountered', error );
 			setFetchingState( FetchingState.Failed );
-			return error;
 		},
 		onCompletionFinished: ( reason, content ) => {
 			try {
 				const parsed = JSON.parse( content );
 				setFetchingState( FetchingState.None );
 				setSuggestions( parsed.suggestions );
-				return parsed.suggestions;
 			} catch ( e ) {
 				setFetchingState( FetchingState.Failed );
 				throw new Error( 'Unable to parse suggestions' );
@@ -80,7 +78,7 @@ export function useAIProductField() {
 	) => {
 		setFetchingState( FetchingState.Fetching );
 		try {
-			return await requestCompletion(
+			await requestCompletion(
 				buildPrompt( prompt, context, responseExample )
 			);
 		} catch ( e ) {
