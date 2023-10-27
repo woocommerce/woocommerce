@@ -5,6 +5,7 @@ export const NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME =
 	'woocommerce_new_product_management_enabled';
 export const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION =
 	'woocommerce_single_variation_notice_dismissed';
+export const WOO_AI_PLUGIN_FEATURE_NAME = 'woo_ai_plugin';
 
 export const NUMBERS_AND_ALLOWED_CHARS = '[^-0-9%s1%s2]';
 export const NUMBERS_AND_DECIMAL_SEPARATOR = '[^-\\d\\%s]+';

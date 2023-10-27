@@ -7,6 +7,7 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
+	useEffect,
 	useRef,
 } from '@wordpress/element';
 
@@ -39,6 +40,7 @@ import { EditProductLinkModal } from '../../../components/edit-product-link-moda
 import { useValidation } from '../../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
+import { useAIProductField } from '../../../hooks/use-ai-product-field';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { AIPopover } from './ai-popover';
 
@@ -46,6 +48,19 @@ export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+
+	const { fetchProductSuggestions, fetchingState } = useAIProductField();
+
+	useEffect( () => {
+		const mySuggestions = fetchProductSuggestions(
+			'shirt',
+			'this is a forma store',
+			'Beautiful shirt in various colors'
+		);
+		console.log( 'mySuggestions', mySuggestions );
+		console.log( 'fetchingState', fetchingState );
+	}, [] );
+
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
