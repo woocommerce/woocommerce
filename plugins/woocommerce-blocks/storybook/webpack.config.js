@@ -63,5 +63,14 @@ module.exports = ( { config: storybookConfig } ) => {
 		} )
 	);
 
+	storybookConfig.module.rules = storybookConfig.module.rules.filter(
+		( rule ) =>
+			! (
+				rule.use &&
+				typeof rule.use.loader === 'string' &&
+				rule.use.loader.indexOf( 'babel-loader' ) >= 0
+			)
+	);
+
 	return storybookConfig;
 };
