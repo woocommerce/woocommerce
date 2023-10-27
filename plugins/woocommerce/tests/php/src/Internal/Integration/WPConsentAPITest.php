@@ -26,7 +26,7 @@ class WPConsentAPITest extends WP_UnitTestCase {
 		$this->WPConsentAPIIntegration = $this->getMockBuilder( WPConsentAPI::class )
 			->onlyMethods( [ 'is_wp_consent_api_active' ] )
 			->getMock();
-		$this->plugin = plugin_basename( WC_PLUGIN_FILE );
+		$this->plugin                  = plugin_basename( WC_PLUGIN_FILE );
 	}
 
 	/**
