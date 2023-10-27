@@ -11,6 +11,7 @@ import { closeSmall } from '@wordpress/icons';
  * Internal dependencies
  */
 import { BlockInspector } from './block-inspector';
+import { Help } from './help';
 import { useFocusedBlock } from './hooks/use-focused-block';
 
 function TabButton( {
@@ -70,11 +71,11 @@ export function ProductEditorDevToolsBar( {
 								{ __( 'Block Inspector', 'woocommerce' ) }
 							</TabButton>
 							<TabButton
-								name="about"
+								name="help"
 								selectedTab={ selectedTab }
 								onClick={ handleTabClick }
 							>
-								{ __( 'About', 'woocommerce' ) }
+								{ __( 'Help', 'woocommerce' ) }
 							</TabButton>
 						</NavigableMenu>
 					</div>
@@ -90,9 +91,7 @@ export function ProductEditorDevToolsBar( {
 					{ selectedTab === 'inspector' && (
 						<BlockInspector blockInfo={ blockInfo } />
 					) }
-					{ selectedTab === 'about' && (
-						<div>About developer tools</div>
-					) }
+					{ selectedTab === 'help' && <Help /> }
 				</div>
 			</div>
 		</WooFooterItem>
