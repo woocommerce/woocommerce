@@ -19,14 +19,6 @@ class CustomizeStore extends Task {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
 
-		// wpcom.editor.js conflicts with CYS scripts due to double registration of the private-apis
-		// dequeue it on CYS pages.
-		add_action( 'admin_print_scripts', function() {
-			if ( str_contains( $_GET['path'], '/customize-store/' ) ) {
-				wp_dequeue_script( 'wpcom-block-editor-wpcom-editor-script' );
-			}
-		}, 9999);
-
 		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
 		global $_GET;
 		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
