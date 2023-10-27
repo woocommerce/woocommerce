@@ -12,7 +12,7 @@ const singleProductPrice = '100.00';
 const singleProductSalePrice = '50.00';
 const totalInclusiveTax = +singleProductSalePrice + 15 + 25;
 
-let productId, usTaxId, nycTaxId, shippingZoneId;
+let productId, caTaxId, smTaxId, shippingZoneId;
 
 test.describe( 'Mini Cart block page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -41,36 +41,35 @@ test.describe( 'Mini Cart block page', () => {
 			value: 'yes',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
-			value: 'incl',
-		} );
-		await api.put( 'settings/tax/woocommerce_tax_total_display', {
-			value: 'itemized',
+			value: 'excl',
 		} );
 		await api
 			.post( 'taxes', {
 				country: 'US',
-				state: '*',
+				state: 'CA',
 				cities: '*',
 				postcodes: '*',
 				rate: '25',
-				name: 'US Tax',
+				name: 'CA Tax',
 				shipping: false,
+				priority: 1,
 			} )
 			.then( ( response ) => {
-				usTaxId = response.data.id;
+				caTaxId = response.data.id;
 			} );
 		await api
 			.post( 'taxes', {
 				country: 'US',
 				state: '*',
-				cities: 'New York',
+				cities: 'Sacramento',
 				postcodes: '*',
 				rate: '15',
-				name: 'NYC Tax',
+				name: 'SM Tax',
 				shipping: false,
+				priority: 2,
 			} )
 			.then( ( response ) => {
-				nycTaxId = response.data.id;
+				smTaxId = response.data.id;
 			} );
 		// add shipping zone, location and method
 		await api
@@ -103,11 +102,8 @@ test.describe( 'Mini Cart block page', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'no',
 		} );
-		await api.put( 'settings/tax/woocommerce_tax_total_display', {
-			value: 'single',
-		} );
 		await api.post( 'taxes/batch', {
-			delete: [ nycTaxId, usTaxId ],
+			delete: [ caTaxId, smTaxId ],
 		} );
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
@@ -142,6 +138,10 @@ test.describe( 'Mini Cart block page', () => {
 	test( 'can see empty mini cart', async ( { page } ) => {
 		// create a new page with mini cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await page.waitForLoadState( 'networkidle' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log In' ).click();
 
 		const welcomeModalVisible = await page
 			.getByRole( 'heading', {
@@ -260,7 +260,19 @@ test.describe( 'Mini Cart block page', () => {
 
 	test( 'can see mini cart total price inclusive with tax', async ( {
 		page,
+		baseURL,
 	} ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// set inlcuding tax prices
+		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
+			value: 'incl',
+		} );
+
 		// add product to cart
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
@@ -269,8 +281,8 @@ test.describe( 'Mini Cart block page', () => {
 		// go to cart and add shipping details to calculate tax
 		await page.goto( '/cart/' ); // we will use the old cart for this purpose
 		await page.locator( '.shipping-calculator-button' ).click();
-		await page.getByLabel( 'Town / City' ).fill( 'New York' );
-		await page.getByLabel( 'ZIP Code' ).fill( '10010' );
+		await page.getByLabel( 'Town / City' ).fill( 'Sacramento' );
+		await page.getByLabel( 'ZIP Code' ).fill( '96000' );
 		await page
 			.getByRole( 'button', { name: 'Update', exact: true } )
 			.click();
