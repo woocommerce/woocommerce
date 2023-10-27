@@ -199,7 +199,7 @@ class WC_Helper_Subscriptions_API {
 	 * @param WP_REST_Request $request Request object.
 	 */
 	public static function activate( $request ) {
-		$product_key = $request->get_param( 'product_key' );
+		$product_key  = $request->get_param( 'product_key' );
 		$subscription = WC_Helper::get_subscription( $product_key );
 
 		if ( ! $subscription ) {
@@ -211,7 +211,7 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		if ( true !== $subscription['local']['installed'] || ! isset($subscription['local']['active']) ) {
+		if ( true !== $subscription['local']['installed'] || ! isset( $subscription['local']['active'] ) ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'This product is not installed.', 'woocommerce' ),
@@ -219,7 +219,6 @@ class WC_Helper_Subscriptions_API {
 				400
 			);
 		}
-
 
 		if ( true === $subscription['local']['active'] ) {
 			wp_send_json_success(
@@ -234,18 +233,18 @@ class WC_Helper_Subscriptions_API {
 			if ( is_wp_error( $success ) ) {
 				wp_send_json_error(
 					array(
-						'message' => __( 'There was an error activating this plugin.', 'woocommerce' )
+						'message' => __( 'There was an error activating this plugin.', 'woocommerce' ),
 					),
 					400
 				);
 			}
-		} else if ( 'theme' === $subscription['product_type'] ) {
+		} elseif ( 'theme' === $subscription['product_type'] ) {
 			switch_theme( $subscription['local']['slug'] );
 			$theme = wp_get_theme();
 			if ( $subscription['local']['slug'] !== $theme->get_stylesheet() ) {
 				wp_send_json_error(
 					array(
-						'message' => __( 'There was an error activating this theme.', 'woocommerce' )
+						'message' => __( 'There was an error activating this theme.', 'woocommerce' ),
 					),
 					400
 				);
