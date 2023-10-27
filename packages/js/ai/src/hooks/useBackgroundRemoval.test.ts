@@ -43,9 +43,9 @@ describe( 'useBackgroundRemoval hook', () => {
 		mockRequestParams = {
 			imageFile,
 		};
-		( requestJwt as jest.MockedFunction<
-			typeof requestJwt
-		> ).mockResolvedValue( {
+		(
+			requestJwt as jest.MockedFunction< typeof requestJwt >
+		 ).mockResolvedValue( {
 			token: 'fake_token',
 			blogId: '0',
 			expire: 0,
@@ -59,9 +59,9 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should return error on empty token', async () => {
-		( requestJwt as jest.MockedFunction<
-			typeof requestJwt
-		> ).mockResolvedValue( {
+		(
+			requestJwt as jest.MockedFunction< typeof requestJwt >
+		 ).mockResolvedValue( {
 			token: '',
 			blogId: '0',
 			expire: 0,
@@ -117,9 +117,9 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should set loading to true when fetchImage is called', async () => {
-		( apiFetch as jest.MockedFunction<
-			typeof apiFetch
-		> ).mockResolvedValue( {
+		(
+			apiFetch as jest.MockedFunction< typeof apiFetch >
+		 ).mockResolvedValue( {
 			blob: () =>
 				Promise.resolve(
 					new Blob( [ new ArrayBuffer( 51200 ) ], {
@@ -139,9 +139,9 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should handle successful API call', async () => {
-		( apiFetch as jest.MockedFunction<
-			typeof apiFetch
-		> ).mockResolvedValue( {
+		(
+			apiFetch as jest.MockedFunction< typeof apiFetch >
+		 ).mockResolvedValue( {
 			blob: () =>
 				Promise.resolve(
 					new Blob( [ new ArrayBuffer( 51200 ) ], {
@@ -159,9 +159,9 @@ describe( 'useBackgroundRemoval hook', () => {
 	} );
 
 	it( 'should handle API errors', async () => {
-		( apiFetch as jest.MockedFunction<
-			typeof apiFetch
-		> ).mockImplementation( () => {
+		(
+			apiFetch as jest.MockedFunction< typeof apiFetch >
+		 ).mockImplementation( () => {
 			throw new Error( 'API Error' );
 		} );
 
@@ -170,8 +170,10 @@ describe( 'useBackgroundRemoval hook', () => {
 			await act( async () => {
 				await result.current.fetchImage( mockRequestParams );
 			} );
-		} catch ( error: Error | any ) {
-			expect( error.message ).toBe( 'API Error' );
+		} catch ( error: unknown ) {
+			if ( error instanceof Error ) {
+				expect( error.message ).toBe( 'API Error' );
+			}
 		}
 		await waitFor( () => expect( result.current.loading ).toBeFalsy() );
 		expect( result.current.imageData ).toBe( null );
