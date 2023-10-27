@@ -49,18 +49,15 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const { fetchProductSuggestions, fetchingState } = useAIProductField();
+	const { fetchProductSuggestions, results } = useAIProductField();
 
 	useEffect( () => {
-		const mySuggestions = fetchProductSuggestions(
+		fetchProductSuggestions(
 			'shirt',
 			'this is a forma store',
 			'Beautiful shirt in various colors'
 		);
-		console.log( 'mySuggestions', mySuggestions );
-		console.log( 'fetchingState', fetchingState );
 	}, [] );
-
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 

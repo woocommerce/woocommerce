@@ -20,6 +20,8 @@ export function useAIProductField() {
 		FetchingState.None
 	);
 
+	const [ results, setResults ] = useState< any[] >( [] );
+
 	const { requestCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamError: ( error ) => {
@@ -32,6 +34,7 @@ export function useAIProductField() {
 			try {
 				const parsed = JSON.parse( content );
 				setFetchingState( FetchingState.None );
+				setResults( parsed.suggestions );
 				return parsed.suggestions;
 			} catch ( e ) {
 				setFetchingState( FetchingState.Failed );
@@ -83,5 +86,6 @@ export function useAIProductField() {
 	return {
 		fetchProductSuggestions,
 		fetchingState,
+		results,
 	};
 }
