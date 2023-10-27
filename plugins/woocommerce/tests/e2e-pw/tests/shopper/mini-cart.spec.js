@@ -258,7 +258,7 @@ test.describe( 'Mini Cart block page', () => {
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 	} );
 
-	test.only( 'can see mini cart total price inclusive with tax', async ( {
+	test( 'can see mini cart total price inclusive with tax', async ( {
 		page,
 		baseURL,
 	} ) => {
