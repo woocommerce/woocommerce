@@ -1453,7 +1453,10 @@ class WC_Helper {
 		if ( empty( $subscriptions ) ) {
 			return false;
 		}
-		return array_values( $subscriptions )[0];
+
+		return self::add_local_data_to_subscription(
+			array_values( $subscriptions )[0]
+		);
 	}
 
 	/**
@@ -1468,9 +1471,6 @@ class WC_Helper {
 		// Installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
-
-		$local_plugins = self::get_local_plugins();
-		$local_themes  = self::get_local_themes();
 
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
@@ -1503,16 +1503,6 @@ class WC_Helper {
 			);
 		}
 
-		$active_product_ids = array_column(
-			array_filter(
-				$subscriptions,
-				function( $subscription ) use ( $site_id ) {
-					return in_array( $site_id, $subscription['connections'], true );
-				}
-			),
-			'product_id'
-		);
-
 		// Track installed subscription ids to avoid duplicate entries for inactive subsriptions.
 		$installed_subscription_ids = array();
 
@@ -1530,34 +1520,11 @@ class WC_Helper {
 
 			$updates = WC_Helper_Updater::get_update_data();
 
-			$local = wp_list_filter(
-				array_merge( $local_plugins, $local_themes ),
-				array( 'slug' => $subscription['zip_slug'] )
-			);
-			$local = array_shift( $local );
-
 			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
-			if ( ! empty( $local ) && false === $has_another_installed_subscription ) {
-				array_push( $installed_subscription_ids, $subscription['product_id'] );
-
-				$subscription['local']['installed'] = true;
-				$subscription['local']['version']   = $local['Version'];
-				$subscription['local']['type']      = $local['_type'];
-				$subscription['local']['path']      = $local['_filename'];
-				$subscription['local']['slug']      = null;
-
-				if ( 'plugin' === $local['_type'] ) {
-					$subscription['local']['slug'] = $local['slug'];
-					if ( is_plugin_active( $local['_filename'] ) ) {
-						$subscription['local']['active'] = true;
-					} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
-						$subscription['local']['active'] = true;
-					}
-				} elseif ( 'theme' === $local['_type'] ) {
-					$subscription['local']['slug'] = $local['_stylesheet'];
-					if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
-						$subscription['local']['active'] = true;
-					}
+			if ( false === $has_another_installed_subscription ) {
+				$subscription = self::add_local_data_to_subscription( $subscription );
+				if ( ! empty( $subscription['local']['installed'] ) ) {
+					array_push( $installed_subscription_ids, $subscription['product_id'] );
 				}
 			}
 
@@ -1574,6 +1541,50 @@ class WC_Helper {
 		unset( $subscription );
 
 		return $subscriptions;
+	}
+
+	/**
+	 * Add local data to a subscription.
+	 */
+	public static function add_local_data_to_subscription( array $subscription ) {
+		$local_plugins = self::get_local_plugins();
+		$local_themes  = self::get_local_themes();
+
+		$local = wp_list_filter(
+			array_merge( $local_plugins, $local_themes ),
+			array( 'slug' => $subscription['zip_slug'] )
+		);
+		$local = array_shift( $local );
+
+		if ( empty( $local ) ) {
+			return $subscription;
+		}
+
+
+		$subscription['local'] = array(
+			'installed' => true,
+			'active'    => false,
+			'version'   => $local['Version'],
+			'type'      => $local['_type'],
+			'slug'      => null,
+			'path'      => $local['_filename'],
+		);
+
+		if ( 'plugin' === $local['_type'] ) {
+			$subscription['local']['slug'] = $local['slug'];
+			if ( is_plugin_active( $local['_filename'] ) ) {
+				$subscription['local']['active'] = true;
+			} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
+				$subscription['local']['active'] = true;
+			}
+		} elseif ( 'theme' === $local['_type'] ) {
+			$subscription['local']['slug'] = $local['_stylesheet'];
+			if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
+				$subscription['local']['active'] = true;
+			}
+		}
+
+		return $subscription;
 	}
 
 	/**
