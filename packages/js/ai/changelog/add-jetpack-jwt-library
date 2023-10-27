@@ -1,0 +1,4 @@
+Significance: major
+Type: add
+
+Replace JWT creation with requestJwt from @automattic/jetpack-ai-client library.
