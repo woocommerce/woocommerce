@@ -1,48 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { useEffect, useState } from 'react';
-
-function useFocusedBlock() {
-	const [ focusedElement, setFocusedElement ] = useState< Element | null >();
-	useEffect( () => {
-		function handleFocus( event: FocusEvent ) {
-			const target = event.target;
-
-			if ( ! ( target instanceof Element ) ) {
-				return;
-			}
-
-			setFocusedElement( target.closest( '[data-block]' ) );
-		}
-
-		const productEditorWrapper = document.querySelector(
-			'.woocommerce-product-block-editor'
-		) as HTMLElement | null;
-
-		productEditorWrapper?.addEventListener( 'focus', handleFocus, {
-			capture: true,
-		} );
-
-		return () => {
-			productEditorWrapper?.removeEventListener( 'focus', handleFocus, {
-				capture: true,
-			} );
-		};
-	}, [] );
-
-	const blockInfo = {
-		blockName: focusedElement?.getAttribute( 'data-type' ),
-		templateBlockId: focusedElement?.getAttribute(
-			'data-template-block-id'
-		),
-		templateBlockOrder: focusedElement?.getAttribute(
-			'data-template-block-order'
-		),
-	};
-
-	return blockInfo;
-}
+import { useFocusedBlock } from './hooks/use-focused-block';
 
 export function BlockInspector() {
 	const { blockName, templateBlockId, templateBlockOrder } =
