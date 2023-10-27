@@ -126,6 +126,7 @@ class ProductGallery extends AbstractBlock {
 		$dialog               = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
 		$post_id              = $block->context['postId'] ?? '';
 		$product              = wc_get_product( $post_id );
+		$product_id           = strval( $product->get_id() );
 
 		$html = $this->inject_dialog( $content, $dialog );
 		$p    = new \WP_HTML_Tag_Processor( $html );
@@ -140,10 +141,16 @@ class ProductGallery extends AbstractBlock {
 							'selectedImage'    => $product->get_image_id(),
 							'visibleImagesIds' => ProductGalleryUtils::get_product_gallery_image_ids( $product, $number_of_thumbnails, true ),
 							'isDialogOpen'     => false,
+							'productId'        => $product_id,
 						),
 					)
 				)
 			);
+
+			if ( $product->is_type( 'variable' ) ) {
+				$p->set_attribute( 'data-wc-init--watch-changes-on-add-to-cart-form', 'effects.woocommerce.watchForChangesOnAddToCartForm' );
+			}
+
 			$p->add_class( $classname );
 			$p->add_class( $classname_single_image );
 			$html = $p->get_updated_html();
