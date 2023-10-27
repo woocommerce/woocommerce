@@ -3,7 +3,7 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useContext, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
