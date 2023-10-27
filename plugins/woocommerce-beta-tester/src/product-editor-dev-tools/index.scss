@@ -4,17 +4,23 @@
 
 	height: 200px;
 
-	background-color: black;
-	color: white;
+	background-color: #2c3338;
+	color: #c3c4c7;
 }
 
 .woocommerce-product-editor-dev-tools-bar__header {
 	display: flex;
 
-	border-bottom: 1px solid white;
+	padding: 0 8px;
+
+	border-bottom: 1px solid #494f56;
+
+	background-color: #3c434a;
 
 	.components-button {
-		color: white;
+		border-radius: 0;
+
+		color: #c3c4c7;
 
 		&:focus:not(:disabled) {
 			outline: 0;
