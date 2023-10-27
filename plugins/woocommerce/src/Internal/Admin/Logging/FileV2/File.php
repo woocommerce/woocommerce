@@ -58,11 +58,18 @@ class File {
 	 * Parse the log filename to derive certain properties of the file.
 	 *
 	 * This makes assumptions about the structure of the log file's name. Using `-` to separate the name into segments,
-	 * if there are at least 5 segments, it assumes that the last segment is the "key" (i.e. hash), and the three
-	 * segments before that make up the date when the file was created in YYYY-MM-DD format. Any segments left after
-	 * that are the "source" that generated the log entries. If the filename doesn't have enough segments, it falls
-	 * back to the source and the key both being the entire filename, and using the last modified time as the creation
-	 * date.
+	 * if there are at least 5 segments, it assumes that the last segment is the hash, and the three segments before
+	 * that make up the date when the file was created in YYYY-MM-DD format. Any segments left after that are the
+	 * "source" that generated the log entries. If the filename doesn't have enough segments, it falls back to the
+	 * source and the hash both being the entire filename, and using the inode change time as the creation date.
+	 *
+	 * Example:
+	 *     my-custom-plugin.2-2025-01-01-a1b2c3d4e5f.log
+	 *           |          |       |         |
+	 *   'my-custom-plugin' | '2025-01-01'    |
+	 *        (source)      |   (created)     |
+	 *                     '2'          'a1b2c3d4e5f'
+	 *                 (rotation)           (hash)
 	 *
 	 * @return void
 	 */
