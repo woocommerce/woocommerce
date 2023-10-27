@@ -114,4 +114,12 @@
 	<rule ref="WordPress.WP.GlobalVariablesOverride">
 		<exclude-pattern>tests/php/src</exclude-pattern>
 	</rule>
+
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax">
+		<exclude-pattern>tests/php/src</exclude-pattern>
+	</rule>
+
+	<rule ref="WooCommerce.Commenting.CommentHooks">
+		<exclude-pattern>tests/php/src</exclude-pattern>
+	</rule>
 </ruleset>
