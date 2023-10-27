@@ -19,14 +19,15 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { ThumbsUpSVG } from './thumbs-up';
+import { Suggestion as AISuggestion } from '../../../hooks/use-ai-product-field';
 
-type Suggestions = string;
+type Suggestion = AISuggestion;
 
 interface AIPopoverProps {
-	getMenuProps: UseComboboxPropGetters< Suggestions >[ 'getMenuProps' ];
+	getMenuProps: UseComboboxPropGetters< Suggestion >[ 'getMenuProps' ];
 	widthRef: React.MutableRefObject< HTMLDivElement | null >;
-	getItemProps: UseComboboxPropGetters< Suggestions >[ 'getItemProps' ];
-	items: Suggestions[];
+	getItemProps: UseComboboxPropGetters< Suggestion >[ 'getItemProps' ];
+	items: Suggestion[];
 	highlightedIndex: number | null;
 }
 
@@ -52,7 +53,7 @@ export function AIPopover( {
 				>
 					{ items.map( ( item, index ) => (
 						<li
-							key={ item }
+							key={ item.content }
 							className={ classNames( {
 								'woocommerce-product-form-name-ai-suggestions__highlighted':
 									highlightedIndex === index,
@@ -62,10 +63,10 @@ export function AIPopover( {
 							<div className="woocommerce-product-form-name-ai-suggestions__item">
 								<div>
 									<p className="woocommerce-product-form-name-ai-suggestions__item-name">
-										{ item }
+										{ item.content }
 									</p>
 									<p className="woocommerce-product-form-name-ai-suggestions__item-description">
-										{ item }
+										{ item.reason }
 									</p>
 								</div>
 								<div>

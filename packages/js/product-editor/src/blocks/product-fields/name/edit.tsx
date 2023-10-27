@@ -49,7 +49,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const { fetchProductSuggestions, results } = useAIProductField();
+	const { fetchProductSuggestions, suggestions } = useAIProductField();
 
 	useEffect( () => {
 		fetchProductSuggestions(
@@ -126,12 +126,6 @@ export function Edit( {
 		setSku( cleanForSlug( name ) );
 	};
 
-	const suggestions = [
-		'Stay Cool and Stylish with our Unisex Beige Linen Jacket',
-		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 2',
-		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 3',
-	];
-
 	const {
 		isOpen,
 		getInputProps,
@@ -140,13 +134,13 @@ export function Edit( {
 		highlightedIndex,
 	} = useCombobox( {
 		items: suggestions,
-		selectedItem: suggestions.find( ( item ) => item === name ),
-		itemToString: ( item ) => item || '',
+		selectedItem: suggestions.find( ( item ) => item.content === name ),
+		itemToString: ( item ) => item?.content || '',
 		inputValue: name,
 		onInputValueChange: ( { inputValue } ) => setName( inputValue || '' ),
 		onSelectedItemChange: ( { selectedItem } ) => {
 			if ( selectedItem ) {
-				setName( selectedItem );
+				setName( selectedItem.content );
 			}
 		},
 	} );
