@@ -1,4 +1,7 @@
-import { useEffect } from 'react';
+/**
+ * External dependencies
+ */
+import { useEffect } from '@wordpress/element';
 
 // Counter to keep track of the number of components using a particular class
 const classCounter: Record< string, number > = {};
