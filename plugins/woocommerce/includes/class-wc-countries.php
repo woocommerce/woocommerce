@@ -1514,8 +1514,8 @@ class WC_Countries {
 							'priority' => 65,
 						),
 						'state'    => array(
-							'label'    => __( 'Municipality', 'woocommerce' ),
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'LK' => array(
