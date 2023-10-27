@@ -16,6 +16,7 @@ describe( 'OnboardingTour', () => {
 		onClose: jest.Mock;
 		setShowWelcomeTour: jest.Mock;
 		showWelcomeTour: boolean;
+		setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 	};
 
 	beforeEach( () => {
@@ -23,6 +24,7 @@ describe( 'OnboardingTour', () => {
 			onClose: jest.fn(),
 			setShowWelcomeTour: jest.fn(),
 			showWelcomeTour: true,
+			setIsResizeHandleVisible: jest.fn(),
 		};
 	} );
 

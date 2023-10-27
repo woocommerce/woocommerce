@@ -78,7 +78,7 @@ test.describe( 'Edit order', () => {
 		// load the orders listing and confirm order is completed
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `#order-${ orderId }` ).getByRole( 'cell', { name: getTranslationFor( 'Completed' ) }) ).toBeVisible();
+		await expect( page.locator( `:is(#order-${ orderId }, #post-${ orderId })` ).getByRole( 'cell', { name: getTranslationFor( 'Completed' ) }) ).toBeVisible();
 	} );
 
 	test( 'can update order status to cancelled', async ( { page } ) => {
@@ -98,7 +98,7 @@ test.describe( 'Edit order', () => {
 		// load the orders listing and confirm order is cancelled
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `#order-${ orderToCancel }` ).getByRole( 'cell', { name: getTranslationFor( 'Cancelled' ) }) ).toBeVisible();
+		await expect( page.locator( `:is(#order-${ orderToCancel }, #post-${ orderToCancel })` ).getByRole( 'cell', { name: getTranslationFor( 'Cancelled' ) }) ).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {

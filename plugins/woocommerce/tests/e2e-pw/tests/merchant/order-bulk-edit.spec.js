@@ -68,23 +68,26 @@ test.describe( 'Bulk edit orders', () => {
 	test( 'can bulk update order status', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		// expect order status 'processing' to show
-		await expect( page.locator( `#order-${ orderId1 }`).getByText( getTranslationFor( 'Processing' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId2 }`).getByText( getTranslationFor( 'Processing' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId3 }`).getByText( getTranslationFor( 'Processing' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId4 }`).getByText( getTranslationFor( 'Processing' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId5 }`).getByText( getTranslationFor( 'Processing' ) ) ).toBeVisible();
+		const orderIds = [orderId1, orderId2, orderId3, orderId4, orderId5];
 
+		// expect order status 'processing' to show
+		for (const orderId of orderIds) {
+			await expect(
+				page.locator( `:is(#order-${ orderId }, #post-${ orderId })` ).getByText( getTranslationFor( 'Processing' ) )
+			).toBeVisible();
+		}
+		
 		await page.locator( '#cb-select-all-1' ).click();
 		await page.locator( '#bulk-action-selector-top' ).selectOption( getTranslationFor( 'Change status to completed' ));
 		await page.locator('#doaction').click();
 
 		// expect order status 'completed' to show
-		await expect( page.locator( `#order-${ orderId1 }`).getByText( getTranslationFor( 'Completed' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId2 }`).getByText( getTranslationFor( 'Completed' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId3 }`).getByText( getTranslationFor( 'Completed' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId4 }`).getByText( getTranslationFor( 'Completed' ) ) ).toBeVisible();
-		await expect( page.locator( `#order-${ orderId5 }`).getByText( getTranslationFor( 'Completed' ) ) ).toBeVisible();
+		for (const orderId of orderIds) {
+			await expect(
+				page.locator( `:is(#order-${ orderId }, #post-${ orderId })` ).getByText( getTranslationFor( 'Completed' ) )
+			).toBeVisible();
+		}
+
 	} );
 
 } );

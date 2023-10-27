@@ -1650,10 +1650,11 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						expect.objectContaining( {
 							id: 'woocommerce_cart_page_id',
 							label: 'Cart page',
-							description: 'Page contents: [woocommerce_cart]',
+							description:
+								'Page where shoppers review their shopping cart',
 							type: 'select',
 							default: '',
-							tip: 'Page contents: [woocommerce_cart]',
+							tip: 'Page where shoppers review their shopping cart',
 							value: expect.any( String ),
 							options: expect.any( Object ),
 						} ),
@@ -1669,10 +1670,10 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							id: 'woocommerce_checkout_page_id',
 							label: 'Checkout page',
 							description:
-								'Page contents: [woocommerce_checkout]',
+								'Page where shoppers go to finalize their purchase',
 							type: 'select',
 							default: expect.any( Number ),
-							tip: 'Page contents: [woocommerce_checkout]',
+							tip: 'Page where shoppers go to finalize their purchase',
 							value: expect.any( String ),
 							options: expect.any( Object ),
 						} ),

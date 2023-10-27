@@ -12,7 +12,7 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 
-type ChangeHandler = (
+export type ChangeHandler = (
 	blocks: BlockInstance[],
 	options: Record< string, unknown >
 ) => void;

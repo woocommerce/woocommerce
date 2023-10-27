@@ -6,6 +6,9 @@ const { getTranslationFor } = require('./utils/translations');
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
 
+/**
+ * @param {import('@playwright/test').FullConfig} config
+ */
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -59,7 +62,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `/wp-admin` );
+			await adminPage.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
 			await adminPage
 				.locator( 'input[name="log"]' )
 				.fill( admin.username );
@@ -140,7 +143,9 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
+			await customerPage.goto( `/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
 			await customerPage
 				.locator( 'input[name="log"]' )
 				.fill( customer.username );
@@ -219,6 +224,8 @@ module.exports = async ( config ) => {
 			process.exit( 1 );
 		}
 	}
+
+	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();

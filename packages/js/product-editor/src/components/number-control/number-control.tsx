@@ -14,6 +14,7 @@ import {
  * Internal dependencies
  */
 import { useNumberInputProps } from '../../hooks/use-number-input-props';
+import { Label } from '../label/label';
 
 export type NumberProps = {
 	value: string;
@@ -24,6 +25,8 @@ export type NumberProps = {
 	error?: string;
 	placeholder?: string;
 	onBlur?: () => void;
+	required?: boolean;
+	tooltip?: string;
 };
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -34,6 +37,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	help,
 	error,
 	onBlur,
+	required,
+	tooltip,
 	placeholder,
 }: NumberProps ) => {
 	const inputProps = useNumberInputProps( {
@@ -49,7 +54,13 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				'has-error': error,
 			} ) }
 			id={ id }
-			label={ label }
+			label={
+				<Label
+					label={ label }
+					required={ required }
+					tooltip={ tooltip }
+				/>
+			}
 			help={ error || help }
 		>
 			<InputControl

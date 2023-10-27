@@ -190,6 +190,15 @@ function _Layout( {
 
 	const query = getQuery();
 
+	useEffect( () => {
+		const wpbody = document.getElementById( 'wpbody' );
+		if ( showHeader ) {
+			wpbody?.classList.remove( 'no-header' );
+		} else {
+			wpbody?.classList.add( 'no-header' );
+		}
+	}, [ showHeader ] );
+
 	return (
 		<LayoutContextProvider
 			value={ getLayoutContextValue( [
