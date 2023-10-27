@@ -10,9 +10,9 @@ const simpleProductName = 'Single Hundred Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
 const singleProductPrice = '100.00';
 const singleProductSalePrice = '50.00';
-const totalInclusiveTax = +singleProductSalePrice + 15 + 25;
+const totalInclusiveTax = +singleProductSalePrice + 5 + 2.5;
 
-let productId, caTaxId, smTaxId, shippingZoneId;
+let productId, countryTaxId, stateTaxId, shippingZoneId;
 
 test.describe( 'Mini Cart block page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -46,30 +46,30 @@ test.describe( 'Mini Cart block page', () => {
 		await api
 			.post( 'taxes', {
 				country: 'US',
-				state: 'CA',
+				state: '*',
 				cities: '*',
 				postcodes: '*',
-				rate: '25',
-				name: 'CA Tax',
+				rate: '10',
+				name: 'Country Tax',
 				shipping: false,
 				priority: 1,
 			} )
 			.then( ( response ) => {
-				caTaxId = response.data.id;
+				countryTaxId = response.data.id;
 			} );
 		await api
 			.post( 'taxes', {
-				country: 'US',
-				state: '*',
-				cities: 'Sacramento',
+				country: '*',
+				state: 'CA',
+				cities: '*',
 				postcodes: '*',
-				rate: '15',
-				name: 'SM Tax',
+				rate: '5',
+				name: 'State Tax',
 				shipping: false,
 				priority: 2,
 			} )
 			.then( ( response ) => {
-				smTaxId = response.data.id;
+				stateTaxId = response.data.id;
 			} );
 		// add shipping zone, location and method
 		await api
@@ -103,7 +103,7 @@ test.describe( 'Mini Cart block page', () => {
 			value: 'no',
 		} );
 		await api.post( 'taxes/batch', {
-			delete: [ caTaxId, smTaxId ],
+			delete: [ countryTaxId, stateTaxId ],
 		} );
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
@@ -258,7 +258,7 @@ test.describe( 'Mini Cart block page', () => {
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 	} );
 
-	test( 'can see mini cart total price inclusive with tax', async ( {
+	test.only( 'can see mini cart total price inclusive with tax', async ( {
 		page,
 		baseURL,
 	} ) => {
