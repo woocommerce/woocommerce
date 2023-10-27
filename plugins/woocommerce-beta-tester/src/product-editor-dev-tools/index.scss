@@ -1,4 +1,9 @@
 .woocommerce-product-editor-dev-tools-bar {
+	display: flex;
+	flex-direction: column;
+
+	height: 200px;
+
 	background-color: black;
 	color: white;
 }
@@ -16,7 +21,17 @@
 }
 
 .woocommerce-product-editor-dev-tools-bar__panel {
+	flex: 1;
+
+	overflow: hidden;
+}
+
+.woocommerce-product-editor-dev-tools-block-inspector {
+	height: 100%;
+
 	padding: 16px;
+
+	overflow: auto;
 }
 
 .woocommerce-product-editor-dev-tools-block-inspector__properties {
