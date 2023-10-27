@@ -14,7 +14,7 @@ export function ProductEditorDevToolsMenu( {
 	onToggleShowDevTools: () => void;
 } ) {
 	return (
-		<WooProductMoreMenuItem>
+		<WooProductMoreMenuItem order={ 1000 }>
 			{ ( { onClose }: { onClose: () => void } ) => (
 				<MenuGroup label={ __( 'Developer tools', 'woocommerce' ) }>
 					<MenuItem
