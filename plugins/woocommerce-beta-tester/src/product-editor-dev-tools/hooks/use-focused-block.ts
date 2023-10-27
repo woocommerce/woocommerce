@@ -36,9 +36,13 @@ export function useFocusedBlock() {
 		templateBlockId: focusedElement?.getAttribute(
 			'data-template-block-id'
 		),
-		templateBlockOrder: focusedElement?.getAttribute(
-			'data-template-block-order'
-		),
+		templateBlockOrder:
+			parseInt(
+				focusedElement?.getAttribute(
+					'data-template-block-order'
+				) as string,
+				10
+			) || null,
 	};
 
 	return blockInfo;

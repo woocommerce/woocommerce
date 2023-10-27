@@ -1,12 +1,12 @@
-/**
- * Internal dependencies
- */
-import { useFocusedBlock } from './hooks/use-focused-block';
-
-export function BlockInspector() {
-	const { blockName, templateBlockId, templateBlockOrder } =
-		useFocusedBlock();
-
+export function BlockInspector( {
+	blockInfo: { blockName, templateBlockId, templateBlockOrder },
+}: {
+	blockInfo: {
+		blockName?: string | null;
+		templateBlockId?: string | null;
+		templateBlockOrder?: number | null;
+	};
+} ) {
 	return (
 		<div className="woocommerce-product-editor-dev-tools-block-inspector">
 			<dl className="woocommerce-product-editor-dev-tools-block-inspector__properties">

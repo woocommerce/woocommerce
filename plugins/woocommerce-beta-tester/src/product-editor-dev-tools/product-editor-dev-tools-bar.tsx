@@ -11,12 +11,16 @@ import { close } from '@wordpress/icons';
  * Internal dependencies
  */
 import { BlockInspector } from './block-inspector';
+import { useFocusedBlock } from './hooks/use-focused-block';
+
 export function ProductEditorDevToolsBar( {
 	onClose,
 }: {
 	onClose: () => void;
 } ) {
 	const [ selectedTab, setSelectedTab ] = useState< string >( 'inspector' );
+
+	const blockInfo = useFocusedBlock();
 
 	function handleNavigate( _childIndex: number, child: HTMLButtonElement ) {
 		child.click();
@@ -55,7 +59,9 @@ export function ProductEditorDevToolsBar( {
 					</div>
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-bar__panel">
-					{ selectedTab === 'inspector' && <BlockInspector /> }
+					{ selectedTab === 'inspector' && (
+						<BlockInspector blockInfo={ blockInfo } />
+					) }
 					{ selectedTab === 'about' && (
 						<div>About developer tools</div>
 					) }
