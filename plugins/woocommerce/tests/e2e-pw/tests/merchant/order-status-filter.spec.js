@@ -47,7 +47,6 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 
 	test( 'should filter by All', async ( { page } ) => {
 		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
-
 		await page.locator( 'li.all > a' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		// because tests are running in parallel, we can't know how many orders there

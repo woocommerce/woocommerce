@@ -169,7 +169,7 @@ const fr_FR = {
 	orderReceivedTextsplit: 10,
 	'Orders': 'Commandes',
 	orderStatus: [
-		['Attente de paiement', 'wc-pending'],
+		['Attente paiement', 'wc-pending'],
 		['En cours', 'wc-processing'],
 		['En attente', 'wc-on-hold'],
 		['Terminée', 'wc-completed'],

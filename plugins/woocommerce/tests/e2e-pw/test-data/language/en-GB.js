@@ -39,7 +39,7 @@ const en_GB = {
     'Billing Last name is a required field.': 'Billing Last name is a required field.',
     'Billing Street address is a required field.': 'Billing Street address is a required field.',
     'Billing Town / City is a required field.': 'Billing Town / City is a required field.',
-    'Billing ZIP Code is a required field.': 'Billing ZIP Code is a required field.',
+    'Billing ZIP Code is a required field.': 'Billing Postcode is a required field.',
     'Billing Phone is a required field.': 'Billing Phone is a required field.',
     'Billing Email address is a required field.': 'Billing Email address is a required field.',
     '"BIC / Swift"': '"BIC / Swift"',
@@ -303,7 +303,7 @@ const en_GB = {
     'Shipping Last name is a required field.': 'Shipping Last name is a required field.',
     'Shipping Street address is a required field.': 'Shipping Street address is a required field.',
     'Shipping Town / City is a required field.': 'Shipping Town / City is a required field.',
-    'Shipping ZIP Code is a required field.': 'Shipping ZIP Code is a required field.',
+    'Shipping ZIP Code is a required field.': 'Shipping Postcode is a required field.',
     'Shop': 'Shop',
     'Showing all 3 results': 'Showing all 3 results',
     '“Simple single product 1” and “Simple single product 2” have been added to your cart.':

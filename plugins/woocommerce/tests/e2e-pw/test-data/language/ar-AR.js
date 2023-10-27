@@ -183,12 +183,12 @@ const ar_AR = {
 	orderReceivedTextsplit: 6,
 	'Orders': 'الطلبات',
 	orderStatus: [
-		[ 'بانتظار الدفع ', 'wc-pending' ],
+		[ 'قيد الإنتظار', 'wc-pending' ],
 		[ 'قيد التنفيذ ', 'wc-processing' ],
-		[ 'في الانتظار ', 'wc-on-hold' ],
+		[ 'بانتظار الدفع', 'wc-on-hold' ],
 		[ 'مُكتمل ', 'wc-completed' ],
-		[ 'تم إلغاء ', 'wc-cancelled' ],
-		[ 'تم استرجاعها ', 'wc-refunded' ],
+		[ 'ملغي', 'wc-cancelled' ],
+		[ 'مُسترّد', 'wc-refunded' ],
 		[ 'فشل ', 'wc-failed' ],
 	],
 	'Order status changed from Completed to Refunded.':
