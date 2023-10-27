@@ -6,20 +6,20 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
+import { LOCALE } from '../../utils/admin-settings';
+import { CategoryAPIItem } from '../components/category-selector/types';
+import {
+	MARKETPLACE_CATEGORY_API_PATH,
+	MARKETPLACE_HOST,
+	MARKETPLACE_SEARCH_API_PATH,
+} from '../components/constants';
+import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
 	ProductType,
-	SearchAPIProductType,
 	SearchAPIJSONType,
+	SearchAPIProductType,
 } from '../components/product-list/types';
-import {
-	MARKETPLACE_HOST,
-	MARKETPLACE_CATEGORY_API_PATH,
-	MARKETPLACE_SEARCH_API_PATH,
-} from '../components/constants';
-import { CategoryAPIItem } from '../components/category-selector/types';
-import { LOCALE } from '../../utils/admin-settings';
-import { Subscription } from '../components/my-subscriptions/types';
 
 interface ProductGroup {
 	id: string;
@@ -199,6 +199,20 @@ function installProduct( productKey: string ): Promise< void > {
 	} );
 }
 
+function connectProduct( productKey: string ): Promise< void > {
+	const url = '/wc/v3/marketplace/subscriptions/activate';
+	const data = new URLSearchParams();
+	data.append( 'product_key', productKey );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -219,11 +233,12 @@ const appendURLParams = (
 };
 
 export {
-	fetchSearchResults,
-	fetchDiscoverPageData,
-	fetchCategories,
-	fetchSubscriptions,
-	installProduct,
 	ProductGroup,
 	appendURLParams,
+	connectProduct,
+	fetchCategories,
+	fetchDiscoverPageData,
+	fetchSearchResults,
+	fetchSubscriptions,
+	installProduct,
 };

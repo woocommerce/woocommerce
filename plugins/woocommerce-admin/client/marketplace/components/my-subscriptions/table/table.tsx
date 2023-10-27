@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Table, TablePlaceholder } from '@woocommerce/components';
 import {
 	TableHeader,
 	TableRow,
 } from '@woocommerce/components/build-types/table/types';
+import { __ } from '@wordpress/i18n';
 
 const tableHeadersDefault = [
 	{
@@ -45,10 +45,19 @@ function SubscriptionsTable( props: {
 		);
 	}
 
+	const headersWithClasses = props.headers.map( ( header ) => {
+		return {
+			...header,
+			cellClassName:
+				'woocommerce-marketplace__my-subscriptions__table__header--' +
+				header.key,
+		};
+	} );
+
 	return (
 		<Table
 			className="woocommerce-marketplace__my-subscriptions__table"
-			headers={ props.headers }
+			headers={ headersWithClasses }
 			rows={ props.rows }
 		/>
 	);
@@ -60,10 +69,6 @@ export function InstalledSubscriptionsTable( props: {
 } ) {
 	const headers = [
 		...tableHeadersDefault,
-		{
-			key: 'activated',
-			label: __( 'Activated', 'woocommerce' ),
-		},
 		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),
@@ -85,10 +90,6 @@ export function AvailableSubscriptionsTable( props: {
 } ) {
 	const headers = [
 		...tableHeadersDefault,
-		{
-			key: 'install',
-			label: __( 'Install', 'woocommerce' ),
-		},
 		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),

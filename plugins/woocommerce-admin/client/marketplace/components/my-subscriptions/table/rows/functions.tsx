@@ -1,18 +1,23 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { TableRow } from '@woocommerce/components/build-types/table/types';
-import { Icon, plugins } from '@wordpress/icons';
 import { gmdateI18n } from '@wordpress/date';
+import { __, sprintf } from '@wordpress/i18n';
+import { Icon, plugins } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { Subscription } from '../../types';
-import StatusPopover from './status-popover';
-import ActivationToggle from './activation-toggle';
+import ConnectButton from '../actions/connect-button';
+import Install from '../actions/install';
+import RenewButton from '../actions/renew-button';
+import SubscribeButton from '../actions/subscribe-button';
+import Update from '../actions/update';
 import ActionsDropdownMenu from './actions-dropdown-menu';
+import StatusPopover from './status-popover';
+import Version from './version';
 
 // TODO: Add explanations.
 function getStatus( subscription: Subscription ): {
@@ -56,21 +61,21 @@ function getStatus( subscription: Subscription ): {
 	};
 }
 
-function getVersion( subscription: Subscription ): string {
+function getVersion( subscription: Subscription ): string | JSX.Element {
 	if ( subscription.local.version === subscription.version ) {
-		return subscription.local.version;
+		return <Version span={ subscription.local.version } />;
 	}
 
 	if ( subscription.local.version && subscription.version ) {
-		return subscription.local.version + ' > ' + subscription.version;
+		return <Update subscription={ subscription } />;
 	}
 
 	if ( subscription.version ) {
-		return subscription.version;
+		return <Version span={ subscription.version } />;
 	}
 
 	if ( subscription.local.version ) {
-		return subscription.local.version;
+		return <Version span={ subscription.local.version } />;
 	}
 
 	return '';
@@ -175,16 +180,26 @@ export function version( subscription: Subscription ): TableRow {
 	};
 }
 
-export function activation( subscription: Subscription ): TableRow {
-	const displayElement = <ActivationToggle subscription={ subscription } />;
-
+export function actions( subscription: Subscription ): TableRow {
+	let actionButton = null;
+	if ( subscription.product_key === '' ) {
+		actionButton = <SubscribeButton subscription={ subscription } />;
+	} else if ( subscription.expired ) {
+		actionButton = <RenewButton subscription={ subscription } />;
+	} else if ( subscription.local.installed === false ) {
+		actionButton = <Install subscription={ subscription } />;
+	} else if ( subscription.active === false ) {
+		actionButton = (
+			<ConnectButton subscription={ subscription } variant="link" />
+		);
+	}
 	return {
-		display: displayElement,
-	};
-}
+		display: (
+			<div className="woocommerce-marketplace__my-subscriptions__actions">
+				{ actionButton }
 
-export function actions(): TableRow {
-	return {
-		display: <ActionsDropdownMenu />,
+				<ActionsDropdownMenu />
+			</div>
+		),
 	};
 }

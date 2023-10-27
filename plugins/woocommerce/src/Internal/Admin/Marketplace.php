@@ -18,6 +18,7 @@ class Marketplace {
 	final public function init() {
 		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
 			add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 	}
 
@@ -52,5 +53,22 @@ class Marketplace {
 		 * @since 8.0
 		 */
 		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
+	}
+
+	/**
+	 * Enqueue update script.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_scripts( $hook_suffix ) {
+		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
+			return;
+		};
+		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
+			return;
+		}
+
+		// Enqueue WordPress updates script to enable plugin and theme installs and updates.
+		wp_enqueue_script( 'updates' );
 	}
 }

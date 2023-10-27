@@ -4,6 +4,7 @@ export type Subscription = {
 	product_name: string;
 	product_url: string;
 	product_icon: string;
+	zip_slug: string;
 	key_type: string;
 	key_type_label: string;
 	autorenew: boolean;
@@ -30,6 +31,9 @@ export interface SubscriptionLocal {
 	installed: boolean;
 	active: boolean;
 	version: string;
+	type: string;
+	slug: string;
+	path: string;
 }
 
 export interface SubscriptionShare {
