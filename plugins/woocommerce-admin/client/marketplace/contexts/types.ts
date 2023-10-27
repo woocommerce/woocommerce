@@ -15,8 +15,12 @@ export type SubscriptionsContextType = {
 	setSubscriptions: ( subscriptions: Subscription[] ) => void;
 	loadSubscriptions: ( toggleLoading?: boolean ) => Promise< void >;
 	isLoading: boolean;
-	isInstalling: ( productKey: string ) => boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
+};
+
+export type InstallContextType = {
+	installingProducts: string[];
+	isInstalling: ( productKey: string ) => boolean;
 	addInstalling: ( productKey: string ) => void;
 	removeInstalling: ( productKey: string ) => void;
 };

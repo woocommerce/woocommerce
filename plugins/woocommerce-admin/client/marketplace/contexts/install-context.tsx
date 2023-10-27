@@ -1,19 +1,15 @@
 /**
  * External dependencies
  */
-import { useState, createContext, useEffect } from '@wordpress/element';
+import { useState, createContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { SubscriptionsContextType } from './types';
+import { InstallContextType } from './types';
 
-export const InstallContext = createContext< SubscriptionsContextType >( {
-	subscriptions: [],
-	setSubscriptions: () => {},
-	loadSubscriptions: () => new Promise( () => {} ),
-	isLoading: true,
-	setIsLoading: () => {},
+export const InstallContext = createContext< InstallContextType >( {
+	installingProducts: [],
 	isInstalling: () => false,
 	addInstalling: () => {},
 	removeInstalling: () => {},
@@ -26,12 +22,7 @@ export function InstallContextProvider( props: {
 		[]
 	);
 
-	useEffect( () => {
-		console.info( 'installingProducts', installingProducts );
-	}, [ installingProducts ] );
-
 	const isInstalling = ( productKey: string ) => {
-		console.debug( productKey, installingProducts );
 		return installingProducts.includes( productKey );
 	};
 	const addInstalling = ( productKey: string ) => {
@@ -45,11 +36,7 @@ export function InstallContextProvider( props: {
 	};
 
 	const contextValue = {
-		subscriptions: [],
-		setSubscriptions: () => {},
-		loadSubscriptions: () => Promise.resolve(),
-		isLoading: true,
-		setIsLoading: () => {},
+		installingProducts,
 		isInstalling,
 		addInstalling,
 		removeInstalling,

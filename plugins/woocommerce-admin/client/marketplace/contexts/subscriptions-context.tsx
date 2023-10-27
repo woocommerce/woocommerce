@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useState,
-	createContext,
-	useEffect,
-	useMemo,
-	useCallback,
-} from '@wordpress/element';
+import { useState, createContext, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,9 +16,6 @@ export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	loadSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
-	isInstalling: () => false,
-	addInstalling: () => {},
-	removeInstalling: () => {},
 } );
 
 export function SubscriptionsContextProvider( props: {
@@ -50,23 +41,6 @@ export function SubscriptionsContextProvider( props: {
 				}
 			} );
 	};
-
-	const [ installingProducts, setInstalling ] = useState< Array< string > >(
-		[]
-	);
-
-	const isInstalling = ( productKey: string ) => {
-		console.debug( productKey, installingProducts );
-		return installingProducts.includes( productKey );
-	};
-	const addInstalling = ( productKey: string ) => {
-		setInstalling( [ ...installingProducts, productKey ] );
-	};
-
-	const removeInstalling = ( productKey: string ) => {
-		setInstalling( installingProducts.filter( ( p ) => p !== productKey ) );
-	};
-
 	useEffect( () => {
 		loadSubscriptions( true );
 	}, [] );
@@ -77,9 +51,6 @@ export function SubscriptionsContextProvider( props: {
 		loadSubscriptions,
 		isLoading,
 		setIsLoading,
-		isInstalling,
-		addInstalling,
-		removeInstalling,
 	};
 
 	return (
