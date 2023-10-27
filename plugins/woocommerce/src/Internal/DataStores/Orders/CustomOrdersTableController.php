@@ -293,7 +293,7 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
-		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || 'no' === $value ) {
+		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option ) {
 			return $value;
 		}
 
