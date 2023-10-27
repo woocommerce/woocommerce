@@ -1,6 +1,12 @@
+$line-height: 1.618;
+
 .wc-block-components-product-rating {
 	display: block;
 	line-height: 1;
+
+	span {
+		line-height: $line-height;
+	}
 
 	&__stars {
 		display: inline-block;
@@ -8,7 +14,7 @@
 		position: relative;
 		width: 5.3em;
 		height: 1.618em;
-		line-height: 1.618;
+		line-height: $line-height;
 		font-size: 1em;
 		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
 		font-family: star;
@@ -76,7 +82,7 @@
 		position: relative;
 		width: 1.5em;
 		height: 1.618em;
-		line-height: 1.618;
+		line-height: $line-height;
 		font-size: 1em;
 		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
 		font-family: star;
