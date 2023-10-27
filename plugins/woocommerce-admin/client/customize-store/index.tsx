@@ -39,6 +39,7 @@ import {
 import { ThemeCard } from './intro/types';
 import './style.scss';
 import { navigateOrParent, attachParentListeners } from './utils';
+import useBodyClass from './hooks/use-body-class';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -367,6 +368,8 @@ export const CustomizeStoreController = ( {
 		const removeListener = attachParentListeners();
 		return removeListener;
 	}, [] );
+
+	useBodyClass( 'is-fullscreen-mode' );
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
