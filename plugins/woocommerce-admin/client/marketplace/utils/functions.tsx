@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -190,7 +190,7 @@ function connectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === true ) {
 		return Promise.resolve();
 	}
-	const url = '/wc/v3/marketplace/subscriptions/activate';
+	const url = '/wc/v3/marketplace/subscriptions/connect';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
 	return apiFetch( {
@@ -207,7 +207,7 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === false ) {
 		return Promise.resolve();
 	}
-	const url = '/wc/v3/marketplace/subscriptions/deactivate';
+	const url = '/wc/v3/marketplace/subscriptions/disconnect';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
 	return apiFetch( {
@@ -220,31 +220,98 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+function wpAjax(
+	action: string,
+	data: {
+		slug?: string;
+		plugin?: string;
+		theme?: string;
+		success?: boolean;
+	}
+): Promise< void > {
+	return new Promise( ( resolve, reject ) => {
+		if ( ! window.wp.updates ) {
+			reject( __( 'Please reload and try again', 'woocommerce' ) );
+			return;
+		}
+
+		window.wp.updates.ajax( action, {
+			...data,
+			success: ( response: {
+				success?: boolean;
+				errorMessage?: string;
+			} ) => {
+				if ( response.success === false ) {
+					reject( {
+						success: false,
+						data: {
+							message: response.errorMessage,
+						},
+					} );
+				}
+				resolve();
+			},
+			error: ( error: { errorMessage: string } ) => {
+				reject( {
+					success: false,
+					data: {
+						message: error.errorMessage,
+					},
+				} );
+			},
+		} );
+	} );
+}
+
+function activateProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.local.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} )
+		.then( () => Promise.resolve() )
+		.catch( ( error ) =>
+			Promise.reject( {
+				success: false,
+				data: {
+					message: sprintf(
+						/* translators: %s: product name, %s: error message */
+						__(
+							'%s could not be activated. Please activate it manually. $s',
+							'woocommerce'
+						),
+						subscription.product_name,
+						error.data.message
+					),
+				},
+			} )
+		);
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
-		return new Promise( ( resolve, reject ) => {
-			if ( ! window.wp.updates ) {
-				reject( __( 'Please reload and try again', 'woocommerce' ) );
-				return;
-			}
-
-			window.wp.updates.ajax( 'install-' + subscription.product_type, {
-				// The slug prefix is required for the install to use WCCOM install filters.
-				slug: 'woocommerce-com-' + subscription.product_slug,
-				success: resolve,
-				error: ( error: { [ 'errorMessage' ]: string } ) => {
-					// If install fails disconnect the product
-					return disconnectProduct( subscription ).finally( () => {
-						reject( {
-							success: false,
-							data: {
-								message: error.errorMessage,
-							},
-						} );
-					} );
-				},
+		return wpAjax( 'install-' + subscription.product_type, {
+			// The slug prefix is required for the install to use WCCOM install filters.
+			slug: 'woocommerce-com-' + subscription.product_slug,
+		} )
+			.then( () => {
+				return activateProduct( subscription );
+			} )
+			.catch( ( error ) => {
+				// If install fails disconnect the product
+				return disconnectProduct( subscription ).finally( () =>
+					Promise.reject( error )
+				);
 			} );
-		} );
 	} );
 }
 

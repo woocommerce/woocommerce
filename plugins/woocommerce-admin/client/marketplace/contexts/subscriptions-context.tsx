@@ -16,7 +16,7 @@ export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	loadSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
-	isInstalling: () => false,
+	installingProducts: [],
 	addInstalling: () => {},
 	removeInstalling: () => {},
 } );
@@ -45,25 +45,20 @@ export function SubscriptionsContextProvider( props: {
 			} );
 	};
 
-	const [ installing, setInstalling ] = useState< Array< string > >( [] );
-
-	const isInstalling = ( productKey: string ) => {
-		return installing.includes( productKey );
-	};
+	const [ installingProducts, setInstalling ] = useState< Array< string > >(
+		[]
+	);
 
 	const addInstalling = ( productKey: string ) => {
-		if ( isInstalling( productKey ) ) {
+		if ( installingProducts.includes( productKey ) ) {
 			return;
 		}
-		const newInstalling = [ ...installing, productKey ];
+		const newInstalling = [ ...installingProducts, productKey ];
 		setInstalling( newInstalling );
 	};
 
 	const removeInstalling = ( productKey: string ) => {
-		if ( ! isInstalling( productKey ) ) {
-			return;
-		}
-		const newInstalling = [ ...installing ];
+		const newInstalling = [ ...installingProducts ];
 		const index = newInstalling.indexOf( productKey );
 		if ( index > -1 ) {
 			newInstalling.splice( index, 1 );
@@ -81,7 +76,7 @@ export function SubscriptionsContextProvider( props: {
 		loadSubscriptions: () => loadSubscriptions(),
 		isLoading,
 		setIsLoading,
-		isInstalling,
+		installingProducts,
 		addInstalling,
 		removeInstalling,
 	};
