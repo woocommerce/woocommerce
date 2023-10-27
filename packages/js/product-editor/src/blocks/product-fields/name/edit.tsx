@@ -10,7 +10,6 @@ import {
 	useRef,
 } from '@wordpress/element';
 
-import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -120,20 +119,6 @@ export function Edit( {
 		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 2',
 		'Stay Cool and Stylish with our Unisex Beige Linen Jacket 3',
 	];
-	const suggestions2 = [ // TODO not working when object, for some reason
-		{
-			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket',
-			description: 'Engaging • Highlights benefits • Good SEO',
-		},
-		{
-			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket 2',
-			description: 'Engaging • Highlights benefits • Good SEO',
-		},
-		{
-			name: 'Stay Cool and Stylish with our Unisex Beige Linen Jacket 3',
-			description: 'Engaging • Highlights benefits • Good SEO',
-		},
-	];
 
 	const {
 		isOpen,
@@ -222,10 +207,12 @@ export function Edit( {
 						// value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						data-1p-ignore
 						{ ...inputProps }
-						onChange={ ( name: any ) => {
+						onChange={ ( changedName: string ) => {
 							if ( inputProps.onChange ) {
 								inputProps.onChange( {
-									target: { value: name },
+									// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+									// @ts-ignore No types for this exist yet.
+									target: { value: changedName },
 								} );
 							}
 						} }

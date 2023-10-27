@@ -6,11 +6,14 @@ import {
 	Fragment,
 	useState,
 	useLayoutEffect,
+	createInterpolateElement,
 } from '@wordpress/element';
 
 import classNames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { UseComboboxPropGetters } from 'downshift';
+import { Link } from '@woocommerce/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -75,9 +78,33 @@ export function AIPopover( {
 				<Button className="woocommerce-product-form-name-ai-suggestions__button">
 					<div className="woocommerce-product-form-name-ai-suggestions__flex">
 						<p>Get more suggestions</p>
-						<p className="woocommerce-product-form-name-ai-suggestions__item-description">
-							Powered by experimental AI
-						</p>
+						<div
+							style={ { display: 'flex', alignItems: 'center' } }
+						>
+							{ createInterpolateElement(
+								__( '<p/> <link/>', 'woocommerce' ),
+								{
+									p: (
+										<p className="woocommerce-product-form-name-ai-suggestions__item-description">
+											Powered by experimental AI.
+										</p>
+									),
+									link: (
+										<Link
+											href="https://automattic.com/ai-guidelines"
+											target="_blank"
+											rel="noopener noreferrer"
+											type="external"
+										>
+											{ __(
+												'Learn more',
+												'woocommerce'
+											) }
+										</Link>
+									),
+								}
+							) }
+						</div>
 					</div>
 				</Button>
 			</>
