@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useState, createContext, useEffect } from '@wordpress/element';
+import {
+	useState,
+	createContext,
+	useEffect,
+	useMemo,
+	useCallback,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,7 +22,7 @@ export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	loadSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
-	installingProducts: [],
+	isInstalling: () => false,
 	addInstalling: () => {},
 	removeInstalling: () => {},
 } );
@@ -49,37 +55,51 @@ export function SubscriptionsContextProvider( props: {
 		[]
 	);
 
-	const addInstalling = ( productKey: string ) => {
-		if ( installingProducts.includes( productKey ) ) {
-			return;
-		}
-		const newInstalling = [ ...installingProducts, productKey ];
-		setInstalling( newInstalling );
-	};
+	const isInstalling = useCallback(
+		( productKey: string ) => {
+			return installingProducts.includes( productKey );
+		},
+		[ installingProducts ]
+	);
+	const addInstalling = useCallback(
+		( productKey: string ) => {
+			setInstalling( [ ...installingProducts, productKey ] );
+		},
+		[ installingProducts ]
+	);
 
-	const removeInstalling = ( productKey: string ) => {
-		const newInstalling = [ ...installingProducts ];
-		const index = newInstalling.indexOf( productKey );
-		if ( index > -1 ) {
-			newInstalling.splice( index, 1 );
-		}
-		setInstalling( newInstalling );
-	};
+	const removeInstalling = useCallback(
+		( productKey: string ) => {
+			setInstalling(
+				installingProducts.filter( ( p ) => p !== productKey )
+			);
+		},
+		[ installingProducts ]
+	);
 
 	useEffect( () => {
 		loadSubscriptions( true );
 	}, [] );
 
-	const contextValue = {
-		subscriptions,
-		setSubscriptions,
-		loadSubscriptions: () => loadSubscriptions(),
-		isLoading,
-		setIsLoading,
-		installingProducts,
-		addInstalling,
-		removeInstalling,
-	};
+	const contextValue = useMemo(
+		() => ( {
+			subscriptions,
+			setSubscriptions,
+			loadSubscriptions,
+			isLoading,
+			setIsLoading,
+			isInstalling,
+			addInstalling,
+			removeInstalling,
+		} ),
+		[
+			subscriptions,
+			isLoading,
+			isInstalling,
+			addInstalling,
+			removeInstalling,
+		]
+	);
 
 	return (
 		<SubscriptionsContext.Provider value={ contextValue }>

@@ -3,7 +3,7 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useContext } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -20,15 +20,9 @@ interface InstallProps {
 export default function Install( props: InstallProps ) {
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
-	const {
-		loadSubscriptions,
-		installingProducts,
-		addInstalling,
-		removeInstalling,
-	} = useContext( SubscriptionsContext );
-	const loading = installingProducts.includes(
-		props.subscription.product_key
-	);
+	const { loadSubscriptions, isInstalling, addInstalling, removeInstalling } =
+		useContext( SubscriptionsContext );
+	const loading = isInstalling( props.subscription.product_key );
 
 	const install = () => {
 		addInstalling( props.subscription.product_key );
@@ -71,8 +65,8 @@ export default function Install( props: InstallProps ) {
 			} );
 	};
 
-	function installButtonLabel( isInstalling: boolean ) {
-		if ( isInstalling ) {
+	function installButtonLabel( installing: boolean ) {
+		if ( installing ) {
 			return __( 'Installing…', 'woocommerce' );
 		}
 
