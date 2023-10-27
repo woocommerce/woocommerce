@@ -280,7 +280,7 @@ const ProductPrice = ( {
 		console.error( 'Price formats need to include the `<price/>` tag.' );
 	}
 
-	const isDiscounted = regularPrice && price !== regularPrice;
+	const isDiscounted = regularPrice && price && price < regularPrice;
 	let priceComponent = (
 		<span
 			className={ classNames(
