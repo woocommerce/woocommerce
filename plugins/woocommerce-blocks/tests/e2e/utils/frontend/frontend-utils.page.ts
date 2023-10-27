@@ -50,6 +50,12 @@ export class FrontendUtils {
 		} );
 	}
 
+	async goToCart() {
+		await this.page.goto( '/cart', {
+			waitUntil: 'commit',
+		} );
+	}
+
 	async goToShop() {
 		await this.page.goto( '/shop', {
 			waitUntil: 'commit',
