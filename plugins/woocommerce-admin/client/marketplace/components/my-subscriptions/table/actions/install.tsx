@@ -22,12 +22,28 @@ export default function Install( props: InstallProps ) {
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
-	const { isInstalling, addInstalling, removeInstalling } =
+	const { installingProducts, setInstallingProducts } =
 		useContext( InstallContext );
-	const loading = isInstalling( props.subscription.product_key );
+	const loading = installingProducts.includes(
+		props.subscription.product_key
+	);
+
+	const startInstall = () => {
+		setInstallingProducts( [
+			...installingProducts,
+			props.subscription.product_key,
+		] );
+	};
+	const stopInstall = () => {
+		setInstallingProducts(
+			installingProducts.filter(
+				( productKey ) => productKey !== props.subscription.product_key
+			)
+		);
+	};
 
 	const install = () => {
-		addInstalling( props.subscription.product_key );
+		startInstall();
 		installProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
@@ -41,7 +57,7 @@ export default function Install( props: InstallProps ) {
 							icon: <Icon icon="yes" />,
 						}
 					);
-					removeInstalling( props.subscription.product_key );
+					stopInstall();
 				} );
 			} )
 			.catch( ( error ) => {
@@ -62,7 +78,7 @@ export default function Install( props: InstallProps ) {
 							},
 						],
 					} );
-					removeInstalling( props.subscription.product_key );
+					stopInstall();
 				} );
 			} );
 	};

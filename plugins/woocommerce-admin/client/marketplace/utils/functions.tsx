@@ -279,18 +279,17 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 		body: data,
 	} )
 		.then( () => Promise.resolve() )
-		.catch( ( error ) =>
+		.catch( () =>
 			Promise.reject( {
 				success: false,
 				data: {
 					message: sprintf(
-						/* translators: %s: product name, %s: error message */
+						// translators: %s is the product name.
 						__(
-							'%s could not be activated. Please activate it manually. $s',
+							'%s could not be activated. Please activate it manually.',
 							'woocommerce'
 						),
-						subscription.product_name,
-						error.data.message
+						subscription.product_name
 					),
 				},
 			} )

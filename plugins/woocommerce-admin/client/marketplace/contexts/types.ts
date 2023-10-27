@@ -20,7 +20,5 @@ export type SubscriptionsContextType = {
 
 export type InstallContextType = {
 	installingProducts: string[];
-	isInstalling: ( productKey: string ) => boolean;
-	addInstalling: ( productKey: string ) => void;
-	removeInstalling: ( productKey: string ) => void;
+	setInstallingProducts: ( products: string[] ) => void;
 };

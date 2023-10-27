@@ -17,6 +17,7 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
+import { InstallContextProvider } from '../../contexts/install-context';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -100,9 +101,11 @@ export default function Content(): JSX.Element {
 				return <Discover />;
 			case 'my-subscriptions':
 				return (
-					<SubscriptionsContextProvider>
-						<MySubscriptions />
-					</SubscriptionsContextProvider>
+					<InstallContextProvider>
+						<SubscriptionsContextProvider>
+							<MySubscriptions />
+						</SubscriptionsContextProvider>
+					</InstallContextProvider>
 				);
 			default:
 				return <></>;

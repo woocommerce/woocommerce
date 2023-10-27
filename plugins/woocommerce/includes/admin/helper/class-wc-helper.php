@@ -1545,6 +1545,9 @@ class WC_Helper {
 
 	/**
 	 * Add local data to a subscription.
+	 *
+	 * @param array $subscription The subscription data.
+	 * @return array The subscription data with local data added.
 	 */
 	public static function add_local_data_to_subscription( array $subscription ) {
 		$local_plugins = self::get_local_plugins();
@@ -1559,7 +1562,6 @@ class WC_Helper {
 		if ( empty( $local ) ) {
 			return $subscription;
 		}
-
 
 		$subscription['local'] = array(
 			'installed' => true,
