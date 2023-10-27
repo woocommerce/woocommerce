@@ -16,12 +16,16 @@ function useFocusedBlock() {
 			setFocusedElement( target.closest( '[data-block]' ) );
 		}
 
-		document.addEventListener( 'focus', handleFocus, {
+		const productEditorWrapper = document.querySelector(
+			'.woocommerce-product-block-editor'
+		) as HTMLElement | null;
+
+		productEditorWrapper?.addEventListener( 'focus', handleFocus, {
 			capture: true,
 		} );
 
 		return () => {
-			document.removeEventListener( 'focus', handleFocus, {
+			productEditorWrapper?.removeEventListener( 'focus', handleFocus, {
 				capture: true,
 			} );
 		};
@@ -45,10 +49,17 @@ export function BlockInspector() {
 		useFocusedBlock();
 
 	return (
-		<div>
-			<div>Block name: { blockName }</div>
-			<div>Template block id: { templateBlockId }</div>
-			<div>Template block order: { templateBlockOrder }</div>
+		<div className="woocommerce-product-editor-dev-tools-block-inspector">
+			<dl className="woocommerce-product-editor-dev-tools-block-inspector__properties">
+				<dt>Block name</dt>
+				<dd>{ blockName }</dd>
+
+				<dt>Template block id</dt>
+				<dd>{ templateBlockId }</dd>
+
+				<dt>Template block order</dt>
+				<dd>{ templateBlockOrder }</dd>
+			</dl>
 		</div>
 	);
 }

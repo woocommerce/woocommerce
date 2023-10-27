@@ -14,3 +14,30 @@
 .woocommerce-product-editor-dev-tools-bar__tabs {
 	flex: 1;
 }
+
+.woocommerce-product-editor-dev-tools-bar__panel {
+	padding: 16px;
+}
+
+.woocommerce-product-editor-dev-tools-block-inspector__properties {
+	display: grid;
+
+	grid-template-columns: auto 1fr;
+
+	column-gap: 16px;
+	row-gap: 4px;
+
+	dt {
+		margin: 0;
+
+		&::after {
+			content: ':';
+		}
+	}
+
+	dd {
+		margin: 0;
+
+		font-family: monospace;
+	}
+}

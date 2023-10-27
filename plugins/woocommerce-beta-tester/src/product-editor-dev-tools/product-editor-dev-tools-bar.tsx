@@ -54,7 +54,7 @@ export function ProductEditorDevToolsBar( {
 						/>
 					</div>
 				</div>
-				<div>
+				<div className="woocommerce-product-editor-dev-tools-bar__panel">
 					{ selectedTab === 'inspector' && <BlockInspector /> }
 					{ selectedTab === 'about' && (
 						<div>About developer tools</div>
