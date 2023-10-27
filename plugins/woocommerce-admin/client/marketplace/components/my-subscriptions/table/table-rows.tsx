@@ -10,15 +10,13 @@ import {
 	actions,
 	autoRenew,
 	expiry,
-	productName,
-	status,
+	nameAndStatus,
 	version,
 } from './rows/functions';
 
 export function availableSubscriptionRow( item: Subscription ): TableRow[] {
 	return [
-		productName( item ),
-		status( item ),
+		nameAndStatus( item ),
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),
@@ -28,8 +26,7 @@ export function availableSubscriptionRow( item: Subscription ): TableRow[] {
 
 export function installedSubscriptionRow( item: Subscription ): TableRow[] {
 	return [
-		productName( item ),
-		status( item ),
+		nameAndStatus( item ),
 		expiry( item ),
 		autoRenew( item ),
 		version( item ),

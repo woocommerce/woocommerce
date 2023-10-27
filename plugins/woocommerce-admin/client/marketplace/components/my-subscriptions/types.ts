@@ -8,6 +8,7 @@ export type Subscription = {
 	product_type: string;
 	documentation_url: string;
 	zip_slug: string;
+	documentation_url: string;
 	key_type: string;
 	key_type_label: string;
 	autorenew: boolean;
