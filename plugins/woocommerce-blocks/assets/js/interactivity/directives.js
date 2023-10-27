@@ -74,6 +74,16 @@ export default () => {
 		}
 	);
 
+	// data-wc-init--[name]
+	directive( 'init', ( { directives: { init }, context, evaluate } ) => {
+		const contextValue = useContext( context );
+		Object.values( init ).forEach( ( path ) => {
+			useEffect( () => {
+				return evaluate( path, { context: contextValue } );
+			}, [] );
+		} );
+	} );
+
 	// data-wc-on--[event]
 	directive( 'on', ( { directives: { on }, element, evaluate, context } ) => {
 		const contextValue = useContext( context );
