@@ -11,13 +11,31 @@
 .woocommerce-product-editor-dev-tools-bar__header {
 	display: flex;
 
+	border-bottom: 1px solid white;
+
 	.components-button {
 		color: white;
+
+		&:focus:not(:disabled) {
+			outline: 0;
+			box-shadow: none;
+		}
 	}
 }
 
 .woocommerce-product-editor-dev-tools-bar__tabs {
 	flex: 1;
+}
+
+.woocommerce-product-editor-dev-tools-bar__tab-button {
+	margin: 0 8px;
+	padding: 0;
+
+	border-bottom: 3.5px solid transparent;
+
+	&[aria-selected='true'] {
+		border-color: var(--wp-admin-theme-color);
+	}
 }
 
 .woocommerce-product-editor-dev-tools-bar__panel {
