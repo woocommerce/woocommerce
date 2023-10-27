@@ -239,7 +239,7 @@ class Settings {
 
 		$settings['isWooPayEligible'] = WCPayPromotionInit::is_woopay_eligible();
 
-		$settings['gutenberg_version']	= defined( 'GUTENBERG_VERSION' ) ? constant('GUTENBERG_VERSION') : 0;
+		$settings['gutenberg_version'] = defined( 'GUTENBERG_VERSION' ) ? constant( 'GUTENBERG_VERSION' ) : 0;
 
 		return $settings;
 	}
