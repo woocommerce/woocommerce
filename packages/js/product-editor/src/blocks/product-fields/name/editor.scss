@@ -56,4 +56,19 @@
 	&__highlighted {
 		font-weight: bold;
 	}
+	&__button {
+		width: 100%;
+		margin: 0;
+		&:hover,
+		&:focus-within {
+			outline: 1.5px solid var( --wp-admin-theme-color );
+			outline-offset: -1.5px;
+			background-color: $gray-100;
+		}
+	}
+	&__flex {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+	}
 }
