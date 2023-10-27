@@ -55,51 +55,32 @@ export function SubscriptionsContextProvider( props: {
 		[]
 	);
 
-	const isInstalling = useCallback(
-		( productKey: string ) => {
-			return installingProducts.includes( productKey );
-		},
-		[ installingProducts ]
-	);
-	const addInstalling = useCallback(
-		( productKey: string ) => {
-			setInstalling( [ ...installingProducts, productKey ] );
-		},
-		[ installingProducts ]
-	);
+	const isInstalling = ( productKey: string ) => {
+		console.debug( productKey, installingProducts );
+		return installingProducts.includes( productKey );
+	};
+	const addInstalling = ( productKey: string ) => {
+		setInstalling( [ ...installingProducts, productKey ] );
+	};
 
-	const removeInstalling = useCallback(
-		( productKey: string ) => {
-			setInstalling(
-				installingProducts.filter( ( p ) => p !== productKey )
-			);
-		},
-		[ installingProducts ]
-	);
+	const removeInstalling = ( productKey: string ) => {
+		setInstalling( installingProducts.filter( ( p ) => p !== productKey ) );
+	};
 
 	useEffect( () => {
 		loadSubscriptions( true );
 	}, [] );
 
-	const contextValue = useMemo(
-		() => ( {
-			subscriptions,
-			setSubscriptions,
-			loadSubscriptions,
-			isLoading,
-			setIsLoading,
-			isInstalling,
-			addInstalling,
-			removeInstalling,
-		} ),
-		[
-			subscriptions,
-			isLoading,
-			isInstalling,
-			addInstalling,
-			removeInstalling,
-		]
-	);
+	const contextValue = {
+		subscriptions,
+		setSubscriptions,
+		loadSubscriptions,
+		isLoading,
+		setIsLoading,
+		isInstalling,
+		addInstalling,
+		removeInstalling,
+	};
 
 	return (
 		<SubscriptionsContext.Provider value={ contextValue }>

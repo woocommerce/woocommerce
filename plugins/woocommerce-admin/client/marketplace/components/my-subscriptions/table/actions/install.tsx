@@ -12,6 +12,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { installProduct } from '../../../../utils/functions';
 import { Subscription } from '../../types';
+import { InstallContext } from '../../../../contexts/install-context';
 
 interface InstallProps {
 	subscription: Subscription;
@@ -20,8 +21,9 @@ interface InstallProps {
 export default function Install( props: InstallProps ) {
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
-	const { loadSubscriptions, isInstalling, addInstalling, removeInstalling } =
-		useContext( SubscriptionsContext );
+	const { loadSubscriptions } = useContext( SubscriptionsContext );
+	const { isInstalling, addInstalling, removeInstalling } =
+		useContext( InstallContext );
 	const loading = isInstalling( props.subscription.product_key );
 
 	const install = () => {

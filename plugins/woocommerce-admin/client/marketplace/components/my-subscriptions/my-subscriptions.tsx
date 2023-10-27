@@ -22,6 +22,7 @@ import {
 	installedSubscriptionRow,
 } from './table/table-rows';
 import { Subscription } from './types';
+import { InstallContextProvider } from '../../contexts/install-context';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -134,12 +135,14 @@ export default function MySubscriptions(): JSX.Element {
 						'woocommerce'
 					) }
 				</p>
-				<AvailableSubscriptionsTable
-					isLoading={ isLoading }
-					rows={ subscriptionsAvailable.map( ( item ) => {
-						return availableSubscriptionRow( item );
-					} ) }
-				/>
+				<InstallContextProvider>
+					<AvailableSubscriptionsTable
+						isLoading={ isLoading }
+						rows={ subscriptionsAvailable.map( ( item ) => {
+							return availableSubscriptionRow( item );
+						} ) }
+					/>
+				</InstallContextProvider>
 			</section>
 
 			<section>
