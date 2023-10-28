@@ -139,6 +139,28 @@ class File {
 	}
 
 	/**
+	 * Get the file's public ID.
+	 *
+	 * The file ID is the basename of the file without the hash part. It allows us to identify a file without revealing
+	 * its full name in the filesystem, so that it's difficult to access the file directly with an HTTP request.
+	 *
+	 * @return string
+	 */
+	public function get_file_id(): string {
+		$file_id = $this->get_source();
+
+		if ( ! is_null( $this->get_rotation() ) ) {
+			$file_id .= '.' . $this->get_rotation();
+		}
+
+		if ( $this->get_source() !== $this->get_hash() ) {
+			$file_id .= '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
+		}
+
+		return $file_id;
+	}
+
+	/**
 	 * Get the file's created property.
 	 *
 	 * @return int|false

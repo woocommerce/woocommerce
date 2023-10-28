@@ -57,9 +57,9 @@ class FileController {
 		$args = wp_parse_args( $args, self::DEFAULTS_GET_FILES );
 
 		$pattern = $args['source'] . '*.log';
-		$files   = glob( $this->log_directory . $pattern );
+		$paths   = glob( $this->log_directory . $pattern );
 
-		if ( false === $files ) {
+		if ( false === $paths ) {
 			return new WP_Error(
 				'wc_log_directory_error',
 				__( 'Could not access the log file directory.', 'woocommerce' )
@@ -67,20 +67,10 @@ class FileController {
 		}
 
 		if ( true === $count_only ) {
-			return count( $files );
+			return count( $paths );
 		}
 
-		$files = array_map(
-			function( $file_path ) {
-				if ( ! is_readable( $file_path ) ) {
-					return null;
-				}
-
-				return new File( $file_path );
-			},
-			$files
-		);
-		$files = array_filter( $files );
+		$files = $this->convert_paths_to_objects( $paths );
 
 		$multi_sorter = function( $sort_sets, $order_sets ) {
 			$comparison = 0;
@@ -156,13 +146,56 @@ class FileController {
 	}
 
 	/**
+	 * Get one or more File instances from an array of file IDs.
+	 *
+	 * @param array $file_ids An array of file IDs (file basename without the hash).
+	 *
+	 * @return File[]
+	 */
+	public function get_files_by_id( array $file_ids ): array {
+		$paths = array();
+
+		foreach ( $file_ids as $file_id ) {
+			$glob = glob( $this->log_directory . $file_id . '*.log' );
+
+			$paths = array_merge( $paths, $glob );
+		}
+
+		$files = $this->convert_paths_to_objects( $paths );
+
+		return $files;
+	}
+
+	/**
+	 * Helper method to get an array of File instances.
+	 *
+	 * @param array $paths An array of absolute file paths.
+	 *
+	 * @return File[]
+	 */
+	private function convert_paths_to_objects( array $paths ): array {
+		$files = array_map(
+			function( $path ) {
+				if ( ! is_readable( $path ) ) {
+					return null;
+				}
+
+				return new File( $path );
+			},
+			$paths
+		);
+
+		return array_filter( $files );
+	}
+
+	/**
 	 * Get a list of sources for existing log files.
 	 *
 	 * @return array|WP_Error
 	 */
 	public function get_file_sources() {
-		$files = glob( $this->log_directory . '*.log' );
-		if ( false === $files ) {
+		$paths = glob( $this->log_directory . '*.log' );
+		if ( false === $paths ) {
 			return new WP_Error(
 				'wc_log_directory_error',
 				__( 'Could not access the log file directory.', 'woocommerce' )
@@ -174,7 +207,7 @@ class FileController {
 				$file = new File( $path );
 				return $file->get_source();
 			},
-			$files
+			$paths
 		);
 
 		return array_unique( $all_sources );
@@ -183,15 +216,15 @@ class FileController {
 	/**
 	 * Delete one or more files from the filesystem.
 	 *
-	 * @param array $files An array of file basenames (filename without the path).
+	 * @param array $file_ids An array of file IDs (file basename without the hash).
 	 *
 	 * @return int
 	 */
-	public function delete_files( array $files ): int {
+	public function delete_files( array $file_ids ): int {
 		$deleted = 0;
 
-		foreach ( $files as $basename ) {
-			$file   = new File( $this->log_directory . $basename );
+		$files = $this->get_files_by_id( $file_ids );
+		foreach ( $files as $file ) {
 			$result = $file->delete();
 
 			if ( true === $result ) {
