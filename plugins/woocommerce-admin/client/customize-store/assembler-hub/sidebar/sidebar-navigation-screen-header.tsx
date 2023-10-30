@@ -16,6 +16,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+import { parse } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -28,6 +29,8 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { findPatternByBlock } from './utils';
+import { useLogoAttributes } from '../hooks/use-logo-attributes';
+import { setLogoWidth } from '../../utils';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
@@ -49,6 +52,7 @@ export const SidebarNavigationScreenHeader = () => {
 	);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
+	const { attributes } = useLogoAttributes();
 
 	useEffect( () => {
 		setHighlightedBlockIndex( 0 );
@@ -81,16 +85,23 @@ export const SidebarNavigationScreenHeader = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
-
 	const onClickHeaderPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern ) => {
 			setSelectedPattern( pattern );
-			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
+			const parsedBlocks = parse(
+				// Set the logo width to the current logo width so that user changes are not lost.
+				setLogoWidth( pattern.content, attributes.width ),
+				// @ts-ignore - Passing options is valid, but not in the type.
+				{
+					__unstableSkipMigrationLogs: true,
+				}
+			);
+			onChange( [ parsedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
 			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern, scroll ]
+		[ blocks, onChange, setSelectedPattern, scroll, attributes ]
 	);
 
 	return (

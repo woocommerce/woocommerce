@@ -14,7 +14,7 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-
+import { parse } from '@wordpress/blocks';
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
@@ -29,6 +29,8 @@ import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
+import { useLogoAttributes } from '../hooks/use-logo-attributes';
+import { setLogoWidth } from '../../utils';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu-and-cart',
@@ -49,6 +51,7 @@ export const SidebarNavigationScreenFooter = () => {
 	);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
+	const { attributes } = useLogoAttributes();
 
 	useEffect( () => {
 		if ( blocks && blocks.length ) {
@@ -85,14 +88,22 @@ export const SidebarNavigationScreenFooter = () => {
 	}, [ blocks, footerPatterns ] );
 
 	const onClickFooterPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern ) => {
 			setSelectedPattern( pattern );
-			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
+			const parsedBlocks = parse(
+				// Set the logo width to the current logo width so that user changes are not lost.
+				setLogoWidth( pattern.content, attributes.width ),
+				// @ts-ignore - Passing options is valid, but not in the type.
+				{
+					__unstableSkipMigrationLogs: true,
+				}
+			);
+			onChange( [ ...blocks.slice( 0, -1 ), parsedBlocks[ 0 ] ], {
 				selection: {},
 			} );
 			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern, scroll ]
+		[ blocks, onChange, setSelectedPattern, scroll, attributes ]
 	);
 
 	return (
