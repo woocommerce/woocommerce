@@ -18,4 +18,4 @@ jobs:
       - name: Run plugin check
         uses: swissspidy/wp-plugin-check-action@main
         with:
-            build-dir: $GITHUB_WORKSPACE/plugins/woocommerce
+            build-dir: ./plugins/woocommerce
