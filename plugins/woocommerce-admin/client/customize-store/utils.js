@@ -63,6 +63,7 @@ export function attachIframeListeners( iframe ) {
 
 	// Listen for pushstate event
 	if ( iframeWindow?.history ) {
+		const originalPushState = iframeWindow.history.pushState;
 		iframeWindow.history.pushState = function ( state, title, url ) {
 			const urlString = url?.toString();
 			if ( urlString ) {
@@ -71,6 +72,7 @@ export function attachIframeListeners( iframe ) {
 					window.location.href = urlString;
 				} else {
 					window.history.pushState( state, title, url ); // Update the main window's history
+					originalPushState( state, title, url );
 				}
 			}
 		};
