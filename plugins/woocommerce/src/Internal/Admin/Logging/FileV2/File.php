@@ -103,6 +103,24 @@ class File {
 	}
 
 	/**
+	 * Check if the file represented by the class instance is a file and is readable.
+	 *
+	 * @return bool
+	 */
+	public function is_readable(): bool {
+		return is_file( $this->path ) && is_readable( $this->path );
+	}
+
+	/**
+	 * Check if the file represented by the class instance is a file and is writable.
+	 *
+	 * @return bool
+	 */
+	public function is_writable(): bool {
+		return is_file( $this->path ) && is_writable( $this->path );
+	}
+
+	/**
 	 * Get the name of the file, with extension, but without full path.
 	 *
 	 * @return string

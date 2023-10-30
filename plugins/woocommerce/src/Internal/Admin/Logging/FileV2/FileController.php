@@ -176,11 +176,8 @@ class FileController {
 	private function convert_paths_to_objects( array $paths ): array {
 		$files = array_map(
 			function( $path ) {
-				if ( ! is_readable( $path ) ) {
-					return null;
-				}
-
-				return new File( $path );
+				$file = new File( $path );
+				return $file->is_readable() ? $file : null;
 			},
 			$paths
 		);
@@ -205,12 +202,12 @@ class FileController {
 		$all_sources = array_map(
 			function( $path ) {
 				$file = new File( $path );
-				return $file->get_source();
+				return $file->is_readable() ? $file->get_source() : null;
 			},
 			$paths
 		);
 
-		return array_unique( $all_sources );
+		return array_unique( array_filter( $all_sources ) );
 	}
 
 	/**
@@ -225,7 +222,10 @@ class FileController {
 
 		$files = $this->get_files_by_id( $file_ids );
 		foreach ( $files as $file ) {
-			$result = $file->delete();
+			$result = false;
+			if ( $file->is_readable() ) {
+				$result = $file->delete();
+			}
 
 			if ( true === $result ) {
 				$deleted ++;
