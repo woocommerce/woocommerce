@@ -95,7 +95,13 @@ export function AIPopover( {
 					} }
 				>
 					<div className="woocommerce-product-form-name-ai-suggestions__flex">
-						<p>Get more suggestions</p>
+						<div
+							style={ { display: 'flex', alignItems: 'center' } }
+						>
+							<p style={ { marginTop: 0, marginBottom: 0 } }>
+								Get more suggestions
+							</p>
+						</div>
 						<div
 							style={ { display: 'flex', alignItems: 'center' } }
 						>
