@@ -1784,7 +1784,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->get_fees(),
 			function( $carry, $item ) {
 				return $carry + (float) $item->get_total();
-			}
+			},
+			0.0
 		);
 	}
 
