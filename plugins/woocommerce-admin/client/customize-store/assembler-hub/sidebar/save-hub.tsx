@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { useContext, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -25,6 +25,8 @@ import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
 import { recordEvent } from '@woocommerce/tracks';
+// @ts-ignore No types for this exist yet.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
@@ -38,6 +40,7 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 		name: 'wp_navigation',
 	},
 ];
+let hasSavedOnLoaded = false;
 
 export const SaveHub = () => {
 	const urlParams = useQuery();
@@ -47,6 +50,7 @@ export const SaveHub = () => {
 	const { resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
+	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
@@ -117,6 +121,19 @@ export const SaveHub = () => {
 		}
 	};
 
+	// Trigger a save when the editor is loaded. This is needed to ensure FE is displayed correctly	because some patterns have dynamic attributes that only generate in Editor.
+	useEffect( () => {
+		if ( isEditorLoading || hasSavedOnLoaded ) {
+			return;
+		}
+
+		save();
+		hasSavedOnLoaded = true;
+
+		// We only want to run this effect once when the editor is loaded so we can ignore the dependencies.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ isEditorLoading ] );
+
 	const onClickSaveButton = async () => {
 		const source = `${ urlParams.path.replace(
 			'/customize-store/assembler-hub/',
@@ -159,7 +176,7 @@ export const SaveHub = () => {
 					variant="primary"
 					onClick={ onDone }
 					className="edit-site-save-hub__button"
-					disabled={ isResolving }
+					disabled={ isResolving || isEditorLoading }
 					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
