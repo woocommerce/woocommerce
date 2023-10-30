@@ -690,3 +690,11 @@
 		box-shadow: none;
 	}
 }
+
+.woocommerce-customize-store {
+	.block-editor-color-gradient-control {
+		.components-circular-option-picker {
+			display: none;
+		}
+	}
+}
