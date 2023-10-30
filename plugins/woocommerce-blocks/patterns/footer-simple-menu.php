@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: Footer with Simple Menu and Cart
- * Slug: woocommerce-blocks/footer-simple-menu-and-cart
+ * Title: Footer with Simple Menu
+ * Slug: woocommerce-blocks/footer-simple-menu
  * Categories: WooCommerce
  * Block Types: core/template-part/footer
  */
