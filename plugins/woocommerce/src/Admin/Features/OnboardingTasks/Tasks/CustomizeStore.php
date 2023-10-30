@@ -99,7 +99,7 @@ class CustomizeStore extends Task {
 			isset( $_GET['page'] ) &&
 			'wc-admin' === $_GET['page'] &&
 			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' )
+			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
 		);
 		if ( ! $is_assembler_hub ) {
 			return;
