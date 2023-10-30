@@ -1,5 +1,12 @@
 # Adding an endpoint to ExtendSchema <!-- omit in toc -->
 
+## Table of contents <!-- omit in toc -->
+
+-   [Extending `GET` endpoints in Store API](#extending-get-endpoints-in-store-api)
+-   [Use cases for adding new endpoints](#use-cases-for-adding-new-endpoints)
+    -   [Extending an existing schema](#extending-an-existing-schema)
+    -   [Adding a new schema](#adding-a-new-schema)
+
 This document is intended for internal developers of the WooCommerce Blocks plugin. If you feel like a new endpoint should be added, feel free to open an issue or a PR detailing why.
 
 ## Extending `GET` endpoints in Store API
@@ -40,6 +47,16 @@ That's it, your endpoint would now contain `extensions` in your endpoint, and yo
 
 Extending a new endpoint is usually half the work, you will need to receive this data in the frontend and pass it to any other extensibility point (Slot, Filter, Event).
 
+## Use cases for adding new endpoints
+
+### Extending an existing schema
+
+There might be a case when you want to extend an existing schema, for example, you want to add `order_number` to the checkout endpoint. In [Add order number to checkout schema](https://github.com/woocommerce/woocommerce-blocks/pull/9927/) we did that.
+
+### Adding a new schema
+
+There might be a case when you want to add a new schema, for example, you need a new endpoint that do not exist in the Store API yet, e.g. `wc/store/order`. In [Add an endpoint for getting pay for order orders](https://github.com/woocommerce/woocommerce-blocks/pull/10199/) we did that.
+
 <!-- FEEDBACK -->
 
 ---
@@ -49,4 +66,3 @@ Extending a new endpoint is usually half the work, you will need to receive this
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/rest-api/extend-rest-api-new-endpoint.md)
 
 <!-- /FEEDBACK -->
-
