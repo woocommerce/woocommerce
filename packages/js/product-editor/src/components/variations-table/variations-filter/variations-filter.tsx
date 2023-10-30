@@ -64,16 +64,15 @@ export function VariationsFilter( {
 
 			const sharedRequestArgs = {
 				attribute_id: attributeId,
+				hide_empty: true,
+				per_page: DEFAULT_TERMS_PER_PAGE,
+				page,
 				search,
 			};
 
 			const terms = await getProductAttributeTerms<
 				ProductAttributeTerm[]
-			>( {
-				...sharedRequestArgs,
-				page,
-				per_page: DEFAULT_TERMS_PER_PAGE,
-			} );
+			>( sharedRequestArgs );
 
 			const totalTerms =
 				await getProductAttributeTermsTotalCount< number >(
@@ -92,11 +91,17 @@ export function VariationsFilter( {
 		}
 	}
 
-	useEffect( () => {
-		fetchOptions( attribute.id );
-	}, [ attribute.id ] );
-
 	useEffect( () => setSelection( initialValues ), [ initialValues ] );
+
+	function dropdownToggleHandler( isOpen: boolean, onToggle: () => void ) {
+		return async function handleClick() {
+			onToggle();
+
+			if ( ! isOpen ) {
+				await fetchOptions( attribute.id );
+			}
+		};
+	}
 
 	async function handleScroll( event: UIEvent< HTMLDivElement > ) {
 		if ( isLoading || options.length >= totalOptions ) return;
@@ -168,6 +173,8 @@ export function VariationsFilter( {
 	const handleInputControlChange = useDebounce(
 		function handleInputControlChange( value: string ) {
 			setSearch( value );
+			setOptions( [] );
+			setCurrentPage( 1 );
 
 			fetchOptions( attribute.id, value );
 		},
@@ -188,7 +195,7 @@ export function VariationsFilter( {
 					aria-expanded={ isOpen }
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="tertiary"
-					onClick={ onToggle }
+					onClick={ dropdownToggleHandler( isOpen, onToggle ) }
 					className="woocommerce-product-variations-filter__toggle"
 				>
 					<span>
@@ -206,7 +213,8 @@ export function VariationsFilter( {
 					onSubmit={ submitHandler( onClose ) }
 					onReset={ resetHandler() }
 				>
-					{ totalOptions > MIN_OPTIONS_COUNT_FOR_SEARCHING && (
+					{ attribute.options.length >
+						MIN_OPTIONS_COUNT_FOR_SEARCHING && (
 						<div className="woocommerce-product-variations-filter__form-header">
 							<label
 								htmlFor={ searchInputId }
