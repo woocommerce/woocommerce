@@ -302,6 +302,7 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		$is_on_sale          = $query['woocommerceOnSale'] ?? false;
+		$product_attributes  = $query['woocommerceAttributes'] ?? [];
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? [] );
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? [];
 
@@ -311,7 +312,7 @@ class ProductCollection extends AbstractBlock {
 				'on_sale'             => $is_on_sale,
 				'stock_status'        => $query['woocommerceStockStatus'],
 				'orderby'             => $query['orderBy'],
-				'product_attributes'  => $query['woocommerceAttributes'],
+				'product_attributes'  => $product_attributes,
 				'taxonomies_query'    => $taxonomies_query,
 				'handpicked_products' => $handpicked_products,
 			),
