@@ -1,5 +1,9 @@
+const rulesDirPlugin = require( 'eslint-plugin-rulesdir' );
+rulesDirPlugin.RULES_DIR = `${ __dirname }/wc-blocks-eslint-rules`;
+
 const config = {
 	extends: [ '../../.eslintrc.js', 'plugin:playwright/recommended' ],
+	plugins: [ 'rulesdir' ],
 	rules: {
 		'playwright/expect-expect': 'error',
 		'playwright/max-nested-describe': 'error',
@@ -18,6 +22,7 @@ const config = {
 		'playwright/no-wait-for-timeout': 'error',
 		'playwright/prefer-web-first-assertions': 'error',
 		'playwright/valid-expect': 'error',
+		'rulesdir/no-raw-playwright-test-import': 'error',
 	},
 };
 
