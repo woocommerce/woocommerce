@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { FormEvent, KeyboardEvent, UIEvent, useEffect } from 'react';
+import { FormEvent, KeyboardEvent, UIEvent, useEffect, useMemo } from 'react';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
@@ -187,6 +187,16 @@ export function VariationsFilter( {
 		'checkbox'
 	) as string;
 
+	const selectedOptionNames = useMemo(
+		() =>
+			options
+				.filter( ( option ) =>
+					selection.some( ( slug ) => option.slug === slug )
+				)
+				.map( ( option ) => option.name ),
+		[ options, selection ]
+	);
+
 	return (
 		<Dropdown
 			className="woocommerce-product-variations-filter"
@@ -199,10 +209,13 @@ export function VariationsFilter( {
 					className="woocommerce-product-variations-filter__toggle"
 				>
 					<span>
-						{ sprintf(
-							__( 'Any %s', 'woocommerce' ),
-							attribute.name
-						) }
+						{ selectedOptionNames.length > 0
+							? selectedOptionNames.join( ', ' )
+							: sprintf(
+									// translators: %s is the attribute name to filter by
+									__( 'Any %s', 'woocommerce' ),
+									attribute.name
+							  ) }
 					</span>
 				</Button>
 			) }
