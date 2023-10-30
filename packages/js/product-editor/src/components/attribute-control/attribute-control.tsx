@@ -60,6 +60,7 @@ type AttributeControlProps = {
 		newAttributeListItemLabel?: string;
 		newAttributeModalTitle?: string;
 		newAttributeModalDescription?: string | React.ReactElement;
+		newAttributeModalNotice?: string;
 		customAttributeHelperMessage?: string;
 		attributeRemoveLabel?: string;
 		attributeRemoveConfirmationMessage?: string;
