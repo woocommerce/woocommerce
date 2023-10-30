@@ -76,7 +76,18 @@ export function AIPopover( {
 						</li>
 					) ) }
 				</ul>
-				<Button className="woocommerce-product-form-name-ai-suggestions__button">
+				<Button
+					{ ...getItemProps( {
+						// workaround for now
+						item: {
+							content: 'get_more_suggestions',
+							reason: '',
+						},
+						index: items.length + 1,
+						className:
+							'woocommerce-product-form-name-ai-suggestions__button',
+					} ) }
+				>
 					<div className="woocommerce-product-form-name-ai-suggestions__flex">
 						<p>Get more suggestions</p>
 						<div
