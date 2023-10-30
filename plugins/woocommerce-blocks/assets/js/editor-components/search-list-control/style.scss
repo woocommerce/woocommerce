@@ -52,6 +52,12 @@
 			}
 		}
 	}
+
+	.woocommerce-search-list__list {
+		// Here to increase specificity compared to default editor styles
+		// wrapping `ul`s and `ol`s.
+		padding-left: 0;
+	}
 }
 
 .woocommerce-search-list__selected {
@@ -98,6 +104,7 @@
 	border: 1px solid $gray-200;
 	margin: 0;
 	padding: 0;
+	list-style: none;
 	max-height: 17em;
 	overflow-x: hidden;
 	overflow-y: auto;
