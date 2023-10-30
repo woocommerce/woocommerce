@@ -915,8 +915,8 @@
                 style.zIndex = 1;
               }
 
-              // Wait a frame: every opacity change before this.offsetWidth does NOT get
-              // animated; but every opacity change after this.offsetWidth gets animated
+              // this.offsetWidth waits a frame - thus, "style.opacity = 0" before this.offsetWidth
+              // does NOT get animated and "style.opacity = 1" after this.offsetWidth gets animated
               this.offsetWidth;
               if (index === slider.currentSlide && fadeFirstSlide) style.opacity = 1; // fadeIn
 
