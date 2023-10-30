@@ -80,7 +80,7 @@ If you’re developing an extension that allows merchants to upload 360 images o
 * Setting up social channels in the Visibility section in the General tab
 * Changing the VAT tax settings in the Pricing tab
 
-# Subgroups
+### Subgroups
 
 Subgroups are significant parts of the form that may consist of multiple groups and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
