@@ -2030,7 +2030,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_total' ) ) ) {
 			// Check if we need to add line tax to the line total.
-			$total = $inc_tax ? $item->get_total() + $item->get_total_tax() : $item->get_total();
+			$total = $inc_tax ? floatval( $item->get_total() ) + floatval( $item->get_total_tax() ) : floatval( $item->get_total() );
 
 			// Check if we need to round.
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
