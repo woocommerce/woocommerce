@@ -259,8 +259,8 @@ class ListTable extends WP_List_Table {
 		$log_file        = $item->get_file_id();
 		$single_file_url = add_query_arg(
 			array(
-				'view'     => 'single_file',
-				'log_file' => $log_file,
+				'view'    => 'single_file',
+				'file_id' => $log_file,
 			),
 			$this->page_controller->get_logs_tab_url()
 		);

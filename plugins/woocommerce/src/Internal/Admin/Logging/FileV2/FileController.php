@@ -167,6 +167,26 @@ class FileController {
 	}
 
 	/**
+	 * Get a File instance from a file ID.
+	 *
+	 * @param string $file_id A file ID (file basename without the hash).
+	 *
+	 * @return File|WP_Error
+	 */
+	public function get_file_by_id( string $file_id ) {
+		$result = $this->get_files_by_id( array( $file_id ) );
+
+		if ( count( $result ) < 1 ) {
+			return new WP_Error(
+				'wc_log_file_error',
+				esc_html__( 'Could not read the specified file.', 'woocommerce' )
+			);
+		}
+
+		return reset( $result );
+	}
+
+	/**
 	 * Helper method to get an array of File instances.
 	 *
 	 * @param array $paths An array of absolute file paths.

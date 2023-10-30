@@ -124,7 +124,7 @@ class PageController {
 				$this->render_file_list_page( $params );
 				break;
 			case 'single_file':
-				WC_Admin_Status::status_logs_file();
+				$this->render_single_file_page( $params );
 				break;
 		}
 	}
@@ -132,7 +132,7 @@ class PageController {
 	/**
 	 * Render the file list view.
 	 *
-	 * @param array $params Args for rendering the views.
+	 * @param array $params Args for rendering the view.
 	 *
 	 * @return void
 	 */
@@ -141,7 +141,7 @@ class PageController {
 
 		?>
 		<h2>
-			<?php esc_html_e( 'Log files', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
 		</h2>
 		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
@@ -162,12 +162,49 @@ class PageController {
 	}
 
 	/**
+	 * Render the single file view.
+	 *
+	 * @param array $params Args for rendering the view.
+	 *
+	 * @return void
+	 */
+	private function render_single_file_page( array $params ): void {
+		$file = $this->file_controller->get_file_by_id( $params['file_id'] );
+
+		if ( is_wp_error( $file ) ) {
+			?>
+			<div class="notice notice-error notice-inline">
+				<p>
+					<?php echo wp_kses_post( $file->get_error_message() ); ?>
+				</p>
+			</div>
+			<?php
+
+			return;
+		}
+
+		?>
+		<h2>
+			<?php
+			printf(
+				// translators: %s is the name of a log file.
+				esc_html__( 'Viewing log file %s', 'woocommerce' ),
+				esc_html( $file->get_file_id() )
+			);
+			?>
+		</h2>
+
+		<?php
+	}
+
+	/**
 	 * Get the default values for URL query params for FileV2 views.
 	 *
 	 * @return string[]
 	 */
 	public function get_query_param_defaults(): array {
 		return array(
+			'file_id' => '',
 			'order'   => $this->file_controller::DEFAULTS_GET_FILES['order'],
 			'orderby' => $this->file_controller::DEFAULTS_GET_FILES['orderby'],
 			'source'  => $this->file_controller::DEFAULTS_GET_FILES['source'],
@@ -185,11 +222,17 @@ class PageController {
 		$params   = filter_input_array(
 			INPUT_GET,
 			array(
-				'view'    => array(
+				'file_id' => array(
+					'filter'  => FILTER_CALLBACK,
+					'options' => function( $file_id ) {
+						return sanitize_file_name( $file_id );
+					},
+				),
+				'order'   => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
-						'regexp'  => '/^(list_files|single_file)$/',
-						'default' => $defaults['view'],
+						'regexp'  => '/^(asc|desc)$/i',
+						'default' => $defaults['order'],
 					),
 				),
 				'orderby' => array(
@@ -199,18 +242,18 @@ class PageController {
 						'default' => $defaults['orderby'],
 					),
 				),
-				'order'   => array(
-					'filter'  => FILTER_VALIDATE_REGEXP,
-					'options' => array(
-						'regexp'  => '/^(asc|desc)$/i',
-						'default' => $defaults['order'],
-					),
-				),
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $source ) {
 						return $this->file_controller->sanitize_source( wp_unslash( $source ) );
 					},
+				),
+				'view'    => array(
+					'filter'  => FILTER_VALIDATE_REGEXP,
+					'options' => array(
+						'regexp'  => '/^(list_files|single_file)$/',
+						'default' => $defaults['view'],
+					),
 				),
 			),
 			false
