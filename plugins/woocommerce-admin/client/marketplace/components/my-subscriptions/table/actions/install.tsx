@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -12,7 +12,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { installProduct } from '../../../../utils/functions';
 import { Subscription } from '../../types';
-import { InstallContext } from '../../../../contexts/install-context';
+import { installingStore } from '../../../../contexts/install-store';
 
 interface InstallProps {
 	subscription: Subscription;
@@ -22,23 +22,24 @@ export default function Install( props: InstallProps ) {
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
-	const { installingProducts, setInstallingProducts } =
-		useContext( InstallContext );
-	const loading = installingProducts.includes(
-		props.subscription.product_key
+
+	const loading: boolean = useSelect(
+		( select ) => {
+			return select( installingStore ).isInstalling(
+				props.subscription.product_key
+			);
+		},
+		[ props.subscription.product_key ]
 	);
 
 	const startInstall = () => {
-		setInstallingProducts( [
-			...installingProducts,
-			props.subscription.product_key,
-		] );
+		dispatch( installingStore ).startInstalling(
+			props.subscription.product_key
+		);
 	};
 	const stopInstall = () => {
-		setInstallingProducts(
-			installingProducts.filter(
-				( productKey ) => productKey !== props.subscription.product_key
-			)
+		dispatch( installingStore ).stopInstalling(
+			props.subscription.product_key
 		);
 	};
 

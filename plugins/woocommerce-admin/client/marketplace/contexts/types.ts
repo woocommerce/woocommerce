@@ -17,8 +17,3 @@ export type SubscriptionsContextType = {
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
 };
-
-export type InstallContextType = {
-	installingProducts: string[];
-	setInstallingProducts: ( products: string[] ) => void;
-};
