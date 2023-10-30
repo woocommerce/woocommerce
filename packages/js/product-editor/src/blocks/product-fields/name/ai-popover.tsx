@@ -50,7 +50,11 @@ export function AIPopover( {
 		<Popover focusOnMount={ false }>
 			<>
 				<ul
-					style={ { width: boundingRect?.width, marginBottom: '0' } }
+					style={ {
+						width: boundingRect?.width,
+						marginBottom: '0',
+						marginTop: '0',
+					} }
 					{ ...getMenuProps() }
 				>
 					{ items.map( ( item, index ) => (
@@ -60,7 +64,13 @@ export function AIPopover( {
 								'woocommerce-product-form-name-ai-suggestions__highlighted':
 									highlightedIndex === index,
 							} ) }
-							{ ...getItemProps( { item, index } ) }
+							{ ...getItemProps( {
+								item,
+								index,
+								style: {
+									paddingTop: '10px',
+								},
+							} ) }
 						>
 							<div className="woocommerce-product-form-name-ai-suggestions__item">
 								<div>
