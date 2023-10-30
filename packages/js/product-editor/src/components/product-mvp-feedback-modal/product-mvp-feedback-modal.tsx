@@ -16,6 +16,7 @@ import {
 import { FeedbackModal } from '@woocommerce/customer-effort-score';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Provides a modal requesting customer feedback.
@@ -56,13 +57,13 @@ function ProductMVPFeedbackModal( {
 		},
 		{
 			key: 'difficult-to-use',
-			label: __( 'It is difficult to use', 'woocommerce' ),
+			label: __( "It's difficult to use", 'woocommerce' ),
 			checked: difficultToUse,
 			onChange: setDifficultToUse,
 		},
 		{
 			key: 'slow-buggy-or-broken',
-			label: __( 'It is slow, buggy, or broken', 'woocommerce' ),
+			label: __( "It's slow, buggy, or broken", 'woocommerce' ),
 			checked: slowBuggyOrBroken,
 			onChange: setSlowBuggyOrBroken,
 		},
@@ -79,8 +80,16 @@ function ProductMVPFeedbackModal( {
 		.filter( ( checkbox ) => checkbox.checked )
 		.map( ( checkbox ) => checkbox.key );
 
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
+
 	const onSendFeedback = () => {
 		recordScoreCallback( checked, comments, email );
+		createSuccessNotice(
+			__(
+				"Thanks for the feedback — we'll put it to good use!",
+				'woocommerce'
+			)
+		);
 	};
 
 	const optionalElement = (
@@ -98,7 +107,7 @@ function ProductMVPFeedbackModal( {
 			onSubmit={ onSendFeedback }
 			onModalClose={ onCloseModal }
 			isSubmitButtonDisabled={ ! checked.length }
-			submitButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
+			submitButtonLabel={ __( 'Send', 'woocommerce' ) }
 			cancelButtonLabel={ __( 'Skip', 'woocommerce' ) }
 			className="woocommerce-product-mvp-feedback-modal"
 		>

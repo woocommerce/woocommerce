@@ -83,6 +83,7 @@ jest.mock( '@woocommerce/experimental', () => {
 const task: TaskType = {
 	id: 'optional',
 	title: 'This task is optional',
+	badge: 'Optional badge',
 	isComplete: false,
 	time: '1 minute',
 	isDismissable: true,

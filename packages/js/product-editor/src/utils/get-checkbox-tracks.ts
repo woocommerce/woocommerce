@@ -8,7 +8,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Get additional props to be passed to all checkbox inputs.
  *
- * @param  name Name of the checkbox.
+ * @param name Name of the checkbox.
  * @return Props.
  */
 export function getCheckboxTracks< T = Product >( name: string ) {

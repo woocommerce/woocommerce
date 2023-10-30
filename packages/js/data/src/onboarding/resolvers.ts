@@ -20,10 +20,12 @@ import {
 	setEmailPrefill,
 	getProductTypesSuccess,
 	getProductTypesError,
+	setJetpackAuthUrl,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
 	ExtensionList,
+	GetJetpackAuthUrlResponse,
 	OnboardingProductTypes,
 	ProfileItems,
 	TaskListType,
@@ -134,5 +136,30 @@ export function* getProductTypes() {
 		yield getProductTypesSuccess( results );
 	} catch ( error ) {
 		yield getProductTypesError( error );
+	}
+}
+
+export function* getJetpackAuthUrl( query: {
+	redirectUrl: string;
+	from?: string;
+} ) {
+	try {
+		let path =
+			WC_ADMIN_NAMESPACE +
+			'/onboarding/plugins/jetpack-authorization-url?redirect_url=' +
+			encodeURIComponent( query.redirectUrl );
+
+		if ( query.from ) {
+			path += '&from=' + query.from;
+		}
+
+		const results: GetJetpackAuthUrlResponse = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+
+		yield setJetpackAuthUrl( results, query.redirectUrl, query.from ?? '' );
+	} catch ( error ) {
+		yield setError( 'getJetpackAuthUrl', error );
 	}
 }

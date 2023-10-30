@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix various 'dynamic property declaration' warnings on PHP 8.2+.

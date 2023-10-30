@@ -1,4 +1,6 @@
 const { devices } = require( '@playwright/test' );
+require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+
 const {
 	ALLURE_RESULTS_DIR,
 	BASE_URL,

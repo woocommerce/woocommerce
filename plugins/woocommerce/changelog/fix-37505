@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Do not show HPOS plugin incompat warning to users with insufficient access permissions.

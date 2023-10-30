@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, Notice } from '@wordpress/components';
+import {
+	Button,
+	TextControl,
+	Notice,
+	Spinner,
+	CheckboxControl,
+} from '@wordpress/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -11,6 +17,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
+import { decodeEntities } from '@wordpress/html-entities';
+
 /**
  * Internal dependencies
  */
@@ -74,12 +82,32 @@ export const selectIndustryMapping = {
 		'woocommerce'
 	),
 };
+
+export type BusinessInfoContextProps = Pick<
+	CoreProfilerStateMachineContext,
+	'geolocatedLocation' | 'userProfile' | 'businessInfo' | 'countries'
+> & {
+	onboardingProfile: Pick<
+		CoreProfilerStateMachineContext[ 'onboardingProfile' ],
+		| 'industry'
+		| 'business_choice'
+		| 'is_store_country_set'
+		| 'is_agree_marketing'
+		| 'store_email'
+	>;
+} & Partial<
+		Pick<
+			CoreProfilerStateMachineContext,
+			'emailMarketingExperimentAssignment' | 'currentUserEmail'
+		>
+	>;
+
 export const BusinessInfo = ( {
 	context,
 	navigationProgress,
 	sendEvent,
 }: {
-	context: CoreProfilerStateMachineContext;
+	context: BusinessInfoContextProps;
 	navigationProgress: number;
 	sendEvent: ( event: BusinessInfoEvent ) => void;
 } ) => {
@@ -91,7 +119,12 @@ export const BusinessInfo = ( {
 		onboardingProfile: {
 			is_store_country_set: isStoreCountrySet,
 			industry: industryFromOnboardingProfile,
+			business_choice: businessChoiceFromOnboardingProfile,
+			is_agree_marketing: isOptInMarketingFromOnboardingProfile,
+			store_email: storeEmailAddressFromOnboardingProfile,
 		},
+		emailMarketingExperimentAssignment,
+		currentUserEmail,
 	} = context;
 
 	const [ storeName, setStoreName ] = useState(
@@ -152,11 +185,23 @@ export const BusinessInfo = ( {
 	const selectCountryLabel = __( 'Select country/region', 'woocommerce' );
 	const selectIndustryQuestionLabel =
 		selectIndustryMapping[
-			businessChoice || 'im_just_starting_my_business'
+			businessChoice ||
+				businessChoiceFromOnboardingProfile ||
+				'im_just_starting_my_business'
 		];
 
 	const [ dismissedGeolocationNotice, setDismissedGeolocationNotice ] =
 		useState( false );
+
+	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+
+	const [ storeEmailAddress, setEmailAddress ] = useState(
+		storeEmailAddressFromOnboardingProfile || currentUserEmail || ''
+	);
+
+	const [ isOptInMarketing, setIsOptInMarketing ] = useState< boolean >(
+		isOptInMarketingFromOnboardingProfile || false
+	);
 
 	return (
 		<div
@@ -186,7 +231,7 @@ export const BusinessInfo = ( {
 						onChange={ ( value ) => {
 							setStoreName( value );
 						} }
-						value={ storeName }
+						value={ decodeEntities( storeName ) }
 						label={
 							<>
 								{ __(
@@ -327,12 +372,55 @@ export const BusinessInfo = ( {
 							</ul>
 						</Notice>
 					) }
+					{ emailMarketingExperimentAssignment === 'treatment' && (
+						<>
+							<TextControl
+								className="woocommerce-profiler-business-info-email-adddress"
+								onChange={ ( value ) => {
+									setEmailAddress( value );
+								} }
+								value={ decodeEntities( storeEmailAddress ) }
+								label={
+									<>
+										{ __(
+											'Your email address',
+											'woocommerce'
+										) }
+										{ isOptInMarketing && (
+											<span className="woocommerce-profiler-question-required">
+												{ '*' }
+											</span>
+										) }
+									</>
+								}
+								placeholder={ __(
+									'wordpress@example.com',
+									'woocommerce'
+								) }
+							/>
+							<CheckboxControl
+								className="core-profiler__checkbox"
+								label={ __(
+									'Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox.',
+									'woocommerce'
+								) }
+								checked={ isOptInMarketing }
+								onChange={ setIsOptInMarketing }
+							/>
+						</>
+					) }
 				</form>
 				<div className="woocommerce-profiler-button-container">
 					<Button
 						className="woocommerce-profiler-button"
 						variant="primary"
-						disabled={ ! storeCountry.key }
+						disabled={
+							! storeCountry.key ||
+							( emailMarketingExperimentAssignment ===
+								'treatment' &&
+								isOptInMarketing &&
+								storeEmailAddress.length === 0 )
+						}
 						onClick={ () => {
 							sendEvent( {
 								type: 'BUSINESS_INFO_COMPLETED',
@@ -342,11 +430,18 @@ export const BusinessInfo = ( {
 									storeLocation: storeCountry.key,
 									geolocationOverruled:
 										geolocationOverruled || false,
+									isOptInMarketing,
+									storeEmailAddress,
 								},
 							} );
+							setHasSubmitted( true );
 						} }
 					>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ hasSubmitted ? (
+							<Spinner />
+						) : (
+							__( 'Continue', 'woocommerce' )
+						) }
 					</Button>
 				</div>
 			</div>

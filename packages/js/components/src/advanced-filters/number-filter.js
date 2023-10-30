@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, isArray } from 'lodash';
 import classnames from 'classnames';
@@ -17,7 +12,10 @@ import { CurrencyFactory } from '@woocommerce/currency';
  * Internal dependencies
  */
 import TextControlWithAffixes from '../text-control-with-affixes';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 class NumberFilter extends Component {
 	getBetweenString() {

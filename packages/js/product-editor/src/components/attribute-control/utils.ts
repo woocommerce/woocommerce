@@ -18,7 +18,7 @@ export function getAttributeKey(
 /**
  * Get an attribute ID that works universally across global and local attributes.
  *
- * @param  attribute Product attribute.
+ * @param attribute Product attribute.
  * @return string
  */
 export const getAttributeId = ( attribute: ProductAttribute ) =>

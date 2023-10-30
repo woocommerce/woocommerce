@@ -136,27 +136,6 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * Test that when an order is partially migrated, it can still be resumed as expected.
-	 */
-	public function test_interrupted_migration() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test that invalid order data is not migrated but logged.
-	 */
-	public function test_migrating_invalid_order_data() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test when one order is invalid but other one is valid in a migration batch.
-	 */
-	public function test_migrating_invalid_valid_order_combo() {
-		$this->markTestSkipped();
-	}
-
-	/**
 	 * Helper method to get order object from COT.
 	 *
 	 * @param WP_Post $post_order Post object for order.
@@ -379,6 +358,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	public function test_database_errors_during_migrations_are_logged() {
 		global $wpdb;
 
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
 		$fake_logger = $this->use_fake_logger();
 
 		$wpdb_mock = new DynamicDecorator( $wpdb );
@@ -390,19 +371,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				$wpdb_mock = $args[0];
 				$query     = $args[1];
 
-				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
-					$wpdb_mock->state = 'Something failed!';
-				}
-			}
-		);
-
-		$wpdb_mock->register_property_get_replacement(
-			'last_error',
-			function( $replacement_object ) {
-				if ( $replacement_object->state ) {
-					return $replacement_object->state;
-				} else {
-					return $replacement_object->decorated_object->last_error;
+				if ( StringUtil::contains( $query, 'posts' ) ) {
+					$wpdb_mock->decorated_object->last_error = 'Something failed!';
 				}
 			}
 		);
@@ -417,7 +387,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			}
 		);
 
-		$this->assertEquals( 'PostMetaToOrderMetaMigrator: when processing ids 1-3: Something failed!', $actual_errors[0]['message'] );
+		$this->assertTrue( str_contains( $actual_errors[0]['message'], 'when processing ids 1-3: Something failed!' ) );
 		$this->assertEquals( array( 1, 2, 3 ), $actual_errors[0]['data']['ids'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
 	}
@@ -440,7 +410,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			function( ...$args ) use ( $exception ) {
 				$query = $args[1];
 
-				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+				if ( StringUtil::contains( $query, 'posts' ) ) {
 					throw $exception;
 				}
 			}
@@ -456,7 +426,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			}
 		);
 
-		$this->assertTrue( StringUtil::starts_with( $actual_errors[0]['message'], 'PostMetaToOrderMetaMigrator: when processing ids 1-3: (Exception) Something failed!' ) );
+		$this->assertTrue( StringUtil::contains( $actual_errors[0]['message'], 'when processing ids 1-3: (Exception) Something failed!' ) );
 		$this->assertEquals( $exception, $actual_errors[0]['data']['exception'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
 	}
@@ -585,22 +555,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_is_rolled_back_on_db_error() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'READ UNCOMMITTED' );
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
-			'get_results',
-			function( ...$args ) {
-				$wpdb_decorator                               = $args[0];
-				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
-				return false;
+			'query',
+			function( $wpdb_decorator, $query ) {
+				$result = $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
+				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
+					$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+				}
+				if ( str_contains( $query, 'SET TRANSACTION ISOLATION LEVEL' ) ) {
+					$wpdb_decorator->decorated_object->last_error = '';
+					return true;
+				}
+				return $result;
 			}
 		);
 
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED',
 			'START TRANSACTION',
 			'ROLLBACK',
 		);
@@ -617,9 +593,12 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
-			'get_results',
-			function( ...$args ) {
-				throw new \Exception( 'Something failed!' );
+			'query',
+			function( $wpdb_decorator, $query ) {
+				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
+					throw new \Exception( 'Something failed!' );
+				}
+				return $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
 			}
 		);
 
@@ -705,28 +684,41 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				$wpdb_decorator = $args[0];
 				$query          = $args[1];
 
-				$is_transaction_related_query =
-					StringUtil::contains( $query, 'TRANSACTION' ) ||
-					StringUtil::contains( $query, 'COMMIT' ) ||
-					StringUtil::contains( $query, 'ROLLBACK' );
-
-				if ( $is_transaction_related_query ) {
-					if ( $transaction_fails instanceof \Exception ) {
-						throw $transaction_fails;
-					} elseif ( $transaction_fails ) {
-						$wpdb_decorator->decorated_object->last_error = 'Something failed!';
-						return false;
-					} else {
-						$this->executed_transaction_statements[] = $query;
-						return true;
-					}
-				} else {
-					return $wpdb_decorator->call_original_method( 'query', $args );
-				}
+				return $this->fake_query_transaction_logger( $wpdb_decorator, $query, $transaction_fails );
 			}
 		);
 
 		return $wpdb_mock;
+	}
+
+	/**
+	 * Helper method to log and optionally error any transaction related query.
+	 *
+	 * @param DynamicDecorator $wpdb_decorator The $wpdb decorator.
+	 * @param string           $query The query.
+	 * @param bool             $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
+	 *
+	 * @return bool
+	 */
+	private function fake_query_transaction_logger( DynamicDecorator $wpdb_decorator, $query, $transaction_fails ) {
+		$is_transaction_related_query =
+			StringUtil::contains( $query, 'TRANSACTION' ) ||
+			StringUtil::contains( $query, 'COMMIT' ) ||
+			StringUtil::contains( $query, 'ROLLBACK' );
+
+		if ( $is_transaction_related_query ) {
+			if ( $transaction_fails instanceof \Exception ) {
+				throw $transaction_fails;
+			} elseif ( $transaction_fails ) {
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+				return false;
+			} else {
+				$this->executed_transaction_statements[] = $query;
+				return true;
+			}
+		} else {
+			return $wpdb_decorator->decorated_object->query( $query );
+		}
 	}
 
 	/**

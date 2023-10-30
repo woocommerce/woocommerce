@@ -18,11 +18,13 @@ import {
 	getTruncatedProductVariationTitle,
 } from './get-product-variation-title';
 import { preventLeavingProductForm } from './prevent-leaving-product-form';
+import { hasAttributesUsedForVariations } from './has-attributes-used-for-variations';
 import { isValidEmail } from './validate-email';
 
 export * from './create-ordered-children';
 export * from './sort-fills-by-order';
-export * from './init-blocks';
+export * from './register-product-editor-block-type';
+export * from './init-block';
 export * from './product-apifetch-middleware';
 export * from './sift';
 
@@ -39,6 +41,7 @@ export {
 	getProductTitle,
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
+	hasAttributesUsedForVariations,
 	isValidEmail,
 	preventLeavingProductForm,
 	PRODUCT_STATUS_LABELS,

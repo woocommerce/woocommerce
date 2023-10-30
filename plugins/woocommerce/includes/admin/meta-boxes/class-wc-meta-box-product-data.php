@@ -56,22 +56,7 @@ class WC_Meta_Box_Product_Data {
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		return apply_filters(
 			'product_type_options',
-			array(
-				'virtual'      => array(
-					'id'            => '_virtual',
-					'wrapper_class' => 'show_if_simple',
-					'label'         => __( 'Virtual', 'woocommerce' ),
-					'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
-					'default'       => 'no',
-				),
-				'downloadable' => array(
-					'id'            => '_downloadable',
-					'wrapper_class' => 'show_if_simple',
-					'label'         => __( 'Downloadable', 'woocommerce' ),
-					'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
-					'default'       => 'no',
-				),
-			)
+			wc_get_default_product_type_options(),
 		);
 		/* phpcs: enable */
 	}
@@ -89,7 +74,7 @@ class WC_Meta_Box_Product_Data {
 				'general'        => array(
 					'label'    => __( 'General', 'woocommerce' ),
 					'target'   => 'general_product_data',
-					'class'    => array(),
+					'class'    => array( 'hide_if_grouped' ),
 					'priority' => 10,
 				),
 				'inventory'      => array(

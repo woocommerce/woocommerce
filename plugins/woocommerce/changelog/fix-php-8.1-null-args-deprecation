@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Adjust wc-formatting-functions.php null args deprecations in PHP 8.1

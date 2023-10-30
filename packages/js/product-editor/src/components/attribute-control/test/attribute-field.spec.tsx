@@ -79,6 +79,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	__esModule: true,
 	__experimentalSelectControlMenuSlot: () => <div></div>,
 	ListItem: ( { children }: { children: JSX.Element } ) => children,
+	Tag: ( { label }: { label: string } ) => <span>{ label }</span>,
 	Sortable: ( {
 		onOrderChange,
 		children,
@@ -113,11 +114,11 @@ describe( 'AttributeControl', () => {
 	} );
 
 	describe( 'empty state', () => {
-		it( 'should show subtitle and "Add attributes" button', () => {
+		it( 'should show subtitle and "Add new" button', () => {
 			const { queryByText } = render(
 				<AttributeControl value={ [] } onChange={ () => {} } />
 			);
-			expect( queryByText( 'Add attributes' ) ).toBeInTheDocument();
+			expect( queryByText( 'Add new' ) ).toBeInTheDocument();
 		} );
 	} );
 

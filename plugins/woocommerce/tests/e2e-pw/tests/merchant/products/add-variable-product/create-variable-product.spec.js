@@ -38,7 +38,9 @@ test.describe( 'Add variable product', () => {
 		await test.step(
 			'Select the "Variable product" product type.',
 			async () => {
-				await page.selectOption( '#product-type', 'variable' );
+				await page
+					.locator( '#product-type' )
+					.selectOption( 'variable' );
 			}
 		);
 

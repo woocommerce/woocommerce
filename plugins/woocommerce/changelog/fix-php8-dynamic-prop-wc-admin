@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix 'dynamic property declaration' warnings in wc-admin code (PHP 8.2+).

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-ensure parameter datatype for array_slice

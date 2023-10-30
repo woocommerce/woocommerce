@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
@@ -597,19 +598,19 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function connect_wcpay() {
 		if ( ! class_exists( 'WC_Payments_Account' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		$connect_url = add_query_arg(
-			array(
-				'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
-				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-			),
-			admin_url()
-		);
+		$args = WooCommercePayments::is_account_partially_onboarded() ? [
+			'wcpay-login' => '1',
+			'_wpnonce'    => wp_create_nonce( 'wcpay-login' ),
+		] : [
+			'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
+			'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+		];
 
 		return( array(
-			'connectUrl' => $connect_url,
+			'connectUrl' => add_query_arg( $args, admin_url() ),
 		) );
 	}
 

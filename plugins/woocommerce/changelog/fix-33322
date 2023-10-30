@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Swap out deprecated jQuery ready handlers

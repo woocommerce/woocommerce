@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Filter by date_paid and date_completed on list table orders based on configuration

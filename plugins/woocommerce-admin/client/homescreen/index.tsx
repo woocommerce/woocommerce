@@ -3,12 +3,14 @@
  */
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
 	WCDataSelector,
 } from '@woocommerce/data';
 import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
+
 /**
  * Internal dependencies
  */
@@ -26,9 +28,15 @@ const Homescreen = ( {
 	} = {},
 	hasFinishedResolution,
 }: HomescreenProps ) => {
-	if ( hasFinishedResolution && ! profilerCompleted && ! profilerSkipped ) {
-		getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
-	}
+	useEffect( () => {
+		if (
+			hasFinishedResolution &&
+			! profilerCompleted &&
+			! profilerSkipped
+		) {
+			getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
+		}
+	}, [ hasFinishedResolution, profilerCompleted, profilerSkipped ] );
 
 	const query = useQuery();
 	// @ts-expect-error Layout is a pure JS component

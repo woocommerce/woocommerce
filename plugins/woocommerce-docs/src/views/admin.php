@@ -5,4 +5,4 @@
  * @package  WooCommerce_Docs
  */
 
-echo '<div id="root"></div>';
+echo '<div class="wrap" id="root"></div>';

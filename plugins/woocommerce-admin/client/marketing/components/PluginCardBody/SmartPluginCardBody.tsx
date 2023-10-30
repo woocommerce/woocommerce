@@ -95,7 +95,7 @@ export const SmartPluginCardBody = ( {
 					disabled={ buttonDisabled }
 					onClick={ installAndActivate }
 				>
-					{ __( 'Install plugin', 'woocommerce' ) }
+					{ __( 'Install extension', 'woocommerce' ) }
 				</Button>
 			);
 		}

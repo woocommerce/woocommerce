@@ -115,7 +115,7 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			async () => {
 				const statsOverviewHeading = page.getByText( 'Stats overview' );
 				const skipSetupStoreLink = page.getByRole( 'button', {
-					name: 'Skip setup store details',
+					name: 'Set up my store',
 				} );
 
 				await page.goto( '/wp-admin/admin.php?page=wc-admin' );

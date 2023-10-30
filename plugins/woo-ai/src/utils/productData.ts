@@ -1,32 +1,92 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
-import { Attribute, ProductData } from './types';
-import { getTinyContent } from '../utils/tiny-tools';
+import { Attribute } from './types';
+import { getTinyContent } from '.';
+
+export enum ProductProps {
+	Name = 'name',
+	Description = 'description',
+	Categories = 'categories',
+	Tags = 'tags',
+	Attributes = 'attributes',
+}
+
+/**
+ * Retrieves a hierarchy string for the specified category element. This includes the category label and all parent categories separated by a > character.
+ *
+ * @param {HTMLInputElement} categoryElement - The category element to get the hierarchy string for.
+ * @return {string} The hierarchy string for the specified category element. e.g. "Clothing > Shirts > T-Shirts"
+ */
+const getCategoryHierarchy = ( categoryElement: HTMLElement ) => {
+	let hierarchy = '';
+	let parentElement = categoryElement.parentElement;
+
+	// Traverse up the DOM Tree until a category list item (LI) is found
+	while ( parentElement ) {
+		const isListItem = parentElement.tagName.toUpperCase() === 'LI';
+		const isRootList = parentElement.id === 'product_catchecklist';
+
+		if ( isListItem ) {
+			const categoryLabel =
+				parentElement.querySelector( 'label' )?.innerText.trim() || '';
+
+			if ( categoryLabel ) {
+				hierarchy = hierarchy
+					? `${ categoryLabel } > ${ hierarchy }`
+					: categoryLabel;
+			} else {
+				break;
+			}
+		}
+
+		if ( isRootList ) {
+			// If the root category list is found, it means we have reached the top of the hierarchy
+			break;
+		}
+
+		parentElement = parentElement.parentElement;
+	}
+
+	return hierarchy;
+};
+
+/**
+ * Function to get selected categories in hierarchical manner.
+ *
+ * @return {string[]} Array of category hierarchy strings for each selected category.
+ */
+export const getCategories = (): string[] => {
+	// Get all the selected category checkboxes
+	const checkboxes: NodeListOf< HTMLInputElement > =
+		document.querySelectorAll(
+			'#taxonomy-product_cat input[type="checkbox"][name="tax_input[product_cat][]"]'
+		);
+	const categoryElements = Array.from( checkboxes );
+
+	// Filter out the Uncategorized category and return the remaining selected categories
+	const selectedCategories = categoryElements.filter( ( element ) => {
+		const categoryLabel = element.parentElement?.innerText.trim();
+
+		return (
+			element.checked &&
+			categoryLabel !== __( 'Uncategorized', 'woocommerce' )
+		);
+	} );
+
+	// Get the hierarchy string for each selected category and filter out any empty strings
+	return selectedCategories.map( getCategoryHierarchy ).filter( Boolean );
+};
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
 
-const getCategories = (): string[] => {
-	const categoryCheckboxEls: NodeListOf< HTMLInputElement > =
-		document.querySelectorAll(
-			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]:checked'
-		);
-
-	const tempCategories: string[] = [];
-
-	categoryCheckboxEls.forEach( ( el ) => {
-		if ( ! el.value.length ) {
-			return;
-		}
-
-		tempCategories.push( el.value );
-	} );
-
-	return tempCategories;
-};
-
-const getTags = (): string[] => {
+export const getTags = (): string[] => {
 	const tagsEl: HTMLTextAreaElement | null = document.querySelector(
 		'textarea[name="tax_input[product_tag]"]'
 	);
@@ -36,36 +96,56 @@ const getTags = (): string[] => {
 	return tags.filter( ( tag ) => tag !== '' );
 };
 
-const getAttributes = (): Attribute[] => {
-	const attributeSelectEls: NodeListOf< HTMLSelectElement > =
-		document.querySelectorAll(
-			"#product_attributes select[name^='attribute_values']"
-		);
+export const getAttributes = (): Attribute[] => {
+	const attributeContainerEls = Array.from(
+		document.querySelectorAll( '.woocommerce_attribute' )
+	);
 
-	const tempAttributes: Attribute[] = [];
+	return attributeContainerEls.reduce( ( acc, item ) => {
+		const attributeGetters = {
+			local: {
+				name: () =>
+					(
+						item.querySelector(
+							'.woocommerce_attribute_data input.attribute_name'
+						) as HTMLInputElement | null
+					 )?.value,
+				values: () =>
+					item
+						.querySelector( '.woocommerce_attribute_data textarea' )
+						?.textContent?.split( '|' )
+						.map( ( attrName ) => attrName.trim() ),
+			},
+			global: {
+				name: () =>
+					(
+						item.querySelector(
+							'.attribute_name > strong'
+						) as Element | null
+					 )?.textContent,
+				values: () =>
+					Array.from(
+						item.querySelectorAll(
+							'select.attribute_values option'
+						) ?? []
+					).map( ( option ) => option.textContent?.trim() ?? '' ),
+			},
+		};
 
-	attributeSelectEls.forEach( ( el: HTMLSelectElement ) => {
-		const attributeName =
-			el.getAttribute( 'data-taxonomy' )?.replace( 'pa_', '' ) || '';
+		const type = Boolean( attributeGetters.global.name() )
+			? 'global'
+			: 'local';
 
-		const attributeValues = Array.from( el.selectedOptions )
-			.map( ( option ) => option.text )
-			.join( ',' );
-
-		if ( ! attributeValues || ! attributeName ) {
-			return;
+		const name = attributeGetters[ type ].name();
+		const values = attributeGetters[ type ].values()?.filter( Boolean );
+		if ( name && values ) {
+			acc.push( { name, values } );
 		}
-
-		tempAttributes.push( {
-			name: attributeName,
-			value: attributeValues,
-		} );
-	} );
-
-	return tempAttributes;
+		return acc;
+	}, [] as Attribute[] );
 };
 
-const getDescription = (): string => {
+export const getDescription = (): string => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
 
@@ -73,7 +153,7 @@ const getDescription = (): string => {
 		const content = document.querySelector(
 			'#content'
 		) as HTMLInputElement;
-		const tinyContent = getTinyContent();
+		const tinyContent = getTinyContent( 'content', { format: 'text' } );
 		if ( content && isElementVisible( content ) ) {
 			return content.value;
 		} else if ( tinyContent ) {
@@ -88,37 +168,41 @@ const getDescription = (): string => {
 	 )?.value;
 };
 
-const getProductName = (): string => {
+export const getProductName = (): string => {
 	const productNameEl: HTMLInputElement | null =
 		document.querySelector( '#title' );
 
 	return productNameEl ? productNameEl.value : '';
 };
 
-const getProductType = () => {
+export const getProductType = () => {
 	const productTypeEl: HTMLInputElement | null =
 		document.querySelector( '#product-type' );
 
 	return productTypeEl ? productTypeEl.value : '';
 };
 
-export const productData = (): ProductData => {
+export const getPublishingStatus = () =>
+	( document.querySelector( '#post_status' ) as HTMLInputElement )?.value;
+
+export const isProductVirtual = () =>
+	( document.querySelector( '#_virtual' ) as HTMLInputElement )?.checked;
+
+export const isProductDownloadable = () =>
+	( document.querySelector( '#_downloadable' ) as HTMLInputElement )?.checked;
+
+export const getProductImageCount = () => {
+	const gallery = document.querySelectorAll(
+		'.product_images li.image'
+	).length;
+
+	const featured = document.querySelectorAll(
+		'#set-post-thumbnail img'
+	).length;
+
 	return {
-		name: getProductName(),
-		categories: getCategories(),
-		tags: getTags(),
-		attributes: getAttributes(),
-		description: getDescription(),
-		product_type: getProductType(),
-		is_downloadable: (
-			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.checked
-			? 'Yes'
-			: 'No',
-		is_virtual: (
-			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.checked
-			? 'Yes'
-			: 'No',
+		gallery,
+		featured,
+		total: gallery + featured,
 	};
 };

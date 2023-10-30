@@ -20,6 +20,28 @@ if ( ! class_exists( 'WC_Email', false ) ) {
  * ReportCSVEmail Class.
  */
 class ReportCSVEmail extends \WC_Email {
+
+	/**
+	 * Report labels.
+	 *
+	 * @var array
+	 */
+	protected $report_labels;
+
+	/**
+	 * Report type (e.g. 'customers').
+	 *
+	 * @var string
+	 */
+	protected $report_type;
+
+	/**
+	 * Download URL.
+	 *
+	 * @var string
+	 */
+	protected $download_url;
+
 	/**
 	 * Constructor.
 	 */

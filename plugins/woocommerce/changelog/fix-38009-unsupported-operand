@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix Unsupported operand string * float

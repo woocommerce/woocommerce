@@ -12,7 +12,6 @@ import {
 } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
-import { updateQueryString } from '@woocommerce/navigation';
 import {
 	useCallback,
 	useEffect,
@@ -24,8 +23,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { redirectToTaxSettings, supportsAvalara } from './utils';
-import { Card as AvalaraCard } from './avalara/card';
+import { redirectToTaxSettings } from './utils';
 import { Card as WooCommerceTaxCard } from './woocommerce-tax/card';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import { getCountryCode } from '~/dashboard/utils';
@@ -166,12 +164,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
 					woocommerceTaxCountries.includes( countryCode ),
 			},
-			{
-				id: 'avalara',
-				card: AvalaraCard,
-				component: null,
-				isVisible: supportsAvalara( countryCode ),
-			},
 		];
 
 		return partners.filter( ( partner ) => partner.isVisible );
@@ -205,18 +197,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			partners.find( ( partner ) => partner.id === query.partner ) || null
 		);
 	};
-
-	useEffect( () => {
-		if ( partners.length > 1 || query.partner ) {
-			return;
-		}
-
-		if ( partners.length === 1 && partners[ 0 ].component ) {
-			updateQueryString( {
-				partner: partners[ 0 ].id,
-			} );
-		}
-	}, [ partners ] );
 
 	const childProps = {
 		isPending,

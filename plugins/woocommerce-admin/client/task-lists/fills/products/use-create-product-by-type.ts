@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { useDispatch } from '@wordpress/data';
-import { ITEMS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
-import moment from 'moment';
 import { useState } from '@wordpress/element';
 
 /**
@@ -14,13 +13,14 @@ import { useState } from '@wordpress/element';
  */
 import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const NEW_PRODUCT_MANAGEMENT = 'woocommerce_new_product_management_enabled';
+const EXPERIMENT_NAME =
+	'woocommerce_product_creation_experience_add_variations_202310_v2';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const isNewExperienceEnabled =
 		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
@@ -34,24 +34,18 @@ export const useCreateProductByType = () => {
 
 		setIsRequesting( true );
 
-		if ( type === 'physical' ) {
-			const momentDate = moment().utc();
-			const year = momentDate.format( 'YYYY' );
-			const month = momentDate.format( 'MM' );
-			const assignment = await loadExperimentAssignment(
-				`woocommerce_product_creation_experience_${ year }${ month }_v1`
-			);
-
+		if ( type === 'physical' || type === 'variable' ) {
 			if ( isNewExperienceEnabled ) {
 				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
 				return;
 			}
+			const assignment = await loadExperimentAssignment(
+				EXPERIMENT_NAME
+			);
 			if ( assignment.variationName === 'treatment' ) {
-				await updateOptions( {
-					[ NEW_PRODUCT_MANAGEMENT ]: 'yes',
-				} );
+				const _feature_nonce = getAdminSetting( '_feature_nonce' );
 				window.location.href = getAdminLink(
-					'admin.php?page=wc-admin&path=/add-product'
+					`post-new.php?post_type=product&product_block_editor=1&_feature_nonce=${ _feature_nonce }`
 				);
 				return;
 			}
@@ -72,9 +66,9 @@ export const useCreateProductByType = () => {
 					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
 				);
 				window.location.href = link;
-			} else {
-				throw new Error( 'Unexpected empty data response from server' );
+				return;
 			}
+			throw new Error( 'Unexpected empty data response from server' );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
 		}

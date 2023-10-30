@@ -107,6 +107,8 @@ export {
 	ProductCategorySelectors,
 } from './product-categories/types';
 export { TaxClass } from './tax-classes/types';
+export { ProductTag, Query } from './product-tags/types';
+export { WCUser } from './user/types';
 
 /**
  * Internal dependencies

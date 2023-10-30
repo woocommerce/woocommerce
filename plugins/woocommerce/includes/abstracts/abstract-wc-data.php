@@ -195,6 +195,19 @@ abstract class WC_Data {
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
+		/**
+		 * Filters whether an object deletion should take place. Equivalent to `pre_delete_post`.
+		 *
+		 * @param mixed   $check Whether to go ahead with deletion.
+		 * @param WC_Data $this The data object being deleted.
+		 * @param bool    $force_delete Whether to bypass the trash.
+		 *
+		 * @since 8.1.0.
+		 */
+		$check = apply_filters( "woocommerce_pre_delete_$this->object_type", null, $this, $force_delete );
+		if ( null !== $check ) {
+			return $check;
+		}
 		if ( $this->data_store ) {
 			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );
@@ -671,14 +684,44 @@ abstract class WC_Data {
 			if ( is_null( $meta->value ) ) {
 				if ( ! empty( $meta->id ) ) {
 					$this->data_store->delete_meta( $this, $meta );
+					/**
+					 * Fires immediately after deleting metadata.
+					 *
+					 * @param int    $meta_id    ID of deleted metadata entry.
+					 * @param int    $object_id  Object ID.
+					 * @param string $meta_key   Metadata key.
+					 * @param mixed  $meta_value Metadata value (will be empty for delete).
+					 */
+					do_action( "deleted_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 					unset( $this->meta_data[ $array_key ] );
 				}
 			} elseif ( empty( $meta->id ) ) {
 				$meta->id = $this->data_store->add_meta( $this, $meta );
+				/**
+				 * Fires immediately after adding metadata.
+				 *
+				 * @param int    $meta_id    ID of added metadata entry.
+				 * @param int    $object_id  Object ID.
+				 * @param string $meta_key   Metadata key.
+				 * @param mixed  $meta_value Metadata value.
+				 */
+				do_action( "added_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 				$meta->apply_changes();
 			} else {
 				if ( $meta->get_changes() ) {
 					$this->data_store->update_meta( $this, $meta );
+					/**
+					 * Fires immediately after updating metadata.
+					 *
+					 * @param int    $meta_id    ID of updated metadata entry.
+					 * @param int    $object_id  Object ID.
+					 * @param string $meta_key   Metadata key.
+					 * @param mixed  $meta_value Metadata value.
+					 */
+					do_action( "updated_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
+
 					$meta->apply_changes();
 				}
 			}
@@ -761,7 +804,7 @@ abstract class WC_Data {
 				if ( ! $errors ) {
 					$errors = new WP_Error();
 				}
-				$errors->add( $e->getErrorCode(), $e->getMessage() );
+				$errors->add( $e->getErrorCode(), $e->getMessage(), array( 'property_name' => $prop ) );
 			}
 		}
 

@@ -16,6 +16,7 @@ import {
 	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
+import { ProductPageSkeleton } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -33,6 +34,11 @@ const AddProductPage = lazy( () =>
 const EditProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
+	)
+);
+const ProductVariationPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
 	)
 );
 const ProductPage = lazy( () =>
@@ -57,6 +63,9 @@ const MarketingOverviewMultichannel = lazy( () =>
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
 );
+const Marketplace = lazy( () =>
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
+);
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
@@ -72,6 +81,10 @@ const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
 	)
+);
+
+const CustomizeStore = lazy( () =>
+	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -173,9 +186,29 @@ export const getPages = () => {
 		} );
 	}
 
+	if ( isFeatureEnabled( 'marketplace' ) ) {
+		pages.push( {
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
+			path: '/extensions',
+			breadcrumbs: [
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-marketplace',
+			},
+		} );
+	}
+
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {
 			container: ProductPage,
+			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},
@@ -240,7 +273,11 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
-			container: EditProductPage,
+			container: ProductVariationPage,
+			fallback: ProductPageSkeleton,
+			layout: {
+				header: false,
+			},
 			path: '/product/:productId/variation/:variationId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -290,6 +327,18 @@ export const getPages = () => {
 		} );
 	}
 
+	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
+		pages.push( {
+			container: CustomizeStore,
+			path: '/customize-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Customize Your Store', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
 	if ( window.wcAdminFeatures.settings ) {
 		pages.push( {
 			container: SettingsGroup,
@@ -324,11 +373,8 @@ export const getPages = () => {
 			container: WCPaymentsWelcomePage,
 			path: '/wc-pay-welcome-page',
 			breadcrumbs: [
-				[
-					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce' ),
-				],
-				__( 'WooCommerce Payments', 'woocommerce' ),
+				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+				__( 'WooPayments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',
@@ -408,8 +454,19 @@ export const Controller = ( { ...props } ) => {
 
 	window.wpNavMenuUrlUpdate( query );
 	window.wpNavMenuClassChange( page, url );
+
+	function getFallback() {
+		return page.fallback ? (
+			<page.fallback />
+		) : (
+			<div className="woocommerce-layout__loading">
+				<Spinner />
+			</div>
+		);
+	}
+
 	return (
-		<Suspense fallback={ <Spinner /> }>
+		<Suspense fallback={ getFallback() }>
 			<page.container
 				params={ params }
 				path={ url }
@@ -488,10 +545,21 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
-	const currentItemsSelector =
+	let currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
+
+	const parentPath = page.navArgs?.parentPath;
+	if ( parentPath ) {
+		const parentPageUrl =
+			parentPath === '/'
+				? 'admin.php?page=wc-admin'
+				: 'admin.php?page=wc-admin&path=' +
+				  encodeURIComponent( parentPath );
+		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
+	}
+
 	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {

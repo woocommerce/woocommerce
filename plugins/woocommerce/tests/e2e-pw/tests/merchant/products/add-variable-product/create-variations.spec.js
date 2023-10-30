@@ -51,7 +51,7 @@ test.describe( 'Add variations', () => {
 		);
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( '.variations_tab' ).click();
 		} );
 
 		await test.step(
@@ -60,7 +60,7 @@ test.describe( 'Add variations', () => {
 				// event listener for handling the link_all_variations confirmation dialog
 				page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-				await page.click( 'button.generate_variations' );
+				await page.locator( 'button.generate_variations' ).click();
 			}
 		);
 
@@ -109,8 +109,26 @@ test.describe( 'Add variations', () => {
 			}
 		);
 
+		// hook up the woocommerce_variations_added jQuery trigger so we can check if it's fired
+		await test.step(
+			'Hook up the woocommerce_variations_added jQuery trigger',
+			async () => {
+				await page.evaluate( () => {
+					window.woocommerceVariationsAddedFunctionCalls = [];
+
+					window.jQuery( '#variable_product_options' ).on(
+						'woocommerce_variations_added',
+						( event, data ) => {
+							window.woocommerceVariationsAddedFunctionCalls.push(
+								[event, data ]
+							);
+						} );
+				} );
+			}
+		);
+
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( '.variations_tab' ).click();
 		} );
 
 		await test.step(
@@ -120,6 +138,7 @@ test.describe( 'Add variations', () => {
 					'.woocommerce_variation h3'
 				);
 				let variationRowsCount = await variationRows.count();
+				const originalVariationRowsCount = variationRowsCount;
 
 				for ( const variationToCreate of variationsToManuallyCreate ) {
 					await test.step( 'Click "Add manually"', async () => {
@@ -132,6 +151,10 @@ test.describe( 'Add variations', () => {
 						await expect( variationRows ).toHaveCount(
 							++variationRowsCount
 						);
+
+						// verify that the woocommerce_variations_added jQuery trigger was fired
+						const woocommerceVariationsAddedFunctionCalls = await page.evaluate( () => window.woocommerceVariationsAddedFunctionCalls );
+    					expect( woocommerceVariationsAddedFunctionCalls.length ).toEqual( variationRowsCount - originalVariationRowsCount );
 					} );
 
 					for ( const attributeValue of variationToCreate ) {

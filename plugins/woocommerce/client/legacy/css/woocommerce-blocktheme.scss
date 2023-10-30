@@ -105,13 +105,13 @@
 				display: inline-block;
 				float: none; // Remove float set by WC core.
 				vertical-align: middle;
-	
+
 				// Adjust positioning of quantity selector and button.
 				.qty {
 					margin-right: 0.5rem;
 				}
 			}
-	
+
 			button[name="add-to-cart"],
 			button.single_add_to_cart_button {
 				display: inline-block;
@@ -153,13 +153,6 @@
 		text-decoration: none;
 	}
 
-	a.added_to_cart {
-		// Prevent "View Cart" button from sticking to "Add to Cart" button.
-		// For details see https://github.com/woocommerce/woocommerce-blocks/issues/5285.
-		display: block;
-		margin-top: 1rem;
-	}
-
 	span.onsale {
 		// Style "On Sale" badge in theme colors by default.
 		background-color: var(--wp--preset--color--foreground, $highlight);
@@ -193,6 +186,16 @@
 		// Ensure variation label is vertically centered.
 		line-height: 3.5rem;
 	}
+}
+
+/**
+* Products grid
+*/
+a.added_to_cart {
+	// Prevent "View Cart" button from sticking to "Add to Cart" button.
+	// For details see https://github.com/woocommerce/woocommerce-blocks/issues/5285.
+	display: block;
+	margin-top: 1rem;
 }
 
 /**
@@ -357,6 +360,13 @@
 			flex-grow: 1;
 			margin-bottom: 1rem;
 			border: none;
+			display: inline;
+			text-transform: uppercase;
+
+			strong {
+				text-transform: none;
+				display: block;
+			}
 		}
 	}
 

@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { execSync } from 'child_process';
 import simpleGit from 'simple-git';
 import nodePath from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -17,6 +16,7 @@ import {
 	getPullRequestData,
 	shouldAutomateChangelog,
 	getChangelogDetails,
+	getChangelogDetailsError,
 } from './lib/github';
 import {
 	getAllProjectPaths,
@@ -66,8 +66,13 @@ const program = new Command( 'changefile' )
 				process.exit( 0 );
 			}
 
-			const { significance, type, message, comment } =
-				getChangelogDetails( prBody );
+			const details = getChangelogDetails( prBody );
+			const { significance, type, message, comment } = details;
+			const changelogDetailsError = getChangelogDetailsError( details );
+
+			if ( changelogDetailsError ) {
+				Logger.error( changelogDetailsError );
+			}
 
 			Logger.startTask(
 				`Making a temporary clone of '${ headOwner }/${ name }'`
@@ -76,7 +81,7 @@ const program = new Command( 'changefile' )
 				? devRepoPath
 				: await cloneAuthenticatedRepo(
 						{ owner: headOwner, name },
-						true
+						false
 				  );
 
 			Logger.endTask();
@@ -85,17 +90,11 @@ const program = new Command( 'changefile' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			// When a devRepoPath is provided, assume that the dependencies are already installed.
-			if ( ! devRepoPath ) {
-				Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
-				execSync( 'pnpm install', {
-					cwd: tmpRepoPath,
-					stdio: 'inherit',
-				} );
+			// If a pull request is coming from a contributor's fork's trunk branch, we don't nee to checkout the remote branch because its already available as part of the clone.
+			if ( branch !== 'trunk' ) {
+				Logger.notice( `Checking out remote branch ${ branch }` );
+				await checkoutRemoteBranch( tmpRepoPath, branch, false );
 			}
-
-			Logger.notice( `Checking out remote branch ${ branch }` );
-			await checkoutRemoteBranch( tmpRepoPath, branch );
 
 			Logger.notice(
 				`Getting all touched projects requiring a changelog`
@@ -106,54 +105,100 @@ const program = new Command( 'changefile' )
 					tmpRepoPath,
 					base,
 					head,
-					fileName
+					fileName,
+					owner,
+					name
 				);
 
 			try {
 				const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 
-				// Remove any already existing changelog files in case a change is reverted and the entry is no longer needed.
+				Logger.notice(
+					'Removing existing changelog files in case a change is reverted and the entry is no longer needed'
+				);
 				allProjectPaths.forEach( ( projectPath ) => {
-					const path = nodePath.join(
+					const composerFilePath = nodePath.join(
 						tmpRepoPath,
 						projectPath,
-						'changelog',
+						'composer.json'
+					);
+					if ( ! existsSync( composerFilePath ) ) {
+						return;
+					}
+
+					// Figure out where the changelog files belong for this project.
+					const composerFile = JSON.parse(
+						readFileSync( composerFilePath, {
+							encoding: 'utf-8',
+						} )
+					);
+					const changelogFilePath = nodePath.join(
+						tmpRepoPath,
+						projectPath,
+						composerFile.extra?.changelogger[ 'changes-dir' ] ??
+							'changelog',
 						fileName
 					);
 
-					if ( existsSync( path ) ) {
-						Logger.notice(
-							`Remove existing changelog file ${ path }`
-						);
-
-						execSync( `rm ${ path }`, {
-							cwd: tmpRepoPath,
-							stdio: 'inherit',
-						} );
+					if ( ! existsSync( changelogFilePath ) ) {
+						return;
 					}
+
+					Logger.notice(
+						`Remove existing changelog file ${ changelogFilePath }`
+					);
+
+					rmSync( changelogFilePath );
 				} );
 
-				touchedProjectsRequiringChangelog.forEach( ( project ) => {
-					Logger.notice(
-						`Running changelog command for ${ project }`
+				if ( ! touchedProjectsRequiringChangelog ) {
+					Logger.notice( 'No projects require a changelog' );
+					process.exit( 0 );
+				}
+
+				for ( const project in touchedProjectsRequiringChangelog ) {
+					const projectPath = nodePath.join(
+						tmpRepoPath,
+						touchedProjectsRequiringChangelog[ project ]
 					);
-					const messageExpression = message
-						? `-e "${ message }"`
-						: '';
-					const commentExpression = comment
-						? `-c "${ comment }"`
-						: '';
-					const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
-					execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
-				} );
+
+					Logger.notice(
+						`Generating changefile for ${ project } (${ projectPath }))`
+					);
+
+					// Figure out where the changelog file belongs for this project.
+					const composerFile = JSON.parse(
+						readFileSync(
+							nodePath.join( projectPath, 'composer.json' ),
+							{ encoding: 'utf-8' }
+						)
+					);
+					const changelogFilePath = nodePath.join(
+						projectPath,
+						composerFile.extra?.changelogger[ 'changes-dir' ] ??
+							'changelog',
+						fileName
+					);
+
+					// Write the changefile using the correct format.
+					let fileContent = `Significance: ${ significance }\n`;
+					fileContent += `Type: ${ type }\n`;
+					if ( comment ) {
+						fileContent += `Comment: ${ comment }\n`;
+					}
+					fileContent += `\n${ message }`;
+					writeFileSync( changelogFilePath, fileContent );
+				}
 			} catch ( e ) {
 				Logger.error( e );
 			}
 
+			const touchedProjectsString = Object.keys(
+				touchedProjectsRequiringChangelog
+			).join( ', ' );
+
 			Logger.notice(
-				`Changelogs created for ${ touchedProjectsRequiringChangelog.join(
-					', '
-				) }`
+				`Changelogs created for ${ touchedProjectsString }`
 			);
 
 			const git = simpleGit( {
@@ -187,7 +232,9 @@ const program = new Command( 'changefile' )
 
 			Logger.notice( `Adding and committing changes` );
 			await git.add( '.' );
-			await git.commit( 'Adding changelog from automation.' );
+			await git.commit(
+				`Add changefile(s) from automation for the following project(s): ${ touchedProjectsString }`
+			);
 			await git.push( 'origin', branch );
 			Logger.notice( `Pushed changes to ${ branch }` );
 		}

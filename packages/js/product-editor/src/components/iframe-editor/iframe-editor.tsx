@@ -33,6 +33,7 @@ import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 
 type IframeEditorProps = {
+	closeModal?: () => void;
 	initialBlocks?: BlockInstance[];
 	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
@@ -41,18 +42,32 @@ type IframeEditorProps = {
 };
 
 export function IframeEditor( {
+	closeModal = () => {},
 	initialBlocks = [],
 	onChange = () => {},
 	onClose,
-	onInput,
+	onInput = () => {},
 	settings: __settings,
 }: IframeEditorProps ) {
-	const [ resizeObserver, sizes ] = useResizeObserver();
+	const [ resizeObserver ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
-	const { appendEdit, hasRedo, hasUndo, redo, undo } = useEditorHistory( {
+	const [ temporalBlocks, setTemporalBlocks ] =
+		useState< BlockInstance[] >( initialBlocks );
+	const { appendEdit } = useEditorHistory( {
 		setBlocks,
 	} );
+	const {
+		appendEdit: tempAppendEdit,
+		hasRedo,
+		hasUndo,
+		redo,
+		undo,
+	} = useEditorHistory( {
+		setBlocks: setTemporalBlocks,
+	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
+	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
+	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -80,9 +95,13 @@ export function IframeEditor( {
 					hasRedo,
 					hasUndo,
 					isInserterOpened,
+					isDocumentOverviewOpened: isListViewOpened,
 					redo,
 					setIsInserterOpened,
+					setIsDocumentOverviewOpened: setIsListViewOpened,
 					undo,
+					isSidebarOpened,
+					setIsSidebarOpened,
 				} }
 			>
 				<BlockEditorProvider
@@ -93,14 +112,32 @@ export function IframeEditor( {
 					} }
 					value={ blocks }
 					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						appendEdit( updatedBlocks );
-						setBlocks( updatedBlocks );
+						tempAppendEdit( updatedBlocks );
+						setTemporalBlocks( updatedBlocks );
 						onChange( updatedBlocks );
 					} }
-					onInput={ onInput }
+					onInput={ ( updatedBlocks: BlockInstance[] ) => {
+						tempAppendEdit( updatedBlocks );
+						setTemporalBlocks( updatedBlocks );
+						onInput( updatedBlocks );
+					} }
 					useSubRegistry={ true }
 				>
-					<HeaderToolbar />
+					<HeaderToolbar
+						onSave={ () => {
+							appendEdit( temporalBlocks );
+							setBlocks( temporalBlocks );
+							onChange( temporalBlocks );
+							closeModal();
+						} }
+						onCancel={ () => {
+							appendEdit( blocks );
+							setBlocks( blocks );
+							onChange( blocks );
+							setTemporalBlocks( blocks );
+							closeModal();
+						} }
+					/>
 					<div className="woocommerce-iframe-editor__main">
 						<SecondarySidebar />
 						<BlockTools
@@ -131,7 +168,7 @@ export function IframeEditor( {
 								enableResizing={ true }
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore This accepts numbers or strings.
-								height={ sizes.height ?? '100%' }
+								height="100%"
 							>
 								<EditorCanvas
 									enableResizing={ true }
@@ -142,10 +179,18 @@ export function IframeEditor( {
 								</EditorCanvas>
 								<Popover.Slot />
 							</ResizableEditor>
+							{ /* This is a hack, but I couldn't find another (easy) way to not
+							     have the inserter render in the content's padding. I believe
+								 that is happening because the inserter is positioned using a transforms,
+								 which take it outside of the normal layout, thus ignoring the parent's
+								 bounds. */ }
+							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
-						<div className="woocommerce-iframe-editor__sidebar">
-							<BlockInspector />
-						</div>
+						{ isSidebarOpened && (
+							<div className="woocommerce-iframe-editor__sidebar">
+								<BlockInspector />
+							</div>
+						) }
 					</div>
 				</BlockEditorProvider>
 			</EditorContext.Provider>

@@ -63,7 +63,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Cart page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
+					'desc'     => __( 'Page where shoppers review their shopping cart', 'woocommerce' ),
 					'id'       => 'woocommerce_cart_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => '',
@@ -83,7 +83,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Checkout page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
+					'desc'     => __( 'Page where shoppers go to finalize their purchase', 'woocommerce' ),
 					'id'       => 'woocommerce_checkout_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => wc_get_page_id( 'checkout' ),
@@ -383,6 +383,25 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_legacy_api_section() {
+		$enable_legacy_api_setting = array(
+			'title'   => __( 'Legacy API', 'woocommerce' ),
+			'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
+			'id'      => 'woocommerce_api_enabled',
+			'type'    => 'checkbox',
+			'default' => 'no',
+		);
+
+		if ( ! is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
+			$enable_legacy_api_setting['desc_tip'] = sprintf(
+			// translators: Placeholder is a URL.
+				__(
+					'⚠️ <b>️The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will soon be available to keep it enabled. <b><a target=”_blank” href="%s">Learn more about this change.</a></b>',
+					'woocommerce'
+				),
+				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+			);
+		}
+
 		$settings =
 			array(
 				array(
@@ -391,13 +410,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'desc'  => '',
 					'id'    => 'legacy_api_options',
 				),
-				array(
-					'title'   => __( 'Legacy API', 'woocommerce' ),
-					'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
-					'id'      => 'woocommerce_api_enabled',
-					'type'    => 'checkbox',
-					'default' => 'no',
-				),
+				$enable_legacy_api_setting,
 				array(
 					'type' => 'sectionend',
 					'id'   => 'legacy_api_options',

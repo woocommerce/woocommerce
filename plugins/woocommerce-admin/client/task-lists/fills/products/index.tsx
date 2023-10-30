@@ -12,6 +12,7 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
@@ -52,6 +53,7 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
+
 	const [
 		isConfirmingLoadSampleProducts,
 		setIsConfirmingLoadSampleProducts,
@@ -75,7 +77,7 @@ export const Products = () => {
 		getOnboardingProductType()
 	);
 
-	const productTypes = useProductTypeListItems(
+	const { productTypes, isRequesting } = useProductTypeListItems(
 		// Subscriptions only in the US
 		getProductTypes( {
 			exclude: isStoreInUS ? [] : [ 'subscription' ],
@@ -136,6 +138,7 @@ export const Products = () => {
 						setIsConfirmingLoadSampleProducts( true )
 					}
 					showOtherOptions={ isExpanded }
+					isTaskListItemClicked={ isRequesting }
 				/>
 				<ViewControlButton
 					isExpanded={ isExpanded }

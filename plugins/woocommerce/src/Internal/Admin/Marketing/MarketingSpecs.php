@@ -52,7 +52,7 @@ class MarketingSpecs {
 
 		if ( false === $plugins ) {
 			$request = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json',
+				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
@@ -136,36 +136,27 @@ class MarketingSpecs {
 	/**
 	 * Load knowledge base posts from WooCommerce.com
 	 *
-	 * @param string|null $category Category of posts to retrieve.
+	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array
 	 */
-	public function get_knowledge_base_posts( ?string $category ): array {
-		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT;
-
-		$categories = array(
-			'marketing' => 1744,
-			'coupons'   => 25202,
-		);
-
-		// Default to marketing category (if no category set on the kb component).
-		if ( ! empty( $category ) && array_key_exists( $category, $categories ) ) {
-			$category_id  = $categories[ $category ];
-			$kb_transient = $kb_transient . '_' . strtolower( $category );
-		} else {
-			$category_id = $categories['marketing'];
+	public function get_knowledge_base_posts( ?string $topic ): array {
+		// Default to the marketing topic (if no topic is set on the kb component).
+		if ( empty( $topic ) ) {
+			$topic = 'marketing';
 		}
+
+		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT . '_' . strtolower( $topic );
 
 		$posts = get_transient( $kb_transient );
 
 		if ( false === $posts ) {
 			$request_url = add_query_arg(
 				array(
-					'categories' => $category_id,
-					'page'       => 1,
-					'per_page'   => 8,
-					'_embed'     => 1,
+					'page'     => 1,
+					'per_page' => 8,
+					'_embed'   => 1,
 				),
-				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
+				'https://woocommerce.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
 			);
 
 			$request = wp_remote_get(

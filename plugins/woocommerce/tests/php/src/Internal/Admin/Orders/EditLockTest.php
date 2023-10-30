@@ -41,7 +41,7 @@ class EditLockTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->setup_cot();
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 
 		$order = new \WC_Order();
 

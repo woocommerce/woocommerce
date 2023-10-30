@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Do not execute order's page controller logic outside of orders screens.

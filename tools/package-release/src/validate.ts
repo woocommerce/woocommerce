@@ -130,10 +130,14 @@ export const validatePackage = (
 /**
  * Determine if an update is valid by comparing version numbers.
  *
- * @param {string} name package name.
+ * @param {string}  name           package name.
+ * @param {boolean} initialRelease if package has not been released yet.
  * @return {boolean} If an update is valid.
  */
-export const isValidUpdate = ( name: string ): boolean => {
+export const isValidUpdate = (
+	name: string,
+	initialRelease: boolean
+): boolean => {
 	const packageJson = getPackageJson( name );
 
 	if ( ! packageJson ) {
@@ -144,6 +148,10 @@ export const isValidUpdate = ( name: string ): boolean => {
 
 	if ( ! nextVersion ) {
 		return false;
+	}
+
+	if ( initialRelease ) {
+		return true;
 	}
 
 	const npmVersion = execSync( `pnpm view ${ name } version`, {

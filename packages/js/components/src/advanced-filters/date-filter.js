@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import classnames from 'classnames';
@@ -18,7 +13,10 @@ import moment from 'moment';
  * Internal dependencies
  */
 import DatePicker from '../calendar/date-picker';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce' );
 const dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );

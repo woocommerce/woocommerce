@@ -23,7 +23,7 @@ import { isValidEmail } from '@woocommerce/product-editor';
  */
 import { FeedbackIcon } from '../../images/feedback-icon';
 
-export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
+export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
 	const { isDescendantOf } = useLayoutContext();
 
@@ -35,7 +35,7 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 						action: 'new_product',
 						showDescription: false,
 						title: __(
-							"How's your experience with the new product form?",
+							'What do you think of the new product form?',
 							'woocommerce'
 						),
 						firstQuestion: __(
@@ -44,6 +44,10 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 						),
 						secondQuestion: __(
 							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+						onsubmitLabel: __(
+							"Thanks for the feedback — we'll put it to good use!",
 							'woocommerce'
 						),
 						getExtraFieldsToBeShown: (
@@ -161,13 +165,12 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 					},
 					{
 						type: 'snackbar',
-						icon: <span>🌟</span>,
 					},
 					{
 						block_editor: isDescendantOf( 'product-block-editor' ),
 					}
 				);
-				onClose();
+				onClick();
 			} }
 			icon={ <FeedbackIcon /> }
 			iconPosition="right"

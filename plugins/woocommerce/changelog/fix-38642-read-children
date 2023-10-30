@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-improve get_children transient validation

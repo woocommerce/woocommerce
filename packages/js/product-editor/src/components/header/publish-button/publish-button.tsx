@@ -20,6 +20,7 @@ import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
 export function PublishButton( {
 	productStatus,
+	productType = 'product',
 	...props
 }: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
@@ -28,12 +29,16 @@ export function PublishButton( {
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 
 	const publishButtonProps = usePublish( {
+		productType,
 		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			recordProductEvent( 'product_update', savedProduct );
+			const isPublished =
+				productType === 'product' ? productStatus === 'publish' : true;
 
-			const isPublished = productStatus === 'publish';
+			if ( isPublished ) {
+				recordProductEvent( 'product_update', savedProduct );
+			}
 
 			const noticeContent = isPublished
 				? __( 'Product updated.', 'woocommerce' )

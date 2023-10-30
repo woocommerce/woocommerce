@@ -11,6 +11,7 @@ import { Modal, Button } from '@wordpress/components';
  */
 import PageControl from './page-control';
 import type { GuideProps } from './types';
+import './style.scss';
 
 /*
  * This component was copied from @wordpress/components since we needed
@@ -90,6 +91,7 @@ function Guide( {
 					{ canGoBack && (
 						<Button
 							className="components-guide__back-button"
+							variant="tertiary"
 							onClick={ goBack }
 						>
 							{ __( 'Previous', 'woocommerce' ) }
@@ -98,6 +100,7 @@ function Guide( {
 					{ canGoForward && (
 						<Button
 							className="components-guide__forward-button"
+							variant="primary"
 							onClick={ goForward }
 						>
 							{ __( 'Next', 'woocommerce' ) }
@@ -106,6 +109,7 @@ function Guide( {
 					{ ! canGoForward && (
 						<Button
 							className="components-guide__finish-button"
+							variant="primary"
 							href={ finishButtonLink }
 							target={ finishButtonLink ? '_blank' : undefined }
 							rel={ finishButtonLink ? 'noopener' : undefined }

@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
 /**
  * This class adds actions to track usage of WooCommerce Products.
  */
@@ -230,18 +232,20 @@ class WC_Products_Tracking {
 	 * @return array
 	 */
 	private static function get_possible_product_type_options_ids() {
-		$product_type_options_ids = array_merge(
+		$product_type_options_ids =
 			array_values(
 				array_map(
 					function ( $product_type_option ) {
 						return $product_type_option['id'];
 					},
 					/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-					apply_filters( 'product_type_options', array() )
+					apply_filters(
+						'product_type_options',
+						wc_get_default_product_type_options(),
+					)
+					/* phpcs: enable */
 				)
-			),
-			array( '_downloadable', '_virtual' )
-		);
+			);
 
 		return $product_type_options_ids;
 	}
@@ -327,6 +331,7 @@ class WC_Products_Tracking {
 			'product_type_options' => $product_type_options_string,
 			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
+			'source'               => apply_filters( 'woocommerce_product_source', '' ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',

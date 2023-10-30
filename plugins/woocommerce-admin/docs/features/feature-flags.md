@@ -31,7 +31,7 @@ To check if a feature is enabled, you can simplify check the boolean value of a 
 We also expose CSS classes on the `body` tag, so that you can target specific feature states when they are enabled:
 
 ```
-<body class="wp-admin woocommerce-page woocommerce-feature-enabled-activity-panels  ....">
+<body class="wp-admin woocommerce-admin-page woocommerce-feature-enabled-activity-panels  ....">
 ```
 
 ## Basic Use - Server

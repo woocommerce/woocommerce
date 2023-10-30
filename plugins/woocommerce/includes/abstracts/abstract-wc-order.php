@@ -1963,7 +1963,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$subtotal = floatval( $item->get_subtotal() ) / $item->get_quantity();
 			}
 
-			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
+			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );

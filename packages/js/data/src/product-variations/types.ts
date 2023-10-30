@@ -55,7 +55,7 @@ export interface ProductVariationImage {
 
 export type ProductVariation = Omit<
 	Product,
-	'name' | 'slug' | 'attributes' | 'images' | 'manage_stock'
+	'slug' | 'attributes' | 'images' | 'manage_stock'
 > & {
 	attributes: ProductVariationAttribute[];
 	/**
@@ -70,6 +70,10 @@ export type ProductVariation = Omit<
 	 * @default false
 	 */
 	manage_stock: boolean | 'parent';
+	/**
+	 * The product id this variation belongs to
+	 */
+	parent_id: number;
 };
 
 type Query = Omit< ProductQuery, 'name' >;
@@ -93,6 +97,11 @@ export type ProductVariationSelectors = CrudSelectors<
 >;
 
 export type ActionDispatchers = DispatchFromMap< ProductVariationActions >;
+
+export type GenerateRequest = {
+	delete?: boolean;
+	default_values?: Partial< ProductVariation >;
+};
 
 export type BatchUpdateRequest = {
 	create?: Partial< Omit< ProductVariation, 'id' > >[];

@@ -7,8 +7,9 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,7 +40,6 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
 		'no_secure_connection'               => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
 		'redirect_download_method'           => 'redirect_download_method_notice',
 		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
@@ -57,7 +57,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_php74_required_notice' ) );
+		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -120,48 +120,77 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
-		self::maybe_add_php74_required_notice();
+		self::maybe_add_legacy_api_removal_notice();
 	}
 
 	// phpcs:disable Generic.Commenting.Todo.TaskFound
 
 	/**
-	 * Add an admin notice about the bump of the required PHP version in WooCommerce 8.2
-	 * if the current PHP version is too old.
+	 * Add an admin notice about the removal of the Legacy REST API if the said API is enabled,
+	 * and a notice about soon to be unsupported webhooks with Legacy API payload if at least one of these exist.
 	 *
-	 * TODO: Remove this method in WooCommerce 8.2.
+	 * TODO: Change this method in WooCommerce 9.0 so that it checks if the Legacy REST API extension is installed, and if not, it points to the extension URL in the WordPress plugins directory.
 	 */
-	private static function maybe_add_php74_required_notice() {
-		if ( version_compare( phpversion(), '7.4', '>=' ) ) {
+	private static function maybe_add_legacy_api_removal_notice() {
+		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
 			return;
 		}
 
-		self::add_custom_notice(
-			'php74_required_in_woo_82',
-			sprintf(
-				'%s%s',
+		if ( 'yes' === get_option( 'woocommerce_api_enabled' ) ) {
+			self::add_custom_notice(
+				'legacy_api_removed_in_woo_90',
 				sprintf(
-					'<h4>%s</h4>',
-					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
-				),
-				sprintf(
-				// translators: Placeholder is a URL.
-					wpautop( wp_kses_data( __( 'WooCommerce 8.2, scheduled for <b>October 2023</b>, will require PHP 7.4 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
-					'https://developer.woocommerce.com/2023/06/05/new-requirement-for-woocommerce-8-2-php-7-4/'
+					'%s%s',
+					sprintf(
+						'<h4>%s</h4>',
+						esc_html__( 'The WooCommerce Legacy REST API will be removed soon', 'woocommerce' )
+					),
+					sprintf(
+					// translators: Placeholders are URLs.
+						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. A separate WooCommerce extension will be available to keep it enabled. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
+						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					)
 				)
-			)
-		);
+			);
+		}
+
+		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 ) {
+			self::add_custom_notice(
+				'legacy_webhooks_unsupported_in_woo_90',
+				sprintf(
+					'%s%s',
+					sprintf(
+						'<h4>%s</h4>',
+						esc_html__( 'WooCommerce webhooks that use the Legacy REST API will be unsupported soon', 'woocommerce' )
+					),
+					sprintf(
+					// translators: Placeholders are URLs.
+						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. A separate WooCommerce extension will be available to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
+						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					)
+				)
+			);
+		}
 	}
 
 	/**
-	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 8.2
-	 * if the current PHP version is good.
+	 * Remove the admin notice about the removal of the Legacy REST API if the said API is disabled
+	 * or if the Legacy REST API extension is installed, and remove the notice about Legacy webhooks
+	 * if no such webhooks exist anymore or if the Legacy REST API extension is installed.
 	 *
-	 * TODO: Remove this method in WooCommerce 8.2.
+	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
 	 */
-	private static function maybe_remove_php74_required_notice() {
-		if ( version_compare( phpversion(), '7.4', '>=' ) && self::has_notice( 'php74_required_in_woo_82' ) ) {
-			self::remove_notice( 'php74_required_in_woo_82' );
+	private static function maybe_remove_legacy_api_removal_notice() {
+		$plugin_is_active = is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
+
+		if ( self::has_notice( 'legacy_api_removed_in_woo_90' ) && ( $plugin_is_active || 'yes' !== get_option( 'woocommerce_api_enabled' ) ) ) {
+			self::remove_notice( 'legacy_api_removed_in_woo_90' );
+		}
+
+		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( $plugin_is_active || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
+			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
 		}
 	}
 
@@ -475,45 +504,12 @@ class WC_Admin_Notices {
 	/**
 	 * Notice about WordPress and PHP minimum requirements.
 	 *
+	 * @deprecated 8.2.0 WordPress and PHP minimum requirements notices are no longer shown.
+	 *
 	 * @since 3.6.5
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
-			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
-			return;
-		}
-
-		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
-		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
-
-		// Both PHP and WordPress up to date version => no notice.
-		if ( ! $old_php && ! $old_wp ) {
-			return;
-		}
-
-		if ( $old_php && $old_wp ) {
-			$msg = sprintf(
-				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION,
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		} elseif ( $old_php ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum PHP version */
-				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_PHP_VERSION
-			);
-		} elseif ( $old_wp ) {
-			$msg = sprintf(
-				/* translators: %s: Minimum WordPress version */
-				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
-				WC_NOTICE_MIN_WP_VERSION
-			);
-		}
-
-		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
 	}
 
 	/**

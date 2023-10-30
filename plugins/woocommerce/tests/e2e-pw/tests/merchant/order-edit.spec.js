@@ -5,7 +5,7 @@ const uuid = require( 'uuid' );
 test.describe( 'Edit order', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	let orderId;
+	let orderId, orderToCancel;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -21,6 +21,13 @@ test.describe( 'Edit order', () => {
 			.then( ( response ) => {
 				orderId = response.data.id;
 			} );
+		await api
+			.post( 'orders', {
+				status: 'processing',
+			} )
+			.then( ( response ) => {
+				orderToCancel = response.data.id;
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -31,6 +38,7 @@ test.describe( 'Edit order', () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ orderToCancel }`, { force: true } );
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
@@ -56,8 +64,8 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// update order status to Completed
-		await page.selectOption( '#order_status', 'wc-completed' );
-		await page.click( 'button.save_order' );
+		await page.locator( '#order_status' ).selectOption( 'wc-completed' );
+		await page.locator( 'button.save_order' ).click();
 
 		// verify order status changed and note added
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
@@ -66,6 +74,31 @@ test.describe( 'Edit order', () => {
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
 		).toContainText( 'Order status changed from Processing to Completed.' );
+
+		// load the orders listing and confirm order is completed
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `:is(#order-${orderId}, #post-${orderId})` ).getByRole( 'cell', { name: 'Completed' }) ).toBeVisible();
+	} );
+
+	test( 'can update order status to cancelled', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderToCancel }&action=edit` );
+
+		// update order status to Completed
+		await page.locator( '#order_status' ).selectOption( 'Cancelled' );
+		await page.locator( 'button.save_order' ).click();
+
+		// verify order status changed and note added
+		await expect( page.locator( '#order_status' ) ).toHaveValue(
+			'wc-cancelled'
+		);
+		await expect( page.getByText( 'Order status changed from Processing to Cancelled.' ) ).toBeVisible();
+
+		// load the orders listing and confirm order is cancelled
+		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+
+		await expect( page.locator( `:is(#order-${orderToCancel}, #post-${orderToCancel})` ).getByRole( 'cell', { name: 'Cancelled' }) ).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
@@ -73,8 +106,8 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// update order date
-		await page.fill( 'input[name=order_date]', '2018-12-14' );
-		await page.click( 'button.save_order' );
+		await page.locator( 'input[name=order_date]' ).fill( '2018-12-14' );
+		await page.locator( 'button.save_order' ).click();
 
 		// verify changes
 		await expect(
@@ -85,6 +118,109 @@ test.describe( 'Edit order', () => {
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);
+	} );
+
+	test( 'can add and delete order notes', async ( { page } ) => {
+		// open order we created
+		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.on( 'dialog', dialog => dialog.accept() );
+
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+
+		// add note to customer
+		// add an order note
+		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
+		await page.getByLabel('Note type').selectOption( 'Note to customer' );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+
+		// verify the note saved
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a note to the customer.' ) ).toBeVisible();
+
+		// delete the note
+		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+
+		// verify the note is gone
+		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+	} );
+
+	test( 'can load billing details', async ( { page, baseURL } ) => {
+		let customerId = 0;
+
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+
+		await api
+			.post( 'customers', {
+				email: 'archie123@email.addr',
+				first_name: 'Archie',
+				last_name: 'Greenback',
+				username: 'big.archie',
+				billing: {
+					first_name: 'Archibald',
+					last_name: 'Greenback',
+					company: 'Automattic',
+					country: 'US',
+					address_1: 'address1',
+					address_2: 'address2',
+					city: 'San Francisco',
+					state: 'CA',
+					postcode: '94107',
+					phone: '123456789',
+					email: 'archie123@email.addr',
+				}
+			} )
+			.then( ( response ) => {
+				customerId = response.data.id;
+			} );
+
+		// Open our test order and select the customer we just created.
+		await page.goto( `wp-admin/post.php?post=${orderId}&action=edit` );
+
+		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
+		const response = await page.evaluate(
+			async ( customerId ) => {
+				const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
+					jQuery.ajax( {
+						url: woocommerce_admin_meta_boxes.ajax_url,
+						data: {
+							user_id : customerId,
+							action  : 'woocommerce_get_customer_details',
+							security: woocommerce_admin_meta_boxes.get_customer_details_nonce
+						},
+						type: 'POST',
+						success: function( response ) {
+							resolve( response );
+						}
+					} );
+				} );
+
+				return await simulateCustomerDetailsCall;
+			},
+			customerId
+		);
+
+		// Response should contain billing address info, but should not contain user meta data.
+		expect( 'billing' in response ).toBeTruthy();
+		expect( response.billing.first_name ).toContain( 'Archibald' );
+		expect( response.meta_data ).toBeUndefined();
+
+		// Clean-up.
+		await api.delete( `customers/${ customerId }`, { force: true } );
 	} );
 } );
 
@@ -224,11 +360,13 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		);
 
 		// add downloadable product permissions
-		await page.type( 'input.select2-search__field', productName );
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
-		await page.click( 'button.grant_access' );
+		await page.locator( 'input.select2-search__field' ).type( productName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
+		await page.locator( 'button.grant_access' ).click();
 
 		// verify new downloadable product permission details
 		await expect(
@@ -260,11 +398,15 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// add downloadable product permissions
-		await page.type( 'input.select2-search__field', product2Name );
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
-		await page.click( 'button.grant_access' );
+		await page
+			.locator( 'input.select2-search__field' )
+			.type( product2Name );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
+		await page.locator( 'button.grant_access' ).click();
 
 		// verify new downloadable product permission details
 		await expect(
@@ -294,25 +436,31 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// expand product download permissions
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short',
-			expectedDownloadsRemaining
-		);
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short',
-			expectedDownloadsExpirationDate
-		);
-		await page.click( 'button.save_order' );
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+			)
+			.fill( expectedDownloadsRemaining );
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+			)
+			.fill( expectedDownloadsExpirationDate );
+		await page.locator( 'button.save_order' ).click();
 
 		// verify new downloadable product permissions
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
@@ -330,9 +478,11 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// expand product download permissions
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 
 		// verify prior state before revoking
 		await expect(
@@ -343,7 +493,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 
 		// click revoke access
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'button.revoke_access' );
+		await page.locator( 'button.revoke_access' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// verify permissions gone
@@ -365,21 +515,26 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 
 		// set the download limit to 0
 		// expand product download permissions
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short',
-			'0'
-		);
-		await page.click( 'button.save_order' );
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+			)
+			.fill( '0' );
+		await page.locator( 'button.save_order' ).click();
 
 		// get the download link
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 		const downloadPage = await page
 			.locator( 'a#copy-download-link' )
 			.getAttribute( 'href' );
@@ -401,21 +556,26 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 
 		// set the download limit to 0
 		// expand product download permissions
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short',
-			'2018-12-14'
-		);
-		await page.click( 'button.save_order' );
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+			)
+			.fill( '2018-12-14' );
+		await page.locator( 'button.save_order' ).click();
 
 		// get the download link
-		await page.click(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+			)
+			.click();
 		const downloadPage = await page
 			.locator( 'a#copy-download-link' )
 			.getAttribute( 'href' );

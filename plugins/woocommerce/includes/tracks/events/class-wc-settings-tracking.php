@@ -89,13 +89,25 @@ class WC_Settings_Tracking {
 		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
 			$this->allowed_options[] = $option['id'];
 		}
-		if ( 'add' === $option['action'] ) {
-			$this->added_options[] = $option['id'];
-		} elseif ( 'delete' === $option['action'] ) {
-			$this->deleted_options[] = $option['id'];
-		} elseif ( ! in_array( $option['id'], $this->updated_options, true ) ) {
+		if ( isset( $option['action'] ) ) {
+			if ( 'add' === $option['action'] ) {
+				$this->added_options[] = $option['id'];
+			} elseif ( 'delete' === $option['action'] ) {
+				$this->deleted_options[] = $option['id'];
+			} elseif ( ! in_array( $option['id'], $this->updated_options, true ) ) {
+				$this->updated_options[] = $option['id'];
+			}
+		} elseif ( isset( $option['value'] ) ) {
+			if ( 'select' === $option['type'] ) {
+				$this->modified_options[ $option['id'] ] = $option['value'];
+
+			} elseif ( 'checkbox' === $option['type'] ) {
+				$option_state                             = 'yes' === $option['value'] ? 'enabled' : 'disabled';
+				$this->toggled_options[ $option_state ][] = $option['id'];
+			}
 			$this->updated_options[] = $option['id'];
 		}
+
 	}
 
 	/**

@@ -68,6 +68,15 @@ export const MultipleSelector = ( {
 							inputValue: state.inputValue,
 							highlightedIndex: state.highlightedIndex,
 						};
+					case selectControlStateChangeTypes.InputBlur:
+						if ( state.isOpen && actionAndChanges.selectItem ) {
+							// Prevent the menu from closing when clicking on a selected item.
+							return {
+								...changes,
+								isOpen: true,
+							};
+						}
+						return changes;
 					default:
 						return changes;
 				}

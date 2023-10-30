@@ -96,6 +96,7 @@ Base.args = {
 	selectAllLabel: 'All countries',
 	includeParent: false,
 	alwaysShowPlaceholder: false,
+	individuallySelectParent: false,
 };
 
 Base.argTypes = {

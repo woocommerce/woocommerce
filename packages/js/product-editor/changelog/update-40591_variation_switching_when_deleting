@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add useVariationSwitcher hook and make use of it in the VariationSwitcherFooter.

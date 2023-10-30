@@ -209,7 +209,7 @@ class WC_AJAX {
 				function( $response, $data ) use ( $ajax_callback ) {
 					return call_user_func_array( array( __CLASS__, $ajax_callback ), func_get_args() );
 				},
-				10,
+				11,
 				2
 			);
 		}
@@ -611,6 +611,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$product_type = isset( $_POST['product_type'] ) ? sanitize_text_field( wp_unslash( $_POST['product_type'] ) ) : 'simple';
+
 		$i             = absint( $_POST['i'] );
 		$metabox_class = array();
 		$attribute     = new WC_Product_Attribute();
@@ -619,7 +621,13 @@ class WC_AJAX {
 		$attribute->set_name( sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) );
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
-		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 1 ) );
+		$attribute->set_variation(
+			apply_filters(
+				'woocommerce_attribute_default_is_variation',
+				'variable' === $product_type ? 1 : 0,
+				$product_type
+			)
+		);
 		/* phpcs: enable */
 
 		if ( $attribute->is_taxonomy() ) {
@@ -962,6 +970,8 @@ class WC_AJAX {
 		$data                  = $customer->get_data();
 		$data['date_created']  = $data['date_created'] ? $data['date_created']->getTimestamp() : null;
 		$data['date_modified'] = $data['date_modified'] ? $data['date_modified']->getTimestamp() : null;
+
+		unset( $data['meta_data'] );
 
 		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $data, $customer, $user_id );
 		wp_send_json( $customer_data );
@@ -3607,7 +3617,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function order_refresh_lock( $response, $data ) : array {
+	private static function order_refresh_lock( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->refresh_lock_ajax( $response, $data );
 	}
 
@@ -3620,7 +3630,7 @@ class WC_AJAX {
 	 * @param array $data     Data sent through the heartbeat.
 	 * @return array Response to be sent.
 	 */
-	private static function check_locked_orders( $response, $data ) : array {
+	private static function check_locked_orders( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
 	}
 

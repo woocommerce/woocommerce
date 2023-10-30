@@ -37,7 +37,10 @@ export const Plugins = ( {
 	navigationProgress,
 	sendEvent,
 }: {
-	context: CoreProfilerStateMachineContext;
+	context: Pick<
+		CoreProfilerStateMachineContext,
+		'pluginsAvailable' | 'pluginsInstallationErrors' | 'pluginsSelected'
+	>;
 	sendEvent: (
 		payload:
 			| PluginsInstallationRequestedEvent
@@ -48,7 +51,13 @@ export const Plugins = ( {
 } ) => {
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
-	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_activated ) );
+	>(
+		context.pluginsAvailable.filter(
+			context.pluginsInstallationErrors.length
+				? ( plugin ) => context.pluginsSelected.includes( plugin.key )
+				: ( plugin ) => ! plugin.is_activated
+		)
+	);
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
 		setSelectedPlugins(
@@ -63,13 +72,33 @@ export const Plugins = ( {
 			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
 	};
+
 	const submitInstallationRequest = () => {
+		const selectedPluginSlugs = selectedPlugins.map( ( plugin ) =>
+			plugin.key.replace( ':alt', '' )
+		);
+
+		const pluginsShown: string[] = [];
+		const pluginsUnselected: string[] = [];
+
+		context.pluginsAvailable.forEach( ( plugin ) => {
+			const pluginSlug = plugin.key.replace( ':alt', '' );
+			pluginsShown.push( pluginSlug );
+
+			if (
+				! plugin.is_activated &&
+				! selectedPluginSlugs.includes( pluginSlug )
+			) {
+				pluginsUnselected.push( pluginSlug );
+			}
+		} );
+
 		return sendEvent( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				plugins: selectedPlugins.map( ( plugin ) =>
-					plugin.key.replace( ':alt', '' )
-				),
+				pluginsShown,
+				pluginsSelected: selectedPluginSlugs,
+				pluginsUnselected,
 			},
 		} );
 	};

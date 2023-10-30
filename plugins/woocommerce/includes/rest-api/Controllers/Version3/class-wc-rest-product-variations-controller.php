@@ -40,9 +40,18 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'/' . $this->rest_base . '/generate',
 			array(
 				'args'   => array(
-					'product_id' => array(
+					'product_id'     => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
+					),
+					'delete'         => array(
+						'description' => __( 'Deletes unused variations.', 'woocommerce' ),
+						'type'        => 'boolean',
+					),
+					'default_values' => array(
+						'description' => __( 'Default values for generated variations.', 'woocommerce' ),
+						'type'        => 'object',
+						'properties'  => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 					),
 				),
 				array(
@@ -90,7 +99,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
 			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
 			'tax_status'            => $object->get_tax_status(),
-			'tax_class'             => $object->get_tax_class(),
+			'tax_class'             => $object->get_tax_class( $context ),
 			'manage_stock'          => $object->managing_stock(),
 			'stock_quantity'        => $object->get_stock_quantity(),
 			'stock_status'          => $object->get_stock_status(),
@@ -110,6 +119,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
+			'name'                  => wc_get_formatted_variation( $object, true, false, false ),
+			'parent_id'             => $object->get_parent_id(),
 		);
 
 		$data     = $this->add_additional_fields_to_object( $data, $request );
@@ -123,6 +134,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * The dynamic portion of the hook name, $this->post_type,
 		 * refers to object type being prepared for the response.
 		 *
+		 * @since 4.5.0
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
@@ -341,6 +353,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
+		 * @since 4.5.0
 		 * @param WC_Data         $variation Object object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param bool            $creating  If is creating a new object.
@@ -401,6 +414,15 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 				if ( is_wp_error( $upload ) ) {
+					/**
+					 * Filter to check if it should supress the image upload error, false by default.
+					 *
+					 * @since 4.5.0
+					 * @param bool false   If it should suppress.
+					 * @param array         $upload Uploaded image array.
+					 * @param int id   Variation id.
+					 * @param array    Array of image to set.
+					 */
 					if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
 						throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
 					}
@@ -639,7 +661,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'low_stock_amount'       => array(
+				'low_stock_amount'      => array(
 					'description' => __( 'Low Stock amount for the variation.', 'woocommerce' ),
 					'type'        => array( 'integer', 'null' ),
 					'context'     => array( 'view', 'edit' ),
@@ -812,9 +834,29 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
-		// Filter by local attributes.
+		/**
+		 * @deprecated 8.1.0 replaced by attributes.
+		 * Filter by local attributes.
+		 */
 		if ( ! empty( $request['local_attributes'] ) && is_array( $request['local_attributes'] ) ) {
+			wc_deprecated_argument( 'local_attributes', '8.1', 'Use "attributes" instead.' );
 			foreach ( $request['local_attributes'] as $attribute ) {
+				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
+					continue;
+				}
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					$args,
+					array(
+						'key'   => 'attribute_' . $attribute['attribute'],
+						'value' => $attribute['term'],
+					)
+				);
+			}
+		}
+
+		// Filter by attributes.
+		if ( ! empty( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
+			foreach ( $request['attributes'] as $attribute ) {
 				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
 					continue;
 				}
@@ -860,6 +902,43 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+		}
+
+		// Price filter.
+		if ( is_bool( $request['has_price'] ) ) {
+			if ( $request['has_price'] ) {
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+					$args,
+					array(
+						'relation' => 'AND',
+						array(
+							'key'     => '_price',
+							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => '_price',
+							'compare' => '!=',
+							'value'   => null,
+						),
+					)
+				);
+			} else {
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+					$args,
+					array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_price',
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'     => '_price',
+							'compare' => '=',
+							'value'   => null,
+						),
+					)
+				);
+			}
 		}
 
 		// Filter product based on stock_status.
@@ -923,7 +1002,66 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['has_price'] = array(
+			'description'       => __( 'Limit result set to products with or without price.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['attributes'] = array(
+			'description' => __( 'Limit result set to products with specified attributes.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type'       => 'object',
+				'properties' => array(
+					'attribute' => array(
+						'type'        => 'string',
+						'description' => __( 'Attribute slug.', 'woocommerce' ),
+					),
+					'term'      => array(
+						'type'        => 'string',
+						'description' => __( 'Attribute term.', 'woocommerce' ),
+					),
+				),
+			),
+		);
+
 		return $params;
+	}
+
+	/**
+	 * Deletes all unmatched variations (aka duplicates).
+	 *
+	 * @param  WC_Product $product Variable product.
+	 * @return int        Number of deleted variations.
+	 */
+	private function delete_unmatched_product_variations( $product ) {
+		$deleted_count = 0;
+
+		if ( ! $product ) {
+			return $deleted_count;
+		}
+
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+
+		// Get existing variations so we don't create duplicates.
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+
+		$possible_attribute_combinations = array_reverse( wc_array_cartesian( $attributes ) );
+
+		foreach ( $existing_variations as $existing_variation ) {
+			$matching_attribute_key = array_search( $existing_variation->get_attributes(), $possible_attribute_combinations ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+			if ( false !== $matching_attribute_key ) {
+				// We only want one possible variation for each possible attribute combination.
+				unset( $possible_attribute_combinations[ $matching_attribute_key ] );
+				continue;
+			}
+			$existing_variation->delete( true );
+			$deleted_count ++;
+		}
+
+		return $deleted_count;
 	}
 
 	/**
@@ -944,8 +1082,14 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		$response          = array();
 		$product           = wc_get_product( $product_id );
+		$default_values    = isset( $request['default_values'] ) ? $request['default_values'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
+
+		if ( isset( $request['delete'] ) && $request['delete'] ) {
+			$deleted_count             = $this->delete_unmatched_product_variations( $product );
+			$response['deleted_count'] = $deleted_count;
+		}
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 

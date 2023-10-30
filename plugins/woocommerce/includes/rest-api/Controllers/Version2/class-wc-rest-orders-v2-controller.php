@@ -804,7 +804,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param WC_Order $order  Order data.
 	 * @param array    $posted Posted data.
-	 * @param string   $type   Address type.
+	 * @param string   $type   Type of address; 'billing' or 'shipping'.
 	 */
 	protected function update_address( $order, $posted, $type = 'billing' ) {
 		foreach ( $posted as $key => $value ) {

@@ -218,6 +218,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Reset all the class registration replacements in the dependency injection container,
+	 * so any further "get" will return an instance of the class originally registered.
+	 * For this to work with shared definitions 'reset_container_resolutions' is required too.
+	 */
+	public function reset_container_replacements() {
+		wc_get_container()->reset_all_replacements();
+	}
+
+	/**
 	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
 	 */
 	public function reset_legacy_proxy_mocks() {
