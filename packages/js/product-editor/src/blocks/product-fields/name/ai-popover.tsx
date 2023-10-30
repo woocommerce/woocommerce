@@ -87,10 +87,12 @@ export function AIPopover( {
 							reason: '',
 						},
 						index: items.length + 1,
-						onClick: () => onGetMoreSuggestions(),
 						className:
 							'woocommerce-product-form-name-ai-suggestions__button',
 					} ) }
+					onClick={ () => {
+						onGetMoreSuggestions();
+					} }
 				>
 					<div className="woocommerce-product-form-name-ai-suggestions__flex">
 						<p>Get more suggestions</p>
