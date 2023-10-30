@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/sidebar-navigation-screen-logo';
+
 export function sendMessageToParent( message ) {
 	window.parent.postMessage( message, '*' );
 }
@@ -99,3 +104,17 @@ export function attachIframeListeners( iframe ) {
 		}
 	} );
 }
+
+export const setLogoWidth = ( content, width = DEFAULT_LOGO_WIDTH ) => {
+	const logoPatternReg = /<!-- wp:site-logo\s*(\{.*?\})?\s*\/-->/g;
+
+	// Replace the logo width with the default width.
+	return content.replaceAll( logoPatternReg, ( match, group ) => {
+		if ( group ) {
+			const json = JSON.parse( group );
+			json.width = width;
+			return `<!-- wp:site-logo ${ JSON.stringify( json ) } /-->`;
+		}
+		return `<!-- wp:site-logo {"width":${ width }} /-->`;
+	} );
+};

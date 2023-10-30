@@ -34,18 +34,16 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { LogoBlockContext } from '../logo-block-context';
+import {
+	useLogoAttributes,
+	LogoAttributes,
+} from '../hooks/use-logo-attributes';
 
 const MIN_SIZE = 20;
 const ALLOWED_MEDIA_TYPES = [ 'image' ];
-
-type LogoAttributes = Partial< {
-	align: string;
-	width: number;
-	height: number;
-	isLink: boolean;
-	linkTarget: string;
-	shouldSyncIcon: boolean;
-} >;
+// Set the default width to a responsible size.
+// Note that this width is also set in the attached frontend CSS file and overrides when we update the template.
+export const DEFAULT_LOGO_WIDTH = 60;
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -178,11 +176,7 @@ const LogoSettings = ( {
 
 	const maxWidth = 200;
 
-	// Set the default width to a responsible size.
-	// Note that this width is also set in the attached frontend CSS file.
-	const defaultWidth = 60;
-
-	const currentWidth = width || defaultWidth;
+	const currentWidth = width || DEFAULT_LOGO_WIDTH;
 	const ratio = naturalWidth / naturalHeight;
 	const minWidth =
 		naturalWidth < naturalHeight ? MIN_SIZE : Math.ceil( MIN_SIZE * ratio );
@@ -213,7 +207,10 @@ const LogoSettings = ( {
 				}
 				min={ minWidth }
 				max={ maxWidth }
-				initialPosition={ Math.min( defaultWidth, maxWidthBuffer ) }
+				initialPosition={ Math.min(
+					DEFAULT_LOGO_WIDTH,
+					maxWidthBuffer
+				) }
 				value={ currentWidth }
 				disabled={ ! isResizable }
 			/>
@@ -362,36 +359,7 @@ const LogoEdit = ( {
 export const SidebarNavigationScreenLogo = () => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
 	const { logoBlockIds } = useContext( LogoBlockContext );
-
-	const {
-		attributes,
-		isAttributesLoading,
-	}: {
-		attributes: LogoAttributes;
-		isAttributesLoading: boolean;
-	} = useSelect(
-		( select ) => {
-			const logoBlocks =
-				// @ts-ignore No types for this exist yet.
-				select( blockEditorStore ).getBlocksByClientId( logoBlockIds );
-
-			const _isAttributesLoading =
-				! logoBlocks.length || logoBlocks[ 0 ] === null;
-
-			if ( _isAttributesLoading ) {
-				return {
-					attributes: {},
-					isAttributesLoading: _isAttributesLoading,
-				};
-			}
-
-			return {
-				attributes: logoBlocks[ 0 ].attributes,
-				isAttributesLoading: _isAttributesLoading,
-			};
-		},
-		[ logoBlockIds ]
-	);
+	const { attributes, isAttributesLoading } = useLogoAttributes();
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
 		useSelect( ( select ) => {
