@@ -1,0 +1,21 @@
+name: 'Plugin Check'
+on:
+  pull_request:
+  push:
+    branches:
+    - trunk
+
+jobs:
+  prepare:
+    name: "Check plugin"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run plugin check
+        uses: swissspidy/wp-plugin-check-action@main
+        with:
+            build-dir: $GITHUB_WORKSPACE/plugins/woocommerce
