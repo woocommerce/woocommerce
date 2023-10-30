@@ -53,6 +53,8 @@ jobs:
               env:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  UPDATE_WC: nightly
 
     e2e-tests:
         name: E2E tests on nightly build
