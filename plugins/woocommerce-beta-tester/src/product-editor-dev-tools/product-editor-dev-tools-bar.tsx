@@ -24,6 +24,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { BlockInspector } from './block-inspector';
 import { Help } from './help';
 import { Product } from './product';
+import { TabPanel } from './tab-panel';
 import { useFocusedBlock } from './hooks/use-focused-block';
 
 function TabButton( {
@@ -120,13 +121,15 @@ export function ProductEditorDevToolsBar( {
 					</div>
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-bar__panel">
-					{ selectedTab === 'inspector' && (
+					<TabPanel isSelected={ selectedTab === 'inspector' }>
 						<BlockInspector blockInfo={ blockInfo } />
-					) }
-					{ selectedTab === 'product' && (
+					</TabPanel>
+					<TabPanel isSelected={ selectedTab === 'product' }>
 						<Product evaluationContext={ evaluationContext } />
-					) }
-					{ selectedTab === 'help' && <Help /> }
+					</TabPanel>
+					<TabPanel isSelected={ selectedTab === 'help' }>
+						<Help />
+					</TabPanel>
 				</div>
 			</div>
 		</WooFooterItem>
