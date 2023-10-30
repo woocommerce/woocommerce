@@ -15,10 +15,10 @@ import type { Currency } from '@woocommerce/types';
  */
 import './style.scss';
 
-interface FormattedMonetaryAmountProps
-	extends Omit< NumberFormatProps, 'onValueChange' > {
+export interface FormattedMonetaryAmountProps
+	extends Omit< NumberFormatProps, 'onValueChange' | 'displayType' > {
 	className?: string;
-	displayType?: NumberFormatProps[ 'displayType' ];
+	displayType?: NumberFormatProps[ 'displayType' ] | undefined;
 	allowNegative?: boolean;
 	isAllowed?: ( formattedValue: NumberFormatValues ) => boolean;
 	value: number | string; // Value of money amount.
@@ -55,6 +55,8 @@ type CustomFormattedMonetaryAmountProps = Omit<
  * FormattedMonetaryAmount component.
  *
  * Takes a price and returns a formatted price using the NumberFormat component.
+ *
+ * More detailed docs on the additional props can be found here:https://s-yadav.github.io/react-number-format/docs/intro
  */
 const FormattedMonetaryAmount = ( {
 	className,
