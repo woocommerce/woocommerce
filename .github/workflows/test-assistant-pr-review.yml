@@ -1,7 +1,7 @@
 name: Send PRs that require review to Slack
 
 on:
-  pull_request:
+  pull_request_target:
     types: [review_requested]
   issue_comment:
     types: [created]
