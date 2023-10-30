@@ -29,7 +29,15 @@ export function Expressions( {
 	};
 
 	const evaluateExpression = ( expression: string ) => {
-		return String( evaluate( expression, evaluationContext ) );
+		let result;
+
+		try {
+			result = evaluate( expression, evaluationContext );
+		} catch ( error ) {
+			result = error;
+		}
+
+		return String( result );
 	};
 
 	return (
