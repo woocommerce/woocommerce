@@ -22,8 +22,17 @@
 	}
 
 	&__form-body {
+		min-height: $grid-unit-70;
 		max-height: 3 * $grid-unit-80;
 		overflow-y: auto;
+	}
+
+	&__loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: $grid-unit-70;
 	}
 
 	&__form-list {

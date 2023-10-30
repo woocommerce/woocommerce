@@ -1,10 +1,14 @@
 /**
  * External dependencies
  */
-import { FormEvent, KeyboardEvent, useEffect } from 'react';
-import { ProductAttribute } from '@woocommerce/data';
+import { FormEvent, KeyboardEvent, UIEvent, useEffect } from 'react';
+import {
+	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
-import { createElement, useState, useMemo } from '@wordpress/element';
+import { resolveSelect } from '@wordpress/data';
+import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Icon,
@@ -18,6 +22,7 @@ import {
 	Dropdown,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
+	Spinner,
 } from '@wordpress/components';
 
 /**
@@ -26,6 +31,7 @@ import {
 import { VariationsFilterProps } from './types';
 
 const MIN_OPTIONS_COUNT_FOR_SEARCHING = 10;
+const DEFAULT_TERMS_PER_PAGE = 10;
 
 export function VariationsFilter( {
 	initialValues,
@@ -33,11 +39,79 @@ export function VariationsFilter( {
 	onFilter,
 }: VariationsFilterProps ) {
 	const [ selection, setSelection ] =
-		useState< ProductAttribute[ 'options' ] >( initialValues );
+		useState< ProductAttributeTerm[ 'slug' ][] >( initialValues );
+	const [ options, setOptions ] = useState< ProductAttributeTerm[] >( [] );
+	const [ totalOptions, setTotalOptions ] = useState< number >( 0 );
+	const [ isLoading, setIsLoading ] = useState( false );
 	const [ search, setSearch ] = useState( '' );
+	const [ currentPage, setCurrentPage ] = useState( 1 );
 	const isDisabled = selection.length === 0;
 
+	async function fetchOptions(
+		attributeId: number,
+		search: string = '',
+		page: number = 1
+	) {
+		try {
+			setIsLoading( true );
+
+			const {
+				getProductAttributeTerms,
+				getProductAttributeTermsTotalCount,
+			} = resolveSelect(
+				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+			);
+
+			const sharedRequestArgs = {
+				attribute_id: attributeId,
+				search,
+			};
+
+			const terms = await getProductAttributeTerms<
+				ProductAttributeTerm[]
+			>( {
+				...sharedRequestArgs,
+				page,
+				per_page: DEFAULT_TERMS_PER_PAGE,
+			} );
+
+			const totalTerms =
+				await getProductAttributeTermsTotalCount< number >(
+					sharedRequestArgs
+				);
+
+			if ( page > 1 ) {
+				setOptions( ( current ) => [ ...current, ...terms ] );
+			} else {
+				setOptions( terms );
+			}
+			setTotalOptions( totalTerms );
+		} catch {
+		} finally {
+			setIsLoading( false );
+		}
+	}
+
+	useEffect( () => {
+		fetchOptions( attribute.id );
+	}, [ attribute.id ] );
+
 	useEffect( () => setSelection( initialValues ), [ initialValues ] );
+
+	async function handleScroll( event: UIEvent< HTMLDivElement > ) {
+		if ( isLoading || options.length >= totalOptions ) return;
+
+		const scrollableElement = event.currentTarget;
+
+		const scrollableHeight =
+			scrollableElement.scrollHeight - scrollableElement.clientHeight;
+
+		if ( scrollableElement.scrollTop >= scrollableHeight ) {
+			const nextPage = currentPage + 1;
+			await fetchOptions( attribute.id, search, nextPage );
+			setCurrentPage( nextPage );
+		}
+	}
 
 	function isOptionChecked( option: string ) {
 		return selection.includes( option );
@@ -94,23 +168,10 @@ export function VariationsFilter( {
 	const handleInputControlChange = useDebounce(
 		function handleInputControlChange( value: string ) {
 			setSearch( value );
+
+			fetchOptions( attribute.id, value );
 		},
 		300
-	);
-
-	const options = useMemo(
-		function getFilteredOptions() {
-			const escapedInputValue = search.replace(
-				/[.*+?^${}()|[\]\\]/g,
-				'\\$&'
-			);
-			const regexp = new RegExp( escapedInputValue, 'i' );
-
-			return attribute.options.filter( ( option ) =>
-				regexp.test( option )
-			);
-		},
-		[ attribute, search ]
 	);
 
 	const searchInputId = useInstanceId( InputControl, 'search' ) as string;
@@ -145,8 +206,7 @@ export function VariationsFilter( {
 					onSubmit={ submitHandler( onClose ) }
 					onReset={ resetHandler() }
 				>
-					{ attribute.options.length >
-						MIN_OPTIONS_COUNT_FOR_SEARCHING && (
+					{ totalOptions > MIN_OPTIONS_COUNT_FOR_SEARCHING && (
 						<div className="woocommerce-product-variations-filter__form-header">
 							<label
 								htmlFor={ searchInputId }
@@ -166,39 +226,49 @@ export function VariationsFilter( {
 							</label>
 						</div>
 					) }
-					<div className="woocommerce-product-variations-filter__form-body">
+					<div
+						className="woocommerce-product-variations-filter__form-body"
+						onScroll={ handleScroll }
+					>
 						{ options.length > 0 ? (
 							<ul className="woocommerce-product-variations-filter__form-list">
 								{ options.map( ( option ) => (
 									<li
-										key={ option }
-										value={ option }
+										key={ option.slug }
 										className="woocommerce-product-variations-filter__form-list-item"
 									>
 										<label
-											htmlFor={ `${ optionCheckboxId }-${ option }` }
+											htmlFor={ `${ optionCheckboxId }-${ option.slug }` }
 											className="woocommerce-product-variations-filter__form-list-item-label"
 										>
 											<CheckboxControl
-												id={ `${ optionCheckboxId }-${ option }` }
+												id={ `${ optionCheckboxId }-${ option.slug }` }
 												checked={ isOptionChecked(
-													option
+													option.slug
 												) }
 												onChange={ optionChangeHandler(
-													option
+													option.slug
 												) }
 											/>
-											<span>{ option }</span>
+											<span>{ option.name }</span>
 										</label>
 									</li>
 								) ) }
 							</ul>
 						) : (
-							<div className="woocommerce-product-variations-filter__form-list-empty">
-								{ __(
-									'No options were found for that search',
-									'woocommerce'
-								) }
+							! isLoading && (
+								<div className="woocommerce-product-variations-filter__form-list-empty">
+									{ __(
+										'No options were found for that search',
+										'woocommerce'
+									) }
+								</div>
+							)
+						) }
+
+						{ isLoading && (
+							<div className="woocommerce-product-variations-filter__loading">
+								<Spinner />
 							</div>
 						) }
 					</div>
