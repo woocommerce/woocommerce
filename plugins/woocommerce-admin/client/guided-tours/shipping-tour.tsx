@@ -251,7 +251,7 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										"Specify the areas you'd like to ship to! Give each zone a name, select the region(s) you'd like to include, and add available shipping methods. Your shipping regions can be as specific as a zip code, or as broad as a country.",
+										"Specify the areas you'd like to ship to! We added a few shipping zones for you based on your location, but you can manage them at any time. Give each zone a name, select the region(s) you'd like to include, and add available shipping methods. Your shipping regions can be as specific as a zip code, or as broad as a country.",
 										'woocommerce'
 									) }
 								</span>
