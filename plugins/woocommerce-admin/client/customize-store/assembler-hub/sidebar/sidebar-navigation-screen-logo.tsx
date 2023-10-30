@@ -38,12 +38,12 @@ import {
 	useLogoAttributes,
 	LogoAttributes,
 } from '../hooks/use-logo-attributes';
-
-const MIN_SIZE = 20;
-const ALLOWED_MEDIA_TYPES = [ 'image' ];
-// Set the default width to a responsible size.
-// Note that this width is also set in the attached frontend CSS file and overrides when we update the template.
-export const DEFAULT_LOGO_WIDTH = 60;
+import {
+	MIN_LOGO_SIZE,
+	DEFAULT_LOGO_WIDTH,
+	MAX_LOGO_WIDTH,
+	ALLOWED_MEDIA_TYPES,
+} from './constants';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -174,12 +174,12 @@ const LogoSettings = ( {
 	const isWideAligned = [ 'wide', 'full' ].includes( align );
 	const isResizable = ! isWideAligned && isLargeViewport;
 
-	const maxWidth = 200;
-
 	const currentWidth = width || DEFAULT_LOGO_WIDTH;
 	const ratio = naturalWidth / naturalHeight;
 	const minWidth =
-		naturalWidth < naturalHeight ? MIN_SIZE : Math.ceil( MIN_SIZE * ratio );
+		naturalWidth < naturalHeight
+			? MIN_LOGO_SIZE
+			: Math.ceil( MIN_LOGO_SIZE * ratio );
 
 	// With the current implementation of ResizableBox, an image needs an
 	// explicit pixel value for the max-width. In absence of being able to
@@ -190,7 +190,7 @@ const LogoSettings = ( {
 	// main column, though not infinitely.
 	// @todo It would be good to revisit this once a content-width variable
 	// becomes available.
-	const maxWidthBuffer = maxWidth * 2.5;
+	const maxWidthBuffer = MAX_LOGO_WIDTH * 2.5;
 
 	return (
 		<div className="woocommerce-customize-store__sidebar-group">
@@ -206,7 +206,7 @@ const LogoSettings = ( {
 					setAttributes( { width: newWidth } )
 				}
 				min={ minWidth }
-				max={ maxWidth }
+				max={ MAX_LOGO_WIDTH }
 				initialPosition={ Math.min(
 					DEFAULT_LOGO_WIDTH,
 					maxWidthBuffer

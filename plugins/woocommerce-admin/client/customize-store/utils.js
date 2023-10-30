@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/sidebar-navigation-screen-logo';
+import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/constants';
 
 export function sendMessageToParent( message ) {
 	window.parent.postMessage( message, '*' );
