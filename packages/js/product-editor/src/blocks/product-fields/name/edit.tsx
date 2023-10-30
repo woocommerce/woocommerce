@@ -7,7 +7,6 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
-	useEffect,
 	useRef,
 } from '@wordpress/element';
 
@@ -50,14 +49,6 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 
 	const { fetchProductSuggestions, suggestions } = useAIProductField();
-
-	useEffect( () => {
-		fetchProductSuggestions(
-			'shirt',
-			'this is a forma store',
-			'Beautiful shirt in various colors'
-		);
-	}, [] );
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
@@ -144,6 +135,35 @@ export function Edit( {
 			}
 		},
 	} );
+
+	const getSuggestions = async () => {
+		const validProductData = Object.entries( {
+			name: product.name,
+			tags: product.tags,
+			attributes: product.attributes,
+			product_type: product.type,
+			is_downloadable: product.downloadable,
+			is_virtual: product.virtual,
+		} ).reduce( ( acc, [ key, value ] ) => {
+			if (
+				typeof value === 'boolean' ||
+				( value instanceof Array
+					? Boolean( value.length )
+					: Boolean( value ) )
+			) {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				acc[ key ] = value;
+			}
+			return acc;
+		}, {} );
+		await fetchProductSuggestions(
+			JSON.stringify( validProductData ),
+			'This is a WooCommerce store.',
+			'Beautiful shirt in various colors.'
+		);
+	};
+
 	const ref = useRef< HTMLDivElement >( null );
 
 	const help =
@@ -231,6 +251,7 @@ export function Edit( {
 						highlightedIndex={ highlightedIndex }
 						items={ suggestions }
 						widthRef={ ref }
+						onGetMoreSuggestions={ getSuggestions }
 					/>
 				) }
 

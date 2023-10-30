@@ -29,6 +29,7 @@ interface AIPopoverProps {
 	getItemProps: UseComboboxPropGetters< Suggestion >[ 'getItemProps' ];
 	items: Suggestion[];
 	highlightedIndex: number | null;
+	onGetMoreSuggestions: () => void;
 }
 
 export function AIPopover( {
@@ -37,6 +38,7 @@ export function AIPopover( {
 	getItemProps,
 	items,
 	highlightedIndex,
+	onGetMoreSuggestions,
 }: AIPopoverProps ) {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	useLayoutEffect( () => {
@@ -85,6 +87,7 @@ export function AIPopover( {
 							reason: '',
 						},
 						index: items.length + 1,
+						onClick: () => onGetMoreSuggestions(),
 						className:
 							'woocommerce-product-form-name-ai-suggestions__button',
 					} ) }
