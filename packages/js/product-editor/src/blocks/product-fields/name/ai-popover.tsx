@@ -71,6 +71,7 @@ export function AIPopover( {
 								</div>
 								<div>
 									<ThumbsUpSVG />
+									<ThumbsUpSVG rotate />
 								</div>
 							</div>
 						</li>

@@ -3,9 +3,11 @@
  */
 import { createElement } from '@wordpress/element';
 
-export function ThumbsUpSVG() {
+export function ThumbsUpSVG( { rotate = false } ) {
+	const props = rotate ? { transform: 'rotate(180)' } : {};
 	return (
 		<svg
+			{ ...props }
 			width="18"
 			height="18"
 			viewBox="0 0 18 18"
