@@ -9,8 +9,8 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SubscriptionsContext } from '~/marketplace/contexts/subscriptions-context';
-import { connectProduct } from '~/marketplace/utils/functions';
+import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
+import { connectProduct } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface ConnectProps {
