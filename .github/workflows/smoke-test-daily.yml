@@ -45,10 +45,7 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Install Playwright
-              run: pnpm exec playwright install
-
-            - name: Update to nightly and run API tests
+            - name: Run API tests
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
