@@ -45,16 +45,7 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Update site to nightly version
-              uses: ./.github/actions/tests/run-e2e-tests
-              with:
-                  report-name: ${{ env.API_ARTIFACT }}
-                  tests: update-woocommerce.spec.js
-              env:
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-                  UPDATE_WC: nightly
-
-            - name: Run API tests
+            - name: Update to nightly and run API tests
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
