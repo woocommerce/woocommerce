@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', 'woocommerce' ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', 'woocommerce' );
-$cost_link = __( '<span id="wc-shipping-advanced-costs-help-text">Advanced Costs allows you to charge a flat rate per item, a percentage based cost or a minimum fee. <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">Learn more</a></span>' );
+$cost_link = __( '<span id="wc-shipping-advanced-costs-help-text">Advanced Costs allows you to charge a flat rate per item, a percentage based cost or a minimum fee. <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">Learn more</a></span>', 'woocommerce' );
 
 $settings = array(
 	'title'      => array(
