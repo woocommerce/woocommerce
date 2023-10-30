@@ -31,6 +31,7 @@
 		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
+		"@woocommerce/expression-evaluation": "workspace:*",
 		"@woocommerce/product-editor": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
