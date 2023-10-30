@@ -4,7 +4,12 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -40,7 +45,7 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 		name: 'wp_navigation',
 	},
 ];
-let hasSavedOnLoaded = false;
+let shouldTriggerSave = true;
 
 export const SaveHub = () => {
 	const urlParams = useQuery();
@@ -96,7 +101,7 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	const save = async () => {
+	const save = useCallback( async () => {
 		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
 			if ( kind === 'root' && name === 'site' ) {
 				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
@@ -119,20 +124,32 @@ export const SaveHub = () => {
 				__unstableMarkLastChangeAsPersistent();
 			}
 		}
-	};
+	}, [
+		dirtyEntityRecords,
+		editEntityRecord,
+		saveEditedEntityRecord,
+		saveSpecifiedEntityEdits,
+		__unstableMarkLastChangeAsPersistent,
+	] );
 
-	// Trigger a save when the editor is loaded. This is needed to ensure FE is displayed correctly	because some patterns have dynamic attributes that only generate in Editor.
+	const isMainScreen = urlParams.path === '/customize-store/assembler-hub';
+
+	// Trigger a save when the editor is loaded abd there are unsaved changes in main screen.  This is needed to ensure FE is displayed correctly	because some patterns have dynamic attributes that only generate in Editor.
 	useEffect( () => {
-		if ( isEditorLoading || hasSavedOnLoaded ) {
+		if ( isEditorLoading ) {
 			return;
 		}
 
-		save();
-		hasSavedOnLoaded = true;
+		if ( ! isMainScreen ) {
+			shouldTriggerSave = false;
+			return;
+		}
 
-		// We only want to run this effect once when the editor is loaded so we can ignore the dependencies.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading ] );
+		if ( shouldTriggerSave && isDirty ) {
+			save();
+			shouldTriggerSave = false;
+		}
+	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
 
 	const onClickSaveButton = async () => {
 		const source = `${ urlParams.path.replace(
@@ -170,7 +187,7 @@ export const SaveHub = () => {
 	};
 
 	const renderButton = () => {
-		if ( urlParams.path === '/customize-store/assembler-hub' ) {
+		if ( isMainScreen ) {
 			return (
 				<Button
 					variant="primary"
