@@ -211,12 +211,6 @@ class PageController {
 				?>
 			<?php endwhile; ?>
 		</div>
-		<script>
-			( function() {
-				let line = document.querySelectorAll( '.line' );
-				console.log(line);
-			} )();
-		</script>
 		<?php
 	}
 
