@@ -230,9 +230,18 @@ export function Edit( {
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
 						) }
-						// value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						data-1p-ignore
 						{ ...inputProps }
+						onFocus={ () => {
+							if ( name === 'AUTO-DRAFT' ) {
+								setName( '' );
+							}
+						} }
+						onBlur={ () => {
+							if ( name === '' ) {
+								setName( 'AUTO-DRAFT' );
+							}
+						} }
 						onChange={ ( changedName: string ) => {
 							if ( inputProps.onChange ) {
 								inputProps.onChange( {
