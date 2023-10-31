@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createReduxStore,
-	dispatch,
-	register,
-	useSelect,
-} from '@wordpress/data';
+import { createReduxStore, dispatch, register } from '@wordpress/data';
 import { Options } from '@wordpress/notices';
 
 /**

@@ -17,7 +17,6 @@ export interface InstallingStateErrorAction {
 
 const DEFAULT_STATE: InstallingState = {
 	installingProducts: [],
-	errors: {},
 };
 
 const store = createReduxStore( INSTALLING_STORE_NAME, {
