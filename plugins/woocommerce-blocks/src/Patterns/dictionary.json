@@ -131,46 +131,34 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Endless Tee's",
-					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
+					"default": "New in: 3-in-1 parka",
+					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}. The title must have less than 30 characters"
 				},
 				{
 					"default": "Waterproof Membrane",
-					"ai_prompt": "A title describing the first displayed product feature"
+					"ai_prompt": "A title describing the first displayed product feature. The title must have only 2 or 3 words."
 				},
 				{
 					"default": "Expert Craftsmanship",
-					"ai_prompt": "A title describing the second displayed product feature"
+					"ai_prompt": "A title describing the second displayed product feature. The title must have only 2 or 3 words."
 				},
 				{
 					"default": "Durable Fabric",
-					"ai_prompt": "A title describing the third displayed product feature"
-				},
-				{
-					"default": "Sustainable Dyes",
-					"ai_prompt": "A title describing the fourth displayed product feature"
+					"ai_prompt": "A title describing the third displayed product feature. The title must have only 2 or 3 words."
 				}
 			],
 			"descriptions": [
 				{
-					"default": "With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.",
-					"ai_prompt": "A description of the product"
-				},
-				{
 					"default": "Never worry about the weather again. Keep yourself dry, warm, and looking stylish.",
-					"ai_prompt": "A description of the first displayed product feature"
+					"ai_prompt": "A description of the first displayed product feature. The description must have less than 120 characters."
 				},
 				{
-					"default": "Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.",
-					"ai_prompt": "A description of the second displayed product feature"
+					"default": "Our products are made with expert craftsmanship and attention to detail.",
+					"ai_prompt": "A description of the second displayed product feature. The description must have less than 120 characters."
 				},
 				{
-					"default": "We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.",
-					"ai_prompt": "A description of the third displayed product feature"
-				},
-				{
-					"default": "From bold prints and colors to intricate details and textures, our products are a perfect combination of style and function.",
-					"ai_prompt": "A description of the fourth displayed product feature"
+					"default": "We use only the highest-quality materials in our products, ensuring that they look great.",
+					"ai_prompt": "A description of the third displayed product feature. The description must have less than 120 characters."
 				}
 			]
 		}
