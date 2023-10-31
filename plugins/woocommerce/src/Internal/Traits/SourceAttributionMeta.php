@@ -214,20 +214,26 @@ trait SourceAttributionMeta {
 	/**
 	 * Get the order object with HPOS compatibility.
 	 *
-	 * @param WP_Post|int $post The post ID or object.
+	 * @param WC_Order|WP_Post|int $post_or_order The post ID or object.
 	 *
 	 * @return WC_Order The order object
 	 * @throws Exception When the order isn't found.
 	 */
-	private function get_hpos_order_object( $post ) {
-		global $theorder;
-
-		if ( is_numeric( $post ) ) {
-			$post = get_post( $post );
+	private function get_hpos_order_object( $post_or_order ) {
+		// If we've already got an order object, just return it.
+		if ( $post_or_order instanceof WC_Order ) {
+			return $post_or_order;
 		}
 
-		if ( empty( $theorder ) || $theorder->get_id() !== $post->ID ) {
-			$theorder = wc_get_order( $post->ID );
+		global $theorder;
+
+		// If we have a post ID, get the post object.
+		if ( is_numeric( $post_or_order ) ) {
+			$post_or_order = get_post( $post_or_order );
+		}
+
+		if ( empty( $theorder ) || $theorder->get_id() !== $post_or_order->ID ) {
+			$theorder = wc_get_order( $post_or_order->ID );
 		}
 
 		// Throw an exception if we don't have an order object.
