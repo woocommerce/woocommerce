@@ -205,6 +205,7 @@ class PageController {
 				<?php
 				$line = fgets( $stream );
 				if ( is_string( $line ) ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- format_line does the escaping.
 					echo $this->format_line( $line, $line_number );
 					$line_number ++;
 				}
@@ -400,7 +401,7 @@ class PageController {
 	 * @return string
 	 */
 	private function format_line( string $text, int $line_number ): string {
-		$classes  = array( 'line' );
+		$classes = array( 'line' );
 
 		$level_severities = range( 100, 800, 100 );
 		$severity_levels  = array();

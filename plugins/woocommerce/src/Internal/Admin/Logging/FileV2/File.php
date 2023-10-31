@@ -73,6 +73,7 @@ class File {
 	 */
 	public function __destruct() {
 		if ( is_resource( $this->stream ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
 			fclose( $this->stream );
 		}
 	}
@@ -158,6 +159,7 @@ class File {
 	 */
 	public function get_stream() {
 		if ( ! is_resource( $this->stream ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
 			$this->stream = fopen( $this->path, 'rb' );
 		}
 
