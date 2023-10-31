@@ -141,9 +141,11 @@ class PageController {
 		$defaults = $this->get_query_param_defaults();
 
 		?>
-		<h2>
-			<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
-		</h2>
+		<header id="logs-header" class="wc-logs-header">
+			<h2>
+				<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
+			</h2>
+		</header>
 		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
 			<input type="hidden" name="tab" value="logs" />
@@ -188,19 +190,21 @@ class PageController {
 		$line_number = 1;
 
 		?>
-		<h2>
-			<?php
-			printf(
+		<header id="logs-header" class="wc-logs-header">
+			<h2>
+				<?php
+				printf(
 				// translators: %s is the name of a log file.
-				esc_html__( 'Viewing log file %s', 'woocommerce' ),
-				sprintf(
-					'<code>%s</code>',
-					esc_html( $file->get_file_id() )
-				)
-			);
-			?>
-		</h2>
-		<div id="log-entries">
+					esc_html__( 'Viewing log file %s', 'woocommerce' ),
+					sprintf(
+						'<span class="file-id">%s</span>',
+						esc_html( $file->get_file_id() )
+					)
+				);
+				?>
+			</h2>
+		</header>
+		<div id="logs-entries" class="wc-logs-entries">
 			<?php while ( ! feof( $stream ) ) : ?>
 				<?php
 				$line = fgets( $stream );

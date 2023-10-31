@@ -1307,7 +1307,15 @@ table.wc_status_table--tools {
 /**
  * FileV2 logs
  */
-#log-entries {
+.wc-logs-header {
+	.file-id {
+		padding: 3px 5px;
+		background: rgba( 0, 0, 0, 0.07 );
+		font-family: Consolas, Monaco, monospace;
+	}
+}
+
+.wc-logs-entries {
 	background: #f6f7f7;
 	border: 1px solid #c3c4c7;
 	font-family: Consolas, Monaco, monospace;
@@ -1351,6 +1359,10 @@ table.wc_status_table--tools {
 
 	.log-timestamp {
 		font-weight: 700;
+	}
+
+	.log-level {
+		font-size: 100%;
 	}
 }
 
@@ -1406,7 +1418,7 @@ table.wc_status_table--tools {
 }
 
 /**
-  * DB log viewer
+  * Legacy file/DB log viewers
   */
 .wp-list-table.logs {
 	// Adjust log table columns only when table is not collapsed
@@ -1447,6 +1459,9 @@ table.wc_status_table--tools {
 	}
 }
 
+/**
+ * Inline edit
+ */
 .inline-edit-product.quick-edit-row {
 	.inline-edit-col-center,
 	.inline-edit-col-right {
