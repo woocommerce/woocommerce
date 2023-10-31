@@ -442,7 +442,7 @@ class PageController {
 			absint( $line_number ),
 			esc_attr( $classes ),
 			sprintf(
-				'<a href="#L%d" class="line-anchor"></a>',
+				'<a href="#L%1$d" class="line-anchor">%1$d</a>',
 				absint( $line_number )
 			),
 			sprintf(
