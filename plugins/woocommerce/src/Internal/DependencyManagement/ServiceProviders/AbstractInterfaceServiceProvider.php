@@ -41,7 +41,7 @@ abstract class AbstractInterfaceServiceProvider extends AbstractServiceProvider 
 	/**
 	 * Register a class in the container and add tags for all the interfaces it implements.
 	 *
-	 * This also updates the `$this->provides` property with the interfaces provided by the class, ane ensures
+	 * This also updates the `$this->provides` property with the interfaces provided by the class, and ensures
 	 * that the property doesn't contain duplicates.
 	 *
 	 * @since x.x.x
