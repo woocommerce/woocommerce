@@ -211,6 +211,12 @@ class PageController {
 				?>
 			<?php endwhile; ?>
 		</div>
+		<script>
+			( function() {
+				let line = document.querySelectorAll( '.line' );
+				console.log(line);
+			} )();
+		</script>
 		<?php
 	}
 
@@ -437,10 +443,17 @@ class PageController {
 
 		$classes = implode( ' ', $classes );
 		$line    = sprintf(
-			'<a id="L%1$d" href="#L%1$d" class="%2$s"><span class="line-content">%3$s</span></a>',
+			'<span id="L%1$d" class="%2$s">%3$s%4$s</span>',
 			absint( $line_number ),
 			esc_attr( $classes ),
-			$text
+			sprintf(
+				'<a href="#L%d" class="line-anchor"></a>',
+				absint( $line_number )
+			),
+			sprintf(
+				'<span class="line-content">%s</span>',
+				$text
+			)
 		);
 
 		return $line;

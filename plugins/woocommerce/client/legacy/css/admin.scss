@@ -1308,36 +1308,44 @@ table.wc_status_table--tools {
  * FileV2 logs
  */
 #log-entries {
-	background: #fff;
-	border: 1px solid #e5e5e5;
-	font-family: monospace;
+	background: #ffffff;
+	border: 1px solid #c3c4c7;
+	font-family: Consolas, Monaco, monospace;
 	word-wrap: break-word;
 	line-height: 2.3;
 	counter-reset: line;
 
 	.line {
 		display: block;
-		color: inherit;
-		text-decoration: none;
 		width: 100%;
 		scroll-margin-top: 6em;
+		position: relative;
 
 		&:before {
 			counter-increment: line;
 			content: counter(line);
 			display: block;
-			padding: 0 1em;
+			padding: 0 1em 0 0.5em;
 			float: left;
 			width: 2em;
 			text-align: right;
 		}
 	}
 
+	.line-anchor {
+		position: absolute;
+		color: inherit;
+		text-decoration: none;
+		display: block;
+		height: 100%;
+		width: 3.5em;
+	}
+
 	.line-content {
 		display: block;
 		overflow: hidden;
 		padding: 0 1em;
-		border-left: 1px solid #ddd;
+		border-left: 1px solid #c3c4c7;
 	}
 
 	.log-timestamp {
