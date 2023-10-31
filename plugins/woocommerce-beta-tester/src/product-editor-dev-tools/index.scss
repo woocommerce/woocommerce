@@ -26,6 +26,11 @@
 			outline: 0;
 			box-shadow: none;
 		}
+
+		&:active,
+		&:hover {
+			color: white;
+		}
 	}
 }
 
