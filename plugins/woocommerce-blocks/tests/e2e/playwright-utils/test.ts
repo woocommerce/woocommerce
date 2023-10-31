@@ -1,3 +1,4 @@
+/* eslint-disable rulesdir/no-raw-playwright-test-import */
 /**
  * External dependencies
  */
