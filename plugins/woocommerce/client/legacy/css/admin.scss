@@ -1313,6 +1313,7 @@ table.wc_status_table--tools {
 	font-family: Consolas, Monaco, monospace;
 	word-wrap: break-word;
 	line-height: 2.3;
+	counter-reset: line;
 
 	.line {
 		display: block;
@@ -1321,10 +1322,13 @@ table.wc_status_table--tools {
 		position: relative;
 
 		&:before {
-			content: '\00A0';
+			counter-increment: line;
+			content: counter(line);
 			display: block;
 			float: left;
-			width: 3.5em;
+			padding: 0 1em 0 0.5em;
+			width: 3em;
+			text-align: right;
 		}
 	}
 
@@ -1334,9 +1338,7 @@ table.wc_status_table--tools {
 		text-decoration: none;
 		display: block;
 		height: 100%;
-		padding: 0 1em 0 0.5em;
-		width: 2em;
-		text-align: right;
+		width: 4.5em;
 	}
 
 	.line-content {
