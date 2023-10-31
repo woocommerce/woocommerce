@@ -3,6 +3,7 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -18,7 +19,7 @@ import {
  * Internal dependencies
  */
 import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../../constants';
-import { UseVariationsProps } from './types';
+import { AttributeFilters, UseVariationsProps } from './types';
 
 export function useVariations( { productId }: UseVariationsProps ) {
 	// Variation pagination
@@ -26,10 +27,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const [ variations, setVariations ] = useState< ProductVariation[] >( [] );
 	const [ totalCount, setTotalCount ] = useState< number >( 0 );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const pageRef = useRef( 1 );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
-	async function getCurrentVariationsPage( id: number ) {
+	async function getCurrentVariationsPage(
+		id: number,
+		attributes: AttributeFilters[] = []
+	) {
 		const { getProductVariations, getProductVariationsTotalCount } =
 			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
@@ -39,6 +44,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			per_page: perPageRef.current,
 			order: 'asc',
 			orderby: 'menu_order',
+			attributes,
 		};
 
 		const data = await getProductVariations< ProductVariation[] >(
@@ -64,7 +70,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		pageRef.current = page;
 
 		setIsLoading( true );
-		getCurrentVariationsPage( productId ).finally( () =>
+		getCurrentVariationsPage( productId, filters ).finally( () =>
 			setIsLoading( false )
 		);
 	}
@@ -74,9 +80,60 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		perPageRef.current = perPage;
 
 		setIsLoading( true );
-		getCurrentVariationsPage( productId ).finally( () =>
+		getCurrentVariationsPage( productId, filters ).finally( () =>
 			setIsLoading( false )
 		);
+	}
+
+	function onFilter( attribute: ProductAttribute ) {
+		return function handleFilter( options: string[] ) {
+			let isPresent = false;
+
+			const newFilter = filters.reduce< AttributeFilters[] >(
+				( prev, item ) => {
+					if ( item.attribute === attribute.slug ) {
+						isPresent = true;
+						if ( options.length === 0 ) {
+							return prev;
+						}
+						return [ ...prev, { ...item, terms: options } ];
+					}
+					return [ ...prev, item ];
+				},
+				[]
+			);
+
+			if ( ! isPresent ) {
+				newFilter.push( {
+					attribute: attribute.slug,
+					terms: options,
+				} );
+			}
+
+			pageRef.current = 1;
+
+			setIsLoading( true );
+			getCurrentVariationsPage( productId, newFilter ).finally( () =>
+				setIsLoading( false )
+			);
+
+			setFilters( newFilter );
+		};
+	}
+
+	function getFilters( attribute: ProductAttribute ) {
+		return (
+			filters.find( ( filter ) => filter.attribute === attribute.slug )
+				?.terms ?? []
+		);
+	}
+
+	function hasFilters() {
+		return filters.length;
+	}
+
+	function clearFilters() {
+		setFilters( [] );
 	}
 
 	// Variation selection
@@ -294,7 +351,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		}
 
 		await invalidateResolutionForStore();
-		await getCurrentVariationsPage( productId );
+		await getCurrentVariationsPage( productId, filters );
 
 		setIsUpdating( {} );
 
@@ -356,7 +413,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			productId,
 		] );
 		await invalidateResolutionForStore();
-		await getCurrentVariationsPage( productId );
+		await getCurrentVariationsPage( productId, filters );
 
 		setIsUpdating( {} );
 
@@ -369,6 +426,10 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		totalCount,
 		onPageChange,
 		onPerPageChange,
+		onFilter,
+		getFilters,
+		hasFilters,
+		clearFilters,
 
 		selected,
 		isSelectingAll,

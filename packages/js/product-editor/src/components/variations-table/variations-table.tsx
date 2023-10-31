@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
@@ -13,7 +13,6 @@ import {
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
-	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -21,9 +20,8 @@ import { ListItem, Sortable, Tag } from '@woocommerce/components';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	useContext,
+	useEffect,
 	createElement,
-	useRef,
-	useState,
 	Fragment,
 	forwardRef,
 } from '@wordpress/element';
@@ -77,8 +75,6 @@ type VariationResponseProps = {
 	update?: Partial< ProductVariation >[];
 	delete?: Partial< ProductVariation >[];
 };
-
-type AttributeFilters = { attribute: string; terms: string[] };
 
 function getEditVariationLink( variation: ProductVariation ) {
 	return getNewPath(
@@ -135,14 +131,7 @@ export const VariationsTable = forwardRef<
 	}: VariationsTableProps,
 	ref
 ) {
-	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const productId = useEntityId( 'postType', 'product' );
-	const [ attributes ] = useEntityProp< ProductAttribute[] >(
-		'postType',
-		'product',
-		'attributes'
-	);
-
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
 
@@ -158,12 +147,6 @@ export const VariationsTable = forwardRef<
 		},
 		[ productId ]
 	);
-
-	useEffect( () => {
-		if ( isGeneratingVariations ) {
-			setFilters( [] );
-		}
-	}, [ isGeneratingVariations ] );
 
 	const { generateProductVariations } = useProductVariationsHelper();
 
@@ -182,6 +165,10 @@ export const VariationsTable = forwardRef<
 		totalCount,
 		onPageChange,
 		onPerPageChange,
+		onFilter,
+		getFilters,
+		hasFilters,
+		clearFilters,
 
 		selected,
 		isSelectingAll,
@@ -201,6 +188,12 @@ export const VariationsTable = forwardRef<
 		onBatchDelete,
 	} = useVariations( { productId } );
 
+	useEffect( () => {
+		if ( isGeneratingVariations ) {
+			clearFilters();
+		}
+	}, [ isGeneratingVariations ] );
+
 	function handleEmptyTableStateActionClick() {
 		generateProductVariations( productAttributes );
 	}
@@ -208,7 +201,7 @@ export const VariationsTable = forwardRef<
 	if (
 		! ( isLoading || isGeneratingVariations ) &&
 		totalCount === 0 &&
-		filters.length === 0
+		hasFilters()
 	) {
 		return (
 			<EmptyTableState
@@ -317,36 +310,6 @@ export const VariationsTable = forwardRef<
 		};
 	}
 
-	function variationsFilterHandler( attribute: ProductAttribute ) {
-		return function handleVariationsFilter( options: string[] ) {
-			setFilters( ( current ) => {
-				let isPresent = false;
-				const newFilter = current.reduce< AttributeFilters[] >(
-					( prev, item ) => {
-						if ( item.attribute === attribute.slug ) {
-							isPresent = true;
-							if ( options.length === 0 ) {
-								return prev;
-							}
-							return [ ...prev, { ...item, terms: options } ];
-						}
-						return [ ...prev, item ];
-					},
-					[]
-				);
-
-				if ( ! isPresent ) {
-					newFilter.push( {
-						attribute: attribute.slug,
-						terms: options,
-					} );
-				}
-
-				return newFilter;
-			} );
-		};
-	}
-
 	async function handleSelectAllVariations() {
 		const now = Date.now();
 
@@ -388,7 +351,7 @@ export const VariationsTable = forwardRef<
 				</Notice>
 			) }
 
-			{ ( filters.length > 0 || totalCount > 0 ) && (
+			{ ( hasFilters() || totalCount > 0 ) && (
 				<div className="woocommerce-product-variations__header">
 					<div className="woocommerce-product-variations__selection">
 						<CheckboxControl
@@ -440,22 +403,16 @@ export const VariationsTable = forwardRef<
 								</Button>
 							</>
 						) : (
-							attributes
+							productAttributes
 								.filter( ( attribute ) => attribute.variation )
 								.map( ( attribute ) => (
 									<VariationsFilter
 										key={ attribute.id }
-										initialValues={
-											filters.find(
-												( filter ) =>
-													filter.attribute ===
-													attribute.slug
-											)?.terms ?? []
-										}
-										attribute={ attribute }
-										onFilter={ variationsFilterHandler(
+										initialValues={ getFilters(
 											attribute
 										) }
+										attribute={ attribute }
+										onFilter={ onFilter( attribute ) }
 									/>
 								) )
 						) }
