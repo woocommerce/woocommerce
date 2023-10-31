@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  * {@internal This class and its methods are not intended for public use.}
  */
 class ProductGalleryUtils {
+	const CROP_IMAGE_SIZE_NAME = '_woo_blocks_product_gallery_crop_full';
 
 	/**
 	 * When requesting a full-size image, this function may return an array with a single image.
@@ -18,9 +19,10 @@ class ProductGalleryUtils {
 	 * @param string $size Image size.
 	 * @param array  $attributes Attributes.
 	 * @param string $wrapper_class Wrapper class.
+	 * @param bool   $crop_images Whether to crop images.
 	 * @return array
 	 */
-	public static function get_product_gallery_images( $post_id, $size = 'full', $attributes = array(), $wrapper_class = '' ) {
+	public static function get_product_gallery_images( $post_id, $size = 'full', $attributes = array(), $wrapper_class = '', $crop_images = false ) {
 		$product_gallery_images = array();
 		$product                = wc_get_product( $post_id );
 
@@ -28,7 +30,13 @@ class ProductGalleryUtils {
 			$all_product_gallery_image_ids = self::get_product_gallery_image_ids( $product );
 
 			if ( 'full' === $size || 'full' !== $size && count( $all_product_gallery_image_ids ) > 1 ) {
+				$size = $crop_images ? self::CROP_IMAGE_SIZE_NAME : $size;
+
 				foreach ( $all_product_gallery_image_ids as $product_gallery_image_id ) {
+					if ( $crop_images ) {
+						self::maybe_generate_intermediate_image( $product_gallery_image_id, self::CROP_IMAGE_SIZE_NAME );
+					}
+
 					$product_image_html = wp_get_attachment_image(
 						$product_gallery_image_id,
 						$size,
@@ -92,5 +100,48 @@ class ProductGalleryUtils {
 		}
 
 		return $unique_image_ids;
+	}
+
+	/**
+	 * Generates the intermediate image sizes only when needed.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param string $size Image size.
+	 * @return void
+	 */
+	public static function maybe_generate_intermediate_image( $attachment_id, $size ) {
+		$metadata   = image_get_intermediate_size( $attachment_id, $size );
+		$upload_dir = wp_upload_dir();
+		$image_path = '';
+
+		if ( $metadata ) {
+			$image_path = $upload_dir['basedir'] . '/' . $metadata['path'];
+		}
+
+		/*
+		 * We need to check both if the size metadata exists and if the file exists.
+		 * Sometimes we can have orphaned image file and no metadata or vice versa.
+		 */
+		if ( $metadata && file_exists( $image_path ) ) {
+			return;
+		}
+
+		$image_path     = wp_get_original_image_path( $attachment_id );
+		$image_metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// If image doesn't exist, we can't generate the intermediate size. Bail.
+		if ( ! isset( $image_metadata['path'] ) ) {
+			return;
+		}
+
+		/*
+		 * We want to take the minimum dimension of the image and
+		 * use that size as the crop size for the new image.
+		 */
+		$min_size                         = min( $image_metadata['width'], $image_metadata['height'] );
+		$new_image_metadata               = image_make_intermediate_size( $image_path, $min_size, $min_size, true );
+		$image_metadata['sizes'][ $size ] = $new_image_metadata;
+
+		wp_update_attachment_metadata( $attachment_id, $image_metadata );
 	}
 }

@@ -21,7 +21,8 @@
 		"nextPreviousButtonsPosition": "nextPreviousButtonsPosition",
 		"pagerDisplayMode": "pagerDisplayMode",
 		"hoverZoom": "hoverZoom",
-		"fullScreenOnClick": "fullScreenOnClick"
+		"fullScreenOnClick": "fullScreenOnClick",
+		"cropImages": "cropImages"
 	},
 	"attributes": {
 		"thumbnailsPosition": {

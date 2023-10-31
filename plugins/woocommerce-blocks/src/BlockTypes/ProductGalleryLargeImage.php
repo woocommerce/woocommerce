@@ -136,7 +136,8 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$product_id,
 			'full',
 			$attributes,
-			'wc-block-product-gallery-large-image__image-element'
+			'wc-block-product-gallery-large-image__image-element',
+			$context['cropImages']
 		);
 
 		$main_image_with_wrapper = array_map(
