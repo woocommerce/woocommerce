@@ -1,9 +1,6 @@
 name: Send PRs that require review to Slack
 
 on:
-  pull_request:
-    types:
-      - review_requested
   pull_request_target:
     types: [review_requested]
   issue_comment:
@@ -21,7 +18,7 @@ jobs:
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
         id: notify-review
         if: |
-          github.event_name == 'pull_request' &&
+          github.event_name == 'pull_request_target' &&
           github.event.action == 'review_requested' &&
           github.event.requested_team.slug == env.WOO_PR_TESTING_REVIEW_TEAM
         with:
