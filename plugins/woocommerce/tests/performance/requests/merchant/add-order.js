@@ -113,7 +113,7 @@ export function addOrder( includeTests = {} ) {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Add new order' header": ( response ) =>
-				response.body.includes( 'Add new order' ),
+				response.body.includes( 'Add new order</h1>' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
