@@ -1,127 +1,75 @@
 <?php
+/**
+ * REST API Onboarding Tasks Controller
+ *
+ * Handles requests to complete various onboarding tasks.
+ */
 
-namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
+namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Jetpack_Gutenberg;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Customize Your Store Task
+ * Customize Your Store Controller.
+ *
+ * @internal
+ * @extends WC_REST_Data_Controller
  */
-class CustomizeStore extends Task {
+class CustomizeYourStore extends \WC_REST_Data_Controller {
 	/**
-	 * Constructor
+	 * Endpoint namespace.
 	 *
-	 * @param TaskList $task_list Parent task list.
+	 * @var string
 	 */
-	public function __construct( $task_list ) {
-		parent::__construct( $task_list );
+	protected $namespace = 'wc-admin';
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'cys';
 
-		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
-		global $_GET;
-		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
-		if ( ! $theme_switch_via_cys_ai_loader ) {
-				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
-		}
+	/**
+	 * Register routes.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/block-editor-settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_block_editor_settings' ),
+					'permission_callback' => array( $this, 'can_access_block_editor_settings' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
-	 * ID.
-	 *
-	 * @return string
+	 * Check if the current user has access to block editor settings
 	 */
-	public function get_id() {
-		return 'customize-store';
-	}
-
-	/**
-	 * Title.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		return __( 'Customize your store ', 'woocommerce' );
-	}
-
-	/**
-	 * Content.
-	 *
-	 * @return string
-	 */
-	public function get_content() {
-		return '';
-	}
-
-	/**
-	 * Time.
-	 *
-	 * @return string
-	 */
-	public function get_time() {
-		return '';
-	}
-
-	/**
-	 * Task completion.
-	 *
-	 * @return bool
-	 */
-	public function is_complete() {
-		return get_option( 'woocommerce_admin_customize_store_completed' ) === 'yes';
-	}
-
-	/**
-	 * Task visibility.
-	 *
-	 * @return bool
-	 */
-	public function can_view() {
+	public function can_access_block_editor_settings() {
 		return true;
 	}
 
-	/**
-	 * Action URL.
-	 *
-	 * @return string
-	 */
-	public function get_action_url() {
-		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store' );
-	}
-
-
-	/**
-	 * Possibly add site editor scripts.
-	 */
-	public function possibly_add_site_editor_scripts() {
-		$is_assembler_hub = (
-			isset( $_GET['page'] ) &&
-			'wc-admin' === $_GET['page'] &&
-			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assember-hub' )
-		);
-		if ( ! $is_assembler_hub ) {
-			return;
+	public function get_block_editor_settings() {
+		global $wp_scripts;
+		global $wp_styles;
+		// @todo -- should not use hard coded wp-admin; relace with constant
+		if (!function_exists('get_block_editor_server_block_settings')) {
+			require_once ABSPATH . 'wp-admin/includes/post.php';
 		}
 
-		// See: https://github.com/WordPress/WordPress/blob/master/wp-admin/site-editor.php.
-		if ( ! wp_is_block_theme() ) {
-			wp_die( esc_html__( 'The theme you are currently using is not compatible.', 'woocommerce' ) );
-		}
 		global $editor_styles;
-
-		// Flag that we're loading the block editor.
-		$current_screen = get_current_screen();
-		$current_screen->is_block_editor( true );
-
-		// Default to is-fullscreen-mode to avoid jumps in the UI.
-		add_filter(
-			'admin_body_class',
-			static function( $classes ) {
-				return "$classes is-fullscreen-mode";
-			}
-		);
 
 		$block_editor_context   = new \WP_Block_Editor_Context( array( 'name' => 'core/edit-site' ) );
 		$indexed_template_types = array();
@@ -185,36 +133,35 @@ class CustomizeStore extends Task {
 		wp_enqueue_script( 'wp-editor' );
 		wp_enqueue_script( 'wp-format-library' ); // Not sure if this is needed.
 		wp_enqueue_script( 'wp-router' );
+
 		wp_enqueue_style( 'wp-editor' );
 		wp_enqueue_style( 'wp-edit-site' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_media();
 
 		if (
-				current_theme_supports( 'wp-block-styles' ) &&
-				( ! is_array( $editor_styles ) || count( $editor_styles ) === 0 )
-			) {
+			current_theme_supports( 'wp-block-styles' ) &&
+			( ! is_array( $editor_styles ) || count( $editor_styles ) === 0 )
+		) {
 			wp_enqueue_style( 'wp-block-library-theme' );
 		}
 		/** This action is documented in wp-admin/edit-form-blocks.php
 		 *
 		 * @since 8.0.3
-		*/
+		 */
 		do_action( 'enqueue_block_editor_assets' );
 
 		// Load Jetpack's block editor assets because they are not enqueued by default.
 		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
 			Jetpack_Gutenberg::enqueue_block_editor_assets();
 		}
-		global $wp_scripts;
 
+		ob_start();
+		wp_print_scripts(array('wp-blocks', 'wp-editor', 'wp-format-library', 'wp-router'));
+		wp_print_styles(array('wp-blocks', 'wp-editor', 'wp-format-library', 'wp-router', 'wp-block-library-theme'));
+		$output = ob_get_contents();
+		ob_end_clean();
+		return rest_ensure_response($output);
 
-	}
-
-	/**
-	 * Mark task as complete.
-	 */
-	public function mark_task_as_complete() {
-		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 }
