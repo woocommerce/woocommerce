@@ -71,7 +71,7 @@ export function Edit( {
 					),
 			};
 		},
-		[ productId ]
+		[ totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
