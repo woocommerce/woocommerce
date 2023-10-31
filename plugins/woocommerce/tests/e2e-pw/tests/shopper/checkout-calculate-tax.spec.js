@@ -512,13 +512,13 @@ test.describe( 'Shopper Tax Levels', () => {
 			await page.goto( '/checkout/' );
 			await expect( page.getByRole( 'heading', { name: 'Checkout', exact: true } ) ).toBeVisible();
 
-			await page.getByLabel('First name *').fill( customer.billing.us.first_name );
-			await page.getByLabel('Last name *').fill( customer.billing.us.last_name );
-			await page.getByPlaceholder('House number and street name').fill( customer.billing.us.address );
-			await page.getByLabel('Town / City *').type( 'Sacramento' );
-			await page.getByLabel('ZIP Code *').type( '55555' );
-			await page.getByLabel('Phone *').fill( customer.billing.us.phone );
-			await page.getByLabel('Email address *').fill( customer.billing.us.email );
+			await page.getByLabel('First name *').first().fill( customer.billing.us.first_name );
+			await page.getByLabel('Last name *').first().fill( customer.billing.us.last_name );
+			await page.getByPlaceholder('House number and street name').first().fill( customer.billing.us.address );
+			await page.getByLabel('Town / City *').first().pressSequentially( 'Sacramento' );
+			await page.getByLabel('ZIP Code *').first().pressSequentially( '55555' );
+			await page.getByLabel('Phone *').first().fill( customer.billing.us.phone );
+			await page.getByLabel('Email address *').first().fill( customer.billing.us.email );
 
 			await expect( page.getByRole( 'row', { name: 'Subtotal $100.00'} ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Country Tax $10.00' } ) ).toBeVisible();
@@ -554,13 +554,13 @@ test.describe( 'Shopper Tax Levels', () => {
 			await page.goto( '/checkout/' );
 			await expect( page.getByRole( 'heading', { name: 'Checkout', exact: true } ) ).toBeVisible();
 
-			await page.getByLabel('First name *').fill( customer.billing.us.first_name );
-			await page.getByLabel('Last name *').fill( customer.billing.us.last_name );
-			await page.getByPlaceholder('House number and street name').fill( customer.billing.us.address );
-			await page.getByLabel('Town / City *').type( customer.billing.us.city );
-			await page.getByLabel('ZIP Code *').type( customer.billing.us.zip );
-			await page.getByLabel('Phone *').fill( customer.billing.us.phone );
-			await page.getByLabel('Email address *').fill( customer.billing.us.email );
+			await page.getByLabel('First name *').first().fill( customer.billing.us.first_name );
+			await page.getByLabel('Last name *').first().fill( customer.billing.us.last_name );
+			await page.getByPlaceholder('House number and street name').first().fill( customer.billing.us.address );
+			await page.getByLabel('Town / City *').first().pressSequentially( customer.billing.us.city );
+			await page.getByLabel('ZIP Code *').first().pressSequentially( customer.billing.us.zip );
+			await page.getByLabel('Phone *').first().fill( customer.billing.us.phone );
+			await page.getByLabel('Email address *').first().fill( customer.billing.us.email );
 
 			await expect( page.getByRole( 'row', { name: 'Subtotal $100.00'} ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Country Tax $10.00' } ) ).toBeVisible();
