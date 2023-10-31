@@ -49,8 +49,6 @@ trait SourceAttributionMeta {
 	/**
 	 * Get the device type based on the other meta fields.
 	 *
-	 * @since x.x.x
-	 *
 	 * @param array $values The meta values.
 	 *
 	 * @return string The device type.
@@ -70,7 +68,6 @@ trait SourceAttributionMeta {
 	/**
 	 * Set the meta fields and the field prefix.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	private function set_fields_and_prefix() {
@@ -88,7 +85,6 @@ trait SourceAttributionMeta {
 	/**
 	 * Set the meta prefix for our fields.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	private function set_field_prefix(): void {
@@ -172,8 +168,6 @@ trait SourceAttributionMeta {
 	/**
 	 * Get the field name with the meta prefix.
 	 *
-	 * @since x.x.x
-	 *
 	 * @param string $field The field name.
 	 *
 	 * @return string The prefixed field name.
@@ -191,8 +185,6 @@ trait SourceAttributionMeta {
 
 	/**
 	 * Remove the meta prefix from the field name.
-	 *
-	 * @since x.x.x
 	 *
 	 * @param string $field The prefixed field.
 	 *
@@ -350,8 +342,6 @@ trait SourceAttributionMeta {
 
 	/**
 	 * Get the description for the order source attribution field.
-	 *
-	 * @since x.x.x
 	 *
 	 * @param string $field The field name.
 	 *
