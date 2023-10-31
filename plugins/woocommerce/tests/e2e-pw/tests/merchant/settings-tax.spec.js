@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

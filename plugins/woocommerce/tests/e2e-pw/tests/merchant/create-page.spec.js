@@ -1,6 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 
 const pageTitle = `Page-${ new Date().getTime().toString() }`;
 

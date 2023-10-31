@@ -8,18 +8,17 @@ import { useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './content.scss';
-import {
-	Product,
-	ProductType,
-	SearchAPIProductType,
-	SearchResultType,
-} from '../product-list/types';
-import { MARKETPLACE_SEARCH_API_PATH, MARKETPLACE_HOST } from '../constants';
+import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { fetchSearchResults } from '../../utils/functions';
+import {
+	recordMarketplaceView,
+	recordLegacyTabView,
+} from '../../utils/tracking';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -30,7 +29,19 @@ export default function Content(): JSX.Element {
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
-		if ( [ '', 'discover' ].includes( selectedTab ) ) {
+		// we are recording both the new and legacy events here for now
+		// they're separate methods to make it easier to remove the legacy one later
+		const marketplaceViewProps = {
+			view: query?.tab,
+			search_term: query?.term,
+			product_type: query?.section,
+			category: query?.category,
+		};
+
+		recordMarketplaceView( marketplaceViewProps );
+		recordLegacyTabView( marketplaceViewProps );
+
+		if ( query.tab && [ '', 'discover' ].includes( query.tab ) ) {
 			return;
 		}
 
@@ -48,9 +59,9 @@ export default function Content(): JSX.Element {
 				'category',
 				query.category === '_all' ? '' : query.category
 			);
-		} else if ( selectedTab === 'themes' ) {
+		} else if ( query?.tab === 'themes' ) {
 			params.append( 'category', 'themes' );
-		} else if ( selectedTab === 'search' ) {
+		} else if ( query?.tab === 'search' ) {
 			params.append( 'category', 'extensions-themes' );
 		}
 
@@ -59,39 +70,8 @@ export default function Content(): JSX.Element {
 			params.append( 'country', wccomSettings.storeCountry );
 		}
 
-		const wccomSearchEndpoint =
-			MARKETPLACE_HOST +
-			MARKETPLACE_SEARCH_API_PATH +
-			'?' +
-			params.toString();
-
-		// Fetch data from WCCOM API
-		fetch( wccomSearchEndpoint, { signal: abortController.signal } )
-			.then( ( response ) => response.json() )
-			.then( ( response ) => {
-				/**
-				 * Product card component expects a Product type.
-				 * So we build that object from the API response.
-				 */
-				const productList = response.products.map(
-					( product: SearchAPIProductType ): Product => {
-						return {
-							id: product.id,
-							title: product.title,
-							image: product.image,
-							type: product.type,
-							description: product.excerpt,
-							vendorName: product.vendor_name,
-							vendorUrl: product.vendor_url,
-							icon: product.icon,
-							url: product.link,
-							// Due to backwards compatibility, raw_price is from search API, price is from featured API
-							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? 0,
-							reviewsCount: product.reviews_count ?? 0,
-						};
-					}
-				);
+		fetchSearchResults( params, abortController.signal )
+			.then( ( productList ) => {
 				setProducts( productList );
 			} )
 			.catch( () => {
@@ -103,7 +83,13 @@ export default function Content(): JSX.Element {
 		return () => {
 			abortController.abort();
 		};
-	}, [ query.term, query.category, selectedTab, setIsLoading ] );
+	}, [
+		query.term,
+		query.category,
+		query?.tab,
+		setIsLoading,
+		query?.section,
+	] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {

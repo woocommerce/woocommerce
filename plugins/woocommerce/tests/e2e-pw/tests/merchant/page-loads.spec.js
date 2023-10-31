@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTranslationFor } = require( './../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 const { features } = require( '../../utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -10,7 +10,7 @@ const wcPages = [
 		subpages: getTranslationFor('WooCommerce subpages'),
 	},
 	{
-		name: getTranslationFor('Products'),
+		name: 'Products',
 		subpages: getTranslationFor('Products subpages'),
 	},
 	// analytics is handled through a separate test
@@ -50,7 +50,7 @@ for ( const currentPage of wcPages ) {
 			expect( httpStatus ).toEqual( 200 );
 			expect( status ).toEqual( 'success' );
 			expect( message ).toEqual(
-				'Onboarding profile data has been updated.'
+				getTranslationFor( 'Onboarding profile data has been updated.' )
 			);
 			const api = new wcApi( {
 				url: baseURL,
@@ -104,7 +104,7 @@ for ( const currentPage of wcPages ) {
 		test.beforeEach( async ( { page } ) => {
 			if ( currentPage.name === 'WooCommerce' ) {
 				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-			} else if ( currentPage.name === getTranslationFor('Products') ) {
+			} else if ( currentPage.name === 'Products' ) {
 				await page.goto( 'wp-admin/edit.php?post_type=product' );
 			} else if ( currentPage.name === 'Marketing' ) {
 				await page.goto(

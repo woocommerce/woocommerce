@@ -72,20 +72,20 @@ Both of these endpoints use WooCommerce Core's `WC_Helper_API` directly. The mai
 
 To disconnect from WooCommerce.com, go to `WooCommerce > Extensions > WooCommerce.com Subscriptions > Connected to WooCommerce.com > Disconnect`.
 
-## Jetpack Connection
+## WordPress.com Connection
 
-Using Jetpack & WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Field Guide for additional resources on testing Jetpack with local setups.
+Using a WordPress.com connection in WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a WPCOM connected site. Search the MGS & the Field Guide for additional resources on testing WordPress.com with local setups.
 
-We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L395-L417).
+We have a special WordPress.com connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we use the [/wc-admin/onboarding/plugins/jetpack-authorization-url](https://github.com/woocommerce/woocommerce/blob/1a9c1f93b942f682b6561b5cd1ae58f6d5eea49c/plugins/woocommerce/src/Admin/API/OnboardingPlugins.php#L240C2-L274) endpoint.
 
-We use Jetpack's `build_connect_url` function directly, but add the following two query parameters:
+We use the Jetpack Connection package's `Manager::get_authorization_url()` function directly, but add the following two query parameters:
 
 * `calypso_env`, which allows us to load different versions of Calypso when testing. See the Calypso section below.
-* `from=woocommerce-onboarding`, which is used to conditionally show the WooCommerce themed Jetpack authorization process [https://github.com/Automattic/wp-calypso/pull/34380](https://github.com/Automattic/wp-calypso/pull/34380). Without this parameter, you would end up in the normal Jetpack authorization flow.
+* `from=woocommerce-services`, which is used to conditionally show the WooCommerce-themed authorization process [https://github.com/Automattic/wp-calypso/pull/35193](https://github.com/Automattic/wp-calypso/pull/35193). Without this parameter, you would end up in the normal Jetpack authorization flow.
 
 The user is prompted to install and connect to Jetpack as the first step of the profile wizard. If the user hasn't connected when they arrive at the task list, we also prompt them on certain tasks to make the setup process easier, such as the shipping and tax steps.
 
-To disconnect from Jetpack, go to `Jetpack > Dashboard > Connections > Site connection > Manage site connection > Disconnect`.
+To disconnect from WordPress.com, install Jetpack, then go to `Jetpack > Dashboard > Connections > Site connection > Manage site connection > Disconnect`. You can remove Jetpack after you disconnect.
 
 ## Calypso
 

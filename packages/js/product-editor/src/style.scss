@@ -8,7 +8,6 @@
 @import "components/tabs/style.scss";
 @import "components/product-section-layout/style.scss";
 @import "components/header/style.scss";
-@import "components/footer/style.scss";
 @import "components/add-new-shipping-class-modal/style.scss";
 
 /* Components */
@@ -25,13 +24,17 @@
 @import "components/attribute-control/attribute-field.scss";
 @import "components/attribute-control/edit-attribute-modal.scss";
 @import "components/attribute-control/new-attribute-modal.scss";
-@import "components/attribute-control/remove-confirmation-modal.scss";
 @import "components/attribute-input-field/attribute-input-field.scss";
 @import "components/attribute-list-item/attribute-list-item.scss";
 @import "components/attribute-term-input-field/attribute-term-input-field.scss";
 @import "components/variations-table/styles.scss";
 @import "components/tags-field/create-tag-modal.scss";
 @import "components/tags-field/style.scss";
+@import "components/variation-switcher-footer/variation-switcher-footer.scss";
+@import "components/remove-confirmation-modal/style.scss";
+@import "components/manage-download-limits-modal/style.scss";
+@import "components/label/style.scss";
+@import "components/product-page-skeleton/styles.scss";
 
 /* Field Blocks */
 

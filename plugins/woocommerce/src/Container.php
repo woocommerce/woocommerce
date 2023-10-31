@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMig
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LoggingServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketplaceServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
@@ -71,6 +72,7 @@ final class Container {
 		MarketingServiceProvider::class,
 		MarketplaceServiceProvider::class,
 		BlockTemplatesServiceProvider::class,
+		LoggingServiceProvider::class,
 	);
 
 	/**

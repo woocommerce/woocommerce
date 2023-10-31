@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
-const { getTranslationFor } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require('../../../../utils/translations');
 const {
 	createVariableProduct,
 	showVariableProductTour,

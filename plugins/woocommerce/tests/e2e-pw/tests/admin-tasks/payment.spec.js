@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { testWithTranslation } = require( './../../utils/translations' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -31,17 +31,17 @@ test.describe( 'Payment setup task', () => {
 		} );
 	} );
 
-	testWithTranslation( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
+	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( 'text=Set up payments' ).click();
+		await page.locator( `text=${getTranslationFor('Set up payments')}` ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toContainText( 'Set up payments');
+		).toHaveText( `${getTranslationFor('Set up payments')}`);
 	} );
 
-	testWithTranslation( 'Saving valid bank account transfer details enables the payment method', async ( {
+	test( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {
 		// load the bank transfer page
@@ -54,19 +54,28 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.getByPlaceholder('Account name').fill('Savings');
-		await page.getByPlaceholder('Account number').fill('1234');
-		await page.getByPlaceholder('Bank name').fill('Test Bank');
-		await page.getByPlaceholder('Sort code').fill('12');
-		await page.getByPlaceholder('IBAN').fill('12 3456 7890');
-		await page.getByPlaceholder('BIC / Swift').fill('ABBA');
-		
-		await page.locator( 'text=Save' ).click();
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
+			.fill( 'Savings' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Account number"')}]` )
+			.fill( '1234' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"Bank name"')}]` )
+			.fill( 'Test Bank' );
+		await page.locator( `//input[@placeholder=${getTranslationFor('"Sort code"')}]` ).fill( '12' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"IBAN"')}]` )
+			.fill( '12 3456 7890' );
+		await page
+			.locator( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]` )
+			.fill( 'ABBA' );
+		await page.locator( `text=${getTranslationFor('Save')}` ).click();
 
 		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( 'Direct bank transfer details added successfully' );
+		).toContainText( `${getTranslationFor('Direct bank transfer details added successfully')}` );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 

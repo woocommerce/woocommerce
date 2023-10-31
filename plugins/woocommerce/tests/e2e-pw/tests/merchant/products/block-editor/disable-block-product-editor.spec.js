@@ -1,5 +1,5 @@
 const { test } = require( '@playwright/test' );
-const { getTranslationFor } = require('../../../../test-data/data');
+const { getTranslationFor } = require('../../../../utils/translations');
 
 const {
 	clickAddNewMenuItem,

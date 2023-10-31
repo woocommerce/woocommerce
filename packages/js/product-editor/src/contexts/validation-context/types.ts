@@ -11,6 +11,7 @@ export type ValidationContextProps< T > = {
 		validatorId: string,
 		validator: Validator< T >
 	): React.Ref< HTMLElement >;
+	unRegisterValidator( validatorId: string ): void;
 	validateField( name: string ): ValidatorResponse;
 	validateAll( newData?: Partial< T > ): Promise< ValidationErrors >;
 };

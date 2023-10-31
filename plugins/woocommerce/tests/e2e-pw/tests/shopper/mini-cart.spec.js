@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const pageTitle = 'Mini Cart';
@@ -74,38 +75,38 @@ test.describe( 'Mini Cart block page', () => {
 
 		const welcomeModalVisible = await page
 			.getByRole( 'heading', {
-				name: 'Welcome to the block editor',
+				name: getTranslationFor( 'Welcome to the block editor' ),
 			} )
 			.isVisible();
 
 		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Close' ) } ).click();
 		}
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: getTranslationFor( 'Add Title' ) } )
 			.fill( pageTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add default block' ) } ).click();
 
 		await page
 			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
+				name: getTranslationFor( 'Empty block; start writing or type forward slash to choose a block' ),
 			} )
 			.fill( '/mini' );
 		await page.keyboard.press( 'Enter' );
 
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: getTranslationFor( 'Editor publish' ) } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( getTranslationFor( 'Mini Cart is now live.' ) )
 		).toBeVisible();
 
 		// go to the page to test mini cart
@@ -115,11 +116,11 @@ test.describe( 'Mini Cart block page', () => {
 		).toBeVisible();
 		await page.locator( miniCartButton ).click();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
+			page.getByText( getTranslationFor( 'Your cart is currently empty!' ) )
 		).toBeVisible();
-		await page.getByRole( 'link', { name: 'Start shopping' } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor( 'Start shopping' ) } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Shop' } )
+			page.getByRole( 'heading', { name: getTranslationFor( 'Shop' ) }, { exact :true } )
 		).toBeVisible();
 	} );
 
@@ -129,7 +130,7 @@ test.describe( 'Mini Cart block page', () => {
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		// add product to cart
 		await page.goto( `product/${ slug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 
 		// go to page with mini cart block and test with the product added
 		await page.goto( '/mini-cart' );
@@ -138,18 +139,18 @@ test.describe( 'Mini Cart block page', () => {
 		).toContainText( `$${ singleProductSalePrice }` );
 		await page.locator( miniCartButton ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
+			page.getByRole( 'heading', { name: getTranslationFor( 'Your cart (1 item)' ) } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: simpleProductName } )
 		).toBeVisible();
 		await expect(
 			page.locator( '.wc-block-components-product-badge' )
-		).toContainText( `Save $${ singleProductSalePrice }` );
+		).toContainText( getTranslationFor( 'Save $50.00' ) );
 		await expect( page.getByText( simpleProductDesc ) ).toBeVisible();
 		await page.getByRole( 'button' ).filter( { hasText: '＋' } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
+			page.getByRole( 'heading', { name: getTranslationFor( 'Your cart (2 items)' ) } )
 		).toBeVisible();
 		await expect(
 			page.locator( '.wc-block-mini-cart__button' )
@@ -159,29 +160,29 @@ test.describe( 'Mini Cart block page', () => {
 		).toContainText( `$${ singleProductSalePrice * 2 }` );
 		await page
 			.getByRole( 'button' )
-			.filter( { hasText: 'Remove item' } )
+			.filter( { hasText: getTranslationFor( 'Remove item' ) } )
 			.click();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
+			page.getByText( getTranslationFor( 'Your cart is currently empty!' ) )
 		).toBeVisible();
 
 		// add product to cart and redirect from mini to regular cart
 		await page.goto( `product/${ slug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 		await page.goto( '/mini-cart' );
 		await page.locator( miniCartButton ).click();
-		await page.getByRole( 'link', { name: 'View my cart' } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor( 'View my cart' ) } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Cart', exact: true } )
+			page.getByRole( 'heading', { name: getTranslationFor( 'Cart' ), exact: true } )
 		).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 
 		// go to mini cart and test redirection from mini cart to checkout
 		await page.goto( '/mini-cart' );
 		await page.locator( miniCartButton ).click();
-		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor( 'Go to checkout' ) } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Checkout', exact: true } )
+			page.getByRole( 'heading', { name: getTranslationFor( 'Checkout' ), exact: true } )
 		).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 	} );

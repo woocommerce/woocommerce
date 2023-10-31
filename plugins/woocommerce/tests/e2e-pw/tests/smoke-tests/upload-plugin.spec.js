@@ -5,7 +5,8 @@ const {
 	PLUGIN_REPOSITORY,
 } = process.env;
 const { test, expect } = require( '@playwright/test' );
-const { admin, getTranslationFor } = require( '../../test-data/data' );
+const { admin } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 const path = require( 'path' );
 const {
 	deletePlugin,

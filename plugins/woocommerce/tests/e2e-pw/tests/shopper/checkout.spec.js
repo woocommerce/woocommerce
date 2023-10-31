@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer, getTranslationFor } = require( '../../test-data/data' );
+const { admin, customer } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 
 const guestEmail = 'checkout-guest@example.com';
@@ -187,18 +188,18 @@ test.describe( 'Checkout page', () => {
 		await page.goto( '/checkout/' );
 
 		// first try submitting the form with no fields complete
-		await page.getByRole('button', { name: 'Place order' }).click();
+		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
 		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing First name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Last name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Street address is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Town / City is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing ZIP Code is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Phone is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Email address is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing First name is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Last name is a required field.' ), { exact : true } ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Street address is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Town / City is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing ZIP Code is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Phone is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Email address is a required field.' ) ) ).toBeVisible();
 
 		// toggle ship to different address, fill out billing info and confirm error shown
-		await page.getByText('Ship to a different address?').click();
+		await page.getByText( getTranslationFor( 'Ship to a different address?' ) ).click();
 		await page.locator( '#billing_first_name' ).fill( 'Homer' );
 		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
 		await page
@@ -210,14 +211,14 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_postcode' ).fill( '97403' );
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( customer.email );
-		await page.getByRole('button', { name: 'Place order' }).click();
+		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
 
 		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping First name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Last name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Street address is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Town / City is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping ZIP Code is a required field.' ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping First name is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Last name is a required field.' ), { exact : true } ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Street address is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Town / City is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping ZIP Code is a required field.' ) ) ).toBeVisible();
 	} );
 
 	test( 'allows customer to fill shipping details', async ( { page } ) => {

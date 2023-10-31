@@ -1015,19 +1015,6 @@ ul.wc-tabs {
 		margin-bottom: var(--wp--style--block-gap);
 	}
 
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
-	}
-
 	.woocommerce-customer-details {
 		address {
 			border: 1px solid var(--wp--preset--color--black);

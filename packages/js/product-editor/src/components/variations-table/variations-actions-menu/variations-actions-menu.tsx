@@ -16,6 +16,7 @@ import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 import { InventoryMenuItem } from '../inventory-menu-item';
 import { ShippingMenuItem } from '../shipping-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
+import { DownloadsMenuItem } from '../downloads-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,
@@ -73,6 +74,15 @@ export function VariationsActionsMenu( {
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
+						{ window.wcAdminFeatures[
+							'product-virtual-downloadable'
+						] && (
+							<DownloadsMenuItem
+								selection={ selection }
+								onChange={ onChange }
+								onClose={ onClose }
+							/>
+						) }
 					</MenuGroup>
 					<MenuGroup>
 						<MenuItem

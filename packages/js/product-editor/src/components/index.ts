@@ -31,3 +31,16 @@ export {
 export { AttributeControl as __experimentalAttributeControl } from './attribute-control';
 export { Attributes as __experimentalAttributes } from './attributes';
 export * from './add-new-shipping-class-modal';
+export { VariationSwitcherFooter as __experimentalVariationSwitcherFooter } from './variation-switcher-footer';
+
+export * from './remove-confirmation-modal';
+
+export {
+	ManageDownloadLimitsModal as __experimentalManageDownloadLimitsModal,
+	ManageDownloadLimitsModalProps,
+} from './manage-download-limits-modal';
+
+export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
+export { NumberControl as __experimentalNumberControl } from './number-control';
+
+export * from './product-page-skeleton';
