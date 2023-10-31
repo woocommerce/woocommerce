@@ -411,6 +411,7 @@
 				reformatSettingsHTML: function( html ) {
 					const formattingFunctions = [
 						this.replaceHTMLTables,
+						this.moveAdvancedCostsHelpTip,
 						this.moveHTMLHelpTips,
 						this.addCurrencySymbol
 					];
@@ -418,6 +419,17 @@
 					return formattingFunctions.reduce( ( formattedHTML, fn ) => {
 						return fn( formattedHTML );
 					}, html );
+				},
+				moveAdvancedCostsHelpTip: function( html ) {
+					const htmlContent = $( html );
+					const advancedCostsHelpTip = htmlContent.find( '#wc-shipping-advanced-costs-help-text' );
+					advancedCostsHelpTip.addClass( 'wc-shipping-zone-method-fields-help-text' );
+
+					const input = htmlContent.find( '#woocommerce_flat_rate_cost' );
+					const fieldset = input.closest( 'fieldset' );
+					advancedCostsHelpTip.appendTo( fieldset );
+
+					return htmlContent.prop( 'outerHTML' );
 				},
 				addCurrencySymbol: function( html ) {
 					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
@@ -443,7 +455,7 @@
 				},
 				moveHTMLHelpTips: function( html ) {
 					// These help tips aren't moved.
-					const helpTipsToIgnore = [ 'woocommerce_flat_rate_cost' ];
+					const helpTipsToRetain = [ 'woocommerce_flat_rate_cost', 'woocommerce_flat_rate_no_class_cost', 'woocommerce_flat_rate_class_cost_' ];
 
 					const htmlContent = $( html );
 					const labels = htmlContent.find( 'label' );
@@ -457,7 +469,9 @@
 
 						const id = label.attr( 'for' );
 
-						if ( helpTipsToIgnore.includes( id ) ) {
+						if ( helpTipsToRetain.some( ( tip ) => id.includes( tip ) ) ) {
+							const helpTip = htmlContent.find( `label[for=${ id }] span.woocommerce-help-tip` );
+							helpTip.addClass( 'wc-shipping-visible-help-text' );
 							return;
 						}
 
