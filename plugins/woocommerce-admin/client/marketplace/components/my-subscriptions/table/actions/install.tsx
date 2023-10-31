@@ -19,8 +19,7 @@ interface InstallProps {
 }
 
 export default function Install( props: InstallProps ) {
-	const { createWarningNotice, createSuccessNotice } =
-		useDispatch( 'core/notices' );
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const loading: boolean = useSelect(
@@ -40,6 +39,12 @@ export default function Install( props: InstallProps ) {
 	const stopInstall = () => {
 		dispatch( installingStore ).stopInstalling(
 			props.subscription.product_key
+		);
+	};
+	const addError = ( message: string ) => {
+		dispatch( installingStore ).addError(
+			props.subscription.product_key,
+			message
 		);
 	};
 
@@ -71,14 +76,7 @@ export default function Install( props: InstallProps ) {
 					if ( error?.success === false && error?.data.message ) {
 						errorMessage += ' ' + error.data.message;
 					}
-					createWarningNotice( errorMessage, {
-						actions: [
-							{
-								label: __( 'Try again', 'woocommerce' ),
-								onClick: install,
-							},
-						],
-					} );
+					addError( errorMessage );
 					stopInstall();
 				} );
 			} );
