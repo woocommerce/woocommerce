@@ -290,9 +290,12 @@
 		padding: 32px;
 		cursor: pointer;
 		width: 324px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		.woocommerce-customize-store_custom-logo {
-			width: 100%;
+			max-width: 60px;
 		}
 	}
 
