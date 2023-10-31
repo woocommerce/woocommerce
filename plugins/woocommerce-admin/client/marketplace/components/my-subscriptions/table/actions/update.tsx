@@ -14,6 +14,7 @@ import { Subscription } from '../../types';
 import ConnectModal from './connect-modal';
 import RenewModal from './renew-modal';
 import SubscribeModal from './subscribe-modal';
+import { updateProduct } from '../../../../utils/functions';
 
 interface UpdateProps {
 	subscription: Subscription;
@@ -63,28 +64,21 @@ export default function Update( props: UpdateProps ) {
 
 		setIsUpdating( true );
 
-		const action =
-			props.subscription.local.type === 'plugin'
-				? 'update-plugin'
-				: 'update-theme';
-		window.wp.updates
-			.ajax( action, {
-				slug: props.subscription.local.slug,
-				plugin: props.subscription.local.path,
-				theme: props.subscription.local.path,
-			} )
+		updateProduct( props.subscription )
 			.then( () => {
-				loadSubscriptions( false );
-				createSuccessNotice(
-					sprintf(
-						// translators: %s is the product name.
-						__( '%s updated successfully.', 'woocommerce' ),
-						props.subscription.product_name
-					),
-					{
-						icon: <Icon icon="yes" />,
-					}
-				);
+				loadSubscriptions( false ).then( () => {
+					createSuccessNotice(
+						sprintf(
+							// translators: %s is the product name.
+							__( '%s updated successfully.', 'woocommerce' ),
+							props.subscription.product_name
+						),
+						{
+							icon: <Icon icon="yes" />,
+						}
+					);
+					setIsUpdating( false );
+				} );
 			} )
 			.catch( () => {
 				createWarningNotice(
@@ -102,8 +96,6 @@ export default function Update( props: UpdateProps ) {
 						],
 					}
 				);
-			} )
-			.always( () => {
 				setIsUpdating( false );
 			} );
 	}
