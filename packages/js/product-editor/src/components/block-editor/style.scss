@@ -1,4 +1,6 @@
 .woocommerce-product-block-editor {
+	padding-top: 106px;
+
 	h1,
 	h2,
 	h3,
@@ -142,15 +144,6 @@
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
 			display: none; // use important or increase specificity.
 		}
-	}
-}
-
-.woocommerce-layout:has(.woocommerce-product-block-editor) {
-	.woocommerce-layout__primary {
-		margin-top: calc($gap-largest + $gap-smaller);
-	}
-	.woocommerce-layout__header {
-		display: none;
 	}
 }
 

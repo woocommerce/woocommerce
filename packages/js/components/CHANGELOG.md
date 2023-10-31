@@ -2,6 +2,35 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.2.0](https://www.npmjs.com/package/@woocommerce/components/v/12.2.0) - 2023-10-17
+
+-   Patch - Add class back in for increase specificity of css for dropdown button. [#40494]
+-   Minor - Categories dropdown display error #39810 [#39811]
+-   Patch - Fixed empty component logo color, used generic rather than old pink [#39182]
+-   Patch - Fix invalid focus state of the experimental select control [#40519]
+-   Minor - Fix new category name field [#39857]
+-   Patch - Fix select control dropdown menu double scroll and width [#39989]
+-   Minor - Select attribute after pressing their names #39456 [#39574]
+-   Patch - TreeSelectControl Component - Make sure individuallySelectParent prop is respected [#40301]
+-   Minor - Add AI wizard business info step for Customize Your Store task [#39979]
+-   Minor - Add customize store assembler hub onboarding tour [#39981]
+-   Minor - Add ProgressBar component [#39979]
+-   Minor - Add tags (or general taxonomy ) block [#39966]
+-   Minor - Add Tooltip to each list item when need it [#39770]
+-   Minor - An international phone number input with country selection, and mobile phone numbers validation. [#40335]
+-   Minor - Image gallery and media uploader now support initial selected images. [#40633]
+-   Minor - Refactor Pagination component and split out into multiple re-usable components. Also added a `usePagination` hook. [#39967]
+-   Minor - Set button optional in MediaUploader component [#40526]
+-   Minor - Update ImageGallery block toolbar, moving some options to an ellipsis dropdown menu. [#39753]
+-   Minor - Allow users to select multiple items from the media library while adding images #39741 [#39741]
+-   Patch - Make eslint emit JSON report for annotating PRs. [#39704]
+-   Minor - Update pnpm to 8.6.7 [#39245]
+-   Patch - Upgraded Storybook to 6.5.17-alpha.0 for TypeScript 5 compatibility [#39745]
+-   Minor - Upgrade TypeScript to 5.1.6 [#39531]
+-   Patch - Add z-index=1 to tour-kit close btn to ensure it's clickable [#40456]
+-   Minor - Remove unnecessary use of woocommerce-page selector for DropdownButton styling. [#40218]
+-   Patch - Small condition change in the date time picker to avoid edge case where inputControl is null. [#40642]
+
 ## [12.1.0](https://www.npmjs.com/package/@woocommerce/components/v/12.1.0) - 2023-07-13
 
 -   Patch - Altering styles to correctly target fields within slot fills on product editor. [#36500]
@@ -157,7 +186,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
 -   Minor - Improve experimental SelectControl accessibility [#35140]
 -   Minor - Improve Sortable component acessibility [#35140]
--   -   Create new experimental SelectControl component [#35140]
+-   Major - Create new experimental SelectControl component [#35140]
 
 ## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12
 

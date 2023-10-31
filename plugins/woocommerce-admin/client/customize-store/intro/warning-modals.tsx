@@ -35,7 +35,7 @@ export const DesignChangeWarningModal = ( {
 			<p>
 				{ createInterpolateElement(
 					__(
-						"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
 						'woocommerce'
 					),
 					{
@@ -94,7 +94,7 @@ export const StartNewDesignWarningModal = ( {
 			<p>
 				{ createInterpolateElement(
 					__(
-						"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
 						'woocommerce'
 					),
 					{

@@ -23,6 +23,7 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
+import { navigateOrParent } from '../utils';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
 
@@ -97,7 +98,10 @@ export const Transitional = ( {
 								recordEvent(
 									'customize_your_store_transitional_editor_click'
 								);
-								window.location.href = `${ ADMIN_URL }site-editor.php`;
+								navigateOrParent(
+									window,
+									`${ ADMIN_URL }site-editor.php`
+								);
 							} }
 						>
 							{ __( 'Go to the Editor', 'woocommerce' ) }

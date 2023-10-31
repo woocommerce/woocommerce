@@ -10,6 +10,7 @@ import ProductList from '../product-list/product-list';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { ProductType } from '../product-list/types';
 import './discover.scss';
 
 export default function Discover(): JSX.Element | null {
@@ -41,7 +42,14 @@ export default function Discover(): JSX.Element | null {
 	}, [] );
 
 	if ( isLoading ) {
-		return <ProductLoader />;
+		return (
+			<div className="woocommerce-marketplace__discover">
+				<ProductLoader
+					placeholderCount={ 9 }
+					type={ ProductType.extension }
+				/>
+			</div>
+		);
 	}
 
 	const groupsList = productGroups.flatMap( ( group ) => group );
