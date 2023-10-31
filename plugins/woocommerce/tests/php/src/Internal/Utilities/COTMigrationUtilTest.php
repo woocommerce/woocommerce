@@ -30,6 +30,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( COTMigrationUtil::class );
 
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$cot_controller       = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
 	}
@@ -41,6 +42,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 
@@ -96,6 +98,10 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
 
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
 		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->sut      = new COTMigrationUtil();
 		$this->sut->init( $cot_controller, $data_sync_mock );
@@ -112,6 +118,10 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 
 		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( false );
+
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
 
 		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->sut      = new COTMigrationUtil();
