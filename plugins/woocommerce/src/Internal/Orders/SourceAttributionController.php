@@ -144,26 +144,13 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action( 'show_user_profile', $customer_meta_boxes );
 		add_action( 'edit_user_profile', $customer_meta_boxes );
 
-		// Add source data to the order table.
-		add_filter(
-			'manage_edit-shop_order_columns',
-			function( $columns ) {
-				$columns['origin'] = esc_html__( 'Origin', 'woocommerce' );
-
-				return $columns;
-			}
-		);
-
+		// Add origin data to the order table.
 		add_action(
-			'manage_shop_order_posts_custom_column',
-			function( $column_name, $order_id ) {
-				if ( 'origin' !== $column_name ) {
-					return;
-				}
-				$this->display_origin_column( $order_id );
+			'init',
+			function() {
+				$this->register_order_origin_column();
 			},
-			10,
-			2
+			20
 		);
 	}
 
@@ -233,9 +220,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function enqueue_admin_scripts_and_styles() {
-		$screen            = get_current_screen();
-		$order_page_suffix = $this->is_hpos_enabled() ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
-		if ( $screen->id !== $order_page_suffix ) {
+		$screen = get_current_screen();
+		if ( $screen->id !== $this->get_order_screen_id() ) {
 			return;
 		}
 
@@ -400,5 +386,48 @@ class SourceAttributionController implements RegisterHooksInterface {
 		);
 
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_source_attribution', $tracks_data );
+	}
+
+	/**
+	 * Get the screen ID for the orders page.
+	 *
+	 * @since x.x.x
+	 * @return string
+	 */
+	private function get_order_screen_id(): string {
+		return $this->is_hpos_enabled() ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
+	}
+
+	/**
+	 * Register the origin column in the orders table.
+	 *
+	 * This accounts for the differences in hooks based on whether HPOS is enabled or not.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	private function register_order_origin_column() {
+		$screen_id = $this->get_order_screen_id();
+
+		add_filter(
+			"manage_{$screen_id}_columns",
+			function( $columns ) {
+				$columns['origin'] = esc_html__( 'Origin', 'woocommerce' );
+
+				return $columns;
+			}
+		);
+
+		add_action(
+			"manage_{$screen_id}_custom_column",
+			function( $column_name, $order_id ) {
+				if ( 'origin' !== $column_name ) {
+					return;
+				}
+				$this->display_origin_column( $order_id );
+			},
+			10,
+			2
+		);
 	}
 }
