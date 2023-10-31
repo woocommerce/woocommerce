@@ -99,10 +99,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
-		newAttributeModalNotice: __(
-			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-			'woocommerce'
-		),
 		attributeRemoveConfirmationMessage: __(
 			'Remove this attribute?',
 			'woocommerce'
@@ -293,7 +289,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
 					description={ uiStrings.newAttributeModalDescription }
-					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
