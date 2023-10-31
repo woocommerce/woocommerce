@@ -51,7 +51,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
-	default: ExistingAiThemeBanner,
+	default: DefaultBanner,
 };
 
 const MODAL_COMPONENTS = {

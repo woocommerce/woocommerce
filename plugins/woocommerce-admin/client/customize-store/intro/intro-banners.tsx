@@ -5,17 +5,13 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
-// @ts-ignore No types for this exist yet.
-import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 
 /**
  * Internal dependencies
  */
 import { Intro } from '.';
-import {
-	ScaledBlockPreview,
-	ScaledBlockPreviewProps,
-} from '../assembler-hub/auto-block-preview';
+import { IntroSiteIframe } from './intro-site-iframe';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -24,7 +20,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
-	bannerSiteRender,
+	secondaryButton,
 	children,
 }: {
 	bannerTitle: string;
@@ -33,10 +29,9 @@ export const BaseIntroBanner = ( {
 	buttonIsLink?: boolean;
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
-	bannerSiteRender?: boolean;
+	secondaryButton?: React.ReactNode;
 	children?: React.ReactNode;
 } ) => {
-
 	return (
 		<div
 			className={ classNames(
@@ -45,18 +40,21 @@ export const BaseIntroBanner = ( {
 			) }
 		>
 			<div className={ `woocommerce-customize-store-banner-content` }>
-				<h1>{ bannerTitle }</h1>
-				<p>{ bannerText }</p>
-				{ bannerButtonText ? (
-					<Button
-						onClick={ () =>
-							bannerButtonOnClick && bannerButtonOnClick()
-						}
-						variant={ buttonIsLink ? 'link' : 'primary' }
-					>
-						{ bannerButtonText }
-					</Button>
-				) : null }
+				<div className="banner-actions">
+					<h1>{ bannerTitle }</h1>
+					<p>{ bannerText }</p>
+					{ bannerButtonText && (
+						<Button
+							onClick={ () =>
+								bannerButtonOnClick && bannerButtonOnClick()
+							}
+							variant={ buttonIsLink ? 'link' : 'primary' }
+						>
+							{ bannerButtonText }
+						</Button>
+					) }
+					{ secondaryButton }
+				</div>
 				{ children }
 			</div>
 		</div>
@@ -189,6 +187,19 @@ export const ExistingAiThemeBanner = ( {
 }: {
 	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
 } ) => {
+	const secondaryButton = (
+		<Button
+			className=""
+			onClick={ () => {
+				setOpenDesignChangeWarningModal( true );
+			} }
+			variant={ 'secondary' }
+		>
+			{ __( 'Create a new one', 'woocommerce' ) }
+		</Button>
+	);
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your custom theme', 'woocommerce' ) }
@@ -206,27 +217,12 @@ export const ExistingAiThemeBanner = ( {
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
-			bannerSiteRender={ true }
+			secondaryButton={ secondaryButton }
 		>
-			<Button
-				className=""
-				onClick={ () => {
-					setOpenDesignChangeWarningModal( true );
-				} }
-				variant={ 'secondary' }
-			>
-				{ __( 'Create a new one', 'woocommerce' ) }
-			</Button>
 			<div className={ 'woocommerce-block-preview-container' }>
-				<ScaledBlockPreview
-					viewportWidth = { 1040 }
-					containerWidth = { 400 }
-					settings = {{ styles: [] }}
-					additionalStyles = { '' }
-					onClickNavigationItem = { ( event: MouseEvent ) => null }
-					isNavigable = { false }
-					isScrollable = { true }
-				/>
+				<div className="iframe-container">
+					<IntroSiteIframe siteUrl={ siteUrl } />
+				</div>
 			</div>
 		</BaseIntroBanner>
 	);
