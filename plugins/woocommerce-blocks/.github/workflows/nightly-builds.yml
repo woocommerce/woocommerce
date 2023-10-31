@@ -2,7 +2,7 @@ name: Nightly builds
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Run at 12 AM UTC.
+    - cron: '1 0 * * *' # Run at 12:01 AM UTC.
   workflow_dispatch:
 
 env:
@@ -45,6 +45,20 @@ jobs:
           asset_name: woocommerce-blocks-${{ matrix.build }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
+      - name: Get Date
+        id: date
+        uses: lee-dohm/calculate-dates-and-times@v1.0.2
+        with:
+          format: 'YYYY-MM-DD'
+          subtract: '1 day'
+      - name: Update release notes
+        uses: irongut/EditRelease@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          id: 80943895
+          body: "Nightly release auto generated everyday at 12:01 AM UTC. \n\n[PRs merged since last nightly build](https://github.com/woocommerce/woocommerce-blocks/pulls?q=is%3Apr+closed%3A%3E${{ steps.date.outputs.date }}+is%3Amerged)"
+          spacing: 0
+          replacebody: true
   update:
     name: Update nightly tag commit ref
     runs-on: ubuntu-20.04
