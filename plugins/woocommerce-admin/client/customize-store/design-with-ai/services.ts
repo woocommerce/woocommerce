@@ -25,6 +25,7 @@ import {
 	getTemplatePatterns,
 } from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+import { setLogoWidth } from '../utils';
 
 const { escalate } = actions;
 
@@ -309,10 +310,13 @@ const updateTemplate = async ( {
 		patternsByName
 	);
 
-	const content = [ ...homepageTemplate ]
+	let content = [ ...homepageTemplate ]
 		.filter( Boolean )
 		.map( ( pattern ) => pattern.content )
 		.join( '\n\n' );
+
+	// Replace the logo width with the default width.
+	content = setLogoWidth( content );
 
 	const currentTemplate = await resolveSelect(
 		coreStore
