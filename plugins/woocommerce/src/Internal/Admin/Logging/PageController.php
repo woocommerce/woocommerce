@@ -7,6 +7,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, ListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
+use WC_Log_Levels;
 
 /**
  * PageController class.
@@ -183,17 +184,33 @@ class PageController {
 			return;
 		}
 
+		$stream      = $file->get_stream();
+		$line_number = 1;
+
 		?>
 		<h2>
 			<?php
 			printf(
 				// translators: %s is the name of a log file.
 				esc_html__( 'Viewing log file %s', 'woocommerce' ),
-				esc_html( $file->get_file_id() )
+				sprintf(
+					'<code>%s</code>',
+					esc_html( $file->get_file_id() )
+				)
 			);
 			?>
 		</h2>
-
+		<div id="log-entries">
+			<?php while ( ! feof( $stream ) ) : ?>
+				<?php
+				$line = fgets( $stream );
+				if ( is_string( $line ) ) {
+					echo $this->format_line( $line, $line_number );
+					$line_number ++;
+				}
+				?>
+			<?php endwhile; ?>
+		</div>
 		<?php
 	}
 
@@ -372,5 +389,60 @@ class PageController {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Format a log file line.
+	 *
+	 * @param string $text        The unformatted log file line.
+	 * @param int    $line_number The line number.
+	 *
+	 * @return string
+	 */
+	private function format_line( string $text, int $line_number ): string {
+		$classes  = array( 'line' );
+
+		$level_severities = range( 100, 800, 100 );
+		$severity_levels  = array();
+		foreach ( $level_severities as $severity ) {
+			$severity_levels[] = WC_Log_Levels::get_severity_level( $severity );
+		}
+
+		$text = esc_html( trim( $text ) );
+		if ( empty( $text ) ) {
+			$text = '&nbsp;';
+		}
+
+		$segments = explode( ' ', $text, 3 );
+
+		if ( isset( $segments[0] ) && false !== strtotime( $segments[0] ) ) {
+			$classes[]   = 'log-entry';
+			$segments[0] = sprintf(
+				'<span class="log-timestamp">%s</span>',
+				$segments[0]
+			);
+		}
+
+		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
+			$segments[1] = sprintf(
+				'<span class="%1$s">%2$s</span>',
+				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
+				$segments[1]
+			);
+		}
+
+		if ( count( $segments ) > 1 ) {
+			$text = implode( ' ', $segments );
+		}
+
+		$classes = implode( ' ', $classes );
+		$line    = sprintf(
+			'<a id="L%1$d" href="#L%1$d" class="%2$s"><span class="line-content">%3$s</span></a>',
+			absint( $line_number ),
+			esc_attr( $classes ),
+			$text
+		);
+
+		return $line;
 	}
 }
