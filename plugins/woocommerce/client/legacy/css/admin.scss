@@ -1308,7 +1308,7 @@ table.wc_status_table--tools {
  * FileV2 logs
  */
 #log-entries {
-	background: #ffffff;
+	background: #f6f7f7;
 	border: 1px solid #c3c4c7;
 	font-family: Consolas, Monaco, monospace;
 	word-wrap: break-word;
@@ -1324,11 +1324,10 @@ table.wc_status_table--tools {
 		&:before {
 			//counter-increment: line;
 			//content: counter(line);
+			content: '\00A0';
 			display: block;
-			padding: 0 1em 0 0.5em;
 			float: left;
-			width: 2em;
-			text-align: right;
+			width: 3.5em;
 		}
 	}
 
@@ -1338,8 +1337,9 @@ table.wc_status_table--tools {
 		text-decoration: none;
 		display: block;
 		height: 100%;
-		width: 3.5em;
-		background: rgba(200,200,200,0.2);
+		padding: 0 1em 0 0.5em;
+		width: 2em;
+		text-align: right;
 	}
 
 	.line-content {
@@ -1347,6 +1347,7 @@ table.wc_status_table--tools {
 		overflow: hidden;
 		padding: 0 1em;
 		border-left: 1px solid #c3c4c7;
+		background: #ffffff;
 	}
 
 	.log-timestamp {
