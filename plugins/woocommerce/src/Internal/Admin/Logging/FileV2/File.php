@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
+use WP_Filesystem_Direct;
+
 /**
  * File class.
  *
@@ -45,13 +47,34 @@ class File {
 	protected $hash = '';
 
 	/**
+	 * The file's resource handle when it is open.
+	 *
+	 * @var resource
+	 */
+	protected $stream;
+
+	/**
 	 * Class File
 	 *
 	 * @param string $path The absolute path of the file.
 	 */
 	public function __construct( $path ) {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem instanceof WP_Filesystem_Direct ) {
+			WP_Filesystem();
+		}
+
 		$this->path = $path;
 		$this->parse_filename();
+	}
+
+	/**
+	 * Make sure open streams are closed.
+	 */
+	public function __destruct() {
+		if ( is_resource( $this->stream ) ) {
+			fclose( $this->stream );
+		}
 	}
 
 	/**
@@ -105,19 +128,40 @@ class File {
 	/**
 	 * Check if the file represented by the class instance is a file and is readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool
 	 */
 	public function is_readable(): bool {
-		return is_file( $this->path ) && is_readable( $this->path );
+		global $wp_filesystem;
+
+		return $wp_filesystem->is_file( $this->path ) && $wp_filesystem->is_readable( $this->path );
 	}
 
 	/**
 	 * Check if the file represented by the class instance is a file and is writable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool
 	 */
 	public function is_writable(): bool {
-		return is_file( $this->path ) && is_writable( $this->path );
+		global $wp_filesystem;
+
+		return $wp_filesystem->is_file( $this->path ) && $wp_filesystem->is_writable( $this->path );
+	}
+
+	/**
+	 * Open a read-only stream file this file.
+	 *
+	 * @return resource|false
+	 */
+	public function get_stream() {
+		if ( ! is_resource( $this->stream ) ) {
+			$this->stream = fopen( $this->path, 'rb' );
+		}
+
+		return $this->stream;
 	}
 
 	/**
@@ -190,31 +234,43 @@ class File {
 	/**
 	 * Get the time of the last modification of the file, as a Unix timestamp. Or false if the file isn't readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return int|false
 	 */
 	public function get_modified_timestamp() {
-		return filemtime( $this->path );
+		global $wp_filesystem;
+
+		return $wp_filesystem->mtime( $this->path );
 	}
 
 	/**
 	 * Get the size of the file in bytes. Or false if the file isn't readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return int|false
 	 */
 	public function get_file_size() {
-		if ( ! is_readable( $this->path ) ) {
+		global $wp_filesystem;
+
+		if ( ! $wp_filesystem->is_readable( $this->path ) ) {
 			return false;
 		}
 
-		return @filesize( $this->path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		return $wp_filesystem->size( $this->path );
 	}
 
 	/**
 	 * Delete the file from the filesystem.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool True on success, false on failure.
 	 */
 	public function delete(): bool {
-		return @unlink( $this->path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		global $wp_filesystem;
+
+		return $wp_filesystem->delete( $this->path, false, 'f' );
 	}
 }
