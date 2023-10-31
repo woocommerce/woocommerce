@@ -6,27 +6,49 @@
  * Block Types: core/template-part/header
  */
 ?>
-<!-- wp:group {"className":"wc-blocks-header-pattern","align":"full","style":{"spacing":{"blockGap":"0px","padding":{"top":"1rem","right":"1rem","bottom":"1rem","left":"1rem"}}},"className":"has-link-color","layout":{"type":"default"}} -->
-<div class="wc-blocks-header-pattern wp-block-group alignfull has-link-color" style="padding-top:1rem;padding-right:1rem;padding-bottom:1rem;padding-left:1rem">
-	<!-- wp:group {"style":{"spacing":{"blockGap":"1rem"}},"className":"has-small-font-size","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-	<div class="wp-block-group has-small-font-size">
-		<!-- wp:search {"style":{"border":{"radius":"0px"}},"label":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","showLabel":false,"placeholder":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonText":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonUseIcon":true,"query":{"post_type":"product"},"width":100,"widthUnit":"%"} /-->
-		<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-		<div class="wp-block-group">
-			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","fontSize":"small","iconClass":"wc-block-customer-account__account-icon"} /-->
-			<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true,"style":{"typography":{"fontSize":"14px"}}} /-->
+
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"40px","left":"40px","top":"24px","bottom":"24px"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull" style="padding-right: 40px; padding-left: 40px; padding-top: 24px; padding-bottom: 24px">
+	<!-- wp:group {"align":"full","layout":{"type":"default"}} -->
+	<div class="wp-block-group alignfull">
+		<!-- wp:columns {"verticalAlignment":"center","isStackedOnMobile":false,"align":"full"} -->
+		<div class="wp-block-columns alignfull are-vertically-aligned-center is-not-stacked-on-mobile">
+			<!-- wp:column {"verticalAlignment":"center","width":"70%","layout":{"type":"default"}} -->
+			<div class="wp-block-column is-vertically-aligned-center" style="flex-basis: 70%;">
+				<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
+				<div class="wp-block-group">
+					<!-- wp:site-logo {"shouldSyncIcon":true} /-->
+
+					<!-- wp:site-title {"style":{"layout":{"selfStretch":"fixed","flexSize":"200px"}}} /-->
+				</div>
+				<!-- /wp:group -->
+			</div>
+			<!-- /wp:column -->
+
+			<!-- wp:column {"verticalAlignment":"center","width":""} -->
+			<div class="wp-block-column is-vertically-aligned-center">
+				<!-- wp:group {"style":{"spacing":{"blockGap":"0px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
+				<div class="wp-block-group">
+					<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"} /-->
+
+					<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
+				</div>
+				<!-- /wp:group -->
+			</div>
+			<!-- /wp:column -->
 		</div>
+		<!-- /wp:columns -->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"align":"full","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+	<div class="wp-block-group alignfull">
+		<!-- wp:navigation /-->
+
+		<!-- wp:group {"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group"><!-- wp:search {"label":"","showLabel":false,"placeholder":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonText":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonUseIcon":true,"query":{"post_type":"product"},"style":{"border":{"radius":"0px"}}} /--></div>
 		<!-- /wp:group -->
-</div>
-<!-- /wp:group -->
-
-<!-- wp:group {"style":{"spacing":{"blockGap":"16px","padding":{"top":"1rem","left":"0px","bottom":"2rem"}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
-<div class="wp-block-group" style="padding-top:1rem;padding-bottom:2rem;padding-left:0px">
-	<!-- wp:site-logo {"shouldSyncIcon":true} /-->
-	<!-- wp:site-title /-->
-</div>
-<!-- /wp:group -->
-
-<!-- wp:navigation {"layout":{"type":"flex","justifyContent":"center"}} /-->
+	</div>
+	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->
