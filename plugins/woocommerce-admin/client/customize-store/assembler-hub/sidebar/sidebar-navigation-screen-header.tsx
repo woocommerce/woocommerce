@@ -14,8 +14,6 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-// import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
