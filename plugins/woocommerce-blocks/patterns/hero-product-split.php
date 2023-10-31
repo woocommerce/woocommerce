@@ -12,11 +12,11 @@ $images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-
 $hero_title = $content['titles'][0]['default'] ?? '';
 ?>
 
-<!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false} -->
-<div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile">
+<!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false,"style":{"spacing":{"margin":{"bottom":"80px"}}}} -->
+<div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile" style="margin-bottom:80px">
 	<div class="wp-block-media-text__content">
-		<!-- wp:heading -->
-		<h2 class="wp-block-heading"><?php echo esc_html( $hero_title ); ?></h2>
+		<!-- wp:heading {"level":3} -->
+		<h3 class="wp-block-heading"><?php echo esc_html( $hero_title ); ?></h3>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
