@@ -59,7 +59,7 @@ test.describe( 'Shopper Tax Display Tests', () => {
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
-			value: 'incl',
+			value: 'excl',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_shop', {
 			value: 'excl'
@@ -69,6 +69,9 @@ test.describe( 'Shopper Tax Display Tests', () => {
 		} );
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'no',
+		} );
+		await api.put( 'settings/tax/woocommerce_tax_total_display', {
+			value: 'itemized',
 		} );
 		await api.delete( `products/${ productId }`, {
 			force: true,
@@ -103,7 +106,7 @@ test.describe( 'Shopper Tax Display Tests', () => {
 			await expect( page.getByRole( 'heading', { name: 'Cart', exact: true } ) ).toBeVisible();
 			await expect( page.getByRole( 'cell', { name: '$125.00 (incl. tax)' } ) ).toHaveCount(2);
 			await expect( page.getByRole( 'row', { name: 'Subtotal $125.00 (incl. tax)'} ) ).toBeVisible();
-			await expect( page.getByRole( 'row', { name: 'Total $125.00 (includes $25.00 Tax)' } ) ).toBeVisible();
+			await expect( page.getByRole( 'row', { name: 'Total $125.00 (includes $25.00 Nasty Tax)' } ) ).toBeVisible();
 		} );
 
 		await test.step( 'Load checkout page and confirm price display', async() => {
@@ -111,7 +114,7 @@ test.describe( 'Shopper Tax Display Tests', () => {
 			await expect( page.getByRole( 'heading', { name: 'Checkout' } ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Taxed products are awesome × 1 $125.00 (incl. tax)' } ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Subtotal $125.00 (incl. tax)' } ) ).toBeVisible();
-			await expect( page.getByRole( 'row', { name: 'Total $125.00 (includes $25.00 Tax)'} ) ).toBeVisible();
+			await expect( page.getByRole( 'row', { name: 'Total $125.00 (includes $25.00 Nasty Tax)'} ) ).toBeVisible();
 		} );
 	} );
 
@@ -266,7 +269,7 @@ test.describe( 'Shopper Tax Rounding', () => {
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
-			value: 'incl',
+			value: 'excl',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_shop', {
 			value: 'excl'
@@ -278,7 +281,7 @@ test.describe( 'Shopper Tax Rounding', () => {
 			value: 'no',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
-			value: 'single'
+			value: 'itemized'
 		} );
 		await api.delete( `products/${ productId }`, {
 			force: true,
@@ -461,10 +464,10 @@ test.describe( 'Shopper Tax Levels', () => {
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
-			value: 'single'
+			value: 'itemized'
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
-			value: 'incl',
+			value: 'excl',
 		} );
 		await api.delete( `products/${ productId }`, {
 			force: true,
@@ -666,7 +669,7 @@ test.describe( 'Shipping Tax', () => {
 			await expect( page.getByRole( 'cell', { name: '$115.00 (incl. tax)' } ) ).toHaveCount(2);
 			await expect( page.getByRole( 'row', { name: 'Subtotal $115.00 (incl. tax)'} ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Shipping Flat rate: $23.00 (incl. tax) Shipping to CA.' } ) ).toBeVisible();
-			await expect( page.getByRole( 'row', { name: 'Total $138.00 (includes $18.00 Tax)' } ) ).toBeVisible();
+			await expect( page.getByRole( 'row', { name: 'Total $138.00 (includes $18.00 Shipping Tax)' } ) ).toBeVisible();
 		} );
 
 		await test.step( 'Load checkout page and confirm price display', async() => {
@@ -684,7 +687,7 @@ test.describe( 'Shipping Tax', () => {
 			await expect( page.getByRole( 'row', { name: 'Taxed products are awesome × 1 $115.00 (incl. tax)' } ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Subtotal $115.00 (incl. tax)' } ) ).toBeVisible();
 			await expect( page.getByRole( 'row', { name: 'Shipping Flat rate: $23.00 (incl. tax)' } ) ).toBeVisible();
-			await expect( page.getByRole( 'row', { name: 'Total $138.00 (includes $18.00 Tax)'} ) ).toBeVisible();
+			await expect( page.getByRole( 'row', { name: 'Total $138.00 (includes $18.00 Shipping Tax)'} ) ).toBeVisible();
 		} );
 
 	} );
