@@ -1,15 +1,13 @@
-/* eslint-disable @woocommerce/dependency-group */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
-// @ts-ignore No types for this exist yet.
-import { store as coreStore } from '@wordpress/core-data';
+import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
-// placeholder xstate async service that returns a set of theme cards
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
 		path: '/wc-admin/onboarding/themes/recommended',
@@ -20,42 +18,77 @@ export const fetchThemeCards = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const currentTemplate = await resolveSelect(
-		coreStore
+	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.
-	).__experimentalGetTemplateForLink( '/' );
+		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
 
-	const styleRevs = await resolveSelect(
-		coreStore
+	const maybePreviousTemplatePromise = resolveSelect(
+		OPTIONS_STORE_NAME
+	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
+
+	const styleRevsPromise =
 		// @ts-expect-error No types for this exist yet.
-	).getCurrentThemeGlobalStylesRevisions();
+		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
 
-	const hasModifiedPages = (
-		await resolveSelect( coreStore )
-			// @ts-expect-error No types for this exist yet.
-			.getEntityRecords( 'postType', 'page', {
-				per_page: 100,
-				_fields: [ 'id', '_links.version-history' ],
-				orderby: 'menu_order',
-				order: 'asc',
-			} )
-	 )?.some( ( page: { _links: { [ key: string ]: string[] } } ) => {
-		return page._links?.[ 'version-history' ]?.length > 1;
-	} );
+	// @ts-expect-error No types for this exist yet.
+	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
+		'postType',
+		'page',
+		{
+			per_page: 100,
+			_fields: [ 'id', '_links.version-history' ],
+			orderby: 'menu_order',
+			order: 'asc',
+		}
+	);
 
-	const { getTask } = resolveSelect( ONBOARDING_STORE_NAME );
+	const getTaskPromise = resolveSelect( ONBOARDING_STORE_NAME ).getTask(
+		'customize-store'
+	);
+
+	const themeDataPromise = fetchThemeCards();
+
+	const [
+		currentTemplate,
+		maybePreviousTemplate,
+		styleRevs,
+		rawPages,
+		task,
+		themeData,
+	] = await Promise.all( [
+		currentTemplatePromise,
+		maybePreviousTemplatePromise,
+		styleRevsPromise,
+		hasModifiedPagesPromise,
+		getTaskPromise,
+		themeDataPromise,
+	] );
+
+	let currentThemeIsAiGenerated = false;
+	if (
+		maybePreviousTemplate &&
+		currentTemplate?.id === maybePreviousTemplate
+	) {
+		currentThemeIsAiGenerated = true;
+	}
+
+	const hasModifiedPages = rawPages?.some(
+		( page: { _links: { [ key: string ]: string[] } } ) => {
+			return page._links?.[ 'version-history' ]?.length > 1;
+		}
+	);
 
 	const activeThemeHasMods =
 		!! currentTemplate?.modified ||
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
-	const customizeStoreTaskCompleted = ( await getTask( 'customize-store' ) )
-		?.isComplete;
-	const themeData = await fetchThemeCards();
+
+	const customizeStoreTaskCompleted = task?.isComplete;
 
 	return {
 		activeThemeHasMods,
 		customizeStoreTaskCompleted,
 		themeData,
+		currentThemeIsAiGenerated,
 	};
 };

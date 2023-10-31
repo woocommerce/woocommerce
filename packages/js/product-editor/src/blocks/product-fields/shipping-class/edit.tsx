@@ -86,13 +86,18 @@ export function Edit( {
 
 	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
 		'postType',
-		'product',
+		context.postType,
 		'categories'
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
 		context.postType,
 		'shipping_class'
+	);
+	const [ virtual ] = useEntityProp< boolean >(
+		'postType',
+		context.postType,
+		'virtual'
 	);
 
 	function handleShippingClassServerError(
@@ -156,6 +161,7 @@ export function Edit( {
 								shippingClasses ?? []
 							),
 						] }
+						disabled={ virtual }
 						help={ createInterpolateElement(
 							__(
 								'Manage shipping classes and rates in <Link>global settings</Link>.',

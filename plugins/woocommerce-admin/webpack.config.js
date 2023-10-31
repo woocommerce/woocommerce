@@ -10,6 +10,8 @@ const BundleAnalyzerPlugin =
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const NormalModuleReplacementPlugin =
+	require( 'webpack' ).NormalModuleReplacementPlugin;
 
 /**
  * Internal dependencies
@@ -168,6 +170,14 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		// Workaround for Gutenberg private API consent string differences between WP 6.3 and 6.4+
+		// The modified version checks for the WP version and replaces the consent string with the correct one.
+		// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
+		// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884
+		new NormalModuleReplacementPlugin(
+			/@wordpress\/edit-site\/build-module\/lock-unlock\.js/,
+			path.resolve( __dirname, 'bin/modified-editsite-lock-unlock.js' )
+		),
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix deprecation Passing null to parameter #1 ($datetime) of type string is deprecated

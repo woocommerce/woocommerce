@@ -21,6 +21,12 @@
 		"placeholder": {
 			"type": "string"
 		},
+		"help": {
+			"type": "string"
+		},
+		"tooltip": {
+			"type": "string"
+		},
 		"required": {
 			"type": "boolean",
 			"default": false
@@ -47,5 +53,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
 }

@@ -3,6 +3,7 @@
  */
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -75,11 +76,49 @@ const loaderSteps = [
 	},
 ];
 
+// Loader for the API call without the last frame.
 export const ApiCallLoader = () => {
+	useEffect( () => {
+		const preload = ( src: string ) => {
+			const img = new Image();
+
+			img.src = src;
+			img.onload = () => {};
+		};
+
+		// We preload the assemblingAiOptimizedStore to avoid flickering. We only need to preload it because the others are small enough to be inlined in base64.
+		preload( assemblingAiOptimizedStore );
+	}, [] );
+
 	return (
 		<Loader>
-			<Loader.Sequence interval={ 3000 }>
-				{ loaderSteps.map( ( step, index ) => (
+			<Loader.Sequence
+				/*  divide all frames equally over 1m. */
+				interval={ ( 60 * 1000 ) / ( loaderSteps.length - 1 ) }
+				shouldLoop={ false }
+			>
+				{ loaderSteps.slice( 0, -1 ).map( ( step, index ) => (
+					<Loader.Layout key={ index }>
+						<Loader.Illustration>
+							{ step.image }
+						</Loader.Illustration>
+						<Loader.Title>{ step.title }</Loader.Title>
+						<Loader.ProgressBar progress={ step.progress || 0 } />
+					</Loader.Layout>
+				) ) }
+			</Loader.Sequence>
+		</Loader>
+	);
+};
+
+export const AssembleHubLoader = () => {
+	// Show the last two steps of the loader so that the last frame is the shortest time possible
+	const steps = loaderSteps.slice( -2 );
+
+	return (
+		<Loader>
+			<Loader.Sequence interval={ 3000 } shouldLoop={ false }>
+				{ steps.map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>
 							{ step.image }

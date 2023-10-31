@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-CYS: Fix the bug where sometimes switching from user defined color palettes to a pre-defined color palette won't set some colors.

@@ -43,6 +43,7 @@ class BlockRegistry {
 	const PRODUCT_FIELDS_BLOCKS = [
 		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-description-field',
+		'woocommerce/product-downloads-field',
 		'woocommerce/product-images-field',
 		'woocommerce/product-inventory-email-field',
 		'woocommerce/product-sku-field',
@@ -59,6 +60,7 @@ class BlockRegistry {
 		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
+		'woocommerce/product-single-variation-notice',
 	];
 
 	/**
@@ -125,6 +127,49 @@ class BlockRegistry {
 	}
 
 	/**
+	 * Augment the attributes of a block by adding attributes that are used by the product editor.
+	 *
+	 * @param array $attributes Block attributes.
+	 */
+	private function augment_attributes( $attributes ) {
+		// Note: If you modify this function, also update the client-side
+		// registerWooBlockType function in @woocommerce/block-templates.
+		return array_merge(
+			$attributes,
+			[
+				'_templateBlockId'             => [
+					'type'               => 'string',
+					'__experimentalRole' => 'content',
+				],
+				'_templateBlockOrder'          => [
+					'type'               => 'integer',
+					'__experimentalRole' => 'content',
+				],
+				'_templateBlockHideConditions' => [
+					'type'               => 'array',
+					'__experimentalRole' => 'content',
+				],
+			]
+		);
+	}
+
+	/**
+	 * Augment the uses_context of a block by adding attributes that are used by the product editor.
+	 *
+	 * @param array $uses_context Block uses_context.
+	 */
+	private function augment_uses_context( $uses_context ) {
+		// Note: If you modify this function, also update the client-side
+		// registerProductEditorBlockType function in @woocommerce/product-editor.
+		return array_merge(
+			isset( $uses_context ) ? $uses_context : [],
+			[
+				'postType',
+			]
+		);
+	}
+
+	/**
 	 * Register a single block.
 	 *
 	 * @param string $block_name Block name.
@@ -152,7 +197,13 @@ class BlockRegistry {
 			$registry->unregister( $metadata['name'] );
 		}
 
-		return register_block_type_from_metadata( $block_json_file );
+		return register_block_type_from_metadata(
+			$block_json_file,
+			[
+				'attributes'   => $this->augment_attributes( isset( $metadata['attributes'] ) ? $metadata['attributes'] : [] ),
+				'uses_context' => $this->augment_uses_context( isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : [] ),
+			]
+		);
 	}
 
 }

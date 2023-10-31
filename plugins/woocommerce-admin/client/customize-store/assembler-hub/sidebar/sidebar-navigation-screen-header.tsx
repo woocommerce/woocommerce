@@ -37,7 +37,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 ];
 
 export const SidebarNavigationScreenHeader = () => {
-	useEditorScroll( {
+	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
 	} );
@@ -78,17 +78,18 @@ export const SidebarNavigationScreenHeader = () => {
 			blocks[ 0 ]
 		);
 		setSelectedPattern( currentSelectedPattern );
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
-
 	const onClickHeaderPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
+			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
 	return (

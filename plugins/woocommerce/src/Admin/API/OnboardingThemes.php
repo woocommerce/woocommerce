@@ -106,12 +106,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme installation status.
 	 */
 	public function install_theme( $request ) {
-		$allowed_themes = Themes::get_allowed_themes();
-		$theme          = sanitize_text_field( $request['theme'] );
-
-		if ( ! in_array( $theme, $allowed_themes, true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
-		}
+		$theme = sanitize_text_field( $request['theme'] );
 
 		$installed_themes = wp_get_themes();
 
@@ -180,11 +175,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme activation status.
 	 */
 	public function activate_theme( $request ) {
-		$allowed_themes = Themes::get_allowed_themes();
-		$theme          = sanitize_text_field( $request['theme'] );
-		if ( ! in_array( $theme, $allowed_themes, true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce' ), 404 );
-		}
+		$theme = sanitize_text_field( $request['theme'] );
 
 		require_once ABSPATH . 'wp-admin/includes/theme.php';
 
@@ -265,8 +256,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'name'           => 'Tsubaki',
 				'price'          => 'Free',
 				'color_palettes' => array(),
+				'total_palettes' => 0,
 				'slug'           => 'tsubaki',
-				'is_active'      => false,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tsubaki/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tsubaki/',
 			),
@@ -274,26 +265,69 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'name'           => 'Tazza',
 				'price'          => 'Free',
 				'color_palettes' => array(),
+				'total_palettes' => 0,
 				'slug'           => 'tazza',
-				'is_active'      => false,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tazza/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tazza/',
+				'total_palettes' => 0,
 			),
 			array(
 				'name'           => 'Amulet',
 				'price'          => 'Free',
-				'color_palettes' => array(),
+				'color_palettes' => array(
+					array(
+						'title'     => 'Default',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+					array(
+						'title'     => 'Brown Sugar',
+						'primary'   => '#EFEBE0',
+						'secondary' => '#AC6239',
+					),
+					array(
+						'title'     => 'Midnight',
+						'primary'   => '#161514',
+						'secondary' => '#AFADA7',
+					),
+					array(
+						'title'     => 'Olive',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+				),
+				'total_palettes' => 5,
 				'slug'           => 'amulet',
-				'is_active'      => false,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/amulet/screenshot.png',
-				'link_url'       => 'https://wordpress.com/theme/tsubaki/',
+				'link_url'       => 'https://wordpress.com/theme/amulet/',
 			),
 			array(
 				'name'           => 'Zaino',
 				'price'          => 'Free',
-				'color_palettes' => array(),
+				'color_palettes' => array(
+					array(
+						'title'     => 'Default',
+						'primary'   => '#202124',
+						'secondary' => '#E3CBC0',
+					),
+					array(
+						'title'     => 'Aubergine',
+						'primary'   => '#1B1031',
+						'secondary' => '#E1746D',
+					),
+					array(
+						'title'     => 'Block out',
+						'primary'   => '#FF5252',
+						'secondary' => '#252525',
+					),
+					array(
+						'title'     => 'Canary',
+						'primary'   => '#FDFF85',
+						'secondary' => '#353535',
+					),
+				),
+				'total_palettes' => 11,
 				'slug'           => 'zaino',
-				'is_active'      => false,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/zaino/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/zaino/',
 			),
@@ -317,7 +351,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			'themes' => $filtered_themes,
 			'_links' => array(
 				'browse_all' => array(
-					'href' => home_url( '/wp-admin/themes.php' ),
+					'href' => admin_url( 'themes.php' ),
 				),
 			),
 		);
@@ -334,12 +368,27 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		 *
 		 * @return array
 		 */
-		return apply_filters(
+		$filtered_response = apply_filters(
 			'__experimental_woocommerce_rest_get_recommended_themes',
 			$response,
 			$industry,
 			$currency
 		);
+
+		/**
+		 * Loop through themes checking to see if any are currently active
+		 */
+		$active_theme = get_stylesheet();
+
+		foreach ( $filtered_response['themes'] as &$theme ) {
+			if ( $theme['slug'] === $active_theme ) {
+				$theme['is_active'] = true;
+			} else {
+				$theme['is_active'] = false;
+			}
+		}
+
+		return $filtered_response;
 	}
 
 	/**

@@ -2,35 +2,40 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
+/**
+ * Internal dependencies
+ */
+import { Metadata } from '../types';
 
-interface Metadata {
-	id?: number;
-	key: string;
-	value: string;
+interface UseProductEntityPropConfig< T > {
+	postType?: string;
+	fallbackValue?: T;
 }
 
-function useProductEntityProp(
-	property: string
-): [ string, ( value: string ) => void ] {
+function useProductEntityProp< T >(
+	property: string,
+	config?: UseProductEntityPropConfig< T >
+): [ T | undefined, ( value: T ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
 	const metaPropertyKey = property.replace( 'meta_data.', '' );
 
-	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
+	const [ entityPropValue, setEntityPropValue ] = useEntityProp< T >(
 		'postType',
-		'product',
+		config?.postType || 'product',
 		property
 	);
-	const [ metadata, setMetadata ] = useEntityProp< Metadata[] >(
+	const [ metadata, setMetadata ] = useEntityProp< Metadata< T >[] >(
 		'postType',
-		'product',
+		config?.postType || 'product',
 		'meta_data'
 	);
 
 	const value = isMeta
-		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value || ''
+		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value ||
+		  config?.fallbackValue
 		: entityPropValue;
 	const setValue = isMeta
-		? ( newValue: string ) => {
+		? ( newValue: T ) => {
 				const existingEntry = metadata.find(
 					( item ) => item.key === metaPropertyKey
 				);

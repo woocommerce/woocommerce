@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assign, spawn, EventObject } from 'xstate';
+import { assign, spawn } from 'xstate';
 import {
 	getQuery,
 	updateQueryString,
@@ -18,7 +18,6 @@ import {
 	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	FontPairing,
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
@@ -30,6 +29,7 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
+import { attachIframeListeners, onIframeLoad } from '../utils';
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -105,38 +105,25 @@ const assignFontPairing = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	aiSuggestions: ( context, event: unknown ) => {
-		if ( ( event as EventObject ).type === 'xstate.error' ) {
-			let fontPairing = context.aiSuggestions.fontPairing;
-			const choice = context.lookAndFeel.choice;
+	aiSuggestions: ( context ) => {
+		let fontPairing = context.aiSuggestions.fontPairing;
+		const choice = context.lookAndFeel.choice;
 
-			switch ( true ) {
-				case choice === 'Contemporary':
-					fontPairing = 'Inter + Inter';
-					break;
-				case choice === 'Classic':
-					fontPairing = 'Bodoni Moda + Overpass';
-					break;
-				case choice === 'Bold':
-					fontPairing = 'Rubik + Inter';
-					break;
-			}
-
-			return {
-				...context.aiSuggestions,
-				fontPairing,
-			};
+		switch ( true ) {
+			case choice === 'Contemporary':
+				fontPairing = 'Inter + Inter';
+				break;
+			case choice === 'Classic':
+				fontPairing = 'Bodoni Moda + Overpass';
+				break;
+			case choice === 'Bold':
+				fontPairing = 'Plus Jakarta Sans + Plus Jakarta Sans';
+				break;
 		}
 
 		return {
 			...context.aiSuggestions,
-			fontPairing: (
-				event as {
-					data: {
-						response: FontPairing;
-					};
-				}
-			 ).data.response.pair_name,
+			fontPairing,
 		};
 	},
 } );
@@ -290,12 +277,33 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = () => {
-	window.location.href = getNewPath(
-		{},
-		'/customize-store/assembler-hub',
-		{}
-	);
+const redirectToAssemblerHub = async () => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = document.createElement( 'iframe' );
+	iframe.classList.add( 'cys-fullscreen-iframe' );
+	iframe.src = assemblerUrl;
+
+	const showIframe = () => {
+		const loader = document.getElementsByClassName(
+			'woocommerce-onboarding-loader'
+		);
+		if ( loader[ 0 ] ) {
+			( loader[ 0 ] as HTMLElement ).style.display = 'none';
+		}
+		iframe.style.opacity = '1';
+	};
+
+	iframe.onload = () => {
+		// Hide loading UI
+		attachIframeListeners( iframe );
+		onIframeLoad( showIframe );
+
+		// Ceiling wait time set to 60 seconds
+		setTimeout( showIframe, 60 * 1000 );
+		window.history?.pushState( {}, '', assemblerUrl );
+	};
+
+	document.body.appendChild( iframe );
 };
 
 export const actions = {

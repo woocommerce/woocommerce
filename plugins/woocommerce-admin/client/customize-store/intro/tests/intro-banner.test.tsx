@@ -48,9 +48,7 @@ describe( 'Intro Banners', () => {
 		);
 
 		expect(
-			screen.getByText(
-				/Please check your internet connection and try again./i
-			)
+			screen.getByText( /Please check your internet connection./i )
 		).toBeInTheDocument();
 	} );
 
@@ -92,5 +90,38 @@ describe( 'Intro Banners', () => {
 		expect( sendEventMock ).toHaveBeenCalledWith( {
 			type: 'DESIGN_WITH_AI',
 		} );
+	} );
+
+	it( 'should display the existing ai theme banner when customizeStoreTaskCompleted and currentThemeIsAiGenerated', () => {
+		const sendEventMock = jest.fn();
+		( useNetworkStatus as jest.Mock ).mockImplementation( () => false );
+		render(
+			<Intro
+				sendEvent={ sendEventMock }
+				context={ {
+					intro: {
+						hasErrors: false,
+						activeTheme: '',
+						themeData: {
+							themes: [],
+							_links: {
+								browse_all: {
+									href: '',
+								},
+							},
+						},
+						activeThemeHasMods: false,
+						customizeStoreTaskCompleted: true,
+						currentThemeIsAiGenerated: true,
+					},
+					themeConfiguration: {},
+				} }
+				currentState={ 'intro' }
+				parentMachine={ null as unknown as AnyInterpreter }
+			/>
+		);
+		expect(
+			screen.getByText( /Customize your custom theme/i )
+		).toBeInTheDocument();
 	} );
 } );

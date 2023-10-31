@@ -14,7 +14,6 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
@@ -37,7 +36,7 @@ const SUPPORTED_FOOTER_PATTERNS = [
 ];
 
 export const SidebarNavigationScreenFooter = () => {
-	useEditorScroll( {
+	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
 	} );
@@ -81,7 +80,6 @@ export const SidebarNavigationScreenFooter = () => {
 			blocks[ blocks.length - 1 ]
 		);
 		setSelectedPattern( currentSelectedPattern );
-
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, footerPatterns ] );
 
@@ -91,8 +89,9 @@ export const SidebarNavigationScreenFooter = () => {
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
 			} );
+			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
 	return (

@@ -19,6 +19,8 @@ class CustomizeStore extends Task {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
 
+		add_action( 'show_admin_bar', array( $this, 'possibly_hide_wp_admin_bar' ) );
+
 		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
 		global $_GET;
 		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
@@ -82,16 +84,26 @@ class CustomizeStore extends Task {
 	}
 
 	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store' );
+	}
+
+
+	/**
 	 * Possibly add site editor scripts.
 	 */
 	public function possibly_add_site_editor_scripts() {
-		$is_customize_store_pages = (
+		$is_assembler_hub = (
 			isset( $_GET['page'] ) &&
 			'wc-admin' === $_GET['page'] &&
 			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
+			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' )
 		);
-		if ( ! $is_customize_store_pages ) {
+		if ( ! $is_assembler_hub ) {
 			return;
 		}
 
@@ -203,5 +215,17 @@ class CustomizeStore extends Task {
 	 */
 	public function mark_task_as_complete() {
 		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+	}
+
+	/**
+	 * Appends a small style to hide admin bar
+	 *
+	 * @param bool $show Whether to show the admin bar.
+	 */
+	public function possibly_hide_wp_admin_bar( $show ) {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
+			return false;
+		}
+		return $show;
 	}
 }

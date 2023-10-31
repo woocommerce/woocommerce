@@ -1,3 +1,6 @@
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
@@ -10,7 +13,8 @@ import {
 	updateQueryString,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { dispatch } from '@wordpress/data';
+import { dispatch, resolveSelect } from '@wordpress/data';
+import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
@@ -34,6 +38,8 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { navigateOrParent, attachParentListeners } from './utils';
+import useBodyClass from './hooks/use-body-class';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -61,7 +67,8 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
+	const url = getNewPath( {}, '/', {} );
+	navigateOrParent( window, url );
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -71,8 +78,15 @@ const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 };
 
 const markTaskComplete = async () => {
+	const currentTemplate = await resolveSelect(
+		coreStore
+		// @ts-expect-error No types for this exist yet.
+	).__experimentalGetTemplateForLink( '/' );
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
+		// we use this on the intro page to determine if this same theme was used in the last customization
+		woocommerce_admin_customize_store_completed_theme_id:
+			currentTemplate.id ?? undefined,
 	} );
 };
 
@@ -129,6 +143,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			activeTheme: '',
 			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
+			currentThemeIsAiGenerated: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -196,6 +211,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								'assignThemeData',
 								'assignActiveThemeHasMods',
 								'assignCustomizeStoreCompleted',
+								'assignCurrentThemeIsAiGenerated',
 							],
 						},
 					},
@@ -347,6 +363,14 @@ export const CustomizeStoreController = ( {
 		}
 	}, [ CurrentComponent, currentNodeMeta?.component ] );
 
+	// Run listeners for parent window.
+	useEffect( () => {
+		const removeListener = attachParentListeners();
+		return removeListener;
+	}, [] );
+
+	useBodyClass( 'is-fullscreen-mode' );
+
 	const currentNodeCssLabel =
 		state.value instanceof Object
 			? Object.keys( state.value )[ 0 ]
@@ -365,7 +389,9 @@ export const CustomizeStoreController = ( {
 						currentState={ state.value }
 					/>
 				) : (
-					<div />
+					<div className="woocommerce-customize-store__loading">
+						<Spinner />
+					</div>
 				) }
 			</div>
 		</>

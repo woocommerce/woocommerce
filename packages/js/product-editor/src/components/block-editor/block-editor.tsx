@@ -3,8 +3,7 @@
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,7 +51,7 @@ export function BlockEditor( {
 	productType,
 	productId,
 }: BlockEditorProps ) {
-	useConfirmUnsavedProductChanges();
+	useConfirmUnsavedProductChanges( productType );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -89,23 +88,16 @@ export function BlockEditor( {
 		{ id: productId }
 	);
 
-	useLayoutEffect( () => {
-		onChange(
-			synchronizeBlocksWithTemplate(
-				[],
-				_settings?.templates[ productType ]
-			),
-			{}
-		);
-	}, [ productId ] );
+	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
-	const editedProduct: Product = useSelect( ( select ) =>
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			productType,
-			productId
-		)
-	);
+	useLayoutEffect( () => {
+		const template = _settings?.templates[ productType ];
+		const blockInstances = synchronizeBlocksWithTemplate( [], template );
+
+		onChange( blockInstances, {} );
+
+		updateEditorSettings( _settings ?? {} );
+	}, [ productType, productId ] );
 
 	if ( ! blocks ) {
 		return null;
@@ -113,7 +105,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ { ...context, editedProduct } }>
+			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

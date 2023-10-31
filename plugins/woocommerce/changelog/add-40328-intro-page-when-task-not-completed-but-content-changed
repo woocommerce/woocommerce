@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-This PR displays a warning modal when the `Design with A.I` button is clicked, but the `Customize Your Store` task has not been completed, and the active theme has modifications.

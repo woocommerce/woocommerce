@@ -108,6 +108,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',
+		slug: 'Automotive',
 		position: 0,
 		visible: true,
 		variation: false,
@@ -116,6 +117,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 1,
 		name: 'Color',
+		slug: 'Color',
 		position: 2,
 		visible: true,
 		variation: true,
@@ -228,6 +230,7 @@ describe( 'AttributeInputField', () => {
 		expect( onChangeMock ).toHaveBeenCalledWith( {
 			id: attributeList[ 0 ].id,
 			name: attributeList[ 0 ].name,
+			slug: attributeList[ 0 ].slug,
 			options: [],
 		} );
 	} );

@@ -1,5 +1,6 @@
 .woocommerce-admin-page__add-product,
-.woocommerce-admin-page__product_product-id {
+.woocommerce-admin-page__product_product-id,
+.woocommerce-admin-page__product_product-id_variation_variation-id {
 	.woocommerce-store-alerts {
 		display: none;
 	}
@@ -61,9 +62,19 @@
 	}
 }
 
+.woocommerce-admin-page__product_product-id_variation_variation-id {
+	.interface-interface-skeleton__content {
+		overflow: hidden;
+	}
+}
+
 html.interface-interface-skeleton__html-container {
 	@include breakpoint( '<782px' ) {
 		position: inherit;
+	}
+	.woocommerce-layout__footer.at-bottom {
+		border-top: none;
+		box-shadow: none;
 	}
 }
 

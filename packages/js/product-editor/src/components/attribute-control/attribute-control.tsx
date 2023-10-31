@@ -30,7 +30,7 @@ import {
 } from './utils';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
-import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeControlProps = {
@@ -97,10 +97,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
-			'woocommerce'
-		),
-		newAttributeModalNotice: __(
-			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
 			'woocommerce'
 		),
 		attributeRemoveConfirmationMessage: __(
@@ -293,7 +289,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
 					description={ uiStrings.newAttributeModalDescription }
-					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
@@ -360,7 +355,11 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						{ attributeName: removingAttribute.name }
 					) }
 					description={
-						uiStrings.attributeRemoveConfirmationModalMessage
+						<p>
+							{
+								uiStrings.attributeRemoveConfirmationModalMessage
+							}
+						</p>
 					}
 					onRemove={ () => handleRemove( removingAttribute ) }
 					onCancel={ () => {

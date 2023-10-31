@@ -78,24 +78,30 @@ export default function NoResults( props: NoResultsProps ): JSX.Element {
 			} );
 	}, [] );
 
+	function productListTitle( type: ProductType ) {
+		if ( type === ProductType.theme ) {
+			return __( 'Our favorite themes', 'woocommerce' );
+		}
+
+		return __( 'Most popular extensions', 'woocommerce' );
+	}
+
 	function renderProductGroup() {
 		if ( isLoadingProductGroup ) {
-			return <ProductLoader />;
+			return (
+				<ProductLoader
+					type={ productGroup?.itemType || ProductType.extension }
+				/>
+			);
 		}
 
 		if ( ! productGroup ) {
 			return <></>;
 		}
 
-		const title = sprintf(
-			// translators: %s: product type (themes or extensions)
-			__( 'Most popular %s', 'woocommerce' ),
-			typeLabel
-		);
-
 		return (
 			<ProductList
-				title={ title }
+				title={ productListTitle( props.type ) }
 				products={ productGroup.items }
 				groupURL={ productGroup.url }
 				type={ productGroup.itemType }

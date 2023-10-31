@@ -1,6 +1,12 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint('<782px') {
 		padding-top: 0 !important;
+	}
+
+	.woocommerce-customize-store__loading {
+		display: grid;
+		place-items: center;
+		height: 100vh;
 	}
 }
 
@@ -14,6 +20,15 @@
 
 	.woocommerce-layout__main {
 		padding-right: 0;
+	}
+
+	.edit-site-site-icon__image {
+		background: transparent;
+		border-radius: 4px;
+		height: auto;
+		-o-object-fit: cover;
+		object-fit: cover;
+		width: 100%;
 	}
 }
 
@@ -71,7 +86,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 }
 
 .woocommerce-cys-design-with-ai {
-
 	.components-base-control {
 		width: 404px;
 		textarea {
@@ -152,4 +166,17 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		padding: 0;
 		height: initial;
 	}
+}
+
+.cys-fullscreen-iframe {
+	display: block;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+	z-index: 9999;
+	transition: opacity 1.2s linear;
+	opacity: 0;
 }

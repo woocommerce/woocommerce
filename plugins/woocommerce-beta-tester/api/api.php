@@ -52,6 +52,7 @@ require 'options/rest-api.php';
 require 'tools/delete-all-products.php';
 require 'tools/disable-wc-email.php';
 require 'tools/trigger-update-callbacks.php';
+require 'tools/reset-cys.php';
 require 'tracks/class-tracks-debug-log.php';
 require 'features/features.php';
 require 'rest-api-filters/class-wca-test-helper-rest-api-filters.php';
