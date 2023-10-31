@@ -121,14 +121,26 @@ const Combobox = ( {
 						// Try to match.
 						const normalizedFilterValue =
 							filterValue.toLocaleUpperCase();
-						const foundOption = options.find(
+
+						// Try to find an exact match first using values.
+						const foundValue = options.find(
 							( option ) =>
-								option.label
-									.toLocaleUpperCase()
-									.startsWith( normalizedFilterValue ) ||
 								option.value.toLocaleUpperCase() ===
-									normalizedFilterValue
+								normalizedFilterValue
 						);
+
+						if ( foundValue ) {
+							onChange( foundValue.value );
+							return;
+						}
+
+						// Fallback to a label match.
+						const foundOption = options.find( ( option ) =>
+							option.label
+								.toLocaleUpperCase()
+								.startsWith( normalizedFilterValue )
+						);
+
 						if ( foundOption ) {
 							onChange( foundOption.value );
 						}
