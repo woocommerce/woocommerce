@@ -5,11 +5,17 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
+// @ts-ignore No types for this exist yet.
+import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 
 /**
  * Internal dependencies
  */
 import { Intro } from '.';
+import {
+	ScaledBlockPreview,
+	ScaledBlockPreviewProps,
+} from '../assembler-hub/auto-block-preview';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -18,6 +24,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
+	bannerSiteRender,
 	children,
 }: {
 	bannerTitle: string;
@@ -26,8 +33,10 @@ export const BaseIntroBanner = ( {
 	buttonIsLink?: boolean;
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
+	bannerSiteRender?: boolean;
 	children?: React.ReactNode;
 } ) => {
+
 	return (
 		<div
 			className={ classNames(
@@ -197,6 +206,7 @@ export const ExistingAiThemeBanner = ( {
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
+			bannerSiteRender={ true }
 		>
 			<Button
 				className=""
@@ -207,6 +217,17 @@ export const ExistingAiThemeBanner = ( {
 			>
 				{ __( 'Create a new one', 'woocommerce' ) }
 			</Button>
+			<div className={ 'woocommerce-block-preview-container' }>
+				<ScaledBlockPreview
+					viewportWidth = { 1040 }
+					containerWidth = { 400 }
+					settings = {{ styles: [] }}
+					additionalStyles = { '' }
+					onClickNavigationItem = { ( event: MouseEvent ) => null }
+					isNavigable = { false }
+					isScrollable = { true }
+				/>
+			</div>
 		</BaseIntroBanner>
 	);
 };
