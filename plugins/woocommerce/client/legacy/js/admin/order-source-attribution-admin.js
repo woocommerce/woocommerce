@@ -4,11 +4,11 @@ jQuery( document ).ready( ( $ ) => {
 
 	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
 	window.wcTracks = window.wcTracks || {};
-	window.wcTracks.recordEvent = window.wcTracks.recordEvent || function() { };
+	window.wcTracks.recordEvent = window.wcTracks.recordEvent || ( () => {} );
 
 	// Handle our details container toggle.
 	$( '.woocommerce-order-source-attribution-details-toggle' )
-		.on( 'click', function ( e ) {
+		.on( 'click', ( e ) => {
 			var $this = $( this );
 			var $container = $this.siblings( '.woocommerce-order-source-attribution-details-container' );
 			var toggle = '';
