@@ -582,22 +582,28 @@ export const VariationsTable = forwardRef<
 								</Tooltip>
 							) }
 
-							<Button
-								href={ getEditVariationLink( variation ) }
-								onClick={ editVariationClickHandler(
-									variation
-								) }
-							>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Button>
+							{ ! areSomeSelected && (
+								<>
+									<Button
+										href={ getEditVariationLink(
+											variation
+										) }
+										onClick={ editVariationClickHandler(
+											variation
+										) }
+									>
+										{ __( 'Edit', 'woocommerce' ) }
+									</Button>
 
-							<VariationActionsMenu
-								selection={ variation }
-								onChange={ handleVariationChange }
-								onDelete={ ( { id } ) =>
-									handleDeleteVariationClick( id )
-								}
-							/>
+									<VariationActionsMenu
+										selection={ variation }
+										onChange={ handleVariationChange }
+										onDelete={ ( { id } ) =>
+											handleDeleteVariationClick( id )
+										}
+									/>
+								</>
+							) }
 						</div>
 					</ListItem>
 				) ) }
