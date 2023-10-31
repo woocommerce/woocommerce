@@ -424,7 +424,6 @@
 					const htmlContent = $( html );
 					const advancedCostsHelpTip = htmlContent.find( '#wc-shipping-advanced-costs-help-text' );
 					advancedCostsHelpTip.addClass( 'wc-shipping-zone-method-fields-help-text' );
-					
 
 					const input = htmlContent.find( '#woocommerce_flat_rate_cost' );
 					const fieldset = input.closest( 'fieldset' );
