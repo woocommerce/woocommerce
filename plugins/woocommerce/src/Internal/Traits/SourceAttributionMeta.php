@@ -107,7 +107,7 @@ trait SourceAttributionMeta {
 		// Remove leading and trailing underscores.
 		$prefix = trim( $prefix, '_' );
 
-		// Ensure the prfix ends with _, and set the prefix.
+		// Ensure the prefix ends with _, and set the prefix.
 		$this->field_prefix = "{$prefix}_";
 	}
 
