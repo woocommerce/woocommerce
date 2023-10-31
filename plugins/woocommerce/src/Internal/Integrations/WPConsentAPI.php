@@ -19,7 +19,6 @@ class WPConsentAPI {
 	/**
 	 * Register the consent API.
 	 *
-	 * @since 0.1.0
 	 * @return void
 	 */
 	public function register() {
