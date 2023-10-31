@@ -76,6 +76,7 @@ const loaderSteps = [
 	},
 ];
 
+// Loader for the API call without the last frame.
 export const ApiCallLoader = () => {
 	useEffect( () => {
 		const preload = ( src: string ) => {
@@ -91,8 +92,33 @@ export const ApiCallLoader = () => {
 
 	return (
 		<Loader>
-			<Loader.Sequence interval={ 4500 } shouldLoop={ false }>
-				{ loaderSteps.map( ( step, index ) => (
+			<Loader.Sequence
+				/*  divide all frames equally over 1m. */
+				interval={ ( 60 * 1000 ) / ( loaderSteps.length - 1 ) }
+				shouldLoop={ false }
+			>
+				{ loaderSteps.slice( 0, -1 ).map( ( step, index ) => (
+					<Loader.Layout key={ index }>
+						<Loader.Illustration>
+							{ step.image }
+						</Loader.Illustration>
+						<Loader.Title>{ step.title }</Loader.Title>
+						<Loader.ProgressBar progress={ step.progress || 0 } />
+					</Loader.Layout>
+				) ) }
+			</Loader.Sequence>
+		</Loader>
+	);
+};
+
+export const AssembleHubLoader = () => {
+	// Show the last two steps of the loader so that the last frame is the shortest time possible
+	const steps = loaderSteps.slice( -2 );
+
+	return (
+		<Loader>
+			<Loader.Sequence interval={ 3000 } shouldLoop={ false }>
+				{ steps.map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>
 							{ step.image }
