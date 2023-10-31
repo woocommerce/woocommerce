@@ -29,12 +29,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const pageRef = useRef( 1 );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
-	async function getCurrentVariationsPage( productId: number ) {
+	async function getCurrentVariationsPage( id: number ) {
 		const { getProductVariations, getProductVariationsTotalCount } =
 			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		const requestParams = {
-			product_id: productId,
+			product_id: id,
 			page: pageRef.current,
 			per_page: perPageRef.current,
 			order: 'asc',
@@ -45,12 +45,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			requestParams
 		);
 
-		const totalCount = await getProductVariationsTotalCount< number >(
+		const total = await getProductVariationsTotalCount< number >(
 			requestParams
 		);
 
 		setVariations( data );
-		setTotalCount( totalCount );
+		setTotalCount( total );
 	}
 
 	useEffect( () => {
@@ -109,12 +109,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	const areAllSelected = useMemo(
 		() => selectedCount > 0 && variations.every( isSelected ),
-		[ variations, selectedCount ]
+		[ variations, selectedCount, isSelected ]
 	);
 
 	const areSomeSelected = useMemo(
 		() => selectedCount > 0 && variations.some( isSelected ),
-		[ variations, selectedCount ]
+		[ variations, selectedCount, isSelected ]
 	);
 
 	function onSelect( variation: ProductVariation ) {
@@ -252,7 +252,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		let currentPage = 1;
-		let offset = 50;
+		const offset = 50;
 
 		const result: ProductVariation[] = [];
 
@@ -309,7 +309,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		let currentPage = 1;
-		let offset = 50;
+		const offset = 50;
 
 		const result: ProductVariation[] = [];
 
