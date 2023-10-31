@@ -23,36 +23,27 @@ test.describe( 'Manage webhooks', () => {
 	const WEBHOOKS_SCREEN_URI = 'wp-admin/admin.php?page=wc-settings&tab=advanced&section=webhooks';
 
 	test( 'Webhook cannot be bulk deleted without nonce', async ( {
-		page,
-	} ) => {
-		await page.goto( WEBHOOKS_SCREEN_URI );
+		                                                              page,
+	                                                              } ) => {
+		await page.goto( WEBHOOKS_SCREEN_URI, { waitUntil: 'networkidle' } );
 
-		await page.getByRole( 'link', { name: 'Add webhook' } )
-			.click()
-			.catch( () => {} );
+		await page.getByRole( 'link', { name: 'Add webhook' } ).click();
 
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.getByRole( 'textbox', { name: 'Name' } )
-			.fill( 'Webhook 1' );
+		await page.getByRole( 'textbox', { name: 'Name' } ).fill( 'Webhook 1' );
 
-		await page.getByRole( 'button', { name: 'Save webhook' } )
-			.click()
-			.catch( () => {} );
+		await page.getByRole( 'button', { name: 'Save webhook' } ).click();
 
 		await page.waitForLoadState( 'networkidle' );
 
-		await expect(
-			page.locator( '#message.updated.inline' )
-		).toContainText( 'Webhook updated successfully.' );
+		await expect( page.getByText( 'Webhook updated successfully.' ) ).toBeVisible( { timeout: 1 } );
 
-		await page.goto( WEBHOOKS_SCREEN_URI );
+		await page.goto( WEBHOOKS_SCREEN_URI, { waitUntil: 'networkidle' } );
 
-		await expect(
-			page.getByRole( 'link', { name: 'Webhook 1' } ).first().isVisible()
-		).toBeTruthy();
+		await expect( page.getByRole( 'row', { name: 'Webhook 1' } ) ).toBeVisible( { timeout: 1 } );
 
-		let editURL = await page.getByRole( 'link', { name: 'Webhook 1' } ).first().getAttribute( 'href' );
+		let editURL = await page.getByRole( 'link', { name: 'Webhook 1', exact: true } ).getAttribute( 'href' );
 		editURL = new URL( editURL );
 		const origin = editURL.origin;
 		const webhookID = editURL.searchParams.get( 'edit-webhook' );
@@ -61,16 +52,10 @@ test.describe( 'Manage webhooks', () => {
 		actionURI.searchParams.set( 'action', 'delete' );
 		actionURI.searchParams.set( 'webhook[]', webhookID );
 
-		await page.goto( actionURI.toString() );
+		await page.goto( actionURI.toString(), { waitUntil: 'networkidle' } );
 
-		await page.waitForLoadState( 'networkidle' );
+		await expect( page.getByText( 'webhook permanently deleted' ) ).not.toBeVisible( { timeout: 1 } );
 
-		await expect(
-			page.locator( '#message.updated.inline' ).filter( { hasText: /webhook permanently deleted/ } )
-		).toHaveCount( 0, { timeout: 1 } ); // No timeout since we already waited for networkidle.
-
-		await expect(
-			page.locator( '.wp-die-message' )
-		).toContainText( 'The link you followed has expired.' );
+		await expect( page.getByText( 'The link you followed has expired.' ) ).toBeVisible( { timeout: 1 } );
 	} );
 } );
