@@ -62,18 +62,24 @@ const WCPayUsageModal = lazy( () =>
 
 export class PrimaryLayout extends Component {
 	render() {
-		const { children } = this.props;
+		const {
+			children,
+			showStoreAlerts = true,
+			showNotices = true,
+		} = this.props;
+
 		return (
 			<div
 				className="woocommerce-layout__primary"
 				id="woocommerce-layout__primary"
 			>
-				{ window.wcAdminFeatures[ 'store-alerts' ] && (
-					<Suspense fallback={ null }>
-						<StoreAlerts />
-					</Suspense>
-				) }
-				<Notices />
+				{ window.wcAdminFeatures[ 'store-alerts' ] &&
+					showStoreAlerts && (
+						<Suspense fallback={ null }>
+							<StoreAlerts />
+						</Suspense>
+					) }
+				{ showNotices && <Notices /> }
 				{ children }
 			</div>
 		);
@@ -186,7 +192,11 @@ function _Layout( {
 	}
 
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
-	const { header: showHeader = true, footer: showFooter = true } = layout;
+	const {
+		header: showHeader = true,
+		footer: showFooter = true,
+		showPluginArea = true,
+	} = layout;
 
 	const query = getQuery();
 
@@ -220,7 +230,10 @@ function _Layout( {
 					) }
 					<TransientNotices />
 					{ ! isEmbedded && (
-						<PrimaryLayout>
+						<PrimaryLayout
+							showNotices={ page?.layout?.showNotices }
+							showStoreAlerts={ page?.layout?.showStoreAlerts }
+						>
 							<div className="woocommerce-layout__main">
 								<Controller
 									page={ page }
@@ -239,11 +252,15 @@ function _Layout( {
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
-				<PluginArea scope="woocommerce-admin" />
-				{ window.wcAdminFeatures.navigation && (
-					<PluginArea scope="woocommerce-navigation" />
+				{ showPluginArea && (
+					<>
+						<PluginArea scope="woocommerce-admin" />
+						{ window.wcAdminFeatures.navigation && (
+							<PluginArea scope="woocommerce-navigation" />
+						) }
+						<PluginArea scope="woocommerce-tasks" />
+					</>
 				) }
-				<PluginArea scope="woocommerce-tasks" />
 			</SlotFillProvider>
 		</LayoutContextProvider>
 	);

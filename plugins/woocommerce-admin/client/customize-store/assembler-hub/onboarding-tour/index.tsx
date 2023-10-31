@@ -11,12 +11,14 @@ type OnboardingTourProps = {
 	onClose: () => void;
 	showWelcomeTour: boolean;
 	setShowWelcomeTour: ( show: boolean ) => void;
+	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 };
 
 export const OnboardingTour = ( {
 	onClose,
 	setShowWelcomeTour,
 	showWelcomeTour,
+	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
@@ -127,9 +129,11 @@ export const OnboardingTour = ( {
 					callbacks: {
 						onPreviousStep: () => {
 							setPlacement( 'left' );
+							setIsResizeHandleVisible( true );
 						},
 						onNextStep: () => {
 							setPlacement( 'right-start' );
+							setIsResizeHandleVisible( false );
 						},
 					},
 					popperModifiers: [

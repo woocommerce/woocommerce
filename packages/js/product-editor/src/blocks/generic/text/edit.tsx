@@ -1,17 +1,10 @@
 /**
  * External dependencies
  */
-import { createElement, createInterpolateElement } from '@wordpress/element';
-import { useInstanceId } from '@wordpress/compose';
+import { createElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import classNames from 'classnames';
-import {
-	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -20,6 +13,8 @@ import { useValidation } from '../../../contexts/validation-context';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { TextBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { TextControl } from '../../../components/text-control';
+import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
@@ -35,13 +30,14 @@ export function Edit( {
 		validationErrorMessage,
 		minLength,
 		maxLength,
+		help,
+		tooltip,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
 	} );
-	const nameControlId = useInstanceId( BaseControl, property ) as string;
-
+	const { hasEdit } = useProductEdits();
 	const { error, validate } = useValidation< Product >(
 		property,
 		async function validator() {
@@ -89,33 +85,21 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl
-				id={ nameControlId }
-				label={
-					required
-						? createInterpolateElement( `${ label } <required/>`, {
-								required: (
-									<span className="woocommerce-product-form__required-input">
-										{ /* translators: field 'required' indicator */ }
-										{ __( '*', 'woocommerce' ) }
-									</span>
-								),
-						  } )
-						: label
-				}
-				className={ classNames( {
-					'has-error': error,
-				} ) }
-				help={ error }
-			>
-				<InputControl
-					id={ nameControlId }
-					placeholder={ placeholder }
-					value={ value }
-					onChange={ setValue }
-					onBlur={ validate }
-				></InputControl>
-			</BaseControl>
+			<TextControl
+				value={ value }
+				label={ label }
+				onChange={ setValue }
+				onBlur={ () => {
+					if ( hasEdit( property ) ) {
+						validate();
+					}
+				} }
+				error={ error }
+				help={ help }
+				placeholder={ placeholder }
+				required={ required }
+				tooltip={ tooltip }
+			/>
 		</div>
 	);
 }

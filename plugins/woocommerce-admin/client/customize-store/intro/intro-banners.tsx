@@ -12,6 +12,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { navigateOrParent } from '../utils';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -210,10 +211,9 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				window.location.href = getNewPath(
-					{},
-					'/customize-store/assembler-hub',
-					{}
+				navigateOrParent(
+					window,
+					getNewPath( {}, '/customize-store/assembler-hub', {} )
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }

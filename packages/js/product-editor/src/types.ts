@@ -14,3 +14,9 @@ export interface ProductEditorBlockEditProps< T extends Record< string, any > >
 	extends BlockEditProps< T > {
 	readonly context: ProductEditorContext;
 }
+
+export interface Metadata< T > {
+	id?: number;
+	key: string;
+	value?: T;
+}

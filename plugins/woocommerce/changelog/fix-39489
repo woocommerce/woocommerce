@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+fix legacy order data PHP 8 compatibility issue

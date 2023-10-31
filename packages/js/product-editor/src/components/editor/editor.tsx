@@ -17,7 +17,7 @@ import {
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
 import { Template } from '@wordpress/blocks';
-import { Popover, SlotFillProvider } from '@wordpress/components';
+import { Popover } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -70,35 +70,33 @@ export function Editor( {
 				>
 					<ShortcutProvider>
 						<FullscreenMode isActive={ false } />
-						<SlotFillProvider>
-							<ValidationProvider initialValue={ product }>
-								<InterfaceSkeleton
-									header={
-										<Header
-											onTabSelect={ setSelectedTab }
+						<ValidationProvider initialValue={ product }>
+							<InterfaceSkeleton
+								header={
+									<Header
+										onTabSelect={ setSelectedTab }
+										productType={ productType }
+									/>
+								}
+								content={
+									<>
+										<BlockEditor
+											settings={ settings }
 											productType={ productType }
+											productId={ product.id }
+											context={ {
+												selectedTab,
+												postType: productType,
+												postId: product.id,
+											} }
 										/>
-									}
-									content={
-										<>
-											<BlockEditor
-												settings={ settings }
-												productType={ productType }
-												productId={ product.id }
-												context={ {
-													selectedTab,
-													postType: productType,
-													postId: product.id,
-												} }
-											/>
-											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-											<PluginArea scope="woocommerce-product-block-editor" />
-										</>
-									}
-								/>
-								<Popover.Slot />
-							</ValidationProvider>
-						</SlotFillProvider>
+										{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+										<PluginArea scope="woocommerce-product-block-editor" />
+									</>
+								}
+							/>
+							<Popover.Slot />
+						</ValidationProvider>
 					</ShortcutProvider>
 				</EntityProvider>
 			</StrictMode>
