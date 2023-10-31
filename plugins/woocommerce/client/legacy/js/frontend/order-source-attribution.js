@@ -2,14 +2,14 @@
 	'use strict';
 
 	const prefix = params.prefix;
-	const cookieLifetime = Number(params.lifetime);
-	const sessionLength = Number(params.session);
+	const cookieLifetime = Number( params.lifetime );
+	const sessionLength = Number( params.session );
 
 
 	// init
 	window.woocommerce_order_source_attribution = {};
 
-	woocommerce_order_source_attribution.initOrderTracking = function() {
+	woocommerce_order_source_attribution.initOrderTracking = () => {
 
 		if ( params.allowTracking === 'no' ) {
 			woocommerce_order_source_attribution.removeTrackingCookies();
@@ -28,7 +28,7 @@
 		/**
 		 * Set values.
 		 */
-		var setFields = function () {
+		const setFields = () => {
 
 			if ( sbjs.get ) {
 				$( `input[name="${prefix}type"]` ).val( sbjs.get.current.typ );
@@ -53,9 +53,7 @@
 		/**
 		 * Add source values to checkout.
 		 */
-		$( document.body ).on( 'init_checkout', function () {
-			setFields();
-		} );
+		$( document.body ).on( 'init_checkout', () => { setFields(); } );
 
 		/**
 		 * Add source values to register.
@@ -65,20 +63,18 @@
 		}
 	}
 
-	woocommerce_order_source_attribution.setAllowTrackingConsent = function( allow ) {
+	woocommerce_order_source_attribution.setAllowTrackingConsent = ( allow ) => {
 		if ( ! allow ) {
 			return;
 		}
 
 		params.allowTracking = 'yes';
 		woocommerce_order_source_attribution.initOrderTracking();
-
 	}
 
-	woocommerce_order_source_attribution.removeTrackingCookies = function() {
-
-		var domain = window.location.hostname;
-		var sbCookies = [
+	woocommerce_order_source_attribution.removeTrackingCookies = () => {
+		const domain = window.location.hostname;
+		const sbCookies = [
 			'sbjs_current',
 			'sbjs_current_add',
 			'sbjs_first',
@@ -90,8 +86,8 @@
 		];
 
 		// Remove cookies
-		sbCookies.forEach( function( name ) {
-			document.cookie = name + '=; path=/; max-age=-999; domain=.' + domain + ';';
+		sbCookies.forEach( ( name ) => {
+			document.cookie = `${name}=; path=/; max-age=-999; domain=.${domain};`;
 		} );
 
 	}
@@ -99,4 +95,4 @@
 	// Run init.
 	woocommerce_order_source_attribution.initOrderTracking();
 
-} )( jQuery, window.wc_order_attribute_source_params );
+}( jQuery, window.wc_order_attribute_source_params ) );
