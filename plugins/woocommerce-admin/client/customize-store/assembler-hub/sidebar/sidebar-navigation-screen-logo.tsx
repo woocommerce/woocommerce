@@ -34,18 +34,16 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { LogoBlockContext } from '../logo-block-context';
-
-const MIN_SIZE = 20;
-const ALLOWED_MEDIA_TYPES = [ 'image' ];
-
-type LogoAttributes = Partial< {
-	align: string;
-	width: number;
-	height: number;
-	isLink: boolean;
-	linkTarget: string;
-	shouldSyncIcon: boolean;
-} >;
+import {
+	useLogoAttributes,
+	LogoAttributes,
+} from '../hooks/use-logo-attributes';
+import {
+	MIN_LOGO_SIZE,
+	DEFAULT_LOGO_WIDTH,
+	MAX_LOGO_WIDTH,
+	ALLOWED_MEDIA_TYPES,
+} from './constants';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -176,16 +174,12 @@ const LogoSettings = ( {
 	const isWideAligned = [ 'wide', 'full' ].includes( align );
 	const isResizable = ! isWideAligned && isLargeViewport;
 
-	const maxWidth = 200;
-
-	// Set the default width to a responsible size.
-	// Note that this width is also set in the attached frontend CSS file.
-	const defaultWidth = 60;
-
-	const currentWidth = width || defaultWidth;
+	const currentWidth = width || DEFAULT_LOGO_WIDTH;
 	const ratio = naturalWidth / naturalHeight;
 	const minWidth =
-		naturalWidth < naturalHeight ? MIN_SIZE : Math.ceil( MIN_SIZE * ratio );
+		naturalWidth < naturalHeight
+			? MIN_LOGO_SIZE
+			: Math.ceil( MIN_LOGO_SIZE * ratio );
 
 	// With the current implementation of ResizableBox, an image needs an
 	// explicit pixel value for the max-width. In absence of being able to
@@ -196,7 +190,7 @@ const LogoSettings = ( {
 	// main column, though not infinitely.
 	// @todo It would be good to revisit this once a content-width variable
 	// becomes available.
-	const maxWidthBuffer = maxWidth * 2.5;
+	const maxWidthBuffer = MAX_LOGO_WIDTH * 2.5;
 
 	return (
 		<div className="woocommerce-customize-store__sidebar-group">
@@ -212,8 +206,11 @@ const LogoSettings = ( {
 					setAttributes( { width: newWidth } )
 				}
 				min={ minWidth }
-				max={ maxWidth }
-				initialPosition={ Math.min( defaultWidth, maxWidthBuffer ) }
+				max={ MAX_LOGO_WIDTH }
+				initialPosition={ Math.min(
+					DEFAULT_LOGO_WIDTH,
+					maxWidthBuffer
+				) }
 				value={ currentWidth }
 				disabled={ ! isResizable }
 			/>
@@ -362,36 +359,7 @@ const LogoEdit = ( {
 export const SidebarNavigationScreenLogo = () => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
 	const { logoBlockIds } = useContext( LogoBlockContext );
-
-	const {
-		attributes,
-		isAttributesLoading,
-	}: {
-		attributes: LogoAttributes;
-		isAttributesLoading: boolean;
-	} = useSelect(
-		( select ) => {
-			const logoBlocks =
-				// @ts-ignore No types for this exist yet.
-				select( blockEditorStore ).getBlocksByClientId( logoBlockIds );
-
-			const _isAttributesLoading =
-				! logoBlocks.length || logoBlocks[ 0 ] === null;
-
-			if ( _isAttributesLoading ) {
-				return {
-					attributes: {},
-					isAttributesLoading: _isAttributesLoading,
-				};
-			}
-
-			return {
-				attributes: logoBlocks[ 0 ].attributes,
-				isAttributesLoading: _isAttributesLoading,
-			};
-		},
-		[ logoBlockIds ]
-	);
+	const { attributes, isAttributesLoading } = useLogoAttributes();
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
 		useSelect( ( select ) => {
