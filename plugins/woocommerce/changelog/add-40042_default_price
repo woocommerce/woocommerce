@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add support for default values when generating variations in data store and REST API.

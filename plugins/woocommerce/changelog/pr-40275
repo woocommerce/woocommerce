@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add order instance and redirect URL arguments to woocommerce_get_cancel_order_url and woocommerce_get_cancel_order_url_raw filters

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add a background sync that can run independently of the normal real-time HPOS data sync. Also add a button on the Features screen to trigger an order sync manually.

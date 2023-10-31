@@ -15,7 +15,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 import { useQuery } from '@woocommerce/navigation';
-import { useContext, useCallback } from '@wordpress/element';
+import { useContext, useCallback, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -24,6 +24,7 @@ import BlockPreview from './block-preview';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import { CustomizeStoreContext } from './';
+import { HighlightedBlockContext } from './context/highlighted-block-context';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -118,13 +119,45 @@ export const BlockEditor = ( {} ) => {
 		[ history, urlParams, pages ]
 	);
 
+	const [ , , onChange ] = useEditorBlocks();
+
+	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
+	const isHighlighting = highlightedBlockIndex !== -1;
+	const additionalStyles = isHighlighting
+		? `
+		.wp-block.preview-opacity {
+			opacity: ${ previewOpacity };
+		}
+	`
+		: '';
+
+	const renderedBlocks = useMemo(
+		() =>
+			blocks.map( ( block, i ) => {
+				if ( ! isHighlighting || i === highlightedBlockIndex ) {
+					return block;
+				}
+
+				return {
+					...block,
+					attributes: {
+						...block.attributes,
+						className:
+							block.attributes.className + ' preview-opacity',
+					},
+				};
+			} ),
+		[ blocks, highlightedBlockIndex, isHighlighting ]
+	);
+
 	return (
 		<div className="woocommerce-customize-store__block-editor">
 			<div className={ 'woocommerce-block-preview-container' }>
 				<BlockPreview
-					blocks={ blocks }
+					blocks={ renderedBlocks }
+					onChange={ isHighlighting ? undefined : onChange }
 					settings={ settings }
-					additionalStyles={ '' }
+					additionalStyles={ additionalStyles }
 					isNavigable={ false }
 					isScrollable={ currentState !== 'transitionalScreen' }
 					onClickNavigationItem={ onClickNavigationItem }

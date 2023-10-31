@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Support using category_id and tag_id in wc_get_product()

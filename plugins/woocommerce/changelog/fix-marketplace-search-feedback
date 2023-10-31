@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: In the marketplace show themes first if there are no extensions, empty search will open the discovery page, and large screens will show 8 results if available.
-

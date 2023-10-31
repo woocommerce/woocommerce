@@ -259,13 +259,10 @@ function ScaledBlockPreview( {
 					` }
 				</style>
 				<MemoizedBlockList renderAppender={ false } />
-				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
-				{ externalFontFamilies.length === 2 && (
-					<FontFamiliesLoader
-						fontFamilies={ externalFontFamilies }
-						onLoad={ noop }
-					/>
-				) }
+				<FontFamiliesLoader
+					fontFamilies={ externalFontFamilies }
+					onLoad={ noop }
+				/>
 			</Iframe>
 		</DisabledProvider>
 	);

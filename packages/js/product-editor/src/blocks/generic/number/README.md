@@ -2,7 +2,7 @@
 
 A reusable number field for the product editor.
 
-![Product number field screenshot](https://woocommerce.files.wordpress.com/2023/10/woocommerceproduct-number-field.png)
+![Product number field screenshot](https://woocommerce.files.wordpress.com/2023/10/woocommerceproduct-number-field-1.png)
 
 ## Attributes
 
@@ -27,6 +27,20 @@ Property in which the value is stored.
 - **Required:** `No`
 
 Help text that appears below the field.
+
+### required
+
+- **Type:** `Boolean`
+- **Required:** `No`
+
+Indicates and enforces that the field is required.
+
+### tooltip
+
+- **Type:** `String`
+- **Required:** `No`
+
+If provided, shows a tooltip next to the label with additional information.
 
 ### suffix
 
@@ -68,10 +82,12 @@ $section->add_block(
     'blockName'  => 'woocommerce/product-number-field',
     'attributes' => [
       'label' => 'Label',
-      'property' => 'meta_data.number_field',
+      'property' => 'meta_data.number',
       'suffix' => 'suffix',
-      'help' => 'Add additional information here',
       'placeholder' => 'Placeholder',
+      'required' => true,
+      'help' => 'Add additional information here',
+      'tooltip' => 'Tooltip information here'
     ]
   ],
 );
