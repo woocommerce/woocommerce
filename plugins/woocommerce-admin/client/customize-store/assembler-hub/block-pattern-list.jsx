@@ -1,3 +1,4 @@
+// Reference: https://github.com/WordPress/gutenberg/blob/94ff2ba55379d9ad7f6bed743b20b85ff26cf56d/packages/block-editor/src/components/block-patterns-list/index.js#L1
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
