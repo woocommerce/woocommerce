@@ -1566,6 +1566,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
+			/**
+			 * Filter to not require shipping state for shipping calculation, even if its' required at checkout. This can be used to allow shipping calculations to be done without a state.
+			 *
+			 * @since 7.6.0
+			 * @param bool $show_state Whether to use the state field. Default true.
+			 */
 			if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) && isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
