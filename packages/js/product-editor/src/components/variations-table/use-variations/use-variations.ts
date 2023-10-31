@@ -171,6 +171,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		setSelectedCount( fetchedCount );
 
 		setIsSelectingAll( false );
+
+		return fetchedCount;
 	}
 
 	function onClearSelection() {
@@ -184,12 +186,75 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		{}
 	);
 
+	async function onUpdate( {
+		id: variationId,
+		...variation
+	}: Partial< ProductVariation > ) {
+		if ( isUpdating[ variationId ] ) return;
+
+		const { invalidateResolution: coreInvalidateResolution } =
+			dispatch( 'core' );
+
+		const { updateProductVariation } = dispatch(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		);
+
+		return updateProductVariation< Promise< ProductVariation > >(
+			{ product_id: productId, id: variationId },
+			variation
+		).then( async ( response: ProductVariation ) => {
+			await coreInvalidateResolution( 'getEntityRecord', [
+				'postType',
+				'product_variation',
+				variationId,
+			] );
+
+			return response;
+		} );
+	}
+
+	async function onDelete( variationId: number ) {
+		if ( isUpdating[ variationId ] ) return;
+
+		const { invalidateResolution: coreInvalidateResolution } =
+			dispatch( 'core' );
+
+		const { deleteProductVariation, invalidateResolutionForStore } =
+			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+		return deleteProductVariation< Promise< ProductVariation > >( {
+			product_id: productId,
+			id: variationId,
+		} ).then( async ( response: ProductVariation ) => {
+			await coreInvalidateResolution( 'getEntityRecord', [
+				'postType',
+				'product',
+				productId,
+			] );
+
+			await coreInvalidateResolution( 'getEntityRecord', [
+				'postType',
+				'product_variation',
+				variationId,
+			] );
+
+			await invalidateResolutionForStore();
+
+			return response;
+		} );
+	}
+
 	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+		const { invalidateResolution: coreInvalidateResolution } =
+			dispatch( 'core' );
+
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		let currentPage = 1;
 		let offset = 50;
+
+		const result: ProductVariation[] = [];
 
 		while ( ( currentPage - 1 ) * offset < values.length ) {
 			const fromIndex = ( currentPage - 1 ) * offset;
@@ -206,8 +271,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			await batchUpdateProductVariations< {
-				update: Partial< ProductVariation >[];
+			const response = await batchUpdateProductVariations< {
+				update: ProductVariation[];
 			} >(
 				{ product_id: productId },
 				{
@@ -216,20 +281,37 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			);
 
 			currentPage++;
+
+			result.push( ...( response?.update ?? [] ) );
+
+			for ( const variation of subset ) {
+				await coreInvalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product_variation',
+					variation.id,
+				] );
+			}
 		}
 
 		await invalidateResolutionForStore();
 		await getCurrentVariationsPage( productId );
 
 		setIsUpdating( {} );
+
+		return { update: result };
 	}
 
 	async function onBatchDelete( values: Pick< ProductVariation, 'id' >[] ) {
+		const { invalidateResolution: coreInvalidateResolution } =
+			dispatch( 'core' );
+
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		let currentPage = 1;
 		let offset = 50;
+
+		const result: ProductVariation[] = [];
 
 		while ( ( currentPage - 1 ) * offset < values.length ) {
 			const fromIndex = ( currentPage - 1 ) * offset;
@@ -246,8 +328,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			await batchUpdateProductVariations< {
-				delete: Partial< ProductVariation >[];
+			const response = await batchUpdateProductVariations< {
+				delete: ProductVariation[];
 			} >(
 				{ product_id: productId },
 				{
@@ -256,12 +338,29 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			);
 
 			currentPage++;
+
+			result.push( ...( response?.delete ?? [] ) );
+
+			for ( const variation of subset ) {
+				await coreInvalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product_variation',
+					variation.id,
+				] );
+			}
 		}
 
+		await coreInvalidateResolution( 'getEntityRecord', [
+			'postType',
+			'product',
+			productId,
+		] );
 		await invalidateResolutionForStore();
 		await getCurrentVariationsPage( productId );
 
 		setIsUpdating( {} );
+
+		return { delete: result };
 	}
 
 	return {
@@ -283,6 +382,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		onClearSelection,
 
 		isUpdating,
+		onUpdate,
+		onDelete,
 		onBatchUpdate,
 		onBatchDelete,
 	};
