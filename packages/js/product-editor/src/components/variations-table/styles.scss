@@ -3,6 +3,7 @@
 @import "./pagination/styles.scss";
 @import "./table-empty-state/styles.scss";
 @import "./variations-filter/styles.scss";
+@import "./table-row-skeleton/styles.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -37,11 +38,6 @@ $table-row-height: calc($grid-unit * 9);
 				margin-left: 0px;
 			}
 		}
-	}
-
-	&__table {
-		height: $table-row-height * 5;
-		overflow: auto;
 	}
 
 	&__selection {
