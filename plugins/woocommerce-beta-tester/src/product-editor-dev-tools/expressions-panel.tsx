@@ -6,7 +6,7 @@ import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { useState } from 'react';
 
-export function Expressions( {
+export function ExpressionsPanel( {
 	evaluationContext,
 }: {
 	evaluationContext: {

@@ -21,9 +21,9 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { BlockInspector } from './block-inspector';
-import { Help } from './help';
-import { Product } from './product';
+import { BlockInspectorTabPanel } from './block-inspector-tab-panel';
+import { HelpTabPanel } from './help-tab-panel';
+import { ProductTabPanel } from './product-tab-panel';
 import { TabPanel } from './tab-panel';
 import { useFocusedBlock } from './hooks/use-focused-block';
 
@@ -121,15 +121,15 @@ export function ProductEditorDevToolsBar( {
 					</div>
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-bar__panel">
-					<TabPanel isSelected={ selectedTab === 'inspector' }>
-						<BlockInspector blockInfo={ blockInfo } />
-					</TabPanel>
-					<TabPanel isSelected={ selectedTab === 'product' }>
-						<Product evaluationContext={ evaluationContext } />
-					</TabPanel>
-					<TabPanel isSelected={ selectedTab === 'help' }>
-						<Help />
-					</TabPanel>
+					<BlockInspectorTabPanel
+						blockInfo={ blockInfo }
+						isSelected={ selectedTab === 'inspector' }
+					/>
+					<ProductTabPanel
+						evaluationContext={ evaluationContext }
+						isSelected={ selectedTab === 'product' }
+					/>
+					<HelpTabPanel isSelected={ selectedTab === 'help' } />
 				</div>
 			</div>
 		</WooFooterItem>
