@@ -1576,6 +1576,12 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) && isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
+			/**
+			 * Filter to not require shipping postcode for shipping calculation, even if it's required at checkout. This can be used to allow shipping calculations to be done without a postcode.
+			 *
+			 * @since 7.6.0
+			 * @param bool $show_postcode Whether to use the postcode field. Default true.
+			 */
 			if ( apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) && isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
