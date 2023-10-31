@@ -2,37 +2,46 @@
  * External dependencies
  */
 import { Notice } from '@wordpress/components';
-import { dispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import Alert from '../../assets/images/alert.svg';
-import {
-	InstallingStateError,
-	installingStore,
-} from '../../contexts/install-store';
+import { Notice as NoticeType } from '../../contexts/types';
+import { noticeStore } from '../../contexts/notice-store';
+import { removeNotice } from '../../utils/functions';
 
 export default function Notices() {
-	const errors: InstallingStateError[] = useSelect(
-		( select ) => select( installingStore ).errors(),
+	const notices: NoticeType[] = useSelect(
+		( select ) => select( noticeStore ).notices(),
 		[]
 	);
 
-	const removeError = ( productKey: string ) => {
-		dispatch( installingStore ).removeError( productKey );
+	const actions = ( notice: NoticeType ) => {
+		if ( ! notice.options?.actions ) {
+			return [];
+		}
+		return notice.options?.actions.map( ( action ) => {
+			return {
+				...action,
+				variant: 'link',
+				className: 'is-link',
+			};
+		} );
 	};
 
 	const errorNotices = [];
-	for ( const error of errors ) {
+	for ( const notice of notices ) {
 		errorNotices.push(
 			<Notice
-				status="error"
-				onRemove={ () => removeError( error.productKey ) }
-				key={ error.productKey }
+				status={ notice.status }
+				onRemove={ () => removeNotice( notice.productKey ) }
+				key={ notice.productKey }
+				actions={ actions( notice ) }
 			>
 				<img src={ Alert } alt="" width={ 24 } height={ 24 } />
-				{ error.error }
+				{ notice.message }
 			</Notice>
 		);
 	}

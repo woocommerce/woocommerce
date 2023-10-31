@@ -3,7 +3,8 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
-
+import { dispatch } from '@wordpress/data';
+import { Options } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
@@ -21,6 +22,8 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
+import { NoticeStatus } from '../contexts/types';
+import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
 	id: string;
@@ -322,6 +325,23 @@ function updateProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+function addNotice(
+	productKey: string,
+	message: string,
+	status?: NoticeStatus,
+	options?: Partial< Options >
+) {
+	if ( status === NoticeStatus.Error ) {
+		dispatch( noticeStore ).addNotice( productKey, message, options );
+	} else {
+		dispatch( 'core/notices' ).createSuccessNotice( message, options );
+	}
+}
+
+const removeNotice = ( productKey: string ) => {
+	dispatch( noticeStore ).removeNotice( productKey );
+};
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -351,4 +371,6 @@ export {
 	fetchSubscriptions,
 	installProduct,
 	updateProduct,
+	addNotice,
+	removeNotice,
 };

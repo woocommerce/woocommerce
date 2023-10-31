@@ -1,20 +1,18 @@
 /**
  * External dependencies
  */
-import { createReduxStore, dispatch, register } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { InstallingState } from './types';
 
 const INSTALLING_STORE_NAME = 'woocommerce-admin/installing';
 
-export interface InstallingStateError {
-	productKey: string;
-	error: string;
-}
-
-interface InstallingState {
-	installingProducts: string[];
-	errors: {
-		[ key: string ]: InstallingStateError;
-	};
+export interface InstallingStateErrorAction {
+	label: string;
+	onClick: () => void;
 }
 
 const DEFAULT_STATE: InstallingState = {
@@ -42,24 +40,6 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 						),
 					],
 				};
-			case 'ADD_ERROR':
-				return {
-					...state,
-					errors: {
-						...state.errors,
-						[ action.productKey ]: {
-							productKey: action.productKey,
-							error: action.error,
-						},
-					},
-				};
-			case 'REMOVE_ERROR':
-				const errors = { ...state.errors };
-				delete errors[ action.productKey ];
-				return {
-					...state,
-					errors,
-				};
 		}
 
 		return state;
@@ -77,22 +57,6 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 				productKey,
 			};
 		},
-		addError( productKey: string, error: string ) {
-			setTimeout( () => {
-				dispatch( store ).removeError( productKey );
-			}, 5000 );
-			return {
-				type: 'ADD_ERROR',
-				productKey,
-				error,
-			};
-		},
-		removeError( productKey: string ) {
-			return {
-				type: 'REMOVE_ERROR',
-				productKey,
-			};
-		},
 	},
 	selectors: {
 		isInstalling(
@@ -103,12 +67,6 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 				return false;
 			}
 			return state.installingProducts.includes( productKey );
-		},
-		errors( state: InstallingState | undefined ): InstallingStateError[] {
-			if ( ! state ) {
-				return [];
-			}
-			return Object.values( state.errors );
 		},
 	},
 } );

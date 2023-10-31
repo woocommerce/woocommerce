@@ -1,4 +1,4 @@
-@import "@wordpress/base-styles/_colors.native.scss";
+@import '@wordpress/base-styles/_colors.native.scss';
 
 /* Tooltip doesn't look exactly like a standard <Tooltip> */
 .woocommerce-marketplace__my-subscriptions {
@@ -22,7 +22,7 @@
 			background-position: 0 3px;
 			background-repeat: no-repeat;
 			background-size: contain;
-			content: "";
+			content: '';
 			display: inline-block;
 			height: 15px;
 			width: 15px;
@@ -111,7 +111,7 @@
 	padding: 0 12px;
 }
 
-.woocommerce-marketplace__my-subscriptions__table .components-button.is-link {
+.woocommerce-marketplace__my-subscriptions .components-button.is-link {
 	text-decoration: none;
 	padding: 6px 12px;
 }
@@ -181,5 +181,9 @@
 				fill: $gray-900;
 			}
 		}
+	}
+	.components-notice__action.components-button.is-link {
+		margin: 0;
+		padding: 0;
 	}
 }

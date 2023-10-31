@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -10,8 +9,13 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
-import { connectProduct } from '../../../../utils/functions';
+import {
+	addNotice,
+	connectProduct,
+	removeNotice,
+} from '../../../../utils/functions';
 import { Subscription } from '../../types';
+import { NoticeStatus } from '../../../../contexts/types';
 
 interface ConnectProps {
 	subscription: Subscription;
@@ -21,21 +25,22 @@ interface ConnectProps {
 
 export default function ConnectButton( props: ConnectProps ) {
 	const [ isConnecting, setIsConnecting ] = useState( false );
-	const { createWarningNotice, createSuccessNotice } =
-		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const connect = () => {
 		setIsConnecting( true );
+		removeNotice( props.subscription.product_key );
 		connectProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
-					createSuccessNotice(
+					addNotice(
+						props.subscription.product_key,
 						sprintf(
 							// translators: %s is the product name.
 							__( '%s successfully connected.', 'woocommerce' ),
 							props.subscription.product_name
 						),
+						NoticeStatus.Success,
 						{
 							icon: <Icon icon="yes" />,
 						}
@@ -47,12 +52,14 @@ export default function ConnectButton( props: ConnectProps ) {
 				} );
 			} )
 			.catch( () => {
-				createWarningNotice(
+				addNotice(
+					props.subscription.product_key,
 					sprintf(
 						// translators: %s is the product name.
 						__( '%s couldn’t be connected.', 'woocommerce' ),
 						props.subscription.product_name
 					),
+					NoticeStatus.Error,
 					{
 						actions: [
 							{
