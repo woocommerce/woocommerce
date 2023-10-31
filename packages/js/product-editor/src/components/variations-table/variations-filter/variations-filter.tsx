@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { FormEvent, KeyboardEvent, UIEvent, useEffect, useMemo } from 'react';
+import {
+	FormEvent,
+	KeyboardEvent,
+	UIEvent,
+	useEffect,
+	useMemo,
+	useRef,
+} from 'react';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
@@ -45,12 +52,13 @@ export function VariationsFilter( {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ search, setSearch ] = useState( '' );
 	const [ currentPage, setCurrentPage ] = useState( 1 );
+	const inputSearchRef = useRef< HTMLInputElement >( null );
 	const isDisabled = selection.length === 0;
 
 	async function fetchOptions(
 		attributeId: number,
-		search: string = '',
-		page: number = 1
+		searchText = '',
+		page = 1
 	) {
 		try {
 			setIsLoading( true );
@@ -67,7 +75,7 @@ export function VariationsFilter( {
 				hide_empty: true,
 				per_page: DEFAULT_TERMS_PER_PAGE,
 				page,
-				search,
+				search: searchText,
 			};
 
 			const terms = await getProductAttributeTerms<
@@ -92,6 +100,11 @@ export function VariationsFilter( {
 	}
 
 	useEffect( () => setSelection( initialValues ), [ initialValues ] );
+
+	function handleClose() {
+		setSearch( '' );
+		setCurrentPage( 1 );
+	}
 
 	function dropdownToggleHandler( isOpen: boolean, onToggle: () => void ) {
 		return async function handleClick() {
@@ -155,11 +168,19 @@ export function VariationsFilter( {
 	}
 
 	function resetHandler() {
-		return function handleReset( event: FormEvent< HTMLFormElement > ) {
+		return async function handleReset(
+			event: FormEvent< HTMLFormElement >
+		) {
 			event.preventDefault();
 
 			if ( ! isDisabled ) {
+				setSearch( '' );
 				setSelection( [] );
+				setCurrentPage( 1 );
+
+				inputSearchRef.current?.focus();
+
+				await fetchOptions( attribute.id );
 			}
 		};
 	}
@@ -200,6 +221,8 @@ export function VariationsFilter( {
 	return (
 		<Dropdown
 			className="woocommerce-product-variations-filter"
+			// @ts-expect-error Property 'onClose' does not exist
+			onClose={ handleClose }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button
 					aria-expanded={ isOpen }
@@ -237,6 +260,7 @@ export function VariationsFilter( {
 								) }
 							>
 								<InputControl
+									ref={ inputSearchRef }
 									id={ searchInputId }
 									type="search"
 									value={ search }
