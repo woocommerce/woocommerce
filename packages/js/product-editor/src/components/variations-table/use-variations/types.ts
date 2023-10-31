@@ -19,3 +19,5 @@ export type GetVariationsResponse = {
 	data: ProductVariation[];
 	totalCount: number;
 };
+
+export type AttributeFilters = { attribute: string; terms: string[] };
