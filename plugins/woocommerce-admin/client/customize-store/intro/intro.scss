@@ -116,10 +116,43 @@
 	}
 
 	&.existing-ai-theme-banner {
-		background: rgba(246, 247, 247, 1) url(../assets/images/intro-banner-existing-ai.svg) no-repeat center right;
-		background-size: auto 218px;
-		background-position-y: 29px;
-		background-position-x: 91%;
+		background: rgba(246, 247, 247, 1);
+
+		.woocommerce-customize-store-banner-content {
+			width: 100%;
+			display: flex;
+		}
+
+		.banner-actions {
+			width: 375px;
+		}
+
+		.woocommerce-block-preview-container {
+			flex: 1;
+			position: relative;
+		}
+
+		.iframe-container {
+			pointer-events: none;
+			overflow: hidden;
+			position: absolute;
+			top: -24px;
+			right: 15%;
+		}
+
+		.preview-iframe {
+			width: 480px;
+			height: 301px;
+			zoom: 2.5;
+			-moz-transform: scale(0.3);
+			-moz-transform-origin: top right;
+			-o-transform: scale(0.3);
+			-o-transform-origin: top right;
+			-webkit-transform: scale(0.3);
+			-webkit-transform-origin: top right;
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
+		}
 	}
 
 	.woocommerce-customize-store-banner-content {
