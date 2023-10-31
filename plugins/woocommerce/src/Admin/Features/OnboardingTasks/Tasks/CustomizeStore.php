@@ -219,9 +219,11 @@ class CustomizeStore extends Task {
 
 	/**
 	 * Appends a small style to hide admin bar
+	 *
+	 * @param bool $show Whether to show the admin bar.
 	 */
 	public function possibly_hide_wp_admin_bar( $show ) {
-		if ( isset( $_GET['cys-hide-admin-bar'] ) ) {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
 			return false;
 		}
 		return $show;
