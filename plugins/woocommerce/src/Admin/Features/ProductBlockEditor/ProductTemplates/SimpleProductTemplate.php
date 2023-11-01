@@ -586,15 +586,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => [
-					'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-					'property' => 'manage_stock',
-					'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
+					'property'     => 'manage_stock',
+					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
 					'disabledCopy' => sprintf(
 						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-							__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
-							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
-							'</a>'
-						),
+						__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
 				],
 			]
 		);
@@ -823,7 +823,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( ! $variation_group ) {
 			return;
 		}
-		$variation_fields = $variation_group->add_block(
+		$variation_fields          = $variation_group->add_block(
 			[
 				'id'         => 'product_variation-field-group',
 				'blockName'  => 'woocommerce/product-variations-fields',
