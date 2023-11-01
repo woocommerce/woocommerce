@@ -278,32 +278,34 @@ const recordTracksStepCompleted = (
 };
 
 const redirectToAssemblerHub = async () => {
-	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
-	const iframe = document.createElement( 'iframe' );
-	iframe.classList.add( 'cys-fullscreen-iframe' );
-	iframe.src = assemblerUrl;
+	updateQueryString( {}, `/customize-store/assembler-hub` );
 
-	const showIframe = () => {
-		const loader = document.getElementsByClassName(
-			'woocommerce-onboarding-loader'
-		);
-		if ( loader[ 0 ] ) {
-			( loader[ 0 ] as HTMLElement ).style.display = 'none';
-		}
-		iframe.style.opacity = '1';
-	};
+	// const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	// const iframe = document.createElement( 'iframe' );
+	// iframe.classList.add( 'cys-fullscreen-iframe' );
+	// iframe.src = assemblerUrl;
 
-	iframe.onload = () => {
-		// Hide loading UI
-		attachIframeListeners( iframe );
-		onIframeLoad( showIframe );
+	// const showIframe = () => {
+	// 	const loader = document.getElementsByClassName(
+	// 		'woocommerce-onboarding-loader'
+	// 	);
+	// 	if ( loader[ 0 ] ) {
+	// 		( loader[ 0 ] as HTMLElement ).style.display = 'none';
+	// 	}
+	// 	iframe.style.opacity = '1';
+	// };
 
-		// Ceiling wait time set to 60 seconds
-		setTimeout( showIframe, 60 * 1000 );
-		window.history?.pushState( {}, '', assemblerUrl );
-	};
+	// iframe.onload = () => {
+	// 	// Hide loading UI
+	// 	attachIframeListeners( iframe );
+	// 	onIframeLoad( showIframe );
 
-	document.body.appendChild( iframe );
+	// 	// Ceiling wait time set to 60 seconds
+	// 	setTimeout( showIframe, 60 * 1000 );
+	// 	window.history?.pushState( {}, '', assemblerUrl );
+	// };
+
+	// document.body.appendChild( iframe );
 };
 
 export const actions = {

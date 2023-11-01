@@ -287,7 +287,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								initial: 'pending',
+								initial: 'success',
 								states: {
 									pending: {
 										invoke: {
@@ -321,58 +321,58 @@ export const designWithAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							chooseFontPairing: {
-								initial: 'pending',
-								states: {
-									pending: {
-										entry: [ 'assignFontPairing' ],
-										always: {
-											target: 'success',
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							updateStorePatterns: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'updateStorePatterns',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions: [
-													'assignAPICallLoaderError',
-												],
-												target: '#toneOfVoice',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
-							installAndActivateTheme: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'installAndActivateTheme',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions: [
-													'assignAPICallLoaderError',
-												],
-												target: '#toneOfVoice',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
+							// chooseFontPairing: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			entry: [ 'assignFontPairing' ],
+							// 			always: {
+							// 				target: 'success',
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
+							// updateStorePatterns: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'updateStorePatterns',
+							// 				onDone: {
+							// 					target: 'success',
+							// 				},
+							// 				onError: {
+							// 					actions: [
+							// 						'assignAPICallLoaderError',
+							// 					],
+							// 					target: '#toneOfVoice',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
+							// installAndActivateTheme: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'installAndActivateTheme',
+							// 				onDone: {
+							// 					target: 'success',
+							// 				},
+							// 				onError: {
+							// 					actions: [
+							// 						'assignAPICallLoaderError',
+							// 					],
+							// 					target: '#toneOfVoice',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
 						},
 						onDone: 'postApiCallLoader',
 					},
@@ -434,6 +434,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				meta: {
 					component: AssemblerHub,
 				},
+				entry: [ 'redirectToAssemblerHub' ],
 				type: 'final',
 			},
 		},
