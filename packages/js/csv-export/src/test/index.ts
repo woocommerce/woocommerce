@@ -35,7 +35,7 @@ describe( 'generateCSVDataFromTable', () => {
 
 	it( 'should prefix tab character when the cell value starts with one of =, +, -, and @', () => {
 		[ '=', '+', '-', '@' ].forEach( ( val ) => {
-			const expected = 'value\n"\t' + val + 'test"';
+			const expected = 'value\n"\'' + val + 'test"';
 			const result = generateCSVDataFromTable(
 				[
 					{
