@@ -38,6 +38,7 @@ class FileTest extends WC_Unit_Test_Case {
 		$file = new File( $filename );
 
 		$this->assertEquals( 'test-Source_1-1-2023-10-23-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
+		$this->assertEquals( 'test-Source_1-1-2023-10-23', $file->get_file_id() );
 		$this->assertEquals( 'test-Source_1-1', $file->get_source() );
 		$this->assertNull( $file->get_rotation() );
 		$this->assertEquals( strtotime( '2023-10-23' ), $file->get_created_timestamp() );
@@ -54,6 +55,7 @@ class FileTest extends WC_Unit_Test_Case {
 		$file = new File( $filename );
 
 		$this->assertEquals( 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
+		$this->assertEquals( 'test-Source_1-1.3-2023-10-23', $file->get_file_id() );
 		$this->assertEquals( 'test-Source_1-1', $file->get_source() );
 		$this->assertEquals( 3, $file->get_rotation() );
 		$this->assertEquals( strtotime( '2023-10-23' ), $file->get_created_timestamp() );
@@ -70,6 +72,7 @@ class FileTest extends WC_Unit_Test_Case {
 		$file = new File( $filename );
 
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
+		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_file_id() );
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
 		$this->assertNull( $file->get_rotation() );
 		$this->assertEquals( filemtime( $filename ), $file->get_created_timestamp() );
@@ -86,6 +89,7 @@ class FileTest extends WC_Unit_Test_Case {
 		$file = new File( $filename );
 
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log', $file->get_basename() );
+		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5', $file->get_file_id() );
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
 		$this->assertEquals( 5, $file->get_rotation() );
 		$this->assertEquals( filemtime( $filename ), $file->get_created_timestamp() );
