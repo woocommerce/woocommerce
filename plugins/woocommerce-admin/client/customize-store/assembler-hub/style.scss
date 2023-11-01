@@ -205,6 +205,7 @@
 			gap: 8px;
 			align-self: stretch;
 			width: 348px;
+			border: 1.5px solid transparent;
 
 			&:hover {
 				background: #ededed;
@@ -219,7 +220,7 @@
 			&:focus {
 				color: #171717;
 				background: #fcfcfc;
-				border: 1.5px solid var(--wp-admin-theme-color);
+				border-color: var(--wp-admin-theme-color);
 			}
 
 			.components-flex-item {
