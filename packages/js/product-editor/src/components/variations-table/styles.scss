@@ -2,6 +2,7 @@
 @import "./downloads-menu-item/styles.scss";
 @import "./pagination/styles.scss";
 @import "./table-empty-state/styles.scss";
+@import "./variations-filter/styles.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -12,7 +13,9 @@ $table-row-height: calc($grid-unit * 9);
 
 	&__header {
 		padding-bottom: $grid-unit-30;
-		display: flex;
+		display: grid;
+		grid-template-columns: $grid-unit-30 1fr auto;
+		column-gap: $grid-unit-30;
 		align-items: center;
 		border-bottom: 1px solid $gray-200;
 
@@ -51,7 +54,9 @@ $table-row-height: calc($grid-unit * 9);
 	}
 
 	&__filters {
-		flex: 1 0 auto;
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: $grid-unit;
 	}
 
 	&__loading {
@@ -73,7 +78,6 @@ $table-row-height: calc($grid-unit * 9);
 
 	&__price {
 		text-align: right;
-		padding-right: $grid-unit-40;
 	}
 
 	&__regular-price--on-sale {
@@ -149,7 +153,8 @@ $table-row-height: calc($grid-unit * 9);
 
 	.woocommerce-list-item {
 		display: grid;
-		grid-template-columns: 44px auto 25% 25% 88px;
+		grid-template-columns: $grid-unit-30 1fr auto 9 * $grid-unit 2 * $grid-unit-80;
+		column-gap: $grid-unit-30;
 		padding: 0;
 		min-height: $table-row-height;
 		border: none;

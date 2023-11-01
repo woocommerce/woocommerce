@@ -12,6 +12,7 @@ import { Product, ProductQuery, ReadOnlyProperties } from '../products/types';
 export type ProductVariationAttribute = {
 	id: number;
 	name: string;
+	slug: string;
 	option: string;
 };
 
