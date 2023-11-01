@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useSlot } from '@woocommerce/experimental';
-export * from './example-fill'; // just so that the example script is run in the package
 
 /**
  * Internal dependencies
