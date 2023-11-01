@@ -9,7 +9,6 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
-import { store } from '@wordpress/edit-post';
 
 /**
  * Internal dependencies
@@ -17,14 +16,14 @@ import { store } from '@wordpress/edit-post';
 import WelcomeGuideImage from './image';
 
 export default function WelcomeGuideDefault() {
-	const { toggleFeature } = useDispatch( store );
+	const { toggle } = useDispatch( 'core/preferences' );
 
 	return (
 		<Guide
 			className="edit-post-welcome-guide"
 			contentLabel={ __( 'Welcome to the block editor', 'woocommerce' ) }
 			finishButtonText={ __( 'Get started', 'woocommerce' ) }
-			onFinish={ () => toggleFeature( 'welcomeGuide' ) }
+			onFinish={ () => toggle( 'core/edit-post', 'welcomeGuide' ) }
 			pages={ [
 				{
 					image: (
