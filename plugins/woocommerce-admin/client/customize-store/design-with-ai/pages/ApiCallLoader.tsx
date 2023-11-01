@@ -140,7 +140,7 @@ export const AssembleHubLoader = () => {
 
 	return (
 		<Loader>
-			<Loader.Sequence interval={ 5000 } shouldLoop={ false }>
+			<Loader.Sequence interval={ 3000 } shouldLoop={ false }>
 				{ steps.map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>
