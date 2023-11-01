@@ -47,6 +47,8 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
+import { ApiCallLoader } from '../design-with-ai/pages';
+import { is } from 'tinymce';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -73,6 +75,9 @@ export const Layout = () => {
 
 	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
 
+	if ( isEditorLoading ) {
+		return <ApiCallLoader />;
+	}
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
 	if ( currentState === 'transitionalScreen' ) {

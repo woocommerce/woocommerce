@@ -24,6 +24,7 @@ import {
 import { actions } from './actions';
 import { services } from './services';
 import { defaultColorPalette } from './prompts';
+import { AssemblerHub } from '../assembler-hub';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -431,9 +432,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 			showAssembleHub: {
 				meta: {
-					component: AssembleHubLoader,
+					component: AssemblerHub,
 				},
-				entry: [ 'redirectToAssemblerHub' ],
 				type: 'final',
 			},
 		},
