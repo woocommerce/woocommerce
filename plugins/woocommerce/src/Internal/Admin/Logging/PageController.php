@@ -186,6 +186,9 @@ class PageController {
 			return;
 		}
 
+		$rotations         = $this->file_controller->get_file_rotations( $file->get_file_id() );
+		$rotation_url_base = add_query_arg( 'view', 'single_file', $this->get_logs_tab_url() );
+
 		$stream      = $file->get_stream();
 		$line_number = 1;
 
@@ -203,8 +206,36 @@ class PageController {
 				);
 				?>
 			</h2>
+			<?php if ( count( $rotations ) > 1 ) : ?>
+				<nav class="wc-logs-single-file-rotations">
+					<h3><?php esc_html_e( 'File rotations:', 'woocommerce' ); ?></h3>
+					<ul class="wc-logs-rotation-links">
+						<?php if ( isset( $rotations['current'] ) ) : ?>
+							<?php
+							printf(
+								'<li><a href="%1$s" class="button button-small button-%2$s">%3$s</a></li>',
+								esc_url( add_query_arg( 'file_id', $rotations['current']->get_file_id(), $rotation_url_base ) ),
+								$file->get_file_id() === $rotations['current']->get_file_id() ? 'primary' : 'secondary',
+								esc_html__( 'Current', 'woocommerce' )
+							);
+							unset( $rotations['current'] );
+							?>
+						<?php endif; ?>
+						<?php foreach ( $rotations as $rotation ) : ?>
+							<?php
+							printf(
+								'<li><a href="%1$s" class="button button-small button-%2$s">%3$s</a></li>',
+								esc_url( add_query_arg( 'file_id', $rotation->get_file_id(), $rotation_url_base ) ),
+								$file->get_file_id() === $rotation->get_file_id() ? 'primary' : 'secondary',
+								absint( $rotation->get_rotation() )
+							);
+							?>
+						<?php endforeach; ?>
+					</ul>
+				</nav>
+			<?php endif; ?>
 		</header>
-		<div id="logs-entries" class="wc-logs-entries">
+		<section id="logs-entries" class="wc-logs-entries">
 			<?php while ( ! feof( $stream ) ) : ?>
 				<?php
 				$line = fgets( $stream );
@@ -215,7 +246,7 @@ class PageController {
 				}
 				?>
 			<?php endwhile; ?>
-		</div>
+		</section>
 		<?php
 	}
 

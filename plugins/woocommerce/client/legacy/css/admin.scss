@@ -1308,10 +1308,43 @@ table.wc_status_table--tools {
  * FileV2 logs
  */
 .wc-logs-header {
+	margin: 1em 0;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 1em;
+
+	h2 {
+		margin: 0;
+	}
+
 	.file-id {
 		padding: 3px 5px;
 		background: rgba( 0, 0, 0, 0.07 );
 		font-family: Consolas, Monaco, monospace;
+	}
+}
+
+.wc-logs-single-file-rotations {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+
+	h3 {
+		font-size: inherit;
+		margin: 0;
+	}
+
+	.wc-logs-rotation-links {
+		list-style: none;
+		margin: 0;
+		display: flex;
+		gap: 0.5em;
+
+		li {
+			display: block;
+			margin: 0;
+		}
 	}
 }
 

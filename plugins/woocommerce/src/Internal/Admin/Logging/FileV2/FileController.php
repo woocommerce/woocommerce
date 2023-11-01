@@ -158,7 +158,9 @@ class FileController {
 		foreach ( $file_ids as $file_id ) {
 			$glob = glob( $this->log_directory . $file_id . '*.log' );
 
-			$paths = array_merge( $paths, $glob );
+			if ( is_array( $glob ) ) {
+				$paths = array_merge( $paths, $glob );
+			}
 		}
 
 		$files = $this->convert_paths_to_objects( $paths );
@@ -184,6 +186,51 @@ class FileController {
 		}
 
 		return reset( $result );
+	}
+
+	/**
+	 * Get File instances for a given file ID and all of its related rotations.
+	 *
+	 * @param string $file_id A file ID (file basename without the hash).
+	 *
+	 * @return File[]|WP_Error An associative array where the rotation integer of the file is the key, and a "current"
+	 *                         key for the iteration of the file that hasn't been rotated (if it exists).
+	 */
+	public function get_file_rotations( string $file_id ) {
+		$file = $this->get_file_by_id( $file_id );
+
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		}
+
+		$current   = array();
+		$rotations = array();
+
+		$source  = $file->get_source();
+		$created = gmdate( 'Y-m-d', $file->get_created_timestamp() );
+
+		if ( is_null( $file->get_rotation() ) ) {
+			$current['current'] = $file;
+		} else {
+			$current_file_id = $source . '-' . $created;
+			$result          = $this->get_file_by_id( $current_file_id );
+			if ( ! is_wp_error( $result ) ) {
+				$current['current'] = $result;
+			}
+		}
+
+		$rotation_pattern = $this->log_directory . $source . '.[0123456789]-' . $created . '*.log';
+		$rotation_paths   = glob( $rotation_pattern );
+		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
+		foreach ( $rotation_files as $rotation_file ) {
+			if ( $rotation_file->is_readable() ) {
+				$rotations[ $rotation_file->get_rotation() ] = $rotation_file;
+			}
+		}
+
+		ksort( $rotations );
+
+		return array_merge( $current, $rotations );
 	}
 
 	/**
