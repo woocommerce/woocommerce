@@ -134,7 +134,7 @@ export const SaveHub = () => {
 
 	const isMainScreen = urlParams.path === '/customize-store/assembler-hub';
 
-	// Trigger a save when the editor is loaded abd there are unsaved changes in main screen.  This is needed to ensure FE is displayed correctly	because some patterns have dynamic attributes that only generate in Editor.
+	// Trigger a save when the editor is loaded and there are unsaved changes in main screen. This is needed to ensure FE is displayed correctly because some patterns have dynamic attributes that only generate in Editor.
 	useEffect( () => {
 		if ( isEditorLoading ) {
 			return;
