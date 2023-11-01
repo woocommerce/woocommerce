@@ -3,6 +3,9 @@
 namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\GroupInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SectionInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 
 /**

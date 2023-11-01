@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\Prod
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\GroupInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SectionInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
 
 /**
