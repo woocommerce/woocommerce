@@ -189,7 +189,7 @@ function updateWireitDependencies( lockPackages, context ) {
 
 		// In order to make maintaining the list easy we use a wireit-only script named "dependencies" to keep the list up to date.
 		// This is an automatically generated script and that we own and so we should make sure it's always as-expected.
-		packageFile.wireit.dependencies = {
+		packageFile.wireit.dependencyOutputs = {
 			// This is needed so we can reference files in `node_modules`.
 			allowUsuallyExcludedPaths: true,
 
@@ -202,7 +202,7 @@ function updateWireitDependencies( lockPackages, context ) {
 		// wireit and it will fingerprint them for us.
 		for ( const linkedPackage of linkedPackages ) {
 			const packageOutputs = getPackageOutputs( linkedPackage );
-			packageFile.wireit.dependencies.files.push( ...packageOutputs );
+			packageFile.wireit.dependencyOutputs.files.push( ...packageOutputs );
 
 			context.log(
 				`[wireit][${ packageFile.name }] Added '${ linkedPackage.name }' Outputs`
