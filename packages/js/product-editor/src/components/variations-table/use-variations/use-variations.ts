@@ -20,6 +20,7 @@ import {
  */
 import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../../constants';
 import { AttributeFilters, UseVariationsProps } from './types';
+import { OutcomeMessage, sendIncomeMessage } from '../variations-worker';
 
 export function useVariations( { productId }: UseVariationsProps ) {
 	// Variation pagination
@@ -30,13 +31,59 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const pageRef = useRef( 1 );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
+	const workerRef = useRef< Worker >();
+
+	useEffect( function prepareVariationsWorker() {
+		workerRef.current = new Worker(
+			/* webpackChunkName: "variations-worker" */
+			new URL( '../variations-worker/worker.js', import.meta.url ),
+			{ credentials: 'include' }
+		);
+
+		workerRef.current.onmessage = function onMessage(
+			event: MessageEvent
+		) {
+			console.log( 'Message received from worker', event.data );
+
+			if ( event.data.action === 'GET_PAGE' ) {
+				const { payload } = event.data as OutcomeMessage< 'GET_PAGE' >;
+				setVariations( payload.items );
+				setTotalCount( payload.totalCount );
+			}
+
+			if ( event.data.action === 'GET_ALL' ) {
+				const { payload } = event.data as OutcomeMessage< 'GET_ALL' >;
+
+				selectedVariationsRef.current = payload;
+
+				setSelectedCount( Object.keys( payload ).length );
+
+				setIsSelectingAll( false );
+			}
+
+			if ( event.data.action === 'BATCH_UPDATE' ) {
+				setIsUpdating( {} );
+			}
+
+			if ( event.data.action === 'IS_UPDATING' ) {
+				const { payload } =
+					event.data as OutcomeMessage< 'IS_UPDATING' >;
+
+				setIsUpdating( ( current ) => ( { ...current, ...payload } ) );
+			}
+		};
+
+		return () => {
+			workerRef.current?.terminate();
+		};
+	}, [] );
 
 	async function getCurrentVariationsPage(
 		id: number,
 		attributes: AttributeFilters[] = []
 	) {
-		const { getProductVariations, getProductVariationsTotalCount } =
-			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+		// const { getProductVariations, getProductVariationsTotalCount } =
+		// 	resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		const requestParams = {
 			product_id: id,
@@ -47,16 +94,23 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			attributes,
 		};
 
-		const data = await getProductVariations< ProductVariation[] >(
-			requestParams
-		);
+		// const data = await getProductVariations< ProductVariation[] >(
+		// 	requestParams
+		// );
 
-		const total = await getProductVariationsTotalCount< number >(
-			requestParams
-		);
+		// const total = await getProductVariationsTotalCount< number >(
+		// 	requestParams
+		// );
 
-		setVariations( data );
-		setTotalCount( total );
+		// setVariations( data );
+		// setTotalCount( total );
+
+		if ( workerRef.current ) {
+			sendIncomeMessage< 'GET_PAGE' >( workerRef.current, {
+				action: 'GET_PAGE',
+				payload: requestParams as any,
+			} );
+		}
 	}
 
 	useEffect( () => {
@@ -202,6 +256,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onSelectAll() {
 		setIsSelectingAll( true );
 
+		if ( workerRef.current ) {
+			return sendIncomeMessage< 'GET_ALL' >( workerRef.current, {
+				action: 'GET_ALL',
+				payload: productId,
+			} );
+		}
+
 		const { getProductVariations } = resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);
@@ -302,6 +363,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+		if ( workerRef.current ) {
+			return sendIncomeMessage< 'BATCH_UPDATE' >( workerRef.current, {
+				action: 'BATCH_UPDATE',
+				payload: { product_id: productId, update: values as never },
+			} );
+		}
+
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
