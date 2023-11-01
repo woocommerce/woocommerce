@@ -118,12 +118,12 @@ class CustomizeStore extends Task {
 		$current_screen->is_block_editor( true );
 
 		// Default to is-fullscreen-mode to avoid jumps in the UI.
-		add_filter(
-			'admin_body_class',
-			static function( $classes ) {
-				return "$classes is-fullscreen-mode";
-			}
-		);
+//		add_filter(
+//			'admin_body_class',
+//			static function( $classes ) {
+//				return "$classes is-fullscreen-mode";
+//			}
+//		);
 
 		$block_editor_context   = new \WP_Block_Editor_Context( array( 'name' => 'core/edit-site' ) );
 		$indexed_template_types = array();
