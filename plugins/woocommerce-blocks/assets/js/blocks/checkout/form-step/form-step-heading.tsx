@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import Title from '@woocommerce/base-components/title';
+import { Title } from '@woocommerce/blocks-components';
 
 /**
  * Step Heading Component

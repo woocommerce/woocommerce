@@ -13,3 +13,4 @@ export { default as RadioControlAccordion } from './radio-control-accordion';
 export { default as SortSelect } from './sort-select';
 export { default as Spinner } from './spinner';
 export { default as Textarea } from './textarea';
+export { default as Title } from './title';

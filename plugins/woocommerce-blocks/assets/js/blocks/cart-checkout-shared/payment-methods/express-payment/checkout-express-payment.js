@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
-import Title from '@woocommerce/base-components/title';
+import { Title } from '@woocommerce/blocks-components';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
