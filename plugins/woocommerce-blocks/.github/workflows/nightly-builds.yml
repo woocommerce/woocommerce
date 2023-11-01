@@ -56,7 +56,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           id: 80943895
-          body: "Nightly release auto generated everyday at 12:01 AM UTC. \n\n[PRs merged since last nightly build](https://github.com/woocommerce/woocommerce-blocks/pulls?q=is%3Apr+closed%3A%3E${{ steps.date.outputs.date }}+is%3Amerged)"
+          body: "Nightly release auto generated everyday at 12:01 AM UTC. \n\n[PRs merged since last nightly build](https://github.com/woocommerce/woocommerce-blocks/pulls?q=is%3Apr+closed%3A>%3D{{ steps.date.outputs.date }}+is%3Amerged)"
           spacing: 0
           replacebody: true
   update:
