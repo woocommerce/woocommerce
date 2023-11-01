@@ -90,7 +90,7 @@ If you get stuck, you can ask for help in the [WooCommerce Support Forum](https:
 
 = Where can I get help for extensions I have purchased from the WooCommerce Marketplace? =
 
-For assistance with paid extensions from the WooCommerce.com Marketplace: first, review our [self-service troubleshooting guide](https://woo.com/document/woocommerce-self-service-guide/). If the problem persists, kindly log a support ticket via [our helpdesk](https://woo.com/my-account/create-a-ticket/). Our dedicated Happiness Engineers aim to respond within 24 hours.
+For assistance with paid extensions from the WooCommerce Marketplace: first, review our [self-service troubleshooting guide](https://woo.com/document/woocommerce-self-service-guide/). If the problem persists, kindly log a support ticket via [our helpdesk](https://woo.com/my-account/create-a-ticket/). Our dedicated Happiness Engineers aim to respond within 24 hours.
 
 = I’m having trouble logging in to WooCommerce.com – what now? =
 
