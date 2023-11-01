@@ -209,6 +209,15 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+type ProductContent = {
+	title: string;
+	description: string;
+	image: {
+		src: string;
+		alt: string;
+	};
+};
+
 export const updateStorePatterns = async (
 	context: designWithAiStateMachineContext
 ) => {
@@ -220,6 +229,7 @@ export const updateStorePatterns = async (
 
 		const response: {
 			ai_content_generated: boolean;
+			product_content: ProductContent[];
 			additional_errors?: unknown[];
 		} = await apiFetch( {
 			path: '/wc/store/patterns',
@@ -229,6 +239,21 @@ export const updateStorePatterns = async (
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		const productContents = response.product_content.map(
+			( product, index ) => {
+				return apiFetch( {
+					path: '/wc/store/product-patterns',
+					method: 'POST',
+					data: {
+						products_information: product,
+						index,
+					},
+				} );
+			}
+		);
+
+		await Promise.all( productContents );
 
 		if ( ! response.ai_content_generated ) {
 			throw new Error(
