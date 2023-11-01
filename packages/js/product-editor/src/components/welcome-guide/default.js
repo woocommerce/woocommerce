@@ -4,7 +4,11 @@
 import { useDispatch } from '@wordpress/data';
 import { ExternalLink, Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, createElement, Fragment } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import { store } from '@wordpress/edit-post';
 
 /**
@@ -18,8 +22,8 @@ export default function WelcomeGuideDefault() {
 	return (
 		<Guide
 			className="edit-post-welcome-guide"
-			contentLabel={ __( 'Welcome to the block editor' ) }
-			finishButtonText={ __( 'Get started' ) }
+			contentLabel={ __( 'Welcome to the block editor', 'woocommerce' ) }
+			finishButtonText={ __( 'Get started', 'woocommerce' ) }
 			onFinish={ () => toggleFeature( 'welcomeGuide' ) }
 			pages={ [
 				{
@@ -32,11 +36,15 @@ export default function WelcomeGuideDefault() {
 					content: (
 						<>
 							<h1 className="edit-post-welcome-guide__heading">
-								{ __( 'Welcome to the block editor' ) }
+								{ __(
+									'Welcome to the block editor',
+									'woocommerce'
+								) }
 							</h1>
 							<p className="edit-post-welcome-guide__text">
 								{ __(
-									'In the WordPress editor, each paragraph, image, or video is presented as a distinct “block” of content.'
+									'In the WordPress editor, each paragraph, image, or video is presented as a distinct “block” of content.',
+									'woocommerce'
 								) }
 							</p>
 						</>
@@ -52,11 +60,15 @@ export default function WelcomeGuideDefault() {
 					content: (
 						<>
 							<h1 className="edit-post-welcome-guide__heading">
-								{ __( 'Make each block your own' ) }
+								{ __(
+									'Make each block your own',
+									'woocommerce'
+								) }
 							</h1>
 							<p className="edit-post-welcome-guide__text">
 								{ __(
-									'Each block comes with its own set of controls for changing things like color, width, and alignment. These will show and hide automatically when you have a block selected.'
+									'Each block comes with its own set of controls for changing things like color, width, and alignment. These will show and hide automatically when you have a block selected.',
+									'woocommerce'
 								) }
 							</p>
 						</>
@@ -72,17 +84,24 @@ export default function WelcomeGuideDefault() {
 					content: (
 						<>
 							<h1 className="edit-post-welcome-guide__heading">
-								{ __( 'Get to know the block library' ) }
+								{ __(
+									'Get to know the block library',
+									'woocommerce'
+								) }
 							</h1>
 							<p className="edit-post-welcome-guide__text">
 								{ createInterpolateElement(
 									__(
-										'All of the blocks available to you live in the block library. You’ll find it wherever you see the <InserterIconImage /> icon.'
+										'All of the blocks available to you live in the block library. You’ll find it wherever you see the <InserterIconImage /> icon.',
+										'woocommerce'
 									),
 									{
 										InserterIconImage: (
 											<img
-												alt={ __( 'inserter' ) }
+												alt={ __(
+													'inserter',
+													'woocommerce'
+												) }
 												src="data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='18' height='18' rx='2' fill='%231E1E1E'/%3E%3Cpath d='M9.22727 4V14M4 8.77273H14' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E%0A"
 											/>
 										),
@@ -102,18 +121,26 @@ export default function WelcomeGuideDefault() {
 					content: (
 						<>
 							<h1 className="edit-post-welcome-guide__heading">
-								{ __( 'Learn how to use the block editor' ) }
+								{ __(
+									'Learn how to use the block editor',
+									'woocommerce'
+								) }
 							</h1>
 							<p className="edit-post-welcome-guide__text">
 								{ __(
-									'New to the block editor? Want to learn more about using it? '
+									'New to the block editor? Want to learn more about using it? ',
+									'woocommerce'
 								) }
 								<ExternalLink
 									href={ __(
-										'https://wordpress.org/documentation/article/wordpress-block-editor/'
+										'https://wordpress.org/documentation/article/wordpress-block-editor/',
+										'woocommerce'
 									) }
 								>
-									{ __( "Here's a detailed guide." ) }
+									{ __(
+										"Here's a detailed guide.",
+										'woocommerce'
+									) }
 								</ExternalLink>
 							</p>
 						</>

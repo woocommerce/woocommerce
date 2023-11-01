@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { useDispatch } from '@wordpress/data';
-import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { store } from '@wordpress/edit-post';
 import { createElement } from '@wordpress/element';
-
+import { Guide } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -19,8 +18,11 @@ export default function WelcomeGuideTemplate() {
 	return (
 		<Guide
 			className="edit-template-welcome-guide"
-			contentLabel={ __( 'Welcome to the template editor' ) }
-			finishButtonText={ __( 'Get started' ) }
+			contentLabel={ __(
+				'Welcome to the template editor',
+				'woocommerce'
+			) }
+			finishButtonText={ __( 'Get started', 'woocommerce' ) }
 			onFinish={ () => toggleFeature( 'welcomeGuideTemplate' ) }
 			pages={ [
 				{
@@ -33,11 +35,15 @@ export default function WelcomeGuideTemplate() {
 					content: (
 						<>
 							<h1 className="edit-post-welcome-guide__heading">
-								{ __( 'Welcome to the template editor' ) }
+								{ __(
+									'Welcome to the template editor',
+									'woocommerce'
+								) }
 							</h1>
 							<p className="edit-post-welcome-guide__text">
 								{ __(
-									'Templates help define the layout of the site. You can customize all aspects of your posts and pages using blocks and patterns in this editor.'
+									'Templates help define the layout of the site. You can customize all aspects of your posts and pages using blocks and patterns in this editor.',
+									'woocommerce'
 								) }
 							</p>
 						</>

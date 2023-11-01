@@ -1,5 +1,8 @@
-import { createElement } from '@wordpress/element';
+/**
+ * External dependencies
+ */
 
+import { createElement } from '@wordpress/element';
 
 export default function WelcomeGuideImage( { nonAnimatedSrc, animatedSrc } ) {
 	return (
