@@ -671,26 +671,21 @@
 
 
 .woocommerce-assembler-hub__resizable-frame__drag-handler {
-	display: inline-flex;
-	padding: 0 10px;
-	align-items: flex-start;
-	gap: 10px;
-	background: var(--wp-admin-theme-color-background-25);
+	background: #000;
 	left: 5px !important;
-	border-radius: 4px;
-	height: 20px;
+	border-radius: 2px;
 
 	.components-popover__content {
-		color: var(--wp-admin-theme-color-darker-20);
+		color: #f0f0f0;
 		font-size: 0.75rem;
 		font-style: normal;
 		font-weight: 500;
-		line-height: 20px; /* 166.667% */
+		line-height: 1.4;
 		background: inherit;
-		padding: 0;
-		margin-left: 10px;
+		padding: 4px 8px;
 		width: max-content;
 		box-shadow: none;
+		text-align: center;
 	}
 }
 
