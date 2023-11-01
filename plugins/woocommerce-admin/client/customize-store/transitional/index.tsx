@@ -23,6 +23,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
 import { navigateOrParent } from '../utils';
+import './secondary-button-slot/example-fill';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
