@@ -13,6 +13,8 @@ import designingTheBestLook from '../../assets/images/loader-designing-the-best-
 import comparingTheTopPerformingStores from '../../assets/images/loader-comparing-top-performing-stores.svg';
 import assemblingAiOptimizedStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
 import applyingFinishingTouches from '../../assets/images/loader-applying-the-finishing-touches.svg';
+import generatingContent from '../../assets/images/loader-generating-content.svg';
+import openingTheDoors from '../../assets/images/loader-opening-the-doors.svg';
 
 const loaderSteps = [
 	{
@@ -23,7 +25,7 @@ const loaderSteps = [
 				alt={ __( 'Analyzing your responses', 'woocommerce' ) }
 			/>
 		),
-		progress: 17,
+		progress: 14,
 	},
 	{
 		title: __( 'Comparing the top performing stores', 'woocommerce' ),
@@ -36,7 +38,7 @@ const loaderSteps = [
 				) }
 			/>
 		),
-		progress: 33,
+		progress: 28,
 	},
 	{
 		title: __( 'Designing the best look for your business', 'woocommerce' ),
@@ -49,7 +51,17 @@ const loaderSteps = [
 				) }
 			/>
 		),
-		progress: 50,
+		progress: 42,
+	},
+	{
+		title: __( 'Generating content', 'woocommerce' ),
+		image: (
+			<img
+				src={ generatingContent }
+				alt={ __( 'Generating content', 'woocommerce' ) }
+			/>
+		),
+		progress: 56,
 	},
 	{
 		title: __( 'Assembling your AI-optimized store', 'woocommerce' ),
@@ -62,7 +74,7 @@ const loaderSteps = [
 				) }
 			/>
 		),
-		progress: 66,
+		progress: 70,
 	},
 	{
 		title: __( 'Applying the finishing touches', 'woocommerce' ),
@@ -72,7 +84,17 @@ const loaderSteps = [
 				alt={ __( 'Applying the finishing touches', 'woocommerce' ) }
 			/>
 		),
-		progress: 83,
+		progress: 84,
+	},
+	{
+		title: __( 'Opening the doors', 'woocommerce' ),
+		image: (
+			<img
+				src={ openingTheDoors }
+				alt={ __( 'Opening the doors', 'woocommerce' ) }
+			/>
+		),
+		progress: 100,
 	},
 ];
 
@@ -86,8 +108,9 @@ export const ApiCallLoader = () => {
 			img.onload = () => {};
 		};
 
-		// We preload the assemblingAiOptimizedStore to avoid flickering. We only need to preload it because the others are small enough to be inlined in base64.
+		// We preload the these images to avoid flickering. We only need to preload them because the others are small enough to be inlined in base64.
 		preload( assemblingAiOptimizedStore );
+		preload( openingTheDoors );
 	}, [] );
 
 	return (
@@ -117,7 +140,7 @@ export const AssembleHubLoader = () => {
 
 	return (
 		<Loader>
-			<Loader.Sequence interval={ 3000 } shouldLoop={ false }>
+			<Loader.Sequence interval={ 5000 } shouldLoop={ false }>
 				{ steps.map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>
