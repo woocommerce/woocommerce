@@ -86,7 +86,7 @@ export function Edit( {
 			{ !! description.length && (
 				<ContentPreview content={ description } />
 			) }
-			{ <WelcomeGuide /> }
+			{ isModalOpen && <WelcomeGuide /> }
 		</div>
 	);
 }
