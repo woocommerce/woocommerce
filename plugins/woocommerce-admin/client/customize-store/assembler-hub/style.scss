@@ -490,6 +490,13 @@
 		}
 	}
 
+	.block-editor-block-patterns-list__list-item {
+		/* Pattern thumbnails in sidebar */
+		.block-editor-block-preview__container {
+			box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px 0px;
+		}
+	}
+
 	.block-editor-block-preview__content {
 		height: 100%;
 		width: 100%;
@@ -717,3 +724,4 @@
 		}
 	}
 }
+
