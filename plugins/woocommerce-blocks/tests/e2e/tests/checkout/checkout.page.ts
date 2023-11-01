@@ -127,7 +127,7 @@ export class CheckoutPage {
 
 	async editBillingDetails() {
 		const editButton = this.page.locator(
-			'.wc-block-checkout__billing-fields .wc-block-components-address-card__edit'
+			'.wc-block-checkout__billing-fields .wc-block-components-address-address-wrapper:not(.is-editing) .wc-block-components-address-card__edit'
 		);
 
 		if ( await editButton.isVisible() ) {
@@ -137,7 +137,7 @@ export class CheckoutPage {
 
 	async editShippingDetails() {
 		const editButton = this.page.locator(
-			'.wc-block-checkout__shipping-fields .wc-block-components-address-card__edit'
+			'.wc-block-checkout__shipping-fields .wc-block-components-address-address-wrapper:not(.is-editing) .wc-block-components-address-card__edit'
 		);
 
 		if ( await editButton.isVisible() ) {
@@ -163,7 +163,6 @@ export class CheckoutPage {
 		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
 		const city = billingForm.getByLabel( 'City' );
-		const state = billingForm.getByLabel( 'State', { exact: true } );
 		const phone = billingForm.getByLabel( 'Phone' );
 
 		// Using locator here since the label of this form changes depending on the country.
@@ -178,9 +177,20 @@ export class CheckoutPage {
 		await city.fill( customerBillingDetails.city );
 		await phone.fill( customerBillingDetails.phone );
 
+		let state = billingForm.getByLabel( 'State', {
+			exact: true,
+		} );
+
+		if ( ! ( await state.isVisible() ) ) {
+			state = billingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
+		}
+
 		if ( await state.isVisible() ) {
 			await state.fill( customerBillingDetails.state );
 		}
+
 		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerBillingDetails.postcode );
 		}
@@ -205,7 +215,6 @@ export class CheckoutPage {
 		const address1 = shippingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = shippingForm.getByLabel( 'Apartment, suite, etc.' );
 		const city = shippingForm.getByLabel( 'City' );
-		const state = shippingForm.getByLabel( 'State', { exact: true } );
 		const phone = shippingForm.getByLabel( 'Phone' );
 
 		// Using locator here since the label of this form changes depending on the country.
@@ -219,12 +228,24 @@ export class CheckoutPage {
 		await city.fill( customerShippingDetails.city );
 		await phone.fill( customerShippingDetails.phone );
 
+		let state = shippingForm.getByLabel( 'State', {
+			exact: true,
+		} );
+
+		if ( ! ( await state.isVisible() ) ) {
+			state = shippingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
+		}
+
 		if ( await state.isVisible() ) {
 			await state.fill( customerShippingDetails.state );
 		}
+
 		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerShippingDetails.postcode );
 		}
+
 		// Blur active field to trigger customer address update.
 		await this.page.evaluate( 'document.activeElement.blur()' );
 	}
