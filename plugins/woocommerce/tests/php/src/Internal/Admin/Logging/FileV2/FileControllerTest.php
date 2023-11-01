@@ -120,6 +120,50 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files_by_id method should return an array of File instances given an array of valid file IDs.
+	 */
+	public function test_get_files_by_id() {
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
+		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing3' ) );
+		$file_id_1 = 'unit-testing1-' . gmdate( 'Y-m-d', time() );
+		$file_id_2 = 'unit-testing2-' . gmdate( 'Y-m-d', time() );
+
+		$files = $this->sut->get_files_by_id( array( $file_id_1, $file_id_2 ) );
+		$this->assertCount( 2, $files );
+
+		$sources = array_map(
+			function( $file ) {
+				return $file->get_source();
+			},
+			$files
+		);
+		$this->assertContains( 'unit-testing1', $sources );
+		$this->assertContains( 'unit-testing2', $sources );
+
+		$files = $this->sut->get_files_by_id( array( 'pop tart' ) );
+		$this->assertCount( 0, $files );
+	}
+
+	/**
+	 * @testdox The get_file_by_id method should return a File instance given a valid file ID, or a WP_Error.
+	 */
+	public function test_get_file_by_id() {
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
+		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing3' ) );
+		$file_id = 'unit-testing2-' . gmdate( 'Y-m-d', time() );
+
+		$file = $this->sut->get_file_by_id( $file_id );
+		$this->assertInstanceOf( 'Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File', $file );
+		$this->assertEquals( 'unit-testing2', $file->get_source() );
+
+
+		$file = $this->sut->get_file_by_id( 'zucchini' );
+		$this->assertWPError( $file );
+	}
+
+	/**
 	 * @testdox The get_file_sources method should return a unique array of sources.
 	 */
 	public function test_get_file_sources(): void {
