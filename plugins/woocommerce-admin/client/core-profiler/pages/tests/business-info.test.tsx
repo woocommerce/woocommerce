@@ -520,7 +520,6 @@ describe( 'BusinessInfo', () => {
 			const continueButton = screen.getByRole( 'button', {
 				name: /Continue/i,
 			} );
-			screen.debug();
 			expect( continueButton ).not.toBeDisabled();
 		} );
 

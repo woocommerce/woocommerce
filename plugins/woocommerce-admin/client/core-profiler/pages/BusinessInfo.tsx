@@ -198,7 +198,7 @@ export const BusinessInfo = ( {
 
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 
-	const [ isEmailValid, setIsEmailValid ] = useState( true );
+	const [ isEmailInvalid, setIsEmailInvalid ] = useState( false );
 
 	const [ storeEmailAddress, setEmailAddress ] = useState(
 		storeEmailAddressFromOnboardingProfile || currentUserEmail || ''
@@ -211,12 +211,12 @@ export const BusinessInfo = ( {
 	const [ doValidate, setDoValidate ] = useState( false );
 
 	useEffect( () => {
-		if ( isOptInMarketing && doValidate ) {
+		if ( doValidate ) {
 			const parseEmail = z
 				.string()
 				.email()
 				.safeParse( storeEmailAddress );
-			setIsEmailValid( parseEmail.success );
+			setIsEmailInvalid( isOptInMarketing && ! parseEmail.success );
 			setDoValidate( false );
 		}
 	}, [ isOptInMarketing, doValidate, storeEmailAddress ] );
@@ -395,10 +395,10 @@ export const BusinessInfo = ( {
 							<TextControl
 								className={ classNames(
 									'woocommerce-profiler-business-info-email-adddress',
-									{ 'is-error': ! isEmailValid }
+									{ 'is-error': isEmailInvalid }
 								) }
 								onChange={ ( value ) => {
-									if ( ! isEmailValid ) {
+									if ( isEmailInvalid ) {
 										setDoValidate( true ); // trigger validation as we want to feedback to the user as soon as it becomes valid
 									}
 									setEmailAddress( value );
@@ -425,7 +425,7 @@ export const BusinessInfo = ( {
 									'woocommerce'
 								) }
 							/>
-							{ ! isEmailValid && (
+							{ isEmailInvalid && (
 								<FormInputValidation
 									isError
 									text={ __(
@@ -443,7 +443,7 @@ export const BusinessInfo = ( {
 								checked={ isOptInMarketing }
 								onChange={ ( isChecked ) => {
 									setIsOptInMarketing( isChecked );
-									setDoValidate( isChecked );
+									setDoValidate( true );
 								} }
 							/>
 						</>
@@ -457,8 +457,7 @@ export const BusinessInfo = ( {
 							! storeCountry.key ||
 							( emailMarketingExperimentAssignment ===
 								'treatment' &&
-								isOptInMarketing &&
-								! isEmailValid )
+								isEmailInvalid )
 						}
 						onClick={ () => {
 							sendEvent( {
