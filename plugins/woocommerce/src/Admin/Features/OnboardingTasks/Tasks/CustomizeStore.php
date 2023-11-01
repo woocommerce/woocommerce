@@ -27,6 +27,9 @@ class CustomizeStore extends Task {
 		if ( ! $theme_switch_via_cys_ai_loader ) {
 				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
 		}
+
+		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
+		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
 	}
 
 	/**
@@ -232,5 +235,20 @@ class CustomizeStore extends Task {
 			return false;
 		}
 		return $show;
+	}
+
+	/**
+	 * Runs script and add styles to remove unwanted elements and hide scrollbar
+	 * when users are viewing with ?cys-hide-admin-bar=true.
+	 *
+	 * @return void
+	 */
+	public function possibly_remove_unwanted_ui_elements() {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
+			echo '
+			<style type="text/css">
+				body { overflow: hidden; }
+			</style>';
+		}
 	}
 }
