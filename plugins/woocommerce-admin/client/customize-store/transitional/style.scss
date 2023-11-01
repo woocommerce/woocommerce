@@ -103,7 +103,8 @@
 			overflow: hidden;
 		}
 
-		.auto-block-preview__container {
+		.auto-block-preview__container,
+		.block-editor-block-preview__content {
 			width: 588px;
 			height: 363px;
 			position: relative;
