@@ -97,13 +97,18 @@ class CustomizeStore extends Task {
 	 * Possibly add site editor scripts.
 	 */
 	public function possibly_add_site_editor_scripts() {
-		$is_assembler_hub = (
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$is_wc_admin_page = (
 			isset( $_GET['page'] ) &&
 			'wc-admin' === $_GET['page'] &&
-			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' )
+			isset( $_GET['path'] )
 		);
-		if ( ! $is_assembler_hub ) {
+
+		$is_assembler_hub     = $is_wc_admin_page && str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' );
+		$is_transitional_page = $is_wc_admin_page && str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/transitional' );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! ( $is_assembler_hub || $is_transitional_page ) ) {
 			return;
 		}
 
