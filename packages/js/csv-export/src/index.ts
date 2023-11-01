@@ -20,7 +20,7 @@ function escapeCSVValue( value: string | number ) {
 	let stringValue = value.toString();
 
 	// Prevent CSV injection.
-	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	// See: https://owasp.org/www-community/attacks/CSV_Injection
 	// See: WC_CSV_Exporter::escape_data()
 	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
 		stringValue = '"\'' + stringValue + '"';
