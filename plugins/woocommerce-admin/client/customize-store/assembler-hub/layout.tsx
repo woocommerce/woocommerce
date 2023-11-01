@@ -80,6 +80,14 @@ export const Layout = () => {
 	}
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
+	if ( ! isEditorLoading ) {
+		console.log(
+			'Loader -> Editor Ready',
+			// @ts-expect-error test
+			performance.now() - window.loaderStarted
+		);
+	}
+
 	if ( currentState === 'transitionalScreen' ) {
 		return (
 			<EntityProvider kind="root" type="site">

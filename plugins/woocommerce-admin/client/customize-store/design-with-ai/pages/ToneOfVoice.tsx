@@ -61,6 +61,8 @@ export const ToneOfVoice = ( {
 	);
 
 	const onContinue = () => {
+		// @ts-expect-error test
+		window.loaderStarted = performance.now();
 		sendEvent( {
 			type: 'TONE_OF_VOICE_COMPLETE',
 			payload: sound,
