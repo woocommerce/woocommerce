@@ -3,9 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default function CloseUp( {
-	...props
-}: React.SVGProps< SVGSVGElement > ) {
+export function CloseUp( { ...props }: React.SVGProps< SVGSVGElement > ) {
 	return (
 		<svg
 			{ ...props }

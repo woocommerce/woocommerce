@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default function LifestyleScene( {
+export function LifestyleScene( {
 	...props
 }: React.SVGProps< SVGSVGElement > ) {
 	return (

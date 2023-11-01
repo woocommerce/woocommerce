@@ -3,9 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default function FrontSide( {
-	...props
-}: React.SVGProps< SVGSVGElement > ) {
+export function FrontSide( { ...props }: React.SVGProps< SVGSVGElement > ) {
 	return (
 		<svg
 			{ ...props }
