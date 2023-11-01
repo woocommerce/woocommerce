@@ -23,7 +23,7 @@ function escapeCSVValue( value: string | number ) {
 	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
 	// See: WC_CSV_Exporter::escape_data()
 	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
-		stringValue = '"\t' + stringValue + '"';
+		stringValue = '"\'' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}
