@@ -10,19 +10,16 @@ import { TabPanel } from './tab-panel';
 
 export function BlockInspectorTabPanel( {
 	isSelected,
-	blockInfo: { blockName, templateBlockId, templateBlockOrder },
+	selectedBlock,
 }: {
 	isSelected: boolean;
-	blockInfo: {
-		blockName?: string | null;
-		templateBlockId?: string | null;
-		templateBlockOrder?: number | null;
-	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	selectedBlock: any;
 } ) {
 	return (
 		<TabPanel isSelected={ isSelected }>
 			<div className="woocommerce-product-editor-dev-tools-block-inspector">
-				{ ! blockName && (
+				{ ! selectedBlock && (
 					<p>
 						{ __(
 							'Focus on a block to see its details.',
@@ -31,17 +28,8 @@ export function BlockInspectorTabPanel( {
 					</p>
 				) }
 
-				{ blockName && (
-					<dl className="woocommerce-product-editor-dev-tools-block-inspector__properties">
-						<dt>Block name</dt>
-						<dd>{ blockName }</dd>
-
-						<dt>Template block id</dt>
-						<dd>{ templateBlockId }</dd>
-
-						<dt>Template block order</dt>
-						<dd>{ templateBlockOrder }</dd>
-					</dl>
+				{ selectedBlock && (
+					<div>{ JSON.stringify( selectedBlock, null, 4 ) }</div>
 				) }
 			</div>
 		</TabPanel>

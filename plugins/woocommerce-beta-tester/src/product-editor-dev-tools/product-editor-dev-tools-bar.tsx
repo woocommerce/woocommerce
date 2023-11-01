@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { PostTypeContext } from '@woocommerce/product-editor';
 import { Button, NavigableMenu } from '@wordpress/components';
@@ -24,8 +24,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { BlockInspectorTabPanel } from './block-inspector-tab-panel';
 import { HelpTabPanel } from './help-tab-panel';
 import { ProductTabPanel } from './product-tab-panel';
-import { TabPanel } from './tab-panel';
-import { useFocusedBlock } from './hooks/use-focused-block';
 
 function TabButton( {
 	name,
@@ -62,14 +60,24 @@ export function ProductEditorDevToolsBar( {
 		select( 'core' ).getEditedEntityRecord( 'postType', postType, id )
 	);
 
+	const [ lastSelectedBlock, setLastSelectedBlock ] = useState( null );
+
+	const selectedBlock = useSelect( ( select: typeof WPSelect ) =>
+		select( 'core/block-editor' ).getSelectedBlock()
+	);
+
+	useEffect( () => {
+		if ( selectedBlock !== null ) {
+			setLastSelectedBlock( selectedBlock );
+		}
+	}, [ selectedBlock ] );
+
 	const evaluationContext = {
 		postType,
 		editedProduct: product,
 	};
 
 	const [ selectedTab, setSelectedTab ] = useState< string >( 'inspector' );
-
-	const blockInfo = useFocusedBlock();
 
 	function handleNavigate( _childIndex: number, child: HTMLButtonElement ) {
 		child.click();
@@ -122,7 +130,7 @@ export function ProductEditorDevToolsBar( {
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-bar__panel">
 					<BlockInspectorTabPanel
-						blockInfo={ blockInfo }
+						selectedBlock={ lastSelectedBlock }
 						isSelected={ selectedTab === 'inspector' }
 					/>
 					<ProductTabPanel
