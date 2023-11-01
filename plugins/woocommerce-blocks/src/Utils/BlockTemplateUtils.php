@@ -183,7 +183,8 @@ class BlockTemplateUtils {
 
 	/**
 	 * Build a unified template object based on a theme file.
-	 * Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
+	 *
+	 * @internal Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
 	 *
 	 * @param array|object $template_file Theme file.
 	 * @param string       $template_type wp_template or wp_template_part.
@@ -223,8 +224,16 @@ class BlockTemplateUtils {
 		$template->area           = 'uncategorized';
 
 		// Force the Mini-Cart template part to be in the Mini-Cart template part area.
-		if ( 'wp_template_part' === $template_type && 'mini-cart' === $template_file->slug ) {
-			$template->area = 'mini-cart';
+		// @todo When this class is refactored, move title, description, and area definition to the template classes (CheckoutHeaderTemplate, MiniCartTemplate, etc).
+		if ( 'wp_template_part' === $template_type ) {
+			switch ( $template_file->slug ) {
+				case 'mini-cart':
+					$template->area = 'mini-cart';
+					break;
+				case 'checkout-header':
+					$template->area = 'header';
+					break;
+			}
 		}
 		return $template;
 	}
