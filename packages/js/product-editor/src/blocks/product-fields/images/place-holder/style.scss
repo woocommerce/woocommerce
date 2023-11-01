@@ -29,20 +29,15 @@
 			color: #949494;
 		}
     }
-	@media (max-width: 700px) {
+	@media ( max-width: 535px ) {
+		&__item {
+			display: none;
+		}
+    }
+	@media ( min-width: 536px) and ( max-width: 700px ) {
 		&__item {
 			display: none;
 			&:nth-child( -n+3 ) {
-				display: flex;
-			}
-		}
-    }
-	@media ( max-width: 535px ) {
-		&__item {
-			&:nth-child( -n+3 ) {
-				display: none;
-			}
-			&:nth-child( -n+2 ) {
 				display: flex;
 			}
 		}
