@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -37,7 +36,6 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
-import { PostTypeContext } from '../../contexts/post-type-context';
 import { ValidationProvider } from '../../contexts/validation-context';
 
 export type ProductEditorSettings = Partial<
@@ -91,12 +89,6 @@ export function Editor( {
 												postId: product.id,
 											} }
 										/>
-										<PostTypeContext.Provider
-											value={ productType }
-										>
-											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-											<PluginArea scope="woocommerce-product-block-editor" />
-										</PostTypeContext.Provider>
 									</>
 								}
 							/>
