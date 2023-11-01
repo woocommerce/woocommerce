@@ -1,22 +1,20 @@
 <?php
 /**
- * WooCommerce Product Group Block class.
+ * WooCommerce Section Block class.
  */
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
 
 /**
- * Class for Group block.
+ * Class for Section block.
  */
-class Group extends ProductBlock implements GroupInterface {
-	use BlockContainerTrait;
+class Section extends ProductBlock implements SectionInterface {
 
 	/**
-	 * Group Block constructor.
+	 * Section Block constructor.
 	 *
 	 * @param array                   $config The block configuration.
 	 * @param BlockTemplateInterface  $root_template The block template that this block belongs to.
@@ -28,13 +26,9 @@ class Group extends ProductBlock implements GroupInterface {
 	 */
 	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
 		if ( ! empty( $config['blockName'] ) ) {
-			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-tab".' );
+			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-section".' );
 		}
-		if ( $config['id'] && ( empty( $config['attributes'] ) || empty( $config['attributes']['id'] ) ) ) {
-			$config['attributes']       = empty( $config['attributes'] ) ? [] : $config['attributes'];
-			$config['attributes']['id'] = $config['id'];
-		}
-		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-tab' ), $config ), $root_template, $parent );
+		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-section' ), $config ), $root_template, $parent );
 	}
 
 	/**
