@@ -19,6 +19,11 @@ outputs:
 runs:
     using: composite
     steps:
+        - name: Download and install Chromium browser.
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: pnpm exec playwright install chromium
+      
         - name: Run API tests.
           id: run-api-tests
           working-directory: plugins/woocommerce
