@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Admin\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\AbstractProductFormTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 
 class CustomProductFormTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	/**

@@ -1,6 +1,6 @@
 # ProductTemplates
 
-The `Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates` namespace contains interfaces for interacting with product editor templates, which are used to define the structure of the product editor form.
+The `Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates` namespace contains interfaces for interacting with product editor templates, which are used to define the structure of the product editor form.
 
 General interfaces for interacting with block templates are located in the
 [`Automattic\WooCommerce\Admin\BlockTemplates`](../../../BlockTemplates/README.md) namespace.
