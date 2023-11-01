@@ -48,7 +48,6 @@ import { HighlightedBlockContextProvider } from './context/highlighted-block-con
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
 import { ApiCallLoader } from '../design-with-ai/pages';
-import { is } from 'tinymce';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
