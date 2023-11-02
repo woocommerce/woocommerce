@@ -171,18 +171,22 @@ $fontSizes: (
 	text-decoration: underline;
 }
 
+@mixin hover-effect() {
+	&:hover {
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
+	}
+}
+
 // Reset <button> style so we can use link style for action buttons in filter blocks
 @mixin filter-link-button() {
 	@include link-button();
+	@include hover-effect();
 	@include font-size(small);
 	text-decoration: underline;
 	font-weight: normal;
 	color: inherit;
-
-	&:hover {
-		text-decoration: none;
-		color: inherit;
-	}
 }
 
 // Makes sure long words are broken if they overflow the container.
