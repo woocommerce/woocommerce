@@ -16,6 +16,13 @@
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json"
 	],
+	"scripts": {
+		"build": "shx rm -rf dist && tsc --project tsconfig.json",
+		"lint": "eslint . --ext .ts --config .eslintrc",
+		"prepack": "pnpm build && oclif manifest",
+		"postpack": "shx rm -f oclif.manifest.json",
+		"posttest": "pnpm lint"
+	},
 	"dependencies": {
 		"@oclif/core": "^1.26.2",
 		"@oclif/plugin-help": "^5.2.20",
@@ -48,14 +55,6 @@
 				"description": "Releases JS packages"
 			}
 		}
-	},
-	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint . --ext .ts --config .eslintrc",
-		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint",
-		"prepack": "pnpm build && oclif manifest"
 	},
 	"engines": {
 		"node": "^16.14.1",

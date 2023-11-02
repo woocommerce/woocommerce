@@ -7,6 +7,15 @@
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"postinstall": "pnpm run build",
+		"lint": "eslint . --ext .ts",
+		"start": "tsc --watch",
+		"test": "pnpm test:js",
+		"test:js": "jest"
+	},
 	"dependencies": {
 		"@actions/core": "^1.10.1",
 		"@commander-js/extra-typings": "^10.0.3",
@@ -43,18 +52,8 @@
 		"typescript": "^5.3.3",
 		"wireit": "^0.14.1"
 	},
-	"scripts": {
-		"build": "tsc",
-		"start": "tsc --watch",
-		"lint": "eslint . --ext .ts",
-		"postinstall": "pnpm run build",
-		"turbo:test": "jest",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name"
-	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
-	},
-	"types": "dist/index.d.ts"
+	}
 }
