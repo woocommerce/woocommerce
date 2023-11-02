@@ -220,7 +220,7 @@ export const updateStorePatterns = async (
 		} );
 
 		const images = await apiFetch( {
-			path: '/wc/store/ai/images',
+			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
@@ -241,7 +241,7 @@ export const updateStorePatterns = async (
 			additional_errors?: unknown[];
 		} >( [
 			apiFetch( {
-				path: '/wc/store/ai/products',
+				path: '/wc/private/ai/products',
 				method: 'POST',
 				data: {
 					business_description:
@@ -250,7 +250,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/store/ai/patterns',
+				path: '/wc/private/ai/patterns',
 				method: 'POST',
 				data: {
 					business_description:
@@ -263,7 +263,7 @@ export const updateStorePatterns = async (
 		const productContents = response.product_content.map(
 			( product, index ) => {
 				return apiFetch( {
-					path: '/wc/store/ai/product',
+					path: '/wc/private/ai/product',
 					method: 'POST',
 					data: {
 						products_information: product,
