@@ -92,7 +92,7 @@
 		"build:project:cjs": {
 			"command": "tsc --project tsconfig-cjs.json",
 			"files": [
-				"tsconfig.json",
+				"tsconfig-cjs.json",
 				"src/**/*.{js,jsx,ts,tsx}",
 				"typings/**/*.ts"
 			],

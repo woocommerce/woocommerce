@@ -28,7 +28,7 @@
 	"scripts": {
 		"build": "pnpm --filter=\"$npm_package_name...\" run build:project",
 		"build:project": "pnpm run /^build:project:.*$/",
-		"build:project:js": "wireit",
+		"build:project:esm": "wireit",
 		"changelog": "composer install && composer exec -- changelogger",
 		"lint": "pnpm run '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm run '/^lint:fix:lang:.*$/'",
@@ -74,7 +74,7 @@
 		"access": "public"
 	},
 	"wireit": {
-		"build:project:js": {
+		"build:project:esm": {
 			"command": "tsc --project tsconfig.json",
 			"files": [
 				"tsconfig.json",
