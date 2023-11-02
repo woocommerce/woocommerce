@@ -1594,7 +1594,9 @@ class WC_Cart extends WC_Legacy_Cart {
 			 *
 			 * @param bool $show_postcode Whether to use the postcode field. Default true.
 			 */
-			if ( apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) && isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
+			$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
+			$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+			if ( $postcode_enabled && $postcode_required && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}
