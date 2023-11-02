@@ -123,7 +123,7 @@ class ProductGallery extends AbstractBlock {
 
 		$number_of_thumbnails = $block->attributes['thumbnailsNumberOfThumbnails'] ?? 0;
 		$classname            = $attributes['className'] ?? '';
-		$dialog               = ( true === $attributes['fullScreenOnClick'] && isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ) ? $this->render_dialog() : '';
+		$dialog               = isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ? $this->render_dialog() : '';
 		$post_id              = $block->context['postId'] ?? '';
 		$product              = wc_get_product( $post_id );
 		$product_id           = strval( $product->get_id() );

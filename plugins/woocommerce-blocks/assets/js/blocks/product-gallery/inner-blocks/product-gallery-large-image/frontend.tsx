@@ -87,7 +87,11 @@ interactivityStore(
 					context: Context;
 					event: Event;
 				} ) => {
-					if ( ( event.target as HTMLElement ).tagName === 'IMG' ) {
+					if (
+						( event.target as HTMLElement ).classList.contains(
+							'wc-block-product-gallery-dialog-on-click'
+						)
+					) {
 						context.woocommerce.isDialogOpen = true;
 					}
 				},

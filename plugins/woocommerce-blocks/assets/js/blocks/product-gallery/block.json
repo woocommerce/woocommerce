@@ -22,6 +22,7 @@
 		"pagerDisplayMode": "pagerDisplayMode",
 		"hoverZoom": "hoverZoom",
 		"fullScreenOnClick": "fullScreenOnClick",
+		"mode": "mode",
 		"cropImages": "cropImages"
 	},
 	"attributes": {
