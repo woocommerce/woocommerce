@@ -273,7 +273,17 @@ export const updateStorePatterns = async (
 			}
 		);
 
-		await Promise.all( productContents );
+		await Promise.all( [
+			...productContents,
+			apiFetch( {
+				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+		] );
 
 		if ( ! response.ai_content_generated ) {
 			throw new Error(
