@@ -11,12 +11,16 @@ const ScheduleStartDate = () => {
 	switch ( process.env.CRON_SCHEDULE ) {
 		case '21 1 * * *':
 			scheduleStartDate = '2022-01-01';
+			break;
 		case '31 2 * * *':
 			scheduleStartDate = '2023-01-01';
+			break;
 		case '41 3 * * *':
 			scheduleStartDate = '2023-08-01';
+			break;
 		default:
 			scheduleStartDate = '2018-01-01';
+			break;
 	}
 
 	core.setOutput( 'stale-start-date', scheduleStartDate );
