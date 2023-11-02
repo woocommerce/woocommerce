@@ -110,6 +110,13 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
+				/**
+				 * Run an action to save order source attribution data.
+				 *
+				 * @since x.x.x
+				 *
+				 * @param WC_Order $order The order object.
+				 */
 				do_action( 'woocommerce_order_save_attribution_source_data', $order );
 			}
 		);
