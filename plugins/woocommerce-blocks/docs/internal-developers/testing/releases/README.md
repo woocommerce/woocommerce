@@ -180,6 +180,8 @@ Every release includes specific testing instructions for new features and bug fi
     -   [11.3.1](./1131.md)
 -   [11.4.0](./1140.md)
     -   [11.4.1](./1141.md)
+    -   [11.4.2](./1142.md)
+    -   [11.4.3](./1143.md)
 
 <!-- FEEDBACK -->
 

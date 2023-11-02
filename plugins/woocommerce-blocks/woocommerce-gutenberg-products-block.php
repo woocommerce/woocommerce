@@ -7,10 +7,10 @@
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
- * Requires at least: 6.3
- * Requires PHP: 7.3
- * WC requires at least: 7.9
- * WC tested up to: 8.0
+ * Requires at least: 6.3.2
+ * Requires PHP: 7.4
+ * WC requires at least: 8.1
+ * WC tested up to: 8.2
  *
  * @package WooCommerce\Blocks
  * @internal This file is only used when running as a feature plugin.
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$minimum_wp_version = '6.3';
+$minimum_wp_version = '6.3.2';
 
 if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
 	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );

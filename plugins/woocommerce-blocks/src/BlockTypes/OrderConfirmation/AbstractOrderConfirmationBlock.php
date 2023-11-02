@@ -151,7 +151,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		 * the 'order received' or 'order pay' pages.
 		 *
 		 * @see \WC_Shortcode_Checkout::order_received()
-		 * @since $VID:$
+		 * @since 11.4.0
 		 * @param int      $grace_period Time in seconds after an order is placed before email verification may be required.
 		 * @param \WC_Order $order        The order for which this grace period is being assessed.
 		 * @param string   $context      Indicates the context in which we might verify the email address. Typically 'order-pay' or 'order-received'.
@@ -195,7 +195,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		 * before we show information such as the order summary, or order payment page.
 		 *
 		 * @see \WC_Shortcode_Checkout::order_received()
-		 * @since $VID:$
+		 * @since 11.4.0
 		 * @param bool     $email_verification_required If email verification is required.
 		 * @param WC_Order $order                       The relevant order.
 		 * @param string   $context                     The context under which we are performing this check.
