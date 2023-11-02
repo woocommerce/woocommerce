@@ -29,7 +29,9 @@ use WP_User;
 class SourceAttributionController implements RegisterHooksInterface {
 
 	use ScriptDebug;
-	use SourceAttributionMeta;
+	use SourceAttributionMeta {
+		get_prefixed_field as public;
+	}
 
 	/**
 	 * The FeatureController instance.
@@ -152,6 +154,24 @@ class SourceAttributionController implements RegisterHooksInterface {
 			},
 			20
 		);
+	}
+
+	/**
+	 * Get all of the fields.
+	 *
+	 * @return array
+	 */
+	public function get_fields(): array {
+		return $this->fields;
+	}
+
+	/**
+	 * Get the prefix for the fields.
+	 *
+	 * @return string
+	 */
+	public function get_prefix(): string {
+		return $this->field_prefix;
 	}
 
 	/**
