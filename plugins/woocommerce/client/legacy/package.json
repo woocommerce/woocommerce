@@ -6,9 +6,12 @@
 	"license": "GPL-2.0-or-later",
 	"main": "Gruntfile.js",
 	"scripts": {
-		"turbo:build": "grunt assets",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:assets": "wireit",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.68",
@@ -38,5 +41,28 @@
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.1.2"
+	},
+	"wireit": {
+		"build:project:assets": {
+			"command": "grunt assets",
+			"files": [
+				"Gruntfile.js",
+				"js/**/*.js",
+				"css/**/*.scss"
+			],
+			"output": [
+				"../../assets/css",
+				"../../assets/js"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
