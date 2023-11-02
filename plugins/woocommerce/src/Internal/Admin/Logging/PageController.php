@@ -205,6 +205,11 @@ class PageController {
 		$stream      = $file->get_stream();
 		$line_number = 1;
 
+		$delete_confirmation_js = sprintf(
+			"return window.confirm( '%s' )",
+			esc_js( __( 'Delete this log file permanently?', 'woocommerce' ) )
+		);
+
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2>
@@ -251,8 +256,9 @@ class PageController {
 				<?php
 				// Delete button.
 				printf(
-					'<a href="%1$s" class="button button-secondary">%2$s</a>',
+					'<a href="%1$s" class="button button-secondary" onclick="%2$s">%3$s</a>',
 					esc_url( $delete_url ),
+					esc_attr( $delete_confirmation_js ),
 					esc_html__( 'Delete permanently', 'woocommerce' )
 				);
 				?>
