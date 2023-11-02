@@ -48,7 +48,7 @@ function updatePackageFile( packagePath, packageFile ) {
  *
  * @param {string} packageFile The package file to read file outputs from.
  *
- * @return {Array.<string>} The globs describing the package's files.
+ * @return {Object.<string, Array.<string>} The include and exclude globs describing the package's files.
  */
 function getPackageOutputs( packageFile ) {
 	// All of the outputs should be relative to the package's path instead of the monorepo root.
@@ -56,7 +56,11 @@ function getPackageOutputs( packageFile ) {
 	const basePath = path.join( 'node_modules', packageFile.name );
 
 	// We're going to construct the package outputs according to the same rules that NPM follows when packaging.
-	const packageOutputs = [];
+	// Note: In order to work with wireit optimally we need to put the excludes at the very end of the list.
+	const packageOutputs = {
+		include: [],
+		exclude: [],
+	};
 
 	// Packages that explicitly declare their outputs have made this easy for us.
 	if ( packageFile.files ) {
@@ -66,28 +70,32 @@ function getPackageOutputs( packageFile ) {
 			let relativeGlob = fileGlob;
 
 			// Negation globs need to move the exclamation point to the beginning of the output glob.
-			let negation = relativeGlob.startsWith( '!' ) ? '!' : '';
+			let negation = relativeGlob.startsWith( '!' ) ? true : false;
 			if ( negation ) {
 				relativeGlob = relativeGlob.substring( 1 );
 			}
 
-			// Normalize leading slashes.
+			// Remove leading slashes.
 			if ( relativeGlob.startsWith( '/' ) ) {
 				relativeGlob = relativeGlob.substring( 1 );
 			}
 
 			// Now we can construct a glob relative to the package directory.
-			packageOutputs.push( `${ negation }${ basePath }/${ relativeGlob }` );
+			if ( negation ) {
+				packageOutputs.exclude.push( `!${ basePath }/${ relativeGlob }` );
+			} else {
+				packageOutputs.include.push( `${ basePath }/${ relativeGlob }` );
+			}
 		}
 	} else {
 		// This is a VERY heavy-handed approach and will simply include every file in the package directory.
-		packageOutputs.push( `${ basePath }/**/*` );
+		packageOutputs.include.push( `${ basePath }/` );
 
 		// We can make this a little bit smarter by ignoring some common directories.
-		packageOutputs.push( `!${ basePath }/node_modules` );
-		packageOutputs.push( `!${ basePath }/.git` );
-		packageOutputs.push( `!${ basePath }/.svn` );
-		packageOutputs.push( `!${ basePath }/src` ); // We generally name our source directories "src" and don't need source files.
+		packageOutputs.exclude.push( `!${ basePath }/node_modules` );
+		packageOutputs.exclude.push( `!${ basePath }/.git` );
+		packageOutputs.exclude.push( `!${ basePath }/.svn` );
+		packageOutputs.exclude.push( `!${ basePath }/src` ); // We generally name our source directories "src" and don't need source files.
 	}
 
 	return packageOutputs;
@@ -204,7 +212,10 @@ function updateWireitDependencies( lockPackages, context ) {
 		// wireit and it will fingerprint them for us.
 		for ( const linkedPackage of linkedPackages ) {
 			const packageOutputs = getPackageOutputs( linkedPackage );
-			packageFile.wireit.dependencyOutputs.files.push( ...packageOutputs );
+			// Put includes at the front and excludes at the end. This is important because otherwise
+			// wireit will blow the call stack due to the way it handles negation globs.
+			packageFile.wireit.dependencyOutputs.files.unshift( ...packageOutputs.include );
+			packageFile.wireit.dependencyOutputs.files.push( ...packageOutputs.exclude );
 
 			context.log(
 				`[wireit][${ packageFile.name }] Added '${ linkedPackage.name }' Outputs`
