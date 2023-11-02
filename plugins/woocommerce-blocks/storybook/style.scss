@@ -30,3 +30,7 @@ body {
 .button .screen-reader-text {
 	height: auto; /* Fixes a Safari+VoiceOver bug, see ticket #42006 */
 }
+
+.force-canvas-height .innerZoomElementWrapper {
+	min-height: 500px;
+}

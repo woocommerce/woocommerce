@@ -10,7 +10,7 @@ import { useState } from '@wordpress/element';
 import { __TabsWithoutInstanceId as Tabs, TabsProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/Tabs',
+	title: 'Base Components/Tabs',
 	component: Tabs,
 	args: {
 		tabs: [

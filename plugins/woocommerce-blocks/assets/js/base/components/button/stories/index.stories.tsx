@@ -10,7 +10,7 @@ import Button, { ButtonProps } from '..';
 const availableTypes = [ 'button', 'input', 'submit' ];
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/Button',
+	title: 'Base Components/Button',
 	argTypes: {
 		children: {
 			control: 'text',

@@ -10,7 +10,7 @@ import type { Story, Meta } from '@storybook/react';
 import QuantitySelector, { QuantitySelectorProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/QuantitySelector',
+	title: 'Base Components/QuantitySelector',
 	component: QuantitySelector,
 	args: {
 		itemName: 'widgets',

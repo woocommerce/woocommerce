@@ -40,11 +40,11 @@ export interface ErrorPlaceholderProps {
 	/**
 	 * Callback to retry an action.
 	 */
-	onRetry?: () => void;
+	onRetry?: ( () => void ) | undefined;
 }
 
 const ErrorPlaceholder = ( {
-	className,
+	className = '',
 	error,
 	isLoading = false,
 	onRetry,

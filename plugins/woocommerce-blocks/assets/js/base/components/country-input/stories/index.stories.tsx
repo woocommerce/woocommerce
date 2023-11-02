@@ -15,7 +15,7 @@ import { countries } from './countries-filler';
 type CountryCode = keyof typeof countries;
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/CountryInput',
+	title: 'Base Components/CountryInput',
 	component: CountryInput,
 	args: {
 		countries,

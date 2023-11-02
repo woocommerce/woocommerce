@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import ProductName, { ProductNameProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/cart-checkout/ProductName',
+	title: 'Base Components/ProductName',
 	component: ProductName,
 	args: {
 		name: 'Test product',

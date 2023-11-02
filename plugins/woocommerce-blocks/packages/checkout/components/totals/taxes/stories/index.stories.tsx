@@ -10,7 +10,7 @@ import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 import Taxes, { TotalsTaxesProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/Checkout Blocks/totals/Taxes',
+	title: 'Checkout Components/Totals/Taxes',
 	component: Taxes,
 	argTypes: {
 		currency: currencyControl,
