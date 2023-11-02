@@ -1581,7 +1581,9 @@ class WC_Cart extends WC_Legacy_Cart {
 			 *
 			 * @param bool $show_state Whether to use the state field. Default true.
 			 */
-			if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) && isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+			$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+			$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+			if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
 			/**
