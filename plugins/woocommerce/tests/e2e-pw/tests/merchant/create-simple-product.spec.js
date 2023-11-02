@@ -152,14 +152,12 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		).toContainText( productPrice );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
-		await expect( page.getByRole('link', { name: nonVirtualProductName }) ).toBeVisible();
-		await expect(
-			page.locator( 'a.shipping-calculator-button' )
-		).toBeVisible();
-		await page.getByLabel(`Remove ${nonVirtualProductName} from cart`).click();
+		await expect( page.getByRole( 'link', { name: nonVirtualProductName } ) ).toBeVisible();
+		await expect( page.getByLabel( 'Add an address for shipping options' ) ).toBeVisible();
+		await page.getByLabel(`Remove ${ nonVirtualProductName } from cart`).click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
-			page.getByLabel(`Remove ${nonVirtualProductName} from cart`)
+			page.getByLabel( `Remove ${ nonVirtualProductName } from cart` )
 		).not.toBeVisible();
 	} );
 } );
