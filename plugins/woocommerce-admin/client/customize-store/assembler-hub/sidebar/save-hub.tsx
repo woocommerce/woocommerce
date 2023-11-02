@@ -4,7 +4,12 @@
 /**
  * External dependencies
  */
-import { useContext, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -25,6 +30,8 @@ import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
 import { recordEvent } from '@woocommerce/tracks';
+// @ts-ignore No types for this exist yet.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
@@ -38,6 +45,7 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 		name: 'wp_navigation',
 	},
 ];
+let shouldTriggerSave = true;
 
 export const SaveHub = () => {
 	const urlParams = useQuery();
@@ -47,6 +55,7 @@ export const SaveHub = () => {
 	const { resetHighlightedBlockIndex } = useContext(
 		HighlightedBlockContext
 	);
+	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
@@ -92,7 +101,7 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	const save = async () => {
+	const save = useCallback( async () => {
 		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
 			if ( kind === 'root' && name === 'site' ) {
 				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
@@ -115,7 +124,32 @@ export const SaveHub = () => {
 				__unstableMarkLastChangeAsPersistent();
 			}
 		}
-	};
+	}, [
+		dirtyEntityRecords,
+		editEntityRecord,
+		saveEditedEntityRecord,
+		saveSpecifiedEntityEdits,
+		__unstableMarkLastChangeAsPersistent,
+	] );
+
+	const isMainScreen = urlParams.path === '/customize-store/assembler-hub';
+
+	// Trigger a save when the editor is loaded and there are unsaved changes in main screen. This is needed to ensure FE is displayed correctly because some patterns have dynamic attributes that only generate in Editor.
+	useEffect( () => {
+		if ( isEditorLoading ) {
+			return;
+		}
+
+		if ( ! isMainScreen ) {
+			shouldTriggerSave = false;
+			return;
+		}
+
+		if ( shouldTriggerSave && isDirty ) {
+			save();
+			shouldTriggerSave = false;
+		}
+	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
 
 	const onClickSaveButton = async () => {
 		const source = `${ urlParams.path.replace(
@@ -153,13 +187,13 @@ export const SaveHub = () => {
 	};
 
 	const renderButton = () => {
-		if ( urlParams.path === '/customize-store/assembler-hub' ) {
+		if ( isMainScreen ) {
 			return (
 				<Button
 					variant="primary"
 					onClick={ onDone }
 					className="edit-site-save-hub__button"
-					disabled={ isResolving }
+					disabled={ isResolving || isEditorLoading }
 					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize

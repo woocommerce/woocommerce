@@ -857,16 +857,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Filter by attributes.
 		if ( ! empty( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
 			foreach ( $request['attributes'] as $attribute ) {
-				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
-					continue;
+				if ( isset( $attribute['attribute'] ) ) {
+					if ( isset( $attribute['term'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'   => 'attribute_' . $attribute['attribute'],
+								'value' => $attribute['term'],
+							)
+						);
+					} elseif ( ! empty( $attribute['terms'] ) && is_array( $attribute['terms'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'     => 'attribute_' . $attribute['attribute'],
+								'compare' => 'IN',
+								'value'   => $attribute['terms'],
+							),
+						);
+					}
 				}
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					$args,
-					array(
-						'key'   => 'attribute_' . $attribute['attribute'],
-						'value' => $attribute['term'],
-					)
-				);
 			}
 		}
 
@@ -1022,6 +1032,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'term'      => array(
 						'type'        => 'string',
 						'description' => __( 'Attribute term.', 'woocommerce' ),
+					),
+					'terms'     => array(
+						'type'        => 'array',
+						'description' => __( 'Attribute terms.', 'woocommerce' ),
 					),
 				),
 			),

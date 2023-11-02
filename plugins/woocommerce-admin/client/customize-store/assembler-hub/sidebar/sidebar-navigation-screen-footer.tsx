@@ -14,8 +14,6 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-expect-error Missing type in core-data.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -28,6 +26,7 @@ import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
+import BlockPatternList from '../block-pattern-list';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu-and-cart',
@@ -140,8 +139,8 @@ export const SidebarNavigationScreenFooter = () => {
 								onClickPattern={ onClickFooterPattern }
 								label={ 'Footers' }
 								orientation="vertical"
-								category={ 'footer' }
 								isDraggable={ false }
+								onHover={ () => {} }
 								showTitlesAsTooltip={ true }
 							/>
 						) }
