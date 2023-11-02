@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Utilities\VersionUtil;
 use WC_Unit_Test_Case;
 
 /**
- * Class VersionUtiilTest
+ * Class VersionUtilTest
  *
  * @since x.x.x
  */
