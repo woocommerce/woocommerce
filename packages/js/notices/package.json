@@ -26,6 +26,25 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"scripts": {
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@wordpress/a11y": "wp-6.3",
 		"@wordpress/data": "wp-6.3",
@@ -40,15 +59,6 @@
 		"access": "public"
 	},
 	"private": true,
-	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
-	},
 	"devDependencies": {
 		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "^7.23.5",
@@ -66,9 +76,41 @@
 		"typescript": "^5.3.3",
 		"wireit": "^0.14.1"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"./build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
