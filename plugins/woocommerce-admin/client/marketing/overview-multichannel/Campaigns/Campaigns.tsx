@@ -138,7 +138,10 @@ export const Campaigns = () => {
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
 											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
-												<Link href={ el.manageUrl }>
+												<Link
+													type="wp-admin"
+													href={ el.manageUrl }
+												>
 													{ el.title }
 												</Link>
 											</FlexItem>
