@@ -1,10 +1,5 @@
-// Note you'll need to install these dependencies as part of your workflow.
-const { Octokit } = require( '@octokit/action' );
-const core = require( '@actions/core' );
-
 // Note that this script assumes you set GITHUB_TOKEN in env, if you don't
 // this won't work.
-const octokit = new Octokit();
 
 const getIssueAuthor = ( payload ) => {
 	return (
@@ -18,7 +13,7 @@ const isCommunityContributor = async ( owner, repo, username ) => {
 	if ( username ) {
 		const {
 			data: { permission },
-		} = await octokit.rest.repos.getCollaboratorPermissionLevel( {
+		} = await github.rest.repos.getCollaboratorPermissionLevel( {
 			owner,
 			repo,
 			username,
@@ -31,7 +26,7 @@ const isCommunityContributor = async ( owner, repo, username ) => {
 };
 
 const addLabel = async ( label, owner, repo, issueNumber ) => {
-	await octokit.rest.issues.addLabels( {
+	await github.rest.issues.addLabels( {
 		owner,
 		repo,
 		issue_number: issueNumber,
