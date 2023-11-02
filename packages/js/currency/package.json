@@ -109,7 +109,20 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"required"
+				"node_modules/@woocommerce/internal-js-tests/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/number/",
+				"package.json",
+				"!node_modules/@woocommerce/number/node_modules",
+				"!node_modules/@woocommerce/number/.git",
+				"!node_modules/@woocommerce/number/.svn",
+				"!node_modules/@woocommerce/number/src",
+				"!node_modules/@woocommerce/internal-js-tests/node_modules",
+				"!node_modules/@woocommerce/internal-js-tests/.git",
+				"!node_modules/@woocommerce/internal-js-tests/.svn",
+				"!node_modules/@woocommerce/internal-js-tests/src"
 			]
 		}
 	}
