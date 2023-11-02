@@ -6,9 +6,12 @@
 	"author": "Automattic",
 	"main": "Gruntfile.js",
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build",
-		"turbo:build": "grunt assets"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:assets": "wireit",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.18",
@@ -35,5 +38,28 @@
 		"sass": "^1.45.0",
 		"stylelint": "13.8.0",
 		"wireit": "^0.14.1"
+	},
+	"wireit": {
+		"build:project:assets": {
+			"command": "grunt assets",
+			"files": [
+				"Gruntfile.js",
+				"js/**/*.js",
+				"css/**/*.scss"
+			],
+			"output": [
+				"../../assets/css",
+				"../../assets/js"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
