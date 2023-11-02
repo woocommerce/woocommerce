@@ -9,6 +9,60 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
+	"scripts": {
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:zip": "./bin/build-zip.sh",
+		"changelog": "composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:lang:php": "composer run-script phpcs",
+		"docker:down": "pnpm exec wc-e2e docker:down",
+		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
+		"docker:up": "pnpm exec wc-e2e docker:up",
+		"e2e": "pnpm exec wc-e2e test:e2e",
+		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
+		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
+		"env:destroy": "pnpm wp-env destroy",
+		"env:dev": "pnpm wp-env start --update",
+		"env:down": "pnpm wp-env stop",
+		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
+		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
+		"env:start": "pnpm wp-env start",
+		"env:stop": "pnpm wp-env stop",
+		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm run env:dev",
+		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm run env:dev",
+		"preinstall": "npx only-allow pnpm",
+		"postinstall": "composer install",
+		"lint:php": "composer run-script phpcs",
+		"lint:php:changes": "composer run-script lint",
+		"lint:php:changes:branch": "composer run-script lint-branch",
+		"lint:php:changes:staged": "composer run-script lint-staged",
+		"lint:php:fix": "composer run-script phpcbf",
+		"make:collection": "pnpm exec wc-api-tests make:collection",
+		"makepot": "composer run-script makepot",
+		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
+		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
+		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:env:start": "pnpm env:test",
+		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:unit": "pnpm test:php",
+		"test:unit:env": "pnpm test:php:env",
+		"turbo:test": "pnpm test:unit",
+		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php"
+	},
+	"lint-staged": {
+		"*.php": [
+			"php -d display_errors=1 -l",
+			"composer run-script lint-staged"
+		],
+		"!(*min).js": [
+			"eslint --fix"
+		]
+	},
 	"config": {
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm run build:zip",
@@ -62,50 +116,6 @@
 			]
 		}
 	},
-	"scripts": {
-		"e2e": "pnpm exec wc-e2e test:e2e",
-		"turbo:test": "pnpm test:unit",
-		"preinstall": "npx only-allow pnpm",
-		"postinstall": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "pnpm lint:php",
-		"build:feature-config": "php bin/generate-feature-config.php",
-		"build:zip": "./bin/build-zip.sh",
-		"lint:fix": "pnpm lint:js:fix && pnpm lint:php:fix",
-		"lint:php": "composer run-script phpcs",
-		"lint:php:fix": "composer run-script phpcbf",
-		"lint:php:changes": "composer run-script lint",
-		"lint:php:changes:staged": "composer run-script lint-staged",
-		"lint:php:changes:branch": "composer run-script lint-branch",
-		"docker:down": "pnpm exec wc-e2e docker:down",
-		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
-		"docker:up": "pnpm exec wc-e2e docker:up",
-		"env:dev": "pnpm wp-env start --update",
-		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm run env:dev",
-		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
-		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"env:start": "pnpm wp-env start",
-		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
-		"env:stop": "pnpm wp-env stop",
-		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm run env:dev",
-		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
-		"env:down": "pnpm wp-env stop",
-		"env:destroy": "pnpm wp-env destroy",
-		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
-		"make:collection": "pnpm exec wc-api-tests make:collection",
-		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
-		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"test:env:start": "pnpm env:test",
-		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
-		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
-		"test:unit": "pnpm test:php",
-		"test:unit:env": "pnpm test:php:env",
-		"makepot": "composer run-script makepot",
-		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
-	},
 	"devDependencies": {
 		"@babel/cli": "7.12.8",
 		"@babel/core": "7.12.9",
@@ -151,15 +161,6 @@
 		"webpack-cli": "3.3.12",
 		"wireit": "^0.14.1",
 		"wp-textdomain": "1.0.1"
-	},
-	"lint-staged": {
-		"*.php": [
-			"php -d display_errors=1 -l",
-			"composer run-script lint-staged"
-		],
-		"!(*min).js": [
-			"eslint --fix"
-		]
 	},
 	"engines": {
 		"node": "^16.14.1",
