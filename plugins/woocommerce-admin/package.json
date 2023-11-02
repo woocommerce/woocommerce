@@ -22,8 +22,7 @@
 		"lint:lang:css": "stylelint '**/*.scss'",
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
 		"prepack": "pnpm run build",
-		"test": "pnpm --if-present run '/^test:lang:.*$/'",
-		"test:lang:js": "wireit",
+		"test:js": "wireit",
 		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
@@ -252,7 +251,7 @@
 				"dependencyOutputs"
 			]
 		},
-		"test:lang:js": {
+		"test:js": {
 			"command": "jest --config client/jest.config.js",
 			"dependencies": [
 				"build:project"
