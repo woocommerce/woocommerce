@@ -10,14 +10,23 @@
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"scripts": {
-		"changelog": "pnpm --filter=@woocommerce/plugin-woocommerce -r run changelog ",
-		"turbo:build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
-		"turbo:test": "pnpm run test:client",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:bundle": "wireit",
+		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
+		"lint:fix:lang:js": "pnpm run lint:js --fix --ext=js,ts,tsx",
+		"lint:lang:css": "stylelint '**/*.scss'",
+		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"test:lang:js": "wireit",
+		"watch:build": "pnpm run build:project --watch",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
 		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",
 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
@@ -26,14 +35,12 @@
 		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm -w run build --filter='./packages/js/*' && cross-env WC_ADMIN_PHASE=development webpack",
 		"example": "webpack --config docs/examples/extensions/examples.config.js --watch",
 		"preinstall": "npx only-allow pnpm",
-		"lint:fix": "pnpm lint:js-fix && pnpm lint:css-fix",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:js": "eslint ./client --ext=js,ts,tsx",
 		"lint:js-fix": "pnpm run lint:js --fix --ext=js,ts,tsx",
 		"lint:js-packages": "eslint ../../packages/js --ext=js,ts,tsx",
 		"lint:js-pre-commit": "eslint --ext=js,ts,tsx",
-		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"packages:build": "pnpm run:packages -- build",
 		"packages:watch": "pnpm run:packages -- start",
@@ -49,6 +56,15 @@
 		"test:watch": "pnpm run test:client --watch",
 		"ts:check": "tsc --project tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch"
+	},
+	"lint-staged": {
+		"*.scss": [
+			"pnpm lint:css-fix"
+		],
+		"client/**/*.(t|j)s?(x)": [
+			"pnpm lint:js-pre-commit",
+			"pnpm test-staged"
+		]
 	},
 	"dependencies": {
 		"@automattic/components": "^2.0.1",
@@ -244,17 +260,41 @@
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.3"
 	},
-	"lint-staged": {
-		"*.scss": [
-			"pnpm lint:css-fix"
-		],
-		"client/**/*.(t|j)s?(x)": [
-			"pnpm lint:js-pre-commit",
-			"pnpm test-staged"
-		]
-	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
+	},
+	"wireit": {
+		"build:project:bundle": {
+			"command": "webpack",
+			"env": {
+				"NODE_ENV": "production",
+				"WC_ADMIN_PHASE": "core"
+			},
+			"files": [
+				"webpack.config.js",
+				"tsconfig.json",
+				"client/**/*.{js,jsx,ts,tsx}",
+				"client/**/*.scss"
+			],
+			"output": [
+				"../woocommerce/assets/client"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"test:lang:js": {
+			"command": "jest --config client/jest.config.js",
+			"dependencies": [
+				"build:project"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
