@@ -28,17 +28,18 @@
 		"access": "public"
 	},
 	"scripts": {
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build:css": "webpack",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"build": "pnpm --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm run /^build:project:.*$/",
+		"build:project:esm": "wireit",
+		"build:project:cjs": "wireit",
+		"build:project:css": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm run '/^lint:fix:lang:.*$/'",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"lint:fix:lang:js": "eslint src --fix",
+		"prepack": "pnpm run build",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"devDependencies": {
 		"@types/react": "^17.0.71",
@@ -71,5 +72,53 @@
 		"@woocommerce/components": "workspace:*",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/element": "wp-6.0"
+	},
+	"wireit": {
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			],
+			"output": [
+				"build-types",
+				"build-module"
+			]
+		},
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			],
+			"output": [
+				"build"
+			]
+		},
+		"build:project:css": {
+			"command": "webpack",
+			"files": [
+				"webpack.config.js",
+				"src/**/*.scss"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			],
+			"output": [
+				"build-style"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [ "required" ]
+		}
 	}
 }
