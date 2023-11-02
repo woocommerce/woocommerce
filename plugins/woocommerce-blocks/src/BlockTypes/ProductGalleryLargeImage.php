@@ -124,7 +124,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		);
 
 		if ( $context['fullScreenOnClick'] ) {
-			$attributes['class'] .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
+			$attributes['class'] .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click wc-block-product-gallery-dialog-on-click';
 		}
 
 		if ( $context['hoverZoom'] ) {

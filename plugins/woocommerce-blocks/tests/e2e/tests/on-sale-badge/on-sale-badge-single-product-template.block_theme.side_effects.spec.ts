@@ -59,12 +59,14 @@ const getBoundingClientRect = async ( {
 				blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
 					.productSaleBadge
 			)
+			.first()
 			.evaluate( ( el ) => el.getBoundingClientRect() ),
 		productSaleBadgeContainer: await page
 			.locator(
 				blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
 					.productSaleBadgeContainer
 			)
+			.first()
 			.evaluate( ( el ) => el.getBoundingClientRect() ),
 	};
 };
@@ -127,7 +129,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
-			await expect( block ).toBeVisible();
+			await expect( block.first() ).toBeVisible();
 		} );
 
 		test( `should be not rendered when the product isn't on sale the frontend side`, async ( {
