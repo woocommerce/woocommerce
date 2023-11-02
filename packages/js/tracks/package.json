@@ -42,7 +42,6 @@
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
 		"prepack": "pnpm run build",
-		"test": "pnpm --if-present run '/^test:lang:.*$/'",
 		"watch:build": "pnpm run build:project --watch"
 	},
 	"devDependencies": {

@@ -23,10 +23,9 @@
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
 		"prepack": "pnpm run build",
 		"test": "pnpm --if-present run '/^test:lang:.*$/'",
-		"test:lang:js": "wireit",
+		"test:js": "wireit",
 		"watch:build": "pnpm run build:project --watch",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",
 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
@@ -284,7 +283,7 @@
 				"dependencyOutputs"
 			]
 		},
-		"test:lang:js": {
+		"test:js": {
 			"command": "jest --config client/jest.config.js",
 			"dependencies": [
 				"build:project"
