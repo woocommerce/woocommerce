@@ -146,7 +146,40 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"required"
+				"node_modules/@woocommerce/tracks/",
+				"node_modules/@woocommerce/navigation/",
+				"node_modules/@woocommerce/internal-style-build/",
+				"node_modules/@woocommerce/internal-js-tests/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/data/",
+				"node_modules/@woocommerce/experimental/",
+				"package.json",
+				"!node_modules/@woocommerce/experimental/node_modules",
+				"!node_modules/@woocommerce/experimental/.git",
+				"!node_modules/@woocommerce/experimental/.svn",
+				"!node_modules/@woocommerce/experimental/src",
+				"!node_modules/@woocommerce/data/node_modules",
+				"!node_modules/@woocommerce/data/.git",
+				"!node_modules/@woocommerce/data/.svn",
+				"!node_modules/@woocommerce/data/src",
+				"!node_modules/@woocommerce/internal-js-tests/node_modules",
+				"!node_modules/@woocommerce/internal-js-tests/.git",
+				"!node_modules/@woocommerce/internal-js-tests/.svn",
+				"!node_modules/@woocommerce/internal-js-tests/src",
+				"!node_modules/@woocommerce/internal-style-build/node_modules",
+				"!node_modules/@woocommerce/internal-style-build/.git",
+				"!node_modules/@woocommerce/internal-style-build/.svn",
+				"!node_modules/@woocommerce/internal-style-build/src",
+				"!node_modules/@woocommerce/navigation/node_modules",
+				"!node_modules/@woocommerce/navigation/.git",
+				"!node_modules/@woocommerce/navigation/.svn",
+				"!node_modules/@woocommerce/navigation/src",
+				"!node_modules/@woocommerce/tracks/node_modules",
+				"!node_modules/@woocommerce/tracks/.git",
+				"!node_modules/@woocommerce/tracks/.svn",
+				"!node_modules/@woocommerce/tracks/src"
 			]
 		}
 	}

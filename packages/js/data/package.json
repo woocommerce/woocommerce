@@ -138,7 +138,30 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"required"
+				"node_modules/@woocommerce/internal-js-tests/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/tracks/",
+				"node_modules/@woocommerce/navigation/",
+				"node_modules/@woocommerce/date/",
+				"package.json",
+				"!node_modules/@woocommerce/date/node_modules",
+				"!node_modules/@woocommerce/date/.git",
+				"!node_modules/@woocommerce/date/.svn",
+				"!node_modules/@woocommerce/date/src",
+				"!node_modules/@woocommerce/navigation/node_modules",
+				"!node_modules/@woocommerce/navigation/.git",
+				"!node_modules/@woocommerce/navigation/.svn",
+				"!node_modules/@woocommerce/navigation/src",
+				"!node_modules/@woocommerce/tracks/node_modules",
+				"!node_modules/@woocommerce/tracks/.git",
+				"!node_modules/@woocommerce/tracks/.svn",
+				"!node_modules/@woocommerce/tracks/src",
+				"!node_modules/@woocommerce/internal-js-tests/node_modules",
+				"!node_modules/@woocommerce/internal-js-tests/.git",
+				"!node_modules/@woocommerce/internal-js-tests/.svn",
+				"!node_modules/@woocommerce/internal-js-tests/src"
 			]
 		}
 	}
