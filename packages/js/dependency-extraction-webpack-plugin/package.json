@@ -41,10 +41,11 @@
 		"wireit": "^0.14.1"
 	},
 	"scripts": {
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"lint": "eslint src",
-		"lint:fix": "eslint src --fix"
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

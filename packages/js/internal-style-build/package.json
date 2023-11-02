@@ -21,6 +21,17 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "index.js",
+	"scripts": {
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint index.js --fix",
+		"lint:lang:js": "eslint index.js"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
 		"@wordpress/base-styles": "wp-6.3",
@@ -31,10 +42,6 @@
 		"sass-loader": "^10.5.0",
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0"
-	},
-	"scripts": {
-		"lint": "eslint index.js",
-		"lint:fix": "eslint index.js --fix"
 	},
 	"private": true,
 	"devDependencies": {
@@ -48,10 +55,5 @@
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",
 		"wireit": "^0.14.1"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
 	}
 }
