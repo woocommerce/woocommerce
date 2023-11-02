@@ -21,8 +21,6 @@
 		"lint:fix:lang:js": "pnpm run lint:js --fix --ext=js,ts,tsx",
 		"lint:lang:css": "stylelint '**/*.scss'",
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
-		"prepack": "pnpm run build",
-		"test": "pnpm --if-present run '/^test:lang:.*$/'",
 		"test:js": "wireit",
 		"watch:build": "pnpm run build:project --watch",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
