@@ -96,18 +96,14 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		).toContainText( productPrice );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
-			virtualProductName
-		);
+		await expect( page.getByRole('link', { name: virtualProductName }) ).toBeVisible();
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).not.toBeVisible();
-		await page
-			.locator( `a.remove[data-product_id='${ virtualProductId }']` )
-			.click();
+		await page.getByLabel(`Remove ${virtualProductName} from cart`).click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
-			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
+			page.getByLabel(`Remove ${virtualProductName} from cart`)
 		).not.toBeVisible();
 	} );
 
@@ -156,20 +152,14 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		).toContainText( productPrice );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
-			nonVirtualProductName
-		);
+		await expect( page.getByRole('link', { name: nonVirtualProductName }) ).toBeVisible();
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).toBeVisible();
-		await page
-			.locator( `a.remove[data-product_id='${ nonVirtualProductId }']` )
-			.click();
+		await page.getByLabel(`Remove ${nonVirtualProductName} from cart`).click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
-			page.locator(
-				`a.remove[data-product_id='${ nonVirtualProductId }']`
-			)
+			page.getByLabel(`Remove ${nonVirtualProductName} from cart`)
 		).not.toBeVisible();
 	} );
 } );
