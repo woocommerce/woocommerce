@@ -76,16 +76,9 @@ runs:
               fi
 
         - name: Cache Build Output
-          if: ${{ inputs.build == 'true' }}
-          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
-          with:
-              path: .turbo
-              key: ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}-${{ github.sha }}
-              restore-keys: |
-                  ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}
-                  ${{ runner.os }}-build-output
+          uses: google/wireit@setup-github-actions-caching/v1
 
         - name: Build
           if: ${{ inputs.install == 'true' && inputs.build == 'true' }}
           shell: bash
-          run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
+          run: pnpm ${{ steps.parse-input.outputs.BUILD_FILTERS }} build
