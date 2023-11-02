@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
@@ -209,15 +210,6 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
-type ProductContent = {
-	title: string;
-	description: string;
-	image: {
-		src: string;
-		alt: string;
-	};
-};
-
 export const updateStorePatterns = async (
 	context: designWithAiStateMachineContext
 ) => {
@@ -227,12 +219,8 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		const response: {
-			ai_content_generated: boolean;
-			product_content: ProductContent[];
-			additional_errors?: unknown[];
-		} = await apiFetch( {
-			path: '/wc/store/patterns',
+		const images = await apiFetch( {
+			path: '/wc/store/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
@@ -240,10 +228,42 @@ export const updateStorePatterns = async (
 			},
 		} );
 
+		const [ response ] = await Promise.all< {
+			ai_content_generated: boolean;
+			product_content: Array< {
+				title: string;
+				description: string;
+				image: {
+					src: string;
+					alt: string;
+				};
+			} >;
+			additional_errors?: unknown[];
+		} >( [
+			apiFetch( {
+				path: '/wc/store/ai/products',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/store/ai/patterns',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+		] );
+
 		const productContents = response.product_content.map(
 			( product, index ) => {
 				return apiFetch( {
-					path: '/wc/store/product-patterns',
+					path: '/wc/store/ai/product',
 					method: 'POST',
 					data: {
 						products_information: product,
