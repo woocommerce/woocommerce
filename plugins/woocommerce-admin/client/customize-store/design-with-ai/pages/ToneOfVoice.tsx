@@ -13,7 +13,7 @@ import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
-
+import { usePatterns } from '../../assembler-hub/hooks/use-patterns';
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
 	payload: Tone;
@@ -68,6 +68,8 @@ export const ToneOfVoice = ( {
 			payload: sound,
 		} );
 	};
+
+	usePatterns();
 
 	return (
 		<div>

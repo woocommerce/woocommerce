@@ -73,16 +73,25 @@ export type events =
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const { setCanvasMode } = unlock( useDispatch( editSiteStore ) );
 	useEffect( () => {
-		document.getElementsByClassName(
+		const designWithAiStep = document.getElementsByClassName(
 			'woocommerce-customize-store__step-designWithAi'
-			// @ts-ignore
-		)[ 0 ].classList =
-			'woocommerce-customize-store__container woocommerce-customize-store__step-assemblerHub';
+		);
 
-		document.getElementsByClassName(
+		if ( designWithAiStep.length !== 0 ) {
+			// @ts-ignore test
+			designWithAiStep[ 0 ].classList =
+				'woocommerce-customize-store__container woocommerce-customize-store__step-assemblerHub';
+		}
+
+		const apiCaller = document.getElementsByClassName(
 			'woocommerce-design-with-ai-wizard__step-apiCallLoader'
-			// @ts-ignore
-		).classList = '';
+		);
+
+		// @ts-ignore test
+		if ( apiCaller && apiCaller.classList ) {
+			// @ts-ignore test
+			apiCaller.classList = '';
+		}
 
 		if ( ! window.wcBlockSettings ) {
 			// eslint-disable-next-line no-console
