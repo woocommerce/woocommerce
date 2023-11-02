@@ -14,6 +14,19 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"scripts": {
+		"build": "pnpm run clean && pnpm run compile",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm run build"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@wordpress/deprecated": "wp-6.3",
@@ -46,19 +59,5 @@
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"scripts": {
-		"turbo:build": "pnpm run clean && pnpm run compile",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"prepack": "pnpm run build",
-		"lint": "eslint --ext=js,ts,tsx src",
-		"lint:fix": "eslint --ext=js,ts,tsx src --fix"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
 	}
 }

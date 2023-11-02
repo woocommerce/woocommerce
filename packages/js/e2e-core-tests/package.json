@@ -22,6 +22,19 @@
 		"installFiles",
 		"CHANGELOG.md"
 	],
+	"scripts": {
+		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm run build"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@jest/globals": "^27.5.1",
 		"@wordpress/deprecated": "wp-6.3",
@@ -51,19 +64,5 @@
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"scripts": {
-		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
-		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"lint": "eslint --ext=js,ts,tsx src",
-		"lint:fix": "eslint --ext=js,ts,tsx src --fix"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
 	}
 }

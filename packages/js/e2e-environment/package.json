@@ -24,6 +24,30 @@
 	},
 	"main": "index.js",
 	"module": "build-module/index.js",
+	"bin": {
+		"wc-e2e": "bin/wc-e2e.sh"
+	},
+	"scripts": {
+		"build": "pnpm run clean && pnpm run compile",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"docker:clear-all": "docker rmi --force $(docker images -q)",
+		"docker:down": "./bin/docker-compose.sh down",
+		"docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
+		"docker:up": "./bin/docker-compose.sh up",
+		"docker:wait": "bash ./bin/wait-for-build.sh",
+		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
+		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm run build",
+		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
+		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
+		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@jest/test-sequencer": "^27.5.1",
@@ -64,30 +88,5 @@
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"scripts": {
-		"turbo:build": "pnpm run clean && pnpm run compile",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"prepack": "pnpm run build",
-		"docker:up": "./bin/docker-compose.sh up",
-		"docker:wait": "bash ./bin/wait-for-build.sh",
-		"docker:down": "./bin/docker-compose.sh down",
-		"docker:clear-all": "docker rmi --force $(docker images -q)",
-		"docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
-		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
-		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
-		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"lint": "eslint --ext=js,ts,tsx src",
-		"lint:fix": "eslint --ext=js,ts,tsx src --fix"
-	},
-	"bin": {
-		"wc-e2e": "bin/wc-e2e.sh"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
 	}
 }
