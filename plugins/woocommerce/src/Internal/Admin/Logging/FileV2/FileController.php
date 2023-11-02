@@ -181,7 +181,7 @@ class FileController {
 		if ( count( $result ) < 1 ) {
 			return new WP_Error(
 				'wc_log_file_error',
-				esc_html__( 'Could not read the specified file.', 'woocommerce' )
+				esc_html__( 'This file does not exist.', 'woocommerce' )
 			);
 		}
 

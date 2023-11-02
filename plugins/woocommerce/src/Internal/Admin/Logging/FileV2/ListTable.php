@@ -229,7 +229,7 @@ class ListTable extends WP_List_Table {
 		<input
 			id="cb-select-<?php echo esc_attr( $item->get_file_id() ); ?>"
 			type="checkbox"
-			name="file[]"
+			name="file_id[]"
 			value="<?php echo esc_attr( $item->get_file_id() ); ?>"
 		/>
 		<label for="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>">

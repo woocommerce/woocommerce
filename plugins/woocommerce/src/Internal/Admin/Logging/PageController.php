@@ -177,9 +177,14 @@ class PageController {
 		if ( is_wp_error( $file ) ) {
 			?>
 			<div class="notice notice-error notice-inline">
-				<p>
-					<?php echo wp_kses_post( $file->get_error_message() ); ?>
-				</p>
+				<?php echo wp_kses_post( wpautop( $file->get_error_message() ) ); ?>
+				<?php
+				printf(
+					'<p><a href="%1$s">%2$s</a></p>',
+					esc_url( $this->get_logs_tab_url() ),
+					esc_html__( 'Return to the file list.', 'woocommerce' )
+				);
+				?>
 			</div>
 			<?php
 
@@ -188,6 +193,14 @@ class PageController {
 
 		$rotations         = $this->file_controller->get_file_rotations( $file->get_file_id() );
 		$rotation_url_base = add_query_arg( 'view', 'single_file', $this->get_logs_tab_url() );
+
+		$delete_url = add_query_arg(
+			array(
+				'action'  => 'delete',
+				'file_id' => array( $file->get_file_id() ),
+			),
+			wp_nonce_url( $this->get_logs_tab_url(), 'bulk-log-files' )
+		);
 
 		$stream      = $file->get_stream();
 		$line_number = 1;
@@ -234,6 +247,16 @@ class PageController {
 					</ul>
 				</nav>
 			<?php endif; ?>
+			<div class="wc-logs-single-file-actions">
+				<?php
+				// Delete button.
+				printf(
+					'<a href="%1$s" class="button button-secondary">%2$s</a>',
+					esc_url( $delete_url ),
+					esc_html__( 'Delete permanently', 'woocommerce' )
+				);
+				?>
+			</div>
 		</header>
 		<section id="logs-entries" class="wc-logs-entries">
 			<?php while ( ! feof( $stream ) ) : ?>
@@ -367,12 +390,16 @@ class PageController {
 		if ( $action ) {
 			check_admin_referer( 'bulk-log-files' );
 
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( esc_html__( 'You do not have permission to manage log files.', 'woocommerce' ) );
+			}
+
 			$sendback = remove_query_arg( array( 'deleted' ), wp_get_referer() );
 
-			// Multiple file[] params will be filtered separately, but assigned to $files as an array.
+			// Multiple file_id[] params will be filtered separately, but assigned to $files as an array.
 			$file_ids = filter_input(
 				INPUT_GET,
-				'file',
+				'file_id',
 				FILTER_CALLBACK,
 				array(
 					'options' => function( $file ) {

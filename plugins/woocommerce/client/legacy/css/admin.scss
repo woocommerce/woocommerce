@@ -1348,6 +1348,12 @@ table.wc_status_table--tools {
 	}
 }
 
+.wc-logs-single-file-actions {
+	margin-left: auto;
+	display: flex;
+	gap: 0.5em;
+}
+
 .wc-logs-entries {
 	background: #f6f7f7;
 	border: 1px solid #c3c4c7;
