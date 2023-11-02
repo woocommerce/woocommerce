@@ -144,7 +144,7 @@ export const OnboardingTour = ( {
 							requires: [ 'computeStyles' ],
 							fn: ( { state } ) => {
 								state.styles.arrow.transform =
-									'translate3d(0px, 114.4px, 0)';
+									'translate3d(0px, 96px, 0)';
 							},
 						},
 						{

@@ -27,6 +27,9 @@ class CustomizeStore extends Task {
 		if ( ! $theme_switch_via_cys_ai_loader ) {
 				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
 		}
+
+		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
+		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
 	}
 
 	/**
@@ -97,15 +100,7 @@ class CustomizeStore extends Task {
 	 * Possibly add site editor scripts.
 	 */
 	public function possibly_add_site_editor_scripts() {
-//		$is_assembler_hub = (
-//			isset( $_GET['page'] ) &&
-//			'wc-admin' === $_GET['page'] &&
-//			isset( $_GET['path'] ) &&
-//			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' )
-//		);
-//		if ( ! $is_assembler_hub ) {
-//			return;
-//		}
+
 
 		// See: https://github.com/WordPress/WordPress/blob/master/wp-admin/site-editor.php.
 		if ( ! wp_is_block_theme() ) {
@@ -227,5 +222,20 @@ class CustomizeStore extends Task {
 			return false;
 		}
 		return $show;
+	}
+
+	/**
+	 * Runs script and add styles to remove unwanted elements and hide scrollbar
+	 * when users are viewing with ?cys-hide-admin-bar=true.
+	 *
+	 * @return void
+	 */
+	public function possibly_remove_unwanted_ui_elements() {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
+			echo '
+			<style type="text/css">
+				body { overflow: hidden; }
+			</style>';
+		}
 	}
 }

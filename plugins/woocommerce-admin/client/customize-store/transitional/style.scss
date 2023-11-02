@@ -61,10 +61,16 @@
 		width: 560px;
 	}
 
-	.woocommerce-customize-store__transitional-preview-button {
-		padding: 8px 16px;
-		height: 40px;
+	.woocommerce-customize-store__transitional-main-actions {
 		margin: 20px 0 0;
+		display: flex;
+		gap: 20px;
+		flex-direction: row;
+
+		.components-button {
+			padding: 8px 16px;
+			height: 40px;
+		}
 	}
 
 	.woocommerce-customize-store__transitional-site-preview-container {
@@ -97,7 +103,8 @@
 			overflow: hidden;
 		}
 
-		.auto-block-preview__container {
+		.auto-block-preview__container,
+		.block-editor-block-preview__content {
 			width: 588px;
 			height: 363px;
 			position: relative;

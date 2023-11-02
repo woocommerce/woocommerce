@@ -224,7 +224,7 @@ module.exports = async ( config ) => {
 		}
 	}
 
-	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
+	!process.env.BASE_URL || process.env.BASE_URL === 'localhost' && await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();
