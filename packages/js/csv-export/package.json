@@ -63,49 +63,52 @@
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix",
 			"pnpm test-staged"
-		],
-		"wireit": {
-			"build:project:cjs": {
-				"command": "tsc --project tsconfig-cjs.json",
-				"files": [
-					"tsconfig-cjs.json",
-					"src/**/*.{js,jsx,ts,tsx}",
-					"typings/**/*.ts"
-				],
-				"output": [
-					"build"
-				],
-				"dependencies": [
-					"dependencyOutputs"
-				]
-			},
-			"build:project:esm": {
-				"command": "tsc --project tsconfig.json",
-				"files": [
-					"tsconfig.json",
-					"src/**/*.{js,jsx,ts,tsx}",
-					"typings/**/*.ts"
-				],
-				"output": [
-					"build-module",
-					"./build-types"
-				],
-				"dependencies": [
-					"dependencyOutputs"
-				]
-			},
-			"test:lang:js": {
-				"command": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-				"dependencies": [
-					"build:project"
-				]
-			},
-			"dependencyOutputs": {
-				"allowUsuallyExcludedPaths": true,
-				"files": [
-					"required"
-				]
-			}
+		]
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"./build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"test:lang:js": {
+			"command": "jest --config ./jest.config.json --passWithNoTests",
+			"dependencies": [
+				"build:project"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
 		}
 	}
 }

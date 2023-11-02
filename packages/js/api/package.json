@@ -86,7 +86,7 @@
 			]
 		},
 		"test:lang:js": {
-			"command": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+			"command": "jest --config ./jest.config.json --passWithNoTests",
 			"dependencies": [
 				"build:project"
 			]
