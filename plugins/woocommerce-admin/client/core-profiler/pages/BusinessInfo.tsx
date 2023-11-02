@@ -9,6 +9,7 @@ import {
 	Spinner,
 	CheckboxControl,
 } from '@wordpress/components';
+import { FormInputValidation } from '@automattic/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -18,6 +19,8 @@ import {
 } from '@wordpress/element';
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
+import { z } from 'zod';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -195,6 +198,8 @@ export const BusinessInfo = ( {
 
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 
+	const [ isEmailInvalid, setIsEmailInvalid ] = useState( false );
+
 	const [ storeEmailAddress, setEmailAddress ] = useState(
 		storeEmailAddressFromOnboardingProfile || currentUserEmail || ''
 	);
@@ -202,6 +207,19 @@ export const BusinessInfo = ( {
 	const [ isOptInMarketing, setIsOptInMarketing ] = useState< boolean >(
 		isOptInMarketingFromOnboardingProfile || false
 	);
+
+	const [ doValidate, setDoValidate ] = useState( false );
+
+	useEffect( () => {
+		if ( doValidate ) {
+			const parseEmail = z
+				.string()
+				.email()
+				.safeParse( storeEmailAddress );
+			setIsEmailInvalid( isOptInMarketing && ! parseEmail.success );
+			setDoValidate( false );
+		}
+	}, [ isOptInMarketing, doValidate, storeEmailAddress ] );
 
 	return (
 		<div
@@ -375,9 +393,18 @@ export const BusinessInfo = ( {
 					{ emailMarketingExperimentAssignment === 'treatment' && (
 						<>
 							<TextControl
-								className="woocommerce-profiler-business-info-email-adddress"
+								className={ classNames(
+									'woocommerce-profiler-business-info-email-adddress',
+									{ 'is-error': isEmailInvalid }
+								) }
 								onChange={ ( value ) => {
+									if ( isEmailInvalid ) {
+										setDoValidate( true ); // trigger validation as we want to feedback to the user as soon as it becomes valid
+									}
 									setEmailAddress( value );
+								} }
+								onBlur={ () => {
+									setDoValidate( true );
 								} }
 								value={ decodeEntities( storeEmailAddress ) }
 								label={
@@ -398,6 +425,15 @@ export const BusinessInfo = ( {
 									'woocommerce'
 								) }
 							/>
+							{ isEmailInvalid && (
+								<FormInputValidation
+									isError
+									text={ __(
+										'This email is not valid.',
+										'woocommerce'
+									) }
+								/>
+							) }
 							<CheckboxControl
 								className="core-profiler__checkbox"
 								label={ __(
@@ -405,7 +441,10 @@ export const BusinessInfo = ( {
 									'woocommerce'
 								) }
 								checked={ isOptInMarketing }
-								onChange={ setIsOptInMarketing }
+								onChange={ ( isChecked ) => {
+									setIsOptInMarketing( isChecked );
+									setDoValidate( true );
+								} }
 							/>
 						</>
 					) }
@@ -418,8 +457,7 @@ export const BusinessInfo = ( {
 							! storeCountry.key ||
 							( emailMarketingExperimentAssignment ===
 								'treatment' &&
-								isOptInMarketing &&
-								storeEmailAddress.length === 0 )
+								isEmailInvalid )
 						}
 						onClick={ () => {
 							sendEvent( {
