@@ -19,13 +19,12 @@
 		"CHANGELOG.md"
 	],
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
 		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
-		"prepack": "pnpm run build",
-		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile"
+		"prepack": "pnpm run build"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

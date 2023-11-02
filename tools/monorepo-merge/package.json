@@ -18,12 +18,11 @@
 		"/oclif.manifest.json"
 	],
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build": "shx rm -rf dist && tsc --project tsconfig.json",
 		"lint": "eslint . --ext .ts",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint",
-		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json"
+		"posttest": "pnpm lint"
 	},
 	"dependencies": {
 		"@oclif/core": "^1",

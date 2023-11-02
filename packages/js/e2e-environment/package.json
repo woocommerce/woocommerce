@@ -24,7 +24,7 @@
 		"wc-e2e": "bin/wc-e2e.sh"
 	},
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build": "pnpm run clean && pnpm run compile",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"docker:clear-all": "docker rmi --force $(docker images -q)",
@@ -37,8 +37,7 @@
 		"prepack": "pnpm run build",
 		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
 		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
-		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"turbo:build": "pnpm run clean && pnpm run compile"
+		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

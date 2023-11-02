@@ -11,8 +11,7 @@
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
 		"lint": "eslint . --ext .ts",
 		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"turbo:test": "jest"
+		"test:js": "jest"
 	},
 	"dependencies": {
 		"@actions/core": "^1.10.0",
