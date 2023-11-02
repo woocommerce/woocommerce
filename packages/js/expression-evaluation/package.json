@@ -23,18 +23,18 @@
 	"react-native": "src/index",
 	"types": "build-types",
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix",
-		"prepack": "pnpm run clean && pnpm run build",
-		"prepare": "composer install",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"turbo:test": "jest --config ./jest.config.json"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -66,5 +66,42 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"./build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }

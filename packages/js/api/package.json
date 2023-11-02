@@ -26,18 +26,18 @@
 		"!/dist/**/__test_data__/"
 	],
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"changelog": "composer exec -- changelogger",
-		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
-		"compile": "tsc --project tsconfig.json",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:typescript": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
 		"prepack": "pnpm run build",
-		"prepare": "composer install",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"turbo:build": "pnpm run clean && npm run compile",
-		"turbo:test": "jest"
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"test:lang:js": "wireit",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -69,5 +69,33 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"wireit": {
+		"build:project:typescript": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"dist"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"test:lang:js": {
+			"command": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+			"dependencies": [
+				"build:project"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
