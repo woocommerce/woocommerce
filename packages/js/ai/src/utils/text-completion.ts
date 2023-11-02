@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { requestJetpackToken } from './requestJetpackToken';
+import { requestJwt } from '@automattic/jetpack-ai-client';
 
 /**
  * Leaving this here to make it easier to debug the streaming API calls for now
@@ -9,7 +9,7 @@ import { requestJetpackToken } from './requestJetpackToken';
  * @param {string} prompt - The query to send to the API
  */
 export async function getCompletion( prompt: string, feature: string ) {
-	const { token } = await requestJetpackToken();
+	const { token } = await requestJwt();
 
 	const url = new URL(
 		'https://public-api.wordpress.com/wpcom/v2/text-completion/stream'
