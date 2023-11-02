@@ -79,7 +79,7 @@ export function getLowStockCount( select ) {
 		getItemsError( 'products/count-low-in-stock', getLowStockCountQuery )
 	);
 	const isRequesting = isResolving( 'getItemsTotalCount', [
-		'products/ount-clow-in-stock',
+		'products/count-low-in-stock',
 		getLowStockCountQuery,
 		defaultValue,
 	] );
