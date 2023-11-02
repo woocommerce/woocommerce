@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Preload Jetpack-related data from the Jetpack Connection package [#41092](https://github.com/woocommerce/woocommerce/pull/41092)
 * Fix - Fix core profiler email opt in validation. [#41152](https://github.com/woocommerce/woocommerce/pull/41152)
 * Fix - Fix detection of cart and checkout classic-shortcode blocks in the system status report. [#40948](https://github.com/woocommerce/woocommerce/pull/40948)
 * Fix - add enhancement exclusion to stalebot config [#40391](https://github.com/woocommerce/woocommerce/pull/40391)
