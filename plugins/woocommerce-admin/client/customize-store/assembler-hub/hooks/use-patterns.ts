@@ -27,21 +27,31 @@ export type PatternWithBlocks = Pattern & {
 	blocks: BlockInstance[];
 };
 
+// @ts-ignore - This is valid.
+let blockPatternsCache = null;
+
 export const usePatterns = () => {
 	const { blockPatterns, isLoading } = useSelect(
 		( select ) => ( {
-			blockPatterns: select(
-				coreStore
-				// @ts-ignore - This is valid.
-			).getBlockPatterns() as Pattern[],
-			isLoading:
-				// @ts-ignore - This is valid.
-				! select( coreStore ).hasFinishedResolution(
-					'getBlockPatterns'
-				),
+			// @ts-ignore - This is valid.
+			blockPatterns: blockPatternsCache
+				? blockPatternsCache
+				: ( select(
+						coreStore
+						// @ts-ignore - This is valid.
+				  ).getBlockPatterns() as Pattern[] ),
+			// @ts-ignore - This is valid.
+			isLoading: blockPatternsCache
+				? false
+				: // @ts-ignore - This is valid.
+				  ! select( coreStore ).hasFinishedResolution(
+						'getBlockPatterns'
+				  ),
 		} ),
 		[]
 	);
+
+	blockPatternsCache = blockPatterns;
 
 	return {
 		blockPatterns,
