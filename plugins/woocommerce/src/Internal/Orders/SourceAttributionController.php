@@ -110,11 +110,20 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
+				do_action( 'woocommerce_order_save_attribution_source_data', $order );
+			}
+		);
+
+		add_action(
+			'woocommerce_order_save_attribution_source_data',
+			function( $order, $data = array() ) {
 				// phpcs:ignore WordPress.Security.NonceVerification
-				$source_data = $this->get_source_values( $_POST );
+				$source_data = $this->get_source_values( empty( $data ) ? $_POST : $data );
 				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
-			}
+			},
+			10,
+			2
 		);
 
 		add_action(
