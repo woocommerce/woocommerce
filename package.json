@@ -16,7 +16,7 @@
 		"utils": "./tools/monorepo-utils/bin/run"
 	},
 	"scripts": {
-		"build": "pnpm exec turbo run turbo:build",
+		"build": "pnpm -r build",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"create-extension": "node ./tools/create-extension/index.js",
@@ -24,7 +24,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"test": "pnpm exec turbo run turbo:test",
+		"test": "pnpm -r test",
 		"utils": "node ./tools/monorepo-utils/dist/index.js"
 	},
 	"dependencies": {
