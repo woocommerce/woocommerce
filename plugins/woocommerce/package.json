@@ -10,7 +10,48 @@
 	"license": "GPL-3.0+",
 	"config": {
 		"wp_org_slug": "woocommerce",
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"ci": {
+			"name": "WP: latest",
+			"customCommands": {
+				"lint": "lint:php:changes:branch ${baseRef}",
+				"test:php": "test:php:env"
+			},
+			"testEnvCommand": "env:test",
+			"testEnvConfig": {
+				"wpVersion": "latest"
+			},
+			"additionalTasks": [
+				{
+					"name": "PHP 8.0",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"phpVersion": "8.0"
+					}
+				},
+				{
+					"name": "WP: nightly",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "nightly"
+					}
+				},
+				{
+					"name": "WP: latest-1",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-1"
+					}
+				},
+				{
+					"name": "WP: latest-2",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-2"
+					}
+				}
+			]
+		}
 	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
@@ -48,8 +89,11 @@
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-		"test:unit:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:env:start": "pnpm env:test",
+		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:unit": "pnpm test:php",
+		"test:unit:env": "pnpm test:php:env",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},

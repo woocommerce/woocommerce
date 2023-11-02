@@ -3,17 +3,17 @@
 .woocommerce-admin-page__extensions {
 	background: #fff;
 
+	#wpbody {
+		margin: 0;
+	}
+
 	#wpbody-content {
 		/* Prevent double-scrollbar issue on WooCommerce > Extension pages */
 		overflow: hidden;
 	}
 
 	.woocommerce-layout__primary {
-		margin: $header-height-mobile 0 0;
-
-		@media (min-width: $breakpoint-medium) {
-			margin-top: $header-height-desktop;
-		}
+		margin: 0;
 	}
 
 	.woocommerce-layout__main {
@@ -24,10 +24,12 @@
 	.woocommerce-store-alerts {
 		margin-left: 16px;
 		margin-right: 16px;
+		margin-top: 16px;
 
 		@media (min-width: $breakpoint-medium) {
 			margin-left: 32px;
 			margin-right: 32px;
+			margin-top: 32px;
 		}
 	}
 }

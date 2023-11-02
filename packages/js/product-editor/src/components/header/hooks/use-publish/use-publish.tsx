@@ -16,6 +16,7 @@ import { WPError } from '../../../../utils/get-product-error-message';
 import { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
+	productType = 'product',
 	productStatus,
 	disabled,
 	onClick,
@@ -30,7 +31,7 @@ export function usePublish( {
 
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
@@ -41,7 +42,7 @@ export function usePublish( {
 			return {
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -51,7 +52,8 @@ export function usePublish( {
 
 	const isBusy = isSaving || isValidating;
 
-	const isPublished = productStatus === 'publish';
+	const isPublished =
+		productType === 'product' ? productStatus === 'publish' : true;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -61,22 +63,30 @@ export function usePublish( {
 		}
 
 		try {
-			await validate( {
-				status: 'publish',
-			} );
-
-			// The publish button click not only change the status of the product
-			// but also save all the pending changes. So even if the status is
-			// publish it's possible to save the product too.
-			if ( ! isPublished ) {
-				await editEntityRecord( 'postType', 'product', productId, {
+			if ( productType === 'product' ) {
+				await validate( {
 					status: 'publish',
 				} );
+				// The publish button click not only change the status of the product
+				// but also save all the pending changes. So even if the status is
+				// publish it's possible to save the product too.
+				if ( ! isPublished ) {
+					await editEntityRecord(
+						'postType',
+						productType,
+						productId,
+						{
+							status: 'publish',
+						}
+					);
+				}
+			} else {
+				await validate();
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
+				productType,
 				productId,
 				{
 					throwOnError: true,
@@ -100,6 +110,16 @@ export function usePublish( {
 						wpError.message = (
 							error as Record< string, string >
 						 ).variations;
+					} else {
+						const errorMessage = Object.values(
+							error as Record< string, string >
+						).find( ( value ) => value !== undefined ) as
+							| string
+							| undefined;
+						if ( errorMessage !== undefined ) {
+							wpError.code = 'product_form_field_error';
+							wpError.message = errorMessage;
+						}
 					}
 				}
 				onPublishError( wpError );

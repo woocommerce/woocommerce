@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
+use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\ListTable as LoggingListTable;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -27,6 +29,13 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
 class WC_Admin_Menus {
 
 	/**
+	 * The CSS classes used to hide the submenu items in navigation.
+	 *
+	 * @var string
+	 */
+	const HIDE_CSS_CLASS = 'hide-if-js';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -40,13 +49,23 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
-		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-			$container = wc_get_container();
-			$container->get( Marketplace::class );
+		/**
+		 * Controls whether we add a submenu item for the WooCommerce Addons page.
+		 * Woo Express uses this filter.
+		 *
+		 * @since 8.2.1
+		 *
+		 * @param bool $show_addons_page If the addons page should be included.
+		 */
+		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
+			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+				$container = wc_get_container();
+				$container->get( Marketplace::class );
 
-			add_action( 'admin_menu', array( $this, 'addons_my_subscriptions' ), 70 );
-		} else {
-			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
+				add_action( 'admin_menu', array( $this, 'addons_my_subscriptions' ), 70 );
+			} else {
+				add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
+			}
 		}
 
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
@@ -167,7 +186,18 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ), __( 'Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+		$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ), __( 'Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+
+		add_action(
+			'load-' . $status_page,
+			function() {
+				if ( 'logs' === filter_input( INPUT_GET, 'tab' ) ) {
+					// Initialize the logging page controller early so that it can hook into things.
+					wc_get_container()->get( LoggingPageController::class );
+				}
+			},
+			1
+		);
 	}
 
 	/**
@@ -188,6 +218,8 @@ class WC_Admin_Menus {
 	 */
 	public function addons_my_subscriptions() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), null, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		// Temporarily hide the submenu item we've just added.
+		$this->hide_submenu_page( 'woocommerce', 'wc-addons' );
 	}
 
 	/**
@@ -289,7 +321,13 @@ class WC_Admin_Menus {
 	 * @param int      $value  The number of rows to use.
 	 */
 	public function set_screen_option( $status, $option, $value ) {
-		if ( in_array( $option, array( 'woocommerce_keys_per_page', 'woocommerce_webhooks_per_page' ), true ) ) {
+		$screen_options = array(
+			'woocommerce_keys_per_page',
+			'woocommerce_webhooks_per_page',
+			LoggingListTable::PER_PAGE_USER_OPTION_KEY,
+		);
+
+		if ( in_array( $option, $screen_options, true ) ) {
 			return $value;
 		}
 
@@ -455,6 +493,58 @@ class WC_Admin_Menus {
 				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
 			}
 		}
+	}
+
+	/**
+	 * Hide the submenu page based on slug and return the item that was hidden.
+	 *
+	 * Borrowed from Jetpack's Base_Admin_Menu class.
+	 *
+	 * Instead of actually removing the submenu item, a safer approach is to hide it and filter it in the API response.
+	 * In this manner we'll avoid breaking third-party plugins depending on items that no longer exist.
+	 *
+	 * A false|array value is returned to be consistent with remove_submenu_page() function
+	 *
+	 * @param string $menu_slug The parent menu slug.
+	 * @param string $submenu_slug The submenu slug that should be hidden.
+	 * @return false|array
+	 */
+	public function hide_submenu_page( $menu_slug, $submenu_slug ) {
+		global $submenu;
+
+		if ( ! isset( $submenu[ $menu_slug ] ) ) {
+			return false;
+		}
+
+		foreach ( $submenu[ $menu_slug ] as $i => $item ) {
+			if ( $submenu_slug !== $item[2] ) {
+				continue;
+			}
+
+			$this->hide_submenu_element( $i, $menu_slug, $item );
+
+			return $item;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Apply the hide-if-js CSS class to a submenu item.
+	 *
+	 * Borrowed from Jetpack's Base_Admin_Menu class.
+	 *
+	 * @param int    $index The position of a submenu item in the submenu array.
+	 * @param string $parent_slug The parent slug.
+	 * @param array  $item The submenu item.
+	 */
+	public function hide_submenu_element( $index, $parent_slug, $item ) {
+		global $submenu;
+
+		$css_classes = empty( $item[4] ) ? self::HIDE_CSS_CLASS : $item[4] . ' ' . self::HIDE_CSS_CLASS;
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$submenu [ $parent_slug ][ $index ][4] = $css_classes;
 	}
 }
 

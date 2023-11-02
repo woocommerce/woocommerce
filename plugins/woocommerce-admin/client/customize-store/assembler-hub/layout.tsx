@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -45,22 +45,19 @@ import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
+import { Transitional } from '../transitional';
+import { CustomizeStoreContext } from './';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.5;
 
 export const Layout = () => {
-	const [ logoBlock, setLogoBlock ] = useState< {
-		clientId: string | null;
-		isLoading: boolean;
-	} >( {
-		clientId: null,
-		isLoading: true,
-	} );
+	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
-	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
+	const { shouldTourBeShown, isResizeHandleVisible, ...onboardingTourProps } =
+		useOnboardingTour();
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -74,11 +71,29 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
+	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
+
+	const editor = <Editor isLoading={ isEditorLoading } />;
+
+	if ( currentState === 'transitionalScreen' ) {
+		return (
+			<EntityProvider kind="root" type="site">
+				<EntityProvider
+					kind="postType"
+					type={ templateType }
+					id={ templateId }
+				>
+					<Transitional sendEvent={ sendEvent } editor={ editor } />
+				</EntityProvider>
+			</EntityProvider>
+		);
+	}
+
 	return (
 		<LogoBlockContext.Provider
 			value={ {
-				logoBlock,
-				setLogoBlock,
+				logoBlockIds,
+				setLogoBlockIds,
 			} }
 		>
 			<HighlightedBlockContextProvider>
@@ -165,9 +180,9 @@ export const Layout = () => {
 														isReady={
 															! isEditorLoading
 														}
-														duringGuideTour={
-															shouldTourBeShown &&
-															! onboardingTourProps.showWelcomeTour
+														isHandleVisibleByDefault={
+															! onboardingTourProps.showWelcomeTour &&
+															isResizeHandleVisible
 														}
 														isFullWidth={ false }
 														defaultSize={ {
@@ -188,11 +203,7 @@ export const Layout = () => {
 																backgroundColor,
 														} }
 													>
-														<Editor
-															isLoading={
-																isEditorLoading
-															}
-														/>
+														{ editor }
 													</ResizableFrame>
 												</ErrorBoundary>
 											</motion.div>
@@ -201,7 +212,7 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ shouldTourBeShown && (
+						{ ! isEditorLoading && shouldTourBeShown && (
 							<OnboardingTour { ...onboardingTourProps } />
 						) }
 					</EntityProvider>

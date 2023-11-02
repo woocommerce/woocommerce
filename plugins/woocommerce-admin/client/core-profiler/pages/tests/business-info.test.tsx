@@ -173,6 +173,8 @@ describe( 'BusinessInfo', () => {
 				industry: 'other',
 				storeLocation: 'AU:VIC',
 				storeName: '',
+				isOptInMarketing: false,
+				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
 		} );
@@ -224,6 +226,8 @@ describe( 'BusinessInfo', () => {
 				industry: 'other',
 				storeLocation: 'AW',
 				storeName: '',
+				isOptInMarketing: false,
+				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
 		} );
@@ -273,6 +277,8 @@ describe( 'BusinessInfo', () => {
 				industry: 'food_and_drink',
 				storeLocation: 'AU:VIC',
 				storeName: 'Test Store Name',
+				isOptInMarketing: false,
+				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
 		} );
@@ -301,8 +307,238 @@ describe( 'BusinessInfo', () => {
 				industry: 'food_and_drink',
 				storeLocation: 'AU:VIC',
 				storeName: 'Test Store Name',
+				isOptInMarketing: false,
+				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
+		} );
+	} );
+
+	describe( 'business info page, email marketing variant', () => {
+		beforeEach( () => {
+			props.context.emailMarketingExperimentAssignment = 'treatment';
+		} );
+
+		it( 'should correctly render the experiment variant with the email field', () => {
+			render( <BusinessInfo { ...props } /> );
+			expect(
+				screen.getByText( /Your email address/i )
+			).toBeInTheDocument();
+		} );
+
+		it( 'should not disable the continue field when experiment variant is shown, opt in checkbox is not checked and email field is empty', () => {
+			props.context.businessInfo.location = 'AW';
+			props.context.onboardingProfile.is_store_country_set = true;
+			render( <BusinessInfo { ...props } /> );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			expect( continueButton ).not.toBeDisabled();
+		} );
+
+		it( 'should disable the continue field when experiment variant is shown, opt in checkbox is checked and email field is empty', () => {
+			props.context.businessInfo.location = 'AW';
+			props.context.onboardingProfile.is_store_country_set = true;
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			expect( continueButton ).toBeDisabled();
+		} );
+
+		it( 'should correctly send event with opt-in true when experiment variant is shown, opt in checkbox is checked and email field is filled', () => {
+			props.context.businessInfo.location = 'AW';
+			props.context.onboardingProfile.is_store_country_set = true;
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'wordpress@automattic.com' );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			userEvent.click( continueButton );
+			expect( props.sendEvent ).toHaveBeenCalledWith( {
+				payload: {
+					geolocationOverruled: false,
+					industry: 'other',
+					storeLocation: 'AW',
+					storeName: '',
+					isOptInMarketing: true,
+					storeEmailAddress: 'wordpress@automattic.com',
+				},
+				type: 'BUSINESS_INFO_COMPLETED',
+			} );
+		} );
+
+		it( 'should correctly prepopulate the email field if populated in the onboarding profile', () => {
+			props.context.onboardingProfile.store_email =
+				'wordpress@automattic.com';
+			render( <BusinessInfo { ...props } /> );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			expect( emailInput ).toHaveValue( 'wordpress@automattic.com' );
+		} );
+
+		it( 'should correctly prepopulate the email field if populated in the current user', () => {
+			props.context.currentUserEmail = 'currentUser@automattic.com';
+			render( <BusinessInfo { ...props } /> );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			expect( emailInput ).toHaveValue( 'currentUser@automattic.com' );
+		} );
+
+		it( 'should correctly favor the onboarding profile email over the current user email', () => {
+			props.context.currentUserEmail = 'currentUser@automattic.com';
+			props.context.onboardingProfile.store_email =
+				'wordpress@automattic.com';
+			render( <BusinessInfo { ...props } /> );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			expect( emailInput ).toHaveValue( 'wordpress@automattic.com' );
+		} );
+
+		it( 'should not show an error for invalid email if isOptInMarketing is false', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'invalid email' );
+			expect(
+				screen.queryByText( /This email is not valid./i )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'should validate the email field when isOptInMarketing is true', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'invalid email' );
+			expect(
+				screen.getByText( /This email is not valid./i )
+			).toBeInTheDocument();
+		} );
+
+		it( 'should not show an error for invalid email if isOptInMarketing is true and email is valid', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'valid@email.com' );
+		} );
+
+		it( 'should show an error for invalid email if isOptInMarketing is checked after the invalid email has already been filled out', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			expect(
+				screen.queryByText( /This email is not valid./i )
+			).not.toBeInTheDocument();
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'invalid email' );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			expect(
+				screen.getByText( /This email is not valid./i )
+			).toBeInTheDocument();
+		} );
+
+		it( 'should hide the error after the invalid email has been corrected', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'invalid email' );
+			expect(
+				screen.getByText( /This email is not valid./i )
+			).toBeInTheDocument();
+			userEvent.clear( emailInput );
+			userEvent.type( emailInput, 'valid@email.com' );
+			expect(
+				screen.queryByText( /This email is not valid./i )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'should not allow the continue button to be pressed if email is invalid and isOptInMarketing is checked', () => {
+			props.context.businessInfo.location = 'AW';
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'invalid email' );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			expect( continueButton ).toBeDisabled();
+		} );
+
+		it( 'should allow the continue button to be pressed if email is invalid and isOptInMarketing is unchecked', () => {
+			props.context.businessInfo.location = 'AW';
+			props.context.onboardingProfile.is_store_country_set = true;
+
+			render( <BusinessInfo { ...props } /> );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+
+			userEvent.type( emailInput, 'invalid email' );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			expect( continueButton ).not.toBeDisabled();
+		} );
+
+		it( 'should allow the continue button to be pressed if email is valid and isOptInMarketing is checked', () => {
+			props.context.businessInfo.location = 'AW';
+			props.context.onboardingProfile.is_store_country_set = true;
+			render( <BusinessInfo { ...props } /> );
+			const checkbox = screen.getByRole( 'checkbox', {
+				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+			} );
+			userEvent.click( checkbox );
+			const emailInput = screen.getByRole( 'textbox', {
+				name: /Your email address/i,
+			} );
+			userEvent.type( emailInput, 'valid@email.com' );
+			const continueButton = screen.getByRole( 'button', {
+				name: /Continue/i,
+			} );
+			expect( continueButton ).not.toBeDisabled();
 		} );
 	} );
 } );

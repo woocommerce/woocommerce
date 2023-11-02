@@ -8,21 +8,28 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-
-/**
- * Internal dependencies
- */
-import { customizeStoreStateMachineContext } from '../types';
-import { ThemeCard } from './theme-cards';
+import {
+	customizeStoreStateMachineContext,
+	RecommendThemesAPIResponse,
+} from '../types';
 import { events } from './';
 
-export const assignThemeCards = assign<
+export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	intro: ( context, event ) => {
-		const themeCards = ( event as DoneInvokeEvent< ThemeCard[] > ).data; // type coercion workaround for now
-		return { ...context.intro, themeCards };
+		const apiResponse = (
+			event as DoneInvokeEvent< {
+				themeData: RecommendThemesAPIResponse;
+			} >
+		 ).data.themeData;
+
+		// type coercion workaround for now
+		return {
+			...context.intro,
+			themeData: apiResponse,
+		};
 	},
 } );
 
@@ -46,3 +53,53 @@ export const recordTracksThemeSelected = (
 export const recordTracksBrowseAllThemesClicked = () => {
 	recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
 };
+
+export const assignActiveThemeHasMods = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	intro: ( context, event ) => {
+		const activeThemeHasMods = (
+			event as DoneInvokeEvent< { activeThemeHasMods: boolean } >
+		 ).data.activeThemeHasMods;
+		// type coercion workaround for now
+		return { ...context.intro, activeThemeHasMods };
+	},
+} );
+
+export const assignCustomizeStoreCompleted = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const customizeStoreTaskCompleted = (
+			event as DoneInvokeEvent< {
+				customizeStoreTaskCompleted: boolean;
+			} >
+		 ).data.customizeStoreTaskCompleted;
+		return { ...context.intro, customizeStoreTaskCompleted };
+	},
+} );
+
+export const assignFetchIntroDataError = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	intro: ( context ) => {
+		return { ...context.intro, hasErrors: true };
+	},
+} );
+
+export const assignCurrentThemeIsAiGenerated = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const currentThemeIsAiGenerated = (
+			event as DoneInvokeEvent< {
+				currentThemeIsAiGenerated: boolean;
+			} >
+		 ).data.currentThemeIsAiGenerated;
+		return { ...context.intro, currentThemeIsAiGenerated };
+	},
+} );

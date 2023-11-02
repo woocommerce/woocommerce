@@ -7,7 +7,7 @@ General interfaces for interacting with block templates are located in the
 
 ## Usage
 
-For more examples and best practices, please see the Product Editor Development Handbook.
+For more information on how to extend the product editor, please see the [Product Editor Development Handbook](../../../../../../../docs/product-editor-development/README.md).
 
 ### Adding a new group to product editor templates after an existing group
 
@@ -64,6 +64,18 @@ function YOUR_PREFIX_remove_block( BlockInterface $sale_price_block ) {
 }
 
 add_action( 'woocommerce_block_template_area_product-form_after_remove_block_sale-price', 'YOUR_PREFIX_remove_block' );
+```
+
+### Conditionally hiding a block in product editor templates
+
+```php
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
+
+function YOUR_PREFIX_hide_block( BlockInterface $sale_price_block ) {
+  $sale_price_block->add_hide_condition( 'editedProduct.regular_price < 10' );
+}
+
+add_action( 'woocommerce_block_template_area_product-form_after_add_block_sale-price', 'YOUR_PREFIX_hide_block' );
 ```
 
 ## Interfaces
