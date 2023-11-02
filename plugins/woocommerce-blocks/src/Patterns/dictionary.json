@@ -171,46 +171,30 @@
 		"content": {
 			"titles": [
 				{
-					"default": "The Fall Collection",
-					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
-				},
-				{
 					"default": "Quality Materials",
-					"ai_prompt": "A title describing the first displayed product feature"
+					"ai_prompt": "A title describing the first displayed product feature. The title must have less than 20 characters."
 				},
 				{
 					"default": "Expert Craftsmanship",
-					"ai_prompt": "A title describing the second displayed product feature"
-				},
-				{
-					"default": "Unique Design",
-					"ai_prompt": "A title describing the third displayed product feature"
+					"ai_prompt": "A title describing the second displayed product feature. The title must have less than 20 characters."
 				},
 				{
 					"default": "Customer Satisfaction",
-					"ai_prompt": "A title describing the fourth displayed product feature"
+					"ai_prompt": "A title describing the fourth displayed product feature. The title must have less than 20 characters."
 				}
 			],
 			"descriptions": [
 				{
-					"default": "With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.",
-					"ai_prompt": "A description of the product"
-				},
-				{
 					"default": "We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.",
-					"ai_prompt": "A description of the first displayed product feature"
+					"ai_prompt": "A description of the first displayed product feature. The text must have less than 120 characters."
 				},
 				{
 					"default": "Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.",
-					"ai_prompt": "A description of the second displayed product feature"
-				},
-				{
-					"default": "From bold prints and colors to intricate details and textures, our products are a perfect combination of style and function.",
-					"ai_prompt": "A description of the third displayed product feature"
+					"ai_prompt": "A description of the second displayed product feature. The text must have less than 120 characters."
 				},
 				{
 					"default": "Our top priority is customer satisfaction, and we stand behind our products 100%. ",
-					"ai_prompt": "A description of the fourth displayed product feature"
+					"ai_prompt": "A description of the fourth displayed product feature. The text must have less than 120 characters."
 				}
 			]
 		}
