@@ -14,12 +14,7 @@ import {
 	FlexBlock,
 } from '@wordpress/components';
 import { Icon, megaphone, cancelCircleFilled } from '@wordpress/icons';
-import {
-	Pagination,
-	Table,
-	TablePlaceholder,
-	Link,
-} from '@woocommerce/components';
+import { Pagination, Table, TablePlaceholder } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -138,12 +133,9 @@ export const Campaigns = () => {
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
 											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
-												<Link
-													type="wp-admin"
-													href={ el.manageUrl }
-												>
+												<a href={ el.manageUrl }>
 													{ el.title }
-												</Link>
+												</a>
 											</FlexItem>
 											{ !! el.description && (
 												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
