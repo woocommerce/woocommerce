@@ -41,8 +41,7 @@
 		"lint:fix:lang:js": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
 		"lint:lang:js": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
 		"prepack": "pnpm run build",
-		"test": "pnpm --if-present run '/^test:lang:.*$/'",
-		"test:lang:js": "wireit",
+		"test:js": "wireit",
 		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
@@ -213,7 +212,7 @@
 				"dependencyOutputs"
 			]
 		},
-		"test:lang:js": {
+		"test:js": {
 			"command": "jest --config ./jest.config.json --passWithNoTests",
 			"dependencies": [
 				"build:project"
