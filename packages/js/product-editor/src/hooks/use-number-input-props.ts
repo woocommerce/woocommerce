@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { useProductHelper } from './use-product-helper';
+import { deferSelectInFocus } from '../utils';
 
 export type NumberInputProps = {
 	value: string;
@@ -28,18 +29,7 @@ export const useNumberInputProps = ( {
 	const numberInputProps: NumberInputProps = {
 		value: formatNumber( value ),
 		onFocus( event: React.FocusEvent< HTMLInputElement > ) {
-			// In some browsers like safari .select() function inside
-			// the onFocus event doesn't work as expected because it
-			// conflicts with onClick the first time user click the
-			// input. Using setTimeout defers the text selection and
-			// avoid the unexpected behaviour.
-			setTimeout(
-				function deferSelection( element: HTMLInputElement ) {
-					element.select();
-				},
-				0,
-				event.currentTarget
-			);
+			deferSelectInFocus( event.currentTarget );
 			if ( onFocus ) {
 				onFocus( event );
 			}
