@@ -10,5 +10,5 @@
 			"./typings",
 			"./node_modules/@types"
 		]
-	},
+	}
 }
