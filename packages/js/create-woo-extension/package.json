@@ -15,8 +15,7 @@
 	"author": "",
 	"main": "index.js",
 	"scripts": {
-		"changelog": "composer exec -- changelogger",
-		"postinstall": "composer install"
+		"changelog": "composer install && composer exec -- changelogger"
 	},
 	"devDependencies": {
 		"wireit": "^0.14.1"

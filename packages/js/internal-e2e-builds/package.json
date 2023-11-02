@@ -17,8 +17,10 @@
 		"e2e-builds": "./build.js"
 	},
 	"scripts": {
-		"lint": "eslint build.js",
-		"lint:fix": "eslint build.js --fix"
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint build.js --fix",
+		"lint:lang:js": "eslint build.js"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

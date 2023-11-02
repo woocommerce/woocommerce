@@ -26,10 +26,11 @@
 		"index.js"
 	],
 	"scripts": {
-		"changelog": "composer exec -- changelogger",
-		"lint": "eslint ./rules ./configs",
-		"lint:fix": "eslint ./rules ./configs --fix",
-		"prepare": "composer install"
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint ./rules ./configs --fix",
+		"lint:lang:js": "eslint ./rules ./configs"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
