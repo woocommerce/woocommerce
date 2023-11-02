@@ -28,17 +28,17 @@
 		"access": "public"
 	},
 	"scripts": {
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
-		"prepare": "composer install",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"build:css": "webpack",
+		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint --output-file eslint_report.json --format json src",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build:css": "webpack",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
+		"lint:fix": "eslint src --fix",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"prepare": "composer install",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
+		"turbo:build": "pnpm run build:js && pnpm run build:css"
 	},
 	"devDependencies": {
 		"@types/react": "^17.0.71",

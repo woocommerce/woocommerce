@@ -26,15 +26,15 @@
 	],
 	"sideEffects": false,
 	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"start": "tsc --project tsconfig.json --watch",
+		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint --output-file eslint_report.json --format json src",
 		"lint:fix": "eslint src --fix",
-		"prepack": "pnpm run clean && pnpm run build"
+		"prepack": "pnpm run clean && pnpm run build",
+		"prepare": "composer install",
+		"start": "tsc --project tsconfig.json --watch",
+		"turbo:build": "tsc --project tsconfig.json"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
