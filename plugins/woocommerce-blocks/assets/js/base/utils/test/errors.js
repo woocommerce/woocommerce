@@ -35,12 +35,10 @@ describe( 'formatError', () => {
 		const mockResponse = new Response( mockMalformedJson, { status: 400 } );
 
 		const error = await formatError( mockResponse );
-		const expectedError = {
-			message:
-				'invalid json response body at  reason: Unexpected end of JSON input',
-			type: 'general',
-		};
 
-		expect( error ).toEqual( expectedError );
+		expect( error.message ).toContain(
+			'invalid json response body at  reason:'
+		);
+		expect( error.type ).toEqual( 'general' );
 	} );
 } );

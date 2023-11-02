@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import ReadMore, { defaultProps, ReadMoreProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/ReadMore',
+	title: 'Base Components/ReadMore',
 	component: ReadMore,
 	args: defaultProps,
 	argTypes: {

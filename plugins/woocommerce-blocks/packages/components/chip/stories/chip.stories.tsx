@@ -11,7 +11,7 @@ const availableElements = [ 'li', 'div', 'span' ];
 const availableRadii = [ 'none', 'small', 'medium', 'large' ];
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/Chip',
+	title: 'Block Components/Chip',
 	component: Chip,
 	argTypes: {
 		element: {

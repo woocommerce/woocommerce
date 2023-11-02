@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 
@@ -11,11 +11,11 @@ import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 import ErrorPlaceholder, { ErrorPlaceholderProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/editor-components/Errors',
+	title: 'Editor Components/Errors/Error Placeholder',
 	component: ErrorPlaceholder,
 } as Meta< ErrorPlaceholderProps >;
 
-const Template: Story< ErrorPlaceholderProps > = ( args ) => {
+const Template: StoryFn< ErrorPlaceholderProps > = ( args ) => {
 	const [ { isLoading }, setArgs ] = useArgs();
 
 	const onRetry = args.onRetry
@@ -63,7 +63,7 @@ UnknownError.args = {
 	},
 };
 
-export const NoRetry: Story< ErrorPlaceholderProps > = ( args ) => {
+export const NoRetry: StoryFn< ErrorPlaceholderProps > = ( args ) => {
 	return <ErrorPlaceholder { ...args } onRetry={ undefined } />;
 };
 NoRetry.args = {

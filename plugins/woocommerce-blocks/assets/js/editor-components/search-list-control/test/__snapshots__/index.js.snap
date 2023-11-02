@@ -47,13 +47,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-11"
               >
                 Search for items
@@ -77,10 +77,10 @@ Object {
               tabindex="0"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -108,10 +108,10 @@ Object {
               for="search-list-item-11-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -140,10 +140,10 @@ Object {
               for="search-list-item-11-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -189,13 +189,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-11"
             >
               Search for items
@@ -219,10 +219,10 @@ Object {
             tabindex="0"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -250,10 +250,10 @@ Object {
             for="search-list-item-11-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -282,10 +282,10 @@ Object {
             for="search-list-item-11-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -412,13 +412,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -441,10 +441,10 @@ Object {
               for="search-list-item-0-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -473,10 +473,10 @@ Object {
               for="search-list-item-0-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -505,10 +505,10 @@ Object {
               for="search-list-item-0-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -537,10 +537,10 @@ Object {
               for="search-list-item-0-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -569,10 +569,10 @@ Object {
               for="search-list-item-0-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -601,10 +601,10 @@ Object {
               for="search-list-item-0-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -650,13 +650,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -679,10 +679,10 @@ Object {
             for="search-list-item-0-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -711,10 +711,10 @@ Object {
             for="search-list-item-0-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -743,10 +743,10 @@ Object {
             for="search-list-item-0-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -775,10 +775,10 @@ Object {
             for="search-list-item-0-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -807,10 +807,10 @@ Object {
             for="search-list-item-0-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -839,10 +839,10 @@ Object {
             for="search-list-item-0-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -969,13 +969,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -998,10 +998,10 @@ Object {
               for="search-list-item-1-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1030,10 +1030,10 @@ Object {
               for="search-list-item-1-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1062,10 +1062,10 @@ Object {
               for="search-list-item-1-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1094,10 +1094,10 @@ Object {
               for="search-list-item-1-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1126,10 +1126,10 @@ Object {
               for="search-list-item-1-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1158,10 +1158,10 @@ Object {
               for="search-list-item-1-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1207,13 +1207,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1236,10 +1236,10 @@ Object {
             for="search-list-item-1-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1268,10 +1268,10 @@ Object {
             for="search-list-item-1-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1300,10 +1300,10 @@ Object {
             for="search-list-item-1-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1332,10 +1332,10 @@ Object {
             for="search-list-item-1-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1364,10 +1364,10 @@ Object {
             for="search-list-item-1-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1396,10 +1396,10 @@ Object {
             for="search-list-item-1-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -1526,13 +1526,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -1608,13 +1608,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -1771,13 +1771,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-9"
               >
                 Testing search label
@@ -1800,10 +1800,10 @@ Object {
               for="search-list-item-9-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1832,10 +1832,10 @@ Object {
               for="search-list-item-9-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1864,10 +1864,10 @@ Object {
               for="search-list-item-9-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1896,10 +1896,10 @@ Object {
               for="search-list-item-9-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1928,10 +1928,10 @@ Object {
               for="search-list-item-9-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -1960,10 +1960,10 @@ Object {
               for="search-list-item-9-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2009,13 +2009,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-9"
             >
               Testing search label
@@ -2038,10 +2038,10 @@ Object {
             for="search-list-item-9-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2070,10 +2070,10 @@ Object {
             for="search-list-item-9-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2102,10 +2102,10 @@ Object {
             for="search-list-item-9-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2134,10 +2134,10 @@ Object {
             for="search-list-item-9-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2166,10 +2166,10 @@ Object {
             for="search-list-item-9-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2198,10 +2198,10 @@ Object {
             for="search-list-item-9-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2328,13 +2328,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2396,13 +2396,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2545,13 +2545,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-8"
               >
                 Search for items
@@ -2574,10 +2574,10 @@ Object {
               for="search-list-item-8-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2606,10 +2606,10 @@ Object {
               for="search-list-item-8-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2638,10 +2638,10 @@ Object {
               for="search-list-item-8-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2670,10 +2670,10 @@ Object {
               for="search-list-item-8-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2702,10 +2702,10 @@ Object {
               for="search-list-item-8-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2734,10 +2734,10 @@ Object {
               for="search-list-item-8-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -2783,13 +2783,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-8"
             >
               Search for items
@@ -2812,10 +2812,10 @@ Object {
             for="search-list-item-8-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2844,10 +2844,10 @@ Object {
             for="search-list-item-8-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2876,10 +2876,10 @@ Object {
             for="search-list-item-8-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2908,10 +2908,10 @@ Object {
             for="search-list-item-8-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2940,10 +2940,10 @@ Object {
             for="search-list-item-8-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -2972,10 +2972,10 @@ Object {
             for="search-list-item-8-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3102,13 +3102,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -3131,10 +3131,10 @@ Object {
               for="search-list-item-5-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3163,10 +3163,10 @@ Object {
               for="search-list-item-5-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3195,10 +3195,10 @@ Object {
               for="search-list-item-5-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3227,10 +3227,10 @@ Object {
               for="search-list-item-5-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3259,10 +3259,10 @@ Object {
               for="search-list-item-5-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3291,10 +3291,10 @@ Object {
               for="search-list-item-5-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3340,13 +3340,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -3369,10 +3369,10 @@ Object {
             for="search-list-item-5-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3401,10 +3401,10 @@ Object {
             for="search-list-item-5-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3433,10 +3433,10 @@ Object {
             for="search-list-item-5-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3465,10 +3465,10 @@ Object {
             for="search-list-item-5-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3497,10 +3497,10 @@ Object {
             for="search-list-item-5-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3529,10 +3529,10 @@ Object {
             for="search-list-item-5-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3659,13 +3659,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -3688,10 +3688,10 @@ Object {
               for="search-list-item-6-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3724,10 +3724,10 @@ Object {
               for="search-list-item-6-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -3777,13 +3777,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -3806,10 +3806,10 @@ Object {
             for="search-list-item-6-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -3842,10 +3842,10 @@ Object {
             for="search-list-item-6-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4027,13 +4027,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -4056,10 +4056,10 @@ Object {
               for="search-list-item-2-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4088,10 +4088,10 @@ Object {
               for="search-list-item-2-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4109,7 +4109,7 @@ Object {
                       class="components-checkbox-control__checked"
                       focusable="false"
                       height="24"
-                      role="img"
+                      role="presentation"
                       viewBox="0 0 24 24"
                       width="24"
                       xmlns="http://www.w3.org/2000/svg"
@@ -4135,10 +4135,10 @@ Object {
               for="search-list-item-2-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4167,10 +4167,10 @@ Object {
               for="search-list-item-2-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4199,10 +4199,10 @@ Object {
               for="search-list-item-2-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4231,10 +4231,10 @@ Object {
               for="search-list-item-2-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4331,13 +4331,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -4360,10 +4360,10 @@ Object {
             for="search-list-item-2-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4392,10 +4392,10 @@ Object {
             for="search-list-item-2-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4413,7 +4413,7 @@ Object {
                     class="components-checkbox-control__checked"
                     focusable="false"
                     height="24"
-                    role="img"
+                    role="presentation"
                     viewBox="0 0 24 24"
                     width="24"
                     xmlns="http://www.w3.org/2000/svg"
@@ -4439,10 +4439,10 @@ Object {
             for="search-list-item-2-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4471,10 +4471,10 @@ Object {
             for="search-list-item-2-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4503,10 +4503,10 @@ Object {
             for="search-list-item-2-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4535,10 +4535,10 @@ Object {
             for="search-list-item-2-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -4758,13 +4758,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+            class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+                class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -4787,10 +4787,10 @@ Object {
               for="search-list-item-3-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4819,10 +4819,10 @@ Object {
               for="search-list-item-3-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4840,7 +4840,7 @@ Object {
                       class="components-checkbox-control__checked"
                       focusable="false"
                       height="24"
-                      role="img"
+                      role="presentation"
                       viewBox="0 0 24 24"
                       width="24"
                       xmlns="http://www.w3.org/2000/svg"
@@ -4866,10 +4866,10 @@ Object {
               for="search-list-item-3-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4898,10 +4898,10 @@ Object {
               for="search-list-item-3-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4919,7 +4919,7 @@ Object {
                       class="components-checkbox-control__checked"
                       focusable="false"
                       height="24"
-                      role="img"
+                      role="presentation"
                       viewBox="0 0 24 24"
                       width="24"
                       xmlns="http://www.w3.org/2000/svg"
@@ -4945,10 +4945,10 @@ Object {
               for="search-list-item-3-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -4977,10 +4977,10 @@ Object {
               for="search-list-item-3-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <span
                     class="components-checkbox-control__input-container"
@@ -5119,13 +5119,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-wdf2ti-Wrapper e1puf3u3"
+          class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-13ck15n-StyledLabel e1puf3u1"
+              class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-3"
             >
               Search for items
@@ -5148,10 +5148,10 @@ Object {
             for="search-list-item-3-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -5180,10 +5180,10 @@ Object {
             for="search-list-item-3-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -5201,7 +5201,7 @@ Object {
                     class="components-checkbox-control__checked"
                     focusable="false"
                     height="24"
-                    role="img"
+                    role="presentation"
                     viewBox="0 0 24 24"
                     width="24"
                     xmlns="http://www.w3.org/2000/svg"
@@ -5227,10 +5227,10 @@ Object {
             for="search-list-item-3-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -5259,10 +5259,10 @@ Object {
             for="search-list-item-3-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -5280,7 +5280,7 @@ Object {
                     class="components-checkbox-control__checked"
                     focusable="false"
                     height="24"
-                    role="img"
+                    role="presentation"
                     viewBox="0 0 24 24"
                     width="24"
                     xmlns="http://www.w3.org/2000/svg"
@@ -5306,10 +5306,10 @@ Object {
             for="search-list-item-3-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"
@@ -5338,10 +5338,10 @@ Object {
             for="search-list-item-3-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-ij2po-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
+                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <span
                   class="components-checkbox-control__input-container"

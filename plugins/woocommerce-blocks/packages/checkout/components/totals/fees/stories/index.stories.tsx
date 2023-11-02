@@ -14,7 +14,7 @@ import {
 import Fees, { TotalsFeesProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/Checkout Blocks/totals/Fees',
+	title: 'Checkout Components/Totals/Fees',
 	component: Fees,
 	argTypes: {
 		currency: currencyControl,

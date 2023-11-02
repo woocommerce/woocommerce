@@ -10,7 +10,7 @@ import { useState } from '@wordpress/element';
 import FormTokenField, { Props } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/FormTokenField',
+	title: 'Base Components/FormTokenField',
 	argTypes: {},
 	component: FormTokenField,
 } as Meta< Props >;

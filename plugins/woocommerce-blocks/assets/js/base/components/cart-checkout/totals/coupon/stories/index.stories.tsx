@@ -13,7 +13,7 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { TotalsCoupon, TotalsCouponProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/cart-checkout/totals/Coupon',
+	title: 'Base Components/Totals/Coupon',
 	component: TotalsCoupon,
 	args: {
 		initialOpen: true,

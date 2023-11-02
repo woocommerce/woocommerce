@@ -11,7 +11,7 @@ import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 import PriceSlider, { PriceSliderProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/PriceSlider',
+	title: 'Base Components/PriceSlider',
 	component: PriceSlider,
 	args: {
 		currency: currencies.USD,

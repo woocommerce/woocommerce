@@ -14,29 +14,20 @@ import Button from '../button';
 import { useSpokenMessage } from '../../hooks';
 
 export interface NoticeBannerProps {
-	// The displayed message of a notice. Also used as the spoken message for assistive technology, unless `spokenMessage` is provided as an alternative message.
 	children: React.ReactNode;
-	// Additional class name to give to the notice.
-	className?: string | undefined;
-	// Determines whether the notice can be dismissed by the user.
-	isDismissible?: boolean | undefined;
-	// Function called when dismissing the notice.
-	onRemove?: ( () => void ) | undefined;
-	// Determines the level of politeness for the notice for assistive technology.
-	politeness?: 'polite' | 'assertive' | undefined;
-	// Optionally provided to change the spoken message for assistive technology.
-	spokenMessage?: string | React.ReactNode | undefined;
-	// Status determines the color of the notice and the icon.
+	className?: string;
+	isDismissible?: boolean;
+	onRemove?: () => void;
+	politeness?: 'polite' | 'assertive';
+	spokenMessage?: string | React.ReactNode;
 	status: 'success' | 'error' | 'info' | 'warning' | 'default';
-	// Optional summary text shown above notice content, used when several notices are listed together.
-	summary?: string | undefined;
+	summary?: string;
 }
 
 /**
- * NoticeBanner: An informational UI displayed near the top of the store pages.
+ * NoticeBanner component.
  *
- * Notices are informational UI displayed near the top of store pages. WooCommerce blocks, themes, and plugins all use
- * notices to indicate the result of an action, or to draw the user’s attention to necessary information.
+ * An informational UI displayed near the top of the store pages.
  */
 const NoticeBanner = ( {
 	className,

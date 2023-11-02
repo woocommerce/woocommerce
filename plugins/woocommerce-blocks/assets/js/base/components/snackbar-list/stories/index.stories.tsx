@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 
 /**
  * Internal dependencies
@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import SnackbarList, { SnackbarListProps } from '../';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/SnackbarList',
+	title: 'Base Components/SnackbarList',
 	args: {
 		notices: [
 			{
@@ -28,18 +28,20 @@ export default {
 			control: 'text',
 		},
 		notices: {
-			description: 'List of notice objects to show as snackbar notices.',
+			description:
+				'A list of notices to display as snackbars. Each notice must have an `id` and `content` prop.',
 			disable: true,
 		},
 		onRemove: {
-			description: 'Function called when dismissing the notice(s).',
+			description:
+				'Function called when dismissing the notice. When the close icon is clicked or the Escape key is pressed, this function will be called. This is also called when the notice times out after 10000ms.',
 			disable: true,
 		},
 	},
 	component: SnackbarList,
 } as Meta< SnackbarListProps >;
 
-const Template: Story< SnackbarListProps > = ( args ) => {
+const Template: StoryFn< SnackbarListProps > = ( args ) => {
 	return <SnackbarList { ...args } />;
 };
 

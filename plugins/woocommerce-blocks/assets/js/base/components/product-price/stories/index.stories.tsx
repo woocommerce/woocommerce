@@ -12,7 +12,7 @@ import ProductPrice, { ProductPriceProps } from '..';
 const ALLOWED_ALIGN_VALUES = [ 'left', 'center', 'right' ];
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/ProductPrice',
+	title: 'Base Components/ProductPrice',
 	component: ProductPrice,
 	argTypes: {
 		align: {
@@ -25,6 +25,15 @@ export default {
 		align: 'left',
 		format: '<price/>',
 		price: 3000,
+		currency: {
+			code: 'USD',
+			symbol: '$',
+			thousandSeparator: ' ',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '$',
+			suffix: '',
+		},
 	},
 } as Meta< ProductPriceProps >;
 

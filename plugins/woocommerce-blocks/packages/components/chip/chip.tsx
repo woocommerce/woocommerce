@@ -40,7 +40,6 @@ export interface ChipProps {
  *
  * Each chip defaults to a list element but this can be customized by providing
  * a wrapperElement.
- *
  */
 const Chip: React.FC< ChipProps > = ( {
 	text,
