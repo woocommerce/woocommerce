@@ -62,7 +62,7 @@
 			<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"}}} -->
 			<p style="font-size:12px">@ 2022</p>
 			<!-- /wp:paragraph -->
-			<!-- wp:site-title {"style":{"typography":{"fontStyle":"normal","fontWeight":"400","fontSize":"12px"}}} /-->
+			<!-- wp:site-title {"style":{"typography":{"fontStyle":"normal","fontWeight":"400","fontSize":"12px"},"elements":{"link":{"color":{"text":"var:preset|color|base"}}}}} /-->
 		</div>
 		<!-- /wp:group -->
 
