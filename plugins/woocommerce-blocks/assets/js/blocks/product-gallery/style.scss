@@ -245,6 +245,35 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		width: 100px;
 		height: 100px;
 		margin: 5px;
+		position: relative;
 
+	}
+
+	.wc-block-product-gallery-thumbnails__thumbnail__overlay {
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		background-color: rgba(0, 0, 0, 0.4);
+		top: 0;
+		width: 100%;
+		height: 100%;
+
+		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+			@include font-size(large);
+			font-weight: 700;
+		}
+
+		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+			@include font-size(smaller);
+			text-decoration: underline;
+		}
+
+		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count,
+		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+			color: #fff;
+		}
 	}
 }
