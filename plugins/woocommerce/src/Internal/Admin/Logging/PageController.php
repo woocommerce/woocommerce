@@ -382,6 +382,35 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
+		$deleted = filter_input( INPUT_GET, 'deleted', FILTER_VALIDATE_INT );
+
+		if ( is_numeric( $deleted ) ) {
+			add_action(
+				'admin_notices',
+				function() use ( $deleted ) {
+					?>
+					<div class="notice notice-info is-dismissible">
+						<p>
+							<?php
+							printf(
+								// translators: %s is a number of files.
+								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
+								esc_html( number_format_i18n( $deleted ) )
+							);
+							?>
+						</p>
+					</div>
+					<?php
+				}
+			);
+		}
+
+		// Bail if this is not the list table view.
+		$params = $this->get_query_params();
+		if ( 'list_files' !== $params['view'] ) {
+			return;
+		}
+
 		$action = $this->get_list_table()->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -428,29 +457,6 @@ class PageController {
 			$removable_args = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'filter_action' );
 			wp_safe_redirect( remove_query_arg( $removable_args, $request_uri ) );
 			exit;
-		}
-
-		$deleted = filter_input( INPUT_GET, 'deleted', FILTER_VALIDATE_INT );
-
-		if ( is_numeric( $deleted ) ) {
-			add_action(
-				'admin_notices',
-				function() use ( $deleted ) {
-					?>
-					<div class="notice notice-info is-dismissible">
-						<p>
-							<?php
-							printf(
-								// translators: %s is a number of files.
-								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
-								esc_html( number_format_i18n( $deleted ) )
-							);
-							?>
-						</p>
-					</div>
-					<?php
-				}
-			);
 		}
 	}
 
