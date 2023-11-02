@@ -105,7 +105,7 @@ function isLinkedPackage( packagePath, lockVersion ) {
 	// We can parse the version that PNPM stores in order to get the relative path to the package.
 	// file: dependencies use a relative path with dependencies listed in parentheses after it.
 	// workspace: dependencies just store the relative path from the package itself.
-	const match = lockVersion.match( /^(?:file:|link:)([^<>:"|?*()]+)/i );
+	const match = lockVersion.match( /^(?:file:|link:)((?:\.?\/|\.\.\/)[^\^<>:"|?*()]+)/i );
 	if ( ! match ) {
 		return false;
 	}
@@ -141,11 +141,13 @@ function getLinkedPackages( packagePath, lockPackage ) {
 	for ( const packageName in possiblePackages ) {
 		const linkedPackagePath = isLinkedPackage(
 			packagePath,
-			possiblePackages[ packageName ]
+			possiblePackages[ packageName ],
 		);
 		if ( ! linkedPackagePath ) {
 			continue;
 		}
+
+		
 
 		// Load the linked package file and mark it as a dependency.
 		linkedPackages[ linkedPackagePath ] =
@@ -184,7 +186,7 @@ function updateWireitDependencies( lockPackages, context ) {
 		// changed then the lock file will be updated and the fingerprint will change too.
 		const linkedPackages = getLinkedPackages(
 			packagePath,
-			lockPackages[ packagePath ]
+			lockPackages[ packagePath ],
 		);
 
 		// In order to make maintaining the list easy we use a wireit-only script named "dependencies" to keep the list up to date.
@@ -194,7 +196,7 @@ function updateWireitDependencies( lockPackages, context ) {
 			allowUsuallyExcludedPaths: true,
 
 			// The files list will include globs for dependency files that we should fingerprint.
-			files: [],
+			files: [ "package.json" ],
 		};
 
 		// We're going to spin through all of the dependencies for the package and add
