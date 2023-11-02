@@ -10,8 +10,12 @@ import { useArgs } from '@storybook/client-api';
 import FormattedMonetaryAmount, { type FormattedMonetaryAmountProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@woocommerce-blocks-components/FormattedMonetaryAmount',
+	title: 'Block Components/FormattedMonetaryAmount',
 	component: FormattedMonetaryAmount,
+	args: {
+		displayType: 'text',
+		value: 1234,
+	},
 	argTypes: {
 		className: {
 			control: 'text',
@@ -39,7 +43,6 @@ export default {
 			},
 			control: 'select',
 			options: [ 'input', 'text' ],
-			defaultValue: 'text',
 			description:
 				'Whether this should be an input or just a text display.',
 		},
@@ -50,7 +53,6 @@ export default {
 					summary: 'number',
 				},
 			},
-			defaultValue: 1234,
 			description:
 				'The raw value of the currency, it will be formatted depending on the props of this component.',
 		},

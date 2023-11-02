@@ -124,6 +124,7 @@ module.exports = {
 	extends: [
 		'plugin:@woocommerce/eslint-plugin/recommended',
 		'plugin:you-dont-need-lodash-underscore/compatible',
+		'plugin:storybook/recommended',
 	],
 	globals: {
 		wcBlocksMiddlewareConfig: 'readonly',

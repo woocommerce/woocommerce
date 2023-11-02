@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import ErrorMessage, { ErrorMessageProps } from '../error-message';
 
 export default {
-	title: 'WooCommerce Blocks/editor-components/Errors/Base Error Atom',
+	title: 'Editor Components/Errors/Base Error Atom',
 	component: ErrorMessage,
 } as Meta< ErrorMessageProps >;
 

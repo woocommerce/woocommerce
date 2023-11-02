@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 
 /**
  * Internal dependencies
  */
-import NoticeBanner, { NoticeBannerProps } from '../';
+import Snackbar, { SnackbarProps } from '../snackbar';
 const availableStatus = [ 'default', 'success', 'error', 'warning', 'info' ];
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/NoticeBanner',
+	title: 'Base Components/SnackbarList/Snackbar',
 	argTypes: {
 		status: {
 			control: 'radio',
@@ -20,7 +20,8 @@ export default {
 		},
 		isDismissible: {
 			control: 'boolean',
-			description: 'Determines whether the notice can be dismissed.',
+			description:
+				'Determines whether the notice can be dismissed by the user. When set to true, a close icon will be displayed on the banner.',
 		},
 		summary: {
 			description:
@@ -33,7 +34,7 @@ export default {
 		},
 		spokenMessage: {
 			description:
-				'Optionally provided to change the spoken message for assistive technology.',
+				'Optionally provided to change the spoken message for assistive technology. If not provided, the `children` prop will be used as the spoken message.',
 			control: 'text',
 		},
 		politeness: {
@@ -44,24 +45,25 @@ export default {
 		},
 		children: {
 			description:
-				'The content of the notice; either text or a React node such as a list of errors.',
+				'The displayed message of a notice. Also used as the spoken message for assistive technology, unless `spokenMessage` is provided as an alternative message.',
 			disable: true,
 		},
 		onRemove: {
-			description: 'Function called when dismissing the notice.',
+			description:
+				'Function called when dismissing the notice. When the close icon is clicked or the Escape key is pressed, this function will be called.',
 			disable: true,
 		},
 	},
-	component: NoticeBanner,
-} as Meta< NoticeBannerProps >;
+	component: Snackbar,
+} as Meta< SnackbarProps >;
 
-const Template: Story< NoticeBannerProps > = ( args ) => {
-	return <NoticeBanner { ...args } />;
+const Template: StoryFn< SnackbarProps > = ( args ) => {
+	return <Snackbar { ...args } />;
 };
 
 export const Default = Template.bind( {} );
 Default.args = {
-	children: 'This is a default notice',
+	children: 'This is a default snackbar notice',
 	status: 'default',
 	isDismissible: true,
 	summary: undefined,
@@ -72,36 +74,24 @@ Default.args = {
 
 export const Error = Template.bind( {} );
 Error.args = {
-	children: 'This is an error notice',
+	children: 'This is an error snackbar notice',
 	status: 'error',
 };
 
 export const Warning = Template.bind( {} );
 Warning.args = {
-	children: 'This is a warning notice',
+	children: 'This is a warning snackbar notice',
 	status: 'warning',
 };
 
 export const Info = Template.bind( {} );
 Info.args = {
-	children: 'This is an info notice',
+	children: 'This is an informational snackbar notice',
 	status: 'info',
 };
 
 export const Success = Template.bind( {} );
 Success.args = {
-	children: 'This is a success notice',
+	children: 'This is a success snackbar notice',
 	status: 'success',
-};
-
-export const ErrorSummary = Template.bind( {} );
-ErrorSummary.args = {
-	summary: 'Please fix the following errors',
-	children: (
-		<ul>
-			<li>This is an error notice</li>
-			<li>This is another error notice</li>
-		</ul>
-	),
-	status: 'error',
 };

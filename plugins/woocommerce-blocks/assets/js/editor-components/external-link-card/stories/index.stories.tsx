@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import ExternalLinkCard, { ExternalLinkCardProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/editor-components/ExternalLinkCard',
+	title: 'Editor Components/ExternalLinkCard',
 	component: ExternalLinkCard,
 } as Meta< ExternalLinkCardProps >;
 

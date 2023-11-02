@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import CheckboxControl, { CheckboxControlProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/Checkout Blocks/CheckboxControl',
+	title: 'Checkout Components/CheckboxControl',
 	component: CheckboxControl,
 	args: {
 		instanceId: 'my-checkbox-id',
