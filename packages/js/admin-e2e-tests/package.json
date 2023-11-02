@@ -26,15 +26,17 @@
 	],
 	"sideEffects": false,
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix",
-		"prepack": "pnpm run clean && pnpm run build",
-		"prepare": "composer install",
-		"start": "tsc --project tsconfig.json --watch",
-		"turbo:build": "tsc --project tsconfig.json"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:typescript": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -71,5 +73,27 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"wireit": {
+		"build:project:typescript": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }

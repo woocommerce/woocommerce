@@ -28,17 +28,19 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"build:css": "webpack",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix",
-		"prepack": "pnpm run clean && pnpm run build",
-		"prepare": "composer install",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
-		"turbo:build": "pnpm run build:js && pnpm run build:css"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:bundle": "wireit",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"devDependencies": {
 		"@types/react": "^17.0.71",
@@ -66,5 +68,55 @@
 		"@types/react": "^17.0.71",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
+	},
+	"wireit": {
+		"build:project:bundle": {
+			"command": "webpack",
+			"files": [
+				"webpack.config.js",
+				"src/**/*.scss"
+			],
+			"output": [
+				"build-style"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"./build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }

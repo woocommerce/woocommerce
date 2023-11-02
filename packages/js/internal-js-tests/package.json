@@ -21,13 +21,18 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"ts:check": "tsc --noEmit --project ./tsconfig.json",
-		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"prepack": "pnpm run build",
+		"test": "pnpm --if-present run '/^test:lang:.*$/'",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"dependencies": {
 		"@testing-library/jest-dom": "5.16.2",
@@ -54,5 +59,41 @@
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"required"
+			]
+		}
 	}
 }
