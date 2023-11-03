@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { Campaign } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
-	CampaignsState,
+	CampaignsPage,
 	Campaign as APICampaign,
 	ApiFetchError,
 } from '~/marketing/data-multichannel/types';
@@ -36,7 +36,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 	return useSelect(
 		( select ) => {
 			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
-			const campaignsState = getCampaigns< CampaignsState >(
+			const campaignsPage = getCampaigns< CampaignsPage | null >(
 				page,
 				perPage
 			);
@@ -62,22 +62,15 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 				};
 			};
 
-			const error =
-				campaignsState.pages && campaignsState.pages[ page ]?.error;
-
-			const data =
-				campaignsState.pages &&
-				campaignsState.pages[ page ]?.data?.map( convert );
-
 			return {
 				loading: ! hasFinishedResolution( 'getCampaigns', [
 					page,
 					perPage,
 				] ),
-				data,
-				error,
+				data: campaignsPage?.data?.map( convert ),
+				error: campaignsPage?.error,
 				meta: {
-					total: campaignsState.total,
+					total: campaignsPage?.total,
 				},
 			};
 		},

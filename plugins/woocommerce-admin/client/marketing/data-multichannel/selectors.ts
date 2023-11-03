@@ -13,9 +13,14 @@ export const getRecommendedChannels = ( state: State ) => {
 
 /**
  * Get campaigns from state.
+ *
+ * @param state   State passed in from the data store.
+ * @param page    Page number. First page is `1`.
+ * @param perPage Page size, i.e. number of records in one page.
  */
-export const getCampaigns = ( state: State ) => {
-	return state.campaigns;
+export const getCampaigns = ( state: State, page: number, perPage: number ) => {
+	const key = `${ page }-${ perPage }`;
+	return state.campaigns.pages[ key ] || null;
 };
 
 export const getCampaignTypes = ( state: State ) => {
