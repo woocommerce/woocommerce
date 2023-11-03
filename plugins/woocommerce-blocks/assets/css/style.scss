@@ -161,6 +161,13 @@
 
 // Element spacing.
 .wc-block-grid__product {
+	// Prevent link and image taking the full width unnecessarily, which might cause: https://github.com/woocommerce/woocommerce-blocks/issues/11438
+	.wc-block-grid__product-link,
+	.wc-block-grid__product-image {
+		display: inline-block;
+		position: relative;
+	}
+
 	// Not operator necessary for avoid this problem: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5925/files#r814043454
 	.wc-block-grid__product-image:not(.wc-block-components-product-image),
 	.wc-block-grid__product-title {
