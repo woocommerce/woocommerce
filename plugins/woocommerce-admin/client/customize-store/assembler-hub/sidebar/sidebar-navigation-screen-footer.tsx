@@ -29,7 +29,7 @@ import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
 
 const SUPPORTED_FOOTER_PATTERNS = [
-	'woocommerce-blocks/footer-simple-menu-and-cart',
+	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-with-3-menus',
 	'woocommerce-blocks/footer-large',
 ];
