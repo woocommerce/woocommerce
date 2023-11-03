@@ -394,7 +394,7 @@ class ProductUpdater {
 			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate the content for your site.', 'woo-gutenberg-products-block' ) );
 		}
 
-		$prompt = sprintf( 'Given the following business description: "%1s" and the assigned value for the alt property in the json bellow, generate new titles and descriptions for each one of the products listed bellow and assign them as the new values for the json: %2s. Each one of the titles should be unique and must be limited to 29 characters. The response should be only a JSON string, with no intro or explanations.', $store_description, wp_json_encode( $products_default_content ) );
+		$prompt = sprintf( 'Given the following business description: "%1s" and the assigned value for the alt property in the JSON below, generate new titles and descriptions for each one of the products listed below and assign them as the new values for the JSON: %2s. Each one of the titles should be unique and must be limited to 29 characters. The response should be only a JSON string, with no intro or explanations.', $store_description, wp_json_encode( $products_default_content ) );
 
 		return $ai_connection->fetch_ai_response( $token, $prompt, 60 );
 	}
