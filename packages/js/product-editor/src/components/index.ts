@@ -45,4 +45,4 @@ export { NumberControl as __experimentalNumberControl } from './number-control';
 
 export * from './product-page-skeleton';
 
-export * from './welcome-guide';
+export * from './modal-editor-welcome-guide';

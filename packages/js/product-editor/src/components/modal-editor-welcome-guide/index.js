@@ -15,7 +15,7 @@ import WelcomeGuideDefault from './default';
  * Ideally it should be exposed from gutenberg and we should use it from there.
  */
 
-export default function WelcomeGuide() {
+export default function ModalEditorWelcomeGuide() {
 	const { isActive } = useSelect( ( select ) => {
 		const { get } = select( 'core/preferences' );
 		return {
