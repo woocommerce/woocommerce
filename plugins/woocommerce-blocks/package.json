@@ -179,7 +179,7 @@
 		"@wordpress/element": "5.22.0",
 		"@wordpress/env": "8.2.0",
 		"@wordpress/html-entities": "3.24.0",
-		"@wordpress/i18n": "4.31.0",
+		"@wordpress/i18n": "4.45.0",
 		"@wordpress/is-shallow-equal": "4.24.0",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "24.6.0",
