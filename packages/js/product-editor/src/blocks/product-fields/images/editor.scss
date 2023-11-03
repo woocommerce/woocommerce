@@ -3,7 +3,8 @@
 		text-align: left;
 
 		.components-drop-zone {
-			min-height: 222px;
+			// This height cannot be higher than this, otherwise it will invade the area from the block below.
+			min-height: 84px;
 		}
 	}
 
