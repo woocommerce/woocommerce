@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
