@@ -10,7 +10,7 @@ jobs:
             - uses: actions/checkout@v3
               with:
                   fetch-depth: 1
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
             - uses: preactjs/compressed-size-action@8a15fc9a36a94c8c3f7835af11a4924da7e95c7c
