@@ -34,17 +34,19 @@ class IsWooExpressRuleProcessor implements RuleProcessorInterface {
 		}
 
 		// If a plan name is defined, only evaluate the plan if we're on the Woo Express plan.
-		if ( isset( $rule->plan ) && wc_calypso_bridge_is_woo_express_plan() ) {
-			if ( function_exists( 'wc_calypso_bridge_is_woo_express_' . (string) $rule->plan . '_plan' ) ) {
-				$fn = 'wc_calypso_bridge_is_woo_express_' . (string) $rule->plan . '_plan';
+		if ( wc_calypso_bridge_is_woo_express_plan() ) {
+			$fn = 'wc_calypso_bridge_is_woo_express_' . (string) $rule->plan . '_plan';
+			if ( function_exists( $fn ) ) {
 				return $fn() === $rule->value;
-			} elseif ( function_exists( 'wc_calypso_bridge_is_ecommerce_' . (string) $rule->plan . '_plan' ) ) {
-				$fn = 'wc_calypso_bridge_is_ecommerce_' . (string) $rule->plan . '_plan';
-				return $fn() === $rule->value;
-			} else {
-				// If an invalid plan name is given, only evaluate the rule if we're targeting all plans other than the specified (invalid) one.
-				return false === $rule->value;
 			}
+
+			$fn = 'wc_calypso_bridge_is_ecommerce_' . (string) $rule->plan . '_plan';
+			if ( function_exists( $fn ) ) {
+				return $fn() === $rule->value;
+			}
+
+			// If an invalid plan name is given, only evaluate the rule if we're targeting all plans other than the specified (invalid) one.
+			return false === $rule->value;
 		}
 
 		return false;
