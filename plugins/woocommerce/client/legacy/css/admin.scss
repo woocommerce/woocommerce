@@ -1417,15 +1417,26 @@ table.wc_status_table--tools {
  */
 .log-level {
 	display: inline;
-	padding: 0.2em 0.6em 0.3em;
+	padding: 0 0.5em;
 	font-size: 80%;
-	font-weight: bold;
+	font-weight: 700;
 	line-height: 1;
-	color: #fff;
+	color: #000000;
+	background: #ffffff;
 	text-align: center;
 	white-space: nowrap;
 	vertical-align: baseline;
-	border-radius: 0.2em;
+	border-style: solid;
+	border-width: 0.16em 0.16em 0.16em 1em;
+	border-top-left-radius: 0.5em;
+	border-bottom-left-radius: 0.5em;
+
+	&:before {
+		content: "•";
+		color: #ffffff;
+		margin-left: -1.3em;
+		margin-right: 0.7em;
+	}
 
 	&:empty {
 		display: none;
@@ -1434,26 +1445,26 @@ table.wc_status_table--tools {
 
 .log-level--emergency,
 .log-level--alert {
-	background-color: #ff4136;
+	border-color: #ff4136;
 }
 
 .log-level--critical,
 .log-level--error {
-	background-color: #ff851b;
+	border-color: #ff851b;
 }
 
 .log-level--warning,
 .log-level--notice {
 	color: #222;
-	background-color: #ffdc00;
+	border-color: #ffdc00;
 }
 
 .log-level--info {
-	background-color: #0074d9;
+	border-color: #0074d9;
 }
 
 .log-level--debug {
-	background-color: #3d9970;
+	border-color: #3d9970;
 }
 
 /**
