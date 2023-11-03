@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adds e2e tests for tax display in store, cart and checkout
