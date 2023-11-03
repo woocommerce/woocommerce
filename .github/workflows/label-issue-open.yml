@@ -45,6 +45,7 @@ jobs:
   community:
     name: Add community contribution label
     runs-on: ubuntu-20.04
+    needs: 'triage'
     permissions:
       contents: read
       pull-requests: write
