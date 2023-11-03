@@ -85,7 +85,7 @@
 			]
 		},
 		"test:js": {
-			"command": "jest --config ./jest.config.json --passWithNoTests",
+			"command": "jest --config ./jest.config.js --passWithNoTests",
 			"dependencies": [
 				"build:project"
 			]
