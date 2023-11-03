@@ -219,7 +219,10 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		const images = await apiFetch( {
+		const { images } = await apiFetch< {
+			ai_content_generated: boolean;
+			images: Array< unknown >;
+		} >( {
 			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
