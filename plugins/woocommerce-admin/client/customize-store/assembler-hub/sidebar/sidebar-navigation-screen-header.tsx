@@ -14,8 +14,6 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -28,6 +26,7 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { findPatternByBlock } from './utils';
+import BlockPatternList from '../block-pattern-list';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
@@ -37,7 +36,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 ];
 
 export const SidebarNavigationScreenHeader = () => {
-	useEditorScroll( {
+	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
 	} );
@@ -78,17 +77,18 @@ export const SidebarNavigationScreenHeader = () => {
 			blocks[ 0 ]
 		);
 		setSelectedPattern( currentSelectedPattern );
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
-
 	const onClickHeaderPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
+			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
 	return (
@@ -137,8 +137,8 @@ export const SidebarNavigationScreenHeader = () => {
 								onClickPattern={ onClickHeaderPattern }
 								label={ 'Headers' }
 								orientation="vertical"
-								category={ 'header' }
 								isDraggable={ false }
+								onHover={ () => {} }
 								showTitlesAsTooltip={ true }
 							/>
 						) }

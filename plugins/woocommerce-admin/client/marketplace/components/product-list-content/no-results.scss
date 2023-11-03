@@ -11,6 +11,11 @@
 
 .woocommerce-marketplace__no-results__product-group {
 	margin-top: $grid-unit-60;
+
+	.woocommerce-marketplace__product-list-title {
+		font-size: 16px;
+		font-weight: 600;
+	}
 }
 
 .woocommerce-marketplace__no-results__icon {

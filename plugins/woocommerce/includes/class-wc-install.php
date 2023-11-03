@@ -250,6 +250,13 @@ class WC_Install {
 	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
 
 	/**
+	 * Option name used to uniquely identify installations of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const STORE_ID_OPTION = 'woocommerce_store_id';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
@@ -438,6 +445,7 @@ class WC_Install {
 		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_set_store_id();
 
 		delete_transient( 'wc_installing' );
 
@@ -611,6 +619,17 @@ class WC_Install {
 	}
 
 	/**
+	 * Set the Store ID if not already present.
+	 *
+	 * @since 8.4.0
+	 */
+	public static function maybe_set_store_id() {
+		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
+			add_option( self::STORE_ID_OPTION, wp_generate_uuid4() );
+		}
+	}
+
+	/**
 	 * Update WC version to current.
 	 */
 	private static function update_wc_version() {
@@ -767,15 +786,21 @@ class WC_Install {
 		 * Determines the cart shortcode tag used for the cart page.
 		 *
 		 * @since 2.1.0
+		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
 		 */
-		$cart_shortcode = apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' );
+		$cart_shortcode = apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( '' ), '8.3.0', 'woocommerce_create_pages' );
+
+		$cart_page_content = empty( $cart_shortcode ) ? self::get_cart_block_content() : '<!-- wp:shortcode -->[' . $cart_shortcode . ']<!-- /wp:shortcode -->';
 
 		/**
 		 * Determines the checkout shortcode tag used on the checkout page.
 		 *
 		 * @since 2.1.0
+		 * @deprecated 8.3.0 This filter is deprecated and will be removed in future versions.
 		 */
-		$checkout_shortcode = apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' );
+		$checkout_shortcode = apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( '' ), '8.3.0', 'woocommerce_create_pages' );
+
+		$checkout_page_content = empty( $checkout_shortcode ) ? self::get_checkout_block_content() : '<!-- wp:shortcode -->[' . $checkout_shortcode . ']<!-- /wp:shortcode -->';
 
 		/**
 		 * Determines the my account shortcode tag used on the my account page.
@@ -800,12 +825,12 @@ class WC_Install {
 				'cart'           => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-					'content' => '<!-- wp:shortcode -->[' . $cart_shortcode . ']<!-- /wp:shortcode -->',
+					'content' => $cart_page_content,
 				),
 				'checkout'       => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-					'content' => '<!-- wp:shortcode -->[' . $checkout_shortcode . ']<!-- /wp:shortcode -->',
+					'content' => $checkout_page_content,
 				),
 				'myaccount'      => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
@@ -1217,11 +1242,10 @@ class WC_Install {
 		$product_attributes_lookup_table_creation_sql = wc_get_container()->get( DataRegenerator::class )->get_table_creation_sql();
 
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		$hpos_enabled =
+		$hpos_enabled       =
 			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ) || $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ||
-			self::should_enable_hpos_for_new_shop()
-		;
-		$hpos_table_schema = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
+			self::should_enable_hpos_for_new_shop();
+		$hpos_table_schema  = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
@@ -2431,6 +2455,182 @@ EOT;
 			delete_option( 'woocommerce_refund_returns_page_created' );
 			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
 		}
+	}
+
+	/**
+	 * Get the Cart block content.
+	 *
+	 * @since 8.3.0
+	 * @return string
+	 */
+	protected static function get_cart_block_content() {
+		return '<!-- wp:woocommerce/cart -->
+<div class="wp-block-woocommerce-cart alignwide is-loading"><!-- wp:woocommerce/filled-cart-block -->
+<div class="wp-block-woocommerce-filled-cart-block"><!-- wp:woocommerce/cart-items-block -->
+<div class="wp-block-woocommerce-cart-items-block"><!-- wp:woocommerce/cart-line-items-block -->
+<div class="wp-block-woocommerce-cart-line-items-block"></div>
+<!-- /wp:woocommerce/cart-line-items-block -->
+
+<!-- wp:woocommerce/cart-cross-sells-block -->
+<div class="wp-block-woocommerce-cart-cross-sells-block"><!-- wp:heading {"fontSize":"large"} -->
+<h2 class="wp-block-heading has-large-font-size">' . __( 'You may be interested in…', 'woocommerce' ) . '</h2>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/cart-cross-sells-products-block -->
+<div class="wp-block-woocommerce-cart-cross-sells-products-block"></div>
+<!-- /wp:woocommerce/cart-cross-sells-products-block --></div>
+<!-- /wp:woocommerce/cart-cross-sells-block --></div>
+<!-- /wp:woocommerce/cart-items-block -->
+
+<!-- wp:woocommerce/cart-totals-block -->
+<div class="wp-block-woocommerce-cart-totals-block"><!-- wp:woocommerce/cart-order-summary-block -->
+<div class="wp-block-woocommerce-cart-order-summary-block"><!-- wp:woocommerce/cart-order-summary-heading-block -->
+<div class="wp-block-woocommerce-cart-order-summary-heading-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-heading-block -->
+
+<!-- wp:woocommerce/cart-order-summary-coupon-form-block -->
+<div class="wp-block-woocommerce-cart-order-summary-coupon-form-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-coupon-form-block -->
+
+<!-- wp:woocommerce/cart-order-summary-subtotal-block -->
+<div class="wp-block-woocommerce-cart-order-summary-subtotal-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-subtotal-block -->
+
+<!-- wp:woocommerce/cart-order-summary-fee-block -->
+<div class="wp-block-woocommerce-cart-order-summary-fee-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-fee-block -->
+
+<!-- wp:woocommerce/cart-order-summary-discount-block -->
+<div class="wp-block-woocommerce-cart-order-summary-discount-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-discount-block -->
+
+<!-- wp:woocommerce/cart-order-summary-shipping-block -->
+<div class="wp-block-woocommerce-cart-order-summary-shipping-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-shipping-block -->
+
+<!-- wp:woocommerce/cart-order-summary-taxes-block -->
+<div class="wp-block-woocommerce-cart-order-summary-taxes-block"></div>
+<!-- /wp:woocommerce/cart-order-summary-taxes-block --></div>
+<!-- /wp:woocommerce/cart-order-summary-block -->
+
+<!-- wp:woocommerce/cart-express-payment-block -->
+<div class="wp-block-woocommerce-cart-express-payment-block"></div>
+<!-- /wp:woocommerce/cart-express-payment-block -->
+
+<!-- wp:woocommerce/proceed-to-checkout-block -->
+<div class="wp-block-woocommerce-proceed-to-checkout-block"></div>
+<!-- /wp:woocommerce/proceed-to-checkout-block -->
+
+<!-- wp:woocommerce/cart-accepted-payment-methods-block -->
+<div class="wp-block-woocommerce-cart-accepted-payment-methods-block"></div>
+<!-- /wp:woocommerce/cart-accepted-payment-methods-block --></div>
+<!-- /wp:woocommerce/cart-totals-block --></div>
+<!-- /wp:woocommerce/filled-cart-block -->
+
+<!-- wp:woocommerce/empty-cart-block -->
+<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
+<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
+<!-- /wp:heading -->
+
+<!-- wp:separator {"className":"is-style-dots"} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
+<!-- /wp:separator -->
+
+<!-- wp:heading {"textAlign":"center"} -->
+<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
+<!-- /wp:woocommerce/empty-cart-block --></div>
+<!-- /wp:woocommerce/cart -->';
+	}
+
+	/**
+	 * Get the Checkout block content.
+	 *
+	 * @since 8.3.0
+	 * @return string
+	 */
+	protected static function get_checkout_block_content() {
+		return '<!-- wp:woocommerce/checkout -->
+<div class="wp-block-woocommerce-checkout alignwide wc-block-checkout is-loading"><!-- wp:woocommerce/checkout-fields-block -->
+<div class="wp-block-woocommerce-checkout-fields-block"><!-- wp:woocommerce/checkout-express-payment-block -->
+<div class="wp-block-woocommerce-checkout-express-payment-block"></div>
+<!-- /wp:woocommerce/checkout-express-payment-block -->
+
+<!-- wp:woocommerce/checkout-contact-information-block -->
+<div class="wp-block-woocommerce-checkout-contact-information-block"></div>
+<!-- /wp:woocommerce/checkout-contact-information-block -->
+
+<!-- wp:woocommerce/checkout-shipping-method-block -->
+<div class="wp-block-woocommerce-checkout-shipping-method-block"></div>
+<!-- /wp:woocommerce/checkout-shipping-method-block -->
+
+<!-- wp:woocommerce/checkout-pickup-options-block -->
+<div class="wp-block-woocommerce-checkout-pickup-options-block"></div>
+<!-- /wp:woocommerce/checkout-pickup-options-block -->
+
+<!-- wp:woocommerce/checkout-shipping-address-block -->
+<div class="wp-block-woocommerce-checkout-shipping-address-block"></div>
+<!-- /wp:woocommerce/checkout-shipping-address-block -->
+
+<!-- wp:woocommerce/checkout-billing-address-block -->
+<div class="wp-block-woocommerce-checkout-billing-address-block"></div>
+<!-- /wp:woocommerce/checkout-billing-address-block -->
+
+<!-- wp:woocommerce/checkout-shipping-methods-block -->
+<div class="wp-block-woocommerce-checkout-shipping-methods-block"></div>
+<!-- /wp:woocommerce/checkout-shipping-methods-block -->
+
+<!-- wp:woocommerce/checkout-payment-block -->
+<div class="wp-block-woocommerce-checkout-payment-block"></div>
+<!-- /wp:woocommerce/checkout-payment-block -->
+
+<!-- wp:woocommerce/checkout-order-note-block -->
+<div class="wp-block-woocommerce-checkout-order-note-block"></div>
+<!-- /wp:woocommerce/checkout-order-note-block -->
+
+<!-- wp:woocommerce/checkout-terms-block -->
+<div class="wp-block-woocommerce-checkout-terms-block"></div>
+<!-- /wp:woocommerce/checkout-terms-block -->
+
+<!-- wp:woocommerce/checkout-actions-block -->
+<div class="wp-block-woocommerce-checkout-actions-block"></div>
+<!-- /wp:woocommerce/checkout-actions-block --></div>
+<!-- /wp:woocommerce/checkout-fields-block -->
+
+<!-- wp:woocommerce/checkout-totals-block -->
+<div class="wp-block-woocommerce-checkout-totals-block"><!-- wp:woocommerce/checkout-order-summary-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-block"><!-- wp:woocommerce/checkout-order-summary-cart-items-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-cart-items-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-cart-items-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-coupon-form-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-coupon-form-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-coupon-form-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-subtotal-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-subtotal-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-subtotal-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-fee-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-fee-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-fee-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-discount-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-discount-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-discount-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-shipping-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-shipping-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-shipping-block -->
+
+<!-- wp:woocommerce/checkout-order-summary-taxes-block -->
+<div class="wp-block-woocommerce-checkout-order-summary-taxes-block"></div>
+<!-- /wp:woocommerce/checkout-order-summary-taxes-block --></div>
+<!-- /wp:woocommerce/checkout-order-summary-block --></div>
+<!-- /wp:woocommerce/checkout-totals-block --></div>
+<!-- /wp:woocommerce/checkout -->';
 	}
 }
 

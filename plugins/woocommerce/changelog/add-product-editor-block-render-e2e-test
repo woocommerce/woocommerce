@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new E2E test for the product editor to check if all blocks render correctly.

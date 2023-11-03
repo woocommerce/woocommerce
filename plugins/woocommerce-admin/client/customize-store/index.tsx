@@ -16,7 +16,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-
+import { PluginArea } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
@@ -38,6 +38,8 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { navigateOrParent, attachParentListeners } from './utils';
+import useBodyClass from './hooks/use-body-class';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -65,7 +67,8 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
+	const url = getNewPath( {}, '/', {} );
+	navigateOrParent( window, url );
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -360,6 +363,14 @@ export const CustomizeStoreController = ( {
 		}
 	}, [ CurrentComponent, currentNodeMeta?.component ] );
 
+	// Run listeners for parent window.
+	useEffect( () => {
+		const removeListener = attachParentListeners();
+		return removeListener;
+	}, [] );
+
+	useBodyClass( 'is-fullscreen-mode' );
+
 	const currentNodeCssLabel =
 		state.value instanceof Object
 			? Object.keys( state.value )[ 0 ]
@@ -383,6 +394,8 @@ export const CustomizeStoreController = ( {
 					</div>
 				) }
 			</div>
+			{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+			<PluginArea scope="woocommerce-customize-store" />
 		</>
 	);
 };

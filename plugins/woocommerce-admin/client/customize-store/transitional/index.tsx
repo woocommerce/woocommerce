@@ -15,7 +15,6 @@ import {
 } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
-
 /**
  * Internal dependencies
  */
@@ -23,6 +22,8 @@ import { SiteHub } from '../assembler-hub/site-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
+import { navigateOrParent } from '../utils';
+import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 
 export type events = { type: 'GO_BACK_TO_HOME' };
 
@@ -57,18 +58,23 @@ export const Transitional = ( {
 						'woocommerce'
 					) }
 				</h2>
-				<Button
-					className="woocommerce-customize-store__transitional-preview-button"
-					variant="primary"
-					onClick={ () => {
-						recordEvent(
-							'customize_your_store_transitional_preview_store_click'
-						);
-						window.open( homeUrl, '_blank' );
-					} }
-				>
-					{ __( 'Preview store', 'woocommerce' ) }
-				</Button>
+
+				<div className="woocommerce-customize-store__transitional-main-actions">
+					<WooCYSSecondaryButtonSlot />
+
+					<Button
+						className="woocommerce-customize-store__transitional-preview-button"
+						variant="primary"
+						onClick={ () => {
+							recordEvent(
+								'customize_your_store_transitional_preview_store_click'
+							);
+							window.open( homeUrl, '_blank' );
+						} }
+					>
+						{ __( 'Preview store', 'woocommerce' ) }
+					</Button>
+				</div>
 
 				<div
 					className={ classNames(
@@ -97,7 +103,10 @@ export const Transitional = ( {
 								recordEvent(
 									'customize_your_store_transitional_editor_click'
 								);
-								window.location.href = `${ ADMIN_URL }site-editor.php`;
+								navigateOrParent(
+									window,
+									`${ ADMIN_URL }site-editor.php`
+								);
 							} }
 						>
 							{ __( 'Go to the Editor', 'woocommerce' ) }

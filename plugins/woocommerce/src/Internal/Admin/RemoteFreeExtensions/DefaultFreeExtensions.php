@@ -50,7 +50,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'mailpoet:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
 					self::get_plugin( 'klaviyo' ),
-					self::get_plugin( 'creative-mail-by-constant-contact' ),
 				),
 			),
 			array(
@@ -76,6 +75,7 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'mailpoet' ),
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
+						self::get_plugin( 'tiktok-for-business' ),
 					)
 				),
 			),
@@ -93,7 +93,7 @@ class DefaultFreeExtensions {
 	 */
 	public static function get_plugin( $slug ) {
 		$plugins = array(
-			'google-listings-and-ads'           => array(
+			'google-listings-and-ads'       => array(
 				'min_php_version' => '7.4',
 				'name'            => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'     => sprintf(
@@ -117,14 +117,14 @@ class DefaultFreeExtensions {
 					),
 				),
 			),
-			'google-listings-and-ads:alt'       => array(
+			'google-listings-and-ads:alt'   => array(
 				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			),
-			'facebook-for-woocommerce'          => array(
+			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
@@ -132,7 +132,7 @@ class DefaultFreeExtensions {
 				'is_visible'     => false,
 				'is_built_by_wc' => false,
 			),
-			'facebook-for-woocommerce:alt'      => array(
+			'facebook-for-woocommerce:alt'  => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
@@ -140,7 +140,7 @@ class DefaultFreeExtensions {
 				'is_visible'     => false,
 				'is_built_by_wc' => false,
 			),
-			'pinterest-for-woocommerce'         => array(
+			'pinterest-for-woocommerce'     => array(
 				'name'            => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'     => __( 'Get your products in front of Pinners searching for ideas and things to buy.', 'woocommerce' ),
 				'image_url'       => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
@@ -148,42 +148,35 @@ class DefaultFreeExtensions {
 				'is_built_by_wc'  => true,
 				'min_php_version' => '7.3',
 			),
-			'pinterest-for-woocommerce:alt'     => array(
+			'pinterest-for-woocommerce:alt' => array(
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => true,
 			),
-			'mailpoet'                          => array(
+			'mailpoet'                      => array(
 				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			),
-			'mailchimp-for-woocommerce'         => array(
+			'mailchimp-for-woocommerce'     => array(
 				'name'           => __( 'Mailchimp', 'woocommerce' ),
 				'description'    => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailchimp-for-woocommerce.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailchimp-woocommerce',
 				'is_built_by_wc' => false,
 			),
-			'klaviyo'                           => array(
+			'klaviyo'                       => array(
 				'name'           => __( 'Klaviyo', 'woocommerce' ),
 				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=klaviyo_settings',
 				'is_built_by_wc' => false,
 			),
-			'creative-mail-by-constant-contact' => array(
-				'name'           => __( 'Creative Mail for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=creativemail',
-				'is_built_by_wc' => false,
-			),
-			'codistoconnect'                    => array(
+			'codistoconnect'                => array(
 				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
@@ -195,14 +188,14 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=codisto-settings',
 				'is_built_by_wc' => true,
 			),
-			'codistoconnect:alt'                => array(
+			'codistoconnect:alt'            => array(
 				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=codisto-settings',
 				'is_built_by_wc' => true,
 			),
-			'woocommerce-payments'              => array(
+			'woocommerce-payments'          => array(
 				'name'           => __( 'WooPayments', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -417,7 +410,7 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 				'min_wp_version' => '5.9',
 			),
-			'woocommerce-services:shipping'     => array(
+			'woocommerce-services:shipping' => array(
 				'name'           => __( 'WooCommerce Shipping', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/woo.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -486,7 +479,7 @@ class DefaultFreeExtensions {
 				),
 				'is_built_by_wc' => true,
 			),
-			'woocommerce-services:tax'          => array(
+			'woocommerce-services:tax'      => array(
 				'name'           => __( 'WooCommerce Tax', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/woo.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -568,7 +561,7 @@ class DefaultFreeExtensions {
 				),
 				'is_built_by_wc' => true,
 			),
-			'jetpack'                           => array(
+			'jetpack'                       => array(
 				'name'           => __( 'Jetpack', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/jetpack.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -591,7 +584,7 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => false,
 				'min_wp_version' => '6.0',
 			),
-			'mailpoet'                          => array(
+			'mailpoet'                      => array(
 				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
@@ -614,14 +607,14 @@ class DefaultFreeExtensions {
 				),
 				'is_built_by_wc' => true,
 			),
-			'mailpoet:alt'                      => array(
+			'mailpoet:alt'                  => array(
 				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			),
-			'tiktok-for-business'               => array(
+			'tiktok-for-business'           => array(
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
 				'description'    =>
@@ -836,7 +829,7 @@ class DefaultFreeExtensions {
 				),
 				'is_built_by_wc' => false,
 			),
-			'tiktok-for-business:alt'           => array(
+			'tiktok-for-business:alt'       => array(
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(

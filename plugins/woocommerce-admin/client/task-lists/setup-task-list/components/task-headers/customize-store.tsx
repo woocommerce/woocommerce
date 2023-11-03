@@ -4,7 +4,6 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { TaskType } from '@woocommerce/data';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -13,6 +12,7 @@ import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
 const CustomizeStoreHeader = ( {
 	task,
+	goToTask,
 }: {
 	task: TaskType;
 	goToTask: React.MouseEventHandler;
@@ -40,12 +40,7 @@ const CustomizeStoreHeader = ( {
 				<Button
 					isSecondary={ task.isComplete }
 					isPrimary={ ! task.isComplete }
-					onClick={ () => {
-						// We need to use window.location.href instead of navigateTo because we need to initiate a full page refresh to ensure that all dependencies are loaded.
-						window.location.href = getAdminLink(
-							'admin.php?page=wc-admin&path=%2Fcustomize-store'
-						);
-					} }
+					onClick={ goToTask }
 				>
 					{ __( 'Start customizing', 'woocommerce' ) }
 				</Button>

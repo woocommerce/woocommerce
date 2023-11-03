@@ -1333,12 +1333,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			),
 			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
-				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+				'shortcode' => '[' . apply_filters_deprecated( 'woocommerce_cart_shortcode_tag', array( 'woocommerce_cart' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
 				'block'     => 'woocommerce/cart',
 			),
 			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
-				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+				'shortcode' => '[' . apply_filters_deprecated( 'woocommerce_checkout_shortcode_tag', array( 'woocommerce_checkout' ), '8.3.0', 'woocommerce_create_pages' ) . ']',
 				'block'     => 'woocommerce/checkout',
 			),
 			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
@@ -1388,6 +1388,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			if ( $values['block'] && get_post( $page_id ) ) {
 				$block_required = true;
 				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
+
+				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
+				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
+					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
+				}
 			}
 
 			// Wrap up our findings into an output array.
