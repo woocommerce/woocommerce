@@ -56,7 +56,8 @@ jobs:
 
       - name: Check if user is a community contributor
         id: check
-        run: node .github/workflows/scripts/is-community-contributor.js
+        script: |
+          const script = require(./.github/workflows/scripts/is-community-contributor.js);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
