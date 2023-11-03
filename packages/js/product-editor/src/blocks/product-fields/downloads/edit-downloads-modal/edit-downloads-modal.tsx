@@ -132,7 +132,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 		>
 			<div className="woocommerce-edit-downloads-modal__preview">
 				{ isImage( file ) && (
-					<ImageGallery allowDragging={ false }>
+					<ImageGallery allowDragging={ false } columns={ 1 }>
 						<ImageGalleryItem
 							key={ id }
 							alt={ name }
