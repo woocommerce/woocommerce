@@ -7,7 +7,7 @@ This document provides an overview of the data stores registered with `wp.data` 
 The **[Cart Store (wc/store/cart)](cart.md)** is responsible for handling cart-related data and operations. To access this store using a constant, you can use:
 
 ```ts
-import { CART_STORE_KEY } from '@woocommerce/blocks-data';
+const { CART_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Checkout Store (wc/store/checkout)](checkout.md)
@@ -15,7 +15,7 @@ import { CART_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Checkout Store (wc/store/checkout)](checkout.md)** manages the checkout process, ensuring a seamless experience for users. To access this store using a constant, you can use:
 
 ```ts
-import { CHECKOUT_STORE_KEY } from '@woocommerce/blocks-data';
+const { CHECKOUT_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Collections Store (wc/store/collections)](collections.md)
@@ -23,7 +23,7 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Collections Store (wc/store/collections)](collections.md)** holds data indexed by namespace, model name, and query string. To access this store using a constant, you can use:
 
 ```ts
-import { COLLECTIONS_STORE_KEY } from '@woocommerce/blocks-data';
+const { COLLECTIONS_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Payment Store (wc/store/payment)](payment.md)
@@ -31,7 +31,7 @@ import { COLLECTIONS_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Payment Store (wc/store/payment)](payment.md)** deals with all payment-related data and transactions. To access this store using a constant, you can use:
 
 ```ts
-import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
+const { PAYMENT_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Query-State Store (wc/store/query-state)](query-state.md)
@@ -39,7 +39,7 @@ import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Query-State Store (wc/store/query-state)](query-state.md)** holds arbitrary values indexed by context and key. It's often used for tracking the state of query objects for a given context. To access this store using a constant, you can use:
 
 ```ts
-import { QUERY_STATE_STORE_KEY } from '@woocommerce/blocks-data';
+const { QUERY_STATE_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Schema Store (wc/store/schema)](schema.md)
@@ -47,7 +47,7 @@ import { QUERY_STATE_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Schema Store (wc/store/schema)](schema.md)** is primarily used for accessing routes and has more of an internal usage. To access this store using a constant, you can use:
 
 ```ts
-import { SCHEMA_STORE_KEY } from '@woocommerce/blocks-data';
+const { SCHEMA_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Store Notices Store (wc/store/store-notices)](store-notices.md)
@@ -55,7 +55,7 @@ import { SCHEMA_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Store Notices Store (wc/store/store-notices)](store-notices.md)** is dedicated to handling various store notices and alerts. To access this store using a constant, you can use:
 
 ```ts
-import { STORE_NOTICES_STORE_KEY } from '@woocommerce/blocks-data';
+const { STORE_NOTICES_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## [Validation Store (wc/store/validation)](validation.md)
@@ -63,7 +63,7 @@ import { STORE_NOTICES_STORE_KEY } from '@woocommerce/blocks-data';
 The **[Validation Store (wc/store/validation)](validation.md)** holds data relating to validation errors, it is primarily used in the Cart and Checkout flows to ensure the Checkout doesn't continue while invalid data is present. To access this store using a constant, you can use:
 
 ```ts
-import { VALIDATION_STORE_KEY } from '@woocommerce/blocks-data';
+const { VALIDATION_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 <!-- FEEDBACK -->

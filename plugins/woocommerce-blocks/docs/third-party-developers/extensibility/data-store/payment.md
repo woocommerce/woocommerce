@@ -39,7 +39,7 @@ Currently, all the actions are internal-only while we determine which ones will 
 To utilize this store you will import the `PAYMENT_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+const { PAYMENT_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Selectors

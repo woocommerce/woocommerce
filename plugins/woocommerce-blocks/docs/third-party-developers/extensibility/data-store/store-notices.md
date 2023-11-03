@@ -20,7 +20,7 @@ The Store Notices Store allows to register and unregister containers for notices
 To utilize this store you will import the `STORE_NOTICES_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { STORE_NOTICES_STORE_KEY } from '@woocommerce/block-data';
+const { STORE_NOTICES_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Example

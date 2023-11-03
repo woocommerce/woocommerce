@@ -19,7 +19,7 @@ The Collections Store allows to retrieve product-related collections within WooC
 To utilize this store you will import the COLLECTIONS_STORE_KEY in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { COLLECTIONS_STORE_KEY } from '@woocommerce/block-data';
+const { COLLECTIONS_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Actions
