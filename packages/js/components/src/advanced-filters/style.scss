@@ -1,0 +1,244 @@
+.woocommerce-filters-advanced {
+	margin: $gap-large 0;
+
+	.components-card__body {
+		background-color: $gray-100;
+		overflow: initial;
+
+		&.is-size-small:hover,
+		ul li:hover {
+			background-color: $gray-200;
+		}
+	}
+
+	.components-select-control {
+		.components-input-control__container {
+			.components-select-control__input {
+				height: 38px;
+				padding: 0 0 0 $gap-smaller;
+				margin: 0;
+			}
+		}
+	}
+
+	.components-card__header {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		div {
+			display: flex;
+			line-height: 38px;
+		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		margin: $gap 0;
+		border: 1px solid $gray-400;
+	}
+	@include breakpoint( '<400px' ) {
+		margin: $gap-small 0;
+	}
+
+	.woocommerce-filters-advanced__title-select {
+		width: 70px;
+		display: inline-block;
+		margin: 0 $gap-smaller;
+	}
+}
+
+.woocommerce-filters-advanced__list {
+	margin: 0;
+}
+
+.woocommerce-filters-advanced__list-item {
+	padding: 0 $gap 0 0;
+	margin: 0;
+	display: grid;
+	grid-template-columns: 1fr 40px;
+	border-bottom: 1px solid $gray-400;
+
+	&:hover {
+		background-color: $gray-200;
+	}
+
+	.woocommerce-filters-advanced__line-item {
+		@include set-grid-item-position( 2, 2 );
+	}
+
+	fieldset {
+		padding: $gap-smaller $gap-smaller $gap-smaller $gap;
+	}
+
+	.woocommerce-filters-advanced__remove {
+		width: 40px;
+		height: 38px;
+		align-self: center;
+		color: $gray-700;
+		padding: $gap-smaller;
+
+		@include breakpoint( '<400px' ) {
+			position: absolute;
+			top: 0;
+			right: $gap-smallest;
+		}
+	}
+
+	.components-form-token-field {
+		border-radius: 4px;
+	}
+
+	@include breakpoint( '<400px' ) {
+		display: block;
+		position: relative;
+		padding: $gap-smaller $gap-smaller 0 0;
+	}
+}
+
+.woocommerce-filters-advanced__add-filter {
+	margin: 0;
+	display: block;
+
+	div div {
+		display: inline-block;
+	}
+
+	.components-popover:not(.is-mobile) .components-popover__content {
+		min-width: 180px;
+	}
+
+	.components-popover__content > div {
+		width: 100%;
+	}
+}
+
+.woocommerce-filters-advanced__fieldset {
+	& > div {
+		padding: 0 $gap-smallest;
+
+		@include breakpoint( '<782px' ) {
+			width: 100%;
+			padding: $gap-smallest 0;
+		}
+
+		@include breakpoint( '<400px' ) {
+			//display: block;
+			//margin: 0;
+		}
+	}
+
+	display: flex;
+	align-items: center;
+
+	@include breakpoint( '<782px' ) {
+		display: block;
+	}
+
+	&.is-english {
+		display: grid;
+		grid-template-columns: 100px 150px 1fr;
+
+		.woocommerce-filters-advanced__fieldset-item {
+			@include set-grid-item-position( 3, 3 );
+
+			&:nth-child(1) {
+				display: flex;
+				align-items: center;
+			}
+
+			.components-base-control__field {
+				margin-bottom: 0;
+			}
+		}
+
+		@include breakpoint( '<782px' ) {
+			display: block;
+		}
+	}
+}
+
+.woocommerce-filters-advanced__rule {
+	width: 150px;
+}
+
+.woocommerce-filters-advanced__input {
+	width: 100%;
+
+	&.woocommerce-search.woocommerce-select-control {
+		.woocommerce-select-control__control {
+			height: 38px;
+		}
+	}
+}
+
+.woocommerce-filters-advanced__add-filter-dropdown {
+	display: inline-block;
+}
+
+.woocommerce-filters-advanced__add-button {
+	align-items: center;
+	color: $gray-700;
+	padding: $gap-smaller;
+
+	svg {
+		fill: currentColor;
+		margin: 0 6px 0 0;
+	}
+}
+
+.woocommerce-filters-advanced__controls {
+	.components-button {
+		margin-right: $gap;
+	}
+}
+
+.woocommerce-filters-advanced__add-dropdown {
+	padding: $gap-smaller 0;
+
+	li {
+		margin: 0;
+	}
+
+	.components-button {
+		width: 100%;
+		padding: $gap-smaller;
+
+		&:hover {
+			background-color: $gray-200;
+		}
+
+		&:not(:disabled):not([aria-disabled='true']):focus {
+			background-color: $gray-100;
+			box-shadow: none;
+		}
+	}
+}
+
+.woocommerce-filters-advanced__input-range {
+	align-items: center;
+	display: grid;
+	grid-template-columns: 1fr;
+
+	&.is-between {
+		grid-template-columns: 1fr 36px 1fr;
+	}
+
+	input {
+		height: 38px;
+		margin: 0;
+	}
+
+	.separator {
+		text-align: center;
+	}
+}
+
+.woocommerce-filters-advanced__attribute-fieldset {
+	align-items: center;
+	display: grid;
+	grid-template-columns: 1fr 20px 1fr;
+
+	.woocommerce-filters-advanced__attribute-field-separator {
+		padding: 0 6px;
+	}
+}

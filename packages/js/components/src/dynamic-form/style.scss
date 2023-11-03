@@ -1,0 +1,13 @@
+.woocommerce-component_dynamic-form {
+	.components-base-control {
+		margin-top: $gap;
+		margin-bottom: $gap;
+		position: relative;
+
+		&.has-error {
+			.components-base-control__help {
+				left: 0 !important;
+			}
+		}
+	}
+}

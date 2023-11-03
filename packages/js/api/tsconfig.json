@@ -1,0 +1,11 @@
+{
+	"extends": "../../../tsconfig.base.json",
+	"compilerOptions": {
+		"types": [ "node", "jest", "create-hmac" ],
+		"rootDir": "src",
+		"outDir": "dist",
+		"target": "es5",
+		"typeRoots": [ "./node_modules/@types" ]
+	},
+	"include": [ "src/" ]
+}

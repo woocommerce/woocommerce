@@ -1,0 +1,25 @@
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea
+.vscode/
+project.xml
+project.properties
+.project
+.settings*
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+
+# Dependencies
+vendor/
+node_modules/
+
+# Built assets
+build/
+woocommerce-beta-tester.zip
+build
+build-module
+build-style

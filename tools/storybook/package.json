@@ -1,0 +1,57 @@
+{
+	"name": "@woocommerce/storybook",
+	"title": "WooCommerce Storybook",
+	"description": "Storybook implementation for WooCommerce",
+	"homepage": "https://woocommerce.github.io/woocommerce-admin/#/components/",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"scripts": {
+		"build-storybook": "build-storybook  -c ./.storybook",
+		"preinstall": "npx only-allow pnpm",
+		"build-woocommerce": "pnpm --filter=woocommerce run build",
+		"storybook": "pnpm run build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
+	},
+	"devDependencies": {
+		"@babel/plugin-proposal-class-properties": "^7.16.7",
+		"@babel/preset-env": "^7.16.11",
+		"@babel/runtime": "^7.17.2",
+		"@storybook/addon-a11y": "^6.5.17-alpha.0",
+		"@storybook/addon-actions": "^6.5.17-alpha.0",
+		"@storybook/addon-console": "^1.2.3",
+		"@storybook/addon-controls": "^6.5.17-alpha.0",
+		"@storybook/addon-docs": "^6.5.17-alpha.0",
+		"@storybook/addon-knobs": "^6.4.0",
+		"@storybook/addon-links": "^6.5.17-alpha.0",
+		"@storybook/addon-storysource": "^6.5.17-alpha.0",
+		"@storybook/addon-viewport": "^6.5.17-alpha.0",
+		"@storybook/addons": "^6.5.17-alpha.0",
+		"@storybook/api": "^6.5.17-alpha.0",
+		"@storybook/builder-webpack5": "^6.5.17-alpha.0",
+		"@storybook/components": "^6.5.17-alpha.0",
+		"@storybook/core-events": "^6.5.17-alpha.0",
+		"@storybook/manager-webpack5": "^6.5.17-alpha.0",
+		"@storybook/react": "^6.5.17-alpha.0",
+		"@storybook/theming": "^6.5.17-alpha.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"typescript": "^5.1.6",
+		"webpack": "^5.70.0"
+	},
+	"dependencies": {
+		"@babel/preset-typescript": "^7.16.7"
+	}
+}

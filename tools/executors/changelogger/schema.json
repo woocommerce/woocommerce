@@ -1,0 +1,13 @@
+{
+	"cli": "nx",
+	"id": "Changelogger",
+	"description": "Executes Jetpack Changelogger scripts.",
+	"type": "object",
+	"properties": {
+		"action": {
+			"type": "string",
+			"description": "Action to take"
+		}
+	},
+	"required": [ "action" ]
+}

@@ -1,0 +1,24 @@
+.woocommerce-product-breadcrumbs {
+	display: flex;
+	align-items: center;
+}
+
+.woocommerce-product-breadcrumbs__item {
+	font-weight: 400;
+	color: $gray-700;
+
+	a {
+		color: $gray-700;
+		text-decoration: none;
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+.woocommerce-product-breadcrumbs__separator {
+	display: inline-flex;
+	path {
+		fill: $gray-700;
+	}
+}

@@ -1,0 +1,38 @@
+<!-- wp:heading -->
+<h2 id="template-changes">Template Changes</h2>
+<!-- /wp:heading -->
+
+<% if (changes.templates.size) { %>
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <thead>
+        <th>
+          <strong>Template</strong>
+        </th>
+        <th>
+          <strong>GitHub Link</strong>
+        </th>
+      </thead>
+      <tbody>
+
+        <!-- for each template change (template / description) -->
+        <% changes.templates.forEach((change) => { %>
+          <tr>
+            <td><%= change.filePath %></td>
+            <td>
+              <% change.pullRequests.forEach( ( pullRequest ) => { %>
+                <a href="https://github.com/woocommerce/woocommerce/pull/<%= pullRequest %>">#<%= pullRequest %></a>
+              <% }) %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } else { %>
+  <!-- wp:paragraph -->
+  <p>There are no template changes in this release.</p>
+  <!-- /wp:paragraph -->
+<% } %>

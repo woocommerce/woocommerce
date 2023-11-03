@@ -1,0 +1,9 @@
+/dist/
+/node_modules
+.eslintrc.js
+.gitignore
+jest.config.js
+package.json
+package-lock.json
+tsconfig.json
+__tests__

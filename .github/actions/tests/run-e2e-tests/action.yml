@@ -1,0 +1,54 @@
+name: Run E2E tests
+description: Runs the WooCommerce Core E2E tests and generates Allure report.
+permissions: {}
+
+inputs:
+    report-name:
+        description: Name of Allure report to be generated.
+        required: true
+    tests:
+        description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
+    playwright-config:
+        description: The Playwright configuration file to use.
+        default: playwright.config.js
+
+outputs:
+    result:
+        description: Whether the test passed or failed.
+        value: ${{ steps.run-e2e-tests.conclusion }}
+
+runs:
+    using: composite
+    steps:
+        - name: Download and install Chromium browser.
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: pnpm exec playwright install chromium
+
+        - name: Run E2E tests.
+          id: run-e2e-tests
+          env:
+              FORCE_COLOR: 1
+              USE_WP_ENV: 1
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: |
+              pnpm exec playwright test \
+              --config=tests/e2e-pw/${{ inputs.playwright-config }} \
+              ${{ inputs.tests }}
+
+        - name: Generate Test report.
+          if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+        - name: Archive test report
+          if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+          uses: actions/upload-artifact@v3
+          with:
+              name: ${{ inputs.report-name }}
+              path: |
+                  ${{ env.ALLURE_RESULTS_DIR }}
+                  ${{ env.ALLURE_REPORT_DIR }}
+              retention-days: 20

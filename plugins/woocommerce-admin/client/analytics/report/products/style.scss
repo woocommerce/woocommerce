@@ -1,0 +1,16 @@
+
+
+.woocommerce-table__product-categories {
+	> .woocommerce-table__breadcrumbs {
+		display: inline-block;
+		margin-right: $gap-small;
+	}
+	.components-popover__content {
+		padding: 0 $gap;
+		text-align: left;
+	}
+	.components-popover__content .woocommerce-table__breadcrumbs {
+		margin-top: $gap-small;
+		margin-bottom: $gap-small;
+	}
+}

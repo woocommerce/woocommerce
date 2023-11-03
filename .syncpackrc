@@ -1,0 +1,245 @@
+{
+	"indent": "\t",
+	"semverRange": "^",
+	"customTypes": {
+		"engines": {
+			"path": "engines",
+			"strategy": "versionsByName"
+		}
+	},
+	"versionGroups": [
+		{
+			"dependencies": [
+				"pnpm"
+			],
+			"pinVersion": "^8.6.7",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"node"
+			],
+			"dependencyTypes": [
+				"engines"
+			],
+			"pinVersion": "^16.14.1",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"pinVersion": "^5.54.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"pinVersion": "^17.0.2",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.3.7"
+		},
+		{
+			"dependencies": [
+				"react",
+				"react-dom"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^17.0.2"
+		},
+		{
+			"dependencies": [
+				"typescript"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^5.1.6"
+		},
+		{
+			"dependencies": [
+				"eslint"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.32.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/babel-plugin-import-jsx-pragma",
+				"@wordpress/babel-preset-default",
+				"@wordpress/stylelint-config",
+				"@wordpress/scripts",
+				"@wordpress/jest-console",
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/e2e-test-utils",
+				"@wordpress/jest-preset-default",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/custom-templated-path-webpack-plugin",
+				"@wordpress/postcss-themes"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/block**",
+				"@wordpress/viewport",
+				"@wordpress/interface",
+				"@wordpress/router",
+				"@wordpress/edit-site"
+			],
+			"packages": [
+				"@woocommerce/block-templates",
+				"@woocommerce/product-editor",
+				"woocommerce/client/admin",
+				"@woocommerce/components"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"@woocommerce/experimental"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/prettier-config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.17.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/eslint-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "14.7.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/env"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.2.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-6.0"
+		},
+		{
+			"dependencies": [
+				"@types/wordpress__components"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^19.10.3"
+		},
+		{
+			"dependencies": [
+				"postcss-loader"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.3.0"
+		},
+		{
+			"dependencies": [
+				"postcss"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.4.7"
+		},
+		{
+			"dependencies": [
+				"@types/node"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^16.18.18"
+		},
+		{
+			"label": "Only manage versions for these dependencies",
+			"dependencies": [
+				"@types/node",
+				"@types/react",
+				"@types/wordpress__components",
+				"@typescript-eslint/**",
+				"@wordpress/**",
+				"config",
+				"eslint",
+				"node",
+				"pnpm",
+				"postcss",
+				"postcss-loader",
+				"react",
+				"react-dom",
+				"typescript"
+			],
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Ignore versions for everything else",
+			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		}
+	]
+}

@@ -1,0 +1,90 @@
+{
+    "code": "HN",
+    "name": "Honduras",
+    "states": [
+        {
+            "code": "HN-AT",
+            "name": "Atlántida"
+        },
+        {
+            "code": "HN-IB",
+            "name": "Bay Islands"
+        },
+        {
+            "code": "HN-CH",
+            "name": "Choluteca"
+        },
+        {
+            "code": "HN-CL",
+            "name": "Colón"
+        },
+        {
+            "code": "HN-CM",
+            "name": "Comayagua"
+        },
+        {
+            "code": "HN-CP",
+            "name": "Copán"
+        },
+        {
+            "code": "HN-CR",
+            "name": "Cortés"
+        },
+        {
+            "code": "HN-EP",
+            "name": "El Paraíso"
+        },
+        {
+            "code": "HN-FM",
+            "name": "Francisco Morazán"
+        },
+        {
+            "code": "HN-GD",
+            "name": "Gracias a Dios"
+        },
+        {
+            "code": "HN-IN",
+            "name": "Intibucá"
+        },
+        {
+            "code": "HN-LE",
+            "name": "Lempira"
+        },
+        {
+            "code": "HN-LP",
+            "name": "La Paz"
+        },
+        {
+            "code": "HN-OC",
+            "name": "Ocotepeque"
+        },
+        {
+            "code": "HN-OL",
+            "name": "Olancho"
+        },
+        {
+            "code": "HN-SB",
+            "name": "Santa Bárbara"
+        },
+        {
+            "code": "HN-VA",
+            "name": "Valle"
+        },
+        {
+            "code": "HN-YO",
+            "name": "Yoro"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/hn"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

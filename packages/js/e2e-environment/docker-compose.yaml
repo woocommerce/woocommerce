@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+
+  db:
+    container_name: "${APP_NAME}_db"
+    image: mariadb:${DC_MARIADB_VERSION}
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+        test: ["CMD-SHELL", "mysqladmin ping -P 3306 --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} | grep 'mysqld is alive' || exit 1"]
+        interval: 2s
+        retries: 30
+
+  php:
+    container_name: "${APP_NAME}_php"
+    image: php:${DC_PHP_VERSION}
+    depends_on:
+        db:
+            condition: service_healthy
+
+  wordpress-www:
+    container_name: "${APP_NAME}_wordpress-www"
+    depends_on:
+        db:
+            condition: service_healthy
+    image: wordpress:${WORDPRESS_VERSION}
+    ports:
+      - ${WORDPRESS_PORT}:80
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: "${WORDPRESS_TABLE_PREFIX}"
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - wordpress:/var/www/html
+      - ./upload.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - "../../../${WC_E2E_FOLDER}:${WC_E2E_FOLDER_MAPPING}"
+
+  wordpress-cli:
+    container_name: "${APP_NAME}_wordpress-cli"
+    depends_on:
+        - wordpress-www
+    build:
+        context: ./docker/wp-cli
+    environment:
+        WORDPRESS_PORT: ${WORDPRESS_PORT}
+        WORDPRESS_HOST: wordpress-www:80
+        WORDPRESS_TITLE: ${WORDPRESS_TITLE}
+        WORDPRESS_LOGIN: ${WORDPRESS_LOGIN}
+        WORDPRESS_PASSWORD: ${WORDPRESS_PASSWORD}
+        WORDPRESS_EMAIL: "${WORDPRESS_EMAIL}"
+        WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+        WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+        DOMAIN_NAME:
+
+    volumes:
+      - wordpress:/var/www/html
+      - "../../../${WC_E2E_FOLDER}:${WC_E2E_FOLDER_MAPPING}"
+
+volumes:
+  db:
+  wordpress:

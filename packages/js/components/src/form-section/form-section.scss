@@ -1,0 +1,27 @@
+.woocommerce-form-section {
+	display: grid;
+	grid-template-columns: 32% auto;
+	gap: $gap-large;
+
+    &__title {
+        margin-bottom: $gap-small;
+        display: flex;
+        align-items: center;
+    }
+
+    &__description {
+        &>*:first-child {
+            margin-top: 0;
+        }
+    }
+
+	&__content {
+        .components-card {
+            margin-bottom: $gap;
+        }
+
+		> * {
+			width: 100%;
+		}
+	}
+}

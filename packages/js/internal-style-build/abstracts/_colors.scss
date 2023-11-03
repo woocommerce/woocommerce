@@ -1,0 +1,35 @@
+@import '@automattic/color-studio/dist/color-variables.scss';
+@import '@wordpress/base-styles/colors.scss';
+
+$transparent: rgba(255, 255, 255, 0);
+
+$gray-text: $gray-700;
+$gray-text-hover: $gray-900;
+
+// Gutenberg
+$button-hover: #fafafa;
+$button-hover-border: #999;
+$button-disabled: #a0a5aa;
+$button-disabled-border: #ddd;
+$button-focus-inner: #00435d;
+$button-focus-outer: #bfe7f3;
+$input-active-border: #00a0d2;
+$input-active-inner: $button-focus-inner;
+$input-active-outer: $button-focus-outer;
+$table-border: #e2e4e7;
+
+// Bright colors
+$valid-green: #4ab866;
+$notice-yellow: #ffb900;
+$error-red: #d94f4f;
+$box-shadow-blue: #5b9dd9;
+$core-orange: #ca4a1f;
+
+$button: #f0f2f4;
+$button-border: darken($button, 20%);
+
+// Blues
+$core-blue-dark-900: #0071a1;
+
+// WooCommerce brand colors
+$woocommerce-brand-purple: #3c2861;

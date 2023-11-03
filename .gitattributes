@@ -1,20 +1,15 @@
-# Set the default behavior, in case people don't have `core.autocrlf` set.
-* text=auto
+*       text=auto
 
-# Declare files that will always have LF line endings on checkout.
-*.php text eol=lf
+# Force LF In Configuration Files
+*.md    text    eol=lf
+*.json  text    eol=lf
+*.yml   text    eol=lf
 
-# Remove files for archives generated using `git archive`.
-/.*                export-ignore
-bin                export-ignore
-CODE_OF_CONDUCT.md export-ignore
-changelog.txt      export-ignore
-composer.*         export-ignore
-Gruntfile.js       export-ignore
-package.json       export-ignore
-package-lock.json  export-ignore
-phpcs.xml          export-ignore
-phpunit.*          export-ignore
-README.md          export-ignore
-renovate.json      export-ignore
-tests              export-ignore
+# Force LF In Code Files
+*.php   text    eol=lf
+*.js    text    eol=lf
+*.jsx   text    eol=lf
+*.ts    text    eol=lf
+*.tsx   text    eol=lf
+*.css   text    eol=lf
+*.scss  text    eol=lf

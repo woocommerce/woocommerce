@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use createSelector for getPermalinkParts selector, to cache result.

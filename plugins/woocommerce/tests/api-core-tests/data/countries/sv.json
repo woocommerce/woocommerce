@@ -1,0 +1,74 @@
+{
+    "code": "SV",
+    "name": "El Salvador",
+    "states": [
+        {
+            "code": "SV-AH",
+            "name": "Ahuachapán"
+        },
+        {
+            "code": "SV-CA",
+            "name": "Cabañas"
+        },
+        {
+            "code": "SV-CH",
+            "name": "Chalatenango"
+        },
+        {
+            "code": "SV-CU",
+            "name": "Cuscatlán"
+        },
+        {
+            "code": "SV-LI",
+            "name": "La Libertad"
+        },
+        {
+            "code": "SV-MO",
+            "name": "Morazán"
+        },
+        {
+            "code": "SV-PA",
+            "name": "La Paz"
+        },
+        {
+            "code": "SV-SA",
+            "name": "Santa Ana"
+        },
+        {
+            "code": "SV-SM",
+            "name": "San Miguel"
+        },
+        {
+            "code": "SV-SO",
+            "name": "Sonsonate"
+        },
+        {
+            "code": "SV-SS",
+            "name": "San Salvador"
+        },
+        {
+            "code": "SV-SV",
+            "name": "San Vicente"
+        },
+        {
+            "code": "SV-UN",
+            "name": "La Unión"
+        },
+        {
+            "code": "SV-US",
+            "name": "Usulután"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/sv"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

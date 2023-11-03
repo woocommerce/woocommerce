@@ -1,0 +1,101 @@
+$gutenberg-blue: var(--wp-admin-theme-color);
+
+.woocommerce-product-mvp-ces-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	// the left/right padding is set to this to match the padding of
+	// .block-editor-block-list__layout.is-root-container and
+	// .editor-styles-wrapper combined
+	padding: $gap calc(2 * $gap + $gap-small);
+	gap: $gap;
+
+	@include breakpoint(">782px") {
+		padding: $gap 0;
+		max-width: 650px;
+		margin: 0 auto;
+	}
+
+	.woocommerce-pill {
+		background-color: $studio-yellow-5;
+		border: 0;
+		font-size: 1em;
+	}
+
+	&__close-button {
+		padding: 0;
+	}
+
+	&__message {
+		flex: 1;
+		flex-wrap: wrap;
+		align-items: center;
+		white-space: pre-wrap;
+	}
+
+	&__message-buttons {
+		white-space: nowrap;
+
+		button.is-link {
+			text-decoration: none;
+		}
+	}
+}
+.woocommerce-customer-effort-score {
+	.components-modal__content {
+		> p {
+			text-transform: uppercase;
+			color: $gray-900;
+		}
+		> .components-base-control {
+			margin-top: $gap-small;
+		}
+
+		.woocommerce-product-feedback__additional-thoughts,
+		.woocommerce-product-feedback__email {
+			.components-base-control__help {
+				color: $error-red;
+			}
+			.components-base-control__label {
+				color: $gray-900;
+				line-height: 16px;
+				text-transform: uppercase;
+				.woocommerce-product-feedback__optional-input {
+					color: $gray-700;
+				}
+			}
+			.components-base-control__field {
+				> span {
+					font-size: 12px;
+					line-height: 16px;
+					color: $gray-700;
+				}
+			}
+		}
+	}
+	&__selection {
+		.components-radio-control__option {
+			margin-right: 0;
+			label {
+				color: $gray-900;
+				padding: 1em 0;
+				width: 8.8em;
+				height: 80px;
+				&::before {
+					margin: $gap-smaller 0;
+				}
+				&:hover {
+					box-shadow: 0 0 0 1.5px $gutenberg-blue;
+					border-radius: 2px;
+					background-color: #fff;
+				}
+			}
+		}
+	}
+	&__errors {
+		> p {
+			color: $error-red;
+		}
+	}
+}

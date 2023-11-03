@@ -1,0 +1,122 @@
+{
+    "code": "IE",
+    "name": "Ireland",
+    "states": [
+        {
+            "code": "CW",
+            "name": "Carlow"
+        },
+        {
+            "code": "CN",
+            "name": "Cavan"
+        },
+        {
+            "code": "CE",
+            "name": "Clare"
+        },
+        {
+            "code": "CO",
+            "name": "Cork"
+        },
+        {
+            "code": "DL",
+            "name": "Donegal"
+        },
+        {
+            "code": "D",
+            "name": "Dublin"
+        },
+        {
+            "code": "G",
+            "name": "Galway"
+        },
+        {
+            "code": "KY",
+            "name": "Kerry"
+        },
+        {
+            "code": "KE",
+            "name": "Kildare"
+        },
+        {
+            "code": "KK",
+            "name": "Kilkenny"
+        },
+        {
+            "code": "LS",
+            "name": "Laois"
+        },
+        {
+            "code": "LM",
+            "name": "Leitrim"
+        },
+        {
+            "code": "LK",
+            "name": "Limerick"
+        },
+        {
+            "code": "LD",
+            "name": "Longford"
+        },
+        {
+            "code": "LH",
+            "name": "Louth"
+        },
+        {
+            "code": "MO",
+            "name": "Mayo"
+        },
+        {
+            "code": "MH",
+            "name": "Meath"
+        },
+        {
+            "code": "MN",
+            "name": "Monaghan"
+        },
+        {
+            "code": "OY",
+            "name": "Offaly"
+        },
+        {
+            "code": "RN",
+            "name": "Roscommon"
+        },
+        {
+            "code": "SO",
+            "name": "Sligo"
+        },
+        {
+            "code": "TA",
+            "name": "Tipperary"
+        },
+        {
+            "code": "WD",
+            "name": "Waterford"
+        },
+        {
+            "code": "WH",
+            "name": "Westmeath"
+        },
+        {
+            "code": "WX",
+            "name": "Wexford"
+        },
+        {
+            "code": "WW",
+            "name": "Wicklow"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ie"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

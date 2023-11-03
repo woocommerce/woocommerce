@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix up updateItem query in CRUD data store

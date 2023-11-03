@@ -1,0 +1,74 @@
+.text-control-with-affixes {
+	display: inline-flex;
+	flex-direction: row;
+	width: 100%;
+
+	input[type='email'],
+	input[type='password'],
+	input[type='url'],
+	input[type='text'],
+	input[type='number'] {
+		flex-grow: 1;
+		margin: 0;
+
+		&:disabled {
+			border-right-width: 0;
+
+			& + .text-control-with-affixes__suffix {
+				border-left: 1px solid $gray-100;
+			}
+		}
+	}
+
+	&.text-control-with-prefix input {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+
+	&.text-control-with-suffix input {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+}
+
+.text-control-with-affixes__prefix,
+.text-control-with-affixes__suffix {
+	position: relative;
+	background: $studio-white;
+	border-width: 1px;
+	border-style: solid;
+	border-color: $gray-700;
+	color: $gray-text;
+	padding: 7px 14px;
+	white-space: nowrap;
+	flex: 1 0 auto;
+	font-size: 14px;
+	line-height: 1.5;
+
+	.disabled & {
+		background: rgba(255, 255, 255, 0.5);
+		border-color: rgba(222, 222, 222, 0.75);
+		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+		color: rgba(51, 51, 51, 0.5);
+	}
+}
+
+.text-control-with-affixes__prefix {
+	border-right: none;
+	border-radius: 4px 0 0 4px;
+
+	& + input[type='email'],
+	& + input[type='password'],
+	& + input[type='url'],
+	& + input[type='text'],
+	& + input[type='number'] {
+		&:disabled {
+			border-left-color: $gray-100;
+		}
+	}
+}
+
+.text-control-with-affixes__suffix {
+	border-left: none;
+	border-radius: 0 4px 4px 0;
+}

@@ -1,0 +1,82 @@
+{
+    "code": "NZ",
+    "name": "New Zealand",
+    "states": [
+        {
+            "code": "NTL",
+            "name": "Northland"
+        },
+        {
+            "code": "AUK",
+            "name": "Auckland"
+        },
+        {
+            "code": "WKO",
+            "name": "Waikato"
+        },
+        {
+            "code": "BOP",
+            "name": "Bay of Plenty"
+        },
+        {
+            "code": "TKI",
+            "name": "Taranaki"
+        },
+        {
+            "code": "GIS",
+            "name": "Gisborne"
+        },
+        {
+            "code": "HKB",
+            "name": "Hawke’s Bay"
+        },
+        {
+            "code": "MWT",
+            "name": "Manawatu-Wanganui"
+        },
+        {
+            "code": "WGN",
+            "name": "Wellington"
+        },
+        {
+            "code": "NSN",
+            "name": "Nelson"
+        },
+        {
+            "code": "MBH",
+            "name": "Marlborough"
+        },
+        {
+            "code": "TAS",
+            "name": "Tasman"
+        },
+        {
+            "code": "WTC",
+            "name": "West Coast"
+        },
+        {
+            "code": "CAN",
+            "name": "Canterbury"
+        },
+        {
+            "code": "OTA",
+            "name": "Otago"
+        },
+        {
+            "code": "STL",
+            "name": "Southland"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/nz"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

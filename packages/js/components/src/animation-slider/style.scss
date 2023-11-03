@@ -1,0 +1,78 @@
+
+
+@keyframes slide-in-left {
+	0% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+@keyframes slide-out-left {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(-200%);
+	}
+}
+
+@keyframes slide-in-right {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+@keyframes slide-out-right {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(0%);
+	}
+}
+
+$duration: 200ms;
+
+/**
+The CSSTransition element creates a containing div without a class
+ */
+.woocommerce-slide-animation {
+	& > div {
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		display: flex;
+	}
+
+	&.animate-left .slide-enter-active {
+		animation: slide-in-left;
+		animation-duration: $duration;
+	}
+
+	&.animate-left .slide-exit-active {
+		animation: slide-out-left;
+		animation-duration: $duration;
+	}
+
+	&.animate-right .slide-enter-active {
+		animation: slide-in-right;
+		animation-duration: $duration;
+	}
+
+	&.animate-right .slide-exit-active {
+		animation: slide-out-right;
+		animation-duration: $duration;
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		.slide-enter-active,
+		.slide-exit-active {
+			animation: none !important;
+		}
+	}
+}

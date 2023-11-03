@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update the variation name, by using the wc_get_formatted_variation.

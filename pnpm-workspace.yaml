@@ -1,0 +1,12 @@
+packages:
+    - 'packages/js/*'
+    - 'plugins/*'
+    - 'plugins/woocommerce/client/legacy'
+    - 'tools/monorepo-merge'
+    - 'tools/code-analyzer'
+    - 'tools/create-extension'
+    - 'tools/package-release'
+    - 'tools/cherry-pick'
+    - 'tools/release-posts'
+    - 'tools/storybook'
+    - 'tools/monorepo-utils'

@@ -1,0 +1,40 @@
+.posts-navigation {
+	display: flex;
+	align-items: center;
+	background: $white;
+	border: 1px solid $gray-400;
+	border-radius: 2px;
+	width: fit-content;
+	height: 48px;
+
+	&__action,
+	&__prev,
+	&__next {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		padding: 12px;
+		text-decoration: none;
+		height: 100%;
+		color: $gray-900;
+
+		&:focus {
+			z-index: 1;
+		}
+
+		&:disabled,
+		&[aria-disabled='true'] {
+			color: $gray-400;
+		}
+	}
+
+	&__action {
+		border-right: 1px solid $gray-400;
+		border-left: 1px solid $gray-400;
+	}
+
+	.screen-reader-only {
+		@include screen-reader-only();
+	}
+}

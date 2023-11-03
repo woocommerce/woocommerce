@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unify semver range for `config@3.3.7` (from `^3.3.7`). Fix `node_env_var_name is not defined` error.

@@ -1,0 +1,327 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActivityCard should render a basic card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard should render a custom icon on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-customize"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M2 6c0-1.505.78-3.08 2-4 0 .845.69 2 2 2a3 3 0 013 3c0 .386-.079.752-.212 1.091a74.515 74.515 0 012.191 1.808l-2.08 2.08a75.852 75.852 0 01-1.808-2.191A2.977 2.977 0 016 10c-2.21 0-4-1.79-4-4zm12.152 6.848l1.341-1.341A4.446 4.446 0 0017.5 12 4.5 4.5 0 0022 7.5c0-.725-.188-1.401-.493-2.007L18 9l-2-2 3.507-3.507A4.446 4.446 0 0017.5 3 4.5 4.5 0 0013 7.5c0 .725.188 1.401.493 2.007L3 20l2 2 6.848-6.848a68.562 68.562 0 005.977 5.449l1.425 1.149 1.5-1.5-1.149-1.425a68.562 68.562 0 00-5.449-5.977z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard should render a timestamp on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+      <span
+        class="woocommerce-activity-card__date"
+      >
+        3 days ago
+      </span>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard should render an action on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+    <footer
+      class="woocommerce-activity-card__actions"
+    >
+      <button
+        class="components-button is-secondary"
+        type="button"
+      >
+        Action
+      </button>
+    </footer>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard should render an unread bubble on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      class="woocommerce-activity-card__unread"
+    />
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard should render multiple actions on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+    <footer
+      class="woocommerce-activity-card__actions"
+    >
+      <button
+        class="components-button is-primary"
+        type="button"
+      >
+        Action 1
+      </button>
+      <button
+        class="components-button is-secondary"
+        type="button"
+      >
+        Action 2
+      </button>
+    </footer>
+  </section>
+</div>
+`;
+
+exports[`ActivityCard supports a non-date "date" prop on a card 1`] = `
+<div>
+  <section
+    class="woocommerce-activity-card"
+  >
+    <span
+      aria-hidden="true"
+      class="woocommerce-activity-card__icon"
+    >
+      <svg
+        class="gridicon gridicons-notice-outline"
+        height="48"
+        viewBox="0 0 24 24"
+        width="48"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <header
+      class="woocommerce-activity-card__header"
+    >
+      <h2
+        class="woocommerce-activity-card__title"
+      >
+        Inbox message
+      </h2>
+      <span
+        class="woocommerce-activity-card__date"
+      >
+        A long, long time ago
+      </span>
+    </header>
+    <div
+      class="woocommerce-activity-card__body"
+    >
+      This card has some content
+    </div>
+  </section>
+</div>
+`;
