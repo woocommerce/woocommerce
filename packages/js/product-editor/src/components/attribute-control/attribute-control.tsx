@@ -33,7 +33,7 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
-import { AttributeEmptyStateImage } from './attribute-empty-state-image';
+import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
@@ -373,7 +373,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				/>
 			) }
 			{ ! isMobileViewport && value.length === 0 && (
-				<AttributeEmptyStateImage />
+				<AttributeEmptyStateSkeleton />
 			) }
 		</div>
 	);
