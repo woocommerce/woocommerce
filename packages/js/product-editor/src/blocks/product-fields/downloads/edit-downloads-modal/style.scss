@@ -29,7 +29,6 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 	.components-form-file-upload {
 		display: inline-block;
 		vertical-align: middle;
-		padding-left: $gap;
 		p {
 			margin-bottom: $gap-smallest;
 		}
@@ -49,5 +48,8 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 				border-color: #fff;
 			}
 		}
+	}
+	.components-form-file-upload {
+		padding-left: $gap;
 	}
 }
