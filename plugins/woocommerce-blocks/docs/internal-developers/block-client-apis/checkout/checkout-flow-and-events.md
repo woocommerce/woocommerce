@@ -57,8 +57,8 @@ There are various statuses that are exposed on the Checkout data store via selec
 You can use them in your component like so
 
 ```jsx
-import { useSelect } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY } from '@woocommerce/blocks-data';
+const { useSelect } = window.wp.data;
+const { CHECKOUT_STORE_KEY } = window.wc.wcBlocksData;
 
 const MyComponent = ( props ) => {
 	const isComplete = useSelect( ( select ) =>
@@ -105,8 +105,8 @@ The status is exposed on the `currentErrorStatus` object provided by the `useShi
 The status of the payment lives in the payment data store. You can query the status with the following selectors:
 
 ```jsx
-import { select } from '@wordpress/data';
-import { PAYMENT_STORE_KEY } from '@woocommerce/blocks-data';
+const { select } = window.wp.data;
+const { PAYMENT_STORE_KEY } = window.wc.wcBlocksData;
 
 const MyComponent = ( props ) => {
 	const isPaymentIdle = select( PAYMENT_STORE_KEY ).isPaymentIdle();
@@ -241,7 +241,7 @@ const Component = () => {
 _For registered payment method components:_
 
 ```jsx
-import { useEffect } from '@wordpress/element';
+const { useEffect } = window.wp.element;
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
 	const { onCheckoutValidation } = eventRegistration;
@@ -331,7 +331,7 @@ const Component = () => {
 _For registered payment method components:_
 
 ```jsx
-import { useEffect } from '@wordpress/element';
+const { useEffect } = window.wp.element;
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
 	const { onPaymentMethodProcessing } = eventRegistration;
@@ -404,7 +404,7 @@ const Component = () => {
 _For registered payment method components:_
 
 ```jsx
-import { useEffect } from '@wordpress/element';
+const { useEffect } = window.wp.element;
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
 	const { onCheckoutSuccess } = eventRegistration;
@@ -446,7 +446,7 @@ const Component = () => {
 _For registered payment method components:_
 
 ```jsx
-import { useEffect } from '@wordpress/element';
+const { useEffect } = window.wp.element;
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
 	const { onCheckoutFail } = eventRegistration;

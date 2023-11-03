@@ -41,7 +41,7 @@ The Cart Store provides a collection of selectors and methods to manage and retr
 To utilize this store you will import the `CART_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { CART_STORE_KEY } from '@woocommerce/block-data';
+const { CART_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Selectors

@@ -29,15 +29,6 @@ The `totalLabel` filter allows you to change the label of the total item in the 
 ### Code example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyTotalLabel = ( defaultValue, extensions, args ) => {

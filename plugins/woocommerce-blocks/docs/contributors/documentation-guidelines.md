@@ -22,6 +22,7 @@
     -   [Example](#example-6)
         -   [CSS code example](#css-code-example)
         -   [JS code example](#js-code-example)
+-   [Import from global imports rather than alias](#import-from-global-imports-rather-than-alias)
 -   [Use table of contents for top-level readme](#use-table-of-contents-for-top-level-readme)
 -   [Use internal links](#use-internal-links)
 -   [Sort releases descending](#sort-releases-descending)
@@ -122,9 +123,18 @@ When using code examples, the fence format and the language definition must be u
 
 ````text
 ```js
-import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
+const { registerExpressPaymentMethod } = window.wc.blocksRegistry;
 ```
 ````
+
+## Import from global imports rather than alias
+
+In code examples, use imports from the global window object rather than the aliases, since the aliases require build tools to work. Example:
+
+```diff
+-import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
++const { registerCheckoutFilters } = window.wc.blocksCheckout;
+```
 
 ## Use table of contents for top-level readme
 
@@ -168,4 +178,3 @@ When referencing other documentations, the corresponding document should be link
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/documentation-guidelines.md)
 
 <!-- /FEEDBACK -->
-
