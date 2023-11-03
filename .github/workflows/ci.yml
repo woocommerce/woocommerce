@@ -85,16 +85,22 @@ jobs:
       # results of the other jobs in the workflow.
       name: 'Evaluate Project Matrix'
       runs-on: 'ubuntu-20.04'
-      needs: 'project-task-matrix'
+      needs: [ 
+        'project-matrix',
+        'project-task-matrix'
+      ]
       if: ${{ always() }}
       steps:
         - name: 'Check Matrix Success'
           run: |
+            result="${{ needs.project-matrix.result }}"
+            if [[ $result != "success" && $result != "skipped" ]]; then
+              echo "An error occurred generating the CI matrix."
+              exit 1
+            fi
             result="${{ needs.project-task-matrix.result }}"
-            if [[ $result == "success" || $result == "skipped" ]]; then
-              echo "The matrix has completed successfully."
-              exit 0
-            else
+            if [[ $result != "success" && $result != "skipped" ]]; then
               echo "One or more jobs in the matrix has failed."
               exit 1
             fi
+            echo "The matrix has completed successfully."
