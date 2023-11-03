@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: add
 
 Adds new filters to customize the behavior of the cart shipping calculator.
