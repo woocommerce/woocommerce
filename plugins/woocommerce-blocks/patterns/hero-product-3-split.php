@@ -20,8 +20,9 @@ $second_description = $content['descriptions'][1]['default'] ?? '';
 $third_description  = $content['descriptions'][2]['default'] ?? '';
 ?>
 
-<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
-<div class="wp-block-columns alignwide"><!-- wp:column -->
+<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"left":"0"},"margin":{"top":"0px","bottom":"80px"}}}} -->
+<div class="wp-block-columns alignwide" style="margin-top:0px;margin-bottom:80px">
+	<!-- wp:column -->
 	<div class="wp-block-column">
 		<!-- wp:cover {"url":"<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png' ) ); ?>","dimRatio":0,"minHeight":800,"minHeightUnit":"px","isDark":false,"layout":{"type":"constrained"}} -->
 		<div class="wp-block-cover is-light" style="min-height:800px">
