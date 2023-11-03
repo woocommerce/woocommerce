@@ -22,28 +22,23 @@ If you want to add a new SlotFill component, check the [Checkout - Slot Fill doc
 This Slot renders below the Checkout summary section and above the "Proceed to Checkout" button in the Cart.
 
 ```ts
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
-import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
- 
+const { __ } = window.wp.i18n;
+const { registerPlugin } = window.wp.plugins;
+const { ExperimentalOrderMeta } = window.wc.blocksCheckout;
+
 const render = () => {
-  return (
-    <ExperimentalOrderMeta>
-      <div class="wc-block-components-totals-wrapper">
-        {
-          __( 'Yearly recurring total ...', 'YOUR-TEXTDOMAIN' )
-        }
-      </div>
-    </ExperimentalOrderMeta>
-  );
+	return (
+		<ExperimentalOrderMeta>
+			<div class="wc-block-components-totals-wrapper">
+				{ __( 'Yearly recurring total ...', 'YOUR-TEXTDOMAIN' ) }
+			</div>
+		</ExperimentalOrderMeta>
+	);
 };
- 
+
 registerPlugin( 'slot-and-fill-examples', {
-  render,
-  scope: 'woocommerce-checkout',
+	render,
+	scope: 'woocommerce-checkout',
 } );
 ```
 
@@ -66,28 +61,21 @@ Checkout:
 This slot renders inside the shipping step of Checkout and inside the shipping options in Cart.
 
 ```ts
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
-import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
- 
+const { __ } = window.wp.i18n;
+const { registerPlugin } = window.wp.plugins;
+const { ExperimentalOrderShippingPackages } = window.wc.blocksCheckout;
+
 const render = () => {
-  return (
-    <ExperimentalOrderShippingPackages>
-      <div>
-        {
-          __( 'Express Shipping', 'YOUR-TEXTDOMAIN' )
-        }  
-      </div>
-    </ExperimentalOrderShippingPackages>
-  );
+	return (
+		<ExperimentalOrderShippingPackages>
+			<div>{ __( 'Express Shipping', 'YOUR-TEXTDOMAIN' ) }</div>
+		</ExperimentalOrderShippingPackages>
+	);
 };
- 
+
 registerPlugin( 'slot-and-fill-examples', {
-  render,
-  scope: 'woocommerce-checkout',
+	render,
+	scope: 'woocommerce-checkout',
 } );
 ```
 
@@ -116,28 +104,26 @@ Checkout:
 This slot renders inside the Checkout Pickup Options block in the Checkout block. It does not render in the Cart block.
 
 ```ts
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
-import { ExperimentalOrderLocalPickupPackages } from '@woocommerce/blocks-checkout';
- 
+const { __ } = window.wp.i18n;
+const { registerPlugin } = window.wp.plugins;
+const { ExperimentalOrderLocalPickupPackages } = window.wc.blocksCheckout;
+
 const render = () => {
-  return (
-    <ExperimentalOrderLocalPickupPackages>
-      <div>
-        {
-          __( 'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you and email when your order is ready for pickup.', 'YOUR-TEXTDOMAIN' )
-        }
-      </div>
-    </ExperimentalOrderLocalPickupPackages>
-  );
+	return (
+		<ExperimentalOrderLocalPickupPackages>
+			<div>
+				{ __(
+					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you and email when your order is ready for pickup.',
+					'YOUR-TEXTDOMAIN'
+				) }
+			</div>
+		</ExperimentalOrderLocalPickupPackages>
+	);
 };
- 
+
 registerPlugin( 'slot-and-fill-examples', {
-  render,
-  scope: 'woocommerce-checkout',
+	render,
+	scope: 'woocommerce-checkout',
 } );
 ```
 
@@ -157,28 +143,23 @@ Checkout:
 This slot renders below the `CouponCode` input.
 
 ```ts
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
-import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
- 
+const { __ } = window.wp.i18n;
+const { registerPlugin } = window.wp.plugins;
+const { ExperimentalDiscountsMeta } = window.wc.blocksCheckout;
+
 const render = () => {
-  return (
-    <ExperimentalDiscountsMeta>
-      <div class="wc-block-components-totals-wrapper">
-        {
-          __( 'You have 98683 coins to spend ...', 'YOUR-TEXTDOMAIN' )
-        }
-      </div>
-    </ExperimentalDiscountsMeta>
-  );
+	return (
+		<ExperimentalDiscountsMeta>
+			<div class="wc-block-components-totals-wrapper">
+				{ __( 'You have 98683 coins to spend ...', 'YOUR-TEXTDOMAIN' ) }
+			</div>
+		</ExperimentalDiscountsMeta>
+	);
 };
- 
+
 registerPlugin( 'slot-and-fill-examples', {
-  render,
-  scope: 'woocommerce-checkout',
+	render,
+	scope: 'woocommerce-checkout',
 } );
 ```
 
@@ -205,4 +186,3 @@ Checkout:
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-slot-fills.md)
 
 <!-- /FEEDBACK -->
-

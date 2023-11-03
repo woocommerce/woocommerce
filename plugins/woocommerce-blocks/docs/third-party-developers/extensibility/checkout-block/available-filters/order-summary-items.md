@@ -40,15 +40,6 @@ The `cartItemClass` filter allows to change the order summary item class.
 #### Basic example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemClass = ( defaultValue, extensions, args ) => {
@@ -69,15 +60,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemClass = ( defaultValue, extensions, args ) => {
@@ -145,15 +127,6 @@ The `cartItemPrice` filter allows to format the order summary item price.
 #### Basic example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
@@ -174,15 +147,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
@@ -249,15 +213,6 @@ The `itemName` filter allows to change the order summary item name.
 #### Basic example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyItemName = ( defaultValue, extensions, args ) => {
@@ -278,15 +233,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyItemName = ( defaultValue, extensions, args ) => {
@@ -354,15 +300,6 @@ The `subtotalPriceFormat` filter allows to format the order summary item subtota
 #### Basic example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifySubtotalPriceFormat = (
@@ -388,15 +325,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```tsx
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifySubtotalPriceFormat = (

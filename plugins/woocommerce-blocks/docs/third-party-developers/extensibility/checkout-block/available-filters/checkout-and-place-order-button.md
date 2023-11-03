@@ -33,15 +33,6 @@ The `proceedToCheckoutButtonLabel` filter allows change the label of the "Procee
 #### Basic example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyProceedToCheckoutButtonLabel = (
@@ -64,15 +55,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyProceedToCheckoutButtonLabel = (
@@ -139,15 +121,6 @@ The `proceedToCheckoutButtonLink` filter allows change the link of the "Proceed 
 #### Basic example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyProceedToCheckoutButtonLink = (
@@ -170,15 +143,6 @@ registerCheckoutFilters( 'example-extension', {
 #### Advanced example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyProceedToCheckoutButtonLink = (
@@ -241,15 +205,6 @@ The `placeOrderButtonLabel` filter allows change the label of the "Place order" 
 ### Code example <!-- omit in toc -->
 
 ```ts
-/**
- * Optional: Import `registerCheckoutFilters` using ES module syntax if you are using
- * @woocommerce/dependency-extraction-webpack-plugin for enhanced dependency management.
- *
- * Replace the line below with the following import statement:
- * import { registerCheckoutFilters } from '@woocommerce/checkout-data';
- *
- * @see https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin
- */
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyPlaceOrderButtonLabel = ( defaultValue, extensions ) => {

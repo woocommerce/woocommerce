@@ -37,7 +37,7 @@ The Checkout Store provides a collection of selectors to access and manage data 
 To utilize this store you will import the `CHECKOUT_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+const { CHECKOUT_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Selectors

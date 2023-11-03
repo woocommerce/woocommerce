@@ -17,7 +17,7 @@ The Query State Store offers actions to handle and manipulate query-related data
 To utilize this store you will import the `QUERY_STATE_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { QUERY_STATE_STORE_KEY } from '@woocommerce/block-data';
+const { QUERY_STATE_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Actions

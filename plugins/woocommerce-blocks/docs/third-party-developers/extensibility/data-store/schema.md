@@ -19,7 +19,7 @@ The Schema Store manages the routes associated with WooCommerce Blocks, enabling
 To utilize this store you will import the `SCHEMA_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
-import { SCHEMA_STORE_KEY } from '@woocommerce/block-data';
+const { SCHEMA_STORE_KEY } = window.wc.wcBlocksData;
 ```
 
 ## Actions
