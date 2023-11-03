@@ -158,7 +158,7 @@ export const OnboardingTour = ( {
 									[ key: string ]: unknown;
 								} ) => {
 									if ( placement === 'left' ) {
-										return [ 0, 25 ];
+										return [ 0, 20 ];
 									}
 									return [ 52, 16 ];
 								},
