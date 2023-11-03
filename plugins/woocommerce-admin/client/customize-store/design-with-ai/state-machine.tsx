@@ -24,6 +24,7 @@ import {
 import { actions } from './actions';
 import { services } from './services';
 import { defaultColorPalette } from './prompts';
+import { AssemblerHub } from '../assembler-hub';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -278,6 +279,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 							component: ApiCallLoader,
 						},
 						entry: [
+							'renderAssemberHubIframe',
 							{
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
@@ -433,7 +435,10 @@ export const designWithAiStateMachineDefinition = createMachine(
 				meta: {
 					component: AssembleHubLoader,
 				},
-				entry: [ 'redirectToAssemblerHub' ],
+				entry: [
+					'updateAssemberHubQueryString',
+					'refreshAssemberHubIframe',
+				],
 				type: 'final',
 			},
 		},

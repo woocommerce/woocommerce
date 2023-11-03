@@ -277,6 +277,31 @@ const recordTracksStepCompleted = (
 	} );
 };
 
+const renderAssemberHubIframe = () => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = document.createElement( 'iframe' );
+	iframe.classList.add( 'cys-fullscreen-iframe' );
+	iframe.src = assemblerUrl;
+	// set the opacity to 0 to hide the iframe until it loads
+	iframe.style.opacity = '0';
+
+	iframe.onload = () => {
+		// Hide loading UI
+		attachIframeListeners( iframe );
+		// onIframeLoad( showIframe );
+
+		// Ceiling wait time set to 60 seconds
+		// setTimeout( showIframe, 60 * 1000 );
+	};
+
+	document.body.appendChild( iframe );
+};
+
+const updateAssemberHubQueryString = () => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	window.history?.pushState( {}, '', assemblerUrl );
+};
+
 const redirectToAssemblerHub = async () => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
 	const iframe = document.createElement( 'iframe' );
@@ -306,6 +331,34 @@ const redirectToAssemblerHub = async () => {
 	document.body.appendChild( iframe );
 };
 
+const refreshAssemberHubIframe = () => {
+	const iframe = document.getElementsByClassName(
+		'cys-fullscreen-iframe'
+	)[ 0 ] as HTMLIFrameElement;
+	if ( iframe ) {
+		const showIframe = () => {
+			const loader = document.getElementsByClassName(
+				'woocommerce-onboarding-loader'
+			);
+			if ( loader[ 0 ] ) {
+				( loader[ 0 ] as HTMLElement ).style.display = 'none';
+			}
+			iframe.style.opacity = '1';
+		};
+
+		iframe.onload = () => {
+			// Hide loading UI
+			attachIframeListeners( iframe );
+			onIframeLoad( showIframe );
+
+			// Ceiling wait time set to 60 seconds
+			setTimeout( showIframe, 60 * 1000 );
+		};
+
+		iframe.contentWindow?.location.reload();
+	}
+};
+
 export const actions = {
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
@@ -324,4 +377,7 @@ export const actions = {
 	recordTracksStepCompleted,
 	spawnSaveDescriptionToOption,
 	redirectToAssemblerHub,
+	refreshAssemberHubIframe,
+	renderAssemberHubIframe,
+	updateAssemberHubQueryString,
 };
