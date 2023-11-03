@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -90,8 +89,6 @@ export function Editor( {
 												postId: product.id,
 											} }
 										/>
-										{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-										<PluginArea scope="woocommerce-product-block-editor" />
 									</>
 								}
 							/>
