@@ -60,22 +60,10 @@ runs:
           if: ${{ inputs.install == 'true' }}
           env:
             PUPPETEER_SKIP_DOWNLOAD: 'true'
-          run: |
-              pnpm -w install turbo
-              pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
-
-        - name: Get branch name
-          id: get_branch
-          shell: bash
-          run: |
-              if [ "${{ github.event_name }}" == "pull_request" ]; then
-                branch_name=$(echo "${{ github.head_ref }}" | tr '/' '-')
-                echo "CURRENT_BRANCH_NAME=$branch_name" >> $GITHUB_OUTPUT
-              else
-                echo "CURRENT_BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-              fi
+          run: pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Cache Build Output
+          if: ${{ inputs.install == 'true' && inputs.build == 'true' }}
           uses: google/wireit@setup-github-actions-caching/v1
 
         - name: Build
