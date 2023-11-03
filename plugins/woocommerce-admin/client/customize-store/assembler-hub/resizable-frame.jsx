@@ -244,6 +244,13 @@ function ResizableFrame( {
 				if ( definition === 'fullWidth' )
 					setFrameSize( { width: '100%', height: '100%' } );
 			} }
+			whileHover={ {
+				scale: 1.005,
+				transition: {
+					duration: 0.5,
+					ease: 'easeOut',
+				},
+			} }
 			transition={ frameTransition }
 			size={ frameSize }
 			enable={ {
