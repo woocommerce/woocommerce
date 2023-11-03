@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed warning on wc_get_product_variation_attributes when product does not exist
