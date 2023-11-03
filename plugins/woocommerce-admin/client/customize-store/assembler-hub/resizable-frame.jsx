@@ -189,12 +189,10 @@ function ResizableFrame( {
 		},
 	};
 	const currentResizeHandleVariant = ( () => {
-		if ( isResizing ) {
+		if ( isResizing || isHandleVisibleByDefault ) {
 			return 'active';
 		}
-		return shouldShowHandle || isHandleVisibleByDefault
-			? 'visible'
-			: 'hidden';
+		return shouldShowHandle ? 'visible' : 'hidden';
 	} )();
 
 	const resizeHandler = (
