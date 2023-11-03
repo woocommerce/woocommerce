@@ -145,35 +145,15 @@ export const Layout = () => {
 								</NavigableRegion>
 
 								{ ! isMobileViewport && (
-									<div
-										className={ classnames(
-											'edit-site-layout__canvas-container'
-										) }
-									>
+									<div className="edit-site-layout__canvas-container">
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
-												whileHover={ {
-													scale: 1.005,
-													transition: {
-														duration: disableMotion
-															? 0
-															: 0.5,
-														ease: 'easeOut',
-													},
-												} }
 												initial={ false }
 												layout="position"
 												className={ classnames(
 													'edit-site-layout__canvas'
 												) }
-												transition={ {
-													type: 'tween',
-													duration: disableMotion
-														? 0
-														: ANIMATION_DURATION,
-													ease: 'easeOut',
-												} }
 											>
 												<ErrorBoundary>
 													<ResizableFrame

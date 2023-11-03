@@ -66,7 +66,7 @@ const MAX_PAGE_COUNT = 100;
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
-	const [ blocks, onChange ] = useEditorBlocks();
+	const [ blocks, , onChange ] = useEditorBlocks();
 	const urlParams = useQuery();
 	const { currentState } = useContext( CustomizeStoreContext );
 
