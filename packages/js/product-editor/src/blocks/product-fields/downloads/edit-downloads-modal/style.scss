@@ -29,7 +29,7 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 	.components-form-file-upload {
 		display: inline-block;
 		vertical-align: middle;
-		padding-left: $gap-large;
+		padding-left: $gap;
 		p {
 			margin-bottom: $gap-smallest;
 		}
