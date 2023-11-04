@@ -481,8 +481,8 @@ class PageController {
 	 * @return string
 	 */
 	private function format_line( string $text, int $line_number ): string {
-		$severity_levels  = WC_Log_Levels::get_all_severity_levels();
-		$classes          = array( 'line' );
+		$severity_levels = WC_Log_Levels::get_all_severity_levels();
+		$classes         = array( 'line' );
 
 		$text = esc_html( trim( $text ) );
 		if ( empty( $text ) ) {
