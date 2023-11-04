@@ -24,7 +24,6 @@ import {
 import { actions } from './actions';
 import { services } from './services';
 import { defaultColorPalette } from './prompts';
-import { AssemblerHub } from '../assembler-hub';
 
 export const hasStepInUrl = (
 	_ctx: unknown,

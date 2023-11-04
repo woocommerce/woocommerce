@@ -284,16 +284,6 @@ const renderAssemberHubIframe = () => {
 	iframe.src = assemblerUrl;
 	// set the opacity to 0 to hide the iframe until it loads
 	iframe.style.opacity = '0';
-
-	iframe.onload = () => {
-		// Hide loading UI
-		attachIframeListeners( iframe );
-		// onIframeLoad( showIframe );
-
-		// Ceiling wait time set to 60 seconds
-		// setTimeout( showIframe, 60 * 1000 );
-	};
-
 	document.body.appendChild( iframe );
 };
 
