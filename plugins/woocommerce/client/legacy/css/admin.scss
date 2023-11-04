@@ -1377,6 +1377,19 @@ table.wc_status_table--tools {
 			width: 3em;
 			text-align: right;
 		}
+
+		&:target {
+			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
+			z-index: 1;
+
+			.line-content {
+				background: #fff8c5;
+			}
+
+			.log-level:before {
+				color: #fff8c5;
+			}
+		}
 	}
 
 	.line-anchor {
