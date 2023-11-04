@@ -388,29 +388,6 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
-		$deleted = filter_input( INPUT_GET, 'deleted', FILTER_VALIDATE_INT );
-
-		if ( is_numeric( $deleted ) ) {
-			add_action(
-				'admin_notices',
-				function() use ( $deleted ) {
-					?>
-					<div class="notice notice-info is-dismissible">
-						<p>
-							<?php
-							printf(
-								// translators: %s is a number of files.
-								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
-								esc_html( number_format_i18n( $deleted ) )
-							);
-							?>
-						</p>
-					</div>
-					<?php
-				}
-			);
-		}
-
 		// Bail if this is not the list table view.
 		$params = $this->get_query_params();
 		if ( 'list_files' !== $params['view'] ) {
@@ -452,6 +429,12 @@ class PageController {
 				case 'delete':
 					$deleted  = $this->file_controller->delete_files( $file_ids );
 					$sendback = add_query_arg( 'deleted', $deleted, $sendback );
+
+					/**
+					 * If the delete action was triggered on the single file view, don't redirect back there
+					 * since the file doesn't exist anymore.
+					 */
+					$sendback = remove_query_arg( array( 'view', 'file_id' ), $sendback );
 					break;
 			}
 
@@ -463,6 +446,29 @@ class PageController {
 			$removable_args = array( '_wp_http_referer', '_wpnonce', 'action', 'action2', 'filter_action' );
 			wp_safe_redirect( remove_query_arg( $removable_args, $request_uri ) );
 			exit;
+		}
+
+		$deleted = filter_input( INPUT_GET, 'deleted', FILTER_VALIDATE_INT );
+
+		if ( is_numeric( $deleted ) ) {
+			add_action(
+				'admin_notices',
+				function() use ( $deleted ) {
+					?>
+					<div class="notice notice-info is-dismissible">
+						<p>
+							<?php
+							printf(
+							// translators: %s is a number of files.
+								esc_html( _n( '%s log file deleted.', '%s log files deleted.', $deleted, 'woocommerce' ) ),
+								esc_html( number_format_i18n( $deleted ) )
+							);
+							?>
+						</p>
+					</div>
+					<?php
+				}
+			);
 		}
 	}
 
