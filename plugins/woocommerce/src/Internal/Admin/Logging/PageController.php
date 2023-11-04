@@ -215,7 +215,7 @@ class PageController {
 			<h2>
 				<?php
 				printf(
-				// translators: %s is the name of a log file.
+					// translators: %s is the name of a log file.
 					esc_html__( 'Viewing log file %s', 'woocommerce' ),
 					sprintf(
 						'<span class="file-id">%s</span>',
