@@ -506,7 +506,8 @@ class PageController {
 		}
 
 		$classes = implode( ' ', $classes );
-		$line    = sprintf(
+
+		return sprintf(
 			'<span id="L%1$d" class="%2$s">%3$s%4$s</span>',
 			absint( $line_number ),
 			esc_attr( $classes ),
@@ -519,7 +520,5 @@ class PageController {
 				wp_kses_post( $text )
 			)
 		);
-
-		return $line;
 	}
 }
