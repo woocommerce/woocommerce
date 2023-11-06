@@ -332,7 +332,12 @@ function addNotice(
 	options?: Partial< Options >
 ) {
 	if ( status === NoticeStatus.Error ) {
-		dispatch( noticeStore ).addNotice( productKey, message, options );
+		dispatch( noticeStore ).addNotice(
+			productKey,
+			message,
+			status,
+			options
+		);
 	} else {
 		dispatch( 'core/notices' ).createSuccessNotice( message, options );
 	}

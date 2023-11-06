@@ -7,7 +7,7 @@ import { Options } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
-import { NoticeState, Notice } from './types';
+import { NoticeState, Notice, NoticeStatus } from './types';
 
 const NOTICE_STORE_NAME = 'woocommerce-admin/subscription-notices';
 
@@ -26,8 +26,8 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 						[ action.productKey ]: {
 							productKey: action.productKey,
 							message: action.message,
+							status: action.status,
 							options: action.options,
-							timeout: action.timeout,
 						},
 					},
 				};
@@ -48,12 +48,14 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 		addNotice(
 			productKey: string,
 			message: string,
+			status: NoticeStatus,
 			options?: Partial< Options >
 		) {
 			return {
 				type: 'ADD_NOTICE',
 				productKey,
 				message,
+				status,
 				options,
 			};
 		},
