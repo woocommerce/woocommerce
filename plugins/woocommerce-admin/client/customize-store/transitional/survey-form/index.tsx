@@ -183,7 +183,11 @@ export const SurveyForm = ( {
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 
-					<Button variant="primary" onClick={ sendData }>
+					<Button
+						variant="primary"
+						onClick={ sendData }
+						disabled={ rating === 0 }
+					>
 						{ __( 'Send', 'woocommerce' ) }
 					</Button>
 				</div>
