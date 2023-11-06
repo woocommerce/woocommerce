@@ -83,29 +83,6 @@
 	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
 }
 
-.woocommerce-product-editor-dev-tools-block-inspector__properties {
-	display: grid;
-
-	grid-template-columns: auto 1fr;
-
-	column-gap: var(--woocommerce-product-editor-dev-tools-gap);
-	row-gap: 4px;
-
-	dt {
-		margin: 0;
-
-		&::after {
-			content: ':';
-		}
-	}
-
-	dd {
-		margin: 0;
-
-		font-family: monospace;
-	}
-}
-
 .woocommerce-product-editor-dev-tools-product {
 	display: flex;
 	flex-direction: row;
