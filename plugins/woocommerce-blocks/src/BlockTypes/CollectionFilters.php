@@ -220,12 +220,6 @@ final class CollectionFilters extends AbstractBlock {
 		 * The following params can be passed directly to Store API endpoints.
 		 */
 		$shared_params = array( 'exclude', 'offset', 'order', 'serach' );
-		array_walk(
-			$shared_params,
-			function( $key ) use ( $query, &$params ) {
-				$params[ $key ] = $query[ $key ] ?? '';
-			}
-		);
 
 		/**
 		 * The following params just need to transform the key, their value can
@@ -239,17 +233,7 @@ final class CollectionFilters extends AbstractBlock {
 			'woocommerceOnSale'             => 'on_sale',
 			'woocommerceHandPickedProducts' => 'include',
 		);
-		array_walk(
-			$mapped_params,
-			function( $mapped_key, $original_key ) use ( $query, &$params ) {
-				$params[ $mapped_key ] = $query[ $original_key ] ?? '';
-			}
-		);
 
-		/**
-		 * The value of taxQuery and woocommerceAttributes need additional
-		 * transformation to the shape that Store API accepts.
-		 */
 		$taxonomy_mapper = function( $key ) {
 			$mapping = array(
 				'product_tag' => 'tag',
@@ -259,26 +243,43 @@ final class CollectionFilters extends AbstractBlock {
 			return $mapping[ $key ] ?? '_unstable_tax_' . $key;
 		};
 
-		if ( is_array( $query['taxQuery'] ) ) {
-			array_walk(
-				$query['taxQuery'],
-				function( $terms, $taxonomy ) use ( $taxonomy_mapper, &$params ) {
-					$params[ $taxonomy_mapper( $taxonomy ) ] = implode( ',', $terms );
+		array_walk(
+			$query,
+			function( $value, $key ) use ( $shared_params, $mapped_params, $taxonomy_mapper, &$params ) {
+				if ( in_array( $key, $shared_params, true ) ) {
+					$params[ $key ] = $value;
 				}
-			);
-		}
 
-		if ( is_array( $query['woocommerceAttributes'] ) ) {
-			array_walk(
-				$query['woocommerceAttributes'],
-				function( $attribute ) use ( &$params ) {
-					$params['attributes'][] = array(
-						'attribute' => $attribute['taxonomy'],
-						'term_id'   => $attribute['termId'],
+				if ( in_array( $key, array_keys( $mapped_params ), true ) ) {
+					$params[ $mapped_params[ $key ] ] = $value;
+				}
+
+				/**
+				 * The value of taxQuery and woocommerceAttributes need additional
+				 * transformation to the shape that Store API accepts.
+				 */
+				if ( 'taxQuery' === $key && is_array( $value ) ) {
+					array_walk(
+						$value,
+						function( $terms, $taxonomy ) use ( $taxonomy_mapper, &$params ) {
+							$params[ $taxonomy_mapper( $taxonomy ) ] = implode( ',', $terms );
+						}
 					);
 				}
-			);
-		}
+
+				if ( 'woocommerceAttributes' === $key && is_array( $value ) ) {
+					array_walk(
+						$value,
+						function( $attribute ) use ( &$params ) {
+							$params['attributes'][] = array(
+								'attribute' => $attribute['taxonomy'],
+								'term_id'   => $attribute['termId'],
+							);
+						}
+					);
+				}
+			}
+		);
 
 		/**
 		 * Product Collection determines the product visibility based on stock

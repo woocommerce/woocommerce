@@ -5,6 +5,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { Disabled } from '@wordpress/components';
 import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
+import { formatQuery } from '@woocommerce/blocks/collection-filters/utils';
 
 /**
  * Internal dependencies
@@ -15,10 +16,11 @@ import { PriceSlider } from './price-slider';
 
 const Edit = ( props: EditProps ) => {
 	const blockProps = useBlockProps();
+	const { query } = props.context;
 	const { results } = useCollectionData( {
 		queryPrices: true,
 		isEditor: true,
-		queryState: {},
+		queryState: formatQuery( query ),
 	} );
 
 	return (

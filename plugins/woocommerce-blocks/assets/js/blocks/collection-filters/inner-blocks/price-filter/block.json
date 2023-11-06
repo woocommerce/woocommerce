@@ -19,6 +19,9 @@
 	"supports": {
 		"interactivity": true
 	},
+	"usesContext": [
+		"query"
+	],
 	"attributes": {
 		"showInputFields": {
 			"type": "boolean",
