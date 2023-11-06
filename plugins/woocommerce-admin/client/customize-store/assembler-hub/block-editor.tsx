@@ -6,8 +6,8 @@
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords } from '@wordpress/core-data';
-import { select } from '@wordpress/data';
+import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
+import { dispatch, select } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -15,7 +15,12 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 import { useQuery } from '@woocommerce/navigation';
-import { useContext, useCallback, useMemo } from '@wordpress/element';
+import {
+	useContext,
+	useCallback,
+	useMemo,
+	useEffect,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -147,6 +152,18 @@ export const BlockEditor = ( {} ) => {
 			} ),
 		[ blocks, highlightedBlockIndex, isHighlighting ]
 	);
+
+	useEffect( () => {
+		window.addEventListener( 'message', ( event ) => {
+			if ( event.data.type === 'refresh' ) {
+				// @ts-ignore No types for this exist yet.
+				const { invalidateResolutionForStore } = dispatch( coreStore );
+				invalidateResolutionForStore( 'core' );
+			}
+		} );
+	} );
+
+	console.log( renderedBlocks );
 
 	return (
 		<div className="woocommerce-customize-store__block-editor">
