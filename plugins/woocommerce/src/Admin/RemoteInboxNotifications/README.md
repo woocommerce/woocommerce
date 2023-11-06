@@ -418,8 +418,8 @@ You can optionally pass the `plan` name to target a specific Woo Express plan, e
 
 ```json
 {
-	"type": "is_ecommerce",
-	"plan": "trial|essential|performance"
+	"type": "is_woo_express",
+	"plan": "trial|essential|performance",
 	"value": true
 }
 ```
