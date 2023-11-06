@@ -11,7 +11,6 @@ import { Modal, Button } from '@wordpress/components';
  */
 import PageControl from './page-control';
 import type { GuideProps } from './types';
-import './style.scss';
 
 /*
  * This component was copied from @wordpress/components since we needed
