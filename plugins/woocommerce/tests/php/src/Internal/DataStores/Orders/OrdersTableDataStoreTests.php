@@ -54,11 +54,14 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		$this->reset_legacy_proxy_mocks();
 		$this->original_time_zone = wp_timezone_string();
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
-		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
@@ -79,6 +82,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		$this->clean_up_cot_setup();
+
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
 		parent::tearDown();
 	}
 
