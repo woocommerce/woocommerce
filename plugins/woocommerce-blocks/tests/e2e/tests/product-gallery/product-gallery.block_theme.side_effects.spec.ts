@@ -13,7 +13,12 @@ const blockData = {
 	name: 'woocommerce/product-gallery',
 	selectors: {
 		frontend: {},
-		editor: {},
+		editor: {
+			settings: {
+				cropImagesOption:
+					'.wc-block-product-gallery__crop-images .components-form-toggle__input',
+			},
+		},
 	},
 	slug: 'single-product',
 	productPage: '/product/logo-collection/',
@@ -233,5 +238,46 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 		} );
+	} );
+
+	test( 'should show (square) cropped main product images when crop option is enabled', async ( {
+		page,
+		editorUtils,
+		pageObject,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+
+		const block = await pageObject.getMainImageBlock( {
+			page: 'editor',
+		} );
+
+		await expect( block ).toBeVisible();
+
+		await page
+			.locator( blockData.selectors.editor.settings.cropImagesOption )
+			.click();
+
+		await editorUtils.saveTemplate();
+
+		await expect(
+			page.locator( blockData.selectors.editor.settings.cropImagesOption )
+		).toBeChecked();
+
+		await page.goto( blockData.productPage, {
+			waitUntil: 'commit',
+		} );
+
+		const image = await page
+			.locator(
+				'img.wc-block-woocommerce-product-gallery-large-image__image'
+			)
+			.first()
+			.boundingBox();
+
+		const height = image?.height;
+		const width = image?.width;
+
+		// Allow 1 pixel of difference.
+		expect( width === height + 1 || width === height - 1 ).toBeTruthy();
 	} );
 } );
