@@ -271,7 +271,7 @@ function ResizableFrame( {
 				right: HANDLE_STYLES_OVERRIDE,
 			} }
 			minWidth={ FRAME_MIN_WIDTH }
-			maxWidth={ isFullWidth ? '100%' : '150%' }
+			maxWidth={ '100%' }
 			maxHeight={ '100%' }
 			onFocus={ () => setShouldShowHandle( true ) }
 			onBlur={ () => setShouldShowHandle( false ) }
