@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENABLE_HPOS="${ENABLE_HPOS:-0}"
+HPOS="${HPOS:-true}"
 
 echo "Initializing WooCommerce E2E"
 
@@ -32,9 +32,17 @@ wp-env run tests-cli wp import wp-content/plugins/woocommerce/sample-data/sample
 # install Storefront
 wp-env run tests-cli wp theme install storefront --activate
 
-if [ $ENABLE_HPOS == 1 ]; then
-	echo -e 'Enable High-Performance Order Tables\n'
-	wp-env run tests-cli wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate
+if [ $HPOS = true ]; then
+	echo "Enabling HPOS..."
+	wp-env run tests-cli wp option set woocommerce_custom_orders_table_enabled 'yes'
 fi
+
+if [ $HPOS = false ]; then
+	echo "Disabling HPOS..."
+	wp-env run tests-cli wp option set woocommerce_custom_orders_table_enabled 'no'
+fi
+
+# Print HPOS state
+wp-env run tests-cli wp option get woocommerce_custom_orders_table_enabled
 
 echo "Success! Your E2E Test Environment is now ready."
