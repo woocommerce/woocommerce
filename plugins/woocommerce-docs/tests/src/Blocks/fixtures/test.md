@@ -2,7 +2,7 @@
 title: Some frontmatter
 ---
 
-# Heading 1
+# Heading 1 {{< mdl-disable "<!-- markdownlint-disable MD025 -->" >}}
 
 ## Heading 2
 
@@ -30,8 +30,8 @@ Here is a link: [Woo.com](https://woo.com).
 
 ![An image](https://picsum.photos/200/300 'This is an image.')
 
-```
-$ cd /path/to/woocommerce-docs
+```shell
+cd /path/to/woocommerce-docs
 ```
 
 > This is a blockquote.
