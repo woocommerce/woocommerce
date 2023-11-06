@@ -3,6 +3,7 @@
  */
 import { HTMLElementEvent } from '@woocommerce/types';
 import { BlockEditProps } from '@wordpress/blocks';
+import { ProductCollectionQuery } from '@woocommerce/blocks/product-collection/types';
 
 type PriceFilterState = {
 	minPrice: number;
@@ -31,7 +32,11 @@ export type BlockAttributes = {
 	inlineInput: boolean;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes >;
+export interface EditProps extends BlockEditProps< BlockAttributes > {
+	context: {
+		query: ProductCollectionQuery;
+	};
+}
 
 export type FilterComponentProps = BlockEditProps< BlockAttributes > & {
 	collectionData: Partial< PriceFilterState >;
