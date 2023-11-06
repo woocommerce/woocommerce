@@ -99,7 +99,7 @@ async function fetchJsonWithCache(
 	} );
 }
 
-// Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
+// Fetch search results for a given set of URLSearchParams from the Woo.com API
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
@@ -143,7 +143,7 @@ async function fetchSearchResults(
 	} );
 }
 
-// Fetch data for the discover page from the WooCommerce.com API
+// Fetch data for the discover page from the Woo.com API
 async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	let url = '/wc/v3/marketplace/featured';
 

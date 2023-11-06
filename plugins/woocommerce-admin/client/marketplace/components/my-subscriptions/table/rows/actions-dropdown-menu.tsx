@@ -15,11 +15,11 @@ export default function ActionsDropdownMenu() {
 			) }
 			controls={ [
 				{
-					title: __( 'Manage in WooCommerce.com', 'woocommerce' ),
+					title: __( 'Manage in Woo.com', 'woocommerce' ),
 					icon: external,
 					onClick: () => {
 						window.location.href =
-							'https://woocommerce.com/my-account/my-subscriptions';
+							'https://woo.com/my-account/my-subscriptions';
 					},
 				},
 				{

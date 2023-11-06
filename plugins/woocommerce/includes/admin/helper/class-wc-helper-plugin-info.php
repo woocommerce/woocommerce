@@ -101,7 +101,7 @@ class WC_Helper_Plugin_Info {
 			$response = (object) $results;
 
 			$product = array_shift( $products );
-			if ( ! is_null( $product ) && isset( $product['package'] ) ) {
+			if ( isset( $product['package'] ) ) {
 				$response->download_link = $product['package'];
 			}
 		}

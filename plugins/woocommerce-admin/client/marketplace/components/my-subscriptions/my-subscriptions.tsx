@@ -66,7 +66,7 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
 					{ __(
-						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your WooCommerce.com subscriptions will appear here.',
+						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your Woo.com subscriptions will appear here.',
 						'woocommerce'
 					) }
 				</p>
@@ -104,7 +104,7 @@ export default function MySubscriptions(): JSX.Element {
 								<p
 									dangerouslySetInnerHTML={ {
 										__html: __(
-											'To see all your subscriptions go to <a href="https://woocommerce.com/my-account/" target="_blank" class="woocommerce-marketplace__my-subscriptions__tooltip-external-link">your account</a> on WooCommerce.com.',
+											'To see all your subscriptions go to <a href="https://woo.com/my-account/" target="_blank" class="woocommerce-marketplace__my-subscriptions__tooltip-external-link">your account</a> on Woo.com.',
 											'woocommerce'
 										),
 									} }
@@ -134,7 +134,7 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__table-description">
 					{ __(
-						'Your unused WooCommerce.com subscriptions.',
+						'Your unused Woo.com subscriptions.',
 						'woocommerce'
 					) }
 				</p>
@@ -152,7 +152,7 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__table-description">
 					{ __(
-						'Easily install your existing free to install WooCommerce.com subscriptions across sites.',
+						'Easily install your existing free to install Woo.com subscriptions across sites.',
 						'woocommerce'
 					) }
 				</p>
