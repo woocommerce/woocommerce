@@ -320,8 +320,7 @@ function installProduct( subscription: Subscription ): Promise< void > {
 function updateProduct( subscription: Subscription ): Promise< void > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
-		plugin: subscription.local.path,
-		theme: subscription.local.path,
+		[ subscription.product_type ]: subscription.local.path,
 	} );
 }
 
