@@ -1,7 +1,6 @@
 <?php
 /**
- * Rule processor that passes (or fails) when the site is on the eCommerce
- * plan.
+ * Rule processor that passes (or fails) when the site is on a Woo Express plan.
  *
  * @package WooCommerce\Admin\Classes
  */
@@ -11,8 +10,8 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Rule processor that passes (or fails) when the site is on the Woo Express plan.
- * You may optionally pass a plan name to target specific Woo Express plan.
+ * Rule processor that passes (or fails) when the site is on a Woo Express plan.
+ * You may optionally pass a plan name to target a specific Woo Express plan.
  */
 class IsWooExpressRuleProcessor implements RuleProcessorInterface {
 	/**
@@ -36,11 +35,6 @@ class IsWooExpressRuleProcessor implements RuleProcessorInterface {
 		// If a plan name is defined, only evaluate the plan if we're on the Woo Express plan.
 		if ( wc_calypso_bridge_is_woo_express_plan() ) {
 			$fn = 'wc_calypso_bridge_is_woo_express_' . (string) $rule->plan . '_plan';
-			if ( function_exists( $fn ) ) {
-				return $fn() === $rule->value;
-			}
-
-			$fn = 'wc_calypso_bridge_is_ecommerce_' . (string) $rule->plan . '_plan';
 			if ( function_exists( $fn ) ) {
 				return $fn() === $rule->value;
 			}
