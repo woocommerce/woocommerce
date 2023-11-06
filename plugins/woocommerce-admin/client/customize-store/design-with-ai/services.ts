@@ -218,17 +218,74 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		const response: {
+		const { images } = await apiFetch< {
 			ai_content_generated: boolean;
-			additional_errors?: unknown[];
-		} = await apiFetch( {
-			path: '/wc/store/patterns',
+			images: Array< unknown >;
+		} >( {
+			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		const [ response ] = await Promise.all< {
+			ai_content_generated: boolean;
+			product_content: Array< {
+				title: string;
+				description: string;
+				image: {
+					src: string;
+					alt: string;
+				};
+			} >;
+			additional_errors?: unknown[];
+		} >( [
+			apiFetch( {
+				path: '/wc/private/ai/products',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/patterns',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+		] );
+
+		const productContents = response.product_content.map(
+			( product, index ) => {
+				return apiFetch( {
+					path: '/wc/private/ai/product',
+					method: 'POST',
+					data: {
+						products_information: product,
+						index,
+					},
+				} );
+			}
+		);
+
+		await Promise.all( [
+			...productContents,
+			apiFetch( {
+				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+		] );
 
 		if ( ! response.ai_content_generated ) {
 			throw new Error(
