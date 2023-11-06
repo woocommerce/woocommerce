@@ -160,6 +160,8 @@ const ValidatedTextInput = forwardRef<
 				inputRef.current?.ownerDocument?.activeElement !==
 					inputRef.current
 			) {
+				validateInput( true );
+
 				const formattedValue = customFormatter(
 					inputRef.current.value
 				);
