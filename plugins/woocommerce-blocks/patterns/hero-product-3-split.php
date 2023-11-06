@@ -59,7 +59,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 					<!-- /wp:heading -->
 
 					<!-- wp:paragraph -->
-					<p><?php echo esc_html( $second_description ); ?></p>
+					<p><?php echo esc_html( $first_description ); ?></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
@@ -75,7 +75,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 					<!-- /wp:heading -->
 
 					<!-- wp:paragraph -->
-					<p><?php echo esc_html( $third_description ); ?></p>
+					<p><?php echo esc_html( $second_description ); ?></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
