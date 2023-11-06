@@ -39,6 +39,7 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( PostsToOrdersMigrationController::class );
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -47,6 +48,7 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 	}
 
 	/**

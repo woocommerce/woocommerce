@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Set default HPOS setting in k6 perf tests to enabled.
