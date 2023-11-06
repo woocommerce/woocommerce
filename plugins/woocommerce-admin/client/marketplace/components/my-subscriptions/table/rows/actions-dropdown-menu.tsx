@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Subscription } from '../../types';
+import { ADMIN_URL } from '../../../../../utils/admin-settings';
 
 export default function ActionsDropdownMenu( props: {
 	subscription: Subscription;
@@ -28,7 +29,7 @@ export default function ActionsDropdownMenu( props: {
 			title: __( 'Manage in Plugins', 'woocommerce' ),
 			icon: <></>,
 			onClick: () => {
-				window.location.href = '/wp-admin/plugins.php';
+				window.location.href = ADMIN_URL + 'plugins.php';
 			},
 		},
 	];

@@ -8,7 +8,6 @@ export type Subscription = {
 	product_type: string;
 	documentation_url: string;
 	zip_slug: string;
-	documentation_url: string;
 	key_type: string;
 	key_type_label: string;
 	autorenew: boolean;
@@ -47,4 +46,9 @@ export interface SubscriptionShare {
 	subscription_item_id: string;
 	status: string;
 	created: string;
+}
+
+export enum StatusLevel {
+	Warning = 'warning',
+	Error = 'error',
 }

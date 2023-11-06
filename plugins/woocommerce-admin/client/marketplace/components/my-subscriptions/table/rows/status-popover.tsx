@@ -5,9 +5,14 @@ import { Popover } from '@wordpress/components';
 import { Icon, info } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import { StatusLevel } from '../../types';
+
 export default function StatusPopover( props: {
 	text: string;
-	level: 'error' | 'warning';
+	level: StatusLevel;
 	explanation: string;
 } ) {
 	const [ isVisible, setIsVisible ] = useState( false );

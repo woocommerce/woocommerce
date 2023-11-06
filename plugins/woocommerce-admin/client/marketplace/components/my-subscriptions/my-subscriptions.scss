@@ -44,18 +44,18 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	font-size: 13px;
 	line-height: 20px;
 	margin-top: $grid-unit-30;
+	color: $gray-900;
 }
 
 .woocommerce-marketplace__my-subscriptions__product {
 	display: flex;
 	align-items: center;
-	color: $gray-700;
+	color: $gray-900;
 
 	&-name {
 		margin-left: $grid-unit-15;
 		line-height: 18px;
 		font-weight: 600;
-		color: $gray-900;
 	}
 
 	&-icon img {

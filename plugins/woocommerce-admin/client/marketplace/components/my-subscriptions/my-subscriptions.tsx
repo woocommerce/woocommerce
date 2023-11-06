@@ -107,7 +107,10 @@ export default function MySubscriptions(): JSX.Element {
 						>
 							<img
 								src={ RefreshIcon }
-								alt="Refresh subscriptions"
+								alt={ __(
+									'Refresh subscriptions',
+									'woocommerce'
+								) }
 							/>
 							{ __( 'Refresh', 'woocommerce' ) }
 						</Button>

@@ -9,7 +9,7 @@ import { Icon, plugins } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { Subscription } from '../../types';
+import { StatusLevel, Subscription } from '../../types';
 import ConnectButton from '../actions/connect-button';
 import Install from '../actions/install';
 import RenewButton from '../actions/renew-button';
@@ -21,41 +21,46 @@ import Version from './version';
 
 type StatusBadge = {
 	text: string;
-	level: 'error' | 'warning';
+	level: StatusLevel;
 	explanation?: string;
 };
 
 function getStatusBadges( subscription: Subscription ): StatusBadge[] {
 	const badges: StatusBadge[] = [];
 
+	if ( subscription.local.installed && ! subscription.active ) {
+		badges.push( {
+			text: __( 'Not connected', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: __(
+				'To receive updates and support, please connect your subscription to this store.',
+				'woocommerce'
+			),
+		} );
+	}
+
 	if ( subscription.product_key === '' ) {
 		badges.push( {
 			text: __( 'No subscription', 'woocommerce' ),
-			level: 'error',
+			level: StatusLevel.Error,
 			explanation: __(
 				'To get updates and support for this extension, you need to purchase a new subscription, or else share or transfer a subscription for this extension from another account.',
 				'woocommerce'
 			),
 		} );
+
+		/**
+		 * If there is no subscription, we don't need to check for the expiry.
+		 */
+		return badges;
 	}
 
 	if ( subscription.expired ) {
 		badges.push( {
 			text: __( 'Expired', 'woocommerce' ),
-			level: 'error',
+			level: StatusLevel.Error,
 			explanation: __(
 				'To receive updates and support, please renew your subscription.',
-				'woocommerce'
-			),
-		} );
-	}
-
-	if ( subscription.local.installed && ! subscription.active ) {
-		badges.push( {
-			text: __( 'Not connected', 'woocommerce' ),
-			level: 'warning',
-			explanation: __(
-				'To receive updates and support, please connect your subscription to this store.',
 				'woocommerce'
 			),
 		} );
