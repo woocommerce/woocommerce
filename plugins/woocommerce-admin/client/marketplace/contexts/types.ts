@@ -33,7 +33,6 @@ export interface Notice {
 	message: string;
 	status: NoticeStatus;
 	options?: Partial< Options > | undefined;
-	timeout?: NodeJS.Timeout;
 }
 
 export interface NoticeState {

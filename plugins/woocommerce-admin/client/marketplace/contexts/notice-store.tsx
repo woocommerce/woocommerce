@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createReduxStore, dispatch, register } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { Options } from '@wordpress/notices';
 
 /**
@@ -34,9 +34,6 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 			case 'REMOVE_NOTICE':
 				const notices = { ...state.notices };
 				if ( notices[ action.productKey ] ) {
-					if ( notices[ action.productKey ].timeout ) {
-						clearTimeout( notices[ action.productKey ].timeout );
-					}
 					delete notices[ action.productKey ];
 				}
 				return {
@@ -53,15 +50,11 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 			message: string,
 			options?: Partial< Options >
 		) {
-			const timeout = setTimeout( () => {
-				dispatch( store ).removeNotice( productKey );
-			}, 5000 );
 			return {
 				type: 'ADD_NOTICE',
 				productKey,
 				message,
 				options,
-				timeout,
 			};
 		},
 		removeNotice( productKey: string ) {
