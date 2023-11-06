@@ -97,7 +97,7 @@ export const SurveyForm = ( {
 	return (
 		<>
 			<div className="woocommerce-ai-survey-form">
-				<p>
+				<p className="woocommerce-ai-survey-form__description">
 					{ __(
 						'Our goal is to make sure you have all the right tools to start customizing your store. We’d love to know if we hit our mark and how we can improve.',
 						'woocommerce'
