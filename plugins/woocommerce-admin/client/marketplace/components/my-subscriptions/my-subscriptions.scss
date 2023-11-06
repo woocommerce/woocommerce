@@ -114,6 +114,9 @@
 	text-decoration: none;
 	padding: 6px 12px;
 }
+.woocommerce-marketplace__my-subscriptions .components-button.is-secondary:hover:not(:disabled) {
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+}
 
 .woocommerce-marketplace__my-subscriptions--connect {
 	display: flex;
@@ -181,7 +184,7 @@
 			}
 		}
 	}
-	.components-notice__action.components-button.is-link {
+	.components-notice__action.components-button.is-link{
 		margin: 0;
 		padding: 0;
 	}
