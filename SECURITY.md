@@ -16,7 +16,7 @@ Our most critical targets are:
 
 * WooCommerce core (this repository)
 * WooCommerce [Blocks](https://wordpress.org/plugins/woo-gutenberg-products-block/) and [Admin](https://wordpress.org/plugins/woocommerce-admin/) packages and plugins
-* WooCommerce.com -- the primary marketplace and marketing site, and all of it subdomains, e.g. [developer.woocommerce.com](https://developer.woocommerce.com/)
+* woo.com -- the primary marketplace and marketing site, and all of it subdomains, e.g. [developer.woocommerce.com](https://developer.woo.com/)
 * wordpress.com -- hosted WooCommerce for Business and eCommerce offering on WordPress.com.
 
 For more targets, see the `In Scope` section on [HackerOne](https://hackerone.com/automattic).

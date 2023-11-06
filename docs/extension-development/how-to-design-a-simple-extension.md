@@ -26,7 +26,7 @@ Below is an example of what the header content might look like for an extension 
 ```php
 /**
  * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: http://woocommerce.com/products/woocommerce-extension/
+ * Plugin URI: http://woo.com/products/woocommerce-extension/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name
@@ -260,7 +260,7 @@ Below is an example of what a main plugin file might look like for a very simple
 ```php
 /**
  * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: http://woocommerce.com/products/woocommerce-extension/
+ * Plugin URI: http://woo.com/products/woocommerce-extension/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name

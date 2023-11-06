@@ -110,7 +110,7 @@ export default function HeaderAccount(): JSX.Element {
 									className="woocommerce-marketplace__menu-icon"
 								/>
 								{ __(
-									'WooCommerce.com account',
+									'Woo.com account',
 									'woocommerce'
 								) }
 							</MenuItem>

@@ -1,4 +1,4 @@
-<p align="center"><a href="https://woocommerce.com/"><img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce"></a></p>
+<p align="center"><a href="https://woo.com/"><img src="https://woo.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce"></a></p>
 
 <p align="center">
 <a href="https://packagist.org/packages/woocommerce/woocommerce"><img src="https://poser.pugx.org/woocommerce/woocommerce/license" alt="license"></a> 
@@ -72,9 +72,9 @@ pnpm --filter=woocommerce/client/admin ts:check
 ```
 
 ## Documentation
-* [WooCommerce Documentation](https://docs.woocommerce.com/)
+* [WooCommerce Documentation](https://woo.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
-* [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
+* [WooCommerce Code Reference](https://woo.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 ## Reporting Security Issues

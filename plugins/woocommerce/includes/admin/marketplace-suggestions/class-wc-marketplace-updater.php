@@ -43,7 +43,7 @@ class WC_Marketplace_Updater {
 
 		$data['updated'] = time();
 
-		$url     = 'https://woocommerce.com/wp-json/wccom/marketplace-suggestions/1.0/suggestions.json';
+		$url     = 'https://woo.com/wp-json/wccom/marketplace-suggestions/1.0/suggestions.json';
 		$request = wp_safe_remote_get(
 			$url,
 			array(

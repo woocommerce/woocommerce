@@ -69,9 +69,9 @@ class OnboardingThemes {
 	}
 
 	/**
-	 * Sort themes returned from WooCommerce.com
+	 * Sort themes returned from Woo.com
 	 *
-	 * @param  array $themes Array of themes from WooCommerce.com.
+	 * @param  array $themes Array of themes from Woo.com.
 	 * @return array
 	 */
 	public static function sort_woocommerce_themes( $themes ) {
@@ -102,7 +102,7 @@ class OnboardingThemes {
 		$themes = get_transient( self::THEMES_TRANSIENT );
 		if ( false === $themes ) {
 			$theme_data = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes',
+				'https://woo.com/wp-json/wccom-extensions/1.0/search?category=themes',
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)

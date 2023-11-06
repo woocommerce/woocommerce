@@ -90,7 +90,7 @@ class OnboardingProducts {
 					array(
 						'locale' => $locale,
 					),
-					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
+					'https://woo.com/wp-json/wccom-extensions/1.0/search'
 				),
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),

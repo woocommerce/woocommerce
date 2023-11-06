@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Helper_Plugin_Info Class
  *
- * Provides the "View Information" core modals with data for WooCommerce.com
+ * Provides the "View Information" core modals with data for Woo.com
  * hosted extensions.
  */
 class WC_Helper_Plugin_Info {

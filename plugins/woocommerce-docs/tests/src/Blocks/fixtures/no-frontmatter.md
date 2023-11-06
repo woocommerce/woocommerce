@@ -22,7 +22,7 @@
 
 Try some different things. _Italics_ Try something else. **Bold** Try again.
 
-Here is a link: [Woocommerce.com](https://woocommerce.com).
+Here is a link: [Woo.com](https://woo.com).
 
 ---
 

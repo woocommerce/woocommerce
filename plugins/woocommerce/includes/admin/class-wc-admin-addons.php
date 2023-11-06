@@ -37,7 +37,7 @@ class WC_Admin_Addons {
 			}
 
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				'https://woo.com/wp-json/wccom-extensions/1.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -98,7 +98,7 @@ class WC_Admin_Addons {
 
 			// Important: WCCOM Extensions API v2.0 is used.
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
+				'https://woo.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -202,7 +202,7 @@ class WC_Admin_Addons {
 		}
 
 		$raw_extensions = wp_safe_remote_get(
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+			'https://woo.com/wp-json/wccom-extensions/1.0/search' . $parameters,
 			array(
 				'headers'    => $headers,
 				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -249,7 +249,7 @@ class WC_Admin_Addons {
 		if ( false === ( $addon_sections ) ) {
 			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
 			$raw_sections     = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string,
+				'https://woo.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string,
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
@@ -327,16 +327,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://woocommerce.com/storefront/';
+			$url         = 'https://woo.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
@@ -1026,11 +1026,11 @@ class WC_Admin_Addons {
 					wp_kses_post(
 						/* translators: a url */
 						__(
-							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">Woo.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
-					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					'https://woo.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
 				);
 				?>
 			</p>
