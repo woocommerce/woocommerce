@@ -17,7 +17,7 @@ Note: We provide this page as a best practice for developers.
 
 Most WooCommerce plugins do not need to run unless WooCommerce is already active. You can wrap your plugin in a check to see if WooCommerce is installed:
 
-```
+```php
 // Test to see if WooCommerce is active (including network activated).
 
 $plugin_path = trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/woocommerce.php';
@@ -77,7 +77,7 @@ Logs should be written to a file using the [WC_Logger](https://woocommerce.com/w
 
 Try to prevent direct access data leaks. Add this line of code after the opening PHP tag in each PHP file:
 
-```
+```php
 if ( ! defined( 'ABSPATH' ) ) {
 exit; // Exit if accessed directly
 }
@@ -89,7 +89,7 @@ All plugins need a [standard WordPress readme](http://wordpress.org/plugins/abou
 
 Your readme might look something like this:
 
-```
+```php
 === Plugin Name ===
 Contributors: (this should be a list of wordpress.org userid's)
 Tags: comments, spam
@@ -106,11 +106,11 @@ URI: http://www.gnu.org/licenses/gpl-3.0.html
 To ensure a consistent experience for all WooCommerce users,including finding information on who to contact with queries, the following plugin headers should be in place:
 
 - The Plugin Author isYourName/YourCompany
-- The Developer header is YourName/YourCompany, with the Developer URI field listed as http://yourdomain.com/
+- The Developer header is YourName/YourCompany, with the Developer URI field listed as `http://yourdomain.com/`
 
 For example:
 
-```
+```php
 /**
 * Plugin Name: WooCommerce Extension
 * Plugin URI: http://woocommerce.com/products/woocommerce-extension/
@@ -198,7 +198,7 @@ You may want to log data that can be useful for debugging purposes. This is grea
 
 If adding logging to your extension, here’s a snippet for presenting a link to the logs, in a way the extension user can easily make use of.
 
-```
+```php
 $label = \_\_( 'Enable Logging', 'your-textdomain-here' );
 
 $description = \_\_( 'Enable the logging of errors.', 'your-textdomain-here' );
