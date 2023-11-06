@@ -1,4 +1,4 @@
-.wp-block-add-to-cart-form {
+.wc-block-add-to-cart-form {
 	width: unset;
 	/**
 	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
@@ -8,5 +8,18 @@
 	.input-text {
 		font-size: var(--wp--preset--font-size--small);
 		padding: 0.9rem 1.1rem;
+	}
+
+	.quantity {
+		display: inline-block;
+		float: none;
+		margin-right: 4px;
+		vertical-align: middle;
+
+		.qty {
+			margin-right: 0.5rem;
+			width: 3.631em;
+			text-align: center;
+		}
 	}
 }
