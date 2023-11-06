@@ -337,8 +337,8 @@ export const getPages = () => {
 			],
 			layout: {
 				header: false,
-				footer: false,
-				showNotices: false,
+				footer: true,
+				showNotices: true,
 				showStoreAlerts: false,
 				showPluginArea: false,
 			},
