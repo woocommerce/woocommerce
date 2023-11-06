@@ -41,7 +41,6 @@ export function SubscriptionsContextProvider( props: {
 				}
 			} );
 	};
-
 	useEffect( () => {
 		loadSubscriptions( true );
 	}, [] );
@@ -49,7 +48,7 @@ export function SubscriptionsContextProvider( props: {
 	const contextValue = {
 		subscriptions,
 		setSubscriptions,
-		loadSubscriptions: () => loadSubscriptions(),
+		loadSubscriptions,
 		isLoading,
 		setIsLoading,
 	};

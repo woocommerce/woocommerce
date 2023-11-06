@@ -4,6 +4,9 @@ export type Subscription = {
 	product_name: string;
 	product_url: string;
 	product_icon: string;
+	product_slug: string;
+	product_type: string;
+	documentation_url: string;
 	zip_slug: string;
 	key_type: string;
 	key_type_label: string;

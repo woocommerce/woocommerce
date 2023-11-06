@@ -9,8 +9,8 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SubscriptionsContext } from '~/marketplace/contexts/subscriptions-context';
-import { connectProduct } from '~/marketplace/utils/functions';
+import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
+import { connectProduct } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface ConnectProps {
@@ -27,7 +27,7 @@ export default function ConnectButton( props: ConnectProps ) {
 
 	const connect = () => {
 		setIsConnecting( true );
-		connectProduct( props.subscription.product_key )
+		connectProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
 					createSuccessNotice(

@@ -7,8 +7,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_CART_PATH } from '~/marketplace/components/constants';
-import { appendURLParams } from '~/marketplace/utils/functions';
+import { MARKETPLACE_CART_PATH } from '../../../constants';
+import { appendURLParams } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface RenewProps {

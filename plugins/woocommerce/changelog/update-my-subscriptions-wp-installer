@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Use WP installer for my subscriptions instead of the Woo installer API.
+

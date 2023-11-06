@@ -51,40 +51,40 @@ class WC_Helper_Subscriptions_API {
 		);
 		register_rest_route(
 			'wc/v3',
+			'/marketplace/subscriptions/connect',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'connect' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/subscriptions/disconnect',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'disconnect' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'wc/v3',
 			'/marketplace/subscriptions/activate',
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'activate' ),
-				'permission_callback' => array( __CLASS__, 'get_permission' ),
-				'args'                => array(
-					'product_key' => array(
-						'required' => true,
-						'type'     => 'string',
-					),
-				),
-			)
-		);
-		register_rest_route(
-			'wc/v3',
-			'/marketplace/subscriptions/deactivate',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( __CLASS__, 'deactivate' ),
-				'permission_callback' => array( __CLASS__, 'get_permission' ),
-				'args'                => array(
-					'product_key' => array(
-						'required' => true,
-						'type'     => 'string',
-					),
-				),
-			)
-		);
-		register_rest_route(
-			'wc/v3',
-			'/marketplace/subscriptions/install',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( __CLASS__, 'install' ),
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 				'args'                => array(
 					'product_key' => array(
@@ -127,11 +127,11 @@ class WC_Helper_Subscriptions_API {
 	}
 
 	/**
-	 * Activate a WooCommerce.com subscription.
+	 * Connect a WooCommerce.com subscription.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 */
-	public static function activate( $request ) {
+	public static function connect( $request ) {
 		$product_key = $request->get_param( 'product_key' );
 		try {
 			$success = WC_Helper::activate_helper_subscription( $product_key );
@@ -146,13 +146,13 @@ class WC_Helper_Subscriptions_API {
 		if ( $success ) {
 			wp_send_json_success(
 				array(
-					'message' => __( 'Your subscription has been activated.', 'woocommerce' ),
+					'message' => __( 'Your subscription has been connected.', 'woocommerce' ),
 				)
 			);
 		} else {
 			wp_send_json_error(
 				array(
-					'message' => __( 'There was an error activating your subscription. Please try again.', 'woocommerce' ),
+					'message' => __( 'There was an error connecting your subscription. Please try again.', 'woocommerce' ),
 				),
 				400
 			);
@@ -160,11 +160,11 @@ class WC_Helper_Subscriptions_API {
 	}
 
 	/**
-	 * Deactivate a WooCommerce.com subscription.
+	 * Disconnect a WooCommerce.com subscription.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 */
-	public static function deactivate( $request ) {
+	public static function disconnect( $request ) {
 		$product_key = $request->get_param( 'product_key' );
 		try {
 			$success = WC_Helper::deactivate_helper_subscription( $product_key );
@@ -179,13 +179,13 @@ class WC_Helper_Subscriptions_API {
 		if ( $success ) {
 			wp_send_json_success(
 				array(
-					'message' => __( 'Your subscription has been deactivated.', 'woocommerce' ),
+					'message' => __( 'Your subscription has been disconnected.', 'woocommerce' ),
 				)
 			);
 		} else {
 			wp_send_json_error(
 				array(
-					'message' => __( 'There was an error deactivating your subscription. Please try again.', 'woocommerce' ),
+					'message' => __( 'There was an error disconnecting your subscription. Please try again.', 'woocommerce' ),
 				),
 				400
 			);
@@ -193,77 +193,68 @@ class WC_Helper_Subscriptions_API {
 	}
 
 	/**
-	 * Install a WooCommerce.com product.
+	 * Activate a WooCommerce.com product.
+	 * This activates the plugin/theme on the site.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 */
-	public static function install( $request ) {
-		$product_key   = $request->get_param( 'product_key' );
-		$subscriptions = WC_Helper::get_subscription( $product_key );
+	public static function activate( $request ) {
+		$product_key  = $request->get_param( 'product_key' );
+		$subscription = WC_Helper::get_subscription( $product_key );
 
-		if ( empty( $subscriptions ) ) {
+		if ( ! $subscription ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t find this subscription.', 'woocommerce' ),
-				),
-				404
-			);
-		}
-
-		if ( true === $subscriptions['expired'] ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'This subscription has expired.', 'woocommerce' ),
-				),
-				402
-			);
-		}
-
-		if ( true === $subscriptions['maxed'] ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'All licenses for this subscription are already in use.', 'woocommerce' ),
-				),
-				402
-			);
-		}
-
-		$activation_success = WC_Helper::activate_helper_subscription( $product_key );
-		if ( ! $activation_success ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'We couldn\'t activate your subscription.', 'woocommerce' ),
+					'message' => __( 'We couldn\'t find a subscription for this product.', 'woocommerce' ),
 				),
 				400
 			);
 		}
 
-		$product_id = $subscriptions['product_id'];
-
-		// Delete any existing state for this product.
-		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
-		if ( null !== $state ) {
-			WC_WCCOM_Site_Installation_State_Storage::delete_state( $state );
-		}
-
-		// Run the installation.
-		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, $product_id );
-		$installation_success = $installation_manager->run_installation( 'activate_product' );
-
-		if ( ! $installation_success ) {
-			WC_Helper::deactivate_helper_subscription( $product_key );
+		if ( true !== $subscription['local']['installed'] || ! isset( $subscription['local']['active'] ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'We couldn\'t install the extension.', 'woocommerce' ),
+					'message' => __( 'This product is not installed.', 'woocommerce' ),
 				),
 				400
 			);
 		}
 
-		wp_send_json(
+		if ( true === $subscription['local']['active'] ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'This product is already active.', 'woocommerce' ),
+				),
+			);
+		}
+
+		if ( 'plugin' === $subscription['product_type'] ) {
+			$success = activate_plugin( $subscription['local']['path'] );
+			if ( is_wp_error( $success ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'There was an error activating this plugin.', 'woocommerce' ),
+					),
+					400
+				);
+			}
+		} elseif ( 'theme' === $subscription['product_type'] ) {
+			switch_theme( $subscription['local']['slug'] );
+			$theme = wp_get_theme();
+			if ( $subscription['local']['slug'] !== $theme->get_stylesheet() ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'There was an error activating this theme.', 'woocommerce' ),
+					),
+					400
+				);
+			}
+		}
+
+		wp_send_json_success(
 			array(
-				'message' => __( 'The extension has been installed.', 'woocommerce' ),
-			)
+				'message' => __( 'This product has been activated.', 'woocommerce' ),
+			),
 		);
 	}
 }

@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
-import { useContext, useState } from '@wordpress/element';
+import { dispatch, useDispatch, useSelect } from '@wordpress/data';
+import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -12,20 +12,40 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { installProduct } from '../../../../utils/functions';
 import { Subscription } from '../../types';
+import { installingStore } from '../../../../contexts/install-store';
 
 interface InstallProps {
 	subscription: Subscription;
 }
 
 export default function Install( props: InstallProps ) {
-	const [ loading, setLoading ] = useState( false );
 	const { createWarningNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
+	const loading: boolean = useSelect(
+		( select ) => {
+			return select( installingStore ).isInstalling(
+				props.subscription.product_key
+			);
+		},
+		[ props.subscription.product_key ]
+	);
+
+	const startInstall = () => {
+		dispatch( installingStore ).startInstalling(
+			props.subscription.product_key
+		);
+	};
+	const stopInstall = () => {
+		dispatch( installingStore ).stopInstalling(
+			props.subscription.product_key
+		);
+	};
+
 	const install = () => {
-		setLoading( true );
-		installProduct( props.subscription.product_key )
+		startInstall();
+		installProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
 					createSuccessNotice(
@@ -38,26 +58,29 @@ export default function Install( props: InstallProps ) {
 							icon: <Icon icon="yes" />,
 						}
 					);
-					setLoading( false );
+					stopInstall();
 				} );
 			} )
-			.catch( () => {
-				createWarningNotice(
-					sprintf(
+			.catch( ( error ) => {
+				loadSubscriptions( false ).then( () => {
+					let errorMessage = sprintf(
 						// translators: %s is the product name.
 						__( '%s couldn’t be installed.', 'woocommerce' ),
 						props.subscription.product_name
-					),
-					{
+					);
+					if ( error?.success === false && error?.data.message ) {
+						errorMessage += ' ' + error.data.message;
+					}
+					createWarningNotice( errorMessage, {
 						actions: [
 							{
 								label: __( 'Try again', 'woocommerce' ),
 								onClick: install,
 							},
 						],
-					}
-				);
-				setLoading( false );
+					} );
+					stopInstall();
+				} );
 			} );
 	};
 
