@@ -116,8 +116,7 @@ export const ApiCallLoader = () => {
 	return (
 		<Loader>
 			<Loader.Sequence
-				/*  divide all frames equally over 1m. */
-				interval={ ( 60 * 1000 ) / ( loaderSteps.length - 1 ) }
+				interval={ ( 40 * 1000 ) / ( loaderSteps.length - 1 ) }
 				shouldLoop={ false }
 			>
 				{ loaderSteps.slice( 0, -1 ).map( ( step, index ) => (
