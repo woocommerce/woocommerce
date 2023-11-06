@@ -69,6 +69,7 @@ export const ProductGalleryBlockSettings = ( {
 							cropImages: ! cropImages,
 						} )
 					}
+					className="wc-block-product-gallery__crop-images"
 				/>
 				<ToggleControl
 					label={ __(
