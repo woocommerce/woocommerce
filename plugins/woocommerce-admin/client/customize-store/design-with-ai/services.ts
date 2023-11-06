@@ -260,6 +260,12 @@ const updateGlobalStyles = async ( {
 		( pairing ) => pairing.title === fontPairingName
 	);
 
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
+	);
+
 	const globalStylesId = await resolveSelect(
 		coreStore
 		// @ts-ignore No types for this exist yet.
@@ -299,6 +305,7 @@ const updateTemplate = async ( {
 
 	// Ensure that the patterns are up to date because we populate images and content in previous step.
 	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
+	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 
 	const patterns = ( await resolveSelect(
 		coreStore
@@ -349,7 +356,6 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent(
@@ -358,6 +364,7 @@ export const assembleSite = async (
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);
+		throw error;
 	}
 
 	try {
@@ -368,12 +375,12 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent( 'customize_your_store_ai_update_template_response_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
+		throw error;
 	}
 };
 
