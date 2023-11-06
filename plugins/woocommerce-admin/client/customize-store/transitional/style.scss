@@ -173,4 +173,52 @@
 			}
 		}
 	}
+
+
 }
+
+.woocommerce-ai-survey-modal {
+	max-height: 100%;
+	max-width: 620px;
+}
+
+.woocommerce-ai-survey-form {
+	.woocommerce-survey-star-rating {
+		button {
+			background-color: transparent;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			padding: 0 6px 0 0;
+			font-size: 20px;
+		}
+
+		.woocommerce-survey-star-rating__button-on {
+			color: #000;
+		}
+
+		.woocommerce-survey-star-rating__button-off {
+			color: var(--gray-gray-5, #DCDCDE);
+		}
+	}
+
+	hr {
+		color: var(--gutenberg-gray-100, #F0F0F0);
+		margin: 18px 0;
+	}
+
+	.components-checkbox-control:last-child {
+		margin-bottom: 4px;
+	}
+
+	h4 {
+		margin-top: 0
+	}
+
+	.buttons {
+		float: right;
+		margin-left: 15px;
+	}
+}
+
+
