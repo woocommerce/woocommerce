@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Templating\TemplatingEngine;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
@@ -263,6 +264,7 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
+		$container->get( TemplatingEngine::class );
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Templating;
 use \Exception;
 use \InvalidArgumentException;
 use \OverflowException;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
@@ -22,8 +23,15 @@ use Automattic\WooCommerce\Utilities\TimeUtil;
  * While the rendered templates are stored as files in the filesystem, metadata data about them
  * (creation and expiration dates, reachable via REST API or not) is stored in the wp_wc_rendered_templates
  * and wc_rendered_templates_meta tables.
+ *
+ * Rendered templates that are public and haven't expired can be obtained remotely via the "/wc-file/filename" endpoint
+ * (unauthenticated access is allowed). The default content type will be "text/html", this can be changed if a
+ * "content-type" metadata key is passed to render_template. Once a rendered file is successfully served,
+ * the woocommerce_rendered_template_served action is fired.
  */
 class TemplatingEngine {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Default directory where templates are stored.
@@ -44,6 +52,10 @@ class TemplatingEngine {
 	 */
 	public function __construct() {
 		$this->default_templates_directory = __DIR__ . '/Templates';
+
+		self::add_action( 'init', array( $this, 'handle_init' ), 0 );
+		self::add_filter( 'query_vars', array( $this, 'handle_query_vars' ), 0 );
+		self::add_action( 'parse_request', array( $this, 'handle_parse_request' ), 0 );
 	}
 
 	/**
@@ -150,7 +162,7 @@ class TemplatingEngine {
 				throw new InvalidArgumentException( 'The metadata array must have either an expiration_date key or an expiration_seconds key' );
 			}
 
-			$is_public = (bool) $metadata['is_public'] ?? false;
+			$is_public = (bool) ( $metadata['is_public'] ?? false );
 			unset( $metadata['is_public'] );
 
 			$filename = bin2hex( random_bytes( 16 ) );
@@ -313,7 +325,7 @@ class TemplatingEngine {
 		}
 
 		$template_directory = ( $relative && ! is_null( $parent_template_path ) ) ? dirname( $parent_template_path ) : $this->default_templates_directory;
-		$template_path      = $template_directory . '/' . $template_name . ( is_null( pathinfo( $template_name )['extension'] ) ? '.template' : '' );
+		$template_path      = $template_directory . '/' . $template_name . ( is_null( pathinfo( $template_name )['extension'] ?? null ) ? '.template' : '' );
 		$template_path      = realpath( $template_path );
 		if ( false === $template_path || strpos( $template_path, $template_directory . DIRECTORY_SEPARATOR ) !== 0 ) {
 			$template_path = null;
@@ -693,4 +705,103 @@ CREATE TABLE {$wpdb->prefix}wc_rendered_templates_meta(
 )
 $collate;";
 	}
+
+	/**
+	 * Handle the "init" action, add rewrite rules for the "wc/file" endpoint.
+	 */
+	private function handle_init() {
+		add_rewrite_rule( '^wc/file/?$', 'index.php?wc-rendered-template=', 'top' );
+		add_rewrite_rule( '^wc/file/(.+)$', 'index.php?wc-rendered-template=$matches[1]', 'top' );
+		add_rewrite_endpoint( 'wc/file', EP_ALL );
+	}
+
+	/**
+	 * Handle the "query_vars" action, add the "wc-rendered-template" variable.
+	 *
+	 * @param array $vars The original query variables.
+	 * @return array The updated query variables.
+	 */
+	private function handle_query_vars( $vars ) {
+		$vars[] = 'wc-rendered-template';
+		return $vars;
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
+
+	/**
+	 * Handle the "parse_request" action.
+	 *
+	 * If the request is not for "/wc-template/filename" or "index.php?wc-rendered-template=filename", it returns without doing anything.
+	 * Otherwise, it will serve the contents of the file with the provided name if it exists, is public and has not expired,
+	 * or will return a "Not found" status otherwise.
+	 *
+	 * The file will be served with a content type header taken from the "content-type" metadata key of the rendered file,
+	 * or "text/html" if that key isn't present.
+	 */
+	private function handle_parse_request() {
+		global $wp;
+
+		// phpcs:ignore WordPress.Security
+		$query_arg = wp_unslash( $_GET['wc-rendered-template'] ?? null );
+		if ( ! is_null( $query_arg ) ) {
+			$wp->query_vars['wc-rendered-template'] = $query_arg;
+		}
+
+		$template_file_name = $wp->query_vars['wc-rendered-template'] ?? null;
+		if ( is_null( $template_file_name ) ) {
+			return;
+		}
+
+		try {
+			$rendered_template_info = $this->get_rendered_file_by_name( $template_file_name, true );
+			if ( is_null( $rendered_template_info ) || $rendered_template_info['is_expired'] || ! $rendered_template_info['is_public'] ) {
+				status_header( 404 );
+				exit;
+			}
+
+			$rendered_file_path = $rendered_template_info['file_path'];
+			if ( ! is_file( $rendered_file_path ) ) {
+				throw new Exception( "File not found: $rendered_file_path" );
+			}
+
+			$file_length = filesize( $rendered_file_path );
+			if ( false === $file_length ) {
+				throw new Exception( "Can't retrieve file size: $rendered_file_path" );
+			}
+
+			$file_handle = fopen( $rendered_file_path, 'r' );
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
+			status_header( 500 );
+			exit;
+		}
+
+		$content_type = $rendered_template_info['metadata']['content-type'] ?? 'text/html';
+		header( "Content-Type: $content_type" );
+		header( "Content-Length: $file_length" );
+
+		try {
+			while ( ! feof( $file_handle ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo fread( $file_handle, 1024 );
+			}
+
+			/**
+			 * Action that fires after a rendered file has been successfully served, right before terminating the request.
+			 *
+			 * @param array $rendered_template_info Information about the served file, as returned by get_rendered_file_by_name.
+			 *
+			 * @since 8.4.0
+			 */
+			do_action( 'woocommerce_rendered_template_served', $rendered_template_info );
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
+			// We can't change the response status code at this point.
+		} finally {
+			fclose( $file_handle );
+			exit;
+		}
+	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
 }
