@@ -32,7 +32,7 @@ const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
-	'woocommerce-blocks/header-centered-menu-with-search',
+	'woocommerce-blocks/header-centered-menu',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
