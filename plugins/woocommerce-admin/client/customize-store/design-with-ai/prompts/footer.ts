@@ -5,8 +5,8 @@ import { z } from 'zod';
 
 const footerChoices = [
 	{
-		slug: 'woocommerce-blocks/footer-simple-menu-and-cart',
-		label: 'Footer with Simple Menu and Cart',
+		slug: 'woocommerce-blocks/footer-simple-menu',
+		label: 'Footer with Simple Menu',
 	},
 	{
 		slug: 'woocommerce-blocks/footer-with-3-menus',

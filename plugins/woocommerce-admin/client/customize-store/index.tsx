@@ -16,7 +16,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-
+import { PluginArea } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
@@ -394,6 +394,8 @@ export const CustomizeStoreController = ( {
 					</div>
 				) }
 			</div>
+			{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+			<PluginArea scope="woocommerce-customize-store" />
 		</>
 	);
 };

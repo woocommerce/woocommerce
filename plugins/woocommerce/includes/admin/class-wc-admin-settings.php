@@ -288,7 +288,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					case 'info':
 						?><tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
-							<th scope="row" class="titledesc"/><td style="<?php echo esc_attr( $value['css'] ); ?>">;
+							<th scope="row" class="titledesc"/><td style="<?php echo esc_attr( $value['css'] ); ?>">
 						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';

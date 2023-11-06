@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { AUTO_DRAFT_NAME } from './constants';
+import { deferSelectInFocus } from './defer-select-in-focus';
 import { formatCurrencyDisplayValue } from './format-currency-display-value';
 import { getCheckboxTracks } from './get-checkbox-tracks';
 import { getCurrencySymbolProps } from './get-currency-symbol-props';
@@ -30,6 +31,7 @@ export * from './sift';
 
 export {
 	AUTO_DRAFT_NAME,
+	deferSelectInFocus,
 	formatCurrencyDisplayValue,
 	getCheckboxTracks,
 	getCurrencySymbolProps,
