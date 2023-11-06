@@ -15,7 +15,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 /**
@@ -34,13 +33,17 @@ export type events = { type: 'GO_BACK_TO_HOME' };
 export const Transitional = ( {
 	editor,
 	sendEvent,
+	isSurveyOpen,
+	setSurveyOpen,
 }: {
 	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
+	isSurveyOpen: boolean;
+	setSurveyOpen: ( isOpen: boolean ) => void;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const isEditorLoading = useIsSiteEditorLoading();
-	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
+
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
