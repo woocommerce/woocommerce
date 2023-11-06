@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
  */
 class MailchimpScheduler {
 
-	const SUBSCRIBE_ENDPOINT     = 'https://woo.com/wp-json/wccom/v1/subscribe';
+	const SUBSCRIBE_ENDPOINT     = 'https://woocommerce.com/wp-json/wccom/v1/subscribe';
 	const SUBSCRIBE_ENDPOINT_DEV = 'http://woocommerce.test/wp-json/wccom/v1/subscribe';
 
 	const SUBSCRIBED_OPTION_NAME             = 'woocommerce_onboarding_subscribed_to_mailchimp';

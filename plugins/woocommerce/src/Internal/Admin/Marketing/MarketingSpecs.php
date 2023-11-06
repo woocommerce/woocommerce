@@ -52,7 +52,7 @@ class MarketingSpecs {
 
 		if ( false === $plugins ) {
 			$request = wp_remote_get(
-				'https://woo.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
+				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
@@ -156,7 +156,7 @@ class MarketingSpecs {
 					'per_page' => 8,
 					'_embed'   => 1,
 				),
-				'https://woo.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
+				'https://woocommerce.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
 			);
 
 			$request = wp_remote_get(

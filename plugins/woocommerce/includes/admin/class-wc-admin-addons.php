@@ -37,7 +37,7 @@ class WC_Admin_Addons {
 			}
 
 			$raw_featured = wp_safe_remote_get(
-				'https://woo.com/wp-json/wccom-extensions/1.0/featured',
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -98,7 +98,7 @@ class WC_Admin_Addons {
 
 			// Important: WCCOM Extensions API v2.0 is used.
 			$raw_featured = wp_safe_remote_get(
-				'https://woo.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
+				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -202,7 +202,7 @@ class WC_Admin_Addons {
 		}
 
 		$raw_extensions = wp_safe_remote_get(
-			'https://woo.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
 			array(
 				'headers'    => $headers,
 				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
@@ -249,7 +249,7 @@ class WC_Admin_Addons {
 		if ( false === ( $addon_sections ) ) {
 			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
 			$raw_sections     = wp_safe_remote_get(
-				'https://woo.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string,
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string,
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)

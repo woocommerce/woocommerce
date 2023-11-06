@@ -18,7 +18,7 @@ class ShippingPartnerSuggestionsDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woo.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json',
+		'https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json',
 	);
 
 	/**
