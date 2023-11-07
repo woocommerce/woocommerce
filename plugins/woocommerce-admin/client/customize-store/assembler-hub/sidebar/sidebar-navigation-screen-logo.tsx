@@ -235,7 +235,7 @@ const LogoSettings = ( {
 						} }
 						checked={ !! shouldSyncIcon }
 						help={ __(
-							'Site Icons are what you see in browser tabs, bookmark bars, and within the WordPress mobile apps.',
+							'Site icons are what you see in browser tabs, bookmark bars, and within the WordPress mobile apps.',
 							'woocommerce'
 						) }
 					/>

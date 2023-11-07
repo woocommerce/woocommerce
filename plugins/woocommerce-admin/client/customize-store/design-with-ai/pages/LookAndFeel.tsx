@@ -33,7 +33,7 @@ export const LookAndFeel = ( {
 			title: __( 'Contemporary', 'woocommerce' ),
 			key: 'Contemporary' as const,
 			subtitle: __(
-				'Clean lines, neutral colors, sleek and modern look.',
+				'Clean lines, neutral colors, sleek and modern.',
 				'woocommerce'
 			),
 		},
@@ -41,7 +41,7 @@ export const LookAndFeel = ( {
 			title: __( 'Classic', 'woocommerce' ),
 			key: 'Classic' as const,
 			subtitle: __(
-				'Elegant and timeless look with nostalgic touch.',
+				'Elegant and timeless with a nostalgic touch.',
 				'woocommerce'
 			),
 		},
@@ -49,7 +49,7 @@ export const LookAndFeel = ( {
 			title: __( 'Bold', 'woocommerce' ),
 			key: 'Bold' as const,
 			subtitle: __(
-				'Vibrant look with eye-catching colors and visuals.',
+				'Vibrant with eye-catching colors and visuals.',
 				'woocommerce'
 			),
 		},
