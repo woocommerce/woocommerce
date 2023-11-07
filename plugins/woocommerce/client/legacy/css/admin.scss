@@ -1348,9 +1348,11 @@ table.wc_status_table--tools {
 	}
 }
 
-.wc-logs-single-file-actions {
+.wc-logs-single-file-actions,
+.wc-logs-search {
 	margin-left: auto;
 	display: flex;
+	flex-flow: row wrap;
 	gap: 0.5em;
 }
 

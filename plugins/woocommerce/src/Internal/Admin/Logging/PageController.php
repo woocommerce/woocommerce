@@ -121,6 +121,9 @@ class PageController {
 			default:
 				$this->render_list_files_view();
 				break;
+			case 'search_results':
+				$this->render_search_results_view();
+				break;
 			case 'single_file':
 				$this->render_single_file_view();
 				break;
@@ -136,11 +139,16 @@ class PageController {
 		$params   = $this->get_query_params( array( 'order', 'orderby', 'source', 'view' ) );
 		$defaults = $this->get_query_param_defaults();
 
+		$this->get_list_table()->prepare_items();
+
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2>
 				<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
 			</h2>
+			<?php if ( $this->get_list_table()->has_items() ) : ?>
+				<?php $this->render_search_field(); ?>
+			<?php endif; ?>
 		</header>
 		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
@@ -154,7 +162,6 @@ class PageController {
 					/>
 				<?php endif; ?>
 			<?php endforeach; ?>
-			<?php $this->get_list_table()->prepare_items(); ?>
 			<?php $this->get_list_table()->display(); ?>
 		</form>
 		<?php
@@ -275,6 +282,25 @@ class PageController {
 	}
 
 	/**
+	 * Render the search results view.
+	 *
+	 * @return void
+	 */
+	private function render_search_results_view(): void {
+		$params = $this->get_query_params( array( 'search' ) );
+
+		?>
+		<header id="logs-header" class="wc-logs-header">
+			<h2><?php esc_html_e( 'Search results', 'woocommerce' ); ?></h2>
+			<?php $this->render_search_field(); ?>
+		</header>
+		<section id="logs-search-results" class="wc-logs-search-results">
+
+		</section>
+		<?php
+	}
+
+	/**
 	 * Get the default values for URL query params for FileV2 views.
 	 *
 	 * @return string[]
@@ -284,6 +310,7 @@ class PageController {
 			'file_id' => '',
 			'order'   => $this->file_controller::DEFAULTS_GET_FILES['order'],
 			'orderby' => $this->file_controller::DEFAULTS_GET_FILES['orderby'],
+			'search'  => '',
 			'source'  => $this->file_controller::DEFAULTS_GET_FILES['source'],
 			'view'    => 'list_files',
 		);
@@ -321,6 +348,12 @@ class PageController {
 						'default' => $defaults['orderby'],
 					),
 				),
+				'search'  => array(
+					'filter'  => FILTER_CALLBACK,
+					'options' => function( $search ) {
+						return sanitize_text_field( $search );
+					},
+				),
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $source ) {
@@ -330,7 +363,7 @@ class PageController {
 				'view'    => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
-						'regexp'  => '/^(list_files|single_file)$/',
+						'regexp'  => '/^(list_files|single_file|search_results)$/',
 						'default' => $defaults['view'],
 					),
 				),
@@ -519,5 +552,48 @@ class PageController {
 				wp_kses_post( $text )
 			)
 		);
+	}
+
+	/**
+	 * Render a form for searching within log files.
+	 *
+	 * @return void
+	 */
+	private function render_search_field(): void {
+		$params        = $this->get_query_params( array( 'search', 'source' ) );
+		$defaults      = $this->get_query_param_defaults();
+		$search_action = add_query_arg( 'view', 'search_results', $this->get_logs_tab_url() );
+		?>
+		<form
+			id="logs-search"
+			class="wc-logs-search"
+			method="get"
+			action="<?php echo esc_url( $search_action ); ?>"
+		>
+			<input type="hidden" name="page" value="wc-status" />
+			<input type="hidden" name="tab" value="logs" />
+			<input type="hidden" name="view" value="search_results" />
+			<?php foreach ( $params as $key => $value ) : ?>
+				<?php if ( $value !== $defaults[ $key ] ) : ?>
+					<input
+						type="hidden"
+						name="<?php echo esc_attr( $key ); ?>"
+						value="<?php echo esc_attr( $value ); ?>"
+					/>
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<label for="logs-search-field">
+				<?php esc_html_e( 'Search within these files', 'woocommerce' ); ?>
+				<input
+					id="logs-search-field"
+					class="wc-logs-search-field"
+					type="text"
+					name="search"
+					value="<?php echo esc_attr( $params['search'] ); ?>"
+				/>
+			</label>
+			<?php submit_button( __( 'Search', 'woocommerce' ), 'secondary', 'submit', false ); ?>
+		</form>
+		<?php
 	}
 }
