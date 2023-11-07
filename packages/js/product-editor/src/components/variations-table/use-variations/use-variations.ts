@@ -84,57 +84,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} );
 	}
 
-	function onFilter( attribute: ProductAttribute ) {
-		return function handleFilter( options: string[] ) {
-			let isPresent = false;
-
-			const newFilters = filters.reduce< AttributeFilters[] >(
-				( prev, item ) => {
-					if ( item.attribute === attribute.slug ) {
-						isPresent = true;
-						if ( options.length === 0 ) {
-							return prev;
-						}
-						return [ ...prev, { ...item, terms: options } ];
-					}
-					return [ ...prev, item ];
-				},
-				[]
-			);
-
-			if ( ! isPresent ) {
-				newFilters.push( {
-					attribute: attribute.slug,
-					terms: options,
-				} );
-			}
-
-			onClearSelection();
-
-			getCurrentVariationsPage( {
-				product_id: productId,
-				attributes: newFilters,
-			} );
-
-			setFilters( newFilters );
-		};
-	}
-
-	function getFilters( attribute: ProductAttribute ) {
-		return (
-			filters.find( ( filter ) => filter.attribute === attribute.slug )
-				?.terms ?? []
-		);
-	}
-
-	function hasFilters() {
-		return filters.length;
-	}
-
-	function clearFilters() {
-		setFilters( [] );
-	}
-
 	// Variation selection
 
 	const [ selectedCount, setSelectedCount ] = useState( 0 );
@@ -235,6 +184,59 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	function onClearSelection() {
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
+	}
+
+	// Filters
+
+	function onFilter( attribute: ProductAttribute ) {
+		return function handleFilter( options: string[] ) {
+			let isPresent = false;
+
+			const newFilters = filters.reduce< AttributeFilters[] >(
+				( prev, item ) => {
+					if ( item.attribute === attribute.slug ) {
+						isPresent = true;
+						if ( options.length === 0 ) {
+							return prev;
+						}
+						return [ ...prev, { ...item, terms: options } ];
+					}
+					return [ ...prev, item ];
+				},
+				[]
+			);
+
+			if ( ! isPresent ) {
+				newFilters.push( {
+					attribute: attribute.slug,
+					terms: options,
+				} );
+			}
+
+			onClearSelection();
+
+			getCurrentVariationsPage( {
+				product_id: productId,
+				attributes: newFilters,
+			} );
+
+			setFilters( newFilters );
+		};
+	}
+
+	function getFilters( attribute: ProductAttribute ) {
+		return (
+			filters.find( ( filter ) => filter.attribute === attribute.slug )
+				?.terms ?? []
+		);
+	}
+
+	function hasFilters() {
+		return filters.length;
+	}
+
+	function clearFilters() {
+		setFilters( [] );
 	}
 
 	// Updating
