@@ -122,10 +122,10 @@ class PageController {
 		switch ( $view ) {
 			case 'list_files':
 			default:
-				$this->render_file_list_page( $params );
+				$this->render_list_files_view( $params );
 				break;
 			case 'single_file':
-				$this->render_single_file_page( $params );
+				$this->render_single_file_view( $params );
 				break;
 		}
 	}
@@ -137,7 +137,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function render_file_list_page( array $params = array() ): void {
+	private function render_list_files_view( array $params = array() ): void {
 		$defaults = $this->get_query_param_defaults();
 
 		?>
@@ -171,7 +171,7 @@ class PageController {
 	 *
 	 * @return void
 	 */
-	private function render_single_file_page( array $params ): void {
+	private function render_single_file_view( array $params ): void {
 		$file = $this->file_controller->get_file_by_id( $params['file_id'] );
 
 		if ( is_wp_error( $file ) ) {
