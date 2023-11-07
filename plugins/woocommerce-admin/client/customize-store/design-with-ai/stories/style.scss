@@ -7,8 +7,11 @@
 				min-height: auto;
 			}
 		}
-		.woocommerce-onboarding-progress-bar__filler {
-			transition: width linear 1s;
-		}
+	}
+}
+
+.progress-bar.smooth-transition {
+	.woocommerce-onboarding-progress-bar__filler {
+		transition: width linear 1s;
 	}
 }

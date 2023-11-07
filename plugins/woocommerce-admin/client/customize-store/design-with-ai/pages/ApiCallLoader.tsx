@@ -157,7 +157,10 @@ export const ApiCallLoader = () => {
 					</Loader.Layout>
 				) ) }
 			</Loader.Sequence>
-			<Loader.ProgressBar progress={ progress || 0 } />
+			<Loader.ProgressBar
+				className="smooth-transition"
+				progress={ progress || 0 }
+			/>
 		</Loader>
 	);
 };
