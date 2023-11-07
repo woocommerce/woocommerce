@@ -20,7 +20,7 @@ If no action is required for setup it’s best to rely on other onboarding aids 
 
 **Show helpful empty states**. Rely on the existing plugin UI, if any, to guide users towards successful setup and use of the plugin. Avoid onboarding emails, push notifications, and welcome tours.
 
-**Plugins should not redirect on activation from WordPress plugins area**. This can break bulk activation of plugins. Following the [dotorg plugin guideline 11](https://www.google.com/url?q=https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/%2311-plugins-should-not-hijack-the-admin-dashboard&sa=D&source=editors&ust=1693330746653223&usg=AOvVaw3YwkUVGDikvvG4jHmZ4Yej), the extension shouldn’t hijack the dashboard or hide functionality of core or other extensions.
+**Plugins should not redirect on activation from WordPress plugins area**. This can break bulk activation of plugins. Following the [dotorg plugin guideline 11](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#11-plugins-should-not-hijack-the-admin-dashboard), the extension shouldn’t hijack the dashboard or hide functionality of core or other extensions.
 
 **Avoid dead end links and pages**. There should always be a way forward or back.
 
