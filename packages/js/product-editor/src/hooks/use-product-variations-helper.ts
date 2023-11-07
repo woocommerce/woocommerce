@@ -97,6 +97,24 @@ export function useProductVariationsHelper() {
 			productId
 		);
 
+		await Promise.all(
+			variations.map( ( variationId ) =>
+				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product_variation',
+					variationId,
+				] )
+			)
+		);
+		await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
+			'postType',
+			'product',
+			productId,
+		] );
+		await dispatch(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		).invalidateResolutionForStore();
+
 		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
 			.generateProductVariations< {
 				count: number;
@@ -115,23 +133,6 @@ export function useProductVariationsHelper() {
 					default_values: defaultVariationValues,
 				}
 			)
-			.then( async () => {
-				await Promise.all(
-					variations.map( ( variationId ) =>
-						dispatch( 'core' ).invalidateResolution(
-							'getEntityRecord',
-							[ 'postType', 'product_variation', variationId ]
-						)
-					)
-				);
-				await dispatch( 'core' ).invalidateResolution(
-					'getEntityRecord',
-					[ 'postType', 'product', productId ]
-				);
-				return dispatch(
-					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-				).invalidateResolutionForStore();
-			} )
 			.finally( () => {
 				setIsGenerating( false );
 				if (
