@@ -79,6 +79,11 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function register() {
+		// Don't run during install.
+		if ( Constants::get_constant( 'WC_INSTALLING' ) ) {
+			return;
+		}
+
 		// Bail if the feature is not enabled.
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
 			return;
@@ -164,11 +169,10 @@ class SourceAttributionController implements RegisterHooksInterface {
 
 		// Add origin data to the order table.
 		add_action(
-			'init',
+			'admin_init',
 			function() {
 				$this->register_order_origin_column();
-			},
-			20
+			}
 		);
 	}
 
