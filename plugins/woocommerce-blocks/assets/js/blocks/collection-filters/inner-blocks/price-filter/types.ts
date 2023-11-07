@@ -1,18 +1,25 @@
 /**
  * External dependencies
  */
-import { HTMLElementEvent } from '@woocommerce/types';
 import { BlockEditProps } from '@wordpress/blocks';
-import { ProductCollectionQuery } from '@woocommerce/blocks/product-collection/types';
+import { HTMLElementEvent } from '@woocommerce/types';
 
-type PriceFilterState = {
+export type BlockAttributes = {
+	showInputFields: boolean;
+	inlineInput: boolean;
+};
+
+export interface EditProps extends BlockEditProps< BlockAttributes > {
+	context: {
+		collectionData: unknown[];
+	};
+}
+
+export type PriceFilterState = {
 	minPrice: number;
 	maxPrice: number;
 	minRange: number;
 	maxRange: number;
-	rangeStyle: string;
-	isMinActive: boolean;
-	isMaxActive: boolean;
 	formattedMinPrice: string;
 	formattedMaxPrice: string;
 };
@@ -23,19 +30,8 @@ export type StateProps = {
 	};
 };
 
-export type ActionProps = StateProps & {
+export interface ActionProps extends StateProps {
 	event: HTMLElementEvent< HTMLInputElement >;
-};
-
-export type BlockAttributes = {
-	showInputFields: boolean;
-	inlineInput: boolean;
-};
-
-export interface EditProps extends BlockEditProps< BlockAttributes > {
-	context: {
-		query: ProductCollectionQuery;
-	};
 }
 
 export type FilterComponentProps = BlockEditProps< BlockAttributes > & {

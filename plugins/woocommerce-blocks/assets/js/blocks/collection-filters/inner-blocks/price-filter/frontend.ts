@@ -37,10 +37,17 @@ store( {
 	state: {
 		filters: {
 			rangeStyle: ( { state }: StateProps ) => {
-				const { minPrice, maxPrice, maxRange } = state.filters;
+				const { minPrice, maxPrice, minRange, maxRange } =
+					state.filters;
 				return [
-					`--low: ${ ( 100 * minPrice ) / maxRange }%`,
-					`--high: ${ ( 100 * maxPrice ) / maxRange }%`,
+					`--low: ${
+						( 100 * ( minPrice - minRange ) ) /
+						( maxRange - minRange )
+					}%`,
+					`--high: ${
+						( 100 * ( maxPrice - minRange ) ) /
+						( maxRange - minRange )
+					}%`,
 				].join( ';' );
 			},
 			formattedMinPrice: ( { state }: StateProps ) => {
