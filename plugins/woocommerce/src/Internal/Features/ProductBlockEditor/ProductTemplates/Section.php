@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Se
  * Class for Section block.
  */
 class Section extends ProductBlock implements SectionInterface {
-
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 	/**
 	 * Section Block constructor.
 	 *
@@ -31,6 +31,7 @@ class Section extends ProductBlock implements SectionInterface {
 		}
 		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-section' ), $config ), $root_template, $parent );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Add a section block type to this template.

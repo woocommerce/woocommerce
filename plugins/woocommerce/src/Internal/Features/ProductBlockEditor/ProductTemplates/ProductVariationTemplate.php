@@ -64,40 +64,40 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 */
 	private function add_group_blocks() {
 		$this->add_group(
-			[
+			array(
 				'id'         => $this::GROUP_IDS['GENERAL'],
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'title' => __( 'General', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		$this->add_group(
-			[
+			array(
 				'id'         => $this::GROUP_IDS['PRICING'],
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		$this->add_group(
-			[
+			array(
 				'id'         => $this::GROUP_IDS['INVENTORY'],
 				'order'      => 30,
-				'attributes' => [
+				'attributes' => array(
 					'title' => __( 'Inventory', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		$this->add_group(
-			[
+			array(
 				'id'         => $this::GROUP_IDS['SHIPPING'],
 				'order'      => 40,
-				'attributes' => [
+				'attributes' => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -107,61 +107,61 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		$general_group->add_block(
-			[
+			array(
 				'id'         => 'general-single-variation-notice',
 				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-				],
-			]
+				),
+			)
 		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
-			[
+			array(
 				'id'         => 'product-variation-details-section',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Variation details', 'woocommerce' ),
 					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		$basic_details->add_block(
-			[
+			array(
 				'id'         => 'product-variation-note',
 				'blockName'  => 'woocommerce/product-summary-field',
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'property' => 'description',
 					'label'    => __( 'Note <optional />', 'woocommerce' ),
 					'helpText' => 'Enter an optional note displayed on the product page when customers select this variation.',
-				],
-			]
+				),
+			)
 		);
 		$basic_details->add_block(
-			[
+			array(
 				'id'         => 'product-variation-visibility',
 				'blockName'  => 'woocommerce/product-checkbox-field',
 				'order'      => 30,
-				'attributes' => [
+				'attributes' => array(
 					'property'       => 'status',
 					'label'          => __( 'Hide in product catalog', 'woocommerce' ),
 					'checkedValue'   => 'private',
 					'uncheckedValue' => 'publish',
-				],
-			]
+				),
+			)
 		);
 
 		// Images section.
 		$images_section = $general_group->add_section(
-			[
+			array(
 				'id'         => 'product-variation-images-section',
 				'order'      => 30,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Image', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
@@ -169,38 +169,38 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'<a href="https://woocommerce.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
-				],
-			]
+				),
+			)
 		);
 		$images_section->add_block(
-			[
+			array(
 				'id'         => 'product-variation-image',
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'property' => 'image',
 					'multiple' => false,
-				],
-			]
+				),
+			)
 		);
 
 		// Downloads section.
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 			$general_group->add_section(
-				[
+				array(
 					'id'         => 'product-variation-downloads-section',
 					'order'      => 40,
-					'attributes' => [
+					'attributes' => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
 						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
-					],
-				]
+					),
+				)
 			)->add_block(
-				[
+				array(
 					'id'        => 'product-variation-downloads',
 					'blockName' => 'woocommerce/product-downloads-field',
 					'order'     => 10,
-				]
+				)
 			);
 		}
 	}
@@ -211,24 +211,24 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_pricing_group_blocks() {
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$pricing_group->add_block(
-			[
+			array(
 				'id'         => 'pricing-single-variation-notice',
 				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-				],
-			]
+				),
+			)
 		);
 		// Product Pricing Section.
 		$product_pricing_section = $pricing_group->add_section(
-			[
+			array(
 				'id'         => 'product-pricing-section',
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Pricing', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
@@ -237,72 +237,72 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'</a>'
 					),
 					'blockGap'    => 'unit-40',
-				],
-			]
+				),
+			)
 		);
 		$pricing_columns         = $product_pricing_section->add_block(
-			[
+			array(
 				'id'        => 'product-pricing-group-pricing-columns',
 				'blockName' => 'core/columns',
 				'order'     => 10,
-			]
+			)
 		);
 		$pricing_column_1        = $pricing_columns->add_block(
-			[
+			array(
 				'id'         => 'product-pricing-group-pricing-column-1',
 				'blockName'  => 'core/column',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'templateLock' => 'all',
-				],
-			]
+				),
+			)
 		);
 		$pricing_column_1->add_block(
-			[
+			array(
 				'id'         => 'product-pricing-regular-price',
 				'blockName'  => 'woocommerce/product-regular-price-field',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'name'       => 'regular_price',
 					'label'      => __( 'Regular price', 'woocommerce' ),
 					'isRequired' => true,
-				],
-			]
+				),
+			)
 		);
 		$pricing_column_2 = $pricing_columns->add_block(
-			[
+			array(
 				'id'         => 'product-pricing-group-pricing-column-2',
 				'blockName'  => 'core/column',
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'templateLock' => 'all',
-				],
-			]
+				),
+			)
 		);
 		$pricing_column_2->add_block(
-			[
+			array(
 				'id'         => 'product-pricing-sale-price',
 				'blockName'  => 'woocommerce/product-sale-price-field',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'label' => __( 'Sale price', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		$product_pricing_section->add_block(
-			[
+			array(
 				'id'        => 'product-pricing-schedule-sale-fields',
 				'blockName' => 'woocommerce/product-schedule-sale-fields',
 				'order'     => 20,
-			]
+			)
 		);
 
 		$product_pricing_section->add_block(
-			[
+			array(
 				'id'         => 'product-tax-class',
 				'blockName'  => 'woocommerce/product-radio-field',
 				'order'      => 40,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Tax class', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
@@ -311,26 +311,26 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'</a>'
 					),
 					'property'    => 'tax_class',
-					'options'     => [
-						[
+					'options'     => array(
+						array(
 							'label' => __( 'Same as main product', 'woocommerce' ),
 							'value' => 'parent',
-						],
-						[
+						),
+						array(
 							'label' => __( 'Standard', 'woocommerce' ),
 							'value' => '',
-						],
-						[
+						),
+						array(
 							'label' => __( 'Reduced rate', 'woocommerce' ),
 							'value' => 'reduced-rate',
-						],
-						[
+						),
+						array(
 							'label' => __( 'Zero rate', 'woocommerce' ),
 							'value' => 'zero-rate',
-						],
-					],
-				],
-			]
+						),
+					),
+				),
+			)
 		);
 	}
 
@@ -340,24 +340,24 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
 		$inventory_group->add_block(
-			[
+			array(
 				'id'         => 'inventory-single-variation-notice',
 				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-				],
-			]
+				),
+			)
 		);
 		// Product Inventory Section.
 		$product_inventory_section       = $inventory_group->add_section(
-			[
+			array(
 				'id'         => 'product-variation-inventory-section',
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Inventory', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Inventory settings link opening tag. %2$s: Inventory settings link closing tag.*/
@@ -366,28 +366,28 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'</a>'
 					),
 					'blockGap'    => 'unit-40',
-				],
-			]
+				),
+			)
 		);
 		$product_inventory_inner_section = $product_inventory_section->add_section(
-			[
+			array(
 				'id'    => 'product-variation-inventory-inner-section',
 				'order' => 10,
-			]
+			)
 		);
 		$product_inventory_inner_section->add_block(
-			[
+			array(
 				'id'        => 'product-variation-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
-			]
+			)
 		);
 		$product_inventory_inner_section->add_block(
-			[
+			array(
 				'id'         => 'product-variation-track-stock',
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
-				'attributes' => [
+				'attributes' => array(
 					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
@@ -397,64 +397,64 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
-				],
-			]
+				),
+			)
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
-			[
+			array(
 				'id'         => 'product-variation-inventory-quantity-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 30,
-				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ true ],
-					],
-				],
-			]
+				'attributes' => array(
+					'mustMatch' => array(
+						'manage_stock' => array( true ),
+					),
+				),
+			)
 		);
 		$product_inventory_quantity_conditional->add_block(
-			[
+			array(
 				'id'        => 'product-variation-inventory-quantity',
 				'blockName' => 'woocommerce/product-inventory-quantity-field',
 				'order'     => 10,
-			]
+			)
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
-			[
+			array(
 				'id'         => 'product-variation-stock-status-conditional-wrapper',
 				'blockName'  => 'woocommerce/conditional',
 				'order'      => 20,
-				'attributes' => [
-					'mustMatch' => [
-						'manage_stock' => [ false ],
-					],
-				],
-			]
+				'attributes' => array(
+					'mustMatch' => array(
+						'manage_stock' => array( false ),
+					),
+				),
+			)
 		);
 		$product_stock_status_conditional->add_block(
-			[
+			array(
 				'id'         => 'product-variation-stock-status',
 				'blockName'  => 'woocommerce/product-radio-field',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
-					'options'  => [
-						[
+					'options'  => array(
+						array(
 							'label' => __( 'In stock', 'woocommerce' ),
 							'value' => 'instock',
-						],
-						[
+						),
+						array(
 							'label' => __( 'Out of stock', 'woocommerce' ),
 							'value' => 'outofstock',
-						],
-						[
+						),
+						array(
 							'label' => __( 'On backorder', 'woocommerce' ),
 							'value' => 'onbackorder',
-						],
-					],
-				],
-			]
+						),
+					),
+				),
+			)
 		);
 	}
 
@@ -464,43 +464,43 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	private function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
 		$shipping_group->add_block(
-			[
+			array(
 				'id'         => 'shipping-single-variation-notice',
 				'blockName'  => 'woocommerce/product-single-variation-notice',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
 					'type'          => 'info',
 					'isDismissible' => true,
 					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-				],
-			]
+				),
+			)
 		);
 		// Virtual section.
 		$shipping_group->add_section(
-			[
+			array(
 				'id'    => 'product-variation-virtual-section',
 				'order' => 20,
-			]
+			)
 		)->add_block(
-			[
+			array(
 				'id'         => 'product-variation-virtual',
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 10,
-				'attributes' => [
+				'attributes' => array(
 					'property'       => 'virtual',
 					'checkedValue'   => false,
 					'uncheckedValue' => true,
 					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
-				],
-			]
+				),
+			)
 		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
-			[
+			array(
 				'id'         => 'product-variation-fee-and-dimensions-section',
 				'order'      => 30,
-				'attributes' => [
+				'attributes' => array(
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
@@ -508,22 +508,22 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
-				],
-			]
+				),
+			)
 		);
 		$product_fee_and_dimensions_section->add_block(
-			[
+			array(
 				'id'        => 'product-variation-shipping-class',
 				'blockName' => 'woocommerce/product-shipping-class-field',
 				'order'     => 10,
-			]
+			)
 		);
 		$product_fee_and_dimensions_section->add_block(
-			[
+			array(
 				'id'        => 'product-variation-shipping-dimensions',
 				'blockName' => 'woocommerce/product-shipping-dimensions-fields',
 				'order'     => 20,
-			]
+			)
 		);
 	}
 }

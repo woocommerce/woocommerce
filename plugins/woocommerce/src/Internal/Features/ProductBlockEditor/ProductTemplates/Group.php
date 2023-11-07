@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockContainerTrait;
  */
 class Group extends ProductBlock implements GroupInterface {
 	use BlockContainerTrait;
-
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 	/**
 	 * Group Block constructor.
 	 *
@@ -33,11 +33,12 @@ class Group extends ProductBlock implements GroupInterface {
 			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-tab".' );
 		}
 		if ( $config['id'] && ( empty( $config['attributes'] ) || empty( $config['attributes']['id'] ) ) ) {
-			$config['attributes']       = empty( $config['attributes'] ) ? [] : $config['attributes'];
+			$config['attributes']       = empty( $config['attributes'] ) ? array() : $config['attributes'];
 			$config['attributes']['id'] = $config['id'];
 		}
 		parent::__construct( array_merge( array( 'blockName' => 'woocommerce/product-tab' ), $config ), $root_template, $parent );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Add a section block type to this template.
