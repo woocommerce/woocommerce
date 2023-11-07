@@ -135,6 +135,12 @@ export const VariationsTable = forwardRef<
 		'attributes'
 	);
 
+	const [ variationIds ] = useEntityProp< Product[ 'variations' ] >(
+		'postType',
+		'product',
+		'variations'
+	);
+
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
@@ -173,7 +179,7 @@ export const VariationsTable = forwardRef<
 		onGenerate( productAttributes );
 	}
 
-	if ( ! ( isLoading || isGenerating ) && totalCount === 0 && hasFilters() ) {
+	if ( ! ( isLoading || isGenerating ) && variationIds.length === 0 ) {
 		return (
 			<EmptyTableState
 				onActionClick={ handleEmptyTableStateActionClick }
