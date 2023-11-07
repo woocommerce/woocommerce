@@ -141,6 +141,10 @@ export function useProductVariationsHelper() {
 					productId
 				);
 
+				await dispatch(
+					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				).invalidateResolutionForStore();
+
 				return response;
 			} )
 			.finally( () => {
