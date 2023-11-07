@@ -167,11 +167,11 @@
 		margin-right: 0;
 		background-color: #fff;
 		box-shadow: 0 2px 6px 0 rgba($gray-100, 0.05);
-		border: 1px solid var(--gutenberg-gray-100, #F0F0F0);
+		border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
 		padding-right: $grid-unit-15;
 
 		&::before {
-			content: "";
+			content: '';
 			display: block;
 			width: 4px;
 			height: 100%;
