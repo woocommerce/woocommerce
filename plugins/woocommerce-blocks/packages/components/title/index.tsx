@@ -9,20 +9,12 @@ import type { ReactNode } from 'react';
  */
 import './style.scss';
 
-/** @typedef {import('react')} React */
-
 /**
  * Component that renders a block title.
- *
- * @param {Object}          props              Incoming props for the component.
- * @param {React.ReactNode} [props.children]   Children elements this component wraps.
- * @param {string}          [props.className]  CSS class used.
- * @param {string}          props.headingLevel Heading level for title.
- * @param {Object}          [props.props]      Rest of props passed through to component.
  */
 const Title = ( {
 	children,
-	className,
+	className = '',
 	headingLevel,
 	...props
 }: TitleProps ): JSX.Element => {
@@ -39,9 +31,9 @@ const Title = ( {
 	);
 };
 
-interface TitleProps {
+export interface TitleProps {
 	headingLevel: '1' | '2' | '3' | '4' | '5' | '6';
-	className: string;
+	className?: string | undefined;
 	children: ReactNode;
 }
 
