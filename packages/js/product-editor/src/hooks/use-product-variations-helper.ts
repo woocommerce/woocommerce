@@ -106,11 +106,7 @@ export function useProductVariationsHelper() {
 				] )
 			)
 		);
-		await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
-			'postType',
-			'product',
-			productId,
-		] );
+
 		await dispatch(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).invalidateResolutionForStore();
@@ -133,6 +129,20 @@ export function useProductVariationsHelper() {
 					default_values: defaultVariationValues,
 				}
 			)
+			.then( async ( response ) => {
+				await dispatch( 'core' ).invalidateResolution(
+					'getEntityRecord',
+					[ 'postType', 'product', productId ]
+				);
+
+				await resolveSelect( 'core' ).getEntityRecord(
+					'postType',
+					'product',
+					productId
+				);
+
+				return response;
+			} )
 			.finally( () => {
 				setIsGenerating( false );
 				if (
