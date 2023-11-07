@@ -16,18 +16,6 @@ final class CollectionFilters extends AbstractBlock {
 	protected $block_name = 'collection-filters';
 
 	/**
-	 * Mapping inner blocks to CollectionData API parameters.
-	 *
-	 * @var array
-	 */
-	protected $collection_data_params_mapping = array(
-		'calculate_price_range'         => 'woocommerce/collection-price-filter',
-		'calculate_stock_status_counts' => 'woocommerce/collection-stock-filter',
-		'calculate_attribute_counts'    => 'woocommerce/collection-attribute-filter',
-		'calculate_rating_counts'       => 'woocommerce/collection-rating-filter',
-	);
-
-	/**
 	 * Cache the current response from the API.
 	 *
 	 * @var array
@@ -40,17 +28,6 @@ final class CollectionFilters extends AbstractBlock {
 	 * @return null
 	 */
 	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 *
-	 * @return null This block has no frontend script.
-	 */
-	protected function get_block_type_script( $key = null ) {
 		return null;
 	}
 
@@ -98,22 +75,13 @@ final class CollectionFilters extends AbstractBlock {
 		}
 
 		/**
-		 * Bail if the current block is not a direct child of CollectionFilters
-		 * and the parent block doesn't have our custom context.
+		 * When the first direct child of Collection Filters is rendering, we
+		 * hydrate and cache the collection data response.
 		 */
 		if (
-			"woocommerce/{$this->block_name}" !== $parent_block->name &&
-			empty( $parent_block->context['isCollectionFiltersInnerBlock'] )
+			"woocommerce/{$this->block_name}" === $parent_block->name &&
+			! isset( $this->current_response )
 		) {
-			return $context;
-		}
-
-		/**
-		 * The first time we reach here, WP is rendering the first direct child
-		 * of CollectionFilters block. We hydrate and cache the collection data
-		 * response for other inner blocks to use.
-		 */
-		if ( ! isset( $this->current_response ) ) {
 			$this->current_response = $this->get_aggregated_collection_data( $parent_block );
 		}
 
@@ -122,18 +90,10 @@ final class CollectionFilters extends AbstractBlock {
 		}
 
 		/**
-		 * We target only filter blocks, but they can be nested inside other
-		 * blocks like Group/Row for layout purposes. We pass this custom light
-		 * weight context (instead of full CollectionData response) to all inner
-		 * blocks of current CollectionFilters to find and iterate inner filter
-		 * blocks.
+		 * Filter blocks use the collectionData context, so we only update that
+		 * specific context with fetched data.
 		 */
-		$context['isCollectionFiltersInnerBlock'] = true;
-
-		if (
-			isset( $parsed_block['blockName'] ) &&
-			in_array( $parsed_block['blockName'], $this->collection_data_params_mapping, true )
-		) {
+		if ( isset( $context['collectionData'] ) ) {
 			$context['collectionData'] = $this->current_response;
 		}
 
@@ -148,25 +108,16 @@ final class CollectionFilters extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_aggregated_collection_data( $block ) {
-		$inner_blocks = $this->get_inner_blocks_recursive( $block->inner_blocks );
-
-		$collection_data_params = array_map(
-			function( $block_name ) use ( $inner_blocks ) {
-				return in_array( $block_name, $inner_blocks, true );
-			},
-			$this->collection_data_params_mapping
-		);
+		$collection_data_params = $this->get_inner_collection_data_params( $block->inner_blocks );
 
 		if ( empty( array_filter( $collection_data_params ) ) ) {
 			return array();
 		}
 
-		$products_params = $this->get_formatted_products_params( $block->context['query'] );
-
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data(
 			add_query_arg(
 				array_merge(
-					$products_params,
+					$this->get_formatted_products_params( $block->context['query'] ),
 					$collection_data_params,
 				),
 				'/wc/store/v1/products/collection-data'
@@ -188,11 +139,13 @@ final class CollectionFilters extends AbstractBlock {
 	 *
 	 * @return array
 	 */
-	private function get_inner_blocks_recursive( $inner_blocks, &$results = array() ) {
+	private function get_inner_collection_data_params( $inner_blocks, &$results = array() ) {
 		if ( is_a( $inner_blocks, 'WP_Block_List' ) ) {
 			foreach ( $inner_blocks as $inner_block ) {
-				$results[] = $inner_block->name;
-				$this->get_inner_blocks_recursive(
+				if ( ! empty( $inner_block->attributes['queryParam'] ) ) {
+					$results = array_merge( $results, $inner_block->attributes['queryParam'] );
+				}
+				$this->get_inner_collection_data_params(
 					$inner_block->inner_blocks,
 					$results
 				);
@@ -219,7 +172,7 @@ final class CollectionFilters extends AbstractBlock {
 		/**
 		 * The following params can be passed directly to Store API endpoints.
 		 */
-		$shared_params = array( 'exclude', 'offset', 'order', 'serach' );
+		$shared_params = array( 'exclude', 'offset', 'order', 'search' );
 
 		/**
 		 * The following params just need to transform the key, their value can
@@ -286,8 +239,9 @@ final class CollectionFilters extends AbstractBlock {
 		 * statuses. We need to pass the catalog_visibility param to the Store
 		 * API to make sure the product visibility is correct.
 		 */
-		$params['catalog_visibility'] = is_search() ? 'catalog' : 'visible';
+		$params['catalog_visibility'] = is_search() ? 'search' : 'visible';
 
 		return array_filter( $params );
 	}
+
 }

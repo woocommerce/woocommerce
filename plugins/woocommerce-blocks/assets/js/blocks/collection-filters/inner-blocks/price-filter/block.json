@@ -10,19 +10,22 @@
 	],
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2,
-	"viewScript": [
-		"wc-collection-price-filter-block-frontend"
-	],
 	"ancestor": [
-		"woocommerce/product-collection"
+		"woocommerce/collection-filters"
 	],
 	"supports": {
 		"interactivity": true
 	},
 	"usesContext": [
-		"query"
+		"collectionData"
 	],
 	"attributes": {
+		"queryParam": {
+			"type": "object",
+			"default": {
+				"calculate_price_range": "true"
+			}
+		},
 		"showInputFields": {
 			"type": "boolean",
 			"default": true

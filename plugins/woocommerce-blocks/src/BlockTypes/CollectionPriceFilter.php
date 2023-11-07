@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use stdClass;
-
 /**
  * CollectionPriceFilter class.
  */
@@ -27,24 +25,31 @@ final class CollectionPriceFilter extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// Short circuit if the collection data isn't ready yet.
-		if ( empty( $block->context['collectionData']['price_range'] ) ) {
+		if (
+			is_admin() ||
+			empty( $block->context['collectionData'] ) ||
+			empty( $block->context['collectionData']['price_range'] )
+		) {
 			return $content;
 		}
 
 		$price_range = $block->context['collectionData']['price_range'];
 
-		$wrapper_attributes = get_block_wrapper_attributes();
-		$min_range          = $price_range->min_price / 10 ** $price_range->currency_minor_unit;
-		$max_range          = $price_range->max_price / 10 ** $price_range->currency_minor_unit;
-		$min_price          = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
-		$max_price          = intval( get_query_var( self::MAX_PRICE_QUERY_VAR, $max_range ) );
+		$wrapper_attributes  = get_block_wrapper_attributes();
+		$min_range           = $price_range->min_price / 10 ** $price_range->currency_minor_unit;
+		$max_range           = $price_range->max_price / 10 ** $price_range->currency_minor_unit;
+		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
+		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR, $max_range ) );
+		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
+		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
 
 		$data = array(
-			'minPrice' => $min_price,
-			'maxPrice' => $max_price,
-			'minRange' => $min_range,
-			'maxRange' => $max_range,
+			'minPrice'          => $min_price,
+			'maxPrice'          => $max_price,
+			'minRange'          => $min_range,
+			'maxRange'          => $max_range,
+			'formattedMinPrice' => $formatted_min_price,
+			'formattedMaxPrice' => $formatted_max_price,
 		);
 
 		wc_store(
@@ -55,55 +60,26 @@ final class CollectionPriceFilter extends AbstractBlock {
 			)
 		);
 
-		$filter_reset_button = sprintf(
-			' <button class="wc-block-components-filter-reset-button" data-wc-on--click="actions.filters.reset">
-				<span aria-hidden="true">%1$s</span>
-				<span class="screen-reader-text">%2$s</span>
-			</button>',
-			__( 'Reset', 'woo-gutenberg-products-block' ),
-			__( 'Reset filter', 'woo-gutenberg-products-block' ),
-		);
-
-		return sprintf(
-			'<div %1$s>
-				<div class="controls">%2$s</div>
-				<div class="actions">
-					%3$s
-				</div>
-			</div>',
-			$wrapper_attributes,
-			$this->get_price_slider( $data, $attributes ),
-			$filter_reset_button
-		);
-	}
-
-	/**
-	 * Get the price slider HTML.
-	 *
-	 * @param array $store_data The data passing to Interactivity Store.
-	 * @param array $attributes Block attributes.
-	 */
-	private function get_price_slider( $store_data, $attributes ) {
 		list (
 			'showInputFields' => $show_input_fields,
 			'inlineInput' => $inline_input
 		) = $attributes;
-		list (
-			'minPrice' => $min_price,
-			'maxPrice' => $max_price,
-			'minRange' => $min_range,
-			'maxRange' => $max_range,
-		) = $store_data;
+
+		// Max range shouldn't be 0.
+		if ( ! $max_range ) {
+			return $content;
+		}
 
 		// CSS variables for the range bar style.
-		$__low       = 100 * $min_price / $max_range;
-		$__high      = 100 * $max_price / $max_range;
+		$__low       = 100 * ( $min_price - $min_range ) / ( $max_range - $min_range );
+		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
 		$range_style = "--low: $__low%; --high: $__high%";
 
-		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
-		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
-
-		$classes = $show_input_fields && $inline_input ? 'price-slider inline-input' : 'price-slider';
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $show_input_fields && $inline_input ? 'inline-input' : '',
+			)
+		);
 
 		$price_min = $show_input_fields ?
 			sprintf(
@@ -139,7 +115,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 
 		ob_start();
 		?>
-			<div class="<?php echo esc_attr( $classes ); ?>">
+			<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div
 					class="range"
 					style="<?php echo esc_attr( $range_style ); ?>"
