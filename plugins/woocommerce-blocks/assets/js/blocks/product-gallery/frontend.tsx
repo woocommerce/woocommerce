@@ -7,7 +7,7 @@ interface State {
 	[ key: string ]: unknown;
 }
 
-interface Context {
+export interface ProductGalleryInteractivityApiContext {
 	woocommerce: {
 		selectedImage: string;
 		imageId: string;
@@ -29,7 +29,9 @@ export interface ProductGallerySelectors {
 interface Actions {
 	woocommerce: {
 		thumbnails: {
-			handleClick: ( context: Context ) => void;
+			handleClick: (
+				context: ProductGalleryInteractivityApiContext
+			) => void;
 		};
 		handlePreviousImageButtonClick: {
 			( store: Store ): void;
@@ -42,7 +44,7 @@ interface Actions {
 
 interface Store {
 	state: State;
-	context: Context;
+	context: ProductGalleryInteractivityApiContext;
 	selectors: ProductGallerySelectors;
 	actions: Actions;
 	ref?: HTMLElement;
