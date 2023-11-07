@@ -329,6 +329,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - This PR links SiteIcon on the CYS pages to Woo Home. [#40888](https://github.com/woocommerce/woocommerce/pull/40888)
 * Tweak - Update save and done button loading indicator to use spinner [#40840](https://github.com/woocommerce/woocommerce/pull/40840)
 * Tweak - Update thumbnail border radius to 4px in pattern assembler [#40967](https://github.com/woocommerce/woocommerce/pull/40967)
+* Performance - Shrink banner image in customize store task [#41247](https://github.com/woocommerce/woocommerce/pull/41247)
 * Performance - Improve CYS font/color performance [#40701](https://github.com/woocommerce/woocommerce/pull/40701)
 * Enhancement - Add a background sync that can run independently of the normal real-time HPOS data sync. Also add a button on the Features screen to trigger an order sync manually. [#39952](https://github.com/woocommerce/woocommerce/pull/39952)
 * Enhancement - Add look and feel tags to color choices [#40698](https://github.com/woocommerce/woocommerce/pull/40698)
