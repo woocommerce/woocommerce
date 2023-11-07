@@ -147,6 +147,8 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
               run: |
                   pnpm env:dev --filter=woocommerce
                   pnpm env:performance-init --filter=woocommerce
