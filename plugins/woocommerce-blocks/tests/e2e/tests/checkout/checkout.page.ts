@@ -91,7 +91,7 @@ export class CheckoutPage {
 			...this.testData,
 			...overrideAddressDetails,
 		};
-		const selector = `.woocommerce-column--${ shippingOrBilling }-address`;
+		const selector = `.wc-block-order-confirmation-${ shippingOrBilling }-address`;
 		const addressContainer = this.page.locator( selector );
 		await expect(
 			addressContainer.getByText( customerAddressDetails.firstname )
