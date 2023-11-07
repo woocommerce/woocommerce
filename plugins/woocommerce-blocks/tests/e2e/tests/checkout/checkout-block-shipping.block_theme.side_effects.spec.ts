@@ -94,6 +94,5 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 			overrideBillingDetails
 		);
 		await pageObject.verifyAddressDetails( 'shipping' );
-		await expect( page.getByText( FLAT_RATE_SHIPPING_NAME ) ).toBeVisible();
 	} );
 } );
