@@ -58,6 +58,13 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		);
 	}
 
+	/**
+	 * Return # of low in stock count.
+	 *
+	 * @param WP_REST_Request $request request object.
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
 	public function get_low_in_stock_count( $request ) {
 		global $wpdb;
 		$status              = $request->get_param( 'status' );
@@ -262,7 +269,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * - :postmeta_wheres
 	 * - :orderAndLimit
 	 *
-	 * @param $replacements array of replacement strings.
+	 * @param array $replacements  of replacement strings.
 	 *
 	 * @return string
 	 */
@@ -290,7 +297,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	/**
 	 * Add sitewide stock query string to base query string.
 	 *
-	 * @param $query string Base query string
+	 * @param string $query Base query string.
 	 *
 	 * @return string
 	 */
@@ -359,7 +366,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	/**
 	 * Generate a count query.
 	 *
-	 * @param $sitewide_only bool generates a query for sitewide low stock threshold only query.
+	 * @param bool $sitewide_only generates a query for sitewide low stock threshold only query.
 	 *
 	 * @return string
 	 */
