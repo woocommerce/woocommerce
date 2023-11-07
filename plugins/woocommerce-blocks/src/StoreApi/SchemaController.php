@@ -49,12 +49,16 @@ class SchemaController {
 				Schemas\V1\OrderCouponSchema::IDENTIFIER   => Schemas\V1\OrderCouponSchema::class,
 				Schemas\V1\OrderFeeSchema::IDENTIFIER      => Schemas\V1\OrderFeeSchema::class,
 				Schemas\V1\OrderSchema::IDENTIFIER         => Schemas\V1\OrderSchema::class,
-				Schemas\V1\PatternsSchema::IDENTIFIER      => Schemas\V1\PatternsSchema::class,
 				Schemas\V1\ProductSchema::IDENTIFIER       => Schemas\V1\ProductSchema::class,
 				Schemas\V1\ProductAttributeSchema::IDENTIFIER => Schemas\V1\ProductAttributeSchema::class,
 				Schemas\V1\ProductCategorySchema::IDENTIFIER => Schemas\V1\ProductCategorySchema::class,
 				Schemas\V1\ProductCollectionDataSchema::IDENTIFIER => Schemas\V1\ProductCollectionDataSchema::class,
 				Schemas\V1\ProductReviewSchema::IDENTIFIER => Schemas\V1\ProductReviewSchema::class,
+				Schemas\V1\AI\ImagesSchema::IDENTIFIER     => Schemas\V1\AI\ImagesSchema::class,
+				Schemas\V1\AI\PatternsSchema::IDENTIFIER   => Schemas\V1\AI\PatternsSchema::class,
+				Schemas\V1\AI\ProductSchema::IDENTIFIER    => Schemas\V1\AI\ProductSchema::class,
+				Schemas\V1\AI\ProductsSchema::IDENTIFIER   => Schemas\V1\AI\ProductsSchema::class,
+				Schemas\V1\AI\BusinessDescriptionSchema::IDENTIFIER => Schemas\V1\AI\BusinessDescriptionSchema::class,
 			],
 		];
 	}
