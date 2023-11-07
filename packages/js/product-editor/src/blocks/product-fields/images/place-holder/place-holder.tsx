@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,13 +14,25 @@ import { LifestyleScene } from './imgs/lifestyle-scene';
 
 export function PlaceHolder() {
 	const placeHolderImages = [
-		{ id: 'front-side', image: <FrontSide />, text: 'Front side' },
-		{ id: 'close-up', image: <CloseUp />, text: 'Close-up' },
-		{ id: 'variants', image: <Variants />, text: 'Variants' },
+		{
+			id: 'front-side',
+			image: <FrontSide />,
+			text: __( 'Front side', 'woocommerce' ),
+		},
+		{
+			id: 'close-up',
+			image: <CloseUp />,
+			text: __( 'Close-up', 'woocommerce' ),
+		},
+		{
+			id: 'variants',
+			image: <Variants />,
+			text: __( 'Variants', 'woocommerce' ),
+		},
 		{
 			id: 'lifestyle-scene',
 			image: <LifestyleScene />,
-			text: 'Lifestyle scene',
+			text: __( 'Lifestyle scene', 'woocommerce' ),
 		},
 	];
 
