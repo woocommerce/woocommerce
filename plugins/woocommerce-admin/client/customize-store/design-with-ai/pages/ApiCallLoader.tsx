@@ -3,7 +3,7 @@
  */
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -100,6 +100,7 @@ const loaderSteps = [
 
 // Loader for the API call without the last frame.
 export const ApiCallLoader = () => {
+	const [ progress, setProgress ] = useState( 0 );
 	useEffect( () => {
 		const preload = ( src: string ) => {
 			const img = new Image();
@@ -113,17 +114,18 @@ export const ApiCallLoader = () => {
 		preload( openingTheDoors );
 	}, [] );
 
+	//  Duplicate the steps to make the loader last longer and give smoother progress.
 	const augmentedSteps = loaderSteps
 		.map( ( item, index, array ) => {
 			const nextItem = array[ index + 1 ];
 			// last one
 			if ( ! nextItem ) return [ item ];
-			const numOfDuplication = 2;
+			const numOfDupes = 2;
 			const duplicates = [ item ];
 			const progressIncreaseBy =
-				( nextItem.progress - item.progress ) / numOfDuplication;
+				( nextItem.progress - item.progress ) / numOfDupes;
 
-			for ( let i = 0; i < numOfDuplication; i++ ) {
+			for ( let i = 0; i < numOfDupes; i++ ) {
 				duplicates.push( {
 					...item,
 					progress: item.progress + ( i + 1 ) * progressIncreaseBy,
@@ -139,6 +141,12 @@ export const ApiCallLoader = () => {
 			<Loader.Sequence
 				interval={ ( 40 * 1000 ) / ( augmentedSteps.length - 1 ) }
 				shouldLoop={ false }
+				onChange={ ( index ) => {
+					// to get around bad set state timing issue
+					setTimeout( () => {
+						setProgress( augmentedSteps[ index ].progress );
+					}, 0 );
+				} }
 			>
 				{ augmentedSteps.slice( 0, -1 ).map( ( step, index ) => (
 					<Loader.Layout key={ index }>
@@ -146,10 +154,10 @@ export const ApiCallLoader = () => {
 							{ step.image }
 						</Loader.Illustration>
 						<Loader.Title>{ step.title }</Loader.Title>
-						<Loader.ProgressBar progress={ step.progress || 0 } />
 					</Loader.Layout>
 				) ) }
 			</Loader.Sequence>
+			<Loader.ProgressBar progress={ progress || 0 } />
 		</Loader>
 	);
 };
