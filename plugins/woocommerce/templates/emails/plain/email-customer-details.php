@@ -14,7 +14,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 3.4.0
+ * @version 3.4.1
  */
 
 defined( 'ABSPATH' ) || exit;

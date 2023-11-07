@@ -12,7 +12,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 2.3.6
+ * @version 2.3.7
  */
 
 defined( 'ABSPATH' ) || exit;
