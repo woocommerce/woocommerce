@@ -157,7 +157,10 @@ class ListTable extends WP_List_Table {
 			'per_page' => $per_page,
 			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
-		$file_args = wp_parse_args( $this->page_controller->get_query_params(), $defaults );
+		$file_args = wp_parse_args(
+			$this->page_controller->get_query_params( array( 'order', 'orderby', 'source' ) ),
+			$defaults
+		);
 
 		$total_items = $this->file_controller->get_files( $file_args, true );
 		if ( is_wp_error( $total_items ) ) {

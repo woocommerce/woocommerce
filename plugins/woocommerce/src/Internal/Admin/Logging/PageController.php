@@ -97,8 +97,7 @@ class PageController {
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
-				$params = $this->get_query_params();
-				$this->render_filev2( $params );
+				$this->render_filev2();
 				break;
 			case 'WC_Log_Handler_DB':
 				WC_Admin_Status::status_logs_db();
@@ -112,20 +111,18 @@ class PageController {
 	/**
 	 * Render the views for the FileV2 log handler.
 	 *
-	 * @param array $params Args for rendering the views.
-	 *
 	 * @return void
 	 */
-	private function render_filev2( array $params = array() ): void {
-		$view = $params['view'] ?? '';
+	private function render_filev2(): void {
+		$params = $this->get_query_params( array( 'view' ) );
 
-		switch ( $view ) {
+		switch ( $params['view'] ) {
 			case 'list_files':
 			default:
-				$this->render_list_files_view( $params );
+				$this->render_list_files_view();
 				break;
 			case 'single_file':
-				$this->render_single_file_view( $params );
+				$this->render_single_file_view();
 				break;
 		}
 	}
@@ -133,11 +130,10 @@ class PageController {
 	/**
 	 * Render the file list view.
 	 *
-	 * @param array $params Args for rendering the view.
-	 *
 	 * @return void
 	 */
-	private function render_list_files_view( array $params = array() ): void {
+	private function render_list_files_view(): void {
+		$params   = $this->get_query_params( array( 'order', 'orderby', 'source', 'view' ) );
 		$defaults = $this->get_query_param_defaults();
 
 		?>
@@ -167,12 +163,11 @@ class PageController {
 	/**
 	 * Render the single file view.
 	 *
-	 * @param array $params Args for rendering the view.
-	 *
 	 * @return void
 	 */
-	private function render_single_file_view( array $params ): void {
-		$file = $this->file_controller->get_file_by_id( $params['file_id'] );
+	private function render_single_file_view(): void {
+		$params = $this->get_query_params( array( 'file_id', 'view' ) );
+		$file   = $this->file_controller->get_file_by_id( $params['file_id'] );
 
 		if ( is_wp_error( $file ) ) {
 			?>
@@ -297,9 +292,11 @@ class PageController {
 	/**
 	 * Get and validate URL query params for FileV2 views.
 	 *
+	 * @param array $param_keys Optional. The names of the params you want to get.
+	 *
 	 * @return array
 	 */
-	public function get_query_params(): array {
+	public function get_query_params( array $param_keys = array() ): array {
 		$defaults = $this->get_query_param_defaults();
 		$params   = filter_input_array(
 			INPUT_GET,
@@ -307,7 +304,7 @@ class PageController {
 				'file_id' => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $file_id ) {
-						return sanitize_file_name( $file_id );
+						return sanitize_file_name( wp_unslash( $file_id ) );
 					},
 				),
 				'order'   => array(
@@ -342,6 +339,10 @@ class PageController {
 		);
 		$params   = wp_parse_args( $params, $defaults );
 
+		if ( count( $param_keys ) > 0 ) {
+			$params = array_intersect_key( $params, array_flip( $param_keys ) );
+		}
+
 		return $params;
 	}
 
@@ -366,7 +367,7 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_screen_options(): void {
-		$params = $this->get_query_params();
+		$params = $this->get_query_params( array( 'view' ) );
 
 		if ( 'list_files' === $params['view'] ) {
 			// Ensure list table columns are initialized early enough to enable column hiding.
@@ -388,8 +389,9 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
+		$params = $this->get_query_params( array( 'file_id', 'view' ) );
+
 		// Bail if this is not the list table view.
-		$params = $this->get_query_params();
 		if ( 'list_files' !== $params['view'] ) {
 			return;
 		}
@@ -409,16 +411,7 @@ class PageController {
 			$sendback = remove_query_arg( array( 'deleted' ), wp_get_referer() );
 
 			// Multiple file_id[] params will be filtered separately, but assigned to $files as an array.
-			$file_ids = filter_input(
-				INPUT_GET,
-				'file_id',
-				FILTER_CALLBACK,
-				array(
-					'options' => function( $file ) {
-						return sanitize_file_name( wp_unslash( $file ) );
-					},
-				)
-			);
+			$file_ids = $params['file_id'];
 
 			if ( ! is_array( $file_ids ) || count( $file_ids ) < 1 ) {
 				wp_safe_redirect( $sendback );
