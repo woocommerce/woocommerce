@@ -531,7 +531,12 @@ export const VariationsTable = forwardRef<
 
 									<VariationActionsMenu
 										selection={ variation }
-										onChange={ handleVariationChange }
+										onChange={ ( value ) =>
+											handleVariationChange( {
+												id: variation.id,
+												...value,
+											} )
+										}
 										onDelete={ ( { id } ) =>
 											handleDeleteVariationClick( id )
 										}

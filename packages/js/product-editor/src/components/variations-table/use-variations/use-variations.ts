@@ -249,9 +249,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}: Partial< ProductVariation > ) {
 		if ( isUpdating[ variationId ] ) return;
 
-		const { invalidateResolution: coreInvalidateResolution } =
-			dispatch( 'core' );
-
 		const { updateProductVariation } = dispatch(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);
@@ -260,11 +257,16 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			{ product_id: productId, id: variationId },
 			variation
 		).then( async ( response: ProductVariation ) => {
-			await coreInvalidateResolution( 'getEntityRecord', [
+			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
 				variationId,
 			] );
+
+			await getCurrentVariationsPage( {
+				product_id: productId,
+				attributes: filters,
+			} );
 
 			return response;
 		} );
@@ -273,9 +275,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onDelete( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
 
-		const { invalidateResolution: coreInvalidateResolution } =
-			dispatch( 'core' );
-
 		const { deleteProductVariation, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
@@ -283,19 +282,26 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			product_id: productId,
 			id: variationId,
 		} ).then( async ( response: ProductVariation ) => {
-			await coreInvalidateResolution( 'getEntityRecord', [
+			onSelect( response )( false );
+
+			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				productId,
 			] );
 
-			await coreInvalidateResolution( 'getEntityRecord', [
+			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
 				variationId,
 			] );
 
 			await invalidateResolutionForStore();
+
+			await getCurrentVariationsPage( {
+				product_id: productId,
+				attributes: filters,
+			} );
 
 			return response;
 		} );
@@ -407,6 +413,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 					'product_variation',
 					variation.id,
 				] );
+
+				onSelect( variation as never )( false );
 			}
 		}
 
