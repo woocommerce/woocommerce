@@ -2,7 +2,6 @@ $line-height: 1.618;
 
 .wc-block-components-product-rating {
 	display: block;
-	line-height: 1;
 
 	span {
 		line-height: $line-height;
@@ -26,6 +25,7 @@ $line-height: 1.618;
 
 		&::before {
 			content: "\53\53\53\53\53";
+			line-height: $line-height;
 			top: 0;
 			left: 0;
 			right: 0;
@@ -50,6 +50,7 @@ $line-height: 1.618;
 			right: 0;
 			position: absolute;
 			color: inherit;
+			line-height: $line-height;
 			white-space: nowrap;
 		}
 	}
