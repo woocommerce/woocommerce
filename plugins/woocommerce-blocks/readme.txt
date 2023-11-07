@@ -119,6 +119,11 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Remove bullet points and unnecessary padding from `SearchListControl`. ([11444](https://github.com/woocommerce/woocommerce-blocks/pull/11444))
 
+= 11.4.4 - 2023-11-06 =
+
+#### Enhancements
+
+- Enabled the new blockified Order Confirmation by default for block-based themes. [11615](https://github.com/woocommerce/woocommerce-blocks/pull/11615)
 
 = 11.4.3 - 2023-10-30 =
 
