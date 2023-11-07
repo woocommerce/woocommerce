@@ -15,7 +15,7 @@ export default function ActionsDropdownMenu() {
 			) }
 			controls={ [
 				{
-					title: __( 'Manage in Woo.com', 'woocommerce' ),
+					title: __( 'Manage on Woo.com', 'woocommerce' ),
 					icon: external,
 					onClick: () => {
 						window.location.href =
