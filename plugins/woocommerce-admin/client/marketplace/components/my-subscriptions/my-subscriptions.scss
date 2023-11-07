@@ -167,7 +167,25 @@
 		margin-right: 0;
 		background-color: #fff;
 		box-shadow: 0 2px 6px 0 rgba($gray-100, 0.05);
+		border: 1px solid var(--gutenberg-gray-100, #F0F0F0);
 		padding-right: $grid-unit-15;
+
+		&::before {
+			content: "";
+			display: block;
+			width: 4px;
+			height: 100%;
+			background-color: var(--wp-admin-theme-color, #007cba);
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+		}
+
+		&.is-error::before {
+			background-color: $alert-red;
+		}
+
 		.components-notice__content {
 			display: flex;
 			align-items: center;
