@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
+import { __ } from '@wordpress/i18n';
 import {
 	PanelBody,
 	ToggleControl,
@@ -15,13 +15,14 @@ import {
 /**
  * Internal dependencies
  */
-import { FilterComponentProps } from '../types';
+import type { FilterComponentProps } from '../types';
 
 export const Inspector = ( {
 	attributes,
 	setAttributes,
 }: Omit< FilterComponentProps, 'collectionData' > ) => {
 	const { showInputFields, inlineInput } = attributes;
+
 	return (
 		<InspectorControls>
 			<PanelBody

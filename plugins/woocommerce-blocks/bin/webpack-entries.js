@@ -91,13 +91,13 @@ const blocks = {
 	'reviews-by-product': {
 		customDir: 'reviews/reviews-by-product',
 	},
-	'collection-price-filter': {
-		customDir: 'collection-filters/inner-blocks/price-filter',
-		isExperimental: true,
-	},
 	'single-product': {},
 	'stock-filter': {},
 	'collection-filters': {
+		isExperimental: true,
+	},
+	'collection-price-filter': {
+		customDir: 'collection-filters/inner-blocks/price-filter',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
