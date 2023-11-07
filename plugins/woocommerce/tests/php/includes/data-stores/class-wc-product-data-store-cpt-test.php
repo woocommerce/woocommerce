@@ -52,7 +52,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Introduce an empty string as one of the values (to simulate bad or legacy data). Doing this through the
 		// product model won't work, because of sanitization (the empty string will become 0).
-		update_post_meta( $product->get_id(), '_wc_rating_count', [ 1, 2, 3, '', '4' ] );
+		update_post_meta( $product->get_id(), '_wc_rating_count', array( 1, 2, 3, '', '4' ) );
 
 		// We alter the manage stock property not as part of the test but as a way to ensure a lookup table update
 		// takes place when we save (which won't happen if the product model doesn't know of any property changes).
