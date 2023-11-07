@@ -10,22 +10,17 @@ import {
 	Spinner,
 	Tooltip,
 } from '@wordpress/components';
-import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	Product,
-	ProductVariation,
-} from '@woocommerce/data';
+import { Product, ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable, Tag } from '@woocommerce/components';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	useContext,
-	useEffect,
 	createElement,
 	Fragment,
 	forwardRef,
 } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -44,7 +39,6 @@ import { VariationsActionsMenu } from './variations-actions-menu';
 import HiddenIcon from '../../icons/hidden-icon';
 import { Pagination } from './pagination';
 import { EmptyTableState } from './table-empty-state';
-import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 
@@ -135,21 +129,6 @@ export const VariationsTable = forwardRef<
 	const context = useContext( CurrencyContext );
 	const { formatAmount } = context;
 
-	const { isGeneratingVariations } = useSelect(
-		( select ) => {
-			const { isGeneratingVariations: getIsGeneratingVariations } =
-				select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-			return {
-				isGeneratingVariations: getIsGeneratingVariations( {
-					product_id: productId,
-				} ),
-			};
-		},
-		[ productId ]
-	);
-
-	const { generateProductVariations } = useProductVariationsHelper();
-
 	const [ productAttributes ] = useEntityProp< Product[ 'attributes' ] >(
 		'postType',
 		'product',
@@ -168,7 +147,6 @@ export const VariationsTable = forwardRef<
 		onFilter,
 		getFilters,
 		hasFilters,
-		clearFilters,
 
 		selected,
 		isSelectingAll,
@@ -186,23 +164,16 @@ export const VariationsTable = forwardRef<
 		onDelete,
 		onBatchUpdate,
 		onBatchDelete,
+
+		isGenerating,
+		onGenerate,
 	} = useVariations( { productId } );
 
-	useEffect( () => {
-		if ( isGeneratingVariations ) {
-			clearFilters();
-		}
-	}, [ isGeneratingVariations ] );
-
 	function handleEmptyTableStateActionClick() {
-		generateProductVariations( productAttributes );
+		onGenerate( productAttributes );
 	}
 
-	if (
-		! ( isLoading || isGeneratingVariations ) &&
-		totalCount === 0 &&
-		hasFilters()
-	) {
+	if ( ! ( isLoading || isGenerating ) && totalCount === 0 && hasFilters() ) {
 		return (
 			<EmptyTableState
 				onActionClick={ handleEmptyTableStateActionClick }
@@ -325,10 +296,10 @@ export const VariationsTable = forwardRef<
 
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
-			{ ( isLoading || isGeneratingVariations ) && (
+			{ ( isLoading || isGenerating ) && (
 				<div className="woocommerce-product-variations__loading">
 					<Spinner />
-					{ isGeneratingVariations && (
+					{ isGenerating && (
 						<span>
 							{ __( 'Generating variations…', 'woocommerce' ) }
 						</span>

@@ -19,7 +19,12 @@ import {
  * Internal dependencies
  */
 import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../../constants';
-import { AttributeFilters, UseVariationsProps } from './types';
+import {
+	AttributeFilters,
+	GetVariationsRequest,
+	UseVariationsProps,
+} from './types';
+import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 
 export function useVariations( { productId }: UseVariationsProps ) {
 	// Variation pagination
@@ -31,21 +36,19 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const pageRef = useRef( 1 );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
-	async function getCurrentVariationsPage(
-		id: number,
-		attributes: AttributeFilters[] = []
-	) {
-		const { getProductVariations, getProductVariationsTotalCount } =
-			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-
+	async function getCurrentVariationsPage( params: GetVariationsRequest ) {
 		const requestParams = {
-			product_id: id,
 			page: pageRef.current,
 			per_page: perPageRef.current,
 			order: 'asc',
 			orderby: 'menu_order',
-			attributes,
+			...params,
 		};
+
+		const { getProductVariations, getProductVariationsTotalCount } =
+			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+		setIsLoading( true );
 
 		const data = await getProductVariations< ProductVariation[] >(
 			requestParams
@@ -57,39 +60,37 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 		setVariations( data );
 		setTotalCount( total );
+		setIsLoading( false );
 	}
 
 	useEffect( () => {
-		setIsLoading( true );
-		getCurrentVariationsPage( productId ).finally( () =>
-			setIsLoading( false )
-		);
+		getCurrentVariationsPage( { product_id: productId } );
 	}, [ productId ] );
 
 	function onPageChange( page: number ) {
 		pageRef.current = page;
 
-		setIsLoading( true );
-		getCurrentVariationsPage( productId, filters ).finally( () =>
-			setIsLoading( false )
-		);
+		getCurrentVariationsPage( {
+			product_id: productId,
+			attributes: filters,
+		} );
 	}
 
 	function onPerPageChange( perPage: number ) {
 		pageRef.current = 1;
 		perPageRef.current = perPage;
 
-		setIsLoading( true );
-		getCurrentVariationsPage( productId, filters ).finally( () =>
-			setIsLoading( false )
-		);
+		getCurrentVariationsPage( {
+			product_id: productId,
+			attributes: filters,
+		} );
 	}
 
 	function onFilter( attribute: ProductAttribute ) {
 		return function handleFilter( options: string[] ) {
 			let isPresent = false;
 
-			const newFilter = filters.reduce< AttributeFilters[] >(
+			const newFilters = filters.reduce< AttributeFilters[] >(
 				( prev, item ) => {
 					if ( item.attribute === attribute.slug ) {
 						isPresent = true;
@@ -104,7 +105,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			);
 
 			if ( ! isPresent ) {
-				newFilter.push( {
+				newFilters.push( {
 					attribute: attribute.slug,
 					terms: options,
 				} );
@@ -112,12 +113,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			pageRef.current = 1;
 
-			setIsLoading( true );
-			getCurrentVariationsPage( productId, newFilter ).finally( () =>
-				setIsLoading( false )
-			);
+			getCurrentVariationsPage( {
+				product_id: productId,
+				attributes: newFilters,
+			} );
 
-			setFilters( newFilter );
+			setFilters( newFilters );
 		};
 	}
 
@@ -350,10 +351,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 		}
 
-		await invalidateResolutionForStore();
-		await getCurrentVariationsPage( productId, filters );
-
+		pageRef.current = 1;
 		setIsUpdating( {} );
+
+		await invalidateResolutionForStore();
+		await getCurrentVariationsPage( {
+			product_id: productId,
+			attributes: filters,
+		} );
 
 		return { update: result };
 	}
@@ -407,18 +412,49 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 		}
 
+		pageRef.current = 1;
+		setIsUpdating( {} );
+
 		await coreInvalidateResolution( 'getEntityRecord', [
 			'postType',
 			'product',
 			productId,
 		] );
 		await invalidateResolutionForStore();
-		await getCurrentVariationsPage( productId, filters );
-
-		setIsUpdating( {} );
+		await getCurrentVariationsPage( {
+			product_id: productId,
+			attributes: filters,
+		} );
 
 		return { delete: result };
 	}
+
+	// Generation
+
+	const { isGenerating, generateProductVariations: onGenerate } =
+		useProductVariationsHelper();
+
+	const wasGenerating = useRef( false );
+
+	useEffect( () => {
+		if ( isGenerating ) {
+			pageRef.current = 1;
+			clearFilters();
+			onClearSelection();
+		}
+
+		const didGenerate =
+			wasGenerating.current === true && isGenerating === false;
+
+		if ( didGenerate ) {
+			getCurrentVariationsPage( {
+				product_id: productId,
+				attributes: filters,
+			} );
+		}
+
+		wasGenerating.current = Boolean( isGenerating );
+	}, [ isGenerating ] );
 
 	return {
 		isLoading,
@@ -447,5 +483,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		onDelete,
 		onBatchUpdate,
 		onBatchDelete,
+
+		isGenerating,
+		onGenerate,
 	};
 }

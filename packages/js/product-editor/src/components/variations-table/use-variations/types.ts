@@ -1,23 +1,19 @@
 /**
  * External dependencies
  */
-import { Product, ProductVariation } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 
 export type UseVariationsProps = {
 	productId: Product[ 'id' ];
 };
 
 export type GetVariationsRequest = {
-	productId: number;
+	product_id: number;
 	page?: number;
-	perPage?: number;
+	per_page?: number;
 	order?: 'asc' | 'desc';
 	orderby?: string;
-};
-
-export type GetVariationsResponse = {
-	data: ProductVariation[];
-	totalCount: number;
+	attributes?: AttributeFilters[];
 };
 
 export type AttributeFilters = { attribute: string; terms: string[] };
