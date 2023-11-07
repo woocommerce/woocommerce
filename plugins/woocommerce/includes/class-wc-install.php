@@ -1765,6 +1765,12 @@ $templating_engine_schema;
 			'view_woocommerce_reports',
 		);
 
+		$capabilities['templates'] = array(
+			'read_rendered_template_info',
+			'create_rendered_template',
+			'delete_rendered_template'
+		);
+
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
 
 		foreach ( $capability_types as $capability_type ) {

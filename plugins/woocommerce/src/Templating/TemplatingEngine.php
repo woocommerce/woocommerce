@@ -24,10 +24,8 @@ use Automattic\WooCommerce\Utilities\TimeUtil;
  * (creation and expiration dates, reachable via REST API or not) is stored in the wp_wc_rendered_templates
  * and wc_rendered_templates_meta tables.
  *
- * Rendered templates that are public and haven't expired can be obtained remotely via the "/wc-file/filename" endpoint
- * (unauthenticated access is allowed). The default content type will be "text/html", this can be changed if a
- * "content-type" metadata key is passed to render_template. Once a rendered file is successfully served,
- * the woocommerce_rendered_template_served action is fired.
+ * Rendered templates that are public and haven't expired can be obtained remotely via a dedicated endpoint,
+ * this is handled by the TemplatingRestController class.
  */
 class TemplatingEngine {
 
@@ -52,10 +50,6 @@ class TemplatingEngine {
 	 */
 	public function __construct() {
 		$this->default_templates_directory = __DIR__ . '/Templates';
-
-		self::add_action( 'init', array( $this, 'handle_init' ), 0 );
-		self::add_filter( 'query_vars', array( $this, 'handle_query_vars' ), 0 );
-		self::add_action( 'parse_request', array( $this, 'handle_parse_request' ), 0 );
 	}
 
 	/**
@@ -131,15 +125,14 @@ class TemplatingEngine {
 			 */
 			$metadata = apply_filters( 'woocommerce_rendered_template_metadata', $metadata, $template_name, $variables );
 
-			if ( array_key_exists( 'expiration_date', $metadata ) ) {
+			if ( ! is_null( $metadata['expiration_date'] ?? null ) ) {
 				$expiration_date = $metadata['expiration_date'];
 				if ( is_numeric( $expiration_date ) ) {
 					$expiration_date = gmdate( 'Y-m-d H:i:s', $expiration_date );
 				} elseif ( ! is_string( $expiration_date ) || ! TimeUtil::is_valid_date( $expiration_date ) ) {
 					throw new InvalidArgumentException( "$expiration_date is not a valid date, expected format: year-month-day hour:minute:second" );
 				}
-				unset( $metadata['expiration_date'] );
-			} elseif ( array_key_exists( 'expiration_seconds', $metadata ) ) {
+			} elseif ( ! is_null( $metadata['expiration_seconds'] ?? null ) ) {
 				$expiration_seconds = $metadata['expiration_seconds'];
 
 				/**
@@ -157,10 +150,12 @@ class TemplatingEngine {
 				}
 				$now_gmt         = current_time( 'mysql', true );
 				$expiration_date = gmdate( 'Y-m-d H:i:s', strtotime( $now_gmt ) + (int) $expiration_seconds );
-				unset( $metadata['expiration_seconds'] );
 			} else {
 				throw new InvalidArgumentException( 'The metadata array must have either an expiration_date key or an expiration_seconds key' );
 			}
+
+			unset( $metadata['expiration_date'] );
+			unset( $metadata['expiration_seconds'] );
 
 			$is_public = (bool) ( $metadata['is_public'] ?? false );
 			unset( $metadata['is_public'] );
@@ -370,6 +365,7 @@ class TemplatingEngine {
 	 * Otherwise, an array will be returned with the following keys:
 	 *
 	 * - id (int)
+	 * - file_name (string)
 	 * - file_path (string)
 	 * - date_created_gmt (date, Y-m-d H:m:i)
 	 * - expiration_date_gmt (date, Y-m-d H:m:i)
@@ -393,7 +389,7 @@ class TemplatingEngine {
 
 		$sql_query =
 			$wpdb->prepare(
-				"SELECT id, file_name as file_path, date_created_gmt, expiration_date_gmt, is_public FROM {$wpdb->prefix}wc_rendered_templates WHERE id=%d",
+				"SELECT id, file_name, date_created_gmt, expiration_date_gmt, is_public FROM {$wpdb->prefix}wc_rendered_templates WHERE id=%d",
 				$id
 			);
 
@@ -407,6 +403,7 @@ class TemplatingEngine {
 	 * Otherwise, an array will be returned with the following keys:
 	 *
 	 * - id (int)
+	 * - file_name (string)
 	 * - file_path (string)
 	 * - date_created_gmt (date, Y-m-d H:m:i)
 	 * - expiration_date_gmt (date, Y-m-d H:m:i)
@@ -432,7 +429,7 @@ class TemplatingEngine {
 
 		$sql_query =
 			$wpdb->prepare(
-				"SELECT id, file_name as file_path, date_created_gmt, expiration_date_gmt, is_public FROM {$wpdb->prefix}wc_rendered_templates WHERE file_name=%s",
+				"SELECT id, file_name, date_created_gmt, expiration_date_gmt, is_public FROM {$wpdb->prefix}wc_rendered_templates WHERE file_name=%s",
 				$file_name
 			);
 
@@ -457,7 +454,7 @@ class TemplatingEngine {
 			return null;
 		}
 
-		$data['file_path']   = $this->get_rendered_files_directory() . '/' . substr( $data['expiration_date_gmt'], 0, 7 ) . '/' . $data['file_path'];
+		$data['file_path']   = $this->get_rendered_files_directory() . '/' . substr( $data['expiration_date_gmt'], 0, 7 ) . '/' . $data['file_name'];
 		$data['is_public']   = (bool) $data['is_public'];
 		$data['has_expired'] = strtotime( $data['expiration_date_gmt'] ) < time();
 
@@ -705,103 +702,4 @@ CREATE TABLE {$wpdb->prefix}wc_rendered_templates_meta(
 )
 $collate;";
 	}
-
-	/**
-	 * Handle the "init" action, add rewrite rules for the "wc/file" endpoint.
-	 */
-	private function handle_init() {
-		add_rewrite_rule( '^wc/file/?$', 'index.php?wc-rendered-template=', 'top' );
-		add_rewrite_rule( '^wc/file/(.+)$', 'index.php?wc-rendered-template=$matches[1]', 'top' );
-		add_rewrite_endpoint( 'wc/file', EP_ALL );
-	}
-
-	/**
-	 * Handle the "query_vars" action, add the "wc-rendered-template" variable.
-	 *
-	 * @param array $vars The original query variables.
-	 * @return array The updated query variables.
-	 */
-	private function handle_query_vars( $vars ) {
-		$vars[] = 'wc-rendered-template';
-		return $vars;
-	}
-
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
-
-	/**
-	 * Handle the "parse_request" action.
-	 *
-	 * If the request is not for "/wc-template/filename" or "index.php?wc-rendered-template=filename", it returns without doing anything.
-	 * Otherwise, it will serve the contents of the file with the provided name if it exists, is public and has not expired,
-	 * or will return a "Not found" status otherwise.
-	 *
-	 * The file will be served with a content type header taken from the "content-type" metadata key of the rendered file,
-	 * or "text/html" if that key isn't present.
-	 */
-	private function handle_parse_request() {
-		global $wp;
-
-		// phpcs:ignore WordPress.Security
-		$query_arg = wp_unslash( $_GET['wc-rendered-template'] ?? null );
-		if ( ! is_null( $query_arg ) ) {
-			$wp->query_vars['wc-rendered-template'] = $query_arg;
-		}
-
-		$template_file_name = $wp->query_vars['wc-rendered-template'] ?? null;
-		if ( is_null( $template_file_name ) ) {
-			return;
-		}
-
-		try {
-			$rendered_template_info = $this->get_rendered_file_by_name( $template_file_name, true );
-			if ( is_null( $rendered_template_info ) || $rendered_template_info['is_expired'] || ! $rendered_template_info['is_public'] ) {
-				status_header( 404 );
-				exit;
-			}
-
-			$rendered_file_path = $rendered_template_info['file_path'];
-			if ( ! is_file( $rendered_file_path ) ) {
-				throw new Exception( "File not found: $rendered_file_path" );
-			}
-
-			$file_length = filesize( $rendered_file_path );
-			if ( false === $file_length ) {
-				throw new Exception( "Can't retrieve file size: $rendered_file_path" );
-			}
-
-			$file_handle = fopen( $rendered_file_path, 'r' );
-		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
-			status_header( 500 );
-			exit;
-		}
-
-		$content_type = $rendered_template_info['metadata']['content-type'] ?? 'text/html';
-		header( "Content-Type: $content_type" );
-		header( "Content-Length: $file_length" );
-
-		try {
-			while ( ! feof( $file_handle ) ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo fread( $file_handle, 1024 );
-			}
-
-			/**
-			 * Action that fires after a rendered file has been successfully served, right before terminating the request.
-			 *
-			 * @param array $rendered_template_info Information about the served file, as returned by get_rendered_file_by_name.
-			 *
-			 * @since 8.4.0
-			 */
-			do_action( 'woocommerce_rendered_template_served', $rendered_template_info );
-		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
-			// We can't change the response status code at this point.
-		} finally {
-			fclose( $file_handle );
-			exit;
-		}
-	}
-
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
 }

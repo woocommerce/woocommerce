@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Templating\TemplatingEngine;
+use Automattic\WooCommerce\Templating\TemplatingRestController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\TimeUtil;
@@ -37,6 +38,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		WebhookUtil::class,
 		TimeUtil::class,
 		TemplatingEngine::class,
+		TemplatingRestController::class
 	);
 
 	/**
@@ -53,5 +55,6 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		$this->share( WebhookUtil::class );
 		$this->share( TimeUtil::class );
 		$this->share( TemplatingEngine::class )->addArgument(TimeUtil::class);
+		$this->share( TemplatingRestController::class )->addArgument(TemplatingEngine::class);
 	}
 }
