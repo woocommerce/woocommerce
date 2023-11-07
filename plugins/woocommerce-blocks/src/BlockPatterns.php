@@ -250,7 +250,7 @@ class BlockPatterns {
 	 * @param array        $options  Array of bulk item update data.
 	 */
 	public function schedule_on_plugin_update( $upgrader_object, $options ) {
-		if ( 'update' === $options['action'] && 'plugin' === $options['type'] ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
 				if ( str_contains( $plugin, 'woocommerce-gutenberg-products-block.php' ) || str_contains( $plugin, 'woocommerce.php' ) ) {
 					$business_description = get_option( 'woo_ai_describe_store_description' );
