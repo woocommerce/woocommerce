@@ -196,7 +196,6 @@ export function Edit( {
 
 	const isImageGalleryVisible =
 		propertyValue !== null &&
-		propertyValue !== undefined &&
 		Array.isArray( propertyValue ) &&
 		propertyValue.length > 0;
 
