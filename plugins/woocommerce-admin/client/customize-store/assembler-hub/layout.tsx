@@ -72,7 +72,7 @@ export const Layout = () => {
 	const { id: templateId, type: templateType } = template;
 
 	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
-
+	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
 	if ( currentState === 'transitionalScreen' ) {
@@ -83,7 +83,12 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional sendEvent={ sendEvent } editor={ editor } />
+					<Transitional
+						sendEvent={ sendEvent }
+						editor={ editor }
+						isSurveyOpen={ isSurveyOpen }
+						setSurveyOpen={ setSurveyOpen }
+					/>
 				</EntityProvider>
 			</EntityProvider>
 		);

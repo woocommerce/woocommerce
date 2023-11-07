@@ -20,6 +20,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { ContentPreview } from '../../../components/content-preview';
 import { ModalEditor } from '../../../components/modal-editor';
 import { ProductEditorBlockEditProps } from '../../../types';
+import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 
 /**
  * Internal dependencies
@@ -85,6 +86,7 @@ export function Edit( {
 			{ !! description.length && (
 				<ContentPreview content={ description } />
 			) }
+			{ isModalOpen && <ModalEditorWelcomeGuide /> }
 		</div>
 	);
 }

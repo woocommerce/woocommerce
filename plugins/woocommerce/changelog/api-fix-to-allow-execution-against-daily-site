@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update to allow the api-core-tests to execute against the daily test site
