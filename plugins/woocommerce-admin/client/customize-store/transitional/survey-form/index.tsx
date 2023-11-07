@@ -9,7 +9,7 @@ import {
 	TextareaControl,
 } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 /**
