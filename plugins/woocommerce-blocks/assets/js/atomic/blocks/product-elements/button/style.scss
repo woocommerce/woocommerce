@@ -13,8 +13,7 @@
 		display: inline-flex;
 		justify-content: center;
 		text-align: center;
-		// Set button font size and padding so it inherits from parent.
-		padding: 0.5em 1em;
+		// Set button font size so it inherits from parent.
 		font-size: 1em;
 
 		&.loading {
@@ -25,6 +24,7 @@
 			font-family: WooCommerce; /* stylelint-disable-line */
 			content: "\e031";
 			animation: spin 2s linear infinite;
+			margin-right: 0;
 			margin-left: 0.5em;
 			display: inline-block;
 			width: auto;
@@ -70,8 +70,8 @@
 		justify-content: center;
 		white-space: normal;
 		word-break: break-word;
-		width: 150px;
 		overflow: hidden;
+		align-items: center;
 		line-height: inherit;
 
 		span {
