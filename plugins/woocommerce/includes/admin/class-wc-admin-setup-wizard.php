@@ -1890,9 +1890,12 @@ class WC_Admin_Setup_Wizard {
 					$this->display_recommended_item( array(
 						'type'        => 'storefront_theme',
 						'title'       => __( 'Storefront Theme', 'woocommerce' ),
-						'description' => sprintf( __(
-								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woo.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.', 'woocommerce' ),
-								$theme_name
+						'description' => sprintf(
+							__(
+								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woo.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
+								'woocommerce'
+							),
+							$theme_name
 						),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-storefront-icon.svg',
 						'img_alt'     => __( 'Storefront icon', 'woocommerce' ),
@@ -2216,9 +2219,9 @@ class WC_Admin_Setup_Wizard {
 		// We've made it! Don't prompt the user to run the wizard again.
 		WC_Admin_Notices::remove_notice( 'install', true );
 
-		$user_email   = $this->get_current_user_email();
-		$docs_url     = 'https://woo.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
-		$help_text    = sprintf(
+		$user_email = $this->get_current_user_email();
+		$docs_url   = 'https://woo.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
+		$help_text  = sprintf(
 			/* translators: %1$s: link to docs */
 			__( 'Visit Woo.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url

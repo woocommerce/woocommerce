@@ -372,7 +372,7 @@ class WC_Helper {
 	/**
 	 * Add tracking parameters to buttons (Renew, Purchase, etc.) on subscriptions page
 	 *
-	 * @param string $url URL to product page or to https://woo.com/my-account/my-subscriptions/
+	 * @param string $url URL to product page or to https://woo.com/my-account/my-subscriptions/.
 	 * @param string $utm_content value of utm_content query parameter used for tracking
 	 *
 	 * @return string URL including utm parameters for tracking
