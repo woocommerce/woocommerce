@@ -33,15 +33,15 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const [ totalCount, setTotalCount ] = useState< number >( 0 );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
-	const pageRef = useRef( 1 );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
 	async function getCurrentVariationsPage( params: GetVariationsRequest ) {
-		const requestParams = {
-			page: pageRef.current,
+		const requestParams: GetVariationsRequest = {
+			page: 1,
 			per_page: perPageRef.current,
 			order: 'asc',
 			orderby: 'menu_order',
+			attributes: [],
 			...params,
 		};
 
@@ -68,16 +68,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}, [ productId ] );
 
 	function onPageChange( page: number ) {
-		pageRef.current = page;
-
 		getCurrentVariationsPage( {
 			product_id: productId,
 			attributes: filters,
+			page,
 		} );
 	}
 
 	function onPerPageChange( perPage: number ) {
-		pageRef.current = 1;
 		perPageRef.current = perPage;
 
 		getCurrentVariationsPage( {
@@ -111,7 +109,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				} );
 			}
 
-			pageRef.current = 1;
+			onClearSelection();
 
 			getCurrentVariationsPage( {
 				product_id: productId,
@@ -217,6 +215,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				per_page: 50,
 				order: 'asc',
 				orderby: 'menu_order',
+				attributes: filters,
 			} );
 
 			fetchedCount += chunk.length;
@@ -351,7 +350,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 		}
 
-		pageRef.current = 1;
 		setIsUpdating( {} );
 
 		await invalidateResolutionForStore();
@@ -412,7 +410,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 		}
 
-		pageRef.current = 1;
 		setIsUpdating( {} );
 
 		await coreInvalidateResolution( 'getEntityRecord', [
@@ -438,7 +435,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	useEffect( () => {
 		if ( isGenerating ) {
-			pageRef.current = 1;
 			clearFilters();
 			onClearSelection();
 		}
@@ -449,7 +445,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		if ( didGenerate ) {
 			getCurrentVariationsPage( {
 				product_id: productId,
-				attributes: filters,
 			} );
 		}
 
