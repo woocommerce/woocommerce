@@ -100,7 +100,7 @@ const loaderSteps = [
 
 // Loader for the API call without the last frame.
 export const ApiCallLoader = () => {
-	const [ progress, setProgress ] = useState( 0 );
+	const [ progress, setProgress ] = useState( 5 );
 	useEffect( () => {
 		const preload = ( src: string ) => {
 			const img = new Image();
@@ -114,7 +114,7 @@ export const ApiCallLoader = () => {
 		preload( openingTheDoors );
 	}, [] );
 
-	//  Duplicate the steps to make the loader last longer and give smoother progress.
+	// Make the loader last longer and provide a smoother progress by duplicating the steps.
 	const augmentedSteps = loaderSteps
 		.map( ( item, index, array ) => {
 			const nextItem = array[ index + 1 ];
