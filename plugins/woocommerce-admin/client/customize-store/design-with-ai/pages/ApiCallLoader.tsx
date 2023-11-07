@@ -113,13 +113,34 @@ export const ApiCallLoader = () => {
 		preload( openingTheDoors );
 	}, [] );
 
+	const augmentedSteps = loaderSteps
+		.map( ( item, index, array ) => {
+			const nextItem = array[ index + 1 ];
+			// last one
+			if ( ! nextItem ) return [ item ];
+			const numOfDuplication = 2;
+			const duplicates = [ item ];
+			const progressIncreaseBy =
+				( nextItem.progress - item.progress ) / numOfDuplication;
+
+			for ( let i = 0; i < numOfDuplication; i++ ) {
+				duplicates.push( {
+					...item,
+					progress: item.progress + ( i + 1 ) * progressIncreaseBy,
+				} );
+			}
+
+			return duplicates;
+		} )
+		.flat();
+
 	return (
 		<Loader>
 			<Loader.Sequence
-				interval={ ( 40 * 1000 ) / ( loaderSteps.length - 1 ) }
+				interval={ ( 40 * 1000 ) / ( augmentedSteps.length - 1 ) }
 				shouldLoop={ false }
 			>
-				{ loaderSteps.slice( 0, -1 ).map( ( step, index ) => (
+				{ augmentedSteps.slice( 0, -1 ).map( ( step, index ) => (
 					<Loader.Layout key={ index }>
 						<Loader.Illustration>
 							{ step.image }
