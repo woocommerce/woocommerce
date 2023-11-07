@@ -12,6 +12,7 @@ import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
