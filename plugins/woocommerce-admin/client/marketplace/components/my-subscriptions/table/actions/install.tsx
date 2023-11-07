@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { dispatch, useDispatch, useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -10,17 +10,20 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
-import { installProduct } from '../../../../utils/functions';
+import {
+	addNotice,
+	installProduct,
+	removeNotice,
+} from '../../../../utils/functions';
 import { Subscription } from '../../types';
 import { installingStore } from '../../../../contexts/install-store';
+import { NoticeStatus } from '../../../../contexts/types';
 
 interface InstallProps {
 	subscription: Subscription;
 }
 
 export default function Install( props: InstallProps ) {
-	const { createWarningNotice, createSuccessNotice } =
-		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const loading: boolean = useSelect(
@@ -45,15 +48,18 @@ export default function Install( props: InstallProps ) {
 
 	const install = () => {
 		startInstall();
+		removeNotice( props.subscription.product_key );
 		installProduct( props.subscription )
 			.then( () => {
 				loadSubscriptions( false ).then( () => {
-					createSuccessNotice(
+					addNotice(
+						props.subscription.product_key,
 						sprintf(
 							// translators: %s is the product name.
 							__( '%s successfully installed.', 'woocommerce' ),
 							props.subscription.product_name
 						),
+						NoticeStatus.Success,
 						{
 							icon: <Icon icon="yes" />,
 						}
@@ -71,14 +77,19 @@ export default function Install( props: InstallProps ) {
 					if ( error?.success === false && error?.data.message ) {
 						errorMessage += ' ' + error.data.message;
 					}
-					createWarningNotice( errorMessage, {
-						actions: [
-							{
-								label: __( 'Try again', 'woocommerce' ),
-								onClick: install,
-							},
-						],
-					} );
+					addNotice(
+						props.subscription.product_key,
+						errorMessage,
+						NoticeStatus.Error,
+						{
+							actions: [
+								{
+									label: __( 'Try again', 'woocommerce' ),
+									onClick: install,
+								},
+							],
+						}
+					);
 					stopInstall();
 				} );
 			} );

@@ -3,9 +3,9 @@
  */
 import { getNewPath } from '@woocommerce/navigation';
 import { Button, Tooltip } from '@wordpress/components';
+import { help } from '@wordpress/icons';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { help } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -22,6 +22,7 @@ import {
 	installedSubscriptionRow,
 } from './table/table-rows';
 import { Subscription } from './types';
+import Notices from './notices';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -78,6 +79,9 @@ export default function MySubscriptions(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
+			<section className="woocommerce-marketplace__my-subscriptions__notices">
+				<Notices />
+			</section>
 			<section>
 				<h2 className="woocommerce-marketplace__my-subscriptions__header">
 					{ __( 'Installed on this store', 'woocommerce' ) }

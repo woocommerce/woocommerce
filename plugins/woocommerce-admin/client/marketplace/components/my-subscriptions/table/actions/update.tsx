@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -14,6 +13,12 @@ import { Subscription } from '../../types';
 import ConnectModal from './connect-modal';
 import RenewModal from './renew-modal';
 import SubscribeModal from './subscribe-modal';
+import {
+	addNotice,
+	removeNotice,
+	updateProduct,
+} from '../../../../utils/functions';
+import { NoticeStatus } from '../../../../contexts/types';
 
 interface UpdateProps {
 	subscription: Subscription;
@@ -22,8 +27,6 @@ interface UpdateProps {
 export default function Update( props: UpdateProps ) {
 	const [ showModal, setShowModal ] = useState( false );
 	const [ isUpdating, setIsUpdating ] = useState( false );
-	const { createWarningNotice, createSuccessNotice } =
-		useDispatch( 'core/notices' );
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const canUpdate =
@@ -37,13 +40,16 @@ export default function Update( props: UpdateProps ) {
 			setShowModal( true );
 			return;
 		}
+		removeNotice( props.subscription.product_key );
 		if ( ! window.wp.updates ) {
-			createWarningNotice(
+			addNotice(
+				props.subscription.product_key,
 				sprintf(
 					// translators: %s is the product name.
 					__( '%s couldn’t be updated.', 'woocommerce' ),
 					props.subscription.product_name
 				),
+				NoticeStatus.Error,
 				{
 					actions: [
 						{
@@ -63,36 +69,33 @@ export default function Update( props: UpdateProps ) {
 
 		setIsUpdating( true );
 
-		const action =
-			props.subscription.local.type === 'plugin'
-				? 'update-plugin'
-				: 'update-theme';
-		window.wp.updates
-			.ajax( action, {
-				slug: props.subscription.local.slug,
-				plugin: props.subscription.local.path,
-				theme: props.subscription.local.path,
-			} )
+		updateProduct( props.subscription )
 			.then( () => {
-				loadSubscriptions( false );
-				createSuccessNotice(
-					sprintf(
-						// translators: %s is the product name.
-						__( '%s updated successfully.', 'woocommerce' ),
-						props.subscription.product_name
-					),
-					{
-						icon: <Icon icon="yes" />,
-					}
-				);
+				loadSubscriptions( false ).then( () => {
+					addNotice(
+						props.subscription.product_key,
+						sprintf(
+							// translators: %s is the product name.
+							__( '%s updated successfully.', 'woocommerce' ),
+							props.subscription.product_name
+						),
+						NoticeStatus.Success,
+						{
+							icon: <Icon icon="yes" />,
+						}
+					);
+					setIsUpdating( false );
+				} );
 			} )
 			.catch( () => {
-				createWarningNotice(
+				addNotice(
+					props.subscription.product_key,
 					sprintf(
 						// translators: %s is the product name.
 						__( '%s couldn’t be updated.', 'woocommerce' ),
 						props.subscription.product_name
 					),
+					NoticeStatus.Error,
 					{
 						actions: [
 							{
@@ -102,8 +105,6 @@ export default function Update( props: UpdateProps ) {
 						],
 					}
 				);
-			} )
-			.always( () => {
 				setIsUpdating( false );
 			} );
 	}

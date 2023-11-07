@@ -3,29 +3,20 @@
  */
 import { createReduxStore, register } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
+import { InstallingState } from './types';
+
 const INSTALLING_STORE_NAME = 'woocommerce-admin/installing';
 
-interface InstallingState {
-	installingProducts: string[];
+export interface InstallingStateErrorAction {
+	label: string;
+	onClick: () => void;
 }
 
 const DEFAULT_STATE: InstallingState = {
 	installingProducts: [],
-};
-
-const actions = {
-	startInstalling( productKey: string ) {
-		return {
-			type: 'START_INSTALLING',
-			productKey,
-		};
-	},
-	stopInstalling( productKey: string ) {
-		return {
-			type: 'STOP_INSTALLING',
-			productKey,
-		};
-	},
 };
 
 const store = createReduxStore( INSTALLING_STORE_NAME, {
@@ -52,9 +43,20 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 
 		return state;
 	},
-
-	actions,
-
+	actions: {
+		startInstalling( productKey: string ) {
+			return {
+				type: 'START_INSTALLING',
+				productKey,
+			};
+		},
+		stopInstalling( productKey: string ) {
+			return {
+				type: 'STOP_INSTALLING',
+				productKey,
+			};
+		},
+	},
 	selectors: {
 		isInstalling(
 			state: InstallingState | undefined,
