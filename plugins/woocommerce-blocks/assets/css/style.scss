@@ -54,8 +54,7 @@
 		display: inline-flex;
 		justify-content: center;
 		text-align: center;
-		// Set button font size and padding so it inherits from parent.
-		padding: 0.5em 1em;
+		// Set button font size so it inherits from parent.
 		font-size: 1em;
 
 		&.loading {
@@ -306,7 +305,6 @@
 
 	.wc-block-grid__product-add-to-cart.wp-block-button .wp-block-button__link {
 		@include font-size(smaller);
-		padding: em($gap-smaller);
 	}
 
 	@media only screen and (min-width: 768px) {
