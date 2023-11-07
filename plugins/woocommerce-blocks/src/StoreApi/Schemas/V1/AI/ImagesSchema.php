@@ -1,26 +1,30 @@
 <?php
-namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
+namespace Automattic\WooCommerce\StoreApi\Schemas\V1\AI;
+
+use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 
 /**
- * OrderSchema class.
+ * ImagesSchema class.
+ *
+ * @internal
  */
-class PatternsSchema extends AbstractSchema {
+class ImagesSchema extends AbstractSchema {
 	/**
 	 * The schema item name.
 	 *
 	 * @var string
 	 */
-	protected $title = 'patterns';
+	protected $title = 'ai/images';
 
 	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'patterns';
+	const IDENTIFIER = 'ai/images';
 
 	/**
-	 * Patterns schema properties.
+	 * Images schema properties.
 	 *
 	 * @return array
 	 */
@@ -29,15 +33,13 @@ class PatternsSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get the Patterns response.
+	 * Get the Images response.
 	 *
 	 * @param array $item Item to get response for.
 	 *
 	 * @return array
 	 */
 	public function get_item_response( $item ) {
-		return [
-			'ai_content_generated' => true,
-		];
+		return $item;
 	}
 }

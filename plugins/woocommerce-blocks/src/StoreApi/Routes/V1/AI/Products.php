@@ -1,30 +1,30 @@
 <?php
 
-namespace Automattic\WooCommerce\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Images\Pexels;
-use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
 use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 
 /**
- * Patterns class.
+ * Products class.
+ *
+ * @internal
  */
-class Patterns extends AbstractRoute {
+class Products extends AbstractRoute {
 	/**
 	 * The route identifier.
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'patterns';
+	const IDENTIFIER = 'ai/products';
 
 	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
 	 */
-	const SCHEMA_TYPE = 'patterns';
+	const SCHEMA_TYPE = 'ai/products';
 
 	/**
 	 * Get the path of this REST route.
@@ -32,7 +32,7 @@ class Patterns extends AbstractRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return '/patterns';
+		return '/ai/products';
 	}
 
 	/**
@@ -45,11 +45,15 @@ class Patterns extends AbstractRoute {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'permission_callback' => [ $this, 'is_authorized' ],
+				'permission_callback' => [ Middleware::class, 'is_authorized' ],
 				'args'                => [
 					'business_description' => [
 						'description' => __( 'The business description for a given store.', 'woo-gutenberg-products-block' ),
 						'type'        => 'string',
+					],
+					'images'               => [
+						'description' => __( 'The images for a given store.', 'woo-gutenberg-products-block' ),
+						'type'        => 'object',
 					],
 				],
 			],
@@ -59,30 +63,7 @@ class Patterns extends AbstractRoute {
 	}
 
 	/**
-	 * Permission callback.
-	 *
-	 * @throws RouteException If the user is not allowed to make this request.
-	 *
-	 * @return true|\WP_Error
-	 */
-	public function is_authorized() {
-		try {
-			if ( ! current_user_can( 'manage_options' ) ) {
-				throw new RouteException( 'woocommerce_rest_invalid_user', __( 'You are not allowed to make this request. Please make sure you are logged in.', 'woo-gutenberg-products-block' ), 403 );
-			}
-		} catch ( RouteException $error ) {
-			return new \WP_Error(
-				$error->getErrorCode(),
-				$error->getMessage(),
-				array( 'status' => $error->getCode() )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Ensure the content and images in patterns are powered by AI.
+	 * Generate the content for the products.
 	 *
 	 * @param  \WP_REST_Request $request Request object.
 	 *
@@ -115,6 +96,7 @@ class Patterns extends AbstractRoute {
 				$this->prepare_item_for_response(
 					[
 						'ai_content_generated' => true,
+						'product_content'      => null,
 					],
 					$request
 				)
@@ -126,46 +108,34 @@ class Patterns extends AbstractRoute {
 		$site_id = $ai_connection->get_site_id();
 
 		if ( is_wp_error( $site_id ) ) {
-			return $site_id;
+			return $this->error_to_response( $site_id );
 		}
 
 		$token = $ai_connection->get_jwt_token( $site_id );
 
 		if ( is_wp_error( $token ) ) {
-			return $token;
+			return $this->error_to_response( $token );
 		}
 
-		$images = ( new Pexels() )->get_images( $ai_connection, $token, $business_description );
+		$images = $request['images'];
 
-		if ( is_wp_error( $images ) ) {
-			$response = $this->error_to_response( $images );
-		} else {
-			$populate_patterns = ( new PatternUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
+		$populate_products = ( new ProductUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
 
-			if ( is_wp_error( $populate_patterns ) ) {
-				$response = $this->error_to_response( $populate_patterns );
-			}
-
-			$populate_products = ( new ProductUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
-
-			if ( is_wp_error( $populate_products ) ) {
-				$response = $this->error_to_response( $populate_products );
-			}
-
-			if ( true === $populate_patterns && true === $populate_products ) {
-				update_option( 'last_business_description_with_ai_content_generated', $business_description );
-			}
+		if ( is_wp_error( $populate_products ) ) {
+			return $this->error_to_response( $populate_products );
 		}
 
-		if ( ! isset( $response ) ) {
-			$response = $this->prepare_item_for_response(
-				[
-					'ai_content_generated' => true,
-				],
-				$request
-			);
+		if ( ! isset( $populate_products['product_content'] ) ) {
+			return $this->error_to_response( new \WP_Error( 'product_content_not_found', __( 'Product content not found.', 'woo-gutenberg-products-block' ) ) );
 		}
 
-		return rest_ensure_response( $response );
+		$product_content = $populate_products['product_content'];
+
+		$item = array(
+			'ai_content_generated' => true,
+			'product_content'      => $product_content,
+		);
+
+		return rest_ensure_response( $item );
 	}
 }
