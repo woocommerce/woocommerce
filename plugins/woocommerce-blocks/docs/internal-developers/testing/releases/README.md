@@ -182,13 +182,4 @@ Every release includes specific testing instructions for new features and bug fi
     -   [11.4.1](./1141.md)
     -   [11.4.2](./1142.md)
     -   [11.4.3](./1143.md)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/internal-developers/testing/releases/README.md)
-
-<!-- /FEEDBACK -->
+-   [11.5.0](./1150.md)
