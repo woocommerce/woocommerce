@@ -287,6 +287,7 @@ class PageController {
 
 			if ( ! is_array( $files ) || count( $files ) < 1 ) {
 				wp_safe_redirect( $sendback );
+				exit;
 			}
 
 			switch ( $action ) {
