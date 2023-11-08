@@ -45,6 +45,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	inherit: null,
 	taxQuery: {},
 	isProductCollectionBlock: true,
+	featured: false,
 	woocommerceOnSale: false,
 	woocommerceStockStatus: getDefaultStockStatuses(),
 	woocommerceAttributes: [],
@@ -87,5 +88,6 @@ export const DEFAULT_FILTERS: Partial< ProductCollectionQuery > = {
 	woocommerceAttributes: [],
 	taxQuery: DEFAULT_QUERY.taxQuery,
 	woocommerceHandPickedProducts: [],
+	featured: DEFAULT_QUERY.featured,
 	timeFrame: undefined,
 };
