@@ -19,7 +19,7 @@ class BlockTemplateLogger {
 
 	public static $event_types = array(
 		self::BLOCK_ADDED                       => array(
-			'level'   => \WC_Log_Levels::INFO,
+			'level'   => \WC_Log_Levels::DEBUG,
 			'message' => 'Block added to template.',
 		),
 		self::BLOCK_REMOVED                     => array(
@@ -60,6 +60,8 @@ class BlockTemplateLogger {
 
 	private $all_template_events = array();
 
+	private $threshold_severity = null;
+
 	/**
 	 * Get the singleton instance.
 	 */
@@ -76,6 +78,13 @@ class BlockTemplateLogger {
 	 */
 	protected function __construct() {
 		$this->logger = wc_get_logger();
+
+		$threshold = get_option( 'woocommerce_block_template_logging_threshold', \WC_Log_Levels::INFO );
+		if ( ! \WC_Log_Levels::is_valid_level( $threshold ) ) {
+			$threshold = \WC_Log_Levels::INFO;
+		}
+
+		$this->threshold_severity = \WC_Log_Levels::get_level_severity( $threshold );
 	}
 
 	public function get_template_events( string $template_id ): array {
@@ -103,8 +112,16 @@ class BlockTemplateLogger {
 				'message'    => 'Unknown error.',
 			);
 
-			$this->log_to_logger( $event_type_info, $template, $container, $block, $additional_info );
-			$this->add_template_event( $event_type_info, $template, $container, $block, $additional_info );
+		if ( ! $this->should_handle( $event_type_info['level'] ) ) {
+			return;
+		}
+
+		$this->log_to_logger( $event_type_info, $template, $container, $block, $additional_info );
+		$this->add_template_event( $event_type_info, $template, $container, $block, $additional_info );
+	}
+
+	private function should_handle( $level ) {
+		return $this->threshold_severity <= \WC_Log_Levels::get_level_severity( $level );
 	}
 
 	private function log_to_logger( $event_type_info, $template, $container, $block, $additional_info = array() ) {
