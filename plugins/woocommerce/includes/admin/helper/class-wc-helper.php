@@ -1503,33 +1503,12 @@ class WC_Helper {
 			);
 		}
 
-		// Track installed subscription ids to avoid duplicate entries for inactive subsriptions.
-		$installed_subscription_ids = array();
-	    $default_local_data = array(
-			'installed'    => false,
-			'installable' => true,
-			'active'       => false,
-			'version'      => null,
-			'type'         => null,
-			'slug'         => null,
-			'path'         => null,
-		);
-
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
-			$subscription['local']  = $default_local_data;
 
 			$updates = WC_Helper_Updater::get_update_data();
 
-			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
-			$subscription = self::add_local_data_to_subscription( $subscription );
-			if ( true === $subscription['local']['installed'] ) {
-				if ( false === $has_another_installed_subscription && true === $subscription['active'] ) {
-						array_push( $installed_subscription_ids, $subscription['product_id'] );
-				} else {
-					$subscription['local']['installable'] = false;
-				}
-			}
+			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
 			$subscription['has_update'] = false;
 			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
@@ -1560,45 +1539,53 @@ class WC_Helper {
 	 * @param array $subscription The subscription data.
 	 * @return array The subscription data with local data added.
 	 */
-	public static function add_local_data_to_subscription( array $subscription ) {
+	public static function get_subscription_local_data( array $subscription ) {
 		$local_plugins = self::get_local_plugins();
 		$local_themes  = self::get_local_themes();
 
-		$local = wp_list_filter(
+		$installed_product = wp_list_filter(
 			array_merge( $local_plugins, $local_themes ),
 			array( 'slug' => $subscription['zip_slug'] )
 		);
-		$local = array_shift( $local );
+		$installed_product = array_shift( $installed_product );
 
-		if ( empty( $local ) ) {
-			return $subscription;
+		if ( empty( $installed_product ) ) {
+			return array(
+				'installed'   => false,
+				'installable' => true,
+				'active'      => false,
+				'version'     => null,
+				'type'        => null,
+				'slug'        => null,
+				'path'        => null,
+			);
 		}
 
-		$subscription['local'] = array(
-			'installed'    => true,
+		$local_data = array(
+			'installed'   => true,
 			'installable' => false,
-			'active'       => false,
-			'version'      => $local['Version'],
-			'type'         => $local['_type'],
-			'slug'         => null,
-			'path'         => $local['_filename'],
+			'active'      => false,
+			'version'     => $installed_product['Version'],
+			'type'        => $installed_product['_type'],
+			'slug'        => null,
+			'path'        => $installed_product['_filename'],
 		);
 
-		if ( 'plugin' === $local['_type'] ) {
-			$subscription['local']['slug'] = $local['slug'];
-			if ( is_plugin_active( $local['_filename'] ) ) {
-				$subscription['local']['active'] = true;
-			} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
-				$subscription['local']['active'] = true;
+		if ( 'plugin' === $installed_product['_type'] ) {
+			$local_data['slug'] = $installed_product['slug'];
+			if ( is_plugin_active( $installed_product['_filename'] ) ) {
+				$local_data['active'] = true;
+			} elseif ( is_multisite() && is_plugin_active_for_network( $installed_product['_filename'] ) ) {
+				$local_data['active'] = true;
 			}
-		} elseif ( 'theme' === $local['_type'] ) {
-			$subscription['local']['slug'] = $local['_stylesheet'];
-			if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
-				$subscription['local']['active'] = true;
+		} elseif ( 'theme' === $installed_product['_type'] ) {
+			$local_data['slug'] = $installed_product['_stylesheet'];
+			if ( in_array( $installed_product['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
+				$local_data['active'] = true;
 			}
 		}
 
-		return $subscription;
+		return $local_data;
 	}
 
 	/**
