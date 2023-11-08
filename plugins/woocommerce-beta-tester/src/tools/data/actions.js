@@ -217,7 +217,6 @@ export function* resetCustomizeYourStore() {
 			'woocommerce_customize_store_onboarding_tour_hidden',
 			'woocommerce_admin_customize_store_completed',
 			'woocommerce_admin_customize_store_completed_theme_id',
-			'wc_blocks_patterns_content',
 		];
 		yield apiFetch( {
 			method: 'DELETE',
