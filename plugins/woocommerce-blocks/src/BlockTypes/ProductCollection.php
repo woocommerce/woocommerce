@@ -401,6 +401,7 @@ class ProductCollection extends AbstractBlock {
 		 */
 		if (
 			! empty( $merged_query['post__in'] ) &&
+			is_array( $merged_query['post__in'] ) &&
 			count( $merged_query['post__in'] ) > count( array_unique( $merged_query['post__in'] ) )
 		) {
 			$merged_query['post__in'] = array_unique(
