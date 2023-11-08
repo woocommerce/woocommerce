@@ -48,7 +48,6 @@ export default function MySubscriptions(): JSX.Element {
 		updateConnectionUrl
 	);
 
-
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) => subscription.subscription_installed
 	);

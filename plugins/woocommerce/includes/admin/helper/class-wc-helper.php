@@ -1454,7 +1454,7 @@ class WC_Helper {
 			return false;
 		}
 
-		$subscription = array_shift( $subscriptions );
+		$subscription          = array_shift( $subscriptions );
 		$subscription['local'] = self::get_subscription_local_data( $subscription );
 		return $subscription;
 	}
@@ -1525,8 +1525,8 @@ class WC_Helper {
 			$subscriptions,
 			function( $a, $b ) {
 				$compare_value = strcasecmp( $a['product_name'], $b['product_name'] );
-				if ( $compare_value === 0 ) {
-					$compare_value = strcasecmp( $a['expires'], $b['expires'] );
+				if ( 0 === $compare_value ) {
+					return strcasecmp( $a['expires'], $b['expires'] );
 				}
 				return $compare_value;
 			}
@@ -1650,22 +1650,22 @@ class WC_Helper {
 
 		if ( empty( $installed_product ) ) {
 			return array(
-				'installed'   => false,
-				'active'      => false,
-				'version'     => null,
-				'type'        => null,
-				'slug'        => null,
-				'path'        => null,
+				'installed' => false,
+				'active'    => false,
+				'version'   => null,
+				'type'      => null,
+				'slug'      => null,
+				'path'      => null,
 			);
 		}
 
 		$local_data = array(
-			'installed'   => true,
-			'active'      => false,
-			'version'     => $installed_product['Version'],
-			'type'        => $installed_product['_type'],
-			'slug'        => null,
-			'path'        => $installed_product['_filename'],
+			'installed' => true,
+			'active'    => false,
+			'version'   => $installed_product['Version'],
+			'type'      => $installed_product['_type'],
+			'slug'      => null,
+			'path'      => $installed_product['_filename'],
 		);
 
 		if ( 'plugin' === $installed_product['_type'] ) {
