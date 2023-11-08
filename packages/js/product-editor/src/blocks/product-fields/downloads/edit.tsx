@@ -8,6 +8,7 @@ import {
 	createElement,
 	Fragment,
 	createInterpolateElement,
+	useState,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
@@ -26,6 +27,11 @@ import { UploadsBlockAttributes } from './types';
 import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
 import { ProductEditorBlockEditProps } from '../../../types';
+import {
+	ManageDownloadLimitsModal,
+	ManageDownloadLimitsModalProps,
+} from '../../../components/manage-download-limits-modal';
+import { EditDownloadsModal } from './edit-downloads-modal';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -55,6 +61,15 @@ export function Edit( {
 		postType,
 		'downloads'
 	);
+	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
+		Product[ 'download_limit' ]
+	>( 'postType', 'product', 'download_limit' );
+	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
+		Product[ 'download_expiry' ]
+	>( 'postType', 'product', 'download_expiry' );
+
+	const [ selectedDownload, setSelectedDownload ] =
+		useState< ProductDownload | null >();
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
 		const { getEditorSettings } = select( 'core/editor' );
@@ -66,6 +81,25 @@ export function Edit( {
 		: [];
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
+
+	const [ showManageDownloadLimitsModal, setShowManageDownloadLimitsModal ] =
+		useState( false );
+
+	function handleManageLimitsClick() {
+		setShowManageDownloadLimitsModal( true );
+	}
+
+	function handleManageDownloadLimitsModalClose() {
+		setShowManageDownloadLimitsModal( false );
+	}
+
+	function handleManageDownloadLimitsModalSubmit(
+		value: ManageDownloadLimitsModalProps[ 'initialValue' ]
+	) {
+		setDownloadLimit( value.downloadLimit as number );
+		setDownloadExpiry( value.downloadExpiry as number );
+		setShowManageDownloadLimitsModal( false );
+	}
 
 	function handleFileUpload( files: MediaItem | MediaItem[] ) {
 		if ( ! Array.isArray( files ) ) return;
@@ -109,23 +143,69 @@ export function Edit( {
 		}
 	}
 
+	function handleFileReplace( files: MediaItem | MediaItem[] ) {
+		if (
+			! Array.isArray( files ) ||
+			! files?.length ||
+			files[ 0 ]?.id === undefined
+		) {
+			return;
+		}
+
+		if ( ! downloads.length ) {
+			setDownloadable( true );
+		}
+
+		const uploadedFile = {
+			id: stringifyId( files[ 0 ].id ),
+			file: files[ 0 ].url,
+			name:
+				files[ 0 ].title ||
+				files[ 0 ].alt ||
+				files[ 0 ].caption ||
+				getFileName( files[ 0 ].url ),
+		};
+		const stringifyIds = downloads.map( ( download ) => {
+			if ( download.file === selectedDownload?.file ) {
+				return stringifyEntityId( uploadedFile );
+			}
+			return stringifyEntityId( download );
+		} );
+
+		setDownloads( stringifyIds );
+		setSelectedDownload( uploadedFile );
+	}
+
+	function removeDownload( download: ProductDownload ) {
+		const otherDownloads = downloads.reduce< ProductDownload[] >(
+			function removeDownloadElement(
+				others: ProductDownload[],
+				current: ProductDownload
+			) {
+				if ( current.file === download.file ) {
+					return others;
+				}
+				return [ ...others, stringifyEntityId( current ) ];
+			},
+			[]
+		);
+
+		if ( ! otherDownloads.length ) {
+			setDownloadable( false );
+		}
+
+		setDownloads( otherDownloads );
+	}
+
 	function removeHandler( download: ProductDownload ) {
 		return function handleRemoveClick() {
-			const otherDownloads = downloads.reduce< ProductDownload[] >(
-				function removeDownload( others, current ) {
-					if ( current.file === download.file ) {
-						return others;
-					}
-					return [ ...others, stringifyEntityId( current ) ];
-				},
-				[]
-			);
+			removeDownload( download );
+		};
+	}
 
-			if ( ! otherDownloads.length ) {
-				setDownloadable( false );
-			}
-
-			setDownloads( otherDownloads );
+	function editHandler( download: ProductDownload ) {
+		return function handleEditClick() {
+			setSelectedDownload( download );
 		};
 	}
 
@@ -140,6 +220,15 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-downloads-field__header">
+				{ Boolean( downloads.length ) && (
+					<Button
+						variant="tertiary"
+						onClick={ handleManageLimitsClick }
+					>
+						{ __( 'Manage limits', 'woocommerce' ) }
+					</Button>
+				) }
+
 				<DownloadsMenu
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
@@ -195,7 +284,7 @@ export function Edit( {
 
 				{ Boolean( downloads.length ) && (
 					<Sortable className="wp-block-woocommerce-product-downloads-field__table">
-						{ downloads.map( ( download ) => {
+						{ downloads.map( ( download: ProductDownload ) => {
 							const nameFromUrl = getFileName( download.file );
 							const isUploading =
 								download.file.startsWith( 'blob' );
@@ -220,6 +309,16 @@ export function Edit( {
 												) }
 											/>
 										) }
+										{ ! isUploading && (
+											<Button
+												onClick={ editHandler(
+													download
+												) }
+												variant="tertiary"
+											>
+												{ __( 'Edit', 'woocommerce' ) }
+											</Button>
+										) }
 										<Button
 											icon={ closeSmall }
 											label={ __(
@@ -238,6 +337,42 @@ export function Edit( {
 					</Sortable>
 				) }
 			</div>
+
+			{ showManageDownloadLimitsModal && (
+				<ManageDownloadLimitsModal
+					initialValue={ { downloadLimit, downloadExpiry } }
+					onSubmit={ handleManageDownloadLimitsModalSubmit }
+					onClose={ handleManageDownloadLimitsModalClose }
+				/>
+			) }
+			{ selectedDownload && (
+				<EditDownloadsModal
+					downloableItem={ { ...selectedDownload } }
+					onCancel={ () => setSelectedDownload( null ) }
+					onRemove={ () => {
+						removeDownload( selectedDownload );
+						setSelectedDownload( null );
+					} }
+					onChange={ ( text: string ) => {
+						setSelectedDownload( {
+							...selectedDownload,
+							name: text,
+						} );
+					} }
+					onSave={ () => {
+						const newDownloads = downloads.map(
+							( obj: ProductDownload ) =>
+								obj.id === selectedDownload.id
+									? selectedDownload
+									: obj
+						) as ProductDownload[];
+						setDownloads( newDownloads );
+						setSelectedDownload( null );
+					} }
+					onUploadSuccess={ handleFileReplace }
+					onUploadError={ handleUploadError }
+				/>
+			) }
 		</div>
 	);
 }

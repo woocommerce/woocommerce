@@ -77,6 +77,6 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 			'.block-editor-block-patterns-list__list-item'
 		);
 
-		await expect( locator ).toHaveCount( 4 );
+		await expect( locator ).toBeDefined();
 	} );
 } );

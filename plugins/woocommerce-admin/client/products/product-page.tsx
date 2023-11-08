@@ -10,9 +10,9 @@ import {
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
+	ProductPageSkeleton,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
@@ -75,7 +75,7 @@ export default function ProductPage() {
 	);
 
 	if ( ! product?.id ) {
-		return <Spinner />;
+		return <ProductPageSkeleton />;
 	}
 
 	return (

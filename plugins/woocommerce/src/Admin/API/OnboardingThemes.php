@@ -249,8 +249,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$current_theme_slug = wp_get_theme()->get_stylesheet();
-
 		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
 		$themes = array(
@@ -260,7 +258,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tsubaki',
-				'is_active'      => 'tsubaki' === $current_theme_slug,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tsubaki/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tsubaki/',
 			),
@@ -270,7 +267,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tazza',
-				'is_active'      => 'tazza' === $current_theme_slug,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tazza/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tazza/',
 				'total_palettes' => 0,
@@ -302,7 +298,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				),
 				'total_palettes' => 5,
 				'slug'           => 'amulet',
-				'is_active'      => 'amulet' === $current_theme_slug,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/amulet/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/amulet/',
 			),
@@ -333,7 +328,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				),
 				'total_palettes' => 11,
 				'slug'           => 'zaino',
-				'is_active'      => 'zaino' === $current_theme_slug,
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/zaino/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/zaino/',
 			),
@@ -374,12 +368,27 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		 *
 		 * @return array
 		 */
-		return apply_filters(
+		$filtered_response = apply_filters(
 			'__experimental_woocommerce_rest_get_recommended_themes',
 			$response,
 			$industry,
 			$currency
 		);
+
+		/**
+		 * Loop through themes checking to see if any are currently active
+		 */
+		$active_theme = get_stylesheet();
+
+		foreach ( $filtered_response['themes'] as &$theme ) {
+			if ( $theme['slug'] === $active_theme ) {
+				$theme['is_active'] = true;
+			} else {
+				$theme['is_active'] = false;
+			}
+		}
+
+		return $filtered_response;
 	}
 
 	/**

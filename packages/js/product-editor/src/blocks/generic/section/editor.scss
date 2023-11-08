@@ -34,13 +34,6 @@
 				}
 			}
 		}
-
-		.wp-block-woocommerce-product-section__heading-description {
-			margin: $gap-small 0 0;
-			font-size: 13px;
-			color: $gray-700;
-			line-height: 1.5;
-		}
 	}
 
 	&__content {
@@ -57,5 +50,10 @@
 			padding-bottom: 0;
 			border-bottom: none;
 		}
+	}
+
+	&__heading-description {
+		margin: 0;
+		max-width: 300px;
 	}
 }

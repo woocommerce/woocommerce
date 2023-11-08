@@ -137,7 +137,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => [
 					'property' => 'description',
 					'label'    => __( 'Note <optional />', 'woocommerce' ),
-					'helpText' => '',
+					'helpText' => 'Enter an optional note displayed on the product page when customers select this variation.',
 				],
 			]
 		);
@@ -475,11 +475,30 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				],
 			]
 		);
+		// Virtual section.
+		$shipping_group->add_section(
+			[
+				'id'    => 'product-variation-virtual-section',
+				'order' => 20,
+			]
+		)->add_block(
+			[
+				'id'         => 'product-variation-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => [
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+				],
+			]
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			[
 				'id'         => 'product-variation-fee-and-dimensions-section',
-				'order'      => 20,
+				'order'      => 30,
 				'attributes' => [
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(

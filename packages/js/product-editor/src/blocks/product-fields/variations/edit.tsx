@@ -22,7 +22,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { VariationsBlockAttributes } from './types';
-import { EmptyVariationsImage } from './empty-variations-image';
+import { EmptyVariationsImage } from '../../../images/empty-variations-image';
 import { NewAttributeModal } from '../../../components/attribute-control/new-attribute-modal';
 import {
 	EnhancedProductAttribute,

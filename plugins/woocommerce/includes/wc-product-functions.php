@@ -448,7 +448,6 @@ function wc_scheduled_sales() {
 
 				if ( $sale_price ) {
 					$product->set_price( $sale_price );
-					$product->set_date_on_sale_from( '' );
 				} else {
 					$product->set_date_on_sale_to( '' );
 					$product->set_date_on_sale_from( '' );
@@ -686,7 +685,7 @@ function wc_get_product_id_by_sku( $sku ) {
  */
 function wc_get_product_variation_attributes( $variation_id ) {
 	// Build variation data from meta.
-	$all_meta                = get_post_meta( $variation_id );
+	$all_meta                = is_array( get_post_meta( $variation_id ) ) ? get_post_meta( $variation_id ) : array();
 	$parent_id               = wp_get_post_parent_id( $variation_id );
 	$parent_attributes       = array_filter( (array) get_post_meta( $parent_id, '_product_attributes', true ) );
 	$found_parent_attributes = array();
