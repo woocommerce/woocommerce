@@ -10,6 +10,40 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
  * Logger for block template modifications.
  */
 class BlockTemplateLogger {
+	const BLOCK_ADDED                       = 'block_added';
+	const BLOCK_REMOVED                     = 'block_removed';
+	const BLOCK_MODIFIED                    = 'block_modified';
+	const BLOCK_ADDED_TO_DETACHED_CONTAINER = 'block_added_to_detached_container';
+	const ERROR_AFTER_BLOCK_ADDED           = 'error_after_block_added';
+	const ERROR_AFTER_BLOCK_REMOVED         = 'error_after_block_removed';
+
+	public static $event_types = array(
+		self::BLOCK_ADDED                       => array(
+			'level'   => \WC_Log_Levels::INFO,
+			'message' => 'Block added to template.',
+		),
+		self::BLOCK_REMOVED                     => array(
+			'level'   => \WC_Log_Levels::NOTICE,
+			'message' => 'Block removed from template.',
+		),
+		self::BLOCK_MODIFIED                    => array(
+			'level'   => \WC_Log_Levels::NOTICE,
+			'message' => 'Block modified in template.',
+		),
+		self::BLOCK_ADDED_TO_DETACHED_CONTAINER => array(
+			'level'   => \WC_Log_Levels::WARNING,
+			'message' => 'Block added to detached container. Block will not be included in the template, since the container will not be included in the template.',
+		),
+		self::ERROR_AFTER_BLOCK_ADDED           => array(
+			'level'   => \WC_Log_Levels::WARNING,
+			'message' => 'Error after block added to template.',
+		),
+		self::ERROR_AFTER_BLOCK_REMOVED         => array(
+			'level'   => \WC_Log_Levels::WARNING,
+			'message' => 'Error after block removed from template.',
+		),
+	);
+
 	/**
 	 * Singleton instance.
 	 *
@@ -23,6 +57,8 @@ class BlockTemplateLogger {
 	 * @var \WC_Logger
 	 */
 	protected $logger = null;
+
+	private $all_template_events = array();
 
 	/**
 	 * Get the singleton instance.
@@ -42,42 +78,78 @@ class BlockTemplateLogger {
 		$this->logger = wc_get_logger();
 	}
 
-	/**
-	 * Log an informational message.
-	 *
-	 * @param string $message Message to log.
-	 * @param array  $info    Additional info to log.
-	 */
-	public function info( string $message, array $info = [] ) {
-		$this->logger->info(
-			$this->format_message( $message, $info ),
-			[ 'source' => 'block_template' ]
+	public function get_template_events( string $template_id ): array {
+		return isset( $this->all_template_events[ $template_id ] )
+			? $this->all_template_events[ $template_id ]
+			: array();
+	}
+
+	public function log( string $event_type, $template, $container, $block, $additional_info = array() ) {
+		if ( ! isset( self::$event_types[ $event_type ] ) ) {
+			/* translators: 1: WC_Logger::log 2: level */
+			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid event type "%2$s".', 'woocommerce' ), '<code>BlockTemplateLogger::log</code>', $event_type ), '8.4' );
+		}
+
+		$event_type_info = isset( self::$event_types[ $event_type ] )
+			? array_merge(
+				self::$event_types[ $event_type ],
+				array(
+					'event_type' => $event_type,
+				)
+			)
+			: array(
+				'level'      => \WC_Log_Levels::ERROR,
+				'event_type' => $event_type,
+				'message'    => 'Unknown error.',
+			);
+
+			$this->log_to_logger( $event_type_info, $template, $container, $block, $additional_info );
+			$this->add_template_event( $event_type_info, $template, $container, $block, $additional_info );
+	}
+
+	private function log_to_logger( $event_type_info, $template, $container, $block, $additional_info = array() ) {
+		$info = array_merge(
+			array(
+				'template'  => $template,
+				'container' => $container,
+				'block'     => $block,
+			),
+			$additional_info
+		);
+
+		$message = $this->format_message( $event_type_info['message'], $info );
+
+		$this->logger->log(
+			$event_type_info['level'],
+			$message,
+			array( 'source' => 'block_template' )
 		);
 	}
 
-	/**
-	 * Log a warning message.
-	 *
-	 * @param string $message Message to log.
-	 * @param array  $info    Additional info to log.
-	 */
-	public function warning( string $message, array $info = [] ) {
-		$this->logger->warning(
-			$this->format_message( $message, $info ),
-			[ 'source' => 'block_template' ]
-		);
-	}
+	private function add_template_event( $event_type_info, $template, $container, $block, $additional_info = array() ) {
+		$template_id = $template->get_id();
 
-	/**
-	 * Log an error message.
-	 *
-	 * @param string $message Message to log.
-	 * @param array  $info    Additional info to log.
-	 */
-	public function error( string $message, array $info = [] ) {
-		$this->logger->error(
-			$this->format_message( $message, $info ),
-			[ 'source' => 'block_template' ]
+		if ( ! isset( $this->all_template_events[ $template_id ] ) ) {
+			$this->all_template_events[ $template_id ] = array();
+		}
+
+		$template_events = &$this->all_template_events[ $template_id ];
+
+		$template_events[] = array(
+			'level'           => $event_type_info['level'],
+			'event_type'      => $event_type_info['event_type'],
+			'message'         => $event_type_info['message'],
+			'container'       => $container instanceof BlockContainerInterface
+				? array(
+					'id'   => $container->get_id(),
+					'name' => $container->get_name(),
+				)
+				: null,
+			'block'           => array(
+				'id'   => $block->get_id(),
+				'name' => $block->get_name(),
+			),
+			'additional_info' => $this->format_info( $additional_info ),
 		);
 	}
 
