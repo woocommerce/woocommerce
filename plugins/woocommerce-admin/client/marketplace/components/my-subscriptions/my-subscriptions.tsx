@@ -49,12 +49,11 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) => subscription.local.installed
+		( subscription: Subscription ) => subscription.subscription_installed
 	);
 
 	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) =>
-			! subscriptionsInstalled.includes( subscription )
+		( subscription: Subscription ) => ! subscription.subscription_installed
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
