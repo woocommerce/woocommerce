@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 8.2.2 2023-11-08 =
+
+**WooCommerce**
+
+* Fix - Update WooCommerce Blocks to 11.1.3 [#41291](https://github.com/woocommerce/woocommerce/pull/41291)
+
+
 = 8.2.1 2023-10-16 =
 
 **WooCommerce**

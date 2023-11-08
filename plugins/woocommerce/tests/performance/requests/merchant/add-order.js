@@ -15,7 +15,7 @@ import {
  */
 import {
 	base_url,
-	hpos_enabled,
+	cot_status,
 	addresses_guest_billing_first_name,
 	addresses_guest_billing_last_name,
 	addresses_guest_billing_company,
@@ -43,8 +43,9 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// Change URL if HPOS is enabled and being used
+// Change URL if COT is enabled and being used
 let admin_new_order_base;
+let admin_new_order_assert;
 let admin_created_order_assert;
 let admin_open_order_base;
 let admin_open_order_assert;
@@ -54,15 +55,17 @@ let admin_update_order_id;
 let admin_update_order_params;
 let admin_update_order_assert;
 
-if ( hpos_enabled ) {
+if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
+	admin_new_order_assert = 'post_status" type="hidden" value="pending';
 	admin_open_order_assert = 'post_status" type="hidden" value="pending';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'changed from Pending payment to Completed';
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
 	admin_update_order_base = 'post.php';
+	admin_new_order_assert = 'Add new order</h1>';
 	admin_open_order_assert = 'Edit order</h1>';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'Order updated.';
@@ -113,7 +116,7 @@ export function addOrder( includeTests = {} ) {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Add new order' header": ( response ) =>
-				response.body.includes( 'Add new order' ),
+				response.body.includes( `${ admin_new_order_assert }` ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -332,7 +335,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			const hposOrderParams = new URLSearchParams( [
+			const cotOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -386,9 +389,9 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			if ( hpos_enabled ) {
+			if ( cot_status === true ) {
 				admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-				admin_update_order_params = hposOrderParams.toString();
+				admin_update_order_params = cotOrderParams.toString();
 			} else {
 				admin_update_order = admin_update_order_base;
 				admin_update_order_params = orderParams.toString();
@@ -424,7 +427,7 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
-			if ( hpos_enabled ) {
+			if ( cot_status === true ) {
 				admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			} else {
 				admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
@@ -523,7 +526,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			const hposOrderParams = new URLSearchParams( [
+			const cotOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -577,9 +580,9 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
-			if ( hpos_enabled ) {
+			if ( cot_status === true ) {
 				admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-				admin_update_order_params = hposOrderParams.toString();
+				admin_update_order_params = cotOrderParams.toString();
 			} else {
 				admin_update_order_params = orderParams.toString();
 				admin_update_order_id = `${ admin_open_order_base }`;
@@ -682,7 +685,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		const hposOrderParams = new URLSearchParams( [
+		const cotOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -736,9 +739,9 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		if ( hpos_enabled ) {
+		if ( cot_status === true ) {
 			admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-			admin_update_order_params = hposOrderParams.toString();
+			admin_update_order_params = cotOrderParams.toString();
 		} else {
 			admin_update_order = admin_update_order_base;
 			admin_update_order_params = orderParams.toString();
@@ -772,7 +775,7 @@ export function addOrder( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
-		if ( hpos_enabled ) {
+		if ( cot_status === true ) {
 			admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 		} else {
 			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
@@ -869,7 +872,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		const hposOrderParams = new URLSearchParams( [
+		const cotOrderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
 			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
 			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
@@ -923,9 +926,9 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
-		if ( hpos_enabled ) {
+		if ( cot_status === true ) {
 			admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
-			admin_update_order_params = hposOrderParams.toString();
+			admin_update_order_params = cotOrderParams.toString();
 		} else {
 			admin_update_order_params = orderParams.toString();
 			admin_update_order_id = `${ admin_open_order_base }`;
