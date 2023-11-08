@@ -95,14 +95,6 @@ export default function Install( props: InstallProps ) {
 			} );
 	};
 
-	function installButtonLabel( installing: boolean ) {
-		if ( installing ) {
-			return __( 'Installing…', 'woocommerce' );
-		}
-
-		return __( 'Install', 'woocommerce' );
-	}
-
 	return (
 		<Button
 			variant="link"
@@ -110,7 +102,7 @@ export default function Install( props: InstallProps ) {
 			disabled={ loading }
 			onClick={ install }
 		>
-			{ installButtonLabel( loading ) }
+			{ __( 'Install', 'woocommerce' ) }
 		</Button>
 	);
 }

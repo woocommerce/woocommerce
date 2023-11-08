@@ -50,3 +50,8 @@ export interface SubscriptionShare {
 	status: string;
 	created: string;
 }
+
+export enum StatusLevel {
+	Warning = 'warning',
+	Error = 'error',
+}
