@@ -86,8 +86,8 @@ describe( 'List', () => {
 					.dataset.linkType
 			).toBe( 'wc-admin' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Woo.com' } )
-					.dataset.linkType
+				screen.getByRole( 'menuitem', { name: 'Woo.com' } ).dataset
+					.linkType
 			).toBe( 'external' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
@@ -132,8 +132,8 @@ describe( 'List', () => {
 					.dataset.listItemTag
 			).toBe( 'marketing' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Woo.com' } )
-					.dataset.listItemTag
+				screen.getByRole( 'menuitem', { name: 'Woo.com' } ).dataset
+					.listItemTag
 			).toBe( 'woo.com-site' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
