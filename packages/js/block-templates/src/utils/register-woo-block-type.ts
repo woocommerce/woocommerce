@@ -46,8 +46,10 @@ function getEdit<
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore context is added to the block props by the block editor.
 		const { context } = props;
-		const { _templateBlockHideConditions: hideConditions } =
-			props.attributes;
+		const {
+			_templateBlockHideConditions: hideConditions,
+			_templateBlockDisableConditions: disableConditions,
+		} = props.attributes;
 
 		const { getEvaluationContext } = useEvaluationContext( context );
 
@@ -66,11 +68,32 @@ function getEdit<
 			[ getEvaluationContext, hideConditions ]
 		);
 
+		const disabled: boolean = useSelect(
+			( select: typeof WPSelect ) => {
+				if (
+					! disableConditions ||
+					! Array.isArray( disableConditions )
+				) {
+					return false;
+				}
+
+				const evaluationContext = getEvaluationContext( select );
+
+				return disableConditions.some( ( condition ) =>
+					evaluate( condition.expression, evaluationContext )
+				);
+			},
+			[ getEvaluationContext, disableConditions ]
+		);
+
 		if ( ! edit || shouldHide ) {
 			return null;
 		}
 
-		return createElement( edit, props );
+		return createElement( edit, {
+			...props,
+			attributes: { ...props.attributes, disabled },
+		} );
 	};
 }
 
@@ -93,6 +116,14 @@ function augmentAttributes<
 			},
 			_templateBlockHideConditions: {
 				type: 'array',
+				__experimentalRole: 'content',
+			},
+			_templateBlockDisableConditions: {
+				type: 'array',
+				__experimentalRole: 'content',
+			},
+			disabled: {
+				type: 'boolean',
 				__experimentalRole: 'content',
 			},
 		},
