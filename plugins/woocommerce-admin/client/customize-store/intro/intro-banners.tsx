@@ -13,6 +13,7 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { recordEvent } from '@woocommerce/tracks';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -193,6 +194,9 @@ export const ExistingAiThemeBanner = ( {
 			className=""
 			onClick={ () => {
 				setOpenDesignChangeWarningModal( true );
+				recordEvent(
+					'customize_your_store_intro_create_a_new_one_click'
+				);
 			} }
 			variant={ 'secondary' }
 		>
@@ -211,6 +215,7 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
+				recordEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath( {}, '/customize-store/assembler-hub', {} )

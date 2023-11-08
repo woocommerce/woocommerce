@@ -62,6 +62,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -269,6 +270,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				initial: 'preApiCallLoader',
 				states: {
 					preApiCallLoader: {
+						entry: [ 'assignStartLoadingTime' ],
 						always: {
 							target: 'apiCallLoader',
 						},
