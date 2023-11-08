@@ -49,6 +49,10 @@ export interface ProductCollectionQuery {
 	postType: string;
 	search: string;
 	taxQuery: Record< string, number[] >;
+	/**
+	 * If true, show only featured products.
+	 */
+	featured: boolean;
 	timeFrame: TimeFrame | undefined;
 	woocommerceOnSale: boolean;
 	/**
