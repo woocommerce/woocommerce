@@ -181,9 +181,6 @@ export function version( subscription: Subscription ): TableRow {
 }
 
 export function actions( subscription: Subscription ): TableRow {
-	if ( subscription.product_name === 'Product Add-Ons' ) {
-		console.log( subscription );
-	}
 	let actionButton = null;
 	if ( subscription.product_key === '' ) {
 		actionButton = <SubscribeButton subscription={ subscription } />;
