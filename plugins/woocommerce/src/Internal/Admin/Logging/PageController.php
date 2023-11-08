@@ -569,6 +569,43 @@ class PageController {
 	}
 
 	/**
+	 * Format a search results line.
+	 *
+	 * @param string $file_id     The file ID that contains the matched line.
+	 * @param int    $line_number The line number of the matched line.
+	 * @param string $line        The matched line, with matched substrings highlighted.
+	 *
+	 * @return string
+	 */
+	private function format_match( string $file_id, int $line_number, string $line ): string {
+		$match_url = add_query_arg(
+			array(
+				'view'    => 'single_file',
+				'file_id' => $file_id,
+			),
+			$this->get_logs_tab_url() . '#L' . absint( $line_number )
+		);
+
+		return sprintf(
+			'<span class="match">%1$s%2$s</span>',
+			sprintf(
+				'<a href="%1$s" class="match-anchor">%2$s<br />%3$s</a>',
+				esc_url( $match_url ),
+				esc_html( $file_id ),
+				sprintf(
+					// translators: %d is a line number in a file.
+					esc_html__( 'Line %d', 'woocommerce' ),
+					absint( $line_number )
+				)
+			),
+			sprintf(
+				'<span class="match-content">%s</span>',
+				wp_kses_post( $line )
+			)
+		);
+	}
+
+	/**
 	 * Render a form for searching within log files.
 	 *
 	 * @return void
