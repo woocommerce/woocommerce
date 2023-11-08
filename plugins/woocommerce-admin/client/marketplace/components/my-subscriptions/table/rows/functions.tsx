@@ -186,9 +186,15 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = <SubscribeButton subscription={ subscription } />;
 	} else if ( subscription.expired ) {
 		actionButton = <RenewButton subscription={ subscription } />;
-	} else if ( subscription.local.installed === false ) {
+	} else if (
+		subscription.local.installed === false &&
+		subscription.local.installable === true
+	) {
 		actionButton = <Install subscription={ subscription } />;
-	} else if ( subscription.active === false ) {
+	} else if (
+		subscription.active === false &&
+		subscription.local.installed === true
+	) {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />
 		);

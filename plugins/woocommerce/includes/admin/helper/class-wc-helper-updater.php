@@ -353,6 +353,7 @@ class WC_Helper_Updater {
 			)
 		);
 
+		debug(wp_remote_retrieve_body( $request ));
 		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
 		} else {

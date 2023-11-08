@@ -1505,26 +1505,29 @@ class WC_Helper {
 
 		// Track installed subscription ids to avoid duplicate entries for inactive subsriptions.
 		$installed_subscription_ids = array();
+	    $default_local_data = array(
+			'installed'    => false,
+			'installable' => true,
+			'active'       => false,
+			'version'      => null,
+			'type'         => null,
+			'slug'         => null,
+			'path'         => null,
+		);
 
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
-
-			$subscription['local'] = array(
-				'installed' => false,
-				'active'    => false,
-				'version'   => null,
-				'type'      => null,
-				'slug'      => null,
-				'path'      => null,
-			);
+			$subscription['local']  = $default_local_data;
 
 			$updates = WC_Helper_Updater::get_update_data();
 
 			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
-			if ( false === $has_another_installed_subscription ) {
-				$subscription = self::add_local_data_to_subscription( $subscription );
-				if ( ! empty( $subscription['local']['installed'] ) ) {
-					array_push( $installed_subscription_ids, $subscription['product_id'] );
+			$subscription = self::add_local_data_to_subscription( $subscription );
+			if ( true === $subscription['local']['installed'] ) {
+				if ( false === $has_another_installed_subscription && true === $subscription['active'] ) {
+						array_push( $installed_subscription_ids, $subscription['product_id'] );
+				} else {
+					$subscription['local']['installable'] = false;
 				}
 			}
 
@@ -1539,6 +1542,14 @@ class WC_Helper {
 		}
 		// Break the by-ref.
 		unset( $subscription );
+
+		// Sort subscriptions by name.
+		usort(
+			$subscriptions,
+			function( $a, $b ) {
+				return strcasecmp( $a['product_name'], $b['product_name'] );
+			}
+		);
 
 		return $subscriptions;
 	}
@@ -1564,12 +1575,13 @@ class WC_Helper {
 		}
 
 		$subscription['local'] = array(
-			'installed' => true,
-			'active'    => false,
-			'version'   => $local['Version'],
-			'type'      => $local['_type'],
-			'slug'      => null,
-			'path'      => $local['_filename'],
+			'installed'    => true,
+			'installable' => false,
+			'active'       => false,
+			'version'      => $local['Version'],
+			'type'         => $local['_type'],
+			'slug'         => null,
+			'path'         => $local['_filename'],
 		);
 
 		if ( 'plugin' === $local['_type'] ) {

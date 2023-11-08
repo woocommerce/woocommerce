@@ -32,6 +32,7 @@ export type Subscription = {
 
 export interface SubscriptionLocal {
 	installed: boolean;
+	installable: boolean;
 	active: boolean;
 	version: string;
 	type: string;
