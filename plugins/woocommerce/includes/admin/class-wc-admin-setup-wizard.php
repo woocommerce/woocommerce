@@ -1891,6 +1891,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'storefront_theme',
 						'title'       => __( 'Storefront Theme', 'woocommerce' ),
 						'description' => sprintf(
+							/* translators: %s: theme name. */
 							__(
 								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woo.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
 								'woocommerce'

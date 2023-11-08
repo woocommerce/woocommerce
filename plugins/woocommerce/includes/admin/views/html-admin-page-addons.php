@@ -58,7 +58,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					<?php
 					$count_html = WC_Helper_Updater::get_updates_count_html();
 					/* translators: %s: Woo.com Subscriptions tab count HTML. */
-					echo ( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) );
+					echo ( esc_html( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) ) );
 					?>
 				</a>
 			</li>
@@ -90,7 +90,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<?php if ( '_featured' !== $current_section ) : ?>
 				<?php if ( is_wp_error( $addons ) ) : ?>
 					<?php WC_Admin_Addons::output_empty( $addons->get_error_message() ); ?>
-				<?php else: ?>
+				<?php else : ?>
 					<?php
 					if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
 						foreach ( $promotions as $promotion ) {
@@ -105,7 +105,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 								$country = WC()->countries->get_base_country();
 								if ( 'US' === $country
-									 && false !== strpos(
+									&& false !== strpos(
 										$addon->link,
 										'woo.com/products/usps-shipping-method'
 									)
@@ -113,7 +113,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 									continue;
 								}
 								if ( 'CA' === $country
-									 && false !== strpos(
+									&& false !== strpos(
 										$addon->link,
 										'woo.com/products/canada-post-shipping-method'
 									)
