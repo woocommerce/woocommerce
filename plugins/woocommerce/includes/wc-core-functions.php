@@ -2532,7 +2532,7 @@ function wc_selected( $value, $options ) {
 function wc_get_server_database_version() {
 	global $wpdb;
 
-	if ( ! property_exists( $wpdb, 'is_mysql' ) || empty( $wpdb->is_mysql ) || ! property_exists( $wpdb, 'use_mysqli' ) || ! $wpdb->use_mysqli ) {
+	if ( empty( $wpdb->is_mysql ) || empty( $wpdb->use_mysqli ) ) {
 		return array(
 			'string' => '',
 			'number' => '',
