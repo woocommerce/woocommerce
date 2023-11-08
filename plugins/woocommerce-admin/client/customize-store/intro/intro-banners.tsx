@@ -194,9 +194,6 @@ export const ExistingAiThemeBanner = ( {
 			className=""
 			onClick={ () => {
 				setOpenDesignChangeWarningModal( true );
-				recordEvent(
-					'customize_your_store_intro_create_a_new_one_click'
-				);
 			} }
 			variant={ 'secondary' }
 		>
