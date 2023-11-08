@@ -39,8 +39,7 @@ const plugins = [
 		min_php_version: '7.3',
 		key: 'pinterest-for-woocommerce',
 		label: 'Showcase your products with Pinterest',
-		learn_more_link:
-			'https://woo.com/products/pinterest-for-woocommerce',
+		learn_more_link: 'https://woo.com/products/pinterest-for-woocommerce',
 		install_priority: 2,
 		is_visible: true,
 		is_installed: false,

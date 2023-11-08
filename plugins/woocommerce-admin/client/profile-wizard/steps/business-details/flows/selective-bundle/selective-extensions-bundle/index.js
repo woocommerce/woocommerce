@@ -153,9 +153,7 @@ const BundleExtensionCheckbox = ( {
 		}
 
 		recordEvent( 'storeprofiler_store_business_features_link_click', {
-			extension_name: link.href.split(
-				'https://woo.com/products/'
-			)[ 1 ],
+			extension_name: link.href.split( 'https://woo.com/products/' )[ 1 ],
 		} );
 	};
 
