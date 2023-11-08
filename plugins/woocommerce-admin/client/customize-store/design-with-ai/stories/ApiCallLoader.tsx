@@ -5,15 +5,19 @@ import { ApiCallLoader, AssembleHubLoader } from '../pages';
 import { WithCustomizeYourStoreLayout } from './WithCustomizeYourStoreLayout';
 import './style.scss';
 
-export const ApiCallLoaderPage = () => <AssembleHubLoader />;
-export const ApiCallLoaderPageWithSmoothTransition = () => (
+export const APICallLoaderWithSmoothTransition = () => (
 	<div className="smooth-transition">
 		<ApiCallLoader />
+	</div>
+);
+export const AssembleHubLoaderWithSmoothTransition = () => (
+	<div className="smooth-transition">
+		<AssembleHubLoader />
 	</div>
 );
 
 export default {
 	title: 'WooCommerce Admin/Application/Customize Store/Design with AI/API Call Loader',
-	component: AssembleHubLoader,
+	component: ApiCallLoader,
 	decorators: [ WithCustomizeYourStoreLayout ],
 };
