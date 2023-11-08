@@ -72,7 +72,7 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 	}, [ threshold ] );
 
 	return (
-		<div>
+		<div className="select-description">
 			{ isLoading ? (
 				<p>Loading...</p>
 			) : (
