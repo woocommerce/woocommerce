@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 let productId, orderId;
 const productName = 'Simple Product Name';
@@ -68,12 +69,12 @@ test.describe(
 			// verify that the order is pending payment
 			await expect(
 				page.locator( '#select2-order_status-container' )
-			).toContainText( 'Pending payment' );
+			).toContainText( `${getTranslationFor('Pending payment')}` );
 
 			//verify that the customer payment page link is displayed
 			await expect(
 				page.locator( 'label[for=order_status] > a' )
-			).toContainText( 'Customer payment page →' );
+			).toContainText( `${getTranslationFor('Customer payment page →')}` );
 		} );
 
 		test( 'should load the customer payment page', async ( { page } ) => {
@@ -86,7 +87,7 @@ test.describe(
 
 			// verify we landed on the customer payment page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Pay for order'
+				`${getTranslationFor('Pay for order')}`
 			);
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
@@ -110,7 +111,7 @@ test.describe(
 
 			// Verify we landed on the order received page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Order received'
+				`${getTranslationFor('Order received')}`
 			);
 			await expect(
 				page.locator( 'li.woocommerce-order-overview__order.order' )

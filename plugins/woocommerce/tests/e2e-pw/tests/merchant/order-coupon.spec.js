@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 let productId, couponId, orderId;
 
@@ -80,7 +81,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.locator( 'button.add-order-item' ).click();
 
 		// search for product to add
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -102,10 +103,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( `${getTranslationFor('Coupon(s)')}` );
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTranslationFor('Order Total')}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -122,10 +123,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( `${getTranslationFor('Coupon(s)')}` );
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTranslationFor('Order Total')}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -141,7 +142,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		).not.toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTranslationFor('Order Total')}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( productPrice );

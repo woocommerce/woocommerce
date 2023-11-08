@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const simpleProductName = 'Add new order simple product';
 const variableProductName = 'Add new order variable product';
@@ -210,7 +211,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test( 'can create new order', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			'Add new order'
+			`${getTranslationFor('Add new order')}`
 		);
 
 		await page.waitForLoadState( 'networkidle' );
@@ -232,12 +233,12 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
 				has: page.locator( 'p' ),
 			} )
-		).toContainText( 'Order updated.' );
+		).toContainText( `${getTranslationFor('Order updated.')}` );
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-processing'
 		);
 		await expect( page.locator( 'div.note_content' ) ).toContainText(
-			'Order status changed from Pending payment to Processing.'
+			`${getTranslationFor('Order status changed from Pending payment to Processing.')}`
 		);
 	} );
 
@@ -251,7 +252,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.locator( 'button.add-order-item' ).click();
 
 		// search for each product to add
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -262,7 +263,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			)
 			.click();
 
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -273,7 +274,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			)
 			.click();
 
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -284,7 +285,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			)
 			.click();
 
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -313,7 +314,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Recalculate taxes
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.locator( 'text=Recalculate' ).click();
+		await page.locator( `text=${getTranslationFor('Recalculate')}` ).click();
 
 		// verify tax names
 		let i = 0;

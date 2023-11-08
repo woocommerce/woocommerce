@@ -1,4 +1,5 @@
 const { expect } = require( '@playwright/test' );
+const { getTranslationFor } = require('./translations');
 
 const SETTINGS_URL =
 	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
@@ -39,7 +40,7 @@ async function toggleBlockProductEditor( action = 'enable', page ) {
 	await page
 		.locator( '.submit' )
 		.getByRole( 'button', {
-			name: 'Save changes',
+			name: getTranslationFor( 'Save changes' ),
 		} )
 		.click();
 }
@@ -52,7 +53,7 @@ async function toggleBlockProductEditor( action = 'enable', page ) {
 async function clickAddNewMenuItem( page ) {
 	await page
 		.locator( '#menu-posts-product' )
-		.getByRole( 'link', { name: 'Add New' } )
+		.getByRole( 'link', { name: getTranslationFor( 'Add New' )} )
 		.click();
 }
 
@@ -64,7 +65,7 @@ async function clickAddNewMenuItem( page ) {
 async function expectOldProductEditor( page ) {
 	await expect(
 		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+	).toContainText( getTranslationFor( 'Product data' ) );
 }
 
 /**
@@ -75,7 +76,7 @@ async function expectOldProductEditor( page ) {
 async function expectBlockProductEditor( page ) {
 	await expect(
 		page.locator( '.woocommerce-product-header__inner h1' )
-	).toContainText( 'Add new product' );
+	).toContainText( getTranslationFor( 'Add new product' ) );
 }
 
 /**
@@ -88,7 +89,7 @@ async function clickOnTab( tabName, page ) {
 	await page
 		// .locator( '.woocommerce-product-tab__general-content' )
 		.locator( '.woocommerce-product-tabs' )
-		.getByRole( 'button', { name: tabName } )
+		.getByRole( 'button', { name: getTranslationFor( tabName ) } )
 		.click();
 }
 

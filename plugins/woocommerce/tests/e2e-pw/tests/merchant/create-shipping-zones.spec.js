@@ -1,5 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
+const { LANGUAGE } = process.env;
 
 const maynePostal = 'V0N 2J0';
 const shippingZoneNameUSRegion = 'USA Zone';
@@ -64,34 +66,36 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				{ waitUntil: 'networkidle' }
 			);
 			await page
-				.getByPlaceholder( 'Zone name' )
+				.getByPlaceholder( getTranslationFor( 'Zone name' ) )
 				.fill( shippingZoneNameLocalPickup );
 
-			await page.getByPlaceholder( 'Select regions within this zone' ).click();
+			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).click();
 			await page
-				.getByPlaceholder( 'Select regions within this zone' )
-				.type( 'British Columbia, Canada' );
+				.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) )
+				.type( `${ getTranslationFor( 'British Columbia, Canada' ) }` );
 			await page
-				.getByText( 'British Columbia, Canada' ).last()
+				.getByText( `${ getTranslationFor( 'British Columbia, Canada' ) }` ).last()
 				.click();
 
-			await page.getByRole( 'link', { name: 'Limit to specific ZIP/postcodes' } ).click();
-			await page.getByPlaceholder( 'List 1 postcode per line' ).fill( maynePostal );
+			await page.getByRole( 'link', { name:  getTranslationFor( 'Limit to specific ZIP/postcodes') } ).click();
+			await page.getByPlaceholder( getTranslationFor( 'List 1 postcode per line' ) ).fill( maynePostal );
 
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Add shipping method' ) } ).click();
 
 			await page
 				.getByRole( 'combobox' )
-				.selectOption( { label: 'Local pickup' } );
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+				.selectOption( { label: getTranslationFor( 'Local pickup' ) } );
+			await page.getByRole('button', { name: getTranslationFor( 'Add shipping method' ) } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Local pickup' } )
+					.filter( {
+						hasText: getTranslationFor( 'Local pickup' ),
+					} )
 			).toBeVisible();
 
-			await page.getByRole( 'button', { name: 'Save changes'} ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Save changes' )} ).click();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -103,10 +107,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Mayne Island with Local pickup.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia, V0N 2J0.*/
+			getTranslationFor( '/British Columbia, V0N 2J0.*/' )
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Local pickup.*/
+			getTranslationFor( '/Local pickup.*/' )
 		);
 	} );
 
@@ -125,30 +129,32 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.getByPlaceholder( 'Zone name' ).fill( shippingZoneNameFreeShip );
+			await page.getByPlaceholder( getTranslationFor( 'Zone name' ) ).fill( shippingZoneNameFreeShip );
 
-			await page.getByPlaceholder( 'Select regions within this zone' ).click();
+			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).click();
 			await page
-				.getByPlaceholder( 'Select regions within this zone' )
-				.type( 'British Columbia, Canada' );
+				.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) )
+				.type( `${ getTranslationFor( 'British Columbia, Canada' ) }` );
 			await page
-				.getByText( 'British Columbia, Canada' ).last()
+				.getByText( `${ getTranslationFor( 'British Columbia, Canada' ) }` ).last()
 				.click();
 
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Add shipping method' ) } ).click();
 
 			await page
 				.getByRole( 'combobox' )
-				.selectOption( { label: 'Free shipping' } );
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+				.selectOption( { label: getTranslationFor( 'Free shipping' ) } );
+			await page.getByRole('button', { name: getTranslationFor( 'Add shipping method' ) } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Free shipping' } )
+					.filter( {
+						hasText: getTranslationFor( 'Free shipping' ),
+					} )
 			).toBeVisible();
 
-			await page.getByRole( 'button', { name: 'Save changes'} ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Save changes' )} ).click();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -159,10 +165,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/BC with Free shipping.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia.*/
+			getTranslationFor( '/British Columbia.*/' )
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Free shipping.*/
+			getTranslationFor( '/Free shipping.*/' )
 		);
 	} );
 
@@ -179,30 +185,30 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.getByPlaceholder( 'Zone name' ).fill( shippingZoneNameFlatRate );
+			await page.getByPlaceholder( getTranslationFor( 'Zone name' ) ).fill( shippingZoneNameFlatRate );
 
-			await page.getByPlaceholder( 'Select regions within this zone' ).click();
-			await page.getByPlaceholder( 'Select regions within this zone' ).type( 'Canada' );
-			await page
-				.getByText('Canada').last()
-				.click();
+			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).click();
+			await page.getByPlaceholder( getTranslationFor( 'Select regions within this zone' ) ).type( getTranslationFor( 'Canada' ) );
+			await page.getByRole('option', { name: getTranslationFor( 'Canada' ), exact: true }).click();
 
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Add shipping method' ) } ).click();
 
 			await page
 				.getByRole( 'combobox' )
-				.selectOption( { label: 'Flat rate' } );
-			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
+				.selectOption( { label: getTranslationFor( 'Flat rate' ) } );
+			await page.getByRole('button', { name: getTranslationFor( 'Add shipping method' ) } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Flat rate' } )
+					.filter( {
+						hasText: getTranslationFor( 'Flat rate' ),
+					} )
 			).toBeVisible();
 
-			await page.getByRole( 'link', { name: 'Flat rate' } ).click();
-			await page.getByLabel( 'Cost', { exact: true } ).fill( '10' );
-			await page.getByRole( 'button', { name: 'Save changes' } ).last().click();
+			await page.getByRole( 'link', { name: getTranslationFor( 'Flat rate' ) } ).click();
+			await page.getByLabel( getTranslationFor( 'Cost' ), { exact: true } ).fill( '10' );
+			await page.getByRole( 'button', { name: getTranslationFor( 'Save changes' ) } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.goto(
@@ -214,10 +220,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Canada with Flat rate*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Canada.*/
+			getTranslationFor( '/Canada.*/' )
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Flat rate.*/
+			getTranslationFor( '/Flat rate.*/' )
 		);
 	} );
 
@@ -240,7 +246,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.locator( '.select2-search__field' ).click();
 			await page
 				.locator( '.select2-search__field' )
-				.type( 'United States' );
+				.type( `${ getTranslationFor( 'United States' ) }` );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'
@@ -267,8 +273,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 		await page.locator( 'a:has-text("USA Zone") >> nth=0' ).click();
 
+		await page.waitForLoadState( 'networkidle' );
+
 		//delete
 		await page.locator( 'text=×' ).click();
+
 		//save changes
 		await page.locator( '#submit' ).click();
 		await page.waitForFunction( () => {
@@ -280,7 +289,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 		//prove that the Region has been removed (Everywhere will display)
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Everywhere.*/
+			getTranslationFor( '/Everywhere.*/' )
 		);
 	} );
 	test( 'add and delete shipping method', async ( { page } ) => {
@@ -299,14 +308,14 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.locator( '#zone_name' ).fill( shippingZoneNameFlatRate );
 
 			await page.locator( '.select2-search__field' ).click();
-			await page.locator( '.select2-search__field' ).type( 'Canada' );
+			await page.locator( '.select2-search__field' ).type( getTranslationFor( 'Canada' ) );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'
 				)
 				.click();
 
-			await page.locator( 'text=Add shipping method' ).click();
+			await page.locator( `text=${getTranslationFor( 'Add shipping method' )}` ).click();
 
 			await page
 				.locator( 'select[name=add_method_id]' )
@@ -316,25 +325,26 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Flat rate' } )
+					.filter( { hasText: getTranslationFor( 'Flat rate' ) } )
 			).toBeVisible();
 
-			await page.locator( 'a.wc-shipping-zone-method-settings' ).click();
+			await page.locator( 'a.wc-shipping-zone-method-settings' ).first().click();
 			await page.locator( '#woocommerce_flat_rate_cost' ).fill( '10' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
-			await page.locator( '.wc-shipping-zone-method-settings' ).hover();
-			await page.locator( 'text=Delete' ).waitFor();
+			await page.locator( '.wc-shipping-zone-method-settings' ).first().hover();
+			await page.locator( `text=${getTranslationFor( 'Delete' )}` ).first().waitFor();
+			
 
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-			await page.locator( 'text=Delete' ).click();
+			await page.getByRole('link', { name: getTranslationFor( 'Delete' ), exact: true }).click();
 
 			await expect(
 				page.locator( '.wc-shipping-zone-method-blank-state' )
 			).toHaveText(
-				/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/
+				getTranslationFor( '/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/' )
 			);
 		}
 	} );
@@ -458,9 +468,12 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Local pickup' );
+		).toContainText( getTranslationFor( 'Local pickup' ) );
+
 		await expect(
-			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
 		).toContainText( '25.99' );
 	} );
 
@@ -479,9 +492,12 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Free shipping' );
+		).toContainText( `${ getTranslationFor( 'Free shipping' ) }` );
+
 		await expect(
-			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
 		).toContainText( '25.99' );
 	} );
 
@@ -501,12 +517,15 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Flat rate:' );
+		).toContainText( `${ getTranslationFor( 'Flat rate' ) }` );
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( '10.00' );
+
 		await expect(
-			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+			page.locator(
+				`td[data-title=${getTranslationFor( '"Total"' )}] > strong > .amount > bdi`
+			)
 		).toContainText( '35.99' );
 	} );
 } );

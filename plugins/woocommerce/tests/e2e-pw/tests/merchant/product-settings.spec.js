@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -10,11 +11,11 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 
 		// make sure the product tab is active
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Products'
+			getTranslationFor('Products')
 		);
 		await expect(
 			page.locator( 'ul.subsubsub > li > a.current' )
-		).toContainText( 'Downloadable products' );
+		).toContainText( getTranslationFor('Downloadable products'));
 
 		// Set download options
 		await page
@@ -30,11 +31,11 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page
 			.locator( '#woocommerce_downloads_add_hash_to_filename' )
 			.uncheck();
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
@@ -67,11 +68,11 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page
 			.locator( '#woocommerce_downloads_add_hash_to_filename' )
 			.check();
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
@@ -94,11 +95,11 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page
 			.locator( '#woocommerce_file_download_method' )
 			.selectOption( 'force' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )

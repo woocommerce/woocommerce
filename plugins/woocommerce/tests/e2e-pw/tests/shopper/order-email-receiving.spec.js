@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-const { customer, storeDetails } = require( '../../test-data/data' );
+const { customer, storeDetails } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 const { api } = require( '../../utils' );
 
 let productId, orderId;
@@ -32,7 +33,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		) {
 			// In WP 6.3, label intercepts check action. Need to force.
 			await page
-				.getByLabel( 'Select All' )
+				.getByLabel( getTranslationFor( 'Select All' ) )
 				.first()
 				.check( { force: true } );
 			await page
@@ -87,7 +88,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			.fill( customer.billing.us.phone );
 		await page.locator( '#billing_email' ).fill( customer.email );
 
-		await page.locator( 'text=Place order' ).click();
+		await page.locator( `text=${getTranslationFor('Place order')}` ).click();
 
 		await expect(
 			page.locator( 'li.woocommerce-order-overview__order > strong' )
@@ -108,6 +109,6 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		).toContainText( customer.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]: New order #${ orderId }` );
+		).toContainText( `[${ storeName }]${getTranslationFor(': New order #')}${ orderId }` );
 	} );
 } );

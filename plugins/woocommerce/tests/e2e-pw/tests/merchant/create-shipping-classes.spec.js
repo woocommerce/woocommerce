@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Merchant can add shipping classes', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -15,7 +16,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 		await page
 			.locator( '.wc-shipping-class-delete >> nth=0' )
 			.dispatchEvent( 'click' );
-		await page.locator( 'text=Save shipping classes' ).click();
+		await page.locator( `text=${getTranslationFor('Save shipping classes')}` ).click();
 	} );
 
 	test( 'can add shipping classes', async ( { page } ) => {
@@ -37,7 +38,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
-			await page.locator( 'text=Add shipping class' ).click();
+			await page.locator( `text=${getTranslationFor('Add shipping class')}` ).click();
 			await page
 				.locator( '.editing:last-child [data-attribute="name"]' )
 				.fill( name );
@@ -48,7 +49,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 				.locator( '.editing:last-child [data-attribute="description"]' )
 				.fill( description );
 		}
-		await page.locator( 'text=Save shipping classes' ).click();
+		await page.locator( `text=${getTranslationFor('Save shipping classes')}` ).click();
 
 		// Set the expected auto-generated slug
 		shippingClassNoSlug.slug = 'poster-pack';
@@ -56,7 +57,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 		// Verify that the specified shipping classes were saved
 		for ( const { name, slug, description } of shippingClasses ) {
 			await expect(
-				page.locator( `text=${ name } Edit | Remove` )
+				page.locator( `text=${ name } ${getTranslationFor('Edit | Remove')}` )
 			).toBeVisible();
 			await expect( page.locator( `text=${ slug }` ) ).toBeVisible();
 			// account for blank description

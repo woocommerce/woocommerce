@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Merchant > Order Action emails received', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -41,7 +42,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		) {
 			// In WP 6.3, label intercepts check action. Need to force.
 			await page
-				.getByLabel( 'Select All' )
+				.getByLabel( getTranslationFor( 'Select All' ) )
 				.first()
 				.check( { force: true } );
 
@@ -59,7 +60,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-
 		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
 	} );
 
@@ -91,7 +91,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		).toContainText( admin.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+		).toContainText( `[${ storeName }]${getTranslationFor(': New order #')}${ newOrderId }` )
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
@@ -116,7 +116,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				.getByRole( 'row' )
 				.filter( { hasText: admin.email } )
 				.filter( {
-					hasText: `[${ storeName }]: New order #${ orderId }`,
+					hasText: `[${ storeName }]${getTranslationFor(': New order #')}${ orderId }`,
 				} )
 		).toBeVisible();
 	} );
@@ -143,7 +143,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				.getByRole( 'row' )
 				.filter( { hasText: customerBilling.email } )
 				.filter( {
-					hasText: `Invoice for order #${ orderId } on ${ storeName }`,
+					hasText: `${getTranslationFor('Invoice for order #')}${ orderId } ${getTranslationFor('on')} ${ storeName }`,
 				} )
 		).toBeVisible();
 	} );

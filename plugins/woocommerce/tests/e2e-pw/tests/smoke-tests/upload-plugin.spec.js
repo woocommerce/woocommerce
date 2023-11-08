@@ -5,7 +5,8 @@ const {
 	PLUGIN_REPOSITORY,
 } = process.env;
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+const { admin } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 const path = require( 'path' );
 const {
 	deletePlugin,
@@ -113,9 +114,9 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 		await test.step(
 			'Expect the WooCommerce Homepage to load successfully.',
 			async () => {
-				const statsOverviewHeading = page.getByText( 'Stats overview' );
+				const statsOverviewHeading = page.getByText( getTranslationFor('Stats overview') );
 				const skipSetupStoreLink = page.getByRole( 'button', {
-					name: 'Set up my store',
+					name: getTranslationFor('Skip setup store details'),
 				} );
 
 				await page.goto( '/wp-admin/admin.php?page=wc-admin' );

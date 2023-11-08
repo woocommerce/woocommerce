@@ -121,9 +121,7 @@ const deleteAllShippingZones = async () => {
 				per_page: 100,
 				page: page++,
 			} )
-		 ).filter(
-			( { name } ) => name !== 'Locations not covered by your other zones'
-		) ).length > 0
+		).filter( ( { id } ) => id > 0 ) ).length > 0
 	) {
 		const ids = shippingZones.map( ( { id } ) => id );
 		for ( const id of ids ) {

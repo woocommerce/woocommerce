@@ -1,10 +1,14 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require( './../../utils/translations' );
+const { LANGUAGE } = process.env;
 
 test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
 
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( {
+		storageState: process.env.ADMINSTATE,
+	} );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -46,8 +50,12 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `products/${ productId }`, { force: true } );
-		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `products/${ productId }`, {
+			force: true,
+		} );
+		await api.delete( `orders/${ orderId }`, {
+			force: true,
+		} );
 	} );
 
 	test( 'can issue a refund by quantity', async ( { page } ) => {
@@ -76,8 +84,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 			'9.99'
 		);
 		await expect( page.locator( '#refund_amount' ) ).toHaveValue( '9.99' );
+
 		await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-			`Refund ${ currencySymbol }9.99 manually`
+			getTranslationFor( 'Refund $9.99 manually' )
 		);
 
 		// Do the refund
@@ -106,7 +115,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 		// Verify system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			'Order status changed from Completed to Refunded.'
+			getTranslationFor(
+				'Order status changed from Completed to Refunded.'
+			)
 		);
 	} );
 
@@ -116,7 +127,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.getByRole( 'row', { name: /Refund #\d+/ } ).hover();
+		await page
+			.getByRole( 'row', { name: getTranslationFor( '/Refund #d+/' ) } )
+			.hover();
 		await page.locator( '.delete_refund' ).click();
 
 		// Verify the refunded row item is no longer showing
@@ -133,7 +146,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 	let productWithStockId, productWithNoStockId, orderId;
 
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( {
+		storageState: process.env.ADMINSTATE,
+	} );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -197,7 +212,9 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await api.delete( `products/${ productWithNoStockId }`, {
 			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ orderId }`, {
+			force: true,
+		} );
 	} );
 
 	test( 'can update order after refunding item without automatic stock adjustment', async ( {
@@ -207,7 +224,9 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify stock reduction system note was added
 		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
-			/Stock levels reduced: Product with stock \(#\d+\) 10→8/
+			getTranslationFor(
+				'/Stock levels reduced: Product with stock (#d+) 10→8/'
+			)
 		);
 
 		// Click the Refund button
@@ -231,7 +250,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify restock system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			/Item #\d+ stock increased from 8 to 10./
+			getTranslationFor( '/Item #d+ stock increased from 8 to 10./' )
 		);
 	} );
 } );

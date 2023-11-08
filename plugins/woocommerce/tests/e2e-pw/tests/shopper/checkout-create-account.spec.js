@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin } = require( '../../test-data/data' );
+const { admin } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const billingEmail = 'marge-test-account@example.com';
 
@@ -153,14 +154,14 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await page.locator( '#place_order' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
+			getTranslationFor('Order received')
 		);
 
 		// get order ID from the page
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		orderId = orderReceivedText.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ].toString();
 
 		await page.goto( '/my-account/' );
 		// confirms that an account was created
@@ -169,12 +170,13 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		);
 		await page
 			.getByRole( 'navigation' )
-			.getByRole( 'link', { name: 'Log out' } )
+			.getByRole( 'link', { name: getTranslationFor( 'Log out' ) } )
 			.click();
 		// sign in as admin to confirm account creation
 		await page.locator( '#username' ).fill( admin.username );
 		await page.locator( '#password' ).fill( admin.password );
-		await page.locator( 'text=Log in' ).click();
+		await page.getByRole('button', { name: getTranslationFor('Log in') })
+			.click();
 
 		await page.goto( 'wp-admin/users.php' );
 		await expect( page.locator( 'tbody#the-list' ) ).toContainText(

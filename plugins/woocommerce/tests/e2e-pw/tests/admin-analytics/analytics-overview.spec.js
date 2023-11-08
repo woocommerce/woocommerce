@@ -1,7 +1,9 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../utils/translations');
+const { LANGUAGE } = process.env;
 const { admin } = require( '../../test-data/data' );
 
-const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
+const EXPECTED_SECTION_HEADERS = getTranslationFor( 'expectedSections' );
 
 let /**
 	 * @type {number}
@@ -114,7 +116,9 @@ const resetSections = async () => {
 };
 
 test.describe( 'Analytics pages', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( {
+		storageState: process.env.ADMINSTATE,
+	} );
 
 	test.beforeAll( async ( { browser } ) => {
 		page = await browser.newPage();
@@ -143,19 +147,19 @@ test.describe( 'Analytics pages', () => {
 			} );
 
 			heading_performance = page.getByRole( 'heading', {
-				name: 'Performance',
+				name: getTranslationFor( 'Performance'),
 			} );
 
 			buttons_ellipsis = page.getByRole( 'button', {
-				name: 'Choose which',
+				name: getTranslationFor( 'Choose which' ),
 			} );
 
 			menuitem_moveUp = page.getByRole( 'menuitem', {
-				name: 'Move up',
+				name: getTranslationFor( 'Move up' ),
 			} );
 
 			menuitem_moveDown = page.getByRole( 'menuitem', {
-				name: 'Move down',
+				name: getTranslationFor( 'Move down' ),
 			} );
 		} );
 	} );
@@ -247,11 +251,11 @@ test.describe( 'Analytics pages', () => {
 		await test.step( `Remove the Performance section`, async () => {
 			await page
 				.getByRole( 'button', {
-					name: 'Choose which analytics to display and the section name',
+					name: getTranslationFor( 'Choose which analytics to display and the section name' ),
 				} )
 				.click();
 			await page
-				.getByRole( 'menuitem', { name: 'Remove section' } )
+				.getByRole( 'menuitem', { name: getTranslationFor( 'Remove section' ) } )
 				.click();
 			await page.waitForResponse(
 				( response ) =>
@@ -270,8 +274,9 @@ test.describe( 'Analytics pages', () => {
 		await page.reload();
 
 		await test.step( `Add the Performance section back in.`, async () => {
-			await page.getByTitle( 'Add more sections' ).click();
-			await page.getByTitle( 'Add Performance section' ).click();
+
+			await page.getByTitle( getTranslationFor( 'Add more sections' ) ).click();
+			await page.getByTitle( getTranslationFor( 'Add Performance section' ) ).click();
 		} );
 
 		await test.step( `Expect the Performance section to be added back.`, async () => {

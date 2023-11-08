@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const customer = {
 	username: 'customercheckoutlogin',
@@ -119,7 +120,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.locator( 'text=Click here to login' ).click();
+		await page.locator( `text=${getTranslationFor('Click here to login')}`).click();
 
 		// fill in the customer account info
 		await page.locator( '#username' ).fill( customer.username );
@@ -153,9 +154,9 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		);
 
 		// place an order
-		await page.locator( 'text=Place order' ).click();
+		await page.locator(  `text=${getTranslationFor('Place order')}` ).click();
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
+			getTranslationFor('Order received')
 		);
 
 		await page.waitForLoadState( 'networkidle' );
@@ -163,7 +164,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		orderId = orderReceivedText.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ].toString();
 
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(
 			customer.email

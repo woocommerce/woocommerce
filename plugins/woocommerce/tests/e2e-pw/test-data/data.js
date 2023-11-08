@@ -1,3 +1,5 @@
+const { getTranslationFor } = require('../utils/translations');
+
 const {
 	ADMIN_USER,
 	ADMIN_PASSWORD,
@@ -7,6 +9,7 @@ const {
 	CUSTOMER_USER_EMAIL,
 	CUSTOMER_FIRST_NAME,
 	CUSTOMER_LAST_NAME,
+	LANGUAGE,
 	USE_WP_ENV,
 } = process.env;
 
@@ -58,23 +61,23 @@ const storeDetails = {
 			city: 'San Francisco',
 			zip: '94107',
 			email: admin.email,
-			country: 'United States (US) — California', // corresponding to the text value of the option,
+			country: getTranslationFor('United States (US) — California'), // corresponding to the text value of the option,
 			countryCode: 'US:CA',
 		},
 		expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in the US), adjust this constant if we change that
 		industries: {
-			fashion: 'Fashion, apparel, and accessories',
-			health: 'Health and beauty',
+			fashion: getTranslationFor('Fashion, apparel, and accessories'),
+			health: getTranslationFor('Health and beauty'),
 		},
 		// For testing "Save Changes" feature, need to be different from the above
 		industries2: {
-			fashion: 'Fashion, apparel, and accessories',
-			health: 'Health and beauty',
-			foodAndDrinks: 'Food and drink',
+			fashion: getTranslationFor('Fashion, apparel, and accessories'),
+			health: getTranslationFor('Health and beauty'),
+			foodAndDrinks: getTranslationFor('Food and drink'),
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			physical: getTranslationFor('Physical products'),
+			downloadable: getTranslationFor('Downloads'),
 		},
 	},
 	malta: {
@@ -88,11 +91,11 @@ const storeDetails = {
 		},
 		expectedNumberOfIndustries: 7, // There are 7 checkboxes on the page (in Malta), adjust this constant if we change that
 		industries: {
-			other: 'Other',
+			other: getTranslationFor('Other'),
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			physical: getTranslationFor('Physical products'),
+			downloadable: getTranslationFor('Downloads'),
 		},
 	},
 	liberia: {
@@ -106,11 +109,11 @@ const storeDetails = {
 		},
 		expectedNumberOfIndustries: 7, // There are 7 checkboxes on the page (in Liberia), adjust this constant if we change that
 		industries: {
-			other: 'Other',
+			other: getTranslationFor('Other'),
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			physical: getTranslationFor('Physical products'),
+			downloadable: getTranslationFor('Downloads'),
 		},
 	},
 };
