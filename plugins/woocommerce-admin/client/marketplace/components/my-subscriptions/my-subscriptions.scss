@@ -81,7 +81,9 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	border-radius: 2px;
 	border: none;
 	padding: 2px 8px;
-	margin-left: $grid-unit-15; 
+	margin-left: $grid-unit-15;
+	text-align: left;
+	white-space: nowrap;
 
 	&--error {
 		color: var(--wp-red-red-70, #8a2424);
