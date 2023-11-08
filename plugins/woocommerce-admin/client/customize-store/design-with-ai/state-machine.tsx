@@ -270,7 +270,6 @@ export const designWithAiStateMachineDefinition = createMachine(
 				initial: 'preApiCallLoader',
 				states: {
 					preApiCallLoader: {
-						entry: [ 'assignStartLoadingTime' ],
 						always: {
 							target: 'apiCallLoader',
 						},
@@ -284,6 +283,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {
