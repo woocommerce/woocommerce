@@ -58,8 +58,14 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting a registered template when area is specififed.
 	 */
 	public function test_get_template_by_area() {
-		// FIXME: unskip the test and uncomment the code when the issue is fixed.
-		$this->markTestSkipped( 'Waiting for a fix from WooCommerce Blocks: https://github.com/woocommerce/woocommerce-blocks/pull/11690' );
+		$request  = new \WP_REST_Request( 'GET', '/wp/v2/templates' );
+		$request->set_param( 'area', 'test-area' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $data );
+		$this->assertEquals( 'custom-block-template', $data[0]['id'] );
 	}
 
 	/**
