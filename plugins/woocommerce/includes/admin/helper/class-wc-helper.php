@@ -1534,6 +1534,7 @@ class WC_Helper {
 
 		// Add subscription install flags after the active and local data is set.
 		foreach ( $subscriptions as &$subscription ) {
+			$subscription['subscription_available'] = self::is_subscription_available( $subscription, $subscriptions );
 			$subscription['subscription_installed'] = self::is_subscription_installed( $subscription, $subscriptions );
 		}
 
@@ -1541,6 +1542,38 @@ class WC_Helper {
 		unset( $subscription );
 
 		return $subscriptions;
+	}
+
+	/**
+	 * Check if subscription is available.
+	 *
+	 * @param array $subscription The subscription data.
+	 * @param array $subscriptions The list of subscriptions.
+	 * @return bool True if multiple licenses exist, false otherwise.
+	 */
+	public static function is_subscription_available( $subscription, $subscriptions ) {
+		if ( true === $subscription['active'] ) {
+			return false;
+		}
+
+		if ( true === $subscription['expired'] ) {
+			return false;
+		}
+
+		$product_subscriptions = wp_list_filter(
+			$subscriptions,
+			array(
+				'product_id' => $subscription['product_id'],
+				'active'     => true,
+			)
+		);
+
+		// If there are no active subscriptions for this product, then it's available.
+		if ( empty( $product_subscriptions ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

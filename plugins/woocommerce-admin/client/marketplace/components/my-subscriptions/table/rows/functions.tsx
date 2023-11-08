@@ -181,6 +181,9 @@ export function version( subscription: Subscription ): TableRow {
 }
 
 export function actions( subscription: Subscription ): TableRow {
+	if ( subscription.product_name === 'Product Add-Ons' ) {
+		console.log( subscription );
+	}
 	let actionButton = null;
 	if ( subscription.product_key === '' ) {
 		actionButton = <SubscribeButton subscription={ subscription } />;
@@ -193,7 +196,7 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = <Install subscription={ subscription } />;
 	} else if (
 		subscription.active === false &&
-		subscription.subscription_installed === true
+		subscription.subscription_available === true
 	) {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />
