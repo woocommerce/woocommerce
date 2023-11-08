@@ -287,7 +287,20 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_results_view(): void {
-		$params = $this->get_query_params( array( 'search' ) );
+		$params = $this->get_query_params( array( 'order', 'orderby', 'search', 'source' ) );
+		$search = $params['search'];
+		unset( $params['search'] );
+
+		$matches = $this->file_controller->search_within_files( $search, $params );
+
+		if ( is_wp_error( $matches ) ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				esc_html( $matches->get_error_message() )
+			);
+
+			return;
+		}
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
@@ -295,7 +308,18 @@ class PageController {
 			<?php $this->render_search_field(); ?>
 		</header>
 		<section id="logs-search-results" class="wc-logs-search-results">
-
+			<?php if ( count( $matches ) > 0 ) : ?>
+				<?php foreach ( $matches as $match ) : ?>
+					<?php
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- format_match does the escaping.
+					echo $this->format_match( $match['file_id'], $match['line_number'], $match['line'] );
+					?>
+				<?php endforeach; ?>
+			<?php else : ?>
+				<span class="no-match">
+					<?php esc_html_e( 'No results.', 'woocommerce' ); ?>
+				</span>
+			<?php endif; ?>
 		</section>
 		<?php
 	}
@@ -550,6 +574,43 @@ class PageController {
 			sprintf(
 				'<span class="line-content">%s</span>',
 				wp_kses_post( $text )
+			)
+		);
+	}
+
+	/**
+	 * Format a search results line.
+	 *
+	 * @param string $file_id     The file ID that contains the matched line.
+	 * @param int    $line_number The line number of the matched line.
+	 * @param string $line        The matched line, with matched substrings highlighted.
+	 *
+	 * @return string
+	 */
+	private function format_match( string $file_id, int $line_number, string $line ): string {
+		$match_url = add_query_arg(
+			array(
+				'view'    => 'single_file',
+				'file_id' => $file_id,
+			),
+			$this->get_logs_tab_url() . '#L' . absint( $line_number )
+		);
+
+		return sprintf(
+			'<span class="match">%1$s%2$s</span>',
+			sprintf(
+				'<a href="%1$s" class="match-anchor">%2$s<br />%3$s</a>',
+				esc_url( $match_url ),
+				esc_html( $file_id ),
+				sprintf(
+					// translators: %d is a line number in a file.
+					esc_html__( 'Line %d', 'woocommerce' ),
+					absint( $line_number )
+				)
+			),
+			sprintf(
+				'<span class="match-content">%s</span>',
+				wp_kses_post( $line )
 			)
 		);
 	}

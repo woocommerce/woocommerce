@@ -1420,6 +1420,52 @@ table.wc_status_table--tools {
 	}
 }
 
+.wc-logs-search-results {
+	border: 1px solid #c3c4c7;
+	background: #ffffff;
+	font-family: Consolas, Monaco, monospace;
+	word-wrap: break-word;
+	line-height: 2.3;
+
+	.match {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		background: #ffffff;
+		border-top: 1px solid #c3c4c7;
+
+		&:first-child {
+			border-top: 0;
+		}
+
+		&:nth-child( 2n + 1 ) {
+			background: #f6f7f7;
+		}
+	}
+
+	.match-anchor {
+		flex: 1;
+		padding: 0 1em;
+		font-size: 0.9em;
+	}
+
+	.match-content {
+		flex: 6;
+		overflow: hidden;
+		padding: 0 1em;
+	}
+
+	.search-match {
+		display: inline-block;
+		background: #fff8c5;
+	}
+
+	.no-match {
+		display: block;
+		padding: 1em;
+	}
+}
+
 /**
  * Log severity level colors.
  *

@@ -303,6 +303,70 @@ class FileController {
 	}
 
 	/**
+	 * Search within a set of log files for a particular string.
+	 *
+	 * This uses a combination of preg_match_all and str_replace so that the string matches can be case-insensitive,
+	 * but the highlighted matched substrings can retain their original case.
+	 *
+	 * @param string $search    The string to search for.
+	 * @param array  $file_args Optional. Arguments to filter and sort the files that are returned. See get_files().
+	 *
+	 * @return array|WP_Error When matches are found, each array item is an associative array that includes the file ID,
+	 *                        line number, and the matched string with HTML markup around the matched parts.
+	 */
+	public function search_within_files( string $search, array $file_args = array() ) {
+		$file_args = array_merge(
+			$file_args,
+			array(
+				'offset'   => 0,
+				'per_page' => 999,
+			)
+		);
+
+		if ( '' === $search ) {
+			return array();
+		}
+
+		$files = $this->get_files( $file_args );
+		if ( is_wp_error( $files ) ) {
+			return $files;
+		}
+
+		$matched_lines = array();
+		foreach ( $files as $file ) {
+			$stream      = $file->get_stream();
+			$line_number = 1;
+			while ( ! feof( $stream ) ) {
+				$line = fgets( $stream );
+				if ( is_string( $line ) ) {
+					if ( false !== stripos( $line, $search ) ) {
+						$pattern = addcslashes( $search, '/' );
+						preg_match_all( "/$pattern/i", $line, $matches );
+						if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {
+							foreach ( $matches[0] as $match ) {
+								$line = str_replace(
+									$match,
+									'<span class="search-match">' . $match . '</span>',
+									$line
+								);
+							}
+						}
+
+						$matched_lines[] = array(
+							'file_id'     => $file->get_file_id(),
+							'line_number' => $line_number,
+							'line'        => $line,
+						);
+					}
+				}
+				$line_number ++;
+			}
+		}
+
+		return $matched_lines;
+	}
+
+	/**
 	 * Sanitize the source property of a log file.
 	 *
 	 * @param string $source The source property of a log file.
