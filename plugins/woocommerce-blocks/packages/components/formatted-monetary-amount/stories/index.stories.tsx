@@ -10,7 +10,7 @@ import { useArgs } from '@storybook/client-api';
 import FormattedMonetaryAmount, { type FormattedMonetaryAmountProps } from '..';
 
 export default {
-	title: 'Block Components/FormattedMonetaryAmount',
+	title: 'External Components/FormattedMonetaryAmount',
 	component: FormattedMonetaryAmount,
 	args: {
 		displayType: 'text',

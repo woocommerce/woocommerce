@@ -11,7 +11,7 @@ const availableElements = [ 'li', 'div', 'span' ];
 const availableRadii = [ 'none', 'small', 'medium', 'large' ];
 
 export default {
-	title: 'Block Components/Chip',
+	title: 'External Components/Chip',
 	component: Chip,
 	argTypes: {
 		element: {

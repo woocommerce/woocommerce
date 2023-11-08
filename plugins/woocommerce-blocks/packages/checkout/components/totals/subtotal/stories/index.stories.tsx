@@ -10,7 +10,7 @@ import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 import Subtotal, { SubtotalProps } from '..';
 
 export default {
-	title: 'Checkout Components/Totals/Subtotal',
+	title: 'External Components/Totals/Subtotal',
 	component: Subtotal,
 	argTypes: {
 		currency: currencyControl,

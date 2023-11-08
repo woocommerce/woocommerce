@@ -11,7 +11,7 @@ import type { ChangeEventHandler } from 'react';
 import './style.scss';
 import Label from '../label'; // Imported like this because importing from the components package loads the data stores unnecessarily - not a problem in the front end but would require a lot of unit test rewrites to prevent breaking tests due to incorrect mocks.
 
-interface SortSelectProps {
+export interface SortSelectProps {
 	/**
 	 * Unique id for component instance.
 	 */
@@ -27,7 +27,7 @@ interface SortSelectProps {
 	/**
 	 * Function to call on the change event.
 	 */
-	onChange: ChangeEventHandler;
+	onChange: ChangeEventHandler< HTMLSelectElement >;
 	/**
 	 * Option values for the select.
 	 */
@@ -54,7 +54,7 @@ interface SortSelectProps {
  * Component used for 'Order by' selectors, which renders a label
  * and a <select> with the options provided in the props.
  */
-const SortSelect = ( {
+export const SortSelect = ( {
 	className,
 	instanceId,
 	label = '',
@@ -62,6 +62,7 @@ const SortSelect = ( {
 	options,
 	screenReaderLabel,
 	value = '',
+	readOnly = false,
 }: SortSelectProps ): JSX.Element => {
 	const selectId = `wc-block-components-sort-select__select-${ instanceId }`;
 
@@ -83,7 +84,8 @@ const SortSelect = ( {
 					htmlFor: selectId,
 				} }
 			/>
-			<select // eslint-disable-line jsx-a11y/no-onchange
+			<select
+				disabled={ !! readOnly }
 				id={ selectId }
 				className="wc-block-sort-select__select wc-block-components-sort-select__select"
 				onChange={ onChange }
