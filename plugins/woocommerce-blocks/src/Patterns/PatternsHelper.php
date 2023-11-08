@@ -147,7 +147,7 @@ class PatternsHelper {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
 		}
 
-		$patterns_dictionary = json_decode( $patterns_dictionary_file, true );
+		$patterns_dictionary = wp_json_file_decode( $patterns_dictionary_file, array( 'associative' => true ) );
 
 		if ( ! empty( $pattern_slug ) ) {
 			foreach ( $patterns_dictionary as $pattern_dictionary ) {
