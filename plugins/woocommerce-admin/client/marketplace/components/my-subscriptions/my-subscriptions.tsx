@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { getNewPath } from '@woocommerce/navigation';
-import { Button, Tooltip } from '@wordpress/components';
-import { help } from '@wordpress/icons';
-import { useContext } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { createInterpolateElement, useContext } from '@wordpress/element';
+import { Icon, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ import {
 	installedSubscriptionRow,
 } from './table/table-rows';
 import { Subscription } from './types';
-import Notices from './notices';
+import RefreshIcon from '../../assets/images/refresh.svg';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -39,13 +39,24 @@ export default function MySubscriptions(): JSX.Element {
 		},
 		''
 	);
-	const updateConnectionHTML = sprintf(
-		// translators: %s is a link to the update connection page.
+
+	const installedTableDescription = createInterpolateElement(
 		__(
-			'If you don\'t see your subscription, try <a href="%s">updating</a> your connection.',
+			'Woo.com extensions and themes installed on this store. To see all your subscriptions go to <a>your account<custom_icon /></a> on Woo.com.',
 			'woocommerce'
 		),
-		updateConnectionUrl
+		{
+			a: (
+				<a
+					href="https://woo.com/my-account/my-subscriptions"
+					target="_blank"
+					rel="nofollow noopener noreferrer"
+				>
+					your account
+				</a>
+			),
+			custom_icon: <Icon icon={ external } size={ 12 } />,
+		}
 	);
 
 	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
@@ -79,47 +90,32 @@ export default function MySubscriptions(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
-			<section className="woocommerce-marketplace__my-subscriptions__notices">
-				<Notices />
-			</section>
-			<section>
-				<h2 className="woocommerce-marketplace__my-subscriptions__header">
-					{ __( 'Installed on this store', 'woocommerce' ) }
-				</h2>
-				<p className="woocommerce-marketplace__my-subscriptions__table-description">
-					<span
-						dangerouslySetInnerHTML={ {
-							__html: updateConnectionHTML,
-						} }
-					/>
-					<Tooltip
-						text={
-							<>
-								<h3>
-									{ __(
-										"Still don't see your subscription?",
-										'woocommerce'
-									) }
-								</h3>
-								<p
-									dangerouslySetInnerHTML={ {
-										__html: __(
-											'To see all your subscriptions go to <a href="https://woo.com/my-account/" target="_blank" class="woocommerce-marketplace__my-subscriptions__tooltip-external-link">your account</a> on Woo.com.',
-											'woocommerce'
-										),
-									} }
-								/>
-							</>
-						}
-					>
+			<section className="woocommerce-marketplace__my-subscriptions__installed">
+				<header className="woocommerce-marketplace__my-subscriptions__header">
+					<div>
+						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+							{ __( 'Installed on this store', 'woocommerce' ) }
+						</h2>
+						<span className="woocommerce-marketplace__my-subscriptions__table-description">
+							{ installedTableDescription }
+						</span>
+					</div>
+					<div>
 						<Button
-							icon={ help }
-							iconSize={ 20 }
-							isSmall={ true }
-							label={ __( 'Help', 'woocommerce' ) }
-						/>
-					</Tooltip>
-				</p>
+							href={ updateConnectionUrl }
+							className="woocommerce-marketplace__refresh-subscriptions"
+						>
+							<img
+								src={ RefreshIcon }
+								alt={ __(
+									'Refresh subscriptions',
+									'woocommerce'
+								) }
+							/>
+							{ __( 'Refresh', 'woocommerce' ) }
+						</Button>
+					</div>
+				</header>
 				<InstalledSubscriptionsTable
 					isLoading={ isLoading }
 					rows={ subscriptionsInstalled.map( ( item ) => {
@@ -128,13 +124,13 @@ export default function MySubscriptions(): JSX.Element {
 				/>
 			</section>
 
-			<section>
-				<h2 className="woocommerce-marketplace__my-subscriptions__header">
-					{ __( 'Not in use', 'woocommerce' ) }
+			<section className="woocommerce-marketplace__my-subscriptions__available">
+				<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+					{ __( 'Available to use', 'woocommerce' ) }
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__table-description">
 					{ __(
-						'Your unused Woo.com subscriptions.',
+						"Woo.com subscriptions you haven't used yet.",
 						'woocommerce'
 					) }
 				</p>
@@ -143,23 +139,6 @@ export default function MySubscriptions(): JSX.Element {
 					rows={ subscriptionsAvailable.map( ( item ) => {
 						return availableSubscriptionRow( item );
 					} ) }
-				/>
-			</section>
-
-			<section>
-				<h2 className="woocommerce-marketplace__my-subscriptions__header">
-					{ __( 'Free to install', 'woocommerce' ) }
-				</h2>
-				<p className="woocommerce-marketplace__my-subscriptions__table-description">
-					{ __(
-						'Easily install your existing free to install Woo.com subscriptions across sites.',
-						'woocommerce'
-					) }
-				</p>
-				<AvailableSubscriptionsTable
-					isLoading={ isLoading }
-					// TODO: fetch free and uninstalled subscriptions.
-					rows={ [] }
 				/>
 			</section>
 		</div>

@@ -14,10 +14,6 @@ const tableHeadersDefault = [
 		label: __( 'Name', 'woocommerce' ),
 	},
 	{
-		key: 'status',
-		label: __( 'Status', 'woocommerce' ),
-	},
-	{
 		key: 'expiry',
 		label: __( 'Expiry/Renewal date', 'woocommerce' ),
 	},

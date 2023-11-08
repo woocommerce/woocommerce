@@ -5,8 +5,14 @@ import { Popover } from '@wordpress/components';
 import { Icon, info } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import { StatusLevel } from '../../types';
+
 export default function StatusPopover( props: {
 	text: string;
+	level: StatusLevel;
 	explanation: string;
 } ) {
 	const [ isVisible, setIsVisible ] = useState( false );
@@ -24,12 +30,16 @@ export default function StatusPopover( props: {
 			onClick={ () => {
 				setIsVisible( ! isVisible );
 			} }
-			className="woocommerce-marketplace__my-subscriptions__status-warning"
+			className={
+				'woocommerce-marketplace__my-subscriptions__product-status' +
+				' ' +
+				`woocommerce-marketplace__my-subscriptions__product-status--${ props.level }`
+			}
 		>
 			<Icon icon={ info } size={ 16 } />
 			{ props.text }
 			{ shouldShowExplanation() && (
-				<Popover className="woocommerce-marketplace__my-subscriptions__status-popover">
+				<Popover className="woocommerce-marketplace__my-subscriptions__popover">
 					{ props.explanation }
 				</Popover>
 			) }
