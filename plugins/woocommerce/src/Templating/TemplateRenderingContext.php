@@ -35,20 +35,6 @@ class TemplateRenderingContext {
 	private Closure $render_subtemplate_callback;
 
 	/**
-	 * The blocks defined in the parent template, empty array for root templates.
-	 *
-	 * @var array
-	 */
-	private array $blocks = array();
-
-	/**
-	 * The name of the block currently being defined, null if none.
-	 *
-	 * @var string|null
-	 */
-	private ?string $current_block_name = null;
-
-	/**
 	 * The current display name of the template being rendered.
 	 *
 	 * @var string
@@ -68,13 +54,11 @@ class TemplateRenderingContext {
 	 * @param Closure $render_subtemplate_callback The callback to be used to render a secondary template.
 	 * @param string  $template_file_path The full path of the template file being rendered.
 	 * @param array   $variables The variables to be made available to the template code via "$this->variable" and "$this->get_variable".
-	 * @param array   $blocks The blocks defined in the parent template, empty array for root templates.
 	 */
-	public function __construct( Closure $render_subtemplate_callback, string $template_file_path, array $variables, array $blocks ) {
+	public function __construct( Closure $render_subtemplate_callback, string $template_file_path, array $variables ) {
 		$this->render_subtemplate_callback = $render_subtemplate_callback;
 		$this->template_file_path          = $template_file_path;
 		$this->variables                   = $variables;
-		$this->blocks                      = $blocks;
 
 		$this->template_display_name = pathinfo( $template_file_path, PATHINFO_FILENAME );
 	}
@@ -176,79 +160,12 @@ class TemplateRenderingContext {
 	 * The variables available in the current template will be merged with the array passed in $variables
 	 * (the latter will overwrite duplicate keys from the former) and the result will be passed to the secondary template.
 	 *
-	 * Blocks defined in the current template will be passed to the secondary template. The secondary template
-	 * can redefine existing blocks, but these redefinitions will be local to the secondary template
-	 * and won't propagate to the parent template.
-	 *
 	 * @param string $template_name The name of the secondary template.
 	 * @param array  $variables The variables to be passed to the secondary template (after being merged with the variables of the current template).
 	 * @param bool   $relative True if the location of the secondary template file is to be considered as relative to the location of the current template file.
 	 */
 	public function render( string $template_name, array $variables = array(), bool $relative = true ): void {
 		$variables = array_merge( $this->variables, $variables );
-		( $this->render_subtemplate_callback )( $template_name, $variables, $this->blocks, $relative );
-	}
-
-	/**
-	 * Add a reusable block by providing its contents as a string.
-	 * A block already existing with the same name will be overwritten.
-	 *
-	 * @param string $name Block name.
-	 * @param string $contents Block contents.
-	 */
-	public function add_block( string $name, string $contents ): void {
-		$this->blocks[ $name ] = $contents;
-	}
-
-	/**
-	 * Start the definition of a reusable block.
-	 * The definition must be finished with end_block before the rendering of the current template finishes,
-	 * otherwise an exception will be thrown.
-	 *
-	 * Nested blocks (another start_block before the corresponding end_block) aren't allowed.
-	 *
-	 * @param string $name Block name.
-	 * @throws \Exception A block is already being defined.
-	 */
-	public function start_block( string $name ): void {
-		if ( ! is_null( $this->current_block_name ) ) {
-			throw new \Exception( "Blocks can't be nested, currently defining block {$this->current_block_name} in template {$this->template_display_name}" );
-		}
-		$this->current_block_name = $name;
-		ob_start();
-	}
-
-	/**
-	 * End the definition of the reusable block that was started with start_block.
-	 * If no block is currently being defined this method does nothing.
-	 */
-	public function end_block(): void {
-		if ( ! is_null( $this->current_block_name ) ) {
-			$this->blocks[ $this->current_block_name ] = ob_get_clean();
-			$this->current_block_name                  = null;
-		}
-	}
-
-	/**
-	 * Render a defined block.
-	 *
-	 * @param string $name Block name.
-	 * @throws \Exception No block is defined with the specified name.
-	 */
-	public function render_block( string $name ): void {
-		if ( ! array_key_exists( $name, $this->blocks ) ) {
-			throw new \Exception( "Undefined block {$name} rendering template {$this->template_display_name}" );
-		}
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->blocks[ $name ];
-	}
-
-	/**
-	 * Get the name of the block currently being defined.
-	 *
-	 * @return string|null Name of the block currently being defined, or null if no block is currently being defined.
-	 */
-	public function get_name_of_block_being_defined(): ?string {
-		return $this->current_block_name;
+		( $this->render_subtemplate_callback )( $template_name, $variables, $relative );
 	}
 }

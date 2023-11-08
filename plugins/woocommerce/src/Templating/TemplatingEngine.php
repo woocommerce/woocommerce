@@ -198,7 +198,7 @@ class TemplatingEngine {
 
 		ob_start( $ob_callback );
 		try {
-			$this->render_template_core( $template_name, $variables, array(), null, false, 0 );
+			$this->render_template_core( $template_name, $variables, null, false, 0 );
 			if ( ! $render_to_file ) {
 				$result = ob_get_contents();
 				ob_end_flush();
@@ -302,20 +302,18 @@ class TemplatingEngine {
 	/**
 	 * This method does the actual rendering of template, either a "root" one (directly from the render_template method)
 	 * or a "secondary" one (via invoking "$this->render" from within the template itself). It takes care of resolving
-	 * the template path (including invoking the woocommerce_template_file_path filter), creating the instance of
-	 * TemplateRenderingContext that the template will see as "$this", and detecting/throwing unclosed block errors.
+	 * the template path (including invoking the woocommerce_template_file_path filter) and creating the instance of
+	 * TemplateRenderingContext that the template will see as "$this".
 	 *
 	 * @param string      $template_name The name of the template to render.
 	 * @param array       $variables Variables to be used for the rendering process, can be referenced in the template.
-	 * @param array       $blocks Blocks defined by the parent template, always empty when rendering a root template.
 	 * @param string|null $parent_template_path Full path of the parent template file, null when rendering a root template.
 	 * @param bool        $relative True when rendering a secondary template with the $relative parameter passed as true to "$this->render".
 	 * @param int         $depth Secondary template rendering depth, used to detect infinite loops.
 	 * @throws InvalidArgumentException Template file not found.
-	 * @throws Exception Unclosed block found after rendering the template.
 	 * @throws OverflowException Template rendering depth of 255 levels reached, possible circular reference when rendering secondary templates.
 	 */
-	private function render_template_core( string $template_name, array $variables, array $blocks, ?string $parent_template_path, bool $relative, int $depth ): void {
+	private function render_template_core( string $template_name, array $variables, ?string $parent_template_path, bool $relative, int $depth ): void {
 		if ( $depth >= 255 ) {
 			throw new OverflowException( 'Template rendering depth of 256 levels reached, possible circular reference when rendering secondary templates.' );
 		}
@@ -345,18 +343,13 @@ class TemplatingEngine {
 		}
 
 		$render_subtemplate_callbak =
-			fn( $sub_template_name, $sub_variables, $blocks, $relative)
-			=> $this->render_template_core( $sub_template_name, $sub_variables, $blocks, $template_path, $relative, $depth + 1 );
-		$context                    = new TemplateRenderingContext( $render_subtemplate_callbak, $template_path, $variables, $blocks );
+			fn( $sub_template_name, $sub_variables, $relative)
+			=> $this->render_template_core( $sub_template_name, $sub_variables, $template_path, $relative, $depth + 1 );
+		$context                    = new TemplateRenderingContext( $render_subtemplate_callbak, $template_path, $variables );
 
 		// "Execute" the template file, with the instance of TemplateRenderingContext seen as "$this" from within the template code.
 		$include_template_file = ( fn() => include $template_path )->bindTo( $context, $context );
 		$include_template_file();
-
-		$unclosed_block_name = $context->get_name_of_block_being_defined();
-		if ( ! is_null( $unclosed_block_name ) ) {
-			throw new Exception( "Unclosed block: $unclosed_block_name, rendering {$context->get_template_display_name()}" );
-		}
 	}
 
 	/**
