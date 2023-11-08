@@ -173,9 +173,16 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 */
 		do_action( 'woocommerce_before_main_content' );
 
-		while ( have_posts() ) :
+		$product_query = new \WP_Query(
+			array(
+				'post_type' => 'product',
+				'p'         => get_the_ID(),
+			)
+		);
 
-			the_post();
+		while ( $product_query->have_posts() ) :
+
+			$product_query->the_post();
 			wc_get_template_part( 'content', 'single-product' );
 
 		endwhile;
