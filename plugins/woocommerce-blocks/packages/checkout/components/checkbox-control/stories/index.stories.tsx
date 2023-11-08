@@ -9,7 +9,7 @@ import type { Story, Meta } from '@storybook/react';
 import CheckboxControl, { CheckboxControlProps } from '..';
 
 export default {
-	title: 'Checkout Components/CheckboxControl',
+	title: 'External Components/CheckboxControl',
 	component: CheckboxControl,
 	args: {
 		instanceId: 'my-checkbox-id',
