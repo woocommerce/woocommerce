@@ -207,7 +207,7 @@ class MiniCart extends AbstractBlock {
 	public function print_lazy_load_scripts() {
 		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
 
-		$num_dependencies = count( $script_data['dependencies'] );
+		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
 		$wp_scripts       = wp_scripts();
 
 		for ( $i = 0; $i < $num_dependencies; $i++ ) {
@@ -307,7 +307,7 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		if ( count( $script->deps ) ) {
+		if ( is_countable( $script->deps ) && count( $script->deps ) ) {
 			foreach ( $script->deps as $dep ) {
 				if ( ! array_key_exists( $dep, $this->scripts_to_lazy_load ) ) {
 					$dep_script = $this->get_script_from_handle( $dep );
@@ -453,7 +453,7 @@ class MiniCart extends AbstractBlock {
 
 		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
 		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'mini-cart' ), 'wp_template_part' );
-		if ( count( $templates_from_db ) > 0 ) {
+		if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
 			$template_slug_to_load = $templates_from_db[0]->theme;
 		} else {
 			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
