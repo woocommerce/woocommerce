@@ -286,7 +286,9 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = async ( context ) => {
+const redirectToAssemblerHub = async (
+	context: designWithAiStateMachineContext
+) => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
 	const iframe = document.createElement( 'iframe' );
 	iframe.classList.add( 'cys-fullscreen-iframe' );

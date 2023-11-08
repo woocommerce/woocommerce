@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
-import { recordEvent } from '@woocommerce/tracks';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
