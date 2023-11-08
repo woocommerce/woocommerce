@@ -6,7 +6,7 @@ import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { registerPlugin } from '@wordpress/plugins';
 import { getAdminLink } from '@woocommerce/settings';
 
-const useAppearanceClick = () => {
+export const useAppearanceClick = () => {
 	const onClick = () => {
 		window.location = getAdminLink(
 			'theme-install.php?browse=block-themes'
