@@ -31,8 +31,13 @@ import {
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	WCUser,
 } from '@woocommerce/data';
-import { initializeExPlat } from '@woocommerce/explat';
+import {
+	initializeExPlat,
+	loadExperimentAssignment,
+} from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
 import CurrencyFactory from '@woocommerce/currency';
@@ -99,6 +104,8 @@ export type BusinessInfoEvent = {
 		industry?: IndustryChoice;
 		storeLocation: CountryStateOption[ 'key' ];
 		geolocationOverruled: boolean;
+		isOptInMarketing: boolean;
+		storeEmailAddress: string;
 	};
 };
 
@@ -139,6 +146,8 @@ export type OnboardingProfile = {
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
 	is_store_country_set: boolean | null;
+	store_email?: string;
+	is_agree_marketing?: boolean;
 };
 
 export type PluginsPageSkippedEvent = {
@@ -195,6 +204,8 @@ export type CoreProfilerStateMachineContext = {
 	persistBusinessInfoRef?: ReturnType< typeof spawn >;
 	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
 	spawnGeolocationRef?: ReturnType< typeof spawn >;
+	emailMarketingExperimentAssignment: 'treatment' | 'control';
+	currentUserEmail: string | undefined;
 };
 
 const getAllowTrackingOption = async () =>
@@ -309,11 +320,51 @@ const handleOnboardingProfileOption = assign( {
 	},
 } );
 
+const getMarketingOptInExperimentAssignment = async () => {
+	return loadExperimentAssignment(
+		`woocommerce_core_profiler_email_marketing_opt_in_2023_Q4_V1`
+	);
+};
+
+const getCurrentUserEmail = async () => {
+	const currentUser: WCUser< 'email' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser?.email;
+};
+
+const assignCurrentUserEmail = assign( {
+	currentUserEmail: (
+		_context,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		if (
+			event.data &&
+			event.data.length > 0 &&
+			event.data !== 'wordpress@example.com' // wordpress default prefilled email address
+		) {
+			return event.data;
+		}
+		return undefined;
+	},
+} );
+
 const assignOnboardingProfile = assign( {
 	onboardingProfile: (
 		_context,
 		event: DoneInvokeEvent< OnboardingProfile | undefined >
 	) => event.data,
+} );
+
+const assignMarketingOptInExperimentAssignment = assign( {
+	emailMarketingExperimentAssignment: (
+		_context,
+		event: DoneInvokeEvent<
+			Awaited<
+				ReturnType< typeof getMarketingOptInExperimentAssignment >
+			>
+		>
+	) => event.data.variationName ?? 'control',
 } );
 
 const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
@@ -499,6 +550,11 @@ const updateBusinessInfo = async (
 			...refreshedOnboardingProfile,
 			is_store_country_set: true,
 			industry: [ event.payload.industry ],
+			is_agree_marketing: event.payload.isOptInMarketing,
+			store_email:
+				event.payload.storeEmailAddress.length > 0
+					? event.payload.storeEmailAddress
+					: null,
 		},
 	} );
 };
@@ -644,6 +700,8 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
+	assignMarketingOptInExperimentAssignment,
+	assignCurrentUserEmail,
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
@@ -657,6 +715,8 @@ const coreProfilerMachineServices = {
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
+	getMarketingOptInExperimentAssignment,
+	getCurrentUserEmail,
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
@@ -693,6 +753,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
+		emailMarketingExperimentAssignment: 'control',
+		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1026,6 +1088,45 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							},
 						},
+						marketingOptInExperiment: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getMarketingOptInExperimentAssignment',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignMarketingOptInExperimentAssignment',
+											],
+										},
+									},
+								},
+								done: { type: 'final' },
+							},
+						},
+						currentUserEmail: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCurrentUserEmail',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignCurrentUserEmail',
+											],
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
 					},
 					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
 					onDone: {
@@ -1039,14 +1140,17 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 					entry: [
 						{
-							type: 'recordTracksStepViewed',
+							type: 'recordTracksStepViewedBusinessInfo',
 							step: 'business_info',
 						},
 					],
 					on: {
 						BUSINESS_INFO_COMPLETED: {
 							target: 'postBusinessInfo',
-							actions: [ 'recordTracksBusinessInfoCompleted' ],
+							actions: [
+								'recordTracksBusinessInfoCompleted',
+								'recordTracksIsEmailChanged',
+							],
 						},
 					},
 				},

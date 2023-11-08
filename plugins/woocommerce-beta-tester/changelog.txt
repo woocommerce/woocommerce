@@ -1,5 +1,9 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2023-10-30 - version 2.2.5
+* Tweak - Add support for logging array property in track logger
+* Add - Add rest customize your store tool
+
 2023-08-23 - version 2.2.4
 * Patch - check for WC_ADMIN_APP constant before using it
 * Patch - Fix a bug where between WC installs the beta tester would crash trying to log.

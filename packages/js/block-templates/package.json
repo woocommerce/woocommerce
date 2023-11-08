@@ -28,8 +28,11 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@woocommerce/expression-evaluation": "workspace:*",
 		"@wordpress/block-editor": "^9.8.0",
-		"@wordpress/blocks": "^12.3.0"
+		"@wordpress/blocks": "^12.3.0",
+		"@wordpress/data": "wp-6.0",
+		"@wordpress/element": "wp-6.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
@@ -37,6 +40,7 @@
 		"@testing-library/jest-dom": "^5.16.2",
 		"@testing-library/react-hooks": "^8.0.1",
 		"@types/jest": "^27.4.1",
+		"@types/react": "^17.0.2",
 		"@types/testing-library__jest-dom": "^5.14.3",
 		"@types/wordpress__block-editor": "^7.0.0",
 		"@types/wordpress__blocks": "^11.0.7",
@@ -51,6 +55,8 @@
 		"jest-cli": "^27.5.1",
 		"postcss": "^8.4.7",
 		"postcss-loader": "^4.3.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.2.1",
 		"ts-jest": "^27.1.3",
@@ -73,5 +79,10 @@
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix"
+	},
+	"peerDependencies": {
+		"@types/react": "^17.0.2",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	}
 }

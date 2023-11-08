@@ -185,6 +185,7 @@
 				grid-template-columns: 2fr 1fr;
 			}
 			.woocommerce-marketplace__product-card__image {
+				border-bottom: 1px solid $gray-200;
 				grid-column-start: span 2;
 				overflow: hidden;
 				padding-top: 75%;

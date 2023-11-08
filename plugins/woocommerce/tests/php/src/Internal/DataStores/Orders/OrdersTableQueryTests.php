@@ -23,6 +23,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( true );
@@ -33,6 +34,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 

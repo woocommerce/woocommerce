@@ -15,9 +15,6 @@ import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 
-// @ts-expect-error Missing type in core-data.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
-
 /**
  * Internal dependencies
  */
@@ -29,15 +26,16 @@ import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
+import BlockPatternList from '../block-pattern-list';
 
 const SUPPORTED_FOOTER_PATTERNS = [
-	'woocommerce-blocks/footer-simple-menu-and-cart',
+	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-with-3-menus',
 	'woocommerce-blocks/footer-large',
 ];
 
 export const SidebarNavigationScreenFooter = () => {
-	useEditorScroll( {
+	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
 	} );
@@ -81,7 +79,6 @@ export const SidebarNavigationScreenFooter = () => {
 			blocks[ blocks.length - 1 ]
 		);
 		setSelectedPattern( currentSelectedPattern );
-
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, footerPatterns ] );
 
@@ -91,8 +88,9 @@ export const SidebarNavigationScreenFooter = () => {
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {
 				selection: {},
 			} );
+			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
 	return (
@@ -141,8 +139,8 @@ export const SidebarNavigationScreenFooter = () => {
 								onClickPattern={ onClickFooterPattern }
 								label={ 'Footers' }
 								orientation="vertical"
-								category={ 'footer' }
 								isDraggable={ false }
+								onHover={ () => {} }
 								showTitlesAsTooltip={ true }
 							/>
 						) }

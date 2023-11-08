@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -104,13 +105,7 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-		$log_handler = Constants::get_constant( 'WC_LOG_HANDLER' );
-
-		if ( 'WC_Log_Handler_DB' === $log_handler ) {
-			self::status_logs_db();
-		} else {
-			self::status_logs_file();
-		}
+		wc_get_container()->get( LoggingPageController::class )->render();
 	}
 
 	/**

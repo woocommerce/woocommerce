@@ -26,8 +26,13 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { useHomeTemplates } from '../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
+import { useEditorScroll } from '../hooks/use-editor-scroll';
 
 export const SidebarNavigationScreenHomepage = () => {
+	const { scroll } = useEditorScroll( {
+		editorSelector: '.woocommerce-customize-store__block-editor iframe',
+		scrollDirection: 'top',
+	} );
 	const { isLoading, homeTemplates } = useHomeTemplates();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
@@ -40,8 +45,9 @@ export const SidebarNavigationScreenHomepage = () => {
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
+			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
 	const homePatterns = useMemo( () => {
@@ -82,6 +88,7 @@ export const SidebarNavigationScreenHomepage = () => {
 		} );
 
 		setSelectedPattern( _currentSelectedPattern );
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns ] );
 
@@ -130,7 +137,7 @@ export const SidebarNavigationScreenHomepage = () => {
 								orientation="vertical"
 								category={ 'homepage' }
 								isDraggable={ false }
-								showTitlesAsTooltip={ true }
+								showTitlesAsTooltip={ false }
 							/>
 						) }
 					</div>

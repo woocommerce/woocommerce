@@ -16,7 +16,6 @@ import {
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from './use-product-attributes';
-import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../constants';
 
 async function getDefaultVariationValues(
 	productId: number
@@ -35,10 +34,8 @@ async function getDefaultVariationValues(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).getProductVariations< ProductVariation[] >( {
 			product_id: productId,
-			page: 1,
-			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
-			order: 'asc',
-			orderby: 'menu_order',
+			per_page: 1,
+			has_price: true,
 		} );
 		if ( products && products.length > 0 && products[ 0 ].regular_price ) {
 			return {
@@ -63,8 +60,10 @@ export function useProductVariationsHelper() {
 	);
 	const {
 		generateProductVariations: _generateProductVariations,
-		invalidateResolutionForStoreSelector,
+		invalidateResolutionForStore,
 	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	const { invalidateResolution: coreInvalidateResolution } =
+		useDispatch( 'core' );
 
 	const [ isGenerating, setIsGenerating ] = useState( false );
 
@@ -75,7 +74,7 @@ export function useProductVariationsHelper() {
 		) => {
 			setIsGenerating( true );
 
-			const { status: lastStatus } = await resolveSelect(
+			const { status: lastStatus, variations } = await resolveSelect(
 				'core'
 			).getEditedEntityRecord< Product >(
 				'postType',
@@ -108,12 +107,21 @@ export function useProductVariationsHelper() {
 				}
 			)
 				.then( () => {
-					invalidateResolutionForStoreSelector(
-						'getProductVariations'
-					);
-					return invalidateResolutionForStoreSelector(
-						'getProductVariationsTotalCount'
-					);
+					if ( variations && variations.length > 0 ) {
+						for ( const variationId of variations ) {
+							coreInvalidateResolution( 'getEntityRecord', [
+								'postType',
+								'product_variation',
+								variationId,
+							] );
+						}
+					}
+					coreInvalidateResolution( 'getEntityRecord', [
+						'postType',
+						'product',
+						productId,
+					] );
+					return invalidateResolutionForStore();
 				} )
 				.finally( () => {
 					setIsGenerating( false );

@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip =
+	API_BASE_URL !== undefined && ! API_BASE_URL.includes( 'localhost' );
+
 /**
  * Tests for the WooCommerce API.
  *
@@ -445,7 +447,7 @@ test.describe( 'System Status API tests', () => {
 					has_woocommerce_support: expect.any( Boolean ),
 					has_woocommerce_file: expect.any( Boolean ),
 					has_outdated_templates: expect.any( Boolean ),
-					overrides: [],
+					overrides: expect.any( Array ),
 					parent_name: expect.any( String ),
 					parent_version: expect.any( String ),
 					parent_version_latest: expect.any( String ),

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove iframe scrollbar when viewing CYS intro iframe

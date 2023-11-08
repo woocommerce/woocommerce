@@ -1,6 +1,7 @@
 @import "./downloads-menu/style.scss";
 @import "./media-library-menu-item/style.scss";
 @import "./insert-url-menu-item/style.scss";
+@import "./edit-downloads-modal/style.scss";
 
 $fixed-section-height: 224px;
 
@@ -9,6 +10,7 @@ $fixed-section-height: 224px;
 		display: flex;
 		justify-content: flex-end;
 		margin-bottom: $grid-unit-30;
+		gap: $grid-unit;
 	}
 
 	&__body {

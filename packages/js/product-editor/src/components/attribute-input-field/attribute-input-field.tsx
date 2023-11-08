@@ -178,6 +178,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					onChange( {
 						id: attribute.id,
 						name: attribute.name,
+						slug: attribute.slug as string,
 						options: [],
 					} );
 				}

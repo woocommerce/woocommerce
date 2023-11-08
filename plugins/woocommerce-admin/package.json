@@ -53,6 +53,7 @@
 		"@automattic/explat-client": "^0.0.3",
 		"@automattic/explat-client-react-helpers": "^0.0.4",
 		"@automattic/interpolate-components": "^1.2.0",
+		"@automattic/components": "^2.0.1",
 		"@react-spring/web": "^9.4.3",
 		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/api": "^0.2.0",

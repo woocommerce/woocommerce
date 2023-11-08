@@ -70,6 +70,45 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
+		title: 'Albert Sans + Lora',
+		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Albert Sans',
+							slug: 'albert-sans',
+						},
+						{
+							fontFamily: 'Lora',
+							slug: 'lora',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--albert-sans)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--lora)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
 		title: 'Bodoni Moda + Overpass',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
@@ -194,9 +233,119 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
+		title: 'Cormorant + Work Sans',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Cormorant',
+							slug: 'cormorant',
+						},
+						{
+							fontFamily: 'Work Sans',
+							slug: 'work-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--cormorant)',
+						fontStyle: 'normal',
+						fontWeight: '500',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--work-sans)',
+			},
+		},
+	},
+	{
+		title: 'DM Sans + IBM Plex Mono',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'DM Sans',
+							slug: 'dm-sans',
+						},
+						{
+							fontFamily: 'IBM Plex Mono',
+							slug: 'ibm-plex-mono',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--dm-sans)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--ibm-plex-mono)',
+				fontSize: 'var(--wp--preset--font-size--small)',
+				fontStyle: 'normal',
+				fontWeight: '300',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
+		title: 'Fraunces + Libre Franklin',
+		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Fraunces',
+							slug: 'fraunces',
+						},
+						{
+							fontFamily: 'Libre Franklin',
+							slug: 'libre-franklin',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--fraunces)',
+						fontStyle: 'normal',
+						fontWeight: '500',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--libre-franklin)',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
 		title: 'Libre Baskerville + DM Sans',
 		version: 2,
-		lookAndFeel: [ 'Classic', 'Bold' ] as Look[],
+		lookAndFeel: [] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -257,7 +406,7 @@ export const FONT_PAIRINGS = [
 	{
 		title: 'Libre Franklin + EB Garamond',
 		version: 2,
-		lookAndFeel: [ 'Contemporary', 'Classic', 'Bold' ] as Look[],
+		lookAndFeel: [ 'Classic' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -383,6 +532,40 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
+		title: 'Newsreader + Newsreader',
+		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Newsreader',
+							slug: 'newsreader',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--newsreader)',
+						fontStyle: 'normal',
+						fontWeight: '400',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--newsreader)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
 		title: 'Playfair Display + Fira Sans',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
@@ -448,9 +631,79 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
-		title: 'Rubik + Inter',
+		title: 'Plus Jakarta Sans + Plus Jakarta Sans',
 		version: 2,
 		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Plus Jakarta Sans',
+							slug: 'plus-jakarta-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--plus-jakarta-sans)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--plus-jakarta-sans)',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
+		title: 'Raleway + Cormorant',
+		version: 2,
+		lookAndFeel: [ 'Classic', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Raleway',
+							slug: 'raleway',
+						},
+						{
+							fontFamily: 'Cormorant',
+							slug: 'cormorant',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--raleway)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--cormorant)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
+		title: 'Rubik + Inter',
+		version: 2,
+		lookAndFeel: [ 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
@@ -507,9 +760,40 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
+		title: 'Rubik + Rubik',
+		version: 2,
+		lookAndFeel: [ 'Contemporary' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Rubik',
+							slug: 'rubik',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--rubik)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--rubik)',
+				fontWeight: '400',
+				lineHeight: '1.67',
+			},
+		},
+	},
+	{
 		title: 'Space Mono + Roboto',
 		version: 2,
-		lookAndFeel: [ 'Contemporary', 'Classic' ] as Look[],
+		lookAndFeel: [] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
