@@ -20,5 +20,6 @@ export * from './utils';
  * Hooks
  */
 export * from './hooks';
+export { PostTypeContext } from './contexts/post-type-context';
 export { useValidation, useValidations } from './contexts/validation-context';
 export * from './contexts/validation-context/types';

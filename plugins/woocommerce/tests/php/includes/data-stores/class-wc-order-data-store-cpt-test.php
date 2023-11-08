@@ -24,6 +24,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		OrderHelper::toggle_cot_feature_and_usage( false );
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -33,6 +34,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 

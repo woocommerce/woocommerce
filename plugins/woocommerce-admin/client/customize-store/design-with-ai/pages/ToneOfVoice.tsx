@@ -41,7 +41,7 @@ export const ToneOfVoice = ( {
 			title: __( 'Neutral', 'woocommerce' ),
 			key: 'Neutral' as const,
 			subtitle: __(
-				'Impartial tone with casual expressions without slang.',
+				'Impartial tone with casual expressions and no slang.',
 				'woocommerce'
 			),
 		},
