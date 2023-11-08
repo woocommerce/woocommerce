@@ -1243,7 +1243,7 @@ return array(
 		'MZI'   => __( 'Inhambane', 'woocommerce' ),
 		'MZB'   => __( 'Manica', 'woocommerce' ),
 		'MZL'   => __( 'Maputo Province', 'woocommerce' ),
-		'MZMPM' => __( 'Maputo', 'woocommerce' ),
+		'MZMPM' => __( 'Maputo City', 'woocommerce' ),
 		'MZN'   => __( 'Nampula', 'woocommerce' ),
 		'MZA'   => __( 'Niassa', 'woocommerce' ),
 		'MZS'   => __( 'Sofala', 'woocommerce' ),
