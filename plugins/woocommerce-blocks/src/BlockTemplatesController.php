@@ -183,10 +183,22 @@ class BlockTemplatesController {
 	 * @return object|null
 	 */
 	public function get_block_template_fallback( $template, $id, $template_type ) {
-		$template_name_parts  = explode( '//', $id );
-		list( $theme, $slug ) = $template_name_parts;
+		// Add protection against invalid ids.
+		if ( ! is_string( $id ) || ! strstr( $id, '//' ) ) {
+			return null;
+		}
+		// Add protection against invalid template types.
+		if (
+			'wp_template' !== $template_type &&
+			'wp_template_part' !== $template_type
+		) {
+			return null;
+		}
+		$template_name_parts = explode( '//', $id );
+		$theme               = $template_name_parts[0] ?? '';
+		$slug                = $template_name_parts[1] ?? '';
 
-		if ( ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
 			return null;
 		}
 
