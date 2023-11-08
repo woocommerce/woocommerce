@@ -38,14 +38,14 @@ class AbstractBlock implements BlockInterface {
 	 *
 	 * @var array
 	 */
-	private $attributes = [];
+	private $attributes = array();
 
 	/**
 	 * The block hide conditions.
 	 *
 	 * @var array
 	 */
-	private $hide_conditions = [];
+	private $hide_conditions = array();
 
 	/**
 	 * The block hide conditions counter.
@@ -53,6 +53,20 @@ class AbstractBlock implements BlockInterface {
 	 * @var int
 	 */
 	private $hide_conditions_counter = 0;
+
+	/**
+	 * The block disable conditions.
+	 *
+	 * @var array
+	 */
+	private $disable_conditions = array();
+
+	/**
+	 * The block disable conditions counter.
+	 *
+	 * @var int
+	 */
+	private $disable_conditions_counter = 0;
 
 	/**
 	 * The block template that this block belongs to.
@@ -228,9 +242,9 @@ class AbstractBlock implements BlockInterface {
 
 		// Storing the expression in an array to allow for future expansion
 		// (such as adding the plugin that added the condition).
-		$this->hide_conditions[ $key ] = [
+		$this->hide_conditions[ $key ] = array(
 			'expression' => $expression,
-		];
+		);
 
 		return $key;
 	}
@@ -249,5 +263,42 @@ class AbstractBlock implements BlockInterface {
 	 */
 	public function get_hide_conditions(): array {
 		return $this->hide_conditions;
+	}
+
+	/**
+	 * Add a disable condition to the block.
+	 *
+	 * The disable condition is a JavaScript-like expression that will be evaluated on the client to determine if the block should be hidden.
+	 * See [@woocommerce/expression-evaluation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/expression-evaluation/README.md) for more details.
+	 *
+	 * @param string $expression An expression, which if true, will disable the block.
+	 */
+	public function add_disable_condition( string $expression ): string {
+		$key = 'k' . $this->disable_conditions_counter;
+		$this->disable_conditions_counter++;
+
+		// Storing the expression in an array to allow for future expansion
+		// (such as adding the plugin that added the condition).
+		$this->disable_conditions[ $key ] = array(
+			'expression' => $expression,
+		);
+
+		return $key;
+	}
+
+	/**
+	 * Remove a disable condition from the block.
+	 *
+	 * @param string $key The key of the disable condition to remove.
+	 */
+	public function remove_disable_condition( string $key ) {
+		unset( $this->disable_conditions[ $key ] );
+	}
+
+	/**
+	 * Get the disable conditions of the block.
+	 */
+	public function get_disable_conditions(): array {
+		return $this->disable_conditions;
 	}
 }
