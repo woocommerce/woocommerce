@@ -151,10 +151,13 @@ class TemplatingRestController {
 		try {
 			return rest_ensure_response( $this->$method_name( $request ) );
 		} catch ( Exception $ex ) {
+			wc_get_logger()->error( "TemplatingRestController: when executing method $method_name: {$ex->getMessage()}" );
+
 			$data = array( 'status' => 500 );
 			if ( current_user_can( 'manage_woocommerce' ) ) {
 				$data['exception_message'] = $ex->getMessage();
 			}
+
 			return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 		}
 	}

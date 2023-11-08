@@ -105,7 +105,6 @@ class TemplatingEngine {
 	 */
 	public function render_template( string $template_name, array $variables, ?array $metadata = null ): ?string {
 		global $wpdb;
-		global $wp_filesystem;
 
 		$render_to_file = ! is_null( $metadata );
 		$render_ok      = false;
@@ -178,7 +177,9 @@ class TemplatingEngine {
 			$rendered_files_directory  = $this->get_rendered_files_directory();
 			$rendered_files_directory .= '/' . substr( $expiration_date, 0, 7 );
 			if ( ! is_dir( $rendered_files_directory ) ) {
-				mkdir( $rendered_files_directory, 0777, true );
+				if ( ! wp_mkdir_p( $rendered_files_directory ) ) {
+					throw new Exception( "Can't create directory: $rendered_files_directory" );
+				}
 			}
 			$filepath = $rendered_files_directory . '/' . $filename;
 
@@ -212,7 +213,7 @@ class TemplatingEngine {
 				ob_end_clean();
 			}
 			if ( ! $render_ok && $render_to_file ) {
-				unlink( $filepath );
+				wp_delete_file( $filepath );
 			}
 		}
 		// phpcs:enable WordPress.WP.AlternativeFunctions
@@ -257,7 +258,7 @@ class TemplatingEngine {
 		}
 
 		if ( false === $query_ok ) {
-			unlink( $filepath );
+			wp_delete_file( $filepath );
 			throw new Exception( "Error inserting rendered template info in the database: $db_error" );
 		}
 
@@ -529,7 +530,7 @@ class TemplatingEngine {
 		}
 
 		if ( is_file( $file_info['file_path'] ) ) {
-			unlink( $file_info['file_path'] );
+			wp_delete_file( $file_info['file_path'] );
 		}
 
 		try {
@@ -618,7 +619,7 @@ class TemplatingEngine {
 				$limit_reached   = true;
 				$files_to_delete = array_slice( $files_to_delete, 0, $remaining_limit );
 			}
-			array_map( 'unlink', $files_to_delete );
+			array_map( 'wp_delete_file', $files_to_delete );
 			$remaining_limit -= count( $files_to_delete );
 			$this->delete_directory_if_not_empty( $full_dir_path );
 
