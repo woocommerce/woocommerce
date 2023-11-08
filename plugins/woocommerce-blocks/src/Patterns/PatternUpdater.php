@@ -11,11 +11,6 @@ use WP_Error;
 class PatternUpdater {
 
 	/**
-	 * The patterns content option name.
-	 */
-	const WC_BLOCKS_PATTERNS_CONTENT = 'wc_blocks_patterns_content';
-
-	/**
 	 * Creates the patterns content for the given vertical.
 	 *
 	 * @param Connection      $ai_connection The AI connection.
@@ -42,13 +37,15 @@ class PatternUpdater {
 			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
 		}
 
-		if ( get_option( self::WC_BLOCKS_PATTERNS_CONTENT ) === $patterns_with_images_and_content ) {
+		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
+
+		if ( isset( $patterns_ai_data_post->post_content ) && json_decode( $patterns_ai_data_post->post_content ) === $patterns_with_images_and_content ) {
 			return true;
 		}
 
-		$updated_content = update_option( self::WC_BLOCKS_PATTERNS_CONTENT, $patterns_with_images_and_content );
+		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $patterns_with_images_and_content );
 
-		if ( ! $updated_content ) {
+		if ( is_wp_error( $updated_content ) ) {
 			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
 		}
 
