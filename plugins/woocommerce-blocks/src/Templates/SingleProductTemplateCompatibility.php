@@ -425,7 +425,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	private static function group_blocks( $parsed_blocks ) {
 		return array_reduce(
 			$parsed_blocks,
-			function( $carry, $block ) {
+			function( array $carry, array $block ) {
 				if ( 'core/template-part' === $block['blockName'] ) {
 					$carry[] = array( $block );
 					return $carry;
