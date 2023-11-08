@@ -2,7 +2,7 @@ export const HOMEPAGE_TEMPLATES = {
 	template1: {
 		blocks: [
 			// Header
-			'woocommerce-blocks/header-centered-menu-with-search',
+			'woocommerce-blocks/header-centered-menu',
 
 			// Body
 			'woocommerce-blocks/hero-product-split',
@@ -57,7 +57,7 @@ export const HOMEPAGE_TEMPLATES = {
 	template3: {
 		blocks: [
 			// Header
-			'woocommerce-blocks/header-centered-menu-with-search',
+			'woocommerce-blocks/header-centered-menu',
 
 			// Body
 			'woocommerce-blocks/hero-product-split',
