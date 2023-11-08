@@ -1,12 +1,19 @@
 /**
  * External dependencies
  */
-import { Table, TablePlaceholder } from '@woocommerce/components';
+import { EmptyTable, Table, TablePlaceholder } from '@woocommerce/components';
 import {
 	TableHeader,
 	TableRow,
 } from '@woocommerce/components/build-types/table/types';
+import { getNewPath } from '@woocommerce/navigation';
+import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { MARKETPLACE_PATH } from '../../constants';
 
 const tableHeadersDefault = [
 	{
@@ -70,6 +77,26 @@ export function InstalledSubscriptionsTable( props: {
 			label: __( 'Actions', 'woocommerce' ),
 		},
 	];
+
+	if ( ! props.rows || props.rows.length === 0 ) {
+		const marketplaceBrowseURL = getNewPath( {}, MARKETPLACE_PATH, {} );
+		const noInstalledSubscriptionsHTML = createInterpolateElement(
+			__(
+				'No extensions or themes installed. <a>Browse the Marketplace</a>',
+				'woocommerce'
+			),
+			{
+				p: <p />,
+				a: <a href={ marketplaceBrowseURL }>your account</a>,
+			}
+		);
+
+		return (
+			<EmptyTable numberOfRows={ 4 }>
+				{ noInstalledSubscriptionsHTML }
+			</EmptyTable>
+		);
+	}
 
 	return (
 		<SubscriptionsTable
