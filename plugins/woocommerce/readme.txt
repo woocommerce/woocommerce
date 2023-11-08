@@ -163,11 +163,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.2.1 2023-10-16 =
+= 8.2.2 2023-11-08 =
 
 **WooCommerce**
 
-* Fix - Prevent global attribute terms from being automatically selected [#40729](https://github.com/woocommerce/woocommerce/pull/40729)
+* Fix - Update WooCommerce Blocks to 11.1.3 [#41291](https://github.com/woocommerce/woocommerce/pull/41291)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
