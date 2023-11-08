@@ -128,6 +128,7 @@
 		"@storybook/addon-styling-webpack": "^0.0.5",
 		"@storybook/addons": "7.5.2",
 		"@storybook/client-api": "7.5.2",
+		"@storybook/preview-api": "^7.5.3",
 		"@storybook/react": "7.5.2",
 		"@storybook/react-webpack5": "^7.5.2",
 		"@testing-library/dom": "9.3.3",

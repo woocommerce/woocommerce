@@ -14,7 +14,7 @@ import {
 import Fees, { TotalsFeesProps } from '..';
 
 export default {
-	title: 'Checkout Components/Totals/Fees',
+	title: 'External Components/Totals/Fees',
 	component: Fees,
 	argTypes: {
 		currency: currencyControl,

@@ -10,7 +10,7 @@ import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 import Item, { TotalsItemProps } from '..';
 
 export default {
-	title: 'Checkout Components/Totals/Item',
+	title: 'External Components/Totals/Item',
 	component: Item,
 	argTypes: {
 		currency: currencyControl,
