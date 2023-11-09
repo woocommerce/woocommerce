@@ -138,11 +138,12 @@ class ProductGallery extends AbstractBlock {
 				wp_json_encode(
 					array(
 						'woocommerce' => array(
-							'selectedImage'    => $product->get_image_id(),
-							'visibleImagesIds' => ProductGalleryUtils::get_product_gallery_image_ids( $product, $number_of_thumbnails, true ),
+							'selectedImage'          => $product->get_image_id(),
+							'visibleImagesIds'       => ProductGalleryUtils::get_product_gallery_image_ids( $product, $number_of_thumbnails, true ),
+							'dialogVisibleImagesIds' => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, false ),
 							'mouseIsOverPreviousOrNextButton' => false,
-							'isDialogOpen'     => false,
-							'productId'        => $product_id,
+							'isDialogOpen'           => false,
+							'productId'              => $product_id,
 						),
 					)
 				)
