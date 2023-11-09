@@ -105,21 +105,18 @@ class TemplatingRestController {
 			$this->route_namespace,
 			'/templates/(?P<id>[\d]+)',
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => fn( $request ) => $this->run( 'get_template', $request ),
-				'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template_info' ),
-				'args'                => $this->get_args_for_get_or_delete_template(),
-			)
-		);
-
-		register_rest_route(
-			$this->route_namespace,
-			'/templates/(?P<id>[\d]+)',
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => fn( $request ) => $this->run( 'delete_template', $request ),
-				'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_rendered_template' ),
-				'args'                => $this->get_args_for_get_or_delete_template(),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( 'get_template', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template_info' ),
+					'args'                => $this->get_args_for_get_or_delete_template(),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn( $request ) => $this->run( 'delete_template', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_rendered_template' ),
+					'args'                => $this->get_args_for_get_or_delete_template(),
+				),
 			)
 		);
 
