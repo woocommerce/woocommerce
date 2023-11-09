@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -68,6 +69,20 @@ export const LookAndFeel = ( {
 			/>
 			<CloseButton
 				onClick={ () => {
+					if (
+						context.lookAndFeel.choice !== '' &&
+						context.lookAndFeel.choice !== look
+					) {
+						recordEvent(
+							'customize_your_store_ai_wizard_changed_ai_option',
+							{
+								step: 'look-and-feel',
+								ai_option: context.lookAndFeel.choice,
+								user_choice: look,
+							}
+						);
+					}
+
 					sendEvent( {
 						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 						payload: { step: 'look-and-feel' },
