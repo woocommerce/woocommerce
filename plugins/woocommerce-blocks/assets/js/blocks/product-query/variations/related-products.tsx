@@ -57,6 +57,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		{
 			level: 2,
 			content: __( 'Related products', 'woo-gutenberg-products-block' ),
+			style: { spacing: { margin: { top: '1rem', bottom: '1rem' } } },
 		},
 	],
 	[
