@@ -107,15 +107,15 @@ class TemplatingRestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( 'get_template', $request ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template_info' ),
-					'args'                => $this->get_args_for_get_or_delete_template(),
+					'callback'            => fn( $request ) => $this->run( 'get_rendered_template_info', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template' ),
+					'args'                => $this->get_args_for_get_rendered_template_info(),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => fn( $request ) => $this->run( 'delete_template', $request ),
+					'callback'            => fn( $request ) => $this->run( 'delete_rendered_template', $request ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_rendered_template' ),
-					'args'                => $this->get_args_for_get_or_delete_template(),
+					'args'                => $this->get_args_for_get_contents_or_delete_rendered_template(),
 				),
 			)
 		);
@@ -129,6 +129,19 @@ class TemplatingRestController {
 					'callback'            => fn( $request ) => $this->run( 'render_template', $request ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'create_rendered_template' ),
 					'args'                => $this->get_args_for_render_template(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->route_namespace,
+			'/templates/contents/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( 'get_rendered_template_contents', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template' ),
+					'args'                => $this->get_args_for_get_contents_or_delete_rendered_template(),
 				),
 			)
 		);
@@ -189,13 +202,25 @@ class TemplatingRestController {
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return WP_Error|array The response to send back to the client.
 	 */
-	private function get_template( WP_REST_Request $request ) {
+	private function get_rendered_template_info( WP_REST_Request $request ) {
 		$rendered_template_info = $this->templating_engine->get_rendered_file_by_id( $request->get_param( 'id' ), $request->get_param( 'include_metadata' ) );
 		if ( is_null( $rendered_template_info ) ) {
 			return new WP_Error( 'woocommerce_rest_not_found', __( 'Template not found', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $this->adjust_rendered_template_info_for_response( $rendered_template_info );
+	}
+
+	/**
+	 * Serve the contents of a rendered file, exactly in the same way as 'handle_parse_request',
+	 * with the difference that this endpoint (that undergoes authentication and capability checks)
+	 * works even for files that don't have 'is_public' set to true.
+	 *
+	 * @param WP_REST_Request $request The incoming HTTP REST request.
+	 */
+	private function get_rendered_template_contents( WP_REST_Request $request ) {
+		$file_id = $request->get_param( 'id' );
+		$this->serve_file_contents_core( $file_id, null, true );
 	}
 
 	/**
@@ -231,7 +256,7 @@ class TemplatingRestController {
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return array The response to send back to the client.
 	 */
-	private function delete_template( WP_REST_Request $request ): array {
+	private function delete_rendered_template( WP_REST_Request $request ): array {
 		$deleted = $this->templating_engine->delete_rendered_file_by_id( $request->get_param( 'id' ) );
 		return array( 'deleted' => $deleted );
 	}
@@ -296,9 +321,25 @@ class TemplatingRestController {
 			return;
 		}
 
+		$this->serve_file_contents_core( null, $template_file_name, false );
+	}
+
+	/**
+	 * Core method to serve the contents of a rendered file.
+	 * It expects that exactly one of $file_id or $file_name will be non-null.
+	 *
+	 * @param int|null    $file_id Rendered file id.
+	 * @param string|null $file_name Rendered file name.
+	 * @param bool        $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated rendering endpoint.
+	 */
+	private function serve_file_contents_core( ?int $file_id, ?string $file_name, bool $is_json_rest_api_request ) {
 		try {
-			$rendered_template_info = $this->templating_engine->get_rendered_file_by_name( $template_file_name, true );
-			if ( is_null( $rendered_template_info ) || $rendered_template_info['has_expired'] || ! $rendered_template_info['is_public'] ) {
+			$rendered_template_info =
+				is_null( $file_id ) ?
+				$this->templating_engine->get_rendered_file_by_name( $file_name, true ) :
+				$this->templating_engine->get_rendered_file_by_id( $file_id, true );
+
+			if ( is_null( $rendered_template_info ) || $rendered_template_info['has_expired'] || ( ! $is_json_rest_api_request && ! $rendered_template_info['is_public'] ) ) {
 				status_header( 404 );
 				exit;
 			}
@@ -315,7 +356,7 @@ class TemplatingRestController {
 
 			$file_handle = fopen( $rendered_file_path, 'r' );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
+			wc_get_logger()->error( "Error serving rendered template {($file_id ?? $file_name)}: {$e->getMessage()}" );
 			status_header( 500 );
 			exit;
 		}
@@ -339,7 +380,7 @@ class TemplatingRestController {
 			 */
 			do_action( 'woocommerce_rendered_template_served', $rendered_template_info );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template $template_file_name: {$e->getMessage()}" );
+			wc_get_logger()->error( "Error serving rendered template {$rendered_template_info['file_name']}: {$e->getMessage()}" );
 			// We can't change the response status code at this point.
 		} finally {
 			fclose( $file_handle );
@@ -350,11 +391,11 @@ class TemplatingRestController {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
 
 	/**
-	 * Get a description of the arguments accepted by the GET and DELETE /templates endpoints.
+	 * Get a description of the arguments accepted by the GET /templates endpoint.
 	 *
-	 * @return array A description of the arguments accepted by the GET and DELETE /templates endpoints.
+	 * @return array A description of the arguments accepted by the GET /templates endpoint.
 	 */
-	private function get_args_for_get_or_delete_template() {
+	private function get_args_for_get_rendered_template_info(): array {
 		return array(
 			'id'               => array(
 				'description' => __( 'Unique identifier of the template.', 'woocommerce' ),
@@ -370,11 +411,25 @@ class TemplatingRestController {
 	}
 
 	/**
+	 * Get a description of the arguments accepted by the GET /templates/contents and DELETE /templates endpoints.
+	 *
+	 * @return array A description of the arguments accepted by the GET /templates/contents and DELETE /templates endpoints.
+	 */
+	private function get_args_for_get_contents_or_delete_rendered_template(): array {
+		return array(
+			'id' => array(
+				'description' => __( 'Unique identifier of the template.', 'woocommerce' ),
+				'type'        => 'integer',
+			),
+		);
+	}
+
+	/**
 	 * Get a description of the arguments accepted by the POST /templates/render endpoint.
 	 *
 	 * @return array A description of the arguments accepted by the POST /templates/render endpoint.
 	 */
-	private function get_args_for_render_template() {
+	private function get_args_for_render_template(): array {
 		return array(
 			'template_name'      => array(
 				'required'    => true,

@@ -1766,7 +1766,7 @@ $templating_engine_schema;
 		);
 
 		$capabilities['templates'] = array(
-			'read_rendered_template_info',
+			'read_rendered_template',
 			'create_rendered_template',
 			'delete_rendered_template'
 		);
