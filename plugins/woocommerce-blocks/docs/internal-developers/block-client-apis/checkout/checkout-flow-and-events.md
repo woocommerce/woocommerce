@@ -4,13 +4,14 @@
 
 -   [General Concepts](#general-concepts)
     -   [Tracking flow through status](#tracking-flow-through-status)
-    -   [Checkout Data Store Status](#checkout-data-store-status)
-        -   [Special States:](#special-states)
+        -   [Checkout Data Store Status](#checkout-data-store-status)
+        -   [Special States](#special-states)
     -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
     -   [Payment Method Data Store Status](#payment-method-data-store-status)
     -   [Emitting Events](#emitting-events)
     -   [`onCheckoutValidation`](#oncheckoutvalidation)
-    -   [`onPaymentProcessing`](#onpaymentprocessing)
+    -   [~~`onPaymentProcessing`~~](#onpaymentprocessing)
+    -   [`onPaymentSetup`](#onpaymentsetup)
         -   [Success](#success)
         -   [Fail](#fail)
         -   [Error](#error)
@@ -252,9 +253,13 @@ const PaymentMethodComponent = ( { eventRegistration } ) => {
 };
 ```
 
-### `onPaymentProcessing`
+### ~~`onPaymentProcessing`~~
 
-This event emitter is fired when the payment method context status is `PROCESSING` and that status is set when the checkout status is `PROCESSING`, checkout `hasError` is false, checkout is not calculating, and the current payment status is not `FINISHED`.
+This is now deprecated and replaced by the `onPaymentSetup` event emitter.
+
+### `onPaymentSetup`
+
+This event emitter was fired when the payment method context status is `PROCESSING` and that status is set when the checkout status is `PROCESSING`, checkout `hasError` is false, checkout is not calculating, and the current payment status is not `FINISHED`.
 
 This event emitter will execute through each registered observer (passing in nothing as an argument) _until_ an observer returns a non-truthy value at which point it will _abort_ further execution of registered observers.
 
@@ -271,10 +276,10 @@ const successResponse = { type: 'success' };
 When a success response is returned, the payment method context status will be changed to `SUCCESS`. In addition, including any of the additional properties will result in extra actions:
 
 -   `paymentMethodData`: The contents of this object will be included as the value for `payment_data` when checkout sends a request to the checkout endpoint for processing the order. This is useful if a payment method does additional server side processing.
--   `billingData`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../../assets/js/types/type-defs/billing.js).
--   `shippingData`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/type-defs/cart.js#L20-L32).
+-   `billingAddress`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../../assets/js/settings/shared/default-address-fields.ts).
+-   `shippingAddress`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../../assets/js/settings/shared/default-address-fields.ts).
 
-If `billingData` or `shippingData` properties aren't in the response object, then the state for the data is left alone.
+If `billingAddress` or `shippingAddress` properties aren't in the response object, then the state for the data is left alone.
 
 #### Fail
 
@@ -289,7 +294,7 @@ When a fail response is returned by an observer, the payment method context stat
 -   `message`: The string provided here will be set as an error notice in the checkout.
 -   `messageContext`: If provided, this will target the given area for the error notice (this is where `noticeContexts` mentioned earlier come in to play). Otherwise the notice will be added to the `noticeContexts.PAYMENTS` area.
 -   `paymentMethodData`: (same as for success responses).
--   `billingData`: (same as for success responses).
+-   `billingAddress`: (same as for success responses).
 
 #### Error
 
@@ -319,11 +324,11 @@ import { usePaymentEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onPaymentProcessing } = usePaymentEventsContext();
+	const { onPaymentSetup } = usePaymentEventsContext();
 	useEffect( () => {
-		const unsubscribe = onPaymentProcessing( () => true );
+		const unsubscribe = onPaymentSetup( () => true );
 		return unsubscribe;
-	}, [ onPaymentProcessing ] );
+	}, [ onPaymentSetup ] );
 	return null;
 };
 ```
@@ -334,11 +339,11 @@ _For registered payment method components:_
 const { useEffect } = window.wp.element;
 
 const PaymentMethodComponent = ( { eventRegistration } ) => {
-	const { onPaymentMethodProcessing } = eventRegistration;
+	const { onPaymentSetup } = eventRegistration;
 	useEffect( () => {
-		const unsubscribe = onPaymentMethodProcessing( () => true );
+		const unsubscribe = onPaymentSetup( () => true );
 		return unsubscribe;
-	}, [ onPaymentMethodProcessing ] );
+	}, [ onPaymentSetup ] );
 };
 ```
 

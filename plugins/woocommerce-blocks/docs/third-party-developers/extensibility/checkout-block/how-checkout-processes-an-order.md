@@ -16,10 +16,10 @@ Data stores are used to keep track of data that is likely to change during a use
 
 ### Contexts
 
-Contexts are used to make data available to the Checkout block. Each of these provide data and functions related to a specific area of concern, via the use of a hook. For example, if we wanted to use the `onPaymentProcessing` handler from the `PaymentEventsContext` context, we can do it like this:
+Contexts are used to make data available to the Checkout block. Each of these provide data and functions related to a specific area of concern, via the use of a hook. For example, if we wanted to use the `onPaymentSetup` handler from the `PaymentEventsContext` context, we can do it like this:
 
 ```js
-const { onPaymentProcessing } = usePaymentEventsContext();
+const { onPaymentSetup } = usePaymentEventsContext();
 ```
 
 The other job of contexts is to run side effects for our Checkout block. What typically happens is that the `CheckoutEvents` and `PaymentEvents` will listen for changes in the checkout and payment data stores, and dispatch actions on those stores based on some logic.
@@ -145,4 +145,3 @@ The `checkPaymentMethodsCanPay()` [function](https://github.com/woocommerce/wooc
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/how-checkout-processes-an-order.md)
 
 <!-- /FEEDBACK -->
-

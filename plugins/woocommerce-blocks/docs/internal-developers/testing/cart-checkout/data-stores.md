@@ -86,7 +86,7 @@ usePaymentProcessing(
 	emitResponse,
 	sourceId,
 	setSourceId,
-	onPaymentProcessing,
+	onPaymentSetup,
 	eventRegistration
 );
 ```
@@ -102,7 +102,7 @@ export const usePaymentProcessing = (
   emitResponse,
   sourceId,
   setSourceId,
-  onPaymentProcessing,
+  onPaymentSetup,
   eventRegistration
 ) => {
 ...
