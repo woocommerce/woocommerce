@@ -51,7 +51,7 @@ const ValidatedTextInput = forwardRef<
 			customFormatter = ( newValue: string ) => newValue,
 			label,
 			validateOnMount = true,
-			instanceId: preferredInstanceId,
+			instanceId: preferredInstanceId = '',
 			...rest
 		},
 		forwardedRef
@@ -80,6 +80,14 @@ const ValidatedTextInput = forwardRef<
 			clearValidationError,
 		} = useDispatch( VALIDATION_STORE_KEY );
 
+		// Ref for validation callback.
+		const customValidationRef = useRef( customValidation );
+
+		// Update ref when validation callback changes.
+		useEffect( () => {
+			customValidationRef.current = customValidation;
+		}, [ customValidation ] );
+
 		const { validationError, validationErrorId } = useSelect(
 			( select ) => {
 				const store = select( VALIDATION_STORE_KEY );
@@ -105,7 +113,7 @@ const ValidatedTextInput = forwardRef<
 
 				if (
 					inputObject.checkValidity() &&
-					customValidation( inputObject )
+					customValidationRef.current( inputObject )
 				) {
 					clearValidationError( errorIdString );
 					return;
@@ -120,13 +128,7 @@ const ValidatedTextInput = forwardRef<
 					},
 				} );
 			},
-			[
-				clearValidationError,
-				customValidation,
-				errorIdString,
-				setValidationErrors,
-				label,
-			]
+			[ clearValidationError, errorIdString, setValidationErrors, label ]
 		);
 
 		// Allows parent to trigger revalidation.
@@ -160,8 +162,6 @@ const ValidatedTextInput = forwardRef<
 				inputRef.current?.ownerDocument?.activeElement !==
 					inputRef.current
 			) {
-				validateInput( true );
-
 				const formattedValue = customFormatter(
 					inputRef.current.value
 				);
@@ -186,6 +186,9 @@ const ValidatedTextInput = forwardRef<
 			if ( ! isPristine ) {
 				return;
 			}
+
+			setIsPristine( false );
+
 			if ( focusOnMount ) {
 				inputRef.current?.focus();
 			}
@@ -194,8 +197,6 @@ const ValidatedTextInput = forwardRef<
 			if ( validateOnMount || ! focusOnMount ) {
 				validateInput( true );
 			}
-
-			setIsPristine( false );
 		}, [
 			validateOnMount,
 			focusOnMount,

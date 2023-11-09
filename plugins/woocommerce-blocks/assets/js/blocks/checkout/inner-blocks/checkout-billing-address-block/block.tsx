@@ -15,6 +15,8 @@ import type {
 	AddressFields,
 } from '@woocommerce/settings';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { useSelect } from '@wordpress/data';
+import { CART_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -81,16 +83,24 @@ const Block = ( {
 		? [ noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS ]
 		: [ noticeContexts.BILLING_ADDRESS ];
 
+	const { cartDataLoaded } = useSelect( ( select ) => {
+		const store = select( CART_STORE_KEY );
+		return {
+			cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
+		};
+	} );
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				<CustomerAddress
-					addressFieldsConfig={ addressFieldsConfig }
-					showPhoneField={ showPhoneField }
-					requirePhoneField={ requirePhoneField }
-					forceEditing={ forceEditing }
-				/>
+				{ cartDataLoaded ? (
+					<CustomerAddress
+						addressFieldsConfig={ addressFieldsConfig }
+						showPhoneField={ showPhoneField }
+						requirePhoneField={ requirePhoneField }
+						forceEditing={ forceEditing }
+					/>
+				) : null }
 			</WrapperComponent>
 		</>
 	);

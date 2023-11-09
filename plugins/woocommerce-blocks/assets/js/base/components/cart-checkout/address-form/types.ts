@@ -26,8 +26,6 @@ export type AddressFormFields = {
 export interface AddressFormProps {
 	// Id for component.
 	id?: string;
-	// Unique id for form.
-	instanceId: string;
 	// Type of form (billing or shipping).
 	type?: AddressType;
 	// Array of fields in form.
