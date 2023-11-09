@@ -12,7 +12,7 @@
  *
  * @see https://woo.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 7.0.1
+ * @version 8.4.0
  */
 
 use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;

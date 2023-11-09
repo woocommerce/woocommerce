@@ -14,7 +14,7 @@
  *
  * @see         https://woo.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     2.0.1
+ * @version     8.4.0
  * @deprecated  2.6.0
  */
 

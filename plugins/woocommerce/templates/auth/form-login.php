@@ -12,7 +12,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates\Auth
- * @version 7.0.2
+ * @version 8.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
