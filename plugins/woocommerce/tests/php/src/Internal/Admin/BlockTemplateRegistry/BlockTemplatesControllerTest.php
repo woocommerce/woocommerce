@@ -70,14 +70,14 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-        $found_registery_template = false;
+        $found_registry_template = false;
         foreach ( $data as $template ) {
             if ( 'custom-block-template' === $template['id'] ) {
-                $found_registery_template = true;
+                $found_registry_template = true;
             }
         }
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertFalse( $found_registery_template );
+		$this->assertFalse( $found_registry_template );
 	}
 }
