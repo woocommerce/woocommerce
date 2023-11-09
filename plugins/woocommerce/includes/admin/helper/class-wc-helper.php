@@ -1571,7 +1571,7 @@ class WC_Helper {
 			)
 		);
 
-		// If there are no active subscriptions for this product, then it's available.
+		// If there are no subscriptions for this product already active on this site, then it's available.
 		if ( empty( $product_subscriptions ) ) {
 			return true;
 		}
