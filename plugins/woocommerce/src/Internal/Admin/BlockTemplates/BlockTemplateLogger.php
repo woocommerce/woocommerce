@@ -53,7 +53,7 @@ class BlockTemplateLogger {
 		),
 		self::HIDE_CONDITION_ADDED_TO_DETACHED_BLOCK => array(
 			'level'   => \WC_Log_Levels::WARNING,
-			'message' => 'Hide condition added to block.',
+			'message' => 'Hide condition added to detached block. Block will not be included in the template, so the hide condition is not needed.',
 		),
 		self::ERROR_AFTER_BLOCK_ADDED                => array(
 			'level'   => \WC_Log_Levels::WARNING,
