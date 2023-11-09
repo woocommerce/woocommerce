@@ -21,7 +21,7 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	protected $block_template_registry;
 
-    /**
+	/**
 	 * Block templates controller.
 	 *
 	 * @var BlockTemplatesController
@@ -32,19 +32,19 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 	 * Runs before suite initialization.
 	 */
 	public static function setUpBeforeClass(): void {
-        parent::setUpBeforeClass();
+		parent::setUpBeforeClass();
 		wc_get_container()->get( BlockTemplatesController::class );
 		$block_template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
 		$block_template_registry->register( new CustomBlockTemplate() );
 	}
 
-    /**
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-        parent::setUp();
+		parent::setUp();
 
-        $admin_user = wp_insert_user(
+		$admin_user = wp_insert_user(
 			array(
 				'user_login' => uniqid(),
 				'role'       => 'administrator',
@@ -62,7 +62,7 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 		$this->markTestSkipped( 'Waiting for a fix from WooCommerce Blocks: https://github.com/woocommerce/woocommerce-blocks/pull/11690' );
 	}
 
-    /**
+	/**
 	 * Test that getting default templates works as expected and does not show the custom templates.
 	 */
 	public function test_get_template_without_area() {
@@ -70,12 +70,12 @@ class BlockTemplatesControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-        $found_registry_template = false;
-        foreach ( $data as $template ) {
-            if ( 'custom-block-template' === $template['id'] ) {
-                $found_registry_template = true;
-            }
-        }
+		$found_registry_template = false;
+		foreach ( $data as $template ) {
+			if ( 'custom-block-template' === $template['id'] ) {
+				$found_registry_template = true;
+			}
+		}
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertFalse( $found_registry_template );
