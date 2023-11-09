@@ -297,14 +297,25 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$order_customer_id = $order->get_customer_id();
+		/**
+		 * Allow to guest users see the page order-received
+		 *
+		 * @param bool $order_received_verification_required If order-received verification is required.
+		 *
+		 * @since 8.4.0
+		 */
+		$order_received_verification_required = apply_filters( 'woocommerce_order_received_verification_required', true );
 
-		// For non-guest orders, require the user to be logged in before showing this page.
-		if ( $order_customer_id && get_current_user_id() !== $order_customer_id ) {
-			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
-			wc_print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
-			woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );
-			return;
+		if($order_received_verification_required) {
+			$order_customer_id = $order->get_customer_id();
+	
+			// For non-guest orders, require the user to be logged in before showing this page.
+			if ( $order_customer_id && get_current_user_id() !== $order_customer_id ) {
+				wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
+				wc_print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
+				woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );
+				return;
+			}
 		}
 
 		// For guest orders, request they verify their email address (unless we can identify them via the active user session).
