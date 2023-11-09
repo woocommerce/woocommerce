@@ -224,7 +224,7 @@ class BlockTemplateLogger {
 			'level'           => $event_type_info['level'],
 			'event_type'      => $event_type_info['event_type'],
 			'message'         => $event_type_info['message'],
-			'container'       => $container instanceof BlockContainerInterface
+			'container'       => $container instanceof BlockInterface
 				? array(
 					'id'   => $container->get_id(),
 					'name' => $container->get_name(),
