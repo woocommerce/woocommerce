@@ -23,7 +23,7 @@ $is_visible   = $product && $product->is_visible();
  * @param WC_Order_Item $item The order item object.
  * @param bool $is_visible Item's product visibility in the catalog.
  */
-$item_name    = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible );
+$item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible );
 
 ?>
 <tr class="item <?php echo esc_attr( $row_class ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
