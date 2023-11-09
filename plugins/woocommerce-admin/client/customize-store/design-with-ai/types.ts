@@ -16,6 +16,7 @@ import {
 } from './prompts';
 
 export type designWithAiStateMachineContext = {
+	startLoadingTime: number | null;
 	businessInfoDescription: {
 		descriptionText: string;
 	};

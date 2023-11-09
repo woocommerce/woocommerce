@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer } = require( '../../test-data/data' );
+const { admin, customer } = require( '../../../test-data/data' );
 
 const productName = 'Taxed products are awesome';
 const productPrice = '100.00';
@@ -9,7 +9,7 @@ const secondProductName = 'Other products are also awesome';
 
 let productId, productId2, nastyTaxId, seventeenTaxId, sixTaxId, countryTaxId, stateTaxId, cityTaxId, zipTaxId, shippingTaxId, shippingZoneId, shippingMethodId;
 
-test.describe( 'Shopper Tax Display Tests', () => {
+test.describe.serial( 'Shopper Tax Display Tests', () => {
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -193,7 +193,7 @@ test.describe( 'Shopper Tax Display Tests', () => {
 	} );
 } );
 
-test.describe( 'Shopper Tax Rounding', () => {
+test.describe.serial( 'Shopper Tax Rounding', () => {
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -371,7 +371,7 @@ test.describe( 'Shopper Tax Rounding', () => {
 	} );
 } );
 
-test.describe( 'Shopper Tax Levels', () => {
+test.describe.serial( 'Shopper Tax Levels', () => {
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -572,7 +572,7 @@ test.describe( 'Shopper Tax Levels', () => {
 	} );
 } );
 
-test.describe( 'Shipping Tax', () => {
+test.describe.serial( 'Shipping Tax', () => {
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {

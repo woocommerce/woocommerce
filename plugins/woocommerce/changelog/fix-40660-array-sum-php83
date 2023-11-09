@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent a type error when summing an array that may contain empty strings.
