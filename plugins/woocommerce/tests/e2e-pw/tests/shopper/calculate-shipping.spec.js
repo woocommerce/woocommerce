@@ -167,7 +167,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		await page.locator( 'text=Local pickup' ).click();
 
 		// Verify updated shipping costs
-		await expect( page.locator( '.order-total .amount' ) ).toContainText(
+		await expect( page.locator( '.order-total .amount' ).first() ).toContainText(
 			`$${ firstProductPrice }`
 		);
 	} );
