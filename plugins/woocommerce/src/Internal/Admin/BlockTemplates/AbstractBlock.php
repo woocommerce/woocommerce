@@ -252,6 +252,15 @@ class AbstractBlock implements BlockInterface {
 			'expression' => $expression,
 		);
 
+		BlockTemplateLogger::get_instance()->log(
+			$this->is_detached()
+				? BlockTemplateLogger::HIDE_CONDITION_ADDED_TO_DETACHED_BLOCK
+				: BlockTemplateLogger::HIDE_CONDITION_ADDED,
+			$this->get_root_template(),
+			$this->get_parent(),
+			$this,
+		);
+
 		return $key;
 	}
 
@@ -262,6 +271,13 @@ class AbstractBlock implements BlockInterface {
 	 */
 	public function remove_hide_condition( string $key ) {
 		unset( $this->hide_conditions[ $key ] );
+
+		BlockTemplateLogger::get_instance()->log(
+			BlockTemplateLogger::HIDE_CONDITION_REMOVED,
+			$this->get_root_template(),
+			$this->get_parent(),
+			$this,
+		);
 	}
 
 	/**
