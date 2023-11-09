@@ -78,7 +78,7 @@ export function InstalledSubscriptionsTable( props: {
 		},
 	];
 
-	if ( ! props.rows || props.rows.length === 0 ) {
+	if ( ! props.isLoading && ( ! props.rows || props.rows.length === 0 ) ) {
 		const marketplaceBrowseURL = getNewPath( {}, MARKETPLACE_PATH, {} );
 		const noInstalledSubscriptionsHTML = createInterpolateElement(
 			__(
@@ -87,7 +87,8 @@ export function InstalledSubscriptionsTable( props: {
 			),
 			{
 				p: <p />,
-				a: <a href={ marketplaceBrowseURL }>your account</a>,
+				// eslint-disable-next-line jsx-a11y/anchor-has-content
+				a: <a href={ marketplaceBrowseURL } />,
 			}
 		);
 
