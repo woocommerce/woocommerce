@@ -405,11 +405,11 @@ export const VariationsTable = forwardRef<
 							: __( 'Loading variations…', 'woocommerce' )
 					}
 				>
-					{ Array( 5 )
-						.fill( 0 )
-						.map( ( _, index ) => (
+					{ Array.from( { length: variations.length || 5 } ).map(
+						( _, index ) => (
 							<TableRowSkeleton key={ index } />
-						) ) }
+						)
+					) }
 				</div>
 			) : (
 				<Sortable className="woocommerce-product-variations__table">
