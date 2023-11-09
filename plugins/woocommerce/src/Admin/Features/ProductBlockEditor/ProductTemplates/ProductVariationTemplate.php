@@ -161,7 +161,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'id'         => 'product-variation-images-section',
 				'order'      => 30,
 				'attributes' => [
-					'title'       => __( 'Image', 'woocommerce' ),
+					'title'       => __( 'Images', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
@@ -173,12 +173,11 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$images_section->add_block(
 			[
-				'id'         => 'product-variation-image',
+				'id'         => 'product-variation-images',
 				'blockName'  => 'woocommerce/product-images-field',
 				'order'      => 10,
 				'attributes' => [
-					'property' => 'image',
-					'multiple' => false,
+					'property' => 'images',
 				],
 			]
 		);
