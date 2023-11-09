@@ -14,8 +14,6 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -28,12 +26,13 @@ import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { findPatternByBlock } from './utils';
+import BlockPatternList from '../block-pattern-list';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
-	'woocommerce-blocks/header-centered-menu-with-search',
+	'woocommerce-blocks/header-centered-menu',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
@@ -81,7 +80,6 @@ export const SidebarNavigationScreenHeader = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, headerPatterns ] );
-
 	const onClickHeaderPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			setSelectedPattern( pattern );
@@ -139,8 +137,8 @@ export const SidebarNavigationScreenHeader = () => {
 								onClickPattern={ onClickHeaderPattern }
 								label={ 'Headers' }
 								orientation="vertical"
-								category={ 'header' }
 								isDraggable={ false }
+								onHover={ () => {} }
 								showTitlesAsTooltip={ true }
 							/>
 						) }

@@ -66,7 +66,7 @@ const MAX_PAGE_COUNT = 100;
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
-	const [ blocks ] = useEditorBlocks();
+	const [ blocks, , onChange ] = useEditorBlocks();
 	const urlParams = useQuery();
 	const { currentState } = useContext( CustomizeStoreContext );
 
@@ -119,8 +119,6 @@ export const BlockEditor = ( {} ) => {
 		[ history, urlParams, pages ]
 	);
 
-	const [ , , onChange ] = useEditorBlocks();
-
 	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
 	const isHighlighting = highlightedBlockIndex !== -1;
 	const additionalStyles = isHighlighting
@@ -155,7 +153,13 @@ export const BlockEditor = ( {} ) => {
 			<div className={ 'woocommerce-block-preview-container' }>
 				<BlockPreview
 					blocks={ renderedBlocks }
-					onChange={ isHighlighting ? undefined : onChange }
+					onChange={
+						// We only need to pass onChange for the logo screen so that logo block can be updated when we change the logo attributes in logo sidebar navigation screen component.
+						// For other screens, we don't need to pass onChange. Otherwise, we'll get a race condition issue where the block editor will be updated twice: once from the onChange in the sidebar component, and once from the onChange in the block editor component.
+						urlParams.path === '/customize-store/assembler-hub/logo'
+							? onChange
+							: undefined
+					}
 					settings={ settings }
 					additionalStyles={ additionalStyles }
 					isNavigable={ false }
@@ -163,7 +167,8 @@ export const BlockEditor = ( {} ) => {
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
-					previewOpacity={ previewOpacity }
+					autoScale={ false }
+					setLogoBlockContext={ true }
 				/>
 			</div>
 		</div>

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add `@woocommerce/blocks-components` to the list of packages that will be resolved.

@@ -10,6 +10,8 @@ The product editor's UI consists of Groups (currently rendered as tabs), Section
 
 The form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.
 
+For more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).
+
 Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](../../packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 
 ## Declaring compatibility with the product editor

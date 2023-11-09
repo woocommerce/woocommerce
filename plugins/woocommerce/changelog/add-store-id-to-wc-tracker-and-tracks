@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `store_id` to WC Tracker snapshots and Tracks events.

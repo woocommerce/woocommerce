@@ -188,6 +188,19 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
+								onClick={ () => {
+									if ( theme.is_active ) {
+										sendEvent( {
+											type: 'SELECTED_ACTIVE_THEME',
+											payload: { theme: theme.slug },
+										} );
+									} else {
+										sendEvent( {
+											type: 'SELECTED_NEW_THEME',
+											payload: { theme: theme.slug },
+										} );
+									}
+								} }
 							/>
 						) ) }
 					</div>

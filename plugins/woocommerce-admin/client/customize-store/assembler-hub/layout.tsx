@@ -72,7 +72,7 @@ export const Layout = () => {
 	const { id: templateId, type: templateType } = template;
 
 	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
-
+	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
 	if ( currentState === 'transitionalScreen' ) {
@@ -83,7 +83,12 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional sendEvent={ sendEvent } editor={ editor } />
+					<Transitional
+						sendEvent={ sendEvent }
+						editor={ editor }
+						isSurveyOpen={ isSurveyOpen }
+						setSurveyOpen={ setSurveyOpen }
+					/>
 				</EntityProvider>
 			</EntityProvider>
 		);
@@ -145,35 +150,15 @@ export const Layout = () => {
 								</NavigableRegion>
 
 								{ ! isMobileViewport && (
-									<div
-										className={ classnames(
-											'edit-site-layout__canvas-container'
-										) }
-									>
+									<div className="edit-site-layout__canvas-container">
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
-												whileHover={ {
-													scale: 1.005,
-													transition: {
-														duration: disableMotion
-															? 0
-															: 0.5,
-														ease: 'easeOut',
-													},
-												} }
 												initial={ false }
 												layout="position"
 												className={ classnames(
 													'edit-site-layout__canvas'
 												) }
-												transition={ {
-													type: 'tween',
-													duration: disableMotion
-														? 0
-														: ANIMATION_DURATION,
-													ease: 'easeOut',
-												} }
 											>
 												<ErrorBoundary>
 													<ResizableFrame

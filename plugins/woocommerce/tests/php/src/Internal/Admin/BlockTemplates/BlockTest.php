@@ -461,7 +461,7 @@ class BlockTest extends WC_Unit_Test_Case {
 					'attr-1'                       => 'value-1',
 					'attr-2'                       => 'value-2',
 					'_templateBlockId'             => 'test-block-id',
-					'_templateBlockOrder'          => 10,
+					'_templateBlockOrder'          => 10000,
 					'_templateBlockHideConditions' => [
 						[
 							'expression' => 'foo === bar',
@@ -475,14 +475,14 @@ class BlockTest extends WC_Unit_Test_Case {
 							'attr-3'              => 'value-3',
 							'attr-4'              => 'value-4',
 							'_templateBlockId'    => 'test-block-id-2',
-							'_templateBlockOrder' => 10,
+							'_templateBlockOrder' => 10000,
 						],
 					],
 					[
 						'test-block-name-3',
 						[
 							'_templateBlockId'    => 'test-block-id-3',
-							'_templateBlockOrder' => 10,
+							'_templateBlockOrder' => 10000,
 						],
 					],
 				],
@@ -544,7 +544,7 @@ class BlockTest extends WC_Unit_Test_Case {
 				'test-block-name',
 				[
 					'_templateBlockId'    => 'test-block-name-1',
-					'_templateBlockOrder' => 10,
+					'_templateBlockOrder' => 10000,
 				],
 				[
 					[

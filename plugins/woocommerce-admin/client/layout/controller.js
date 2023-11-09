@@ -335,6 +335,13 @@ export const getPages = () => {
 				...initialBreadcrumbs,
 				__( 'Customize Your Store', 'woocommerce' ),
 			],
+			layout: {
+				header: false,
+				footer: true,
+				showNotices: true,
+				showStoreAlerts: false,
+				showPluginArea: false,
+			},
 			capability: 'manage_woocommerce',
 		} );
 	}

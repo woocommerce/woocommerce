@@ -31,7 +31,7 @@ class AbstractBlock implements BlockInterface {
 	 *
 	 * @var int
 	 */
-	private $order = 10;
+	private $order = 10000;
 
 	/**
 	 * The block attributes.
