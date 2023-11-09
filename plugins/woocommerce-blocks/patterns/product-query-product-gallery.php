@@ -18,7 +18,7 @@ $gallery_title = $content['titles'][0]['default'] ?? '';
 	<h3 class="wp-block-heading alignwide"><?php echo esc_html( $gallery_title ); ?></h3>
 	<!-- /wp:heading -->
 
-	<!-- wp:woocommerce/product-collection {"query":{"perPage":6,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"taxQuery":{},"parents":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3},"align":"wide","layout":{"type":"default"}} -->
+	<!-- wp:woocommerce/product-collection {"query":{"perPage":6,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3},"align":"wide","layout":{"type":"default"}} -->
 		<div class="wp-block-woocommerce-product-collection alignwide">
 			<!-- wp:woocommerce/product-template -->
 				<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true, "aspectRatio":"3/4"} /-->
