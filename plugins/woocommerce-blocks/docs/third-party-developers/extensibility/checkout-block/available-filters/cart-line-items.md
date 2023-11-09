@@ -572,7 +572,7 @@ The Cart object of the filters above has the following keys:
     -   _phone_ `string` - The phone of the address.
     -   _postcode_ `string` - The postcode of the address.
     -   _state_ `string` - The state of the address.
--   _billingData_ `object` - The billing data object with the same keys as the `billingAddress` object.
+-   ~~_billingData_~~ `object` - The billing data object with the same keys as the `billingAddress` object.
 -   _cartCoupons_ `array` - The cart coupons array.
 -   _cartErrors_ `array` - The cart errors array.
 -   _cartFees_ `array` - The cart fees array.
