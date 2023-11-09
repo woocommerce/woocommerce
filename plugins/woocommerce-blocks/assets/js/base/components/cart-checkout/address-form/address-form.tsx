@@ -15,7 +15,7 @@ import {
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
 import { useEffect, useMemo, useRef } from '@wordpress/element';
-import { withInstanceId } from '@wordpress/compose';
+import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import { defaultAddressFields } from '@woocommerce/settings';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -44,11 +44,12 @@ const AddressForm = ( {
 	id = '',
 	fields = defaultFields,
 	fieldConfig = {} as FieldConfig,
-	instanceId,
 	onChange,
 	type = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
+	const instanceId = useInstanceId( AddressForm );
+
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
 	const currentFieldConfig = useShallowEqual( fieldConfig );
@@ -99,7 +100,7 @@ const AddressForm = ( {
 		fieldsRef.current?.postcode?.revalidate();
 	}, [ currentCountry ] );
 
-	id = id || instanceId;
+	id = id || `${ instanceId }`;
 
 	return (
 		<div id={ id } className="wc-block-components-address-form">
@@ -206,4 +207,4 @@ const AddressForm = ( {
 	);
 };
 
-export default withInstanceId( AddressForm );
+export default AddressForm;

@@ -19,6 +19,8 @@ import type {
 	AddressField,
 	AddressFields,
 } from '@woocommerce/settings';
+import { useSelect } from '@wordpress/data';
+import { CART_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -96,15 +98,24 @@ const Block = ( {
 		( shippingAddress.first_name || shippingAddress.last_name )
 	);
 
+	const { cartDataLoaded } = useSelect( ( select ) => {
+		const store = select( CART_STORE_KEY );
+		return {
+			cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
+		};
+	} );
+
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				<CustomerAddress
-					addressFieldsConfig={ addressFieldsConfig }
-					showPhoneField={ showPhoneField }
-					requirePhoneField={ requirePhoneField }
-				/>
+				{ cartDataLoaded ? (
+					<CustomerAddress
+						addressFieldsConfig={ addressFieldsConfig }
+						showPhoneField={ showPhoneField }
+						requirePhoneField={ requirePhoneField }
+					/>
+				) : null }
 			</WrapperComponent>
 			{ hasAddress && (
 				<CheckboxControl

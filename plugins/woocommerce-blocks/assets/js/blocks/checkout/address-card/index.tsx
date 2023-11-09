@@ -17,10 +17,12 @@ const AddressCard = ( {
 	address,
 	onEdit,
 	target,
+	showPhoneField,
 }: {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
+	showPhoneField: boolean;
 } ): JSX.Element | null => {
 	return (
 		<div className="wc-block-components-address-card">
@@ -44,7 +46,7 @@ const AddressCard = ( {
 							<span key={ `address-` + index }>{ field }</span>
 						) ) }
 				</div>
-				{ address.phone ? (
+				{ address.phone && showPhoneField ? (
 					<div
 						key={ `address-phone` }
 						className="wc-block-components-address-card__address-section"
