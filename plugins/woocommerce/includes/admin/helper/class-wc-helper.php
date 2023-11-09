@@ -1546,10 +1546,12 @@ class WC_Helper {
 	}
 
 	/**
-	 * Check if subscription is available.
+	 * Check if a subscription is available to use.
+	 * That is, is not already active and hasn't expired, and there are no other subscriptions
+	 * for this product already active on this site.
 	 *
-	 * @param array $subscription The subscription data.
-	 * @param array $subscriptions The list of subscriptions.
+	 * @param array $subscription The subscription we're checking.
+	 * @param array $subscriptions The list of all the user's subscriptions.
 	 * @return bool True if multiple licenses exist, false otherwise.
 	 */
 	public static function is_subscription_available( $subscription, $subscriptions ) {
