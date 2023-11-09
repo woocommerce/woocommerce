@@ -227,10 +227,10 @@ class ListTable extends WP_List_Table {
 		ob_start();
 		?>
 		<input
-			id="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>"
+			id="cb-select-<?php echo esc_attr( $item->get_file_id() ); ?>"
 			type="checkbox"
-			name="file[]"
-			value="<?php echo esc_attr( $item->get_basename() ); ?>"
+			name="file_id[]"
+			value="<?php echo esc_attr( $item->get_file_id() ); ?>"
 		/>
 		<label for="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>">
 			<span class="screen-reader-text">
@@ -256,11 +256,11 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_source( $item ): string {
-		$log_file        = sanitize_title( $item->get_basename() );
+		$log_file        = $item->get_file_id();
 		$single_file_url = add_query_arg(
 			array(
-				'view'     => 'single_file',
-				'log_file' => $log_file,
+				'view'    => 'single_file',
+				'file_id' => $log_file,
 			),
 			$this->page_controller->get_logs_tab_url()
 		);
@@ -274,8 +274,8 @@ class ListTable extends WP_List_Table {
 
 		return sprintf(
 			'<a class="row-title" href="%1$s">%2$s</a>%3$s',
-			$single_file_url,
-			$item->get_source(),
+			esc_url( $single_file_url ),
+			esc_html( $item->get_source() ),
 			$rotation
 		);
 	}

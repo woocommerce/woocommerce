@@ -1263,7 +1263,7 @@ class WC_Admin_Addons {
 				'title'       => $locale->title,
 				'description' => $locale->description,
 				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
-				'image_alt'   => $locale->image_alt,
+				'image_alt'   => $locale->image_alt ?? '',
 				'actions'     => $promotion_actions,
 			);
 		}

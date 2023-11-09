@@ -189,12 +189,10 @@ function ResizableFrame( {
 		},
 	};
 	const currentResizeHandleVariant = ( () => {
-		if ( isResizing ) {
+		if ( isResizing || isHandleVisibleByDefault ) {
 			return 'active';
 		}
-		return shouldShowHandle || isHandleVisibleByDefault
-			? 'visible'
-			: 'hidden';
+		return shouldShowHandle ? 'visible' : 'hidden';
 	} )();
 
 	const resizeHandler = (
@@ -246,6 +244,13 @@ function ResizableFrame( {
 				if ( definition === 'fullWidth' )
 					setFrameSize( { width: '100%', height: '100%' } );
 			} }
+			whileHover={ {
+				scale: 1.005,
+				transition: {
+					duration: 0.5,
+					ease: 'easeOut',
+				},
+			} }
 			transition={ frameTransition }
 			size={ frameSize }
 			enable={ {
@@ -266,7 +271,7 @@ function ResizableFrame( {
 				right: HANDLE_STYLES_OVERRIDE,
 			} }
 			minWidth={ FRAME_MIN_WIDTH }
-			maxWidth={ isFullWidth ? '100%' : '150%' }
+			maxWidth={ '100%' }
 			maxHeight={ '100%' }
 			onFocus={ () => setShouldShowHandle( true ) }
 			onBlur={ () => setShouldShowHandle( false ) }

@@ -174,9 +174,7 @@ test.describe( 'General tab', () => {
 			await page.goto( `/?post_type=product&p=${ productId }`, {
 				waitUntil: 'networkidle',
 			} );
-			await expect( page.locator( '.product_title' ) ).toHaveText(
-				productData.name
-			);
+			await expect( page.getByRole( 'heading', { name: productData.name } ) ).toBeVisible();
 			const productPriceElements = await page
 				.locator( '.summary .woocommerce-Price-amount' )
 				.all();

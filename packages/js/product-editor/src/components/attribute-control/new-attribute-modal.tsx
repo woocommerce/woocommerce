@@ -60,10 +60,7 @@ type AttributeForm = {
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
-	notice = __(
-		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-		'woocommerce'
-	),
+	notice,
 	attributeLabel = __( 'Attribute', 'woocommerce' ),
 	valueLabel = __( 'Values', 'woocommerce' ),
 	attributePlaceholder = __( 'Search or create attribute', 'woocommerce' ),
