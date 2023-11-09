@@ -477,24 +477,26 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 			)
 		);
 		// Virtual section.
-		$shipping_group->add_section(
-			array(
-				'id'    => 'product-variation-virtual-section',
-				'order' => 20,
-			)
-		)->add_block(
-			array(
-				'id'         => 'product-variation-virtual',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 10,
-				'attributes' => array(
-					'property'       => 'virtual',
-					'checkedValue'   => false,
-					'uncheckedValue' => true,
-					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
-				),
-			)
-		);
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$shipping_group->add_section(
+				[
+					'id'    => 'product-variation-virtual-section',
+					'order' => 20,
+				]
+			)->add_block(
+				[
+					'id'         => 'product-variation-virtual',
+					'blockName'  => 'woocommerce/product-toggle-field',
+					'order'      => 10,
+					'attributes' => [
+						'property'       => 'virtual',
+						'checkedValue'   => false,
+						'uncheckedValue' => true,
+						'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+					],
+				]
+			);
+		}
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			array(
