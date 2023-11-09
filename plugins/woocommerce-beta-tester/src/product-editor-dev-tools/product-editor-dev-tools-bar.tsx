@@ -22,6 +22,7 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { BlockInspectorTabPanel } from './block-inspector-tab-panel';
+import { TemplateEventsTabPanel } from './template-events-tab-panel';
 import { HelpTabPanel } from './help-tab-panel';
 import { ProductTabPanel } from './product-tab-panel';
 
@@ -112,6 +113,13 @@ export function ProductEditorDevToolsBar( {
 								{ __( 'Product', 'woocommerce' ) }
 							</TabButton>
 							<TabButton
+								name="events"
+								selectedTab={ selectedTab }
+								onClick={ handleTabClick }
+							>
+								{ __( 'Template Events', 'woocommerce' ) }
+							</TabButton>
+							<TabButton
 								name="help"
 								selectedTab={ selectedTab }
 								onClick={ handleTabClick }
@@ -136,6 +144,10 @@ export function ProductEditorDevToolsBar( {
 					<ProductTabPanel
 						evaluationContext={ evaluationContext }
 						isSelected={ selectedTab === 'product' }
+					/>
+					<TemplateEventsTabPanel
+						postType={ postType }
+						isSelected={ selectedTab === 'events' }
 					/>
 					<HelpTabPanel isSelected={ selectedTab === 'help' } />
 				</div>
