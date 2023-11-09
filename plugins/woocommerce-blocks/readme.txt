@@ -126,6 +126,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Remove bullet points and unnecessary padding from `SearchListControl`. ([11444](https://github.com/woocommerce/woocommerce-blocks/pull/11444))
 
+= 11.4.6 - 2023-11-09 =
+
+#### Bug Fixes
+
+- Prevent PHP warnings when using Jetpack WooCommerce Analytics module. [#11707](https://github.com/woocommerce/woocommerce-blocks/pull/11707)
+
 = 11.4.5 - 2023-11-07 =
 
 #### Bug Fixes
