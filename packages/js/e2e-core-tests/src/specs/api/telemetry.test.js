@@ -47,6 +47,11 @@ const runTelemetryAPITest = () => {
 
 			expect( response.statusCode ).toBe( 200 );
 		} );
+		it( 'returns 200 when fetching tracking ids', async () => {
+			const response = await client.get( `/wc-telemetry/tracker`);
+
+			expect( response.statusCode ).toBe( 200 );
+		} );
 	} );
 };
 
