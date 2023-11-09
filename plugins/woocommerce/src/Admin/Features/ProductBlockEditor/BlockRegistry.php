@@ -153,6 +153,10 @@ class BlockRegistry {
 					'type'               => 'array',
 					'__experimentalRole' => 'content',
 				),
+				'disabled'                        => array(
+					'type'               => 'boolean',
+					'__experimentalRole' => 'content',
+				),
 			)
 		);
 	}
