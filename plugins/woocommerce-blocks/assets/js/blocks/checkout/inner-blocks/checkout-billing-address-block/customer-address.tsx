@@ -97,9 +97,10 @@ const CustomerAddress = ( {
 				onEdit={ () => {
 					setEditing( true );
 				} }
+				showPhoneField={ showPhoneField }
 			/>
 		),
-		[ billingAddress ]
+		[ billingAddress, showPhoneField ]
 	);
 
 	const renderAddressFormComponent = useCallback(
