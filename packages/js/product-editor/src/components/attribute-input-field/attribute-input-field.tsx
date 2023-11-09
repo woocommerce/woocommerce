@@ -52,6 +52,10 @@ function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
 	return attribute.id === -99;
 }
 
+function sanitizeSlugName( slug: string | undefined ): string {
+	return slug ? slug.replace( /pa_/g, '' ) : '';
+}
+
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
 	onChange,
@@ -211,7 +215,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									tooltipText={
 										item.isDisabled
 											? disabledAttributeMessage
-											: item.slug
+											: sanitizeSlugName( item.slug )
 									}
 								>
 									{ isNewAttributeListItem( item ) ? (
