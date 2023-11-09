@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Resolved an issue that would cause array order meta values to not be copied during HPOS post table backporting.
