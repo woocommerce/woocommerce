@@ -1582,8 +1582,8 @@ class WC_Helper {
 	 * This method will return true if the product is installed, but will exclude subscriptions for the same product that are not in use.
 	 * If a product is installed and inactive, this will ensure that one subscription is marked as installed.
 	 *
-	 * @param array $subscription The subscription data.
-	 * @param array $subscriptions The list of subscriptions.
+	 * @param array $subscription The subscription we're checking.
+	 * @param array $subscriptions The list of all the user's subscriptions.
 	 * @return bool True if installed, false otherwise.
 	 */
 	public static function is_subscription_installed( $subscription, $subscriptions ) {
