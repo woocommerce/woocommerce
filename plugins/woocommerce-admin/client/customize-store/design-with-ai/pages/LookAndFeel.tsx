@@ -60,6 +60,7 @@ export const LookAndFeel = ( {
 			? choices[ 0 ].key
 			: context.lookAndFeel.choice
 	);
+
 	return (
 		<div>
 			<ProgressBar
@@ -69,20 +70,6 @@ export const LookAndFeel = ( {
 			/>
 			<CloseButton
 				onClick={ () => {
-					if (
-						context.lookAndFeel.choice !== '' &&
-						context.lookAndFeel.choice !== look
-					) {
-						recordEvent(
-							'customize_your_store_ai_wizard_changed_ai_option',
-							{
-								step: 'look-and-feel',
-								ai_option: context.lookAndFeel.choice,
-								user_choice: look,
-							}
-						);
-					}
-
 					sendEvent( {
 						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 						payload: { step: 'look-and-feel' },
@@ -118,6 +105,21 @@ export const LookAndFeel = ( {
 					<Button
 						variant="primary"
 						onClick={ () => {
+							if (
+								context.lookAndFeel.aiRecommended &&
+								context.lookAndFeel.aiRecommended !== look
+							) {
+								recordEvent(
+									'customize_your_store_ai_wizard_changed_ai_option',
+									{
+										step: 'look-and-feel',
+										ai_recommended:
+											context.lookAndFeel.aiRecommended,
+										user_choice: look,
+									}
+								);
+							}
+
 							sendEvent( {
 								type: 'LOOK_AND_FEEL_COMPLETE',
 								payload: look,

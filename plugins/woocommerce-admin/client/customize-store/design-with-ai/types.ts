@@ -21,9 +21,11 @@ export type designWithAiStateMachineContext = {
 		descriptionText: string;
 	};
 	lookAndFeel: {
+		aiRecommended?: Look;
 		choice: Look | '';
 	};
 	toneOfVoice: {
+		aiRecommended?: Tone;
 		choice: Tone | '';
 	};
 	aiSuggestions: {

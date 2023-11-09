@@ -62,6 +62,17 @@ export const ToneOfVoice = ( {
 	);
 
 	const onContinue = () => {
+		if (
+			context.toneOfVoice.aiRecommended &&
+			context.toneOfVoice.aiRecommended !== sound
+		) {
+			recordEvent( 'customize_your_store_ai_wizard_changed_ai_option', {
+				step: 'tone-of-voice',
+				ai_recommended: context.toneOfVoice.aiRecommended,
+				user_choice: sound,
+			} );
+		}
+
 		sendEvent( {
 			type: 'TONE_OF_VOICE_COMPLETE',
 			payload: sound,
@@ -77,20 +88,6 @@ export const ToneOfVoice = ( {
 			/>
 			<CloseButton
 				onClick={ () => {
-					if (
-						context.toneOfVoice.choice !== '' &&
-						context.toneOfVoice.choice !== sound
-					) {
-						recordEvent(
-							'customize_your_store_ai_wizard_changed_ai_option',
-							{
-								step: 'tone-of-voice',
-								ai_option: context.toneOfVoice.choice,
-								user_choice: sound,
-							}
-						);
-					}
-
 					sendEvent( {
 						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 						payload: { step: 'tone-of-voice' },

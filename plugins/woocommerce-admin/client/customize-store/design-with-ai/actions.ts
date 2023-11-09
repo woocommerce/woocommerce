@@ -54,8 +54,9 @@ const assignLookAndFeel = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( _context, event: unknown ) => {
+	lookAndFeel: ( context, event: unknown ) => {
 		return {
+			...context.lookAndFeel,
 			choice: ( event as lookAndFeelCompleteEvent ).payload,
 		};
 	},
@@ -65,8 +66,9 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	toneOfVoice: ( _context, event: unknown ) => {
+	toneOfVoice: ( context, event: unknown ) => {
 		return {
+			...context.toneOfVoice,
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
 	},
@@ -80,12 +82,16 @@ const assignLookAndTone = assign<
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.look,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.look,
 		};
 	},
 	toneOfVoice: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.tone,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.tone,
 		};
 	},
 } );
