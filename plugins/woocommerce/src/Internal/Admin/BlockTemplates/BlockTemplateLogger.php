@@ -79,7 +79,7 @@ class BlockTemplateLogger {
 	protected function __construct() {
 		$this->logger = wc_get_logger();
 
-		$threshold = get_option( 'woocommerce_block_template_logging_threshold', \WC_Log_Levels::NOTICE );
+		$threshold = get_option( 'woocommerce_block_template_logging_threshold', \WC_Log_Levels::WARNING );
 		if ( ! \WC_Log_Levels::is_valid_level( $threshold ) ) {
 			$threshold = \WC_Log_Levels::INFO;
 		}

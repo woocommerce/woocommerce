@@ -79,7 +79,7 @@ function tools_get_logging_levels() {
  * Get the block template logging threshold.
  */
 function tools_get_block_template_logging_threshold() {
-	$threshold = get_option( 'woocommerce_block_template_logging_threshold', \WC_Log_Levels::NOTICE );
+	$threshold = get_option( 'woocommerce_block_template_logging_threshold', \WC_Log_Levels::WARNING );
 
 	return new WP_REST_Response( $threshold, 200 );
 }
