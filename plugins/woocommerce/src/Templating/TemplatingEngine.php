@@ -31,6 +31,9 @@ class TemplatingEngine {
 
 	use AccessiblePrivateMethods;
 
+	private const CLEANUP_ACTION_NAME = 'woocommerce_expired_rendered_templates_cleanup';
+	private const ACTION_GROUP        = 'wc_batch_processes';
+
 	/**
 	 * Default directory where templates are stored.
 	 *
@@ -50,6 +53,9 @@ class TemplatingEngine {
 	 */
 	public function __construct() {
 		$this->default_templates_directory = __DIR__ . '/Templates';
+
+		self::add_action( self::CLEANUP_ACTION_NAME, array( $this, 'handle_expired_files_cleanup_action' ) );
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_debug_tools_entries' ), 999, 1 );
 	}
 
 	/**
@@ -695,5 +701,107 @@ CREATE TABLE {$wpdb->prefix}wc_rendered_templates_meta(
 	KEY rendered_template_id_meta_key (rendered_template_id, meta_key)
 )
 $collate;";
+	}
+
+	/**
+	 * Is the expired files cleanup action currently scheduled?
+	 *
+	 * @return bool True if the expired files cleanup action is currently scheduled, false otherwise.
+	 */
+	public function expired_files_cleanup_is_scheduled(): bool {
+		return as_has_scheduled_action( self::CLEANUP_ACTION_NAME, array(), self::ACTION_GROUP );
+	}
+
+	/**
+	 * Schedule an action that will do one round of expired files cleanup.
+	 * The action is scheduled to run immediately. If a previous pending action exists, it's unscheduled first.
+	 */
+	public function schedule_expired_files_cleanup(): void {
+		$this->unschedule_expired_files_cleanup();
+		as_schedule_single_action( time() + 1, self::CLEANUP_ACTION_NAME, array(), self::ACTION_GROUP );
+	}
+
+	/**
+	 * Remove the scheduled action that does the expired files cleanup, if it's scheduled.
+	 */
+	public function unschedule_expired_files_cleanup(): void {
+		if ( $this->expired_files_cleanup_is_scheduled() ) {
+			as_unschedule_action( self::CLEANUP_ACTION_NAME, array(), self::ACTION_GROUP );
+		}
+	}
+
+	/**
+	 * Run the expired files cleanup action and schedule a new one.
+	 *
+	 * If files are actually deleted then we assume that more files are pending deletion and schedule the next
+	 * action to run immediately. Otherwise (nothing was deleted) we schedule the next action for one day later
+	 * (but this can be changed via the 'woocommerce_delete_expired_rendered_template_files_interval' filter).
+	 *
+	 * If the actual deletion process fails the next action is scheduled anyway for one day later
+	 * or for the interval given by the filter.
+	 *
+	 * NOTE: If the default interval is changed to something different from DAY_IN_SECONDS, please adjust the
+	 * "every 24h" text in add_debug_tools_entries too.
+	 */
+	private function handle_expired_files_cleanup_action(): void {
+		$new_interval = null;
+
+		try {
+			$result = $this->delete_expired_rendered_files();
+			if ( $result['files_deleted'] + $result['rows_deleted'] > 0 ) {
+				$new_interval = 1;
+			}
+		} finally {
+			if ( is_null( $new_interval ) ) {
+
+				/**
+				 * Filter to alter the interval between the actions that delete expired rendered template files.
+				 *
+				 * @param int $interval The default time before the next action run, in seconds.
+				 * @return int The time to actually wait before the next action run, in seconds.
+				 *
+				 * @since 8.4.0
+				 */
+				$new_interval = apply_filters( 'woocommerce_delete_expired_rendered_template_files_interval', DAY_IN_SECONDS );
+			}
+
+			as_schedule_single_action( time() + $new_interval, self::CLEANUP_ACTION_NAME, array(), self::ACTION_GROUP );
+		}
+	}
+
+	/**
+	 * Add the tools to (re)schedule and un-schedule the expired files cleanup actions in the WooCommerce debug tools page.
+	 *
+	 * @param array $tools_array Original debug tools array.
+	 * @return array Updated debug tools array
+	 */
+	private function add_debug_tools_entries( array $tools_array ): array {
+		$cleanup_is_scheduled = $this->expired_files_cleanup_is_scheduled();
+
+		$tools_array['schedule_expired_rendered_template_files_cleanup'] = array(
+			'name'             => $cleanup_is_scheduled ?
+				__( 'Re-schedule expired rendered template files cleanup', 'woocommerce' ) :
+				__( 'Schedule expired rendered template files cleanup', 'woocommerce' ),
+			'desc'             => $cleanup_is_scheduled ?
+				__( 'Remove the currently scheduled action to delete expired rendered template files, then schedule it again for running immediately. Subsequent actions will run once every 24h.', 'woocommerce' ) :
+				__( 'Schedule the action to delete expired rendered template files for running immediately. Subsequent actions will run once every 24h.', 'woocommerce' ),
+			'button'           => $cleanup_is_scheduled ?
+				__( 'Re-schedule', 'woocommerce' ) :
+				__( 'Schedule', 'woocommerce' ),
+			'requires_refresh' => true,
+			'callback'         => array( $this, 'schedule_expired_files_cleanup' ),
+		);
+
+		if ( $cleanup_is_scheduled ) {
+			$tools_array['unschedule_expired_rendered_template_files_cleanup'] = array(
+				'name'             => __( 'Un-schedule expired rendered template files cleanup', 'woocommerce' ),
+				'desc'             => __( "Remove the currently scheduled action to delete expired rendered template files. Expired files won't be automatically deleted until the 'Schedule expired rendered template files cleanup' tool is run again.", 'woocommerce' ),
+				'button'           => __( 'Un-schedule', 'woocommerce' ),
+				'requires_refresh' => true,
+				'callback'         => array( $this, 'unschedule_expired_files_cleanup' ),
+			);
+		}
+
+		return $tools_array;
 	}
 }
