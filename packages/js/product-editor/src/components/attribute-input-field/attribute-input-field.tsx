@@ -53,7 +53,7 @@ function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
 }
 
 function sanitizeSlugName( slug: string | undefined ): string {
-	return slug ? slug.replace( /pa_/g, '' ) : '';
+	return slug && slug.startsWith( 'pa_' ) ? slug.substring( 3 ) : '';
 }
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
