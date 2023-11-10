@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Clear payment suggestion spec when the base country gets updated.
