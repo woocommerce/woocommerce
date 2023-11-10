@@ -257,17 +257,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 			$general_group->add_section(
 				array(
-					'id'         => 'product-downloads-section',
-					'order'      => 40,
-					'attributes' => array(
+					'id'             => 'product-downloads-section',
+					'order'          => 40,
+					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
 						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
 					),
-					'hideConditions' => [
-						[
+					'hideConditions' => array(
+						array(
 							'expression' => 'editedProduct.type !== "simple"',
-						],
-					],
+						),
+					),
 				)
 			)->add_block(
 				array(
@@ -773,27 +773,27 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		// Virtual section.
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 			$shipping_group->add_section(
-				[
+				array(
 					'id'             => 'product-virtual-section',
 					'order'          => 10,
-					'hideConditions' => [
-						[
+					'hideConditions' => array(
+						array(
 							'expression' => 'editedProduct.type !== "simple"',
-						],
-					],
-				]
+						),
+					),
+				)
 			)->add_block(
-				[
+				array(
 					'id'         => 'product-virtual',
 					'blockName'  => 'woocommerce/product-toggle-field',
 					'order'      => 10,
-					'attributes' => [
+					'attributes' => array(
 						'property'       => 'virtual',
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
-					],
-				]
+					),
+				)
 			);
 		}
 		// Product Shipping Section.
