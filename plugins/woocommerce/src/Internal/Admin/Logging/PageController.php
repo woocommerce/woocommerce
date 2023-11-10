@@ -143,8 +143,6 @@ class PageController {
 
 		$list_table->prepare_items();
 
-		$this->get_list_table()->prepare_items();
-
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2>
