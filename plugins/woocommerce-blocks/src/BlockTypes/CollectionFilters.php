@@ -125,7 +125,13 @@ final class CollectionFilters extends AbstractBlock {
 		);
 
 		if ( ! empty( $response['body'] ) ) {
-			return $response['body'];
+			$normalized_response = array();
+
+			foreach ( $response['body'] as $key => $data ) {
+				$normalized_response[ $key ] = (array) $data;
+			}
+
+			return $normalized_response;
 		}
 
 		return array();
@@ -172,16 +178,13 @@ final class CollectionFilters extends AbstractBlock {
 		/**
 		 * The following params can be passed directly to Store API endpoints.
 		 */
-		$shared_params = array( 'exclude', 'offset', 'order', 'search' );
+		$shared_params = array( 'exclude', 'offset', 'search' );
 
 		/**
 		 * The following params just need to transform the key, their value can
 		 * be passed as it is to the Store API.
 		 */
 		$mapped_params = array(
-			'orderBy'                       => 'orderby',
-			'pages'                         => 'page',
-			'perPage'                       => 'per_page',
 			'woocommerceStockStatus'        => 'stock_status',
 			'woocommerceOnSale'             => 'on_sale',
 			'woocommerceHandPickedProducts' => 'include',
@@ -241,7 +244,16 @@ final class CollectionFilters extends AbstractBlock {
 		 */
 		$params['catalog_visibility'] = is_search() ? 'search' : 'visible';
 
-		return array_filter( $params );
+		/**
+		* `false` values got removed from `add_query_arg`, so we need to convert
+		* them to numeric.
+		*/
+		return array_map(
+			function( $param ) {
+				return is_bool( $param ) ? +$param : $param;
+			},
+			$params
+		);
 	}
 
 }

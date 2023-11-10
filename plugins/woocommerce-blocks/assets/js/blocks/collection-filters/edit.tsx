@@ -26,10 +26,6 @@ const Edit = ( { clientId, setAttributes, context }: EditProps ) => {
 		resourceName: 'products/collection-data',
 		query: {
 			...formatQuery( context.query ),
-			page: undefined,
-			per_page: undefined,
-			orderby: undefined,
-			order: undefined,
 			...getQueryParams( currentBlock ),
 		},
 	} );
