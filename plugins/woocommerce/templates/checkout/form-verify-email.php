@@ -12,7 +12,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.4.0
+ * @version 7.9.1
  *
  * @var bool   $failed_submission Indicates if the last attempt to verify failed.
  * @var string $verify_url        The URL for the email verification form.
