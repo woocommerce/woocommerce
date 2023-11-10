@@ -42,10 +42,13 @@ Required:
 ## Checklist
 
 Required:
+
 * [ ] This PR has either a `[type]` label or a `[skip-changelog]` label.
 * [ ] This PR is assigned to a milestone.
 
 Conditional:
+
+* [ ] This PR has a UI change and has been cross-browser tested at different viewport sizes on both the frontend and in the editor.
 * [ ] This PR has a changelog description (if `[skip-changelog]` label is not present).
 * [ ] This PR adds/removes a feature flag & I've updated [this doc](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md).
 * [ ] This PR adds/removes an experimental interfaces, and I've updated [this doc](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md).
