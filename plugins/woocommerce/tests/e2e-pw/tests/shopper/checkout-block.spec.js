@@ -15,7 +15,7 @@ const threeProductPrice = ( singleProductSalePrice * 3 ).toString();
 const pageTitle = 'Checkout Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
-let guestOrderId, customerOrderId, productId, shippingZoneId;
+let guestOrderId1, guestOrderId2, customerOrderId, productId, shippingZoneId;
 
 test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
@@ -58,6 +58,13 @@ test.describe( 'Checkout Block page', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
+		// enable loggin through checkout
+		await api.put(
+			'settings/account/woocommerce_enable_checkout_login_reminder',
+			{
+				value: 'yes',
+			}
+		);
 		// add a shipping zone and method
 		await api
 			.post( 'shipping/zones', {
@@ -103,9 +110,18 @@ test.describe( 'Checkout Block page', () => {
 		await api.put( 'payment_gateways/cod', {
 			enabled: false,
 		} );
+		await api.put(
+			'settings/account/woocommerce_enable_checkout_login_reminder',
+			{
+				value: 'no',
+			}
+		);
 		// delete the orders we created
-		if ( guestOrderId ) {
-			await api.delete( `orders/${ guestOrderId }`, { force: true } );
+		if ( guestOrderId1 ) {
+			await api.delete( `orders/${ guestOrderId1 }`, { force: true } );
+		}
+		if ( guestOrderId2 ) {
+			await api.delete( `orders/${ guestOrderId2 }`, { force: true } );
 		}
 		if ( customerOrderId ) {
 			await api.delete( `orders/${ customerOrderId }`, { force: true } );
@@ -210,7 +226,7 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 	} );
 
-	test( 'allows customer to fill billing details', async ( { page } ) => {
+	test( 'allows customer to fill shipping details', async ( { page } ) => {
 		// this time we're going to add three products to the cart
 		for ( let i = 1; i < 4; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -250,6 +266,111 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.getByLabel( 'Phone (optional)' ) ).toBeEditable();
 	} );
 
+	test( 'allows customer to fill different shipping and billing details', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// fill shipping address
+		await page.getByLabel( 'Email address' ).fill( guestEmail );
+		await page.getByLabel( 'First name' ).fill( 'Homer' );
+		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.fill( '123 Evergreen Terrace' );
+		await page.getByLabel( 'City' ).fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+
+		// fill billing details
+		await page.getByLabel( 'Use same address for billing' ).click();
+		await page.getByLabel( 'First name' ).last().fill( 'Mister' );
+		await page.getByLabel( 'Last name' ).last().fill( 'Burns' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.last()
+			.fill( '156th Street' );
+		await page.getByLabel( 'City' ).last().fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).last().fill( '98500' );
+
+		// add note to the order
+		await page.getByLabel( 'Add a note to your order' ).check();
+		await page
+			.getByPlaceholder(
+				'Notes about your order, e.g. special notes for delivery.'
+			)
+			.fill( 'Ship it fast.' );
+
+		// place an order
+		await page.getByRole( 'button', { name: 'Place order' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
+
+		// get order ID from the page
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
+		guestOrderId2 = await orderReceivedText
+			.split( /(\s+)/ )[ 6 ]
+			.toString();
+
+		// go again to the checkout to verify details
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// expand shipping and billing details
+		await page
+			.getByLabel( 'Edit address', { exact: true } )
+			.first()
+			.click();
+		await page.getByLabel( 'Edit address', { exact: true } ).last().click();
+
+		// verify shipping details
+		await expect( page.getByLabel( 'First name' ).first() ).toHaveValue(
+			'Homer'
+		);
+		await expect( page.getByLabel( 'Last name' ).first() ).toHaveValue(
+			'Simpson'
+		);
+		await expect(
+			page.getByLabel( 'Address', { exact: true } ).first()
+		).toHaveValue( '123 Evergreen Terrace' );
+		await expect( page.getByLabel( 'City' ).first() ).toHaveValue(
+			'Springfield'
+		);
+		await expect( page.getByLabel( 'ZIP Code' ).first() ).toHaveValue(
+			'97403'
+		);
+
+		// verify billing details
+		await expect( page.getByLabel( 'First name' ).last() ).toHaveValue(
+			'Mister'
+		);
+		await expect( page.getByLabel( 'Last name' ).last() ).toHaveValue(
+			'Burns'
+		);
+		await expect(
+			page.getByLabel( 'Address', { exact: true } ).last()
+		).toHaveValue( '156th Street' );
+		await expect( page.getByLabel( 'City' ).last() ).toHaveValue(
+			'Springfield'
+		);
+		await expect( page.getByLabel( 'ZIP Code' ).last() ).toHaveValue(
+			'98500'
+		);
+	} );
+
 	test( 'warn when customer is missing required details', async ( {
 		page,
 	} ) => {
@@ -283,7 +404,9 @@ test.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 	} );
 
-	test( 'allows customer to fill shipping details', async ( { page } ) => {
+	test( 'allows customer to fill shipping details and toggle different billing', async ( {
+		page,
+	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
@@ -352,7 +475,9 @@ test.describe( 'Checkout Block page', () => {
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
-		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		guestOrderId1 = await orderReceivedText
+			.split( /(\s+)/ )[ 6 ]
+			.toString();
 
 		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
@@ -400,12 +525,12 @@ test.describe( 'Checkout Block page', () => {
 
 		// load the order placed as a guest
 		await page.goto(
-			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
+			`wp-admin/post.php?post=${ guestOrderId1 }&action=edit`
 		);
 
 		await expect(
 			page.getByRole( 'heading', {
-				name: `Order #${ guestOrderId } details`,
+				name: `Order #${ guestOrderId1 } details`,
 			} )
 		).toBeVisible();
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
@@ -421,5 +546,97 @@ test.describe( 'Checkout Block page', () => {
 			twoProductPrice
 		);
 		await clearFilters( page );
+	} );
+
+	test( 'allows existing customer to place an order', async ( { page } ) => {
+		for ( let i = 1; i < 3; i++ ) {
+			await page.goto( `/shop/?add-to-cart=${ productId }` );
+			await page.waitForLoadState( 'networkidle' );
+		}
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// click to log in and make sure you are on the same page after logging in
+		await page.getByText( 'Log in' ).click();
+		await page
+			.locator( 'input[name="username"]' )
+			.fill( customer.username );
+		await page
+			.locator( 'input[name="password"]' )
+			.fill( customer.password );
+		await page.locator( 'text=Log In' ).click();
+		await page.waitForLoadState( 'networkidle' );
+
+		// try to edit shipping details if already prefilled
+		try {
+			await page
+				.getByLabel( 'Edit address', { exact: true } )
+				.click( { timeout: 3000 } );
+		} catch ( error ) {
+			console.log( 'No shipping details prefilled, skipping action.' );
+		}
+
+		// fill shipping address and check cash on delivery method
+		await page.getByLabel( 'Email address' ).fill( customer.email );
+		await page.getByLabel( 'First name' ).fill( 'Homer' );
+		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.fill( '123 Evergreen Terrace' );
+		await page.getByLabel( 'City' ).fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page.getByLabel( 'Cash on delivery' ).check();
+		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
+
+		// place an order
+		await page.getByRole( 'button', { name: 'Place order' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
+
+		// get order ID from the page
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
+		customerOrderId = await orderReceivedText
+			.split( /(\s+)/ )[ 6 ]
+			.toString();
+
+		// Effect a log out/simulate a new browsing session by dropping all cookies.
+		await page.context().clearCookies();
+		await page.reload();
+
+		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+			/Please log in to your account to view this order/
+		);
+
+		// Switch to admin user.
+		await page.goto( 'wp-login.php?loggedout=true' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log In' ).click();
+
+		// load the order placed as a customer
+		await page.goto(
+			`wp-admin/post.php?post=${ customerOrderId }&action=edit`
+		);
+		await expect(
+			page.locator( 'h2.woocommerce-order-data__heading' )
+		).toContainText( `Order #${ customerOrderId } details` );
+		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
+			simpleProductName
+		);
+		await expect( page.locator( 'td.quantity >> nth=0' ) ).toContainText(
+			'2'
+		);
+		await expect( page.locator( 'td.item_cost >> nth=0' ) ).toContainText(
+			singleProductSalePrice
+		);
+		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
+			twoProductPrice
+		);
 	} );
 } );
