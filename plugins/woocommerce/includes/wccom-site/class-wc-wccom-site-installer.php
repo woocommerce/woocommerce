@@ -294,7 +294,7 @@ class WC_WCCOM_Site_Installer {
 		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			return new WP_Error( 'product_info_failed', __( 'Failed to retrieve product info from woo.com', 'woocommerce' ) );
+			return new WP_Error( 'product_info_failed', __( 'Failed to retrieve product info from Woo.com', 'woocommerce' ) );
 		}
 
 		$result = json_decode( wp_remote_retrieve_body( $request ), true );
