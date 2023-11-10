@@ -53,37 +53,26 @@ function getEdit<
 
 		const { getEvaluationContext } = useEvaluationContext( context );
 
-		const shouldHide = useSelect(
+		const { shouldHide, shouldDisable } = useSelect(
 			( select: typeof WPSelect ) => {
-				if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
-					return false;
-				}
-
 				const evaluationContext = getEvaluationContext( select );
 
-				return hideConditions.some( ( condition ) =>
-					evaluate( condition.expression, evaluationContext )
-				);
+				return {
+					shouldHide:
+						hideConditions &&
+						Array.isArray( hideConditions ) &&
+						hideConditions.some( ( condition ) =>
+							evaluate( condition.expression, evaluationContext )
+						),
+					shouldDisable:
+						disableConditions &&
+						Array.isArray( disableConditions ) &&
+						disableConditions.some( ( condition ) =>
+							evaluate( condition.expression, evaluationContext )
+						),
+				};
 			},
 			[ getEvaluationContext, hideConditions ]
-		);
-
-		const disabled: boolean = useSelect(
-			( select: typeof WPSelect ) => {
-				if (
-					! disableConditions ||
-					! Array.isArray( disableConditions )
-				) {
-					return false;
-				}
-
-				const evaluationContext = getEvaluationContext( select );
-
-				return disableConditions.some( ( condition ) =>
-					evaluate( condition.expression, evaluationContext )
-				);
-			},
-			[ getEvaluationContext, disableConditions ]
 		);
 
 		if ( ! edit || shouldHide ) {
@@ -92,7 +81,10 @@ function getEdit<
 
 		return createElement( edit, {
 			...props,
-			attributes: { ...props.attributes, disabled },
+			attributes: {
+				...props.attributes,
+				disabled: props.attributes.disabled || shouldDisable,
+			},
 		} );
 	};
 }
@@ -122,7 +114,7 @@ function augmentAttributes<
 				type: 'array',
 				__experimentalRole: 'content',
 			},
-			disabled: {
+			disabled: attributes.disabled || {
 				type: 'boolean',
 				__experimentalRole: 'content',
 			},
