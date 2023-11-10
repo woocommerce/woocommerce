@@ -341,14 +341,20 @@ class FileController {
 				if ( is_string( $line ) ) {
 					if ( false !== stripos( $line, $search ) ) {
 						$pattern = addcslashes( $search, '/' );
-						preg_match_all( "/$pattern/i", $line, $matches );
+						preg_match_all( "/$pattern/i", $line, $matches, PREG_OFFSET_CAPTURE );
+
 						if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {
+							$length_change = 0;
+
 							foreach ( $matches[0] as $match ) {
-								$line = str_replace(
-									$match,
-									'<span class="search-match">' . $match . '</span>',
-									$line
-								);
+								$replace        = '<span class="search-match">' . $match[0] . '</span>';
+								$offset         = $match[1] + $length_change;
+								$orig_length    = strlen( $match[0] );
+								$replace_length = strlen( $replace );
+
+								$line = substr_replace( $line, $replace, $offset, $orig_length );
+
+								$length_change += $replace_length - $orig_length;
 							}
 						}
 
@@ -361,6 +367,7 @@ class FileController {
 				}
 				$line_number ++;
 			}
+			$file->close_stream();
 		}
 
 		return $matched_lines;
