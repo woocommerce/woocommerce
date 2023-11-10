@@ -124,16 +124,18 @@ test.describe( 'Checkout Block page', () => {
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
-		const welcomeModalVisible = await page
-			.getByRole( 'heading', {
-				name: 'Welcome to the block editor',
-			} )
-			.isVisible();
-		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close' } ).click();
+
+		// Close welcome popup if prompted
+		try {
+			await page
+				.getByLabel( 'Close', { exact: true } )
+				.click( { timeout: 5000 } );
+		} catch ( error ) {
+			console.log( "Welcome modal wasn't present, skipping action." );
 		}
+
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: 'Add title' } )
 			.fill( pageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
