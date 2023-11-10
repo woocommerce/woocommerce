@@ -28,22 +28,26 @@ import { navigateOrParent } from '../utils';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 
-export type events = { type: 'GO_BACK_TO_HOME' };
+export * as actions from './actions';
+export * as services from './services';
+
+export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
 
 export const Transitional = ( {
 	editor,
 	sendEvent,
+	hasCompleteSurvey,
 	isSurveyOpen,
 	setSurveyOpen,
 }: {
 	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
+	hasCompleteSurvey: boolean;
 	isSurveyOpen: boolean;
 	setSurveyOpen: ( isOpen: boolean ) => void;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const isEditorLoading = useIsSiteEditorLoading();
-
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
@@ -57,7 +61,15 @@ export const Transitional = ( {
 					shouldCloseOnClickOutside={ false }
 					className="woocommerce-ai-survey-modal"
 				>
-					<SurveyForm closeFunction={ closeSurvey } />
+					<SurveyForm
+						onSend={ () => {
+							sendEvent( {
+								type: 'COMPLETE_SURVEY',
+							} );
+							closeSurvey();
+						} }
+						closeFunction={ closeSurvey }
+					/>
 				</Modal>
 			) }
 			<SiteHub
@@ -83,18 +95,20 @@ export const Transitional = ( {
 				<div className="woocommerce-customize-store__transitional-main-actions">
 					<WooCYSSecondaryButtonSlot />
 
-					<Button
-						className="woocommerce-customize-store__transitional-preview-button"
-						variant="secondary"
-						onClick={ () => {
-							recordEvent(
-								'customize_your_store_transitional_survey_click'
-							);
-							setSurveyOpen( true );
-						} }
-					>
-						{ __( 'Share feedback', 'woocommerce' ) }
-					</Button>
+					{ ! hasCompleteSurvey && (
+						<Button
+							className="woocommerce-customize-store__transitional-preview-button"
+							variant="secondary"
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_transitional_survey_click'
+								);
+								setSurveyOpen( true );
+							} }
+						>
+							{ __( 'Share feedback', 'woocommerce' ) }
+						</Button>
+					) }
 
 					<Button
 						className="woocommerce-customize-store__transitional-preview-button"
