@@ -60,7 +60,7 @@ jobs:
                   steps.generate_e2e_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: e2e-test-report---pr-${{ github.event.number }}
+                  name: e2e-test-report---pr-${{ github.run_number }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -113,7 +113,7 @@ jobs:
                   steps.generate_api_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
-                  name: api-test-report---pr-${{ github.event.number }}
+                  name: api-test-report---pr-${{ github.run_number }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
@@ -149,13 +149,13 @@ jobs:
             - name: Download API test report artifact
               uses: actions/download-artifact@v3
               with:
-                  name: api-test-report---pr-${{ github.event.number }}
+                  name: api-test-report---pr-${{ github.run_number }}
                   path: artifacts/api
 
             - name: Download Playwright E2E test report artifact
               uses: actions/download-artifact@v3
               with:
-                  name: e2e-test-report---pr-${{ github.event.number }}
+                  name: e2e-test-report---pr-${{ github.run_number }}
                   path: artifacts/e2e
 
             - name: Prepare test summary
@@ -164,29 +164,11 @@ jobs:
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
                   E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  PR_NUMBER: ${{ github.event.number }}
-                  SHA: ${{ github.event.pull_request.head.sha }}
               with:
                   result-encoding: string
                   script: |
-                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary.js' )
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
                       return await script( { core } )
-
-            - name: Find PR comment by github-actions[bot]
-              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
-              id: find-comment
-              with:
-                  issue-number: ${{ github.event.pull_request.number }}
-                  comment-author: 'github-actions[bot]'
-                  body-includes: Test Results Summary
-
-            - name: Create or update PR comment
-              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
-              with:
-                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
-                  issue-number: ${{ github.event.pull_request.number }}
-                  body: ${{ steps.prepare-test-summary.outputs.result }}
-                  edit-mode: replace
 
     publish-test-reports:
         name: Publish test reports
@@ -201,20 +183,17 @@ jobs:
         needs: [cot-api-tests-run, cot-e2e-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            PR_NUMBER: ${{ github.event.number }}
             RUN_ID: ${{ github.run_id }}
             COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         steps:
             - name: Publish test reports
               env:
-                  API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
-                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+                  API_ARTIFACT: api-test-report---pr-${{ github.run_number }}
+                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.run_number }}
               run: |
-                  gh workflow run publish-test-reports-pr.yml \
+                  gh workflow run publish-test-reports-daily.yml \
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
                     -f e2e_artifact=$E2E_ARTIFACT \
-                    -f pr_number=$PR_NUMBER \
-                    -f commit_sha=$COMMIT_SHA \
                     -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
