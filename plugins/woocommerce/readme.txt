@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Clear payment suggestion spec when the base country gets updated. [#41344](https://github.com/woocommerce/woocommerce/pull/41344)
 * Fix - Resolved an issue that would cause array order meta values to not be copied during HPOS post table backporting. [#41281](https://github.com/woocommerce/woocommerce/pull/41281)
 * Fix - Prevent a type error when summing an array that may contain empty strings. [#41205](https://github.com/woocommerce/woocommerce/pull/41205)
 * Fix - Preload Jetpack-related data from the Jetpack Connection package [#41092](https://github.com/woocommerce/woocommerce/pull/41092)
