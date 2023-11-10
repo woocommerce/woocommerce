@@ -18,11 +18,11 @@
 			width: 24px;
 			height: 24px;
 			margin-right: 6px;
-			min-width: max-content;
+			min-width: 24px; // Ensure that notice is visible in Safari. See https://github.com/woocommerce/woocommerce-blocks/issues/11734
 		}
 	}
 	ul {
-		margin: 0 0 1em 1.5em;
+		margin: 0 0 1em 1.2em;
 		padding: 0;
 		list-style: disc outside;
 	}
