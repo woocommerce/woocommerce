@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Create the filter woocommerce_order_received_verification_required to allow guest users to see the page order-received
+Adds filter `woocommerce_order_received_verify_known_shoppers` to allow known shoppers to access the order received page without being logged in.
