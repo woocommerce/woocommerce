@@ -578,6 +578,8 @@ class PageController {
 	 * @return string
 	 */
 	private function format_match( string $file_id, int $line_number, string $line ): string {
+		$params = $this->get_query_params( array( 'search' ) );
+
 		$match_url = add_query_arg(
 			array(
 				'view'    => 'single_file',
@@ -585,6 +587,24 @@ class PageController {
 			),
 			$this->get_logs_tab_url() . '#L' . absint( $line_number )
 		);
+
+		// Highlight matches within the line.
+		$pattern = preg_quote( $params['search'], '/' );
+		preg_match_all( "/$pattern/i", $line, $matches, PREG_OFFSET_CAPTURE );
+		if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {
+			$length_change = 0;
+
+			foreach ( $matches[0] as $match ) {
+				$replace        = '<span class="search-match">' . $match[0] . '</span>';
+				$offset         = $match[1] + $length_change;
+				$orig_length    = strlen( $match[0] );
+				$replace_length = strlen( $replace );
+
+				$line = substr_replace( $line, $replace, $offset, $orig_length );
+
+				$length_change += $replace_length - $orig_length;
+			}
+		}
 
 		return sprintf(
 			'<span class="match">%1$s%2$s</span>',
