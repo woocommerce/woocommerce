@@ -55,7 +55,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 			<div className="woocommerce-profile-wizard__footnote">
 				<Text variant="caption" as="p" size="12" lineHeight="16px">
 					{ sprintf(
-						/* translators: %s: a comma separated list of plugins, e.g. Jetpack, Woocommerce Shipping */
+						/* translators: %s: a comma separated list of plugins, e.g. Jetpack, WooCommerce Shipping */
 						_n(
 							'Installing the following plugin: %s',
 							'Installing the following plugins: %s',
@@ -104,7 +104,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 		<div className="woocommerce-profile-wizard__footnote">
 			<Text variant="caption" as="p" size="12" lineHeight="16px">
 				{ sprintf(
-					/* translators: %1$s: a comma separated list of plugins, e.g. Jetpack, Woocommerce Shipping, %2$s: text: 'User accounts are required to use these features.'  */
+					/* translators: %1$s: a comma separated list of plugins, e.g. Jetpack, WooCommerce Shipping, %2$s: text: 'User accounts are required to use these features.'  */
 					_n(
 						'The following plugin will be installed for free: %1$s. %2$s',
 						'The following plugins will be installed for free: %1$s. %2$s',
