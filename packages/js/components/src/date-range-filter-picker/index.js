@@ -127,8 +127,8 @@ class DateRangeFilterPicker extends Component {
 
 		const {
 			isViewportMobile,
-			focusOnMount = false,
-			popoverProps = { inline: false },
+			focusOnMount = true,
+			popoverProps = { inline: true },
 		} = this.props;
 		const contentClasses = classnames(
 			'woocommerce-filters-date__content',
