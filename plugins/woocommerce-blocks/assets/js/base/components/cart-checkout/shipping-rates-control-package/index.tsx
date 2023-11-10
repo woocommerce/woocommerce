@@ -4,8 +4,7 @@
 import classNames from 'classnames';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { Panel } from '@woocommerce/blocks-checkout';
-import { Label } from '@woocommerce/blocks-components';
+import { Label, Panel } from '@woocommerce/blocks-components';
 import { useCallback } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
