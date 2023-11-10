@@ -99,6 +99,17 @@ class WC_Helper_Admin {
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 			)
 		);
+
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/beacon',
+			array(
+				'methods'  => WP_Rest_Server::CREATABLE,
+				'callback' => array( __CLASS__, 'use_beacon' ),
+				// TODO: Implement permission callback.
+				//'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
 	}
 
 	/**
@@ -121,6 +132,38 @@ class WC_Helper_Admin {
 		}
 
 		wp_send_json( $featured );
+	}
+
+	public static function use_beacon( $request ) {
+
+		// Current sample of data that could come through
+		// object(stdClass)#1622 (2) {
+		// 	["eventName"]=>
+		// 	string(32) "marketplace_product_card_clicked"
+		// 	["data"]=>
+		// 	object(stdClass)#1683 (4) {
+		// 	  ["product"]=>
+		// 	  string(28) "WooCommerce Google Analytics"
+		// 	  ["vendor"]=>
+		// 	  string(11) "WooCommerce"
+		// 	  ["product_type"]=>
+		// 	  string(9) "extension"
+		// 	  ["position"]=>
+		// 	  int(1)
+		// 	}
+		//   }
+
+		$body = $request->get_body();
+		if ( ! $body ) {
+			return new WP_Error( 'invalid_request', __( 'Invalid request', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$event = json_decode( $body, true );
+
+		if ( ! $event ) {
+			return new WP_Error( 'invalid_event', __( 'Invalid event', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 	}
 
 }
