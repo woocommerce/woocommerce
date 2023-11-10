@@ -307,7 +307,7 @@ class WC_Shortcode_Checkout {
 		 */
 		$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
 		$order_customer_id = $order->get_customer_id();
-	
+
 		// For non-guest orders, require the user to be logged in before showing this page.
 		if ( $verify_known_shoppers && $order_customer_id && get_current_user_id() !== $order_customer_id ) {
 			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
