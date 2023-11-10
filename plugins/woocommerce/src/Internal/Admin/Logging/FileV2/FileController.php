@@ -315,6 +315,12 @@ class FileController {
 	 *                        line number, and the matched string with HTML markup around the matched parts.
 	 */
 	public function search_within_files( string $search, array $file_args = array() ) {
+		if ( '' === $search ) {
+			return array();
+		}
+
+		$search = esc_html( $search );
+
 		$file_args = array_merge(
 			$file_args,
 			array(
@@ -323,24 +329,28 @@ class FileController {
 			)
 		);
 
-		if ( '' === $search ) {
-			return array();
-		}
-
 		$files = $this->get_files( $file_args );
 		if ( is_wp_error( $files ) ) {
 			return $files;
 		}
 
 		$matched_lines = array();
+
 		foreach ( $files as $file ) {
 			$stream      = $file->get_stream();
 			$line_number = 1;
 			while ( ! feof( $stream ) ) {
 				$line = fgets( $stream );
 				if ( is_string( $line ) ) {
+					$line = esc_html( trim( $line ) );
+					if ( empty( $line ) ) {
+						continue;
+					}
+				}
+
+				if ( is_string( $line ) ) {
 					if ( false !== stripos( $line, $search ) ) {
-						$pattern = addcslashes( $search, '/' );
+						$pattern = preg_quote( $search, '/' );
 						preg_match_all( "/$pattern/i", $line, $matches, PREG_OFFSET_CAPTURE );
 
 						if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {

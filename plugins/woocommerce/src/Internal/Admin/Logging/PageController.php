@@ -375,7 +375,7 @@ class PageController {
 				'search'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $search ) {
-						return sanitize_text_field( wp_unslash( $search ) );
+						return esc_html( wp_unslash( $search ) );
 					},
 				),
 				'source'  => array(
