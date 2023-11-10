@@ -119,6 +119,12 @@ class AbstractBlock implements BlockInterface {
 				$this->add_hide_condition( $hide_condition['expression'] );
 			}
 		}
+
+		if ( isset( $config[ self::DISABLE_CONDITIONS_KEY ] ) ) {
+			foreach ( $config[ self::DISABLE_CONDITIONS_KEY ] as $disable_condition ) {
+				$this->add_disable_condition( $disable_condition['expression'] );
+			}
+		}
 	}
 
 	/**

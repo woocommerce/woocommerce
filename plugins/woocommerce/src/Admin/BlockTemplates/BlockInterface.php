@@ -32,6 +32,11 @@ interface BlockInterface {
 	public const HIDE_CONDITIONS_KEY = 'hideConditions';
 
 	/**
+	 * Key for the block disable conditions in the block configuration.
+	 */
+	public const DISABLE_CONDITIONS_KEY = 'disableConditions';
+
+	/**
 	 * Get the block name.
 	 */
 	public function get_name(): string;

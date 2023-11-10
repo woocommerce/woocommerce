@@ -382,6 +382,34 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that disable conditions can be passed in when creating a block.
+	 */
+	public function test_disable_conditions_in_constructor() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'blockName'      => 'test-block-name',
+				'disableConditions' => array(
+					array(
+						'expression' => 'foo === bar',
+					),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'k0' => array(
+					'expression' => 'foo === bar',
+				),
+			),
+			$block->get_disable_conditions(),
+			'Failed asserting that the disable conditions are set correctly in the constructor.'
+		);
+	}
+
+	/**
 	 * Test that hide conditions can be added to a block.
 	 */
 	public function test_add_hide_condition() {
