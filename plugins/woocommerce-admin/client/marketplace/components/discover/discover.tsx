@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useContext, useEffect, useState } from '@wordpress/element';
-import { recordPageView } from '@woocommerce/tracks';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -27,7 +27,10 @@ export default function Discover(): JSX.Element | null {
 			.map( ( product ) => {
 				return product.id;
 			} );
-		recordPageView( '/extensions', { view: 'discover', product_ids } );
+		recordEvent( 'marketplace_discover_viewed', {
+			view: 'discover',
+			product_ids,
+		} );
 	}
 
 	// Get the content for this screen
