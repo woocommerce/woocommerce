@@ -23,7 +23,6 @@ export function getQueryParams( block: BlockInstance | null ) {
 export const sharedParams: Array< keyof ProductCollectionQuery > = [
 	'exclude',
 	'offset',
-	'order',
 	'search',
 ];
 
@@ -36,9 +35,6 @@ export const mappedParams: {
 	key: keyof ProductCollectionQuery;
 	map: string;
 }[] = [
-	{ key: 'orderBy', map: 'orderby' },
-	{ key: 'pages', map: 'page' },
-	{ key: 'perPage', map: 'per_page' },
 	{ key: 'woocommerceStockStatus', map: 'stock_status' },
 	{ key: 'woocommerceOnSale', map: 'on_sale' },
 	{ key: 'woocommerceHandPickedProducts', map: 'include' },
