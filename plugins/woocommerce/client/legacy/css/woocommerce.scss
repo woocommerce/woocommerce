@@ -100,19 +100,6 @@ p.demo_store,
 		margin-top: 10px;
 	}
 
-	.woocommerce-breadcrumb {
-
-		@include clearfix();
-		margin: 0 0 1em;
-		padding: 0;
-		font-size: 0.92em;
-		color: $subtext;
-
-		a {
-			color: $subtext;
-		}
-	}
-
 	.quantity .qty {
 		width: 3.631em;
 		text-align: center;
@@ -133,8 +120,6 @@ p.demo_store,
 
 		span.price,
 		p.price {
-			color: $highlight;
-			font-size: 1.25em;
 
 			ins {
 				background: inherit;
@@ -150,14 +135,6 @@ p.demo_store,
 
 		p.stock {
 			font-size: 0.92em;
-		}
-
-		.stock {
-			color: $highlight;
-		}
-
-		.out-of-stock {
-			color: red;
 		}
 
 		.woocommerce-product-rating {
@@ -754,11 +731,6 @@ p.demo_store,
 					position: relative;
 					background: 0;
 					border: 0;
-
-					.meta {
-						color: $subtext;
-						font-size: 0.75em;
-					}
 
 					img.avatar {
 						float: left;
@@ -1745,6 +1717,47 @@ p.demo_store,
 		}
 	}
 }
+
+/**
+ * WooCommerce specific styles for legacy themes.
+ */
+.woocommerce:where(body:not(.woocommerce-uses-block-theme)) {
+
+	.woocommerce-breadcrumb {
+
+		@include clearfix();
+		margin: 0 0 1em;
+		padding: 0;
+		font-size: 0.92em;
+		color: $subtext;
+
+		a {
+			color: $subtext;
+		}
+	}
+
+	div.product {
+		span.price,
+		p.price {
+			color: $highlight;
+			font-size: 1.25em;
+		}
+
+		.stock {
+			color: $highlight;
+		}
+
+		.out-of-stock {
+			color: red;
+		}
+	}
+
+	#reviews #comments ol.commentlist li .meta {
+		color: $subtext;
+		font-size: 0.75em;
+	}
+}
+
 
 .woocommerce-no-js {
 
