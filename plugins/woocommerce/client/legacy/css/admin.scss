@@ -1443,21 +1443,27 @@ table.wc_status_table--tools {
 		}
 	}
 
+	.match-file {
+		width: 16%;
+		padding: 0.3em 0.5em 0.3em 1em;
+		line-height: 2;
+	}
+
 	.match-anchor {
-		flex: 1;
-		padding: 0 1em;
-		font-size: 0.9em;
+		width: 8%;
+		padding: 0 0.5em;
 	}
 
 	.match-content {
-		flex: 6;
+		flex: 1;
 		overflow: hidden;
-		padding: 0 1em;
+		padding: 0 1em 0 0.5em;
 	}
 
 	.search-match {
 		background: #fff8c5;
-		padding: 0.52em 0;
+		padding: 0.46em 0;
+		border: 1px dashed #c3c4c7;
 	}
 
 	.no-match {

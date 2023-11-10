@@ -590,6 +590,9 @@ class PageController {
 	private function format_match( string $file_id, int $line_number, string $line ): string {
 		$params = $this->get_query_params( array( 'search' ) );
 
+		// Add a word break after the rotation number, if it exists.
+		$file_id = preg_replace( '/\.([0-9])+\-/', '.\1<wbr>-', $file_id );
+
 		$match_url = add_query_arg(
 			array(
 				'view'    => 'single_file',
@@ -617,15 +620,18 @@ class PageController {
 		}
 
 		return sprintf(
-			'<span class="match">%1$s%2$s</span>',
+			'<span class="match">%1$s%2$s%3$s</span>',
 			sprintf(
-				'<a href="%1$s" class="match-anchor">%2$s<br />%3$s</a>',
+				'<span class="match-file">%s</span>',
+				wp_kses( $file_id, array( 'wbr' => array() ) )
+			),
+			sprintf(
+				'<a href="%1$s" class="match-anchor">%2$s</a>',
 				esc_url( $match_url ),
-				esc_html( $file_id ),
 				sprintf(
-					// translators: %d is a line number in a file.
-					esc_html__( 'Line %d', 'woocommerce' ),
-					absint( $line_number )
+					// translators: %s is a line number in a file.
+					esc_html__( 'Line %s', 'woocommerce' ),
+					number_format_i18n( absint( $line_number ) )
 				)
 			),
 			sprintf(
