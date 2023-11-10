@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useContainerWidthContext } from '@woocommerce/base-context';
-import { Panel } from '@woocommerce/blocks-checkout';
+import { Panel } from '@woocommerce/blocks-components';
 import type { CartItem } from '@woocommerce/types';
 
 /**
