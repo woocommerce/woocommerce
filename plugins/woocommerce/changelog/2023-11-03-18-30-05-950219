@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use consistent sanitization when saving tax classes.
