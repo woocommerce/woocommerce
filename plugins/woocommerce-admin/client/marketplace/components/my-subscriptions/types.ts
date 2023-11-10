@@ -28,10 +28,13 @@ export type Subscription = {
 	local: SubscriptionLocal;
 	has_updates: boolean;
 	version: string;
+	subscription_installed: boolean;
+	subscription_available: boolean;
 };
 
 export interface SubscriptionLocal {
 	installed: boolean;
+	installable: boolean;
 	active: boolean;
 	version: string;
 	type: string;

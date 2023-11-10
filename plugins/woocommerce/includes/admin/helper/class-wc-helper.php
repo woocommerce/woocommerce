@@ -1454,9 +1454,9 @@ class WC_Helper {
 			return false;
 		}
 
-		return self::add_local_data_to_subscription(
-			array_values( $subscriptions )[0]
-		);
+		$subscription          = array_shift( $subscriptions );
+		$subscription['local'] = self::get_subscription_local_data( $subscription );
+		return $subscription;
 	}
 
 	/**
@@ -1504,30 +1504,12 @@ class WC_Helper {
 			);
 		}
 
-		// Track installed subscription ids to avoid duplicate entries for inactive subsriptions.
-		$installed_subscription_ids = array();
-
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
 
-			$subscription['local'] = array(
-				'installed' => false,
-				'active'    => false,
-				'version'   => null,
-				'type'      => null,
-				'slug'      => null,
-				'path'      => null,
-			);
-
 			$updates = WC_Helper_Updater::get_update_data();
 
-			$has_another_installed_subscription = in_array( $subscription['product_id'], $installed_subscription_ids, true );
-			if ( false === $has_another_installed_subscription ) {
-				$subscription = self::add_local_data_to_subscription( $subscription );
-				if ( ! empty( $subscription['local']['installed'] ) ) {
-					array_push( $installed_subscription_ids, $subscription['product_id'] );
-				}
-			}
+			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
 			$subscription['has_update'] = false;
 			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
@@ -1538,10 +1520,119 @@ class WC_Helper {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
 			}
 		}
+
+		// Sort subscriptions by name and expiration date.
+		usort(
+			$subscriptions,
+			function( $a, $b ) {
+				$compare_value = strcasecmp( $a['product_name'], $b['product_name'] );
+				if ( 0 === $compare_value ) {
+					return strcasecmp( $a['expires'], $b['expires'] );
+				}
+				return $compare_value;
+			}
+		);
+
+		// Add subscription install flags after the active and local data is set.
+		foreach ( $subscriptions as &$subscription ) {
+			$subscription['subscription_available'] = self::is_subscription_available( $subscription, $subscriptions );
+			$subscription['subscription_installed'] = self::is_subscription_installed( $subscription, $subscriptions );
+		}
+
 		// Break the by-ref.
 		unset( $subscription );
 
 		return $subscriptions;
+	}
+
+	/**
+	 * Check if a subscription is available to use.
+	 * That is, is not already active and hasn't expired, and there are no other subscriptions
+	 * for this product already active on this site.
+	 *
+	 * @param array $subscription The subscription we're checking.
+	 * @param array $subscriptions The list of all the user's subscriptions.
+	 * @return bool True if multiple licenses exist, false otherwise.
+	 */
+	public static function is_subscription_available( $subscription, $subscriptions ) {
+		if ( true === $subscription['active'] ) {
+			return false;
+		}
+
+		if ( true === $subscription['expired'] ) {
+			return false;
+		}
+
+		$product_subscriptions = wp_list_filter(
+			$subscriptions,
+			array(
+				'product_id' => $subscription['product_id'],
+				'active'     => true,
+			)
+		);
+
+		// If there are no subscriptions for this product already active on this site, then it's available.
+		if ( empty( $product_subscriptions ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if product relating to a subscription is installed.
+	 * This method will return true if the product is installed, but will exclude subscriptions for the same product that are not in use.
+	 * If a product is installed and inactive, this will ensure that one subscription is marked as installed.
+	 *
+	 * @param array $subscription The subscription we're checking.
+	 * @param array $subscriptions The list of all the user's subscriptions.
+	 * @return bool True if installed, false otherwise.
+	 */
+	public static function is_subscription_installed( $subscription, $subscriptions ) {
+		if ( false === $subscription['local']['installed'] ) {
+			return false;
+		}
+
+		// If the subscription is active, then it's installed.
+		if ( true === $subscription['active'] ) {
+			return true;
+		}
+
+		$product_subscriptions = wp_list_filter(
+			$subscriptions,
+			array(
+				'product_id' => $subscription['product_id'],
+			)
+		);
+		if ( empty( $product_subscriptions ) ) {
+			return false;
+		}
+
+		// If there are no other subscriptions for this product, then it's installed.
+		if ( 1 === count( $product_subscriptions ) ) {
+			return true;
+		}
+
+		$active_subscription = wp_list_filter(
+			$product_subscriptions,
+			array(
+				'active' => true,
+			)
+		);
+
+		// If there is another active subscription, this subscription is not installed.
+		// If the current subscription is active, it would already return true above.
+		if ( ! empty( $active_subscription ) ) {
+			return false;
+		}
+
+		// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
+		$product_subscription = array_shift( $product_subscriptions );
+		if ( $product_subscription['product_key'] === $subscription['product_key'] ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -1550,44 +1641,51 @@ class WC_Helper {
 	 * @param array $subscription The subscription data.
 	 * @return array The subscription data with local data added.
 	 */
-	public static function add_local_data_to_subscription( array $subscription ) {
+	public static function get_subscription_local_data( array $subscription ) {
 		$local_plugins = self::get_local_plugins();
 		$local_themes  = self::get_local_themes();
 
-		$local = wp_list_filter(
+		$installed_product = wp_list_filter(
 			array_merge( $local_plugins, $local_themes ),
 			array( 'slug' => $subscription['zip_slug'] )
 		);
-		$local = array_shift( $local );
+		$installed_product = array_shift( $installed_product );
 
-		if ( empty( $local ) ) {
-			return $subscription;
+		if ( empty( $installed_product ) ) {
+			return array(
+				'installed' => false,
+				'active'    => false,
+				'version'   => null,
+				'type'      => null,
+				'slug'      => null,
+				'path'      => null,
+			);
 		}
 
-		$subscription['local'] = array(
+		$local_data = array(
 			'installed' => true,
 			'active'    => false,
-			'version'   => $local['Version'],
-			'type'      => $local['_type'],
+			'version'   => $installed_product['Version'],
+			'type'      => $installed_product['_type'],
 			'slug'      => null,
-			'path'      => $local['_filename'],
+			'path'      => $installed_product['_filename'],
 		);
 
-		if ( 'plugin' === $local['_type'] ) {
-			$subscription['local']['slug'] = $local['slug'];
-			if ( is_plugin_active( $local['_filename'] ) ) {
-				$subscription['local']['active'] = true;
-			} elseif ( is_multisite() && is_plugin_active_for_network( $local['_filename'] ) ) {
-				$subscription['local']['active'] = true;
+		if ( 'plugin' === $installed_product['_type'] ) {
+			$local_data['slug'] = $installed_product['slug'];
+			if ( is_plugin_active( $installed_product['_filename'] ) ) {
+				$local_data['active'] = true;
+			} elseif ( is_multisite() && is_plugin_active_for_network( $installed_product['_filename'] ) ) {
+				$local_data['active'] = true;
 			}
-		} elseif ( 'theme' === $local['_type'] ) {
-			$subscription['local']['slug'] = $local['_stylesheet'];
-			if ( in_array( $local['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
-				$subscription['local']['active'] = true;
+		} elseif ( 'theme' === $installed_product['_type'] ) {
+			$local_data['slug'] = $installed_product['_stylesheet'];
+			if ( in_array( $installed_product['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
+				$local_data['active'] = true;
 			}
 		}
 
-		return $subscription;
+		return $local_data;
 	}
 
 	/**
