@@ -1,4 +1,4 @@
-name: Run daily tests in an environment with COT enabled
+name: Run daily tests in an environment with HPOS enabled
 on:
     schedule:
         - cron: '30 2 * * *'
@@ -11,8 +11,8 @@ concurrency:
 permissions: {}
 
 jobs:
-    cot-e2e-tests-run:
-        name: Runs E2E tests with COT enabled.
+    hpos-e2e-tests-run:
+        name: Runs E2E tests with HPOS enabled.
         runs-on: ubuntu-20.04
         permissions:
           contents: read
@@ -25,7 +25,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers with COT enabled.
+            - name: Load docker images and start containers with HPOS enabled.
               working-directory: plugins/woocommerce
               env:
                 ENABLE_HPOS: 1
@@ -67,8 +67,8 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    cot-api-tests-run:
-        name: Runs API tests with COT enabled.
+    hpos-api-tests-run:
+        name: Runs API tests with HPOS enabled.
         runs-on: ubuntu-20.04
         permissions:
           contents: read
@@ -81,7 +81,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Load docker images and start containers with COT enabled.
+            - name: Load docker images and start containers with HPOS enabled.
               working-directory: plugins/woocommerce
               env:
                 ENABLE_HPOS: 1
@@ -132,7 +132,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
           contents: read
-        needs: [cot-api-tests-run, cot-e2e-tests-run]
+        needs: [hpos-api-tests-run, hpos-e2e-tests-run]
         steps:
             - name: Create dirs
               run: |
@@ -180,7 +180,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [cot-api-tests-run, cot-e2e-tests-run]
+        needs: [hpos-api-tests-run, hpos-e2e-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
