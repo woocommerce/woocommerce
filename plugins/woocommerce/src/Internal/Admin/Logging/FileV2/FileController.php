@@ -339,44 +339,25 @@ class FileController {
 		foreach ( $files as $file ) {
 			$stream      = $file->get_stream();
 			$line_number = 1;
+
 			while ( ! feof( $stream ) ) {
 				$line = fgets( $stream );
-				if ( is_string( $line ) ) {
-					$line = esc_html( trim( $line ) );
-					if ( empty( $line ) ) {
-						continue;
-					}
+				if ( ! is_string( $line ) ) {
+					continue;
 				}
 
-				if ( is_string( $line ) ) {
-					if ( false !== stripos( $line, $search ) ) {
-						$pattern = preg_quote( $search, '/' );
-						preg_match_all( "/$pattern/i", $line, $matches, PREG_OFFSET_CAPTURE );
-
-						if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {
-							$length_change = 0;
-
-							foreach ( $matches[0] as $match ) {
-								$replace        = '<span class="search-match">' . $match[0] . '</span>';
-								$offset         = $match[1] + $length_change;
-								$orig_length    = strlen( $match[0] );
-								$replace_length = strlen( $replace );
-
-								$line = substr_replace( $line, $replace, $offset, $orig_length );
-
-								$length_change += $replace_length - $orig_length;
-							}
-						}
-
-						$matched_lines[] = array(
-							'file_id'     => $file->get_file_id(),
-							'line_number' => $line_number,
-							'line'        => $line,
-						);
-					}
+				$line = esc_html( trim( $line ) );
+				if ( false !== stripos( $line, $search ) ) {
+					$matched_lines[] = array(
+						'file_id'     => $file->get_file_id(),
+						'line_number' => $line_number,
+						'line'        => $line,
+					);
 				}
+
 				$line_number ++;
 			}
+
 			$file->close_stream();
 		}
 
