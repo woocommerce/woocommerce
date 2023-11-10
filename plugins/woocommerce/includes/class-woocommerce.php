@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
+use Automattic\WooCommerce\Internal\SettingsImportExport;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
@@ -45,6 +46,7 @@ final class WooCommerce {
 	 */
 	public $db_version = '430';
 
+	// phpcs:disable PSR2.Classes.PropertyDeclaration.Underscore
 	/**
 	 * The single instance of the class.
 	 *
@@ -52,6 +54,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
+	// phpcs:enable PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
 	 * Session instance.
@@ -249,6 +252,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
 		// These classes set up hooks on instantiation.
+		wc_get_container()->get( SettingsImportExport::class );
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
 		$container->get( DownloadPermissionsAdjuster::class );

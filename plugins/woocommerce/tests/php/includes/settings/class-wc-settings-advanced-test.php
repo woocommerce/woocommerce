@@ -30,6 +30,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'webhooks',
 			'legacy_api',
 			'woocommerce_com',
+			'importexport',
 			'features',
 		);
 

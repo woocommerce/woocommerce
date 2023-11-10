@@ -5,6 +5,8 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\SettingsImportExport;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -28,6 +30,14 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		parent::__construct();
 		$this->notices();
+
+		add_filter( 'woocommerce_save_settings_advanced_importexport', '__return_false' );
+		add_action(
+			'woocommerce_before_settings_advanced',
+			function() {
+				$this->output_import_export_forms();
+			}
+		);
 	}
 
 	/**
@@ -42,6 +52,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			'importexport'    => __( 'Import/Export', 'woocommerce' ),
 		);
 	}
 
@@ -451,15 +462,168 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		global $current_section, $hide_save_button;
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
 		} elseif ( 'keys' === $current_section ) {
 			WC_Admin_API_Keys::page_output();
+		} elseif ( 'importexport' === $current_section ) {
+			$hide_save_button = true;
+			$this->output_import_export();
 		} else {
 			parent::output();
 		}
+	}
+
+	/**
+	 * Output the forms for the "Import and export settings" section
+	 * (these need to be rendered outside the main settings form).
+	 */
+	private function output_import_export_forms() {
+		global $current_section;
+
+		if ( 'importexport' !== $current_section ) {
+			return;
+		}
+
+		$export_action_name = SettingsImportExport::AJAX_EXPORT_ACTION;
+		$import_action_name = SettingsImportExport::AJAX_IMPORT_ACTION;
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+		<form method='get' action='admin-ajax.php' id='wc_export_settings_form'>
+			<input type='hidden' name='action' value="<?php echo $export_action_name; ?>"/>
+			<?php wp_nonce_field( 'wc_export_settings' ); ?>
+		</form>
+		<form method='post' action='admin-ajax.php' id='wc_import_settings_form' enctype='multipart/form-data'>
+			<input type='hidden' name='action' value="<?php echo $import_action_name; ?>"/>
+			<?php wp_nonce_field( 'wc_import_settings' ); ?>
+		</form>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Output the markup for the "Import and export settings" section.
+	 */
+	private function output_import_export() {
+		$verbose_input_name      = SettingsImportExport::VERBOSE_EXPORT_INPUT_NAME;
+		$pretty_print_input_name = SettingsImportExport::PRETTY_PRINT_EXPORT_INPUT_NAME;
+		$empty_export_input_name = SettingsImportExport::EMPTY_EXPORT_INPUT_NAME;
+		$import_mode_input_name  = SettingsImportExport::IMPORT_MODE_INPUT_NAME;
+		$file_name_input_name    = SettingsImportExport::FILE_NAME_INPUT_NAME;
+
+		?>
+		<h2>Export settings</h2>
+		<div id='export-settings'>Use this to export the WooCommerce settings into a JSON file.</div>
+
+		<div style='margin-top: 15px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $verbose_input_name ); ?>' value='on' />
+				<?php
+				esc_html_e( 'Verbose (include pages, sections, and settings titles, descriptions and default values)', 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $pretty_print_input_name ); ?>' value='on' />
+				<?php
+				esc_html_e( 'Generate a pretty-printed JSON file', 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $empty_export_input_name ); ?>' value='on' />
+				<?php
+					// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+					printf(
+						/* translators: %s are just '<code>' start and end tags. */
+						__( "Don't include WooCommerce core settings (the file will only contain data added via the %1\$swoocommerce_settings_export%2\$s filter)", 'woocommerce' ),
+						'<code>',
+						'</code>'
+					);
+					// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			</label>
+		</div>
+
+		<?php
+		/**
+		 * Customize the settings export form by adding extra input fields if necessary.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param string $form_name The name of the form that any added input should be attached to via a 'form' attribute.
+		 */
+		do_action( 'woocommerce_settings_export_form_extra_inputs', 'wc_export_settings_form' );
+		?>
+
+		<div style='margin-bottom: 20px;'></div>
+		<div>
+			<button form='wc_export_settings_form' type='submit' class='button button-primary'>
+			<?php
+				esc_html_e( 'Export settings', 'woocommerce' );
+			?>
+			</button>
+		</div>
+
+		<h2 style="margin-top: 40px;">Import settings</h2>
+		<div id='export-settings'>Use this to import the WooCommerce settings from a JSON file.</div>
+
+		<div style='margin-top: 15px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='full' checked />
+				<?php
+				esc_html_e( "Full import (replace existing settings and create settings that don't exist)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='replace_only' />
+				<?php
+				esc_html_e( "Only replace existing settings (don't create settings that don't exist)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px; margin-bottom: 20px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='create_only' />
+				<?php
+				esc_html_e( "Only create settings that don't exist (don't replace already existing settings)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+
+		<?php
+		/**
+		 * Customize the settings import form by adding extra input fields if necessary.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param string $form_name The name of the form that any added input should be attached to via a 'form' attribute.
+		 */
+		do_action( 'woocommerce_settings_import_form_extra_inputs', 'wc_import_settings_form' );
+		?>
+
+		<div style='margin-top: 10px;'>
+			<label>
+				<span style='margin-right: 40px;''>Select a file to import:</span>
+				<input form='wc_import_settings_form' type='file' id='settings-import-file' name='<?php echo esc_attr( $file_name_input_name ); ?>'/>
+				</label>
+		</div>
+		<div style='margin-bottom: 10px;'></div>
+		<div>
+		<button form='wc_import_settings_form' type='submit' class="button button-primary">
+			<?php
+			esc_html_e( 'Import settings', 'woocommerce' );
+			?>
+		</button>
+		</div>
+		<?php
 	}
 
 	/**
