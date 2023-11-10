@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import classnames from 'classnames';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,11 +18,23 @@ export interface ProductCardProps {
 	isLoading?: boolean;
 }
 
+function recordBeaconEvent( eventName: string, data: object ) {
+	navigator.sendBeacon(
+		'http://localhost:8888/wp-json/wc/v3/marketplace/beacon',
+		JSON.stringify( {
+			eventName,
+			data,
+		} )
+	);
+	//recordEvent( eventName, { ...data } );
+}
+
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { isLoading, type } = props;
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		title: '',
+		position: '',
 		description: '',
 		vendorName: '',
 		vendorUrl: '',
@@ -29,6 +42,10 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		url: '',
 		price: 0,
 		image: '',
+		label: '',
+		group: '',
+		searchTerm: '',
+		category: '',
 	};
 
 	// We hardcode this for now while we only display prices in USD.
@@ -38,7 +55,18 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	let productVendor: string | JSX.Element | null = product?.vendorName;
 	if ( product?.vendorName && product?.vendorUrl ) {
 		productVendor = (
-			<a href={ product.vendorUrl } rel="noopener noreferrer">
+			<a
+				href={ product.vendorUrl }
+				rel="noopener noreferrer"
+				onClick={ () => {
+					recordEvent( 'marketplace_product_card_vendor_clicked', {
+						product: product.title,
+						vendor: product.vendorName,
+						product_type: type,
+						...( product.label && { label: product.label } ),
+					} );
+				} }
+			>
 				{ product.vendorName }
 			</a>
 		);
@@ -86,8 +114,55 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							<h2 className="woocommerce-marketplace__product-card__title">
 								<a
 									className="woocommerce-marketplace__product-card__link"
-									href={ product.url }
+									// href={ product.url }
+									href="#"
 									rel="noopener noreferrer"
+									onClick={ () => {
+										// recordEvent(
+										// 	'marketplace_product_card_clicked',
+										// 	{
+										// 		product: product.title,
+										// 		vendor: product.vendorName,
+										// 		product_type: type,
+										// 		position: product.position,
+										// 		...( product.label && {
+										// 			label: product.label,
+										// 		} ),
+										// 		...( product.group && {
+										// 			group: product.group,
+										// 		} ),
+										// 		...( product.searchTerm && {
+										// 			search_term:
+										// 				product.searchTerm,
+										// 		} ),
+										// 		...( product.category && {
+										// 			category: product.category,
+										// 		} ),
+										// 	}
+										// );
+										recordBeaconEvent(
+											'marketplace_product_card_clicked',
+											{
+												product: product.title,
+												vendor: product.vendorName,
+												product_type: type,
+												position: product.position,
+												...( product.label && {
+													label: product.label,
+												} ),
+												...( product.group && {
+													group: product.group,
+												} ),
+												...( product.searchTerm && {
+													search_term:
+														product.searchTerm,
+												} ),
+												...( product.category && {
+													category: product.category,
+												} ),
+											}
+										);
+									} }
 								>
 									{ isLoading ? ' ' : product.title }
 								</a>

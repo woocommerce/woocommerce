@@ -25,12 +25,14 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 
 	const query = useQuery();
 	const showCategorySelector = query.section ? true : false;
+	const searchTerm = query.term ? query.term : '';
 
 	const extensionComponent = (
 		<Products
 			products={ extensionList }
 			type={ ProductType.extension }
 			categorySelector={ showCategorySelector }
+			searchTerm={ searchTerm }
 		/>
 	);
 
@@ -39,6 +41,7 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 			products={ themeList }
 			type={ ProductType.theme }
 			categorySelector={ showCategorySelector }
+			searchTerm={ searchTerm }
 		/>
 	);
 
