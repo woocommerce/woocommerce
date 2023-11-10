@@ -364,7 +364,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Check to see if the helper is connected to woocommerce.com
+	 * Check to see if the helper is connected to Woo.com
 	 *
 	 * @return string
 	 */

@@ -12,7 +12,7 @@ Let’s say we had an extension that adds a slider to a single product page. Thi
 
 That’s only two options, specifically related to  **Products**. We could quite easily just append them onto the core WooCommerce Products Settings (**WooCommerce > Settings > Products**), but that wouldn’t be very user friendly. Users wouldn’t know where to look initially so they’d have to scan all of the Products options and it would be difficult / impossible to link the options directly. Fortunately, as of WooCommerce 2.2.2, there is a new filter in place that allows you add a new  **section**, beneath one of the core settings’ tabs.
 
-> **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woocommerce.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](http://www.woocommerce.com/support-policy/).
+> **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](https://woo.com/support-policy/).
 
 ## [How to Create a Section](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extesion-developlment/adding-a-section-to-a-settings-tab.md#section-2)
 
