@@ -282,7 +282,7 @@ class WC_WCCOM_Site_Installer {
 			'product_type' => '',
 		);
 
-		// Get product info from woo.com.
+		// Get product info from Woo.com.
 		$request = WC_Helper_API::get(
 			add_query_arg(
 				array( 'product_id' => absint( $product_id ) ),
