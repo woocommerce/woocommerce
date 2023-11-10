@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent PHP warning when order lock is released during page load.

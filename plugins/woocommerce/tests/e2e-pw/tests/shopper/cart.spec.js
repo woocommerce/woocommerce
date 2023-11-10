@@ -50,9 +50,7 @@ test.describe( 'Cart page', () => {
 
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+		await expect( page.getByText('Your cart is currently empty.') ).toBeVisible();
 	} );
 
 	test( 'should add the product to the cart from the shop page', async ( {

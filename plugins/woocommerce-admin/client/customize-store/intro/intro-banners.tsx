@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -192,6 +193,9 @@ export const ExistingAiThemeBanner = ( {
 		<Button
 			className=""
 			onClick={ () => {
+				recordEvent(
+					'customize_your_store_intro_create_a_new_one_click'
+				);
 				setOpenDesignChangeWarningModal( true );
 			} }
 			variant={ 'secondary' }
@@ -211,6 +215,7 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
+				recordEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath( {}, '/customize-store/assembler-hub', {} )

@@ -31,6 +31,13 @@ import {
 } from './pages';
 import { attachIframeListeners, onIframeLoad } from '../utils';
 
+const assignStartLoadingTime = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	startLoadingTime: () => performance.now(),
+} );
+
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
@@ -47,8 +54,9 @@ const assignLookAndFeel = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( _context, event: unknown ) => {
+	lookAndFeel: ( context, event: unknown ) => {
 		return {
+			...context.lookAndFeel,
 			choice: ( event as lookAndFeelCompleteEvent ).payload,
 		};
 	},
@@ -58,8 +66,9 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	toneOfVoice: ( _context, event: unknown ) => {
+	toneOfVoice: ( context, event: unknown ) => {
 		return {
+			...context.toneOfVoice,
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
 	},
@@ -73,12 +82,16 @@ const assignLookAndTone = assign<
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.look,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.look,
 		};
 	},
 	toneOfVoice: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.tone,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.tone,
 		};
 	},
 } );
@@ -210,6 +223,8 @@ const assignAPICallLoaderError = assign<
 	designWithAiStateMachineEvents
 >( {
 	apiCallLoader: () => {
+		recordEvent( 'customize_your_store_ai_wizard_error' );
+
 		return {
 			hasErrors: true,
 		};
@@ -277,20 +292,36 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = async () => {
+const redirectToAssemblerHub = async (
+	context: designWithAiStateMachineContext
+) => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
 	const iframe = document.createElement( 'iframe' );
 	iframe.classList.add( 'cys-fullscreen-iframe' );
 	iframe.src = assemblerUrl;
 
 	const showIframe = () => {
+		if ( iframe.style.opacity === '1' ) {
+			// iframe is already visible
+			return;
+		}
+
 		const loader = document.getElementsByClassName(
 			'woocommerce-onboarding-loader'
 		);
 		if ( loader[ 0 ] ) {
 			( loader[ 0 ] as HTMLElement ).style.display = 'none';
 		}
+
 		iframe.style.opacity = '1';
+
+		if ( context.startLoadingTime ) {
+			const endLoadingTime = performance.now();
+			const timeToLoad = endLoadingTime - context.startLoadingTime;
+			recordEvent( 'customize_your_store_ai_wizard_loading_time', {
+				time_in_s: ( timeToLoad / 1000 ).toFixed( 2 ),
+			} );
+		}
 	};
 
 	iframe.onload = () => {
@@ -307,6 +338,7 @@ const redirectToAssemblerHub = async () => {
 };
 
 export const actions = {
+	assignStartLoadingTime,
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,
