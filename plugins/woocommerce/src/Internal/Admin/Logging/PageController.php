@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, ListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
 use WC_Log_Levels;
@@ -24,11 +24,11 @@ class PageController {
 	private $file_controller;
 
 	/**
-	 * Instance of ListTable.
+	 * Instance of FileListTable.
 	 *
-	 * @var ListTable
+	 * @var FileListTable
 	 */
-	private $list_table;
+	private $file_list_table;
 
 	/**
 	 * Initialize dependencies.
@@ -139,14 +139,14 @@ class PageController {
 		$params   = $this->get_query_params( array( 'order', 'orderby', 'source', 'view' ) );
 		$defaults = $this->get_query_param_defaults();
 
-		$this->get_list_table()->prepare_items();
+		$this->get_file_list_table()->prepare_items();
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2>
 				<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
 			</h2>
-			<?php if ( $this->get_list_table()->has_items() ) : ?>
+			<?php if ( $this->get_file_list_table()->has_items() ) : ?>
 				<?php $this->render_search_field(); ?>
 			<?php endif; ?>
 		</header>
@@ -162,7 +162,7 @@ class PageController {
 					/>
 				<?php endif; ?>
 			<?php endforeach; ?>
-			<?php $this->get_list_table()->display(); ?>
+			<?php $this->get_file_list_table()->display(); ?>
 		</form>
 		<?php
 	}
@@ -406,16 +406,16 @@ class PageController {
 	/**
 	 * Get and cache an instance of the list table.
 	 *
-	 * @return ListTable
+	 * @return FileListTable
 	 */
-	private function get_list_table(): ListTable {
-		if ( $this->list_table instanceof ListTable ) {
-			return $this->list_table;
+	private function get_file_list_table(): FileListTable {
+		if ( $this->file_list_table instanceof FileListTable ) {
+			return $this->file_list_table;
 		}
 
-		$this->list_table = new ListTable( $this->file_controller, $this );
+		$this->file_list_table = new FileListTable( $this->file_controller, $this );
 
-		return $this->list_table;
+		return $this->file_list_table;
 	}
 
 	/**
@@ -428,13 +428,13 @@ class PageController {
 
 		if ( 'list_files' === $params['view'] ) {
 			// Ensure list table columns are initialized early enough to enable column hiding.
-			$this->get_list_table()->prepare_column_headers();
+			$this->get_file_list_table()->prepare_column_headers();
 
 			add_screen_option(
 				'per_page',
 				array(
 					'default' => 20,
-					'option'  => ListTable::PER_PAGE_USER_OPTION_KEY,
+					'option'  => FileListTable::PER_PAGE_USER_OPTION_KEY,
 				)
 			);
 		}
@@ -453,7 +453,7 @@ class PageController {
 			return;
 		}
 
-		$action = $this->get_list_table()->current_action();
+		$action = $this->get_file_list_table()->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();

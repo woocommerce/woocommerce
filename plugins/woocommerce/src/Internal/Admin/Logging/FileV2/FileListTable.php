@@ -8,9 +8,9 @@ use Automattic\WooCommerce\Internal\Admin\Logging\PageController;
 use WP_List_Table;
 
 /**
- * ListTable class.
+ * FileListTable class.
  */
-class ListTable extends WP_List_Table {
+class FileListTable extends WP_List_Table {
 	/**
 	 * The user option key for saving the preferred number of files displayed per page.
 	 *
@@ -33,7 +33,7 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
-	 * ListTable class.
+	 * FileListTable class.
 	 *
 	 * @param FileController $file_controller Instance of FileController.
 	 * @param PageController $page_controller Instance of PageController.
