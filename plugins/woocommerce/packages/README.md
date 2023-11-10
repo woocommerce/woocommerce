@@ -8,7 +8,7 @@ You need Composer to use the packages. If you don't have it installed, go and ch
 
 ## Developing new packages
 
-To create a package and/or feature plugin for core, you can base your plugin on [the example package here](https://github.com/woocommerce/woocommerce-example-package).
+To create a package and/or feature plugin for core, you can base your plugin on [the example package](https://github.com/woocommerce/woocommerce-example-package).
 
 Packages require a Package class which inits the package and returns version information, and Packages also require that you use the `jetpack-autoloader` package which prevents version conflicts should the same package be used by multiple plugins at once. This is shown in the example package above.
 
