@@ -58,7 +58,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					<?php
 					$count_html = WC_Helper_Updater::get_updates_count_html();
 					/* translators: %s: Woo.com Subscriptions tab count HTML. */
-					echo ( esc_html( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) ) );
+					echo ( wp_kses_post( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) ) );
 					?>
 				</a>
 			</li>
