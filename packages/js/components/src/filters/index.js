@@ -130,6 +130,8 @@ class ReportFilters extends Component {
 								}
 								onRangeSelect={ this.onRangeSelect }
 								isoDateFormat={ isoDateFormat }
+								focusOnMount={ false }
+								popoverProps={ { inline: true } }
 							/>
 						) }
 						{ filters.map( ( config ) => {

@@ -48,6 +48,8 @@ const DefaultDate = ( { value, onChange } ) => {
 			onRangeSelect={ change }
 			dateQuery={ dateQuery }
 			isoDateFormat={ isoDateFormat }
+			focusOnMount={ false }
+			popoverProps={ { inline: true } }
 		/>
 	);
 };

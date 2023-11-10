@@ -125,7 +125,11 @@ class DateRangeFilterPicker extends Component {
 			beforeError,
 		} = this.state;
 
-		const { isViewportMobile } = this.props;
+		const {
+			isViewportMobile,
+			focusOnMount = false,
+			popoverProps = { inline: false },
+		} = this.props;
 		const contentClasses = classnames(
 			'woocommerce-filters-date__content',
 			{
@@ -141,6 +145,8 @@ class DateRangeFilterPicker extends Component {
 					contentClassName={ contentClasses }
 					position="bottom"
 					expandOnMobile
+					focusOnMount={ focusOnMount }
+					popoverProps={ popoverProps }
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<DropdownButton
 							onClick={ onToggle }
