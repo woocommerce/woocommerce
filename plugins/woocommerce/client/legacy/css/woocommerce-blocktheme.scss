@@ -182,9 +182,8 @@
 		}
 	}
 
-	div.product form.cart table.variations th {
-		// Ensure variation label is vertically centered.
-		line-height: 3.5rem;
+	.single_variation_wrap .woocommerce-variation {
+		margin-bottom: var(--wp--style--block-gap);
 	}
 }
 
