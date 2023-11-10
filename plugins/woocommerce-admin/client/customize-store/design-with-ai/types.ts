@@ -16,13 +16,16 @@ import {
 } from './prompts';
 
 export type designWithAiStateMachineContext = {
+	startLoadingTime: number | null;
 	businessInfoDescription: {
 		descriptionText: string;
 	};
 	lookAndFeel: {
+		aiRecommended?: Look;
 		choice: Look | '';
 	};
 	toneOfVoice: {
+		aiRecommended?: Tone;
 		choice: Tone | '';
 	};
 	aiSuggestions: {

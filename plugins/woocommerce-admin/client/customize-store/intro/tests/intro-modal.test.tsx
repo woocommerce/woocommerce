@@ -39,6 +39,9 @@ describe( 'Intro Modals', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -90,6 +93,9 @@ describe( 'Intro Modals', () => {
 						currentThemeIsAiGenerated: true,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -139,6 +145,9 @@ describe( 'Intro Modals', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

@@ -237,6 +237,10 @@ class Edit {
 		// Order updated message.
 		$this->message = 1;
 
+		// Claim lock.
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		$edit_lock->lock( $this->order );
+
 		$this->redirect_order( $this->order );
 	}
 

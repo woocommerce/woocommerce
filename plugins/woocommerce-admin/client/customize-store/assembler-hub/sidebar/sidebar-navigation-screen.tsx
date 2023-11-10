@@ -5,7 +5,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useContext } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
@@ -24,6 +24,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
+import { GoBackWarningModal } from './go-back-warning-modal';
 
 /**
  * Internal dependencies
@@ -53,6 +54,8 @@ export const SidebarNavigationScreen = ( {
 	onNavigateBackClick?: () => void;
 } ) => {
 	const { sendEvent } = useContext( CustomizeStoreContext );
+	const [ openWarningModal, setOpenWarningModal ] =
+		useState< boolean >( false );
 	const location = useLocation();
 	const navigator = useNavigator();
 	const icon = isRTL() ? chevronRight : chevronLeft;
@@ -96,8 +99,7 @@ export const SidebarNavigationScreen = ( {
 					{ isRoot && (
 						<SidebarButton
 							onClick={ () => {
-								onNavigateBackClick?.();
-								sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
+								setOpenWarningModal( true );
 							} }
 							icon={ icon }
 							label={ __( 'Back', 'woocommerce' ) }
@@ -139,6 +141,12 @@ export const SidebarNavigationScreen = ( {
 				<footer className="edit-site-sidebar-navigation-screen__footer">
 					{ footer }
 				</footer>
+			) }
+			{ openWarningModal && (
+				<GoBackWarningModal
+					setOpenWarningModal={ setOpenWarningModal }
+					sendEvent={ sendEvent }
+				/>
 			) }
 		</>
 	);

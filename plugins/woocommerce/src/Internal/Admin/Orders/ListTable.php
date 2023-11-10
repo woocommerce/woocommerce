@@ -103,6 +103,7 @@ class ListTable extends WP_List_Table {
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 
 		$this->items_per_page();
 		set_screen_options();
@@ -673,7 +674,6 @@ class ListTable extends WP_List_Table {
 			ob_start();
 
 			$this->months_filter();
-			$this->customers_filter();
 
 			/**
 			 * Fires before the "Filter" button on the list table for orders and other order types.

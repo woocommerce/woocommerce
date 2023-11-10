@@ -71,11 +71,16 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
-
+	const { sendEvent, currentState, context } = useContext(
+		CustomizeStoreContext
+	);
+	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
-	if ( currentState === 'transitionalScreen' ) {
+	if (
+		typeof currentState === 'object' &&
+		currentState.transitionalScreen === 'transitional'
+	) {
 		return (
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
@@ -83,7 +88,15 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional sendEvent={ sendEvent } editor={ editor } />
+					<Transitional
+						sendEvent={ sendEvent }
+						editor={ editor }
+						isSurveyOpen={ isSurveyOpen }
+						setSurveyOpen={ setSurveyOpen }
+						hasCompleteSurvey={
+							!! context?.transitionalScreen?.hasCompleteSurvey
+						}
+					/>
 				</EntityProvider>
 			</EntityProvider>
 		);

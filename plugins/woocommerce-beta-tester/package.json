@@ -13,6 +13,7 @@
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
 		"@types/wordpress__components": "^19.10.3",
+		"@types/wordpress__plugins": "^3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "^8.2.0",
@@ -27,8 +28,11 @@
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
 		"@types/prop-types": "^15.7.4",
+		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
+		"@woocommerce/expression-evaluation": "workspace:*",
+		"@woocommerce/product-editor": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
@@ -36,6 +40,9 @@
 		"@wordpress/data-controls": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
+		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/icons": "wp-6.0",
+		"@wordpress/plugins": "wp-6.0",
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
