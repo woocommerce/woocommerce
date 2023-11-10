@@ -12,7 +12,7 @@ export const parameters = {
 			date: /Date$/,
 		},
 	},
-	layout: 'centered',
+	layout: 'padded',
 	a11y: {
 		element: '#storybook-root',
 		config: {},

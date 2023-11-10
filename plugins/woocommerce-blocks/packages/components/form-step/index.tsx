@@ -31,7 +31,7 @@ const StepHeading = ( { title, stepHeadingContent }: StepHeadingProps ) => (
 	</div>
 );
 
-interface FormStepProps {
+export interface FormStepProps {
 	id?: string;
 	className?: string;
 	title?: string;
