@@ -15,10 +15,6 @@
 		"property": {
 			"type": "string"
 		},
-		"disabled": {
-			"type": "boolean",
-			"default": false
-		},
 		"disabledCopy": {
 			"type": "string",
 			"__experimentalRole": "content"
