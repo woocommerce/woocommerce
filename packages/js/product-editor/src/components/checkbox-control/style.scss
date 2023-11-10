@@ -1,6 +1,7 @@
 .woocommerce-product-form__checkbox {
 	input:disabled {
-		background: $gray-400;
+		opacity: 1.0;
+		background-color: $gray-100;
 		border-color: $gray-400;
 	}
 	.components-base-control__field,

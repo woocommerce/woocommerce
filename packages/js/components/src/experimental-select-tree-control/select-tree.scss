@@ -4,12 +4,19 @@
 		border-color: var(--wp-admin-theme-color);
 	}
 	&--disabled {
-		background-color: $gray-400;
+		background-color: $gray-100;
+		opacity: 1.0;
+		.woocommerce-experimental-select-control__suffix {
+			fill: $gray-400;
+
+		}
 	}
 }
 
-.woocommerce-experimental-select-control__input:disabled {
-	background-color: $gray-400;
+.woocommerce-experimental-select-control {
+	&__input:disabled {
+		background-color: $gray-100;
+	}
 }
 
 .woocommerce-experimental-select-tree-control__dropdown {
