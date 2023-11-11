@@ -11,8 +11,18 @@ use WC_Logger;
 use WC_Order;
 use WP_UnitTestCase;
 
+/**
+ * Tests for SourceAttributionControllerTest.
+ *
+ * @since x.x.x
+ */
 class SourceAttributionControllerTest extends WP_UnitTestCase {
 
+	/**
+	 * The class instance being tested.
+	 *
+	 * @var SourceAttributionController
+	 */
 	protected SourceAttributionController $attribution_fields_class;
 
 	/**
