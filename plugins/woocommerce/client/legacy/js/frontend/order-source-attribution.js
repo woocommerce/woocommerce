@@ -5,7 +5,6 @@
 	const cookieLifetime = Number( params.lifetime );
 	const sessionLength = Number( params.session );
 
-
 	// init
 	window.woocommerce_order_source_attribution = {};
 
