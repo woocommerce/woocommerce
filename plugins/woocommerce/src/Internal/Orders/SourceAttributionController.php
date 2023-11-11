@@ -22,9 +22,6 @@ use WP_User;
  * Class SourceAttributionController
  *
  * @since x.x.x
- *
- * phpcs:disable WordPress.PHP.DisallowShortTernary
- * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 class SourceAttributionController implements RegisterHooksInterface {
 
@@ -320,7 +317,10 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 */
 	private function output_origin_column( WC_Order $order ) {
 		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
-		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) ) ?: __( '(none)', 'woocommerce' );
+		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
+		if ( ! $source ) {
+			$source = __( '(none)', 'woocommerce' );
+		}
 		echo esc_html( $this->get_origin_label( $source_type, $source ) );
 	}
 
@@ -398,7 +398,11 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 */
 	private function is_hpos_enabled(): bool {
 		try {
-			/** @var CustomOrdersTableController $cot_controller */
+			/**
+			 * CustomOrdersTableController instance.
+			 *
+			 * @var CustomOrdersTableController $cot_controller
+			 */
 			$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
 
 			return $cot_controller->custom_orders_table_usage_is_enabled();
