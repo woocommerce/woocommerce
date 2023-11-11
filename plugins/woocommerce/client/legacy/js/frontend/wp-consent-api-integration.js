@@ -5,7 +5,7 @@
 	const consentCategory = 'marketing';
 	document.addEventListener( 'wp_listen_for_consent_change', ( e ) => {
 		const changedConsentCategory = e.detail;
-		for ( let key in changedConsentCategory ) {
+		for ( const key in changedConsentCategory ) {
 			if ( changedConsentCategory.hasOwnProperty( key ) ) {
 				if ( key === consentCategory && changedConsentCategory[ key ] === 'allow' ) {
 					window.woocommerce_order_source_attribution.setAllowTrackingConsent( true );
