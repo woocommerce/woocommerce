@@ -625,7 +625,7 @@ class WC_Admin_Post_Types {
 	public function disable_autosave() {
 		global $post;
 
-		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+		if ( $post instanceof WP_Post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
 	}
