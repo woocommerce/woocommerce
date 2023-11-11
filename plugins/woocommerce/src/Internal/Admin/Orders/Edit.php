@@ -1,8 +1,6 @@
 <?php
 /**
  * Renders order edit page, works with both post and order object.
- *
- * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
@@ -220,13 +218,21 @@ class Edit {
 	 * @return void
 	 */
 	private static function maybe_register_source_attribution( string $screen_id, string $title ) {
-		/** @var FeaturesController $feature_controller */
+		/**
+		 * Features controller.
+		 *
+		 * @var FeaturesController $feature_controller
+		 */
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
 			return;
 		}
 
-		/** @var SourceAttribution $source_attribution_meta_box */
+		/**
+		 * Source attribution meta box.
+		 *
+		 * @var SourceAttribution $source_attribution_meta_box
+		 */
 		$source_attribution_meta_box = wc_get_container()->get( SourceAttribution::class );
 
 		add_meta_box(
@@ -242,7 +248,11 @@ class Edit {
 			'high'
 		);
 
-		/** @var CustomerHistory $customer_history_meta_box */
+		/**
+		 * Customer history meta box.
+		 *
+		 * @var CustomerHistory $customer_history_meta_box
+		 */
 		$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
 
 		add_meta_box(
