@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\Internal\ntegration;
+namespace Automattic\WooCommerce\Tests\Internal\Integration;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\WCCom\TrackingController as WCCOMTracking;
