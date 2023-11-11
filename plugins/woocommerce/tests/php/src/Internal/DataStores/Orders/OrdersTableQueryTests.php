@@ -23,6 +23,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( true );
@@ -33,6 +34,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 
@@ -351,15 +353,21 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 * @testdox A regular query will still work even if the pre-query escape hook returns null for the whole 3-tuple.
 	 */
 	public function test_pre_query_escape_hook_return_null() {
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null', 10, 3 );
+
+		// Query with no results.
+		$query = new OrdersTableQuery();
+		$this->assertNotNull( $query->orders );
+		$this->assertNotNull( $query->found_orders );
+		$this->assertNotNull( $query->max_num_pages );
+		$this->assertCount( 0, $query->orders );
+		$this->assertEquals( 0, $query->found_orders );
+		$this->assertEquals( 0, $query->max_num_pages );
+
+		// Query with 1 result.
 		$order1 = new \WC_Order();
 		$order1->set_date_created( time() - HOUR_IN_SECONDS );
 		$order1->save();
-
-		$callback = function( $result, $query_object, $sql ) use ( $order1 ) {
-			// Just return null.
-			return null;
-		};
-		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
 
 		$query = new OrdersTableQuery();
 		$this->assertCount( 1, $query->orders );

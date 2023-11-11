@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, TextControl } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -16,6 +17,7 @@ import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { SelectTreeMenu } from './select-tree-menu';
+import { escapeHTML } from '../utils';
 
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
@@ -43,16 +45,25 @@ export const SelectTree = function SelectTree( {
 	const selectTreeInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-experimental-select-tree-control__dropdown'
-	);
+	) as string;
 	const menuInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-select-tree-control__menu'
-	);
-	const isEventOutside = ( event: React.FocusEvent ) => {
-		return ! document
-			.querySelector( '.' + selectTreeInstanceId )
+	) as string;
+
+	function isEventOutside( event: React.FocusEvent ) {
+		const isInsideSelect = document
+			.getElementById( selectTreeInstanceId )
 			?.contains( event.relatedTarget );
-	};
+
+		const isInsidePopover = document
+			.getElementById( menuInstanceId )
+			?.closest(
+				'.woocommerce-experimental-select-tree-control__popover-menu'
+			)
+			?.contains( event.relatedTarget );
+		return ! ( isInsideSelect || isInsidePopover );
+	}
 
 	const recalculateInputValue = () => {
 		if ( onInputChange ) {
@@ -115,11 +126,11 @@ export const SelectTree = function SelectTree( {
 				// focus on the first element from the Popover
 				(
 					document.querySelector(
-						`.${ menuInstanceId } input, .${ menuInstanceId } button`
+						`#${ menuInstanceId } input, #${ menuInstanceId } button`
 					) as HTMLInputElement | HTMLButtonElement
 				 )?.focus();
 			}
-			if ( event.key === 'Tab' ) {
+			if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
 			}
@@ -136,7 +147,8 @@ export const SelectTree = function SelectTree( {
 
 	return (
 		<div
-			className={ `woocommerce-experimental-select-tree-control__dropdown ${ selectTreeInstanceId }` }
+			id={ selectTreeInstanceId }
+			className={ `woocommerce-experimental-select-tree-control__dropdown` }
 			tabIndex={ -1 }
 		>
 			<div
@@ -185,11 +197,11 @@ export const SelectTree = function SelectTree( {
 					) : (
 						<TextControl
 							{ ...inputProps }
-							value={ props.createValue || '' }
+							value={ decodeEntities( props.createValue || '' ) }
 							onChange={ ( value ) => {
 								if ( onInputChange ) onInputChange( value );
 								const item = items.find(
-									( i ) => i.label === value
+									( i ) => i.label === escapeHTML( value )
 								);
 								if ( props.onSelect && item ) {
 									props.onSelect( item );
@@ -215,8 +227,7 @@ export const SelectTree = function SelectTree( {
 						props.onSelect( item );
 					}
 				} }
-				id={ `${ props.id }-menu` }
-				className={ menuInstanceId.toString() }
+				id={ menuInstanceId }
 				ref={ ref }
 				isEventOutside={ isEventOutside }
 				isLoading={ isLoading }

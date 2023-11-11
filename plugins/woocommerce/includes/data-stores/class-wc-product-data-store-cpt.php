@@ -1180,9 +1180,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
+	 * @param  array  	  $default_values Key value pairs to set on created variations.
 	 * @return int        Number of created variations.
 	 */
-	public function create_all_product_variations( $product, $limit = -1 ) {
+	public function create_all_product_variations( $product, $limit = -1, $default_values = array() ) {
 		$count = 0;
 
 		if ( ! $product ) {
@@ -1211,6 +1212,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				continue;
 			}
 			$variation = wc_get_product_object( 'variation' );
+			$variation->set_props( $default_values );
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
@@ -1864,6 +1866,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'slug',
 				'terms'    => $query_vars['category'],
 			);
+		} elseif ( ! empty( $query_vars['product_category_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['product_category_id'],
+			);
 		}
 
 		// Handle product tags.
@@ -1873,6 +1881,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'taxonomy' => 'product_tag',
 				'field'    => 'slug',
 				'terms'    => $query_vars['tag'],
+			);
+		} elseif ( ! empty( $query_vars['product_tag_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['product_tag_id'],
 			);
 		}
 
@@ -2085,7 +2099,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
 				'stock_quantity' => $stock,
 				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
-				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
+				'rating_count'   => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
 				'tax_status'     => get_post_meta( $id, '_tax_status', true ),

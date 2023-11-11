@@ -200,7 +200,7 @@ class WC_Admin_Post_Types {
 			9  => sprintf(
 			/* translators: %s: date */
 				__( 'Order scheduled for: %s.', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $theorder->get_date_created() ) ) . '</strong>'
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $theorder->get_date_created() ?? $post->post_date ) ) . '</strong>'
 			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and sent.', 'woocommerce' ),
@@ -408,6 +408,14 @@ class WC_Admin_Post_Types {
 			}
 		}
 
+		if ( ! empty( $request_data['_tax_class'] ) ) {
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
+			if ( 'standard' === $tax_class ) {
+				$tax_class = '';
+			}
+			$product->set_tax_class( $tax_class );
+		}
+
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
@@ -505,7 +513,7 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $request_data['_tax_class'] ) ) {
-			$tax_class = wc_clean( wp_unslash( $request_data['_tax_class'] ) );
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
 			if ( 'standard' === $tax_class ) {
 				$tax_class = '';
 			}
@@ -617,7 +625,7 @@ class WC_Admin_Post_Types {
 	public function disable_autosave() {
 		global $post;
 
-		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+		if ( $post instanceof WP_Post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
 	}
@@ -871,7 +879,7 @@ class WC_Admin_Post_Types {
 		if ( $post && absint( $post->ID ) === $shop_page_id ) {
 			echo '<div class="notice notice-info">';
 			/* translators: %s: URL to read more about the shop page. */
-			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
+			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://woo.com/document/woocommerce-pages/#section-4' ) . '</p>';
 			echo '</div>';
 		}
 	}

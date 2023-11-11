@@ -5,20 +5,27 @@
 	padding: $grid-unit-80 $grid-unit-40;
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	margin-top: $grid-unit-30;
 }
 
 .woocommerce-marketplace__no-results__product-group {
 	margin-top: $grid-unit-60;
+
+	.woocommerce-marketplace__product-list-title {
+		font-size: 16px;
+		font-weight: 600;
+	}
 }
 
 .woocommerce-marketplace__no-results__icon {
-	height: 100px;
+	height: 80px;
 }
 
 .woocommerce-marketplace__no-results__description {
 	text-align: center;
 	font-size: 13px;
+	max-width: 52ch;
 
 	p {
 		color: $gutenberg-gray-700;

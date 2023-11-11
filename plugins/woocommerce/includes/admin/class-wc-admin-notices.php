@@ -7,7 +7,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,6 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Stores notices.
@@ -53,6 +57,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
+		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -115,7 +120,81 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
+		self::maybe_add_legacy_api_removal_notice();
 	}
+
+	// phpcs:disable Generic.Commenting.Todo.TaskFound
+
+	/**
+	 * Add an admin notice about the removal of the Legacy REST API if the said API is enabled,
+	 * and a notice about soon to be unsupported webhooks with Legacy API payload if at least one of these exist.
+	 *
+	 * TODO: Change this method in WooCommerce 9.0 so that it checks if the Legacy REST API extension is installed, and if not, it points to the extension URL in the WordPress plugins directory.
+	 */
+	private static function maybe_add_legacy_api_removal_notice() {
+		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
+			return;
+		}
+
+		if ( 'yes' === get_option( 'woocommerce_api_enabled' ) ) {
+			self::add_custom_notice(
+				'legacy_api_removed_in_woo_90',
+				sprintf(
+					'%s%s',
+					sprintf(
+						'<h4>%s</h4>',
+						esc_html__( 'The WooCommerce Legacy REST API will be removed soon', 'woocommerce' )
+					),
+					sprintf(
+					// translators: Placeholders are URLs.
+						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. A separate WooCommerce extension will be available to keep it enabled. <b><a target="_blank" href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					)
+				)
+			);
+		}
+
+		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 ) {
+			self::add_custom_notice(
+				'legacy_webhooks_unsupported_in_woo_90',
+				sprintf(
+					'%s%s',
+					sprintf(
+						'<h4>%s</h4>',
+						esc_html__( 'WooCommerce webhooks that use the Legacy REST API will be unsupported soon', 'woocommerce' )
+					),
+					sprintf(
+					// translators: Placeholders are URLs.
+						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. A separate WooCommerce extension will be available to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					)
+				)
+			);
+		}
+	}
+
+	/**
+	 * Remove the admin notice about the removal of the Legacy REST API if the said API is disabled
+	 * or if the Legacy REST API extension is installed, and remove the notice about Legacy webhooks
+	 * if no such webhooks exist anymore or if the Legacy REST API extension is installed.
+	 *
+	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
+	 */
+	private static function maybe_remove_legacy_api_removal_notice() {
+		$plugin_is_active = is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
+
+		if ( self::has_notice( 'legacy_api_removed_in_woo_90' ) && ( $plugin_is_active || 'yes' !== get_option( 'woocommerce_api_enabled' ) ) ) {
+			self::remove_notice( 'legacy_api_removed_in_woo_90' );
+		}
+
+		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( $plugin_is_active || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
+			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
+		}
+	}
+
+	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.
@@ -424,7 +503,7 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about WordPress and PHP minimum requirements.
-	 * 
+	 *
 	 * @deprecated 8.2.0 WordPress and PHP minimum requirements notices are no longer shown.
 	 *
 	 * @since 3.6.5

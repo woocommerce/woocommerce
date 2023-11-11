@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -537,7 +538,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Helper function to get alias for address table, this is used in select query.
 	 *
-	 * @param string $type Address type.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 *
 	 * @return string Alias.
 	 */
@@ -1665,7 +1666,7 @@ FROM $order_meta_table
 	/**
 	 * Helper method to generate join and select query for address table.
 	 *
-	 * @param string $address_type Type of address. Typically will be `billing` or `shipping`.
+	 * @param string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param string $order_table_alias Alias of order table to use.
 	 * @param string $address_table_alias Alias for address table to use.
 	 *
@@ -2481,7 +2482,7 @@ FROM $order_meta_table
 
 		// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
 		if ( ( ! empty( $changes['status'] ) && in_array( 'trash', array( $changes['status'], $previous_status ), true ) )
-			|| ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) {
+			|| ( ! empty( $changes ) && ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) ) {
 			return;
 		}
 
@@ -2523,9 +2524,9 @@ FROM $order_meta_table
 		$order->save_meta_data();
 
 		if ( $backfill ) {
-			$this->clear_caches( $order );
 			self::$backfilling_order_ids[] = $order->get_id();
-			$r_order                       = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
+			$this->clear_caches( $order );
+			$r_order = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 		}
@@ -2580,8 +2581,10 @@ FROM $order_meta_table
 	private function update_address_index_meta( $order, $changes ) {
 		// If address changed, store concatenated version to make searches faster.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			if ( isset( $changes[ $address_type ] ) ) {
-				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
+			$index_meta_key = "_{$address_type}_address_index";
+
+			if ( isset( $changes[ $address_type ] ) || ( is_a( $order, 'WC_Order' ) && empty( $order->get_meta( $index_meta_key ) ) ) ) {
+				$order->update_meta_data( $index_meta_key, implode( ' ', $order->get_address( $address_type ) ) );
 			}
 		}
 	}
@@ -2924,14 +2927,17 @@ CREATE TABLE $meta_table (
 	 */
 	protected function after_meta_change( &$order, $meta ) {
 		method_exists( $meta, 'apply_changes' ) && $meta->apply_changes();
-		$this->clear_caches( $order );
 
 		// Prevent this happening multiple time in same request.
-		if ( $this->should_save_after_meta_change( $order ) ) {
+		if ( $this->should_save_after_meta_change( $order, $meta ) ) {
 			$order->set_date_modified( current_time( 'mysql' ) );
 			$order->save();
 			return true;
+		} else {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $order->get_id() );
 		}
+
 		return false;
 	}
 
@@ -2942,12 +2948,17 @@ CREATE TABLE $meta_table (
 	 * 1. Order modified date is already the current date, no updates needed in this case.
 	 * 2. If there are changes already queued for order object, then we don't need to update the modified date as it will be updated ina subsequent save() call.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order           $order Order object.
+	 * @param \WC_Meta_Data|null $meta  Metadata object.
 	 *
 	 * @return bool Whether the modified date needs to be updated.
 	 */
-	private function should_save_after_meta_change( $order ) {
-		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
-		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() );
+	private function should_save_after_meta_change( $order, $meta = null ) {
+		$current_time      = $this->legacy_proxy->call_function( 'current_time', 'mysql', 1 );
+		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
+		$skip_for          = array(
+			EditLock::META_KEY_NAME,
+		);
+		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $skip_for, true ) );
 	}
 }

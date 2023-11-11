@@ -17,6 +17,7 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
+import { useViewportMatch } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -30,12 +31,15 @@ import {
 } from './utils';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
-import { RemoveConfirmationModal } from './remove-confirmation-modal';
+import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
+import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	onChange: ( value: ProductAttribute[] ) => void;
 	onEdit?: ( attribute: ProductAttribute ) => void;
 	onRemove?: ( attribute: ProductAttribute ) => void;
@@ -71,6 +75,8 @@ type AttributeControlProps = {
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	onAdd = () => {},
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	onChange,
 	onEdit = () => {},
 	onNewModalCancel = () => {},
@@ -93,10 +99,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
-			'woocommerce'
-		),
-		newAttributeModalNotice: __(
-			'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
 			'woocommerce'
 		),
 		attributeRemoveConfirmationMessage: __(
@@ -183,13 +185,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						getAttributeId( newAttr ) === getAttributeId( current )
 				)
 		);
-		recordEvent( 'product_options_add', {
-			source: TRACKS_SOURCE,
-			options: addedAttributesOnly.map( ( attribute ) => ( {
-				attribute: attribute.name,
-				values: attribute.options,
-			} ) ),
-		} );
 		handleChange( [ ...value, ...addedAttributesOnly ] );
 		onAdd( newAttributes );
 		closeNewModal();
@@ -237,6 +232,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		( attr ) => getAttributeId( attr ) === currentAttributeId
 	);
 
+	const isMobileViewport = useViewportMatch( 'medium', '<' );
+
 	return (
 		<div className="woocommerce-attribute-field">
 			<Button
@@ -244,9 +241,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				className="woocommerce-add-attribute-list-item__add-button"
 				onClick={ () => {
 					openNewModal();
-					recordEvent( 'product_options_add_button_click', {
-						source: TRACKS_SOURCE,
-					} );
 				} }
 			>
 				{ uiStrings.newAttributeListItemLabel }
@@ -299,12 +293,13 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
 					description={ uiStrings.newAttributeModalDescription }
-					notice={ uiStrings.newAttributeModalNotice }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
 					} }
 					onAdd={ handleAdd }
+					onAddAnother={ onAddAnother }
+					onRemoveItem={ onRemoveItem }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
 					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
 					disabledAttributeIds={ disabledAttributeIds }
@@ -354,6 +349,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						handleEdit( updatedAttribute );
 					} }
 					attribute={ currentAttribute }
+					attributes={ value }
 				/>
 			) }
 			{ removingAttribute && (
@@ -363,7 +359,11 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						{ attributeName: removingAttribute.name }
 					) }
 					description={
-						uiStrings.attributeRemoveConfirmationModalMessage
+						<p>
+							{
+								uiStrings.attributeRemoveConfirmationModalMessage
+							}
+						</p>
 					}
 					onRemove={ () => handleRemove( removingAttribute ) }
 					onCancel={ () => {
@@ -371,6 +371,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						setRemovingAttribute( null );
 					} }
 				/>
+			) }
+			{ ! isMobileViewport && value.length === 0 && (
+				<AttributeEmptyStateSkeleton />
 			) }
 		</div>
 	);

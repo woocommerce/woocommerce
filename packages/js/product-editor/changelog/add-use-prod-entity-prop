@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add support for persisting automatically in post_meta for generic blocks

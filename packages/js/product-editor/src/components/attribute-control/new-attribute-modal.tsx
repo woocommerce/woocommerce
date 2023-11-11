@@ -2,14 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useState,
-	createElement,
-	Fragment,
-	useEffect,
-} from '@wordpress/element';
+import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
-import { trash } from '@wordpress/icons';
+import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -19,14 +14,7 @@ import {
 	ProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
-import {
-	Button,
-	Modal,
-	Notice,
-	// @ts-expect-error ConfirmDialog is not part of the typescript definition yet.
-	__experimentalConfirmDialog as ConfirmDialog,
-} from '@wordpress/components';
+import { Button, Modal, Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -53,11 +41,10 @@ type NewAttributeModalProps = {
 	cancelLabel?: string;
 	addAccessibleLabel?: string;
 	addLabel?: string;
-	confirmMessage?: string;
-	confirmCancelLabel?: string;
-	confirmConfirmLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 	disabledAttributeIds?: number[];
@@ -73,10 +60,7 @@ type AttributeForm = {
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
-	notice = __(
-		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-		'woocommerce'
-	),
+	notice,
 	attributeLabel = __( 'Attribute', 'woocommerce' ),
 	valueLabel = __( 'Values', 'woocommerce' ),
 	attributePlaceholder = __( 'Search or create attribute', 'woocommerce' ),
@@ -87,14 +71,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	cancelLabel = __( 'Cancel', 'woocommerce' ),
 	addAccessibleLabel = __( 'Add attributes', 'woocommerce' ),
 	addLabel = __( 'Add', 'woocommerce' ),
-	confirmMessage = __(
-		'You have some attributes added to the list, are you sure you want to cancel?',
-		'woocommerce'
-	),
-	confirmCancelLabel = __( 'No thanks', 'woocommerce' ),
-	confirmConfirmLabel = __( 'Yes please!', 'woocommerce' ),
 	onCancel,
 	onAdd,
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 	disabledAttributeIds = [],
@@ -113,7 +93,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );
 	};
-	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
 		setValue: (
@@ -123,6 +102,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
 		scrollAttributeIntoView( values.attributes.length );
+		onAddAnother();
 	};
 
 	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
@@ -185,9 +165,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			value: AttributeForm[ keyof AttributeForm ]
 		) => void
 	) => {
-		recordEvent(
-			'product_add_attributes_modal_remove_attribute_button_click'
-		);
+		onRemoveItem();
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
@@ -210,18 +188,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				valueInputField.focus();
 			}
 		}, 0 );
-	};
-
-	const onClose = ( values: AttributeForm ) => {
-		const hasValuesSet = values.attributes.some(
-			( value ) =>
-				value !== null && value?.terms && value?.terms.length > 0
-		);
-		if ( hasValuesSet ) {
-			setShowConfirmClose( true );
-		} else {
-			onCancel();
-		}
 	};
 
 	useEffect( function focusFirstAttributeField() {
@@ -316,7 +282,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									| React.FocusEvent< Element >
 							) => {
 								if ( ! event.isPropagationStopped() ) {
-									onClose( values );
+									onCancel();
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
@@ -389,7 +355,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														attribute.id !== 0 ? (
 															<AttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute?.terms &&
+																	attribute
+																		?.terms
+																		.length >
+																		0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	attribute
@@ -403,7 +375,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																}
 																value={
 																	attribute ===
-																	null
+																		null ||
+																	attribute ===
+																		undefined
 																		? []
 																		: attribute.terms
 																}
@@ -424,7 +398,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														) : (
 															<CustomAttributeTermInputField
 																placeholder={
-																	termPlaceholder
+																	attribute?.options &&
+																	attribute
+																		?.options
+																		.length >
+																		0
+																		? ''
+																		: termPlaceholder
 																}
 																disabled={
 																	! attribute.name
@@ -450,7 +430,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													</td>
 													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
 														<Button
-															icon={ trash }
+															icon={ closeSmall }
 															disabled={
 																values
 																	.attributes
@@ -484,9 +464,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
-										recordEvent(
-											'product_add_attributes_modal_add_another_attribute_button_click'
-										);
 										addAnother( values, setValue );
 									} }
 								>
@@ -497,7 +474,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								<Button
 									isSecondary
 									label={ cancelLabel }
-									onClick={ () => onClose( values ) }
+									onClick={ () => onCancel() }
 								>
 									{ cancelLabel }
 								</Button>
@@ -506,7 +483,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									label={ addAccessibleLabel }
 									disabled={
 										values.attributes.length === 1 &&
-										values.attributes[ 0 ] === null
+										( values.attributes[ 0 ] === null ||
+											values.attributes[ 0 ] ===
+												undefined )
 									}
 									onClick={ () =>
 										onAddingAttributes( values )
@@ -521,16 +500,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			</Form>
 			{ /* Add slot so select control menu renders correctly within Modal */ }
 			<SelectControlMenuSlot />
-			{ showConfirmClose && (
-				<ConfirmDialog
-					cancelButtonText={ confirmCancelLabel }
-					confirmButtonText={ confirmConfirmLabel }
-					onCancel={ () => setShowConfirmClose( false ) }
-					onConfirm={ onCancel }
-				>
-					{ confirmMessage }
-				</ConfirmDialog>
-			) }
 		</>
 	);
 };

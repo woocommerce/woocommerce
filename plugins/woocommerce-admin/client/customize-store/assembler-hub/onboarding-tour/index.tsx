@@ -4,18 +4,21 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
 	onClose: () => void;
 	showWelcomeTour: boolean;
 	setShowWelcomeTour: ( show: boolean ) => void;
+	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 };
 
 export const OnboardingTour = ( {
 	onClose,
 	setShowWelcomeTour,
 	showWelcomeTour,
+	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
@@ -83,8 +86,15 @@ export const OnboardingTour = ( {
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
 						if ( source === 'done-btn' ) {
+							// Click on "Take a tour" button
+							recordEvent(
+								'customize_your_store_assembler_hub_tour_start'
+							);
 							setShowWelcomeTour( false );
 						} else {
+							recordEvent(
+								'customize_your_store_assembler_hub_tour_skip'
+							);
 							onClose();
 						}
 					},
@@ -119,9 +129,11 @@ export const OnboardingTour = ( {
 					callbacks: {
 						onPreviousStep: () => {
 							setPlacement( 'left' );
+							setIsResizeHandleVisible( true );
 						},
 						onNextStep: () => {
 							setPlacement( 'right-start' );
+							setIsResizeHandleVisible( false );
 						},
 					},
 					popperModifiers: [
@@ -132,7 +144,7 @@ export const OnboardingTour = ( {
 							requires: [ 'computeStyles' ],
 							fn: ( { state } ) => {
 								state.styles.arrow.transform =
-									'translate3d(0px, 114.4px, 0)';
+									'translate3d(0px, 96px, 0)';
 							},
 						},
 						{
@@ -146,7 +158,7 @@ export const OnboardingTour = ( {
 									[ key: string ]: unknown;
 								} ) => {
 									if ( placement === 'left' ) {
-										return [ -15, 35 ];
+										return [ 0, 20 ];
 									}
 									return [ 52, 16 ];
 								},
@@ -196,7 +208,19 @@ export const OnboardingTour = ( {
 						},
 					},
 				],
-				closeHandler: onClose,
+				closeHandler: ( _steps, _currentStepIndex, source ) => {
+					if ( source === 'done-btn' ) {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_complete'
+						);
+					} else {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_close'
+						);
+					}
+
+					onClose();
+				},
 			} }
 		></TourKit>
 	);

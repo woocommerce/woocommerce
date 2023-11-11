@@ -122,27 +122,23 @@ for ( const currentPage of wcPages ) {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
-			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+			const response = await new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc-admin',
+			} ).post( 'onboarding/profile', {
+				skipped: true,
+			} );
 
-			if ( coreProfilerEnabled ) {
-				const response = await new wcApi( {
-					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
-					version: 'wc-admin',
-				} ).post( 'onboarding/profile', {
-					skipped: true,
-				} );
+			const httpStatus = response.status;
+			const { status, message } = response.data;
 
-				const httpStatus = response.status;
-				const { status, message } = response.data;
-
-				expect( httpStatus ).toEqual( 200 );
-				expect( status ).toEqual( 'success' );
-				expect( message ).toEqual(
-					'Onboarding profile data has been updated.'
-				);
-			}
+			expect( httpStatus ).toEqual( 200 );
+			expect( status ).toEqual( 'success' );
+			expect( message ).toEqual(
+				'Onboarding profile data has been updated.'
+			);
 			const api = new wcApi( {
 				url: baseURL,
 				consumerKey: process.env.CONSUMER_KEY,
@@ -235,6 +231,7 @@ for ( const currentPage of wcPages ) {
 
 				await expect(
 					page.locator( currentPage.subpages[ i ].element )
+					.first()
 				).toBeVisible();
 
 				await expect(

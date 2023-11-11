@@ -64,4 +64,9 @@ export default [
 		description: <TriggerUpdateCallbacks />,
 		action: TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
 	},
+	{
+		command: 'Reset Customize Your Store',
+		description: 'Resets Customize Your Store changes.',
+		action: 'resetCustomizeYourStore',
+	},
 ];

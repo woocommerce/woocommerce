@@ -1,19 +1,10 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { resolveSelect } from '@wordpress/data';
 
-/**
- * Internal dependencies
- */
-import { getMshotsUrl } from './mshots-image';
-import { PREVIEW_IMAGE_OPTION } from './';
-
-export const fetchSitePreviewImage = async () => {
-	const homeUrl: string = getSetting( 'homeUrl', '' );
-	return window
-		.fetch( getMshotsUrl( homeUrl, PREVIEW_IMAGE_OPTION ) )
-		.catch( () => {
-			// Ignore errors
-		} );
-};
+export const fetchSurveyCompletedOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		'woocommerce_admin_customize_store_survey_completed'
+	);

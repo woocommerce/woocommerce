@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "8.2.0",
-	"homepage": "https://woocommerce.com/",
+	"version": "8.3.0",
+	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -10,7 +10,48 @@
 	"license": "GPL-3.0+",
 	"config": {
 		"wp_org_slug": "woocommerce",
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"ci": {
+			"name": "WP: latest",
+			"customCommands": {
+				"lint": "lint:php:changes:branch ${baseRef}",
+				"test:php": "test:php:env"
+			},
+			"testEnvCommand": "env:test",
+			"testEnvConfig": {
+				"wpVersion": "latest"
+			},
+			"additionalTasks": [
+				{
+					"name": "PHP 8.0",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"phpVersion": "8.0"
+					}
+				},
+				{
+					"name": "WP: nightly",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "nightly"
+					}
+				},
+				{
+					"name": "WP: latest-1",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-1"
+					}
+				},
+				{
+					"name": "WP: latest-2",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-2"
+					}
+				}
+			]
+		}
 	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
@@ -48,8 +89,11 @@
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-		"test:unit:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:env:start": "pnpm env:test",
+		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:unit": "pnpm test:php",
+		"test:unit:env": "pnpm test:php:env",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},
@@ -58,6 +102,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
+		"@playwright/test": "^1.38.1",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/experimental-utils": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
@@ -116,7 +161,6 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@playwright/test": "^1.37.1",
 		"@wordpress/browserslist-config": "wp-6.0"
 	}
 }

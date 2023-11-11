@@ -106,7 +106,7 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template.
 	 */
 	public function test_remove_block() {
@@ -133,13 +133,19 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the child block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the child block is detached from its parent and root template.'
+		);
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_nested_block() {
@@ -166,13 +172,19 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the nested descendent block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested descendent block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the nested descendent block is detached from its parent and root template.'
+		);
 	}
 
 	/**
-	 * Test that removing a block from a block sets the parent and root template to null
+	 * Test that removing a block from a block detaches it
 	 * and that the block is removed from the root template, as well as any descendants.
 	 */
 	public function test_remove_block_and_descendants() {
@@ -204,9 +216,41 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the nested descendent block was removed from the root template.'
 		);
 
-		$this->expectException( \RuntimeException::class );
+		$this->assertNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the child block was removed from the parent.'
+		);
 
-		$child_block->get_parent();
+		$this->assertTrue(
+			$block->is_detached(),
+			'Failed asserting that the block is detached from its parent and root template.'
+		);
+
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the child block is detached from its parent and root template.'
+		);
+	}
+
+	/**
+	 * Test that removing a block by calling remove on it detaches it.
+	 */
+	public function test_remove_block_self() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$block->remove();
+
+		$this->assertTrue(
+			$block->is_detached(),
+			'Failed asserting that the block is detached from its parent and root template.'
+		);
 	}
 
 	/**
@@ -267,6 +311,111 @@ class BlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a block added to a detached block is detached.
+	 */
+	public function test_block_added_to_detached_block_is_detached() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'id'        => 'test-block-id',
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$template->remove_block( 'test-block-id' );
+
+		$child_block = $block->add_block(
+			[
+				'id'        => 'test-block-id-2',
+				'blockName' => 'test-block-name-2',
+			]
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id' ),
+			'Failed asserting that the block was removed from the root template.'
+		);
+
+		$this->assertNull(
+			$template->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is not in the root template.'
+		);
+
+		$this->assertNotNull(
+			$block->get_block( 'test-block-id-2' ),
+			'Failed asserting that the nested block is in the parent.'
+		);
+
+		$this->assertTrue(
+			$child_block->is_detached(),
+			'Failed asserting that the nested descendent block is detached from its parent and root template.'
+		);
+	}
+
+	/**
+	 * Test that hide conditions can be passed in when creating a block.
+	 */
+	public function test_hide_conditions_in_constructor() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'blockName'      => 'test-block-name',
+				'hideConditions' => [
+					[
+						'expression' => 'foo === bar',
+					],
+				],
+			]
+		);
+
+		$this->assertSame(
+			[
+				'k0' => [
+					'expression' => 'foo === bar',
+				],
+			],
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are set correctly in the constructor.'
+		);
+	}
+
+	/**
+	 * Test that hide conditions can be added to a block.
+	 */
+	public function test_add_hide_condition() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			[
+				'blockName' => 'test-block-name',
+			]
+		);
+
+		$condition_1_key = $block->add_hide_condition( 'editedProduct.manage_stock === true' );
+
+		$condition_2_key = $block->add_hide_condition( 'true' );
+
+		$condition_3_key = $block->add_hide_condition( 'foo > 10' );
+
+		$block->remove_hide_condition( $condition_2_key );
+
+		$this->assertSame(
+			[
+				$condition_1_key => [
+					'expression' => 'editedProduct.manage_stock === true',
+				],
+				$condition_3_key => [
+					'expression' => 'foo > 10',
+				],
+			],
+			$block->get_hide_conditions(),
+			'Failed asserting that the hide conditions are added correctly.'
+		);
+	}
+
+	/**
 	 * Test that getting the block as a formatted template is structured correctly.
 	 */
 	public function test_get_formatted_template() {
@@ -282,6 +431,8 @@ class BlockTest extends WC_Unit_Test_Case {
 				],
 			]
 		);
+
+		$block->add_hide_condition( 'foo === bar' );
 
 		$block->add_block(
 			[
@@ -307,20 +458,32 @@ class BlockTest extends WC_Unit_Test_Case {
 			[
 				'test-block-name',
 				[
-					'attr-1' => 'value-1',
-					'attr-2' => 'value-2',
+					'attr-1'                       => 'value-1',
+					'attr-2'                       => 'value-2',
+					'_templateBlockId'             => 'test-block-id',
+					'_templateBlockOrder'          => 10000,
+					'_templateBlockHideConditions' => [
+						[
+							'expression' => 'foo === bar',
+						],
+					],
 				],
 				[
 					[
 						'test-block-name-2',
 						[
-							'attr-3' => 'value-3',
-							'attr-4' => 'value-4',
+							'attr-3'              => 'value-3',
+							'attr-4'              => 'value-4',
+							'_templateBlockId'    => 'test-block-id-2',
+							'_templateBlockOrder' => 10000,
 						],
 					],
 					[
 						'test-block-name-3',
-						[],
+						[
+							'_templateBlockId'    => 'test-block-id-3',
+							'_templateBlockOrder' => 10000,
+						],
 					],
 				],
 			],
@@ -379,27 +542,45 @@ class BlockTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			[
 				'test-block-name',
-				[],
+				[
+					'_templateBlockId'    => 'test-block-name-1',
+					'_templateBlockOrder' => 10000,
+				],
 				[
 					[
 						'one',
-						[],
+						[
+							'_templateBlockId'    => 'one-1',
+							'_templateBlockOrder' => 1,
+						],
 					],
 					[
 						'two',
-						[],
+						[
+							'_templateBlockId'    => 'two-1',
+							'_templateBlockOrder' => 2,
+						],
 					],
 					[
 						'three',
-						[],
+						[
+							'_templateBlockId'    => 'three-1',
+							'_templateBlockOrder' => 3,
+						],
 					],
 					[
 						'four',
-						[],
+						[
+							'_templateBlockId'    => 'four-1',
+							'_templateBlockOrder' => 4,
+						],
 					],
 					[
 						'five',
-						[],
+						[
+							'_templateBlockId'    => 'five-1',
+							'_templateBlockOrder' => 5,
+						],
 					],
 				],
 			],

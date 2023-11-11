@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useContext, useMemo } from '@wordpress/element';
+import { memo, useMemo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
@@ -16,64 +16,34 @@ import {
 	AutoHeightBlockPreview,
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
-import { HighlightedBlockContext } from './context/highlighted-block-context';
-import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { ChangeHandler } from './hooks/use-editor-blocks';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
-	additionalStyles,
+	onChange,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
+	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
-	const renderedBlocks = useMemo(
-		() => ( Array.isArray( blocks ) ? blocks : [ blocks ] ),
-		[ blocks ]
-	);
-
-	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const previewOpacity = useScrollOpacity(
-		'.interface-navigable-region.interface-interface-skeleton__content',
-		'topDown'
-	);
-
-	const opacityStyles =
-		highlightedBlockIndex === -1
-			? ''
-			: `
-		.wp-block.preview-opacity {
-			opacity: ${ previewOpacity };
-		}
-	`;
+	const renderedBlocks = useMemo( () => {
+		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
+		return _blocks;
+	}, [ blocks ] );
 
 	return (
 		<BlockEditorProvider
-			value={ renderedBlocks.map( ( block, i ) => {
-				if ( i === highlightedBlockIndex ) {
-					return block;
-				}
-
-				return {
-					...block,
-					attributes: {
-						...block.attributes,
-						className:
-							block.attributes.className + ' preview-opacity',
-					},
-				};
-			} ) }
+			value={ renderedBlocks }
 			settings={ settings }
+			// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
+			onChange={ onChange }
 			useSubRegistry={ useSubRegistry }
 		>
-			<AutoHeightBlockPreview
-				settings={ settings }
-				additionalStyles={ `${ opacityStyles } ${ additionalStyles }` }
-				{ ...props }
-			/>
+			<AutoHeightBlockPreview settings={ settings } { ...props } />
 		</BlockEditorProvider>
 	);
 };

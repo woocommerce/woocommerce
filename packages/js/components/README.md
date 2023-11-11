@@ -10,13 +10,11 @@ Install the module
 pnpm install @woocommerce/components --save
 ```
 
-View [the full Component documentation](https://woocommerce.github.io/woocommerce-admin/#/components/) for usage information.
-
 ## Usage
 
 ```jsx
 /**
- * Woocommerce dependencies
+ * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
 

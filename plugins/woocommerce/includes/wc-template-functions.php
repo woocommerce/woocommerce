@@ -2338,7 +2338,7 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 				'woocommerce_breadcrumb_defaults',
 				array(
 					'delimiter'   => '&nbsp;&#47;&nbsp;',
-					'wrap_before' => '<nav class="woocommerce-breadcrumb">',
+					'wrap_before' => '<nav class="woocommerce-breadcrumb" aria-label="Breadcrumb">',
 					'wrap_after'  => '</nav>',
 					'before'      => '',
 					'after'       => '',
@@ -3295,7 +3295,7 @@ if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 	/**
 	 * My Account > Edit address template.
 	 *
-	 * @param string $type Address type.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 */
 	function woocommerce_account_edit_address( $type ) {
 		$type = wc_edit_address_i18n( sanitize_title( $type ), true );

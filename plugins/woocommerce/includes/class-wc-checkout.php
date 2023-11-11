@@ -1046,6 +1046,11 @@ class WC_Checkout {
 		// Store Order ID in session so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 
+		// We save the session early because if the payment gateway hangs
+		// the request will never finish, thus the session data will neved be saved,
+		// and this can lead to duplicate orders if the user submits the order again.
+		WC()->session->save_data();
+
 		// Process Payment.
 		$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
@@ -1291,7 +1296,7 @@ class WC_Checkout {
 	 * Get a posted address field after sanitization and validation.
 	 *
 	 * @param string $key  Field key.
-	 * @param string $type Type of address. Available options: 'billing' or 'shipping'.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {

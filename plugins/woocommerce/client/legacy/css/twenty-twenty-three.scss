@@ -538,13 +538,6 @@
 			}
 		}
 	}
-
-	// Highlights for specific info, e.g. on the My Account > Orders > Order X: Order ___ was placed on ____
-	mark {
-		font-weight: bold;
-		background-color: transparent;
-	}
-
 }
 
 // Description/Additional info/Reviews tabs.
@@ -976,20 +969,6 @@ ul.wc-tabs {
 	// Adds a tiny bit of vertical spacing on the Thank you (after checkout) page.
 	.woocommerce-order > * {
 		margin-bottom: var(--wp--style--block-gap);
-	}
-
-	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
 	}
 
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.

@@ -41,6 +41,7 @@ type AttributeTermInputFieldProps = {
 	disabled?: boolean;
 	label?: string;
 	autoCreateOnSelect?: boolean;
+	readOnlyWhenClosed?: boolean;
 };
 
 interface customError extends Error {
@@ -60,6 +61,7 @@ export const AttributeTermInputField: React.FC<
 	attributeId,
 	label = '',
 	autoCreateOnSelect = true,
+	readOnlyWhenClosed = false,
 } ) => {
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
@@ -266,6 +268,7 @@ export const AttributeTermInputField: React.FC<
 				selected={ value }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
+				readOnlyWhenClosed={ readOnlyWhenClosed }
 				className={
 					'woocommerce-attribute-term-field ' +
 					attributeTermInputId.current
@@ -309,14 +312,7 @@ export const AttributeTermInputField: React.FC<
 													onChange={ () => null }
 													checked={ isSelected }
 													label={
-														<span
-															style={ {
-																fontWeight:
-																	isSelected
-																		? 'bold'
-																		: 'normal',
-															} }
-														>
+														<span>
 															{ item.name }
 														</span>
 													}

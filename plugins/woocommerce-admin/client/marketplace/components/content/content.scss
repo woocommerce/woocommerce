@@ -4,11 +4,11 @@
 	box-sizing: content-box;
 	margin: auto;
 	max-width: $content-max-width;
-	padding: $header-height-mobile $content-spacing-small $content-spacing-small;
+	padding: $grid-unit-30 $grid-unit-20;
 }
 
 @media screen and (min-width: $breakpoint-medium) {
 	.woocommerce-marketplace__content {
-		padding: $header-height-desktop $content-spacing-large $content-spacing-large;
+		padding: $grid-unit-60 $grid-unit-40;
 	}
 }

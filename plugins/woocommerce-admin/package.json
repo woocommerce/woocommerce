@@ -14,7 +14,8 @@
 		"turbo:test": "pnpm run test:client",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"test": "pnpm test:js",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",
@@ -52,6 +53,7 @@
 		"@automattic/explat-client": "^0.0.3",
 		"@automattic/explat-client-react-helpers": "^0.0.4",
 		"@automattic/interpolate-components": "^1.2.0",
+		"@automattic/components": "^2.0.1",
 		"@react-spring/web": "^9.4.3",
 		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/api": "^0.2.0",
@@ -94,6 +96,7 @@
 		"history": "^5.3.0",
 		"lodash": "^4.17.21",
 		"memize": "^1.1.0",
+		"qrcode.react": "^3.1.0",
 		"qs": "^6.10.3",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
@@ -101,7 +104,8 @@
 		"react-transition-group": "^4.4.2",
 		"react-visibility-sensor": "^5.1.1",
 		"redux": "^4.1.2",
-		"xstate": "4.37.1"
+		"xstate": "4.37.1",
+		"zod": "^3.22.2"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "^2.5.0",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix selection in currency and number fields to only select if field still has focus.

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The main entry-point for all things related to the Helper.
  * The Helper manages the connection between the store and
- * an account on WooCommerce.com.
+ * an account on Woo.com.
  */
 class WC_Helper_Admin {
 
@@ -45,13 +45,14 @@ class WC_Helper_Admin {
 			'userEmail'   => $auth_user_email,
 			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
 			'storeCountry' => wc_get_base_location()['country'],
+			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
 		);
 
 		return $settings;
 	}
 
 	/**
-	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
+	 * Generates the URL for connecting or disconnecting the store to/from Woo.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
 	 * @return string
@@ -111,7 +112,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured procucts from WooCommerce.com and serve them
+	 * Fetch featured procucts from Woo.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {
