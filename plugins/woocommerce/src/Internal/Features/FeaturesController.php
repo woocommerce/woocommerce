@@ -212,6 +212,8 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
+				// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
+				//https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				'order_source_attribution' => array(
 					'name'               => __( 'Order Source Attribution', 'woocommerce' ),
 					'description'        => __(
