@@ -102,5 +102,4 @@
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
 	</rule>
-
 </ruleset>
