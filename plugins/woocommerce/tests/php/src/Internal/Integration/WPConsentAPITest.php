@@ -6,12 +6,17 @@ use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Closure;
 use WP_UnitTestCase;
 
+/**
+ * Tests for WPConsentAPI.
+ *
+ * @since x.x.x
+ */
 class WPConsentAPITest extends WP_UnitTestCase {
 
 	/**
 	 * @var WPConsentAPI
 	 */
-	private WPConsentAPI $WPConsentAPIIntegration;
+	private WPConsentAPI $wp_consent_api_integration;
 
 	/**
 	 * @var string
@@ -23,10 +28,10 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->WPConsentAPIIntegration = $this->getMockBuilder( WPConsentAPI::class )
-			->onlyMethods( [ 'is_wp_consent_api_active' ] )
-			->getMock();
-		$this->plugin                  = plugin_basename( WC_PLUGIN_FILE );
+		$this->wp_consent_api_integration = $this->getMockBuilder( WPConsentAPI::class )
+												->onlyMethods( array( 'is_wp_consent_api_active' ) )
+												->getMock();
+		$this->plugin                     = plugin_basename( WC_PLUGIN_FILE );
 	}
 
 	/**
@@ -34,7 +39,7 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
-		unset( $this->WPConsentAPIIntegration );
+		unset( $this->wp_consent_api_integration );
 		unset( $this->plugin );
 	}
 
@@ -48,19 +53,25 @@ class WPConsentAPITest extends WP_UnitTestCase {
 			function() {
 				$this->on_plugins_loaded();
 			},
-			$this->WPConsentAPIIntegration,
-			$this->WPConsentAPIIntegration
+			$this->wp_consent_api_integration,
+			$this->wp_consent_api_integration
 		);
 	}
 
+	/**
+	 * Tests no filter set if WPConsentAPI is not active.
+	 */
 	public function test_wp_consent_api_not_available(): void {
-		$this->WPConsentAPIIntegration->method( 'is_wp_consent_api_active' )->willReturn( false );
+		$this->wp_consent_api_integration->method( 'is_wp_consent_api_active' )->willReturn( false );
 		$this->get_closure_for_on_plugins_loaded_method()();
 		$this->assertFalse( has_filter( "wp_consent_api_registered_{$this->plugin}" ) );
 	}
 
+	/**
+	 * Tests filter set if WPConsentAPI is active.
+	 */
 	public function test_wp_consent_api_available(): void {
-		$this->WPConsentAPIIntegration->method( 'is_wp_consent_api_active' )->willReturn( true );
+		$this->wp_consent_api_integration->method( 'is_wp_consent_api_active' )->willReturn( true );
 		$this->get_closure_for_on_plugins_loaded_method()();
 		$this->assertTrue( has_filter( "wp_consent_api_registered_{$this->plugin}" ) );
 	}
