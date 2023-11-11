@@ -6,7 +6,7 @@ jQuery( document ).ready( ( $ ) => {
 	window.wcTracks = window.wcTracks || {};
 	window.wcTracks.recordEvent = window.wcTracks.recordEvent || ( () => {} );
 
-	// Handle our details container toggle.
+	// Handle the "Details" container toggle.
 	$( '.woocommerce-order-source-attribution-details-toggle' )
 		.on( 'click', ( e ) => {
 			var $this = $( this );
