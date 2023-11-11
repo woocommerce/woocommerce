@@ -2,7 +2,7 @@
 jQuery( document ).ready( ( $ ) => {
 	'use strict';
 
-	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
+	// Stand-in wcTracks.recordEvent in case Tracks is not available (for any reason).
 	window.wcTracks = window.wcTracks || {};
 	window.wcTracks.recordEvent = window.wcTracks.recordEvent || ( () => {} );
 
