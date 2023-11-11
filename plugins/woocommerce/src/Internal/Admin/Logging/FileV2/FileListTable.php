@@ -150,7 +150,7 @@ class FileListTable extends WP_List_Table {
 	public function prepare_items(): void {
 		$per_page = $this->get_items_per_page(
 			self::PER_PAGE_USER_OPTION_KEY,
-			$this->file_controller::DEFAULTS_GET_FILES['per_page']
+			$this->get_per_page_default()
 		);
 
 		$defaults  = array(
@@ -320,5 +320,14 @@ class FileListTable extends WP_List_Table {
 		$size = $item->get_file_size();
 
 		return size_format( $size );
+	}
+
+	/**
+	 * Helper to get the default value for the per_page arg.
+	 *
+	 * @return int
+	 */
+	public function get_per_page_default(): int {
+		return $this->file_controller::DEFAULTS_GET_FILES['per_page'];
 	}
 }

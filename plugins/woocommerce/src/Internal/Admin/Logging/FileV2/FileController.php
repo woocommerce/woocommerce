@@ -24,6 +24,30 @@ class FileController {
 	);
 
 	/**
+	 * Default values for arguments for the search_within_files method.
+	 *
+	 * @const array
+	 */
+	public const DEFAULTS_SEARCH_WITHIN_FILES = array(
+		'offset'   => 0,
+		'per_page' => 50,
+	);
+
+	/**
+	 * The maximum number of files that can be searched at one time.
+	 *
+	 * @const int
+	 */
+	public const SEARCH_MAX_FILES = 100;
+
+	/**
+	 * The maximum number of search results that can be returned at one time.
+	 *
+	 * @const int
+	 */
+	public const SEARCH_MAX_RESULTS = 500;
+
+	/**
 	 * The absolute path to the log directory.
 	 *
 	 * @var string
@@ -305,27 +329,28 @@ class FileController {
 	/**
 	 * Search within a set of log files for a particular string.
 	 *
-	 * This uses a combination of preg_match_all and str_replace so that the string matches can be case-insensitive,
-	 * but the highlighted matched substrings can retain their original case.
+	 * @param string $search     The string to search for.
+	 * @param array  $args       Optional. Arguments for pagination of search results.
+	 * @param array  $file_args  Optional. Arguments to filter and sort the files that are returned. See get_files().
+	 * @param bool   $count_only Optional. True to return a total count of the matches.
 	 *
-	 * @param string $search    The string to search for.
-	 * @param array  $file_args Optional. Arguments to filter and sort the files that are returned. See get_files().
-	 *
-	 * @return array|WP_Error When matches are found, each array item is an associative array that includes the file ID,
-	 *                        line number, and the matched string with HTML markup around the matched parts.
+	 * @return array|int|WP_Error When matches are found, each array item is an associative array that includes the
+	 *                            file ID, line number, and the matched string with HTML markup around the matched parts.
 	 */
-	public function search_within_files( string $search, array $file_args = array() ) {
+	public function search_within_files( string $search, array $args = array(), array $file_args = array(), bool $count_only = false ) {
 		if ( '' === $search ) {
 			return array();
 		}
 
 		$search = esc_html( $search );
 
+		$args = wp_parse_args( $args, self::DEFAULTS_SEARCH_WITHIN_FILES );
+
 		$file_args = array_merge(
 			$file_args,
 			array(
 				'offset'   => 0,
-				'per_page' => 999,
+				'per_page' => self::SEARCH_MAX_FILES,
 			)
 		);
 
@@ -355,13 +380,21 @@ class FileController {
 					);
 				}
 
+				if ( count( $matched_lines ) >= self::SEARCH_MAX_RESULTS ) {
+					break 2;
+				}
+
 				$line_number ++;
 			}
 
 			$file->close_stream();
 		}
 
-		return $matched_lines;
+		if ( true === $count_only ) {
+			return count( $matched_lines );
+		}
+
+		return array_slice( $matched_lines, $args['offset'], $args['per_page'] );
 	}
 
 	/**

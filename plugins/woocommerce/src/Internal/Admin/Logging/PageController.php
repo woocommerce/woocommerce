@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
+use WP_List_Table;
 use WC_Log_Levels;
 
 /**
@@ -24,11 +25,11 @@ class PageController {
 	private $file_controller;
 
 	/**
-	 * Instance of FileListTable.
+	 * Instance of FileListTable or SearchListTable.
 	 *
-	 * @var FileListTable
+	 * @var FileListTable|SearchListTable
 	 */
-	private $file_list_table;
+	private $list_table;
 
 	/**
 	 * Initialize dependencies.
@@ -136,17 +137,18 @@ class PageController {
 	 * @return void
 	 */
 	private function render_list_files_view(): void {
-		$params   = $this->get_query_params( array( 'order', 'orderby', 'source', 'view' ) );
-		$defaults = $this->get_query_param_defaults();
+		$params     = $this->get_query_params( array( 'order', 'orderby', 'source', 'view' ) );
+		$defaults   = $this->get_query_param_defaults();
+		$list_table = $this->get_list_table( $params['view'] );
 
-		$this->get_file_list_table()->prepare_items();
+		$list_table->prepare_items();
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2>
 				<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
 			</h2>
-			<?php if ( $this->get_file_list_table()->has_items() ) : ?>
+			<?php if ( $list_table->has_items() ) : ?>
 				<?php $this->render_search_field(); ?>
 			<?php endif; ?>
 		</header>
@@ -162,7 +164,7 @@ class PageController {
 					/>
 				<?php endif; ?>
 			<?php endforeach; ?>
-			<?php $this->get_file_list_table()->display(); ?>
+			<?php $list_table->display(); ?>
 		</form>
 		<?php
 	}
@@ -287,40 +289,17 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_results_view(): void {
-		$params = $this->get_query_params( array( 'order', 'orderby', 'search', 'source' ) );
-		$search = $params['search'];
-		unset( $params['search'] );
+		$params     = $this->get_query_params( array( 'order', 'orderby', 'search', 'source', 'view' ) );
+		$list_table = $this->get_list_table( $params['view'] );
 
-		$matches = $this->file_controller->search_within_files( $search, $params );
-
-		if ( is_wp_error( $matches ) ) {
-			printf(
-				'<div class="notice notice-warning"><p>%s</p></div>',
-				esc_html( $matches->get_error_message() )
-			);
-
-			return;
-		}
+		$list_table->prepare_items();
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
 			<h2><?php esc_html_e( 'Search results', 'woocommerce' ); ?></h2>
 			<?php $this->render_search_field(); ?>
 		</header>
-		<section id="logs-search-results" class="wc-logs-search-results">
-			<?php if ( count( $matches ) > 0 ) : ?>
-				<?php foreach ( $matches as $match ) : ?>
-					<?php
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- format_match does the escaping.
-					echo $this->format_match( $match['file_id'], $match['line_number'], $match['line'] );
-					?>
-				<?php endforeach; ?>
-			<?php else : ?>
-				<span class="no-match">
-					<?php esc_html_e( 'No results.', 'woocommerce' ); ?>
-				</span>
-			<?php endif; ?>
-		</section>
+		<?php $list_table->display(); ?>
 		<?php
 	}
 
@@ -406,16 +385,25 @@ class PageController {
 	/**
 	 * Get and cache an instance of the list table.
 	 *
-	 * @return FileListTable
+	 * @param string $view The current view, which determines which list table class to get.
+	 *
+	 * @return FileListTable|SearchListTable
 	 */
-	private function get_file_list_table(): FileListTable {
-		if ( $this->file_list_table instanceof FileListTable ) {
-			return $this->file_list_table;
+	private function get_list_table( string $view ) {
+		if ( $this->list_table instanceof WP_List_Table ) {
+			return $this->list_table;
 		}
 
-		$this->file_list_table = new FileListTable( $this->file_controller, $this );
+		switch ( $view ) {
+			case 'list_files':
+				$this->list_table = new FileListTable( $this->file_controller, $this );
+				break;
+			case 'search_results':
+				$this->list_table = new SearchListTable( $this->file_controller, $this );
+				break;
+		}
 
-		return $this->file_list_table;
+		return $this->list_table;
 	}
 
 	/**
@@ -426,15 +414,17 @@ class PageController {
 	private function setup_screen_options(): void {
 		$params = $this->get_query_params( array( 'view' ) );
 
-		if ( 'list_files' === $params['view'] ) {
-			// Ensure list table columns are initialized early enough to enable column hiding.
-			$this->get_file_list_table()->prepare_column_headers();
+		if ( in_array( $params['view'], array( 'list_files', 'search_results' ) ) ) {
+			$list_table = $this->get_list_table( $params['view'] );
+
+			// Ensure list table columns are initialized early enough to enable column hiding, if available.
+			$list_table->prepare_column_headers();
 
 			add_screen_option(
 				'per_page',
 				array(
-					'default' => 20,
-					'option'  => FileListTable::PER_PAGE_USER_OPTION_KEY,
+					'default' => $list_table->get_per_page_default(),
+					'option'  => get_class( $list_table )::PER_PAGE_USER_OPTION_KEY,
 				)
 			);
 		}
@@ -453,7 +443,7 @@ class PageController {
 			return;
 		}
 
-		$action = $this->get_file_list_table()->current_action();
+		$action = $this->get_list_table( $params['view'] )->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();

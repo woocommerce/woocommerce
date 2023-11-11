@@ -1421,54 +1421,37 @@ table.wc_status_table--tools {
 }
 
 .wc-logs-search-results {
-	border: 1px solid #c3c4c7;
-	background: #ffffff;
-	font-family: Consolas, Monaco, monospace;
-	word-wrap: break-word;
-	line-height: 2.3;
+	tbody {
+		font-family: Consolas, Monaco, monospace;
+		word-wrap: break-word;
 
-	.match {
-		display: flex;
-		align-items: center;
-		width: 100%;
-		background: #ffffff;
-		border-top: 1px solid #c3c4c7;
-
-		&:first-child {
-			border-top: 0;
+		.column-file_id {
+			line-height: 2;
 		}
 
-		&:nth-child( 2n + 1 ) {
-			background: #f6f7f7;
+		.column-line_number,
+		.column-line {
+			line-height: 2.3;
 		}
 	}
 
-	.match-file {
+	td {
+		vertical-align: middle;
+	}
+
+	.column-file_id {
 		width: 16%;
-		padding: 0.3em 0.5em 0.3em 1em;
-		line-height: 2;
 	}
 
-	.match-anchor {
+	.column-line_number {
 		width: 8%;
-		padding: 0 0.5em;
-	}
-
-	.match-content {
-		flex: 1;
-		overflow: hidden;
-		padding: 0 1em 0 0.5em;
 	}
 
 	.search-match {
 		background: #fff8c5;
 		padding: 0.46em 0;
 		border: 1px dashed #c3c4c7;
-	}
-
-	.no-match {
-		display: block;
-		padding: 1em;
+		line-height: 2.3;
 	}
 }
 
