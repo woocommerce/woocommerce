@@ -395,7 +395,7 @@ class WC_Order extends WC_Abstract_Order {
 				/**
 				 * Fires when order status is changed.
 				 *
-				 * @since x.x.x Added $status_transition parameter.
+				 * @since 1.0.0
 				 *
 				 * @param int Order ID.
 				 * @param WC_Order $order Order object.
