@@ -41,7 +41,6 @@ type BlockEditorProps = {
 	productId: number;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
-				template?: Template[];
 				templates: Record< string, Template[] >;
 		  } )
 		| undefined;
