@@ -217,23 +217,17 @@ trait SourceAttributionMeta {
 			return $post_or_order;
 		}
 
-		global $theorder;
-
 		// If we have a post ID, get the post object.
 		if ( is_numeric( $post_or_order ) ) {
-			$post_or_order = get_post( $post_or_order );
-		}
-
-		if ( empty( $theorder ) || $theorder->get_id() !== $post_or_order->ID ) {
-			$theorder = wc_get_order( $post_or_order->ID );
+			$post_or_order = wc_get_order( $post_or_order );
 		}
 
 		// Throw an exception if we don't have an order object.
-		if ( ! $theorder instanceof WC_Order ) {
+		if ( ! $post_or_order instanceof WC_Order ) {
 			throw new Exception( __( 'Order not found.', 'woocommerce' ) );
 		}
 
-		return $theorder;
+		return $post_or_order;
 	}
 
 	/**
