@@ -161,13 +161,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'site_url'                  => array(
-							'description' => __( 'Site URL.', 'woocommerce' ),
-							'type'        => 'string',
-							'format'      => 'uri',
-							'context'     => array( 'view' ),
-							'readonly'    => true,
-						),
 						'version'                   => array(
 							'description' => __( 'WooCommerce version.', 'woocommerce' ),
 							'type'        => 'string',
