@@ -9,6 +9,7 @@
 	margin: 0;
 	padding: em($gap-small) $gap;
 	width: 100%;
+	box-sizing: border-box;
 
 	.has-dark-controls & {
 		background-color: $input-background-dark;

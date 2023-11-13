@@ -76,7 +76,7 @@ table.wc-block-cart-items {
 		.wc-block-cart-item__remove-link {
 			display: none;
 		}
-		&:not(.wc-block-mini-cart-items) {
+		&:not(.wc-block-mini-cart-items):not(:last-child) {
 			.wc-block-cart-items__row {
 				@include with-translucent-border( 0 0 1px );
 			}
