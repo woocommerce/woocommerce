@@ -82,7 +82,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 			esc_html_e( 'Session page views', 'woocommerce' );
 			echo wp_kses_post(
-					wc_help_tip(
+				wc_help_tip(
 					__(
 						'The number of unique pages viewed by the customer prior to this order.',
 						'woocommerce'
