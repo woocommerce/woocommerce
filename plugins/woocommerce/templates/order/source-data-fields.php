@@ -81,12 +81,14 @@ defined( 'ABSPATH' ) || exit;
 		<h4>
 			<?php
 			esc_html_e( 'Session page views', 'woocommerce' );
-			echo wc_help_tip(
-				__(
-					'The number of unique pages viewed by the customer prior to this order.',
-					'woocommerce'
+			echo wp_kses_post(
+					wc_help_tip(
+					__(
+						'The number of unique pages viewed by the customer prior to this order.',
+						'woocommerce'
+					)
 				)
-			); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			);
 			?>
 		</h4>
 		<span class="order-source-attribution-utm-session-pages">
