@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/banner' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/banner' );
 
 $banner_title       = $content['titles'][0]['default'] ?? '';
 $banner_button      = $content['buttons'][0]['default'] ?? '';

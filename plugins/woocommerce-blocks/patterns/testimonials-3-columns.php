@@ -7,8 +7,6 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/testimonials-3-columns' );
-
 $main_header        = $content['titles'][0]['default'] ?? '';
 $first_review       = $content['titles'][1]['default'] ?? '';
 $second_review      = $content['titles'][2]['default'] ?? '';

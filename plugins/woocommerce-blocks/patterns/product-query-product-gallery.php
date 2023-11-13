@@ -5,9 +5,6 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-query-product-gallery' );
 
 $gallery_title = $content['titles'][0]['default'] ?? '';
 ?>

@@ -6,9 +6,7 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-category-triple' );
 
-$images = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-category-triple' );
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-restaurant-celebration-food-chocolate-cupcake.png' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/dish-meal-food-breakfast-dessert-eat.png' );
 $image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/dish-food-baking-dessert-bread-bakery.png' );

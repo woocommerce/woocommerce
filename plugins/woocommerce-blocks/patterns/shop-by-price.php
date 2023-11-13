@@ -6,7 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/shop-by-price' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
 $second_title = $content['titles'][1]['default'] ?? '';

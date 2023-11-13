@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/hero-product-split' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/hero-product-split' );
 
 $hero_title = $content['titles'][0]['default'] ?? '';
 ?>
