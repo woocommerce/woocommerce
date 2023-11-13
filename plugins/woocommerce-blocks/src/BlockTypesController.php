@@ -52,6 +52,46 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
+		add_filter(
+			'woocommerce_is_checkout',
+			function( $return ) {
+				return $return || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
+			}
+		);
+		add_filter(
+			'woocommerce_is_cart',
+			function( $return ) {
+				return $return || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
+			}
+		);
+	}
+
+	/**
+	 * Check if the current post has a block with a specific attribute value.
+	 *
+	 * @param string $block_id The block ID to check for.
+	 * @param string $attribute The attribute to check.
+	 * @param string $value The value to check for.
+	 * @return boolean
+	 */
+	private function has_block_variation( $block_id, $attribute, $value ) {
+		$post = get_post();
+
+		if ( ! $post ) {
+			return false;
+		}
+
+		if ( has_block( $block_id, $post->ID ) ) {
+			$blocks = (array) parse_blocks( $post->post_content );
+
+			foreach ( $blocks as $block ) {
+				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
