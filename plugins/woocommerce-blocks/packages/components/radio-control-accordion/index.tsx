@@ -9,7 +9,7 @@ import { withInstanceId } from '@wordpress/compose';
  */
 import { RadioControlOption } from '../radio-control';
 
-interface RadioControlAccordionProps {
+export interface RadioControlAccordionProps {
 	className?: string;
 	instanceId: number;
 	id: string;
