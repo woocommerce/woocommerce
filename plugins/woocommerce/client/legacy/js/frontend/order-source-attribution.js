@@ -24,7 +24,9 @@
 		} );
 
 		/**
-		 * Set values.
+		 * Callback to set visitor source values in the checkout
+		 * and register forms using sourcebuster object values.
+		 * More info at https://sbjs.rocks/#/usage.
 		 */
 		const setFields = () => {
 
