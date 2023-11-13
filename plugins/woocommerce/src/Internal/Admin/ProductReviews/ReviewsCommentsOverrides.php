@@ -84,7 +84,7 @@ class ReviewsCommentsOverrides {
 		);
 		?>
 
-		<div class="woocommerce-message notice notice-info is-dismissible">
+		<div class="notice notice-info is-dismissible">
 			<p><strong><?php esc_html_e( 'Product reviews have moved!', 'woocommerce' ); ?></strong></p>
 			<p><?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?></p>
 			<p class="submit">
