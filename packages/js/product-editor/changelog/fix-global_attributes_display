@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Show global attribute slug without 'pa_' prefix
+
+
