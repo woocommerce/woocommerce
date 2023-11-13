@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useContext } from '@wordpress/element';
@@ -22,23 +21,11 @@ import {
 	installedSubscriptionRow,
 } from './table/table-rows';
 import { Subscription } from './types';
-import RefreshIcon from '../../assets/images/refresh.svg';
+import { RefreshButton } from './table/actions/refresh-button';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-
-	const updateConnectionUrl = getNewPath(
-		{
-			page: 'wc-addons',
-			section: 'helper',
-			filter: 'all',
-			'wc-helper-refresh': 1,
-			'wc-helper-nonce': getAdminSetting( 'wc_helper_nonces' ).refresh,
-			'redirect-to-wc-admin': 1,
-		},
-		''
-	);
 
 	const installedTableDescription = createInterpolateElement(
 		__(
@@ -100,19 +87,7 @@ export default function MySubscriptions(): JSX.Element {
 						</span>
 					</div>
 					<div>
-						<Button
-							href={ updateConnectionUrl }
-							className="woocommerce-marketplace__refresh-subscriptions"
-						>
-							<img
-								src={ RefreshIcon }
-								alt={ __(
-									'Refresh subscriptions',
-									'woocommerce'
-								) }
-							/>
-							{ __( 'Refresh', 'woocommerce' ) }
-						</Button>
+						<RefreshButton />
 					</div>
 				</header>
 				<InstalledSubscriptionsTable

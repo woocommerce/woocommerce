@@ -6,9 +6,19 @@
 	justify-content: space-between;
 }
 
-a.woocommerce-marketplace__refresh-subscriptions {
+.woocommerce-marketplace__refresh-subscriptions {
 	text-decoration: none;
 	color: #007cba;
+
+	&.is-busy {
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		  }
+		.woocommerce-marketplace__refresh-subscriptions__icon {
+			animation: spin 2s linear infinite;
+		}
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions__available {
