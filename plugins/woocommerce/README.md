@@ -23,7 +23,7 @@ cd plugins/woocommerce
 pnpm -- wp-env start
 ```
 
-You should now be able to visit `http://localhost:8888/` and access WooCommerce environment.
+You should now be able to visit `http://localhost:8888/` and access WooCommerce environment. WP Admin access: `user:password`
 
 ## Building Components
 
