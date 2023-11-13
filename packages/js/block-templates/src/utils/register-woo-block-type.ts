@@ -72,7 +72,7 @@ function getEdit<
 						),
 				};
 			},
-			[ getEvaluationContext, hideConditions ]
+			[ getEvaluationContext, hideConditions, disableConditions ]
 		);
 
 		if ( ! edit || shouldHide ) {
