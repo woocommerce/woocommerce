@@ -189,6 +189,14 @@ async function fetchSubscriptions(): Promise< Array< Subscription > > {
 	return await apiFetch( { path: url.toString() } );
 }
 
+async function refreshSubscriptions(): Promise< Array< Subscription > > {
+	const url = '/wc/v3/marketplace/refresh';
+	return await apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+	} );
+}
+
 function connectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === true ) {
 		return Promise.resolve();
@@ -373,6 +381,7 @@ export {
 	fetchDiscoverPageData,
 	fetchSearchResults,
 	fetchSubscriptions,
+	refreshSubscriptions,
 	installProduct,
 	updateProduct,
 	addNotice,

@@ -19,6 +19,7 @@ export type SubscriptionsContextType = {
 	subscriptions: Subscription[];
 	setSubscriptions: ( subscriptions: Subscription[] ) => void;
 	loadSubscriptions: ( toggleLoading?: boolean ) => Promise< void >;
+	refreshSubscriptions: () => Promise< void >;
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
 };
