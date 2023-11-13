@@ -4,12 +4,12 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Exception;
 use WC_Customer;
 use WC_Log_Levels;
@@ -392,27 +392,6 @@ class SourceAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Check to see if HPOS is enabled.
-	 *
-	 * @return bool
-	 */
-	private function is_hpos_enabled(): bool {
-		try {
-			/**
-			 * CustomOrdersTableController instance.
-			 *
-			 * @var CustomOrdersTableController $cot_controller
-			 */
-			$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
-
-			return $cot_controller->custom_orders_table_usage_is_enabled();
-		} catch ( Exception $e ) {
-			$this->log( $e->getMessage(), __METHOD__, WC_Log_Levels::ERROR );
-			return false;
-		}
-	}
-
-	/**
 	 * Send order source data to Tracks.
 	 *
 	 * @param array    $source_data The source data.
@@ -439,7 +418,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_order_screen_id(): string {
-		return $this->is_hpos_enabled() ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
+		return OrderUtil::custom_orders_table_usage_is_enabled() ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
 	}
 
 	/**
