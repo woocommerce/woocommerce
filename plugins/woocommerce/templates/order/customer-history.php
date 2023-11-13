@@ -49,11 +49,11 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</h4>
 	<span class="order-source-attribution-total-spend">
-		<?php echo esc_html( wc_price( $total_spent ) ); ?>
+		<?php echo wp_kses_post( wc_price( $total_spent ) ); ?>
 	</span>
 
 	<h4><?php esc_html_e( 'Average order value', 'woocommerce' ); ?></h4>
 	<span class="order-source-attribution-average-order-value">
-		<?php echo esc_html( wc_price( $average_spent ) ); ?>
+		<?php echo wp_kses_post( wc_price( $average_spent ) ); ?>
 	</span>
 </div>
