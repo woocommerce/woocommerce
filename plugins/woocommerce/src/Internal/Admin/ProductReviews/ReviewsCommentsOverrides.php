@@ -73,17 +73,7 @@ class ReviewsCommentsOverrides {
 	 * @return void
 	 */
 	protected function display_reviews_moved_notice() : void {
-		$dismiss_url = wp_nonce_url(
-			add_query_arg(
-				array(
-					'wc-hide-notice' => static::REVIEWS_MOVED_NOTICE_ID,
-				)
-			),
-			'woocommerce_hide_notices_nonce',
-			'_wc_notice_nonce'
-		);
 		?>
-
 		<div class="notice notice-info is-dismissible">
 			<p><strong><?php esc_html_e( 'Product reviews have moved!', 'woocommerce' ); ?></strong></p>
 			<p><?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?></p>
@@ -91,13 +81,24 @@ class ReviewsCommentsOverrides {
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a>
 			</p>
 
-			<form action="<?php echo esc_url( $dismiss_url ); ?>" method="post">
+			<form action="<?php echo esc_url( admin_url( 'edit-comments.php' ) ); ?>" method="get">
+				<input type="hidden" name="wc-hide-notice" value="<?php echo esc_attr( static::REVIEWS_MOVED_NOTICE_ID ); ?>" />
+
+				<?php if ( ! empty( $_GET['comment_status'] ) ): ?>
+					<input type="hidden" name="comment_status" value="<?php echo esc_attr( $_GET['comment_status'] ); ?>" />
+				<?php endif; ?>
+
+				<?php if ( ! empty( $_GET['paged'] ) ): ?>
+					<input type="hidden" name="paged" value="<?php echo esc_attr( $_GET['paged'] ); ?>" />
+				<?php endif; ?>
+
+				<?php wp_nonce_field( 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ); ?>
+
 				<button type="submit" class="notice-dismiss">
 					<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'woocommerce' ); ?></span>
 				</button>
 			</form>
 		</div>
-
 		<?php
 	}
 
