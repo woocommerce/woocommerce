@@ -5,6 +5,7 @@ recommend_nvm=false
 
 if command -v nvm > /dev/null; then
 	nvm=$(command -v nvm)
+	nvm install
     nvm use
 elif [[ "$OSTYPE" == "darwin"* ]]; then
 	recommend_nvm=true
@@ -13,5 +14,5 @@ fi
 pnpm install
 
 if [ "$recommend_nvm" = true ]; then
-	echo "Could not find nvm; installation is recommended. Please run: brew install nvm"
+	echo "Could not find nvm; installation is recommended. Please run: brew install nvm && nvm install && nvm use"
 fi
