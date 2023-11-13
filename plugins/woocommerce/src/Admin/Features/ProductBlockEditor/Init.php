@@ -202,7 +202,6 @@ class Init {
 
 		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
 
-		$editor_settings['template']  = $template_registry->get_registered( 'simple-product' )->get_formatted_template();
 		$editor_settings['templates'] = array(
 			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
 			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
