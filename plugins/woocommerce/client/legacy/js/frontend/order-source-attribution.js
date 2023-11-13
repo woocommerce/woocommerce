@@ -63,6 +63,9 @@
 		}
 	}
 
+	/**
+	 * Enable or disable order tracking analytics and marketing consent init and change.
+	 */
 	woocommerce_order_source_attribution.setAllowTrackingConsent = ( allow ) => {
 		if ( ! allow ) {
 			return;
@@ -72,6 +75,9 @@
 		woocommerce_order_source_attribution.initOrderTracking();
 	}
 
+	/**
+	 * Remove sourcebuster.js cookies whenever tracking is disabled or consent is revoked.
+	 */
 	woocommerce_order_source_attribution.removeTrackingCookies = () => {
 		const domain = window.location.hostname;
 		const sbCookies = [
