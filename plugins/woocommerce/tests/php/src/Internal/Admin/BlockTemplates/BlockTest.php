@@ -389,7 +389,7 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$block = $template->add_block(
 			array(
-				'blockName'      => 'test-block-name',
+				'blockName'         => 'test-block-name',
 				'disableConditions' => array(
 					array(
 						'expression' => 'foo === bar',
