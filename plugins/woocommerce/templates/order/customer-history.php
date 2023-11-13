@@ -45,11 +45,11 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</h4>
 	<span class="order-source-attribution-total-spend">
-		<?php echo wc_price( $total_spent ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
+		<?php echo esc_html( wc_price( $total_spent ) ); ?>
 	</span>
 
 	<h4><?php esc_html_e( 'Average order value', 'woocommerce' ); ?></h4>
 	<span class="order-source-attribution-average-order-value">
-		<?php echo wc_price( $average_spent ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
+		<?php echo esc_html( wc_price( $average_spent ) ); ?>
 	</span>
 </div>
