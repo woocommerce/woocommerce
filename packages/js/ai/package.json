@@ -73,12 +73,15 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"turbo:build": "pnpm run build",
+		"build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"test": "jest --config ./jest.config.json --passWithNoTests",
 		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"prepack": "pnpm run clean && pnpm run build"
 	},
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
