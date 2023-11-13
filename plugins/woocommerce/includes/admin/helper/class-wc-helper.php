@@ -788,7 +788,16 @@ class WC_Helper {
 			 * Fires when the Helper connection process is denied/cancelled.
 			 */
 			do_action( 'woocommerce_helper_denied' );
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-addons&section=helper' ) );
+
+			wp_safe_redirect(
+				self::get_helper_redirect_url(
+					array(
+						'page'    => 'wc-addons',
+						'section' => 'helper',
+					),
+					isset( $_GET['redirect-to-wc-admin'] )
+				)
+			 );
 			die();
 		}
 
