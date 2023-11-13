@@ -75,22 +75,27 @@ class ReviewsCommentsOverrides {
 	protected function display_reviews_moved_notice() : void {
 		$dismiss_url = wp_nonce_url(
 			add_query_arg(
-				[
-					'wc-hide-notice' => urlencode( static::REVIEWS_MOVED_NOTICE_ID ),
-				]
+				array(
+					'wc-hide-notice' => static::REVIEWS_MOVED_NOTICE_ID,
+				)
 			),
 			'woocommerce_hide_notices_nonce',
 			'_wc_notice_nonce'
 		);
 		?>
 
-		<div class="notice notice-info is-dismissible">
+		<div class="woocommerce-message notice notice-info is-dismissible">
 			<p><strong><?php esc_html_e( 'Product reviews have moved!', 'woocommerce' ); ?></strong></p>
 			<p><?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?></p>
 			<p class="submit">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a>
 			</p>
-			<button type="button" class="notice-dismiss" onclick="window.location = '<?php echo esc_js( esc_url( $dismiss_url ) ); ?>';"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'woocommerce' ); ?></span></button>
+
+			<form action="<?php echo esc_url( $dismiss_url ); ?>" method="post">
+				<button type="submit" class="notice-dismiss">
+					<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'woocommerce' ); ?></span>
+				</button>
+			</form>
 		</div>
 
 		<?php
