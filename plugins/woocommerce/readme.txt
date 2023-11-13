@@ -1,8 +1,8 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, checkout, payments, woo, woo commerce, e-commerce, store
-Requires at least: 6.2
-Tested up to: 6.3
+Requires at least: 6.3
+Tested up to: 6.4
 Requires PHP: 7.4
 Stable tag: 8.2.2
 License: GPLv3
@@ -296,6 +296,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update WooCommerce Blocks to 11.4.1 [#40999](https://github.com/woocommerce/woocommerce/pull/40999)
 * Update - Use the newly added themes REST API on the CYS intro page [#40552](https://github.com/woocommerce/woocommerce/pull/40552)
 * Update - Use the Script API strategy feature to defer front-end scripts in WordPress 6.3+ [#40686](https://github.com/woocommerce/woocommerce/pull/40686)
+* Update - Update required and tested up to WP versions for the WordPress 6.4 release. [#41409](https://github.com/woocommerce/woocommerce/pull/41409)
 * Dev - Add e2e test for order notes [#40317](https://github.com/woocommerce/woocommerce/pull/40317)
 * Dev - Add e2e test to bulk update order statuses [#40320](https://github.com/woocommerce/woocommerce/pull/40320)
 * Dev - Add Product Editor Helper and single variations notice [#40679](https://github.com/woocommerce/woocommerce/pull/40679)
